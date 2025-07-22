@@ -18,6 +18,7 @@ import { Heart, MessageCircle, Share2, Bookmark, Eye, ChevronDown, ChevronUp, Ma
 import ExpirationSettings from './ExpirationSettings';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { formatDistanceToNow } from 'date-fns';
 import type { PrayerRequest, PrayerCircle, PrayerCircleMember } from '../../../shared/schema';
@@ -264,6 +265,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
   };
 
   const form = useForm<PrayerRequestFormData>({
+    resolver: zodResolver(prayerRequestSchema),
     defaultValues: {
       title: "",
       content: "",
@@ -272,6 +274,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
       isPublic: true,
       isUrgent: false,
       isSilent: false,
+      allowsExpiration: false,
     },
   });
 
@@ -383,10 +386,30 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
         description: "Your prayer request has been shared with the community.",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('Prayer creation error:', error);
+      let errorMessage = "Failed to post prayer request. Please try again.";
+      
+      // Check for authentication errors
+      if (error?.message?.includes('Authentication required') || 
+          error?.message?.includes('Unauthorized') ||
+          error?.status === 401) {
+        errorMessage = "You need to be logged in to post prayer requests. Please sign in and try again.";
+        // Redirect to login after showing error
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to post prayer request. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     },

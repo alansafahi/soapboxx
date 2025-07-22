@@ -7999,6 +7999,10 @@ Return JSON with this exact structure:
     try {
       const userId = req.session.userId;
       if (!userId) {
+        console.error('Prayer creation failed - no userId in session:', { 
+          sessionId: req.sessionID,
+          session: req.session 
+        });
         return res.status(401).json({ message: 'User authentication required' });
       }
       
