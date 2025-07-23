@@ -379,7 +379,7 @@ export default function ContentDistributionHub() {
                   value={sermonTitle}
                   onChange={(e) => setSermonTitle(e.target.value)}
                   placeholder="e.g., The Greatest Love Story Ever Told"
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
               </div>
 
@@ -392,7 +392,7 @@ export default function ContentDistributionHub() {
                   onChange={(e) => setSermonSummary(e.target.value)}
                   rows={4}
                   placeholder="Brief summary of your sermon's main message and takeaways..."
-                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 />
               </div>
 
@@ -408,7 +408,7 @@ export default function ContentDistributionHub() {
                         value={point}
                         onChange={(e) => updateKeyPoint(index, e.target.value)}
                         placeholder={`Key point ${index + 1}`}
-                        className="flex-1 p-2 border border-gray-300 rounded-md"
+                        className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
                       />
                       <Button
                         variant="outline"
