@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.replit
+*.log
+*.lock
+package-lock.json
+.env
+.env.local
+.env.production
+.cookies
+cookies.txt
+fresh_cookies.txt

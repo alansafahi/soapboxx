@@ -1,0 +1,128 @@
+name: SoapBox Development Standards Enforcement
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  standards-compliance:
+    runs-on: ubuntu-latest
+    name: Enforce SoapBox Development Standards v1.0
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: TypeScript Strict Mode Check
+      run: npx tsc --noEmit --strict
+      continue-on-error: false
+    
+    - name: ESLint Standards Check
+      run: npx eslint . --ext .ts,.tsx,.js,.jsx --max-warnings 0
+      continue-on-error: false
+    
+    - name: Prettier Format Check
+      run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,md}"
+      continue-on-error: false
+    
+    - name: API Naming Convention Check
+      run: |
+        echo "Checking API endpoint naming conventions..."
+        if grep -r "app\.\(get\|post\|put\|delete\)" server/ | grep -v "kebab-case" | grep -E "/[a-zA-Z]+[A-Z]"; then
+          echo "❌ VIOLATION: Non-kebab-case API endpoints detected"
+          echo "All API endpoints must follow kebab-case convention: /api/resource-name"
+          exit 1
+        fi
+        echo "✅ API naming conventions compliant"
+    
+    - name: Database Schema Naming Check
+      run: |
+        echo "Checking database schema naming conventions..."
+        if grep -r "pgTable\|varchar\|text\|boolean" shared/schema.ts | grep -E "[a-z][A-Z]" | grep -v "([a-z_]+)"; then
+          echo "❌ VIOLATION: Non-snake_case database columns detected"
+          echo "All database columns must follow snake_case convention"
+          exit 1
+        fi
+        echo "✅ Database naming conventions compliant"
+    
+    - name: Legacy Endpoint Usage Check
+      run: |
+        echo "Checking for legacy endpoint usage..."
+        LEGACY_ENDPOINTS=$(grep -r "/api/soap\|/api/users\|/api/checkIns" client/ server/ --exclude-dir=node_modules || true)
+        if [ ! -z "$LEGACY_ENDPOINTS" ]; then
+          echo "⚠️ WARNING: Legacy endpoints detected - must migrate before September 30, 2025"
+          echo "$LEGACY_ENDPOINTS"
+        fi
+        echo "✅ Legacy endpoint check completed"
+    
+    - name: Standards Documentation Check
+      run: |
+        echo "Verifying SoapBox Development Standards compliance..."
+        if [ ! -f "SOAPBOX_DEVELOPMENT_STANDARDS.md" ]; then
+          echo "❌ VIOLATION: SoapBox Development Standards document missing"
+          exit 1
+        fi
+        echo "✅ Standards documentation present"
+
+  schema-governance:
+    runs-on: ubuntu-latest
+    name: Schema and API Governance Check
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Check Schema Changes
+      run: |
+        echo "Checking for unauthorized schema changes..."
+        SCHEMA_CHANGES=$(git diff origin/main..HEAD --name-only | grep -E "shared/schema\.ts|drizzle\.config\.ts" || true)
+        if [ ! -z "$SCHEMA_CHANGES" ]; then
+          echo "🔒 GOVERNANCE REQUIRED: Schema changes detected"
+          echo "Files modified: $SCHEMA_CHANGES"
+          echo "Schema changes require written approval from project owner (Alan Safahi)"
+          echo "Please ensure you have approval before merging this PR"
+        fi
+    
+    - name: Check API Route Changes
+      run: |
+        echo "Checking for new API routes..."
+        NEW_ROUTES=$(git diff origin/main..HEAD | grep -E "^\+.*app\.(get|post|put|delete)" || true)
+        if [ ! -z "$NEW_ROUTES" ]; then
+          echo "🔒 GOVERNANCE REQUIRED: New API routes detected"
+          echo "New routes: $NEW_ROUTES"
+          echo "API changes require written approval from project owner (Alan Safahi)"
+          echo "Please ensure you have approval before merging this PR"
+        fi
+
+  legacy-deprecation-warning:
+    runs-on: ubuntu-latest
+    name: Legacy Deprecation Timeline Check
+    
+    steps:
+    - name: Check Deprecation Timeline
+      run: |
+        CURRENT_DATE=$(date +%Y-%m-%d)
+        DEPRECATION_DATE="2025-09-30"
+        
+        if [[ "$CURRENT_DATE" > "$DEPRECATION_DATE" ]]; then
+          echo "❌ CRITICAL: Legacy deprecation deadline exceeded"
+          echo "All legacy endpoints must be removed immediately"
+          exit 1
+        else
+          DAYS_REMAINING=$(( ($(date -d "$DEPRECATION_DATE" +%s) - $(date -d "$CURRENT_DATE" +%s)) / 86400 ))
+          echo "⏰ Legacy endpoints will be deprecated in $DAYS_REMAINING days ($DEPRECATION_DATE)"
+          if [ $DAYS_REMAINING -lt 30 ]; then
+            echo "⚠️ WARNING: Less than 30 days remaining for legacy migration"
+          fi
+        fi

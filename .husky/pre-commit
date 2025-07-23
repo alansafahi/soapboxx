@@ -1,0 +1,59 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔒 SoapBox Development Standards v1.0 - Pre-commit Enforcement"
+
+# TypeScript strict mode check
+echo "⚡ Running TypeScript strict mode check..."
+npx tsc --noEmit --strict
+if [ $? -ne 0 ]; then
+  echo "❌ TypeScript strict mode violations detected"
+  echo "Fix all TypeScript errors before committing"
+  exit 1
+fi
+
+# ESLint check with zero warnings policy
+echo "⚡ Running ESLint with zero warnings policy..."
+npx eslint . --ext .ts,.tsx,.js,.jsx --max-warnings 0
+if [ $? -ne 0 ]; then
+  echo "❌ ESLint violations detected"
+  echo "Fix all linting errors and warnings before committing"
+  exit 1
+fi
+
+# Prettier format check
+echo "⚡ Running Prettier format check..."
+npx prettier --check "**/*.{ts,tsx,js,jsx,json,md}"
+if [ $? -ne 0 ]; then
+  echo "❌ Code formatting violations detected"
+  echo "Run 'npm run format' to fix formatting issues"
+  exit 1
+fi
+
+# Naming convention enforcement
+echo "⚡ Checking naming conventions..."
+
+# Check for camelCase in API URLs (should be kebab-case)
+if git diff --cached --name-only | xargs grep -l "app\.\(get\|post\|put\|delete\)" | xargs grep -E "/api/[a-zA-Z]*[A-Z]" 2>/dev/null; then
+  echo "❌ Non-kebab-case API endpoints detected in staged changes"
+  echo "All API endpoints must follow kebab-case: /api/resource-name"
+  exit 1
+fi
+
+# Check for camelCase in database schema (should be snake_case)
+if git diff --cached --name-only | grep "shared/schema.ts" | xargs grep -E "[a-z][A-Z].*:" 2>/dev/null | grep -v "([a-z_]+)"; then
+  echo "❌ Non-snake_case database columns detected in staged changes"
+  echo "All database columns must follow snake_case convention"
+  exit 1
+fi
+
+# Legacy endpoint usage warning
+LEGACY_USAGE=$(git diff --cached | grep -E "^\+.*(/api/soap[^-]|/api/users[^-]|/api/checkIns)" || true)
+if [ ! -z "$LEGACY_USAGE" ]; then
+  echo "⚠️ WARNING: Legacy endpoint usage detected in staged changes"
+  echo "Consider migrating to standardized endpoints before September 30, 2025"
+  echo "$LEGACY_USAGE"
+fi
+
+echo "✅ All SoapBox Development Standards checks passed"
+echo "🚀 Commit approved for world-class codebase"

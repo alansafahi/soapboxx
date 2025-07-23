@@ -5009,7 +5009,7 @@ export class DatabaseStorage implements IStorage {
           CONCAT(u.first_name, ' ', u.last_name) as author_name,
           COUNT(DISTINCT dl.id) as like_count,
           COUNT(DISTINCT dc.id) as comment_count,
-          d.attached_media
+          d.attached_media::text
         FROM discussions d
         LEFT JOIN users u ON d.author_id = u.id
         LEFT JOIN discussion_likes dl ON d.id = dl.discussion_id
@@ -5035,7 +5035,7 @@ export class DatabaseStorage implements IStorage {
           CONCAT(u2.first_name, ' ', u2.last_name) as author_name,
           0 as like_count,
           COUNT(DISTINCT sc.id) as comment_count,
-          NULL as attached_media
+          NULL::text as attached_media
         FROM soap_entries se
         LEFT JOIN users u2 ON se.user_id = u2.id
         LEFT JOIN soap_comments sc ON se.id = sc.soap_id
