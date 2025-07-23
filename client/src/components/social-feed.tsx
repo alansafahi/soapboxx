@@ -56,10 +56,11 @@ import { FaFacebook as Facebook, FaTwitter as Twitter } from "react-icons/fa";
 import { formatDistanceToNow } from "date-fns";
 import ExpirationSettings from "./ExpirationSettings";
 import { ShareDialog } from './ShareDialog';
-import { FormattedText } from './FormattedText';
-import { SoapPostCard } from './social-feed/SoapPostCard';
+import FormattedContent from '../utils/FormattedContent';
+import { SoapPostCard } from './SoapPostCard';
 import { FlagContentDialog } from './content-moderation/FlagContentDialog';
 import { ContentModerationStatus, HiddenContentPlaceholder } from './content-moderation/ContentModerationStatus';
+import { CommentConfirmationDialog } from './CommentConfirmationDialog';
 
 interface FeedPost {
   id: number;
@@ -143,6 +144,12 @@ export default function SocialFeed() {
   const [selectedSoapEntry, setSelectedSoapEntry] = useState<any>(null);
   const [shareDialogOpen, setShareDialogOpen] = useState<number | null>(null);
   const [showAllPosts, setShowAllPosts] = useState(false);
+  const [showCommentConfirmation, setShowCommentConfirmation] = useState(false);
+  const [lastCommentData, setLastCommentData] = useState<{
+    content: string;
+    postTitle: string;
+    postId: number;
+  } | null>(null);
   const [expirationSettings, setExpirationSettings] = useState<{
     expiresAt: Date | null;
     allowsExpiration: boolean;
@@ -223,25 +230,39 @@ export default function SocialFeed() {
     }
   });
 
-  // Comment submission mutation - using same pattern as SOAP posts
+  // Comment submission mutation - enhanced with better user feedback
   const commentMutation = useMutation({
     mutationFn: async ({ postId, content }: { postId: number; content: string }) => {
       return apiRequest('POST', `/api/discussions/${postId}/comments`, { content });
     },
-    onSuccess: () => {
+    onSuccess: (data, { postId, content }) => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
+      
+      // Find the post title for the confirmation dialog
+      const currentPost = (feedPosts as any[])?.find((post: any) => post.id === postId);
+      const postTitle = currentPost?.title || currentPost?.content?.substring(0, 50) || 'Community Post';
+      
+      // Store comment data for confirmation dialog
+      setLastCommentData({
+        content,
+        postTitle,
+        postId
+      });
+      
       setCommentText("");
       setCommentDialogOpen(null);
-      toast({
-        title: "Comment added!",
-        description: "Your comment has been posted",
-      });
+      
+      // Show user-friendly confirmation dialog
+      setShowCommentConfirmation(true);
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Comment submission error:', error);
       toast({
-        title: "Error",
-        description: "Failed to add comment",
-        variant: "destructive"
+        title: "Unable to Post Comment",
+        description: "We're experiencing technical difficulties. Please try again in a moment.",
+        variant: "destructive",
+        duration: 5000,
       });
     }
   });
@@ -1204,7 +1225,7 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
             <span className="ml-2">Loading posts...</span>
           </div>
         ) : Array.isArray(feedPosts) && feedPosts.length > 0 ? feedPosts.map((post: FeedPost) => (
-          <Card key={post.id} className="border border-gray-200 dark:border-gray-700">
+          <Card key={post.id} id={`post-${post.id}`} className="border border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-start space-x-3 mb-4">
                 <Avatar className="w-10 h-10">
@@ -1982,6 +2003,34 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Comment Confirmation Dialog */}
+      <CommentConfirmationDialog
+        isOpen={showCommentConfirmation}
+        onClose={() => {
+          setShowCommentConfirmation(false);
+          setLastCommentData(null);
+        }}
+        onViewPost={() => {
+          setShowCommentConfirmation(false);
+          // Scroll to the post where the comment was added
+          if (lastCommentData?.postId) {
+            const postElement = document.getElementById(`post-${lastCommentData.postId}`);
+            if (postElement) {
+              postElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              // Brief highlight effect
+              postElement.style.background = 'rgba(59, 130, 246, 0.1)';
+              setTimeout(() => {
+                postElement.style.background = '';
+              }, 2000);
+            }
+          }
+          setLastCommentData(null);
+        }}
+        commentText={lastCommentData?.content || ""}
+        postTitle={lastCommentData?.postTitle || ""}
+        communitySize={150}
+      />
     </div>
   );
 }
