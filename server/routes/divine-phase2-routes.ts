@@ -619,16 +619,33 @@ router.get('/campuses', async (req, res) => {
 // Create new campus
 router.post('/campuses', async (req, res) => {
   try {
+    // Enhanced authentication logging
+    console.log('Campus creation request received');
+    console.log('Session info:', req.session);
+    console.log('User info:', req.user);
+    console.log('Request body:', req.body);
+    
     if (!req.user) {
-      return res.status(401).json({ error: 'Authentication required' });
+      console.log('Authentication failed - no user in session');
+      return res.status(401).json({ 
+        error: 'Authentication required',
+        session: !!req.session,
+        sessionId: req.session?.id
+      });
     }
 
     // Verify user has permission to create campuses
     const user = req.user as any;
+    console.log('User role check:', user.role);
     const hasPermission = ['church_admin', 'admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(user.role);
     
     if (!hasPermission) {
-      return res.status(403).json({ error: 'Insufficient permissions to create campuses' });
+      console.log('Permission denied for role:', user.role);
+      return res.status(403).json({ 
+        error: 'Insufficient permissions to create campuses',
+        userRole: user.role,
+        requiredRoles: ['church_admin', 'admin', 'pastor', 'lead_pastor', 'soapbox_owner']
+      });
     }
 
     const { name, address, city, state, capacity } = req.body;
