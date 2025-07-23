@@ -721,7 +721,7 @@ router.get('/analytics/ministry/performance', async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const performance = await analyticsService.getMinistryPerformanceAnalytics();
+    const performance = await analyticsService.getVolunteerEngagementTrends();
     
     res.json({
       success: true,
@@ -743,7 +743,7 @@ router.get('/analytics/volunteer/engagement', async (req, res) => {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    const engagement = await analyticsService.getVolunteerEngagementAnalytics();
+    const engagement = await analyticsService.getVolunteerRetentionAnalytics();
     
     res.json({
       success: true,

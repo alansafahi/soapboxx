@@ -1,0 +1,380 @@
+500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+queryFn @ DivinePhase2Dashboard.tsx:77
+fetchFn @ @tanstack_react-query.js?v=01dc6607:881
+run @ @tanstack_react-query.js?v=01dc6607:513
+start @ @tanstack_react-query.js?v=01dc6607:555
+fetch @ @tanstack_react-query.js?v=01dc6607:969
+executeFetch_fn @ @tanstack_react-query.js?v=01dc6607:2280
+onSubscribe @ @tanstack_react-query.js?v=01dc6607:1983
+subscribe @ @tanstack_react-query.js?v=01dc6607:24
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:3147
+subscribeToStore @ chunk-RPCDYKBN.js?v=01dc6607:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=01dc6607:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=01dc6607:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=01dc6607:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=01dc6607:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=01dc6607:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=01dc6607:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=01dc6607:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=01dc6607:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=01dc6607:19432
+commitRoot @ chunk-RPCDYKBN.js?v=01dc6607:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=01dc6607:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18718
+workLoop @ chunk-RPCDYKBN.js?v=01dc6607:197
+flushWork @ chunk-RPCDYKBN.js?v=01dc6607:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=01dc6607:384Understand this error
+queryClient.ts:77  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/divine-phase2/campuses 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+queryFn @ DivinePhase2Dashboard.tsx:59
+fetchFn @ @tanstack_react-query.js?v=01dc6607:881
+run @ @tanstack_react-query.js?v=01dc6607:513
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:534
+Promise.catch
+run @ @tanstack_react-query.js?v=01dc6607:517
+start @ @tanstack_react-query.js?v=01dc6607:555
+fetch @ @tanstack_react-query.js?v=01dc6607:969
+executeFetch_fn @ @tanstack_react-query.js?v=01dc6607:2280
+onSubscribe @ @tanstack_react-query.js?v=01dc6607:1983
+subscribe @ @tanstack_react-query.js?v=01dc6607:24
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:3147
+subscribeToStore @ chunk-RPCDYKBN.js?v=01dc6607:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=01dc6607:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=01dc6607:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=01dc6607:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=01dc6607:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=01dc6607:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=01dc6607:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=01dc6607:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=01dc6607:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=01dc6607:19432
+commitRoot @ chunk-RPCDYKBN.js?v=01dc6607:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=01dc6607:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18718
+workLoop @ chunk-RPCDYKBN.js?v=01dc6607:197
+flushWork @ chunk-RPCDYKBN.js?v=01dc6607:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=01dc6607:384Understand this error
+queryClient.ts:77  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/divine-phase2/campuses/statistics 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+queryFn @ DivinePhase2Dashboard.tsx:65
+fetchFn @ @tanstack_react-query.js?v=01dc6607:881
+run @ @tanstack_react-query.js?v=01dc6607:513
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:534
+Promise.catch
+run @ @tanstack_react-query.js?v=01dc6607:517
+start @ @tanstack_react-query.js?v=01dc6607:555
+fetch @ @tanstack_react-query.js?v=01dc6607:969
+executeFetch_fn @ @tanstack_react-query.js?v=01dc6607:2280
+onSubscribe @ @tanstack_react-query.js?v=01dc6607:1983
+subscribe @ @tanstack_react-query.js?v=01dc6607:24
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:3147
+subscribeToStore @ chunk-RPCDYKBN.js?v=01dc6607:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=01dc6607:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=01dc6607:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=01dc6607:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=01dc6607:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=01dc6607:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=01dc6607:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=01dc6607:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=01dc6607:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=01dc6607:19432
+commitRoot @ chunk-RPCDYKBN.js?v=01dc6607:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=01dc6607:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18718
+workLoop @ chunk-RPCDYKBN.js?v=01dc6607:197
+flushWork @ chunk-RPCDYKBN.js?v=01dc6607:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=01dc6607:384Understand this error
+queryClient.ts:77  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/divine-phase2/background-checks/expiring 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+queryFn @ DivinePhase2Dashboard.tsx:71
+fetchFn @ @tanstack_react-query.js?v=01dc6607:881
+run @ @tanstack_react-query.js?v=01dc6607:513
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:534
+Promise.catch
+run @ @tanstack_react-query.js?v=01dc6607:517
+start @ @tanstack_react-query.js?v=01dc6607:555
+fetch @ @tanstack_react-query.js?v=01dc6607:969
+executeFetch_fn @ @tanstack_react-query.js?v=01dc6607:2280
+onSubscribe @ @tanstack_react-query.js?v=01dc6607:1983
+subscribe @ @tanstack_react-query.js?v=01dc6607:24
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:3147
+subscribeToStore @ chunk-RPCDYKBN.js?v=01dc6607:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=01dc6607:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=01dc6607:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=01dc6607:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=01dc6607:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=01dc6607:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=01dc6607:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=01dc6607:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=01dc6607:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=01dc6607:19432
+commitRoot @ chunk-RPCDYKBN.js?v=01dc6607:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=01dc6607:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18718
+workLoop @ chunk-RPCDYKBN.js?v=01dc6607:197
+flushWork @ chunk-RPCDYKBN.js?v=01dc6607:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=01dc6607:384Understand this error
+queryClient.ts:77  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/divine-phase2/analytics/ministry/performance 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+queryFn @ DivinePhase2Dashboard.tsx:77
+fetchFn @ @tanstack_react-query.js?v=01dc6607:881
+run @ @tanstack_react-query.js?v=01dc6607:513
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:534
+Promise.catch
+run @ @tanstack_react-query.js?v=01dc6607:517
+start @ @tanstack_react-query.js?v=01dc6607:555
+fetch @ @tanstack_react-query.js?v=01dc6607:969
+executeFetch_fn @ @tanstack_react-query.js?v=01dc6607:2280
+onSubscribe @ @tanstack_react-query.js?v=01dc6607:1983
+subscribe @ @tanstack_react-query.js?v=01dc6607:24
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:3147
+subscribeToStore @ chunk-RPCDYKBN.js?v=01dc6607:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=01dc6607:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=01dc6607:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=01dc6607:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=01dc6607:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=01dc6607:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=01dc6607:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=01dc6607:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=01dc6607:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=01dc6607:19432
+commitRoot @ chunk-RPCDYKBN.js?v=01dc6607:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=01dc6607:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18718
+workLoop @ chunk-RPCDYKBN.js?v=01dc6607:197
+flushWork @ chunk-RPCDYKBN.js?v=01dc6607:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=01dc6607:384Understand this error
+queryClient.ts:77  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/divine-phase2/campuses 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+queryFn @ DivinePhase2Dashboard.tsx:59
+fetchFn @ @tanstack_react-query.js?v=01dc6607:881
+run @ @tanstack_react-query.js?v=01dc6607:513
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:534
+Promise.catch
+run @ @tanstack_react-query.js?v=01dc6607:517
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:534
+Promise.catch
+run @ @tanstack_react-query.js?v=01dc6607:517
+start @ @tanstack_react-query.js?v=01dc6607:555
+fetch @ @tanstack_react-query.js?v=01dc6607:969
+executeFetch_fn @ @tanstack_react-query.js?v=01dc6607:2280
+onSubscribe @ @tanstack_react-query.js?v=01dc6607:1983
+subscribe @ @tanstack_react-query.js?v=01dc6607:24
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:3147
+subscribeToStore @ chunk-RPCDYKBN.js?v=01dc6607:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=01dc6607:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=01dc6607:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=01dc6607:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=01dc6607:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=01dc6607:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=01dc6607:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=01dc6607:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=01dc6607:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=01dc6607:19432
+commitRoot @ chunk-RPCDYKBN.js?v=01dc6607:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=01dc6607:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18718
+workLoop @ chunk-RPCDYKBN.js?v=01dc6607:197
+flushWork @ chunk-RPCDYKBN.js?v=01dc6607:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=01dc6607:384Understand this error
+queryClient.ts:77  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/divine-phase2/campuses/statistics 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+queryFn @ DivinePhase2Dashboard.tsx:65
+fetchFn @ @tanstack_react-query.js?v=01dc6607:881
+run @ @tanstack_react-query.js?v=01dc6607:513
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:534
+Promise.catch
+run @ @tanstack_react-query.js?v=01dc6607:517
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:534
+Promise.catch
+run @ @tanstack_react-query.js?v=01dc6607:517
+start @ @tanstack_react-query.js?v=01dc6607:555
+fetch @ @tanstack_react-query.js?v=01dc6607:969
+executeFetch_fn @ @tanstack_react-query.js?v=01dc6607:2280
+onSubscribe @ @tanstack_react-query.js?v=01dc6607:1983
+subscribe @ @tanstack_react-query.js?v=01dc6607:24
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:3147
+subscribeToStore @ chunk-RPCDYKBN.js?v=01dc6607:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=01dc6607:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=01dc6607:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=01dc6607:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=01dc6607:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=01dc6607:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=01dc6607:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=01dc6607:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=01dc6607:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=01dc6607:19432
+commitRoot @ chunk-RPCDYKBN.js?v=01dc6607:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=01dc6607:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18718
+workLoop @ chunk-RPCDYKBN.js?v=01dc6607:197
+flushWork @ chunk-RPCDYKBN.js?v=01dc6607:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=01dc6607:384Understand this error
+queryClient.ts:77  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/divine-phase2/background-checks/expiring 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+queryFn @ DivinePhase2Dashboard.tsx:71
+fetchFn @ @tanstack_react-query.js?v=01dc6607:881
+run @ @tanstack_react-query.js?v=01dc6607:513
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:534
+Promise.catch
+run @ @tanstack_react-query.js?v=01dc6607:517
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:534
+Promise.catch
+run @ @tanstack_react-query.js?v=01dc6607:517
+start @ @tanstack_react-query.js?v=01dc6607:555
+fetch @ @tanstack_react-query.js?v=01dc6607:969
+executeFetch_fn @ @tanstack_react-query.js?v=01dc6607:2280
+onSubscribe @ @tanstack_react-query.js?v=01dc6607:1983
+subscribe @ @tanstack_react-query.js?v=01dc6607:24
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:3147
+subscribeToStore @ chunk-RPCDYKBN.js?v=01dc6607:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=01dc6607:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=01dc6607:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=01dc6607:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=01dc6607:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=01dc6607:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=01dc6607:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=01dc6607:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=01dc6607:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=01dc6607:19432
+commitRoot @ chunk-RPCDYKBN.js?v=01dc6607:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=01dc6607:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18718
+workLoop @ chunk-RPCDYKBN.js?v=01dc6607:197
+flushWork @ chunk-RPCDYKBN.js?v=01dc6607:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=01dc6607:384Understand this error
+queryClient.ts:77  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/divine-phase2/analytics/ministry/performance 500 (Internal Server Error)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+queryFn @ DivinePhase2Dashboard.tsx:77
+fetchFn @ @tanstack_react-query.js?v=01dc6607:881
+run @ @tanstack_react-query.js?v=01dc6607:513
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:534
+Promise.catch
+run @ @tanstack_react-query.js?v=01dc6607:517
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:534
+Promise.catch
+run @ @tanstack_react-query.js?v=01dc6607:517
+start @ @tanstack_react-query.js?v=01dc6607:555
+fetch @ @tanstack_react-query.js?v=01dc6607:969
+executeFetch_fn @ @tanstack_react-query.js?v=01dc6607:2280
+onSubscribe @ @tanstack_react-query.js?v=01dc6607:1983
+subscribe @ @tanstack_react-query.js?v=01dc6607:24
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:3147
+subscribeToStore @ chunk-RPCDYKBN.js?v=01dc6607:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=01dc6607:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=01dc6607:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=01dc6607:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=01dc6607:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=01dc6607:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=01dc6607:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=01dc6607:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=01dc6607:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=01dc6607:19432
+commitRoot @ chunk-RPCDYKBN.js?v=01dc6607:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=01dc6607:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=01dc6607:18718
+workLoop @ chunk-RPCDYKBN.js?v=01dc6607:197
+flushWork @ chunk-RPCDYKBN.js?v=01dc6607:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=01dc6607:384Understand this error
+queryClient.ts:77  POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/divine-phase2/campuses 400 (Bad Request)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+mutationFn @ DivinePhase2Dashboard.tsx:82
+fn @ @tanstack_react-query.js?v=01dc6607:1236
+run @ @tanstack_react-query.js?v=01dc6607:513
+start @ @tanstack_react-query.js?v=01dc6607:555
+execute @ @tanstack_react-query.js?v=01dc6607:1272
+await in execute
+mutate @ @tanstack_react-query.js?v=01dc6607:2692
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:3415
+handleCreateCampus @ DivinePhase2Dashboard.tsx:123
+callCallback2 @ chunk-RPCDYKBN.js?v=01dc6607:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=01dc6607:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=01dc6607:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=01dc6607:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=01dc6607:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=01dc6607:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=01dc6607:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=01dc6607:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=01dc6607:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=01dc6607:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=01dc6607:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=01dc6607:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=01dc6607:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=01dc6607:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=01dc6607:5449Understand this error
+queryClient.ts:77  POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/divine-phase2/campuses 400 (Bad Request)
+window.fetch @ Network.js:219
+apiRequest @ queryClient.ts:77
+mutationFn @ DivinePhase2Dashboard.tsx:82
+fn @ @tanstack_react-query.js?v=01dc6607:1236
+run @ @tanstack_react-query.js?v=01dc6607:513
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:534
+Promise.catch
+run @ @tanstack_react-query.js?v=01dc6607:517
+start @ @tanstack_react-query.js?v=01dc6607:555
+execute @ @tanstack_react-query.js?v=01dc6607:1272
+await in execute
+mutate @ @tanstack_react-query.js?v=01dc6607:2692
+(anonymous) @ @tanstack_react-query.js?v=01dc6607:3415
+handleCreateCampus @ DivinePhase2Dashboard.tsx:123
+callCallback2 @ chunk-RPCDYKBN.js?v=01dc6607:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=01dc6607:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=01dc6607:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=01dc6607:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=01dc6607:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=01dc6607:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=01dc6607:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=01dc6607:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=01dc6607:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=01dc6607:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=01dc6607:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=01dc6607:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=01dc6607:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=01dc6607:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=01dc6607:5449Understand this error
