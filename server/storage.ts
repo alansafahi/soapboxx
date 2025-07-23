@@ -4632,7 +4632,7 @@ export class DatabaseStorage implements IStorage {
 
   async getDiscussionComments(discussionId: number, userId?: string): Promise<DiscussionComment[]> {
     try {
-      console.log('Fetching comments for discussion:', discussionId, 'user:', userId);
+      // Remove debug logging for production
       
       const comments = await db
         .select({
@@ -4652,19 +4652,24 @@ export class DatabaseStorage implements IStorage {
         .where(eq(discussionComments.discussionId, discussionId))
         .orderBy(asc(discussionComments.createdAt));
 
-      console.log('Found comments:', comments.length);
+      // Comment count logged
 
       // Get user's liked comments if userId provided
       let userLikedComments: Set<number> = new Set();
       if (userId && comments.length > 0) {
-        const commentIds = comments.map(c => c.id);
-        const userLikesResult = await db.execute(sql`
-          SELECT comment_id 
-          FROM discussion_comment_likes 
-          WHERE user_id = ${userId} AND comment_id IN (${sql.join(commentIds, sql`, `)})
-        `);
-        
-        userLikedComments = new Set(userLikesResult.rows.map((row: any) => row.comment_id));
+        try {
+          const commentIds = comments.map(c => c.id);
+          const userLikesResult = await db.execute(sql`
+            SELECT comment_id 
+            FROM discussion_comment_likes 
+            WHERE user_id = ${userId} AND comment_id IN (${sql.join(commentIds, sql`, `)})
+          `);
+          
+          userLikedComments = new Set(userLikesResult.rows.map((row: any) => row.comment_id));
+        } catch (likesError) {
+          console.log('Comment likes table not available, skipping like status');
+          // Continue without like status if table doesn't exist
+        }
       }
 
       const result = comments.map(comment => ({
@@ -4684,7 +4689,7 @@ export class DatabaseStorage implements IStorage {
         }
       }));
 
-      console.log('Returning comments:', result.length);
+      // Returning comment results
       return result;
     } catch (error) {
       console.error('Error fetching discussion comments:', error);
