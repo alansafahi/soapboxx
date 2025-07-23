@@ -8057,6 +8057,58 @@ Return JSON with this exact structure:
     }
   });
 
+  // Like SOAP comment endpoint
+  app.post('/api/soap/comments/:id/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const commentId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      // Award points for liking a SOAP comment
+      await storage.trackUserActivity({
+        userId: userId,
+        activityType: 'like_soap_comment',
+        entityId: commentId,
+        points: 3,
+      });
+      
+      // For now, return static response (like other comment systems)
+      res.json({ liked: true, likeCount: 1 });
+    } catch (error) {
+      console.error('Error liking SOAP comment:', error);
+      res.status(500).json({ message: "Failed to like comment" });
+    }
+  });
+
+  // Like discussion comment endpoint
+  app.post('/api/comments/:id/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const commentId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      // Award points for liking a discussion comment
+      await storage.trackUserActivity({
+        userId: userId,
+        activityType: 'like_discussion_comment',
+        entityId: commentId,
+        points: 3,
+      });
+      
+      // For now, return static response (consistent with other comment systems)
+      res.json({ liked: true, likeCount: 1 });
+    } catch (error) {
+      console.error('Error liking discussion comment:', error);
+      res.status(500).json({ message: "Failed to like comment" });
+    }
+  });
+
   // Prayer request endpoints
   app.get('/api/prayers', isAuthenticated, async (req: any, res) => {
     try {

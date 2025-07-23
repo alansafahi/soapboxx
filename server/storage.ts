@@ -4235,6 +4235,14 @@ export class DatabaseStorage implements IStorage {
           .from(prayerResponseLikes)
           .where(eq(prayerResponseLikes.prayerResponseId, responseId));
 
+        // Award points for liking a prayer comment
+        await this.trackUserActivity({
+          userId: userId,
+          activityType: 'like_prayer_comment',
+          entityId: responseId,
+          points: 5,
+        });
+
         return { liked: true, likeCount: Number(likeCount[0]?.count || 0) };
       }
     } catch (error) {
@@ -4503,6 +4511,22 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error fetching SOAP comments:', error);
       return [];
+    }
+  }
+
+  // Track user activity for rewards system
+  async trackUserActivity(activity: InsertUserActivity): Promise<void> {
+    try {
+      await db.insert(userActivities).values({
+        userId: activity.userId,
+        activityType: activity.activityType,
+        entityId: activity.entityId,
+        points: activity.points || 0,
+        createdAt: new Date(),
+      });
+    } catch (error) {
+      console.error('Error tracking user activity:', error);
+      // Don't throw error to avoid breaking main functionality
     }
   }
 }

@@ -186,9 +186,16 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
       // Refresh comment data from server
       queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
       
+      // Show different messages based on post type and points earned
+      const pointsEarned = postType === 'prayer' ? 5 : 3;
+      const activityType = postType === 'prayer' ? 'prayer comment' : 
+                          postType === 'soap' ? 'SOAP comment' : 'discussion comment';
+      
       toast({
         title: result.liked ? "Comment liked!" : "Comment unliked!",
-        description: result.liked ? "You liked this comment" : "You removed your like",
+        description: result.liked ? 
+          `You liked this ${activityType} and earned ${pointsEarned} SoapBox Points!` : 
+          "You removed your like",
       });
     },
     onError: (error: any) => {
