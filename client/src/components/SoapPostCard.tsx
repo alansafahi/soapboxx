@@ -11,6 +11,8 @@ import { Textarea } from "./ui/textarea";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { FlagContentDialog } from "./content-moderation/FlagContentDialog";
 import { useAuth } from "@/hooks/useAuth";
+import { CommentDialog } from "./CommentDialog";
+import FormattedContent from '../utils/FormattedContent';
 
 interface SoapPost {
   id: number;
@@ -47,161 +49,7 @@ interface SoapPostCardProps {
   isRemoving?: boolean;
 }
 
-interface CommentDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  postId: number;
-}
-
-function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
-  const [commentText, setCommentText] = useState("");
-  const { toast } = useToast();
-  const { user } = useAuth();
-
-  // Fetch comments for this SOAP post
-  const { data: comments = [] } = useQuery({
-    queryKey: [`/api/soap/${postId}/comments`],
-    enabled: isOpen && !!postId,
-  });
-
-  // Comment mutation for SOAP posts
-  const commentMutation = useMutation({
-    mutationFn: async ({ content }: { content: string }) => {
-      const response = await fetch(`/api/soap/${postId}/comments`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-          "Referer": window.location.href,
-        },
-        credentials: "include",
-        body: JSON.stringify({ content })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`Failed to add comment: ${response.status}`);
-      }
-      
-      return await response.json();
-    },
-    onSuccess: () => {
-      // Invalidate all relevant queries to refresh comment counts
-      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/soap/${postId}/comments`] });
-      queryClient.invalidateQueries({ queryKey: ["/api/soap"] });
-      setCommentText("");
-      onClose(); // Close dialog after successful comment
-      toast({
-        title: "Comment added",
-        description: "Your comment has been posted",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Failed to add comment",
-        variant: "destructive",
-      });
-    }
-  });
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl" aria-describedby="comments-dialog-description">
-        <DialogHeader>
-          <DialogTitle>Comments</DialogTitle>
-          <DialogDescription id="comments-dialog-description">
-            View and add comments to this S.O.A.P. reflection
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 max-h-[50vh] overflow-y-auto">
-          {comments.length === 0 ? (
-            <div className="text-center py-8">
-              <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No comments yet. Be the first to share your thoughts!</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {comments.map((comment: any) => (
-                <div key={comment.id} className="flex space-x-3 p-3 rounded-lg bg-gray-50">
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={comment.author?.profileImageUrl || undefined} />
-                    <AvatarFallback className="bg-blue-100 text-blue-600">
-                      {comment.author?.firstName?.[0] || comment.authorId?.[0]?.toUpperCase() || 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-medium text-sm">
-                          {comment.author?.firstName ? `${comment.author.firstName} ${comment.author.lastName || ''}`.trim() : 'Community Member'}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
-                        </span>
-                      </div>
-                      
-                      {/* Flag Button - Only show for other users' comments */}
-                      {user && comment.author && (String(user.id) !== String(comment.author.id) && user.email !== comment.author.email) && (
-                        <FlagContentDialog
-                          contentType="comment"
-                          contentId={comment.id}
-                          trigger={
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-xs text-gray-400 hover:text-red-500 h-6 w-6 p-0"
-                              title="Report this comment"
-                            >
-                              <Flag className="w-3 h-3" />
-                            </Button>
-                          }
-                        />
-                      )}
-                    </div>
-                    <p className="text-gray-700 text-sm">{comment.content}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        
-        {/* Add Comment Form */}
-        <div className="border-t pt-4">
-          <div className="space-y-3">
-            <Textarea
-              placeholder="Share your thoughts..."
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              className="min-h-[80px] resize-none"
-            />
-            <div className="flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                onClick={onClose}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  if (commentText.trim()) {
-                    commentMutation.mutate({
-                      content: commentText.trim()
-                    });
-                  }
-                }}
-                disabled={!commentText.trim() || commentMutation.isPending}
-              >
-                {commentMutation.isPending ? "Posting..." : "Post Comment"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
+// Using shared CommentDialog component
 
 function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = false }: SoapPostCardProps) {
   const [expandedSections, setExpandedSections] = useState({
@@ -781,6 +629,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
         isOpen={commentDialogOpen}
         onClose={() => setCommentDialogOpen(false)}
         postId={post.id}
+        postType="soap"
       />
       
       {/* Share Dialog */}

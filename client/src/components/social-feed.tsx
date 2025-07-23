@@ -61,6 +61,7 @@ import { SoapPostCard } from './SoapPostCard';
 import { FlagContentDialog } from './content-moderation/FlagContentDialog';
 import { ContentModerationStatus, HiddenContentPlaceholder } from './content-moderation/ContentModerationStatus';
 import { CommentConfirmationDialog } from './CommentConfirmationDialog';
+import { CommentDialog } from './CommentDialog';
 
 interface FeedPost {
   id: number;
@@ -230,54 +231,15 @@ export default function SocialFeed() {
     }
   });
 
-  // Comment submission mutation - enhanced with better user feedback
-  const commentMutation = useMutation({
-    mutationFn: async ({ postId, content }: { postId: number; content: string }) => {
-      // Find the post to determine its type
-      const currentPost = (feedPosts as any[])?.find((post: any) => post.id === postId);
-      const isSOAPEntry = currentPost?.type === 'soap' || 
-                         currentPost?.type === 'soap_reflection' || 
-                         currentPost?.postType === 'soap' ||
-                         currentPost?.soapEntry;
-      
-      // Use the correct endpoint based on post type
-      const endpoint = isSOAPEntry 
-        ? `/api/soap/${postId}/comments` 
-        : `/api/discussions/${postId}/comments`;
-      
-      return apiRequest('POST', endpoint, { content });
-    },
-    onSuccess: (data, { postId, content }) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
-      
-      // Find the post title for the confirmation dialog
-      const currentPost = (feedPosts as any[])?.find((post: any) => post.id === postId);
-      const postTitle = currentPost?.title || currentPost?.content?.substring(0, 50) || 'Community Post';
-      
-      // Store comment data for confirmation dialog
-      setLastCommentData({
-        content,
-        postTitle,
-        postId
-      });
-      
-      setCommentText("");
-      setCommentDialogOpen(null);
-      
-      // Show user-friendly confirmation dialog
-      setShowCommentConfirmation(true);
-    },
-    onError: (error: any) => {
-      console.error('Comment submission error:', error);
-      toast({
-        title: "Unable to Post Comment",
-        description: "We're experiencing technical difficulties. Please try again in a moment.",
-        variant: "destructive",
-        duration: 5000,
-      });
-    }
-  });
+  // Helper function to determine post type for CommentDialog
+  const getPostType = (postId: number): 'discussion' | 'soap' | 'community' => {
+    const currentPost = (feedPosts as any[])?.find((post: any) => post.id === postId);
+    const isSOAPEntry = currentPost?.type === 'soap' || 
+                       currentPost?.type === 'soap_reflection' || 
+                       currentPost?.postType === 'soap' ||
+                       currentPost?.soapEntry;
+    return isSOAPEntry ? 'soap' : 'discussion';
+  };
 
   // Prayer reaction mutation
   const prayMutation = useMutation({
@@ -1768,67 +1730,15 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
         )}
       </div>
 
-      {/* Comment Dialog - iPhone SE optimized layout */}
-      <Dialog open={commentDialogOpen !== null} onOpenChange={() => setCommentDialogOpen(null)}>
-        <DialogContent className="sm:max-w-md max-h-[85vh] h-[85vh] flex flex-col p-4 m-2" aria-describedby="comment-dialog-description">
-          <DialogHeader className="flex-shrink-0 pb-2">
-            <DialogTitle className="text-lg">Comments</DialogTitle>
-            <DialogDescription id="comment-dialog-description" className="text-sm">
-              Share your thoughts and engage with this post.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex-1 flex flex-col min-h-0 space-y-3">
-            <Textarea
-              value={commentText}
-              onChange={(e) => setCommentText(e.target.value)}
-              placeholder="Write a thoughtful comment..."
-              className="min-h-[60px] max-h-[120px] text-sm resize-none"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                  if (commentDialogOpen && commentText.trim()) {
-                    commentMutation.mutate({ 
-                      postId: commentDialogOpen, 
-                      content: commentText.trim() 
-                    });
-                  }
-                }
-              }}
-            />
-            
-            {/* Sticky button area at bottom */}
-            <div className="flex-shrink-0 pt-3 border-t mt-auto">
-              <div className="flex flex-col gap-2">
-                <div className="flex space-x-2 w-full">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => setCommentDialogOpen(null)}
-                    disabled={commentMutation.isPending}
-                    className="flex-1 h-10"
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    onClick={() => {
-                      if (commentDialogOpen && commentText.trim()) {
-                        commentMutation.mutate({ 
-                          postId: commentDialogOpen, 
-                          content: commentText.trim() 
-                        });
-                      }
-                    }}
-                    disabled={commentMutation.isPending || !commentText.trim()}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium flex-1 h-10"
-                  >
-                    {commentMutation.isPending ? "Posting..." : "Post Comment"}
-                  </Button>
-                </div>
-                <span className="text-xs text-gray-400 text-center">Press Cmd+Enter to post</span>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Shared Comment Dialog */}
+      {commentDialogOpen !== null && (
+        <CommentDialog
+          isOpen={true}
+          onClose={() => setCommentDialogOpen(null)}
+          postId={commentDialogOpen}
+          postType={getPostType(commentDialogOpen)}
+        />
+      )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>

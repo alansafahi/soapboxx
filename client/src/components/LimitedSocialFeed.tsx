@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Textarea } from "./ui/textarea";
 import ShareDialog from "./ShareDialog";
 import { FlagContentDialog } from './content-moderation/FlagContentDialog';
+import { CommentDialog } from './CommentDialog';
 import { ContentModerationStatus, HiddenContentPlaceholder } from './content-moderation/ContentModerationStatus';
 
 
@@ -74,7 +75,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
   // Comment dialog state
   const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
-  const [commentText, setCommentText] = useState("");
+  // Remove unused commentText state - now handled by shared CommentDialog
   const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
 
   // Share dialog state
@@ -188,61 +189,17 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     }
   };
 
-  // Comment mutation
-  const commentMutation = useMutation({
-    mutationFn: async ({ postId, content }: { postId: number; content: string }) => {
-      // Find the post to determine its type
-      const currentPost = allPosts.find((post: any) => post.id === postId);
-      const isSOAPEntry = currentPost?.type === 'soap' || 
-                         currentPost?.type === 'soap_reflection' || 
-                         currentPost?.postType === 'soap' ||
-                         currentPost?.soapEntry;
-      
-      // Use the correct endpoint based on post type
-      const endpoint = isSOAPEntry 
-        ? `/api/soap/${postId}/comments` 
-        : `/api/discussions/${postId}/comments`;
-      
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-          "Referer": window.location.href,
-        },
-        credentials: "include",
-        body: JSON.stringify({ content })
-      });
+  // Helper function to determine post type for CommentDialog
+  const getPostType = (postId: number): 'discussion' | 'soap' | 'community' => {
+    const currentPost = allPosts.find((post: any) => post.id === postId);
+    const isSOAPEntry = currentPost?.type === 'soap' || 
+                       currentPost?.type === 'soap_reflection' || 
+                       currentPost?.postType === 'soap' ||
+                       currentPost?.soapEntry;
+    return isSOAPEntry ? 'soap' : 'discussion';
+  };
 
-      if (!response.ok) {
-        throw new Error(`Failed to add comment: ${response.status}`);
-      }
-
-      return await response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
-      queryClient.invalidateQueries({ queryKey: [`/api/discussions/${commentDialogOpen}/comments`] });
-      setCommentText("");
-      setCommentDialogOpen(null);
-      toast({
-        title: "Comment added",
-        description: "Your comment has been posted",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Failed to add comment",
-        variant: "destructive",
-      });
-    }
-  });
-
-  // Fetch comments for a specific post
-  const { data: comments = [] } = useQuery({
-    queryKey: [`/api/discussions/${commentDialogOpen}/comments`],
-    enabled: !!commentDialogOpen,
-  });
+  // Remove unused comments query - now handled by shared CommentDialog
 
   // Fetch posts with pagination
   const { data: posts = [], isLoading, error } = useQuery({
@@ -717,82 +674,15 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         </div>
       )}
 
-      {/* Comment Dialog */}
-      <Dialog open={!!commentDialogOpen} onOpenChange={() => setCommentDialogOpen(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Comments</DialogTitle>
-            <DialogDescription>
-              Share your thoughts and engage with the community
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 max-h-[50vh] overflow-y-auto">
-            {comments.length === 0 ? (
-              <div className="text-center py-8">
-                <MessageCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-700 dark:text-gray-300">No comments yet. Be the first to share your thoughts!</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {comments.map((comment: any) => (
-                  <div key={comment.id} className="flex space-x-3 p-3 rounded-lg bg-gray-50">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={comment.author?.profileImageUrl || undefined} />
-                      <AvatarFallback className="bg-blue-100 text-blue-600">
-                        {comment.author?.firstName?.[0] || comment.authorId?.[0]?.toUpperCase() || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <span className="font-medium text-sm">
-                          {comment.author?.firstName ? `${comment.author.firstName} ${comment.author.lastName || ''}`.trim() : 'Community Member'}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
-                        </span>
-                      </div>
-                      <p className="text-gray-800 dark:text-gray-300 text-sm">{comment.content}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Add Comment Form */}
-          <div className="border-t pt-4">
-            <div className="space-y-3">
-              <Textarea
-                placeholder="Share your thoughts..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                className="min-h-[80px] resize-none"
-              />
-              <div className="flex justify-end space-x-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setCommentDialogOpen(null)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (commentText.trim() && commentDialogOpen) {
-                      commentMutation.mutate({
-                        postId: commentDialogOpen,
-                        content: commentText.trim()
-                      });
-                    }
-                  }}
-                  disabled={!commentText.trim() || commentMutation.isPending}
-                >
-                  {commentMutation.isPending ? "Posting..." : "Post Comment"}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Shared Comment Dialog */}
+      {commentDialogOpen !== null && (
+        <CommentDialog
+          isOpen={true}
+          onClose={() => setCommentDialogOpen(null)}
+          postId={commentDialogOpen}
+          postType={getPostType(commentDialogOpen)}
+        />
+      )}
 
       {/* Share Dialog */}
       <ShareDialog 
