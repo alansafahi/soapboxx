@@ -232,13 +232,28 @@ export default function SocialFeed() {
   });
 
   // Helper function to determine post type for CommentDialog
-  const getPostType = (postId: number): 'discussion' | 'soap' | 'community' => {
+  const getPostType = (postId: number): 'discussion' | 'soap' | 'community' | 'prayer' => {
     const currentPost = (feedPosts as any[])?.find((post: any) => post.id === postId);
+    if (!currentPost) {
+      console.warn('Post not found in current feed for ID:', postId);
+      return 'discussion';
+    }
+    
+    // Check for prayer request
+    if (currentPost?.type === 'prayer_request' || currentPost?.isPrayerRequest || currentPost?.category) {
+      return 'prayer';
+    }
+    
+    // Check for SOAP entry
     const isSOAPEntry = currentPost?.type === 'soap' || 
                        currentPost?.type === 'soap_reflection' || 
                        currentPost?.postType === 'soap' ||
                        currentPost?.soapEntry;
-    return isSOAPEntry ? 'soap' : 'discussion';
+    if (isSOAPEntry) {
+      return 'soap';
+    }
+    
+    return 'discussion';
   };
 
   // Prayer reaction mutation

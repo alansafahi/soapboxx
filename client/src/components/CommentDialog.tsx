@@ -15,7 +15,7 @@ interface CommentDialogProps {
   isOpen: boolean;
   onClose: () => void;
   postId: number;
-  postType: 'discussion' | 'soap' | 'community';
+  postType: 'discussion' | 'soap' | 'community' | 'prayer';
 }
 
 interface Comment {
@@ -45,6 +45,8 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
     switch (type) {
       case 'soap':
         return `/api/soap/${postId}/comments`;
+      case 'prayer':
+        return `/api/prayers/${postId}/comments`;
       case 'discussion':
         return `/api/discussions/${postId}/comments`;
       case 'community':

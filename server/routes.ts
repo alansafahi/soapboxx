@@ -7979,10 +7979,15 @@ Return JSON with this exact structure:
         return res.status(400).json({ success: false, message: "Invalid discussion ID" });
       }
       
-      // Check if discussion exists - simplified check
+      // Check if discussion exists - simplified check with better logging
       try {
         const discussion = await storage.getDiscussion(discussionId);
+        console.log('Discussion lookup result:', { discussionId, found: !!discussion });
         if (!discussion) {
+          console.log('Discussion not found for ID:', discussionId);
+          // Check if this might be a SOAP entry or prayer request instead
+          const availableIds = await db.select({ id: discussions.id }).from(discussions).limit(10);
+          console.log('Available discussion IDs:', availableIds.map(d => d.id));
           return res.status(404).json({ success: false, message: "Post not found" });
         }
       } catch (discussionError) {
