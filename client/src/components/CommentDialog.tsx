@@ -21,6 +21,7 @@ interface CommentDialogProps {
 interface Comment {
   id: number;
   content: string;
+  parentId?: number | null;
   author: {
     id: string;
     email?: string;
@@ -31,6 +32,7 @@ interface Comment {
   createdAt: string;
   likeCount: number;
   isLiked: boolean;
+  replies?: Comment[];
 }
 
 export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDialogProps) {
@@ -247,8 +249,35 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
     addCommentMutation.mutate({ content: replyText.trim(), parentId });
   };
 
-  // Sort comments
-  const sortedComments = (comments || []).slice().sort((a, b) => {
+  // Build threaded comments structure
+  const buildThreadedComments = (comments: Comment[]): Comment[] => {
+    const commentMap = new Map<number, Comment>();
+    const rootComments: Comment[] = [];
+
+    // First pass: create a map of all comments
+    comments.forEach(comment => {
+      commentMap.set(comment.id, { ...comment, replies: [] });
+    });
+
+    // Second pass: organize into threaded structure
+    comments.forEach(comment => {
+      const commentWithReplies = commentMap.get(comment.id)!;
+      
+      if (comment.parentId && commentMap.has(comment.parentId)) {
+        // This is a reply, add it to its parent's replies
+        const parentComment = commentMap.get(comment.parentId)!;
+        parentComment.replies!.push(commentWithReplies);
+      } else {
+        // This is a top-level comment
+        rootComments.push(commentWithReplies);
+      }
+    });
+
+    return rootComments;
+  };
+
+  // Sort and thread comments
+  const threadedComments = buildThreadedComments(comments || []).sort((a, b) => {
     if (sortBy === 'newest') {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     } else {
@@ -300,7 +329,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
             </div>
           ) : (comments && comments.length > 0) ? (
             <div className="space-y-4">
-              {sortedComments.map((comment) => (
+              {threadedComments.map((comment) => (
                 <div key={comment.id} className="flex space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                   <Avatar className="w-8 h-8">
                     <AvatarImage src={comment.author?.profileImageUrl || ""} />
@@ -415,6 +444,49 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
                             </div>
                           </div>
                         </div>
+                      </div>
+                    )}
+
+                    {/* Nested Replies */}
+                    {comment.replies && comment.replies.length > 0 && (
+                      <div className="mt-3 ml-8 space-y-3 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
+                        {comment.replies.map((reply) => (
+                          <div key={reply.id} className="flex space-x-2 p-2 rounded-lg bg-gray-25 dark:bg-gray-850">
+                            <Avatar className="w-6 h-6">
+                              <AvatarImage src={reply.author?.profileImageUrl || ""} />
+                              <AvatarFallback className="bg-purple-600 text-white text-xs">
+                                {reply.author?.firstName?.[0]}{reply.author?.lastName?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <span className="font-medium text-xs text-gray-900 dark:text-white">
+                                    {reply.author?.firstName || 'Unknown'} {reply.author?.lastName || ''}
+                                  </span>
+                                  <span className="text-xs text-gray-500 ml-2">
+                                    {new Date(reply.createdAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1">{reply.content}</p>
+                              
+                              {/* Reply Actions */}
+                              <div className="flex items-center space-x-2 mt-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => likeCommentMutation.mutate(reply.id)}
+                                  className={`text-xs p-1 ${(reply.isLiked || likedComments.has(reply.id)) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                                  disabled={likeCommentMutation.isPending}
+                                >
+                                  <Heart className={`w-3 h-3 mr-1 ${(reply.isLiked || likedComments.has(reply.id)) ? 'fill-current' : ''}`} />
+                                  <span className="text-xs">{reply.likeCount || 0}</span>
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
