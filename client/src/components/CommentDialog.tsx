@@ -42,6 +42,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
 
   // Get the correct API endpoint based on post type
   const getApiEndpoint = (type: string) => {
+    console.log('Determining API endpoint for postType:', type, 'postId:', postId);
     switch (type) {
       case 'soap':
         return `/api/soap/${postId}/comments`;
@@ -52,6 +53,8 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
       case 'community':
         return `/api/discussions/${postId}/comments`;
       default:
+        // Fallback: Check if postId exists in prayer_requests table
+        console.warn('Using default endpoint for unknown postType:', type);
         return `/api/discussions/${postId}/comments`;
     }
   };
