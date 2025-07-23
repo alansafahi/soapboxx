@@ -2682,11 +2682,15 @@ export class DatabaseStorage implements IStorage {
         })
         .from(userChurches)
         .leftJoin(churches, eq(userChurches.churchId, churches.id))
-        .where(eq(userChurches.userId, userId))
+        .where(and(
+          eq(userChurches.userId, userId),
+          eq(userChurches.isActive, true)
+        ))
         .orderBy(desc(userChurches.lastAccessedAt));
       
       return result.map(r => ({
         ...r.church,
+        role: r.userChurch?.role || 'member', // Use 'role' for consistency with admin portal checks
         userRole: r.userChurch?.role || 'member',
         lastAccessedAt: r.userChurch?.lastAccessedAt,
       }));

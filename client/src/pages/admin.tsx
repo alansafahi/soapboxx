@@ -1,4 +1,5 @@
 import { useState } from "react";
+import * as React from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -413,18 +414,64 @@ function MembersPage() {
     );
   }
 
-  // Show simplified member directory for church admins, full admin for soapbox owners
+  // Get the first church that user is admin of for default selection
+  const adminChurch = userChurches.find((uc: any) => {
+    const adminRoles = ['church_admin', 'church-admin', 'admin', 'pastor', 'lead-pastor', 'elder', 'system_admin'];
+    return adminRoles.includes(uc.role);
+  });
+
+  // Set default selected church to the one user is admin of
+  React.useEffect(() => {
+    if (adminChurch && !selectedChurch) {
+      setSelectedChurch(adminChurch.id);
+    }
+  }, [adminChurch, selectedChurch]);
+
+  // Show simplified member directory for church admins who are not soapbox owners
+  // But allow them to access campus management for their church
   if (hasChurchAdminRole && user?.role !== 'soapbox_owner') {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Member Directory</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Church Administration</h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Manage church members and their information
+              Manage your church members and campus operations
             </p>
           </div>
-          <MemberManagementSystem selectedChurch={selectedChurch} />
+
+          <Tabs defaultValue="members" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="members">Members</TabsTrigger>
+              <TabsTrigger value="campuses">Campuses</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="members" className="space-y-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Member Management</h2>
+              <MemberManagementSystem selectedChurch={selectedChurch} />
+            </TabsContent>
+
+            <TabsContent value="campuses" className="space-y-6">
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                  <Building2 className="h-6 w-6" />
+                  Campus Management
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mt-2">
+                  Manage campus locations for your church
+                </p>
+              </div>
+              {selectedChurch ? (
+                <CampusManagement churchId={selectedChurch} />
+              ) : (
+                <Card className="p-8 text-center">
+                  <Building2 className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+                  <h2 className="text-xl font-semibold mb-2">Loading Church Data</h2>
+                  <p className="text-gray-600">Setting up your church administration...</p>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
         </main>
       </div>
     );
