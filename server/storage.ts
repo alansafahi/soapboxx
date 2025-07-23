@@ -2308,22 +2308,49 @@ export class DatabaseStorage implements IStorage {
   // Discussion operations
   async getDiscussions(limit?: number, offset?: number, churchId?: number, currentUserId?: string, includeFlagged?: boolean): Promise<any[]> {
     try {
-      // Get regular discussions
-      const regularDiscussions = await db
-        .select()
-        .from(discussions)
-        .leftJoin(users, eq(discussions.authorId, users.id))
-        .where(
-          and(
-            isNull(discussions.expiredAt),
-            eq(discussions.isPublic, true),
-            churchId ? eq(discussions.churchId, churchId) : undefined
-          )
-        )
-        .orderBy(desc(discussions.createdAt))
-        .limit(limit || 50)
-        .offset(offset || 0);
+      // Simple query to get discussions without complex joins for now
+      const discussionsResult = await db.execute(sql`
+        SELECT 
+          d.id, d.title, d.content, d.category, d.is_public, d.created_at, d.author_id,
+          u.id as user_id, u.email, u.first_name, u.last_name, u.profile_image_url
+        FROM discussions d
+        LEFT JOIN users u ON d.author_id = u.id
+        WHERE d.is_public = true AND d.expired_at IS NULL
+        ORDER BY d.created_at DESC
+        LIMIT ${limit || 50} OFFSET ${offset || 0}
+      `);
 
+      const discussions = discussionsResult.rows.map((row: any) => ({
+        id: row.id,
+        title: row.title,
+        content: row.content,
+        category: row.category,
+        isPublic: row.is_public,
+        createdAt: row.created_at,
+        authorId: row.author_id,
+        author: {
+          id: row.user_id,
+          email: row.email,
+          firstName: row.first_name,
+          lastName: row.last_name,
+          profileImageUrl: row.profile_image_url,
+        },
+        type: 'general',
+        soapData: null,
+        isLiked: false
+      }));
+
+      // Return just discussions for now - SOAP entries will be added back after testing
+      return discussions;
+    } catch (error) {
+      console.error('Error fetching discussions:', error);
+      return [];
+    }
+  }
+
+  // Simplified getDiscussions for testing - keeping original complex version below
+  async getDiscussionsOLD(limit?: number, offset?: number, churchId?: number, currentUserId?: string, includeFlagged?: boolean): Promise<any[]> {
+    try {
       // Get public SOAP entries  
       const soapEntriesData = await db
         .select()
