@@ -123,7 +123,10 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         )
       );
       
-      queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      // Delay invalidation to preserve UI state
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      }, 1000);
       
       const postType = getPostType(postId);
       const pointsEarned = postType === 'prayer' ? 10 : postType === 'soap' ? 15 : 5;

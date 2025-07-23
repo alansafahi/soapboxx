@@ -2358,11 +2358,42 @@ export class DatabaseStorage implements IStorage {
         }, {});
       }
 
-      // Add comment counts to discussions
+      // Get like counts and user like status for discussions
+      let discussionLikeCounts: Record<number, number> = {};
+      let userLikedDiscussions: Set<number> = new Set();
+      
+      if (discussionIds.length > 0) {
+        // Get like counts
+        const likeCountResult = await db.execute(sql`
+          SELECT discussion_id, COUNT(*) as like_count 
+          FROM discussion_likes 
+          WHERE discussion_id IN (${sql.join(discussionIds, sql`, `)})
+          GROUP BY discussion_id
+        `);
+        
+        discussionLikeCounts = likeCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
+          acc[row.discussion_id] = Number(row.like_count);
+          return acc;
+        }, {});
+        
+        // Get user's liked posts
+        if (currentUserId) {
+          const userLikesResult = await db.execute(sql`
+            SELECT discussion_id 
+            FROM discussion_likes 
+            WHERE user_id = ${currentUserId} AND discussion_id IN (${sql.join(discussionIds, sql`, `)})
+          `);
+          
+          userLikedDiscussions = new Set(userLikesResult.rows.map((row: any) => row.discussion_id));
+        }
+      }
+
+      // Add comment counts, like counts, and like status to discussions
       const discussionsWithCounts = discussions.map(discussion => ({
         ...discussion,
         commentCount: discussionCommentCounts[discussion.id] || 0,
-        likeCount: 0 // Will be added later
+        likeCount: discussionLikeCounts[discussion.id] || 0,
+        isLiked: userLikedDiscussions.has(discussion.id)
       }));
 
       return discussionsWithCounts;

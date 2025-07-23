@@ -183,8 +183,10 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
         return newSet;
       });
       
-      // Refresh comment data from server
-      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
+      // Delay invalidation to preserve UI state
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
+      }, 2000);
       
       // Show different messages based on post type and points earned
       const pointsEarned = postType === 'prayer' ? 5 : 3;
