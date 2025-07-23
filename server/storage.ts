@@ -4191,6 +4191,46 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getUserPrayerResponse(prayerRequestId: number, userId: string): Promise<PrayerResponse | undefined> {
+    try {
+      const [response] = await db
+        .select()
+        .from(prayerResponses)
+        .where(and(
+          eq(prayerResponses.prayerRequestId, prayerRequestId),
+          eq(prayerResponses.userId, userId),
+          eq(prayerResponses.responseType, 'prayer')
+        ));
+      return response;
+    } catch (error) {
+      console.error('Error getting user prayer response:', error);
+      return undefined;
+    }
+  }
+
+  async removePrayerResponse(prayerRequestId: number, userId: string): Promise<void> {
+    try {
+      await db
+        .delete(prayerResponses)
+        .where(and(
+          eq(prayerResponses.prayerRequestId, prayerRequestId),
+          eq(prayerResponses.userId, userId),
+          eq(prayerResponses.responseType, 'prayer')
+        ));
+      
+      // Update prayer count on the prayer request
+      await db
+        .update(prayerRequests)
+        .set({ 
+          prayerCount: sql`${prayerRequests.prayerCount} - 1`
+        })
+        .where(eq(prayerRequests.id, prayerRequestId));
+    } catch (error) {
+      console.error('Error removing prayer response:', error);
+      throw new Error('Failed to remove prayer response');
+    }
+  }
+
   // Prayer response like methods
   async likePrayerResponse(responseId: number, userId: string): Promise<{ liked: boolean; likeCount: number }> {
     try {
