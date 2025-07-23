@@ -4632,8 +4632,6 @@ export class DatabaseStorage implements IStorage {
 
   async getDiscussionComments(discussionId: number, userId?: string): Promise<DiscussionComment[]> {
     try {
-      // Remove debug logging for production
-      
       const comments = await db
         .select({
           id: discussionComments.id,
@@ -4652,8 +4650,6 @@ export class DatabaseStorage implements IStorage {
         .where(eq(discussionComments.discussionId, discussionId))
         .orderBy(asc(discussionComments.createdAt));
 
-      // Comment count logged
-
       // Get user's liked comments if userId provided
       let userLikedComments: Set<number> = new Set();
       if (userId && comments.length > 0) {
@@ -4667,12 +4663,11 @@ export class DatabaseStorage implements IStorage {
           
           userLikedComments = new Set(userLikesResult.rows.map((row: any) => row.comment_id));
         } catch (likesError) {
-          console.log('Comment likes table not available, skipping like status');
-          // Continue without like status if table doesn't exist
+          // Continue without like status if table doesn't exist or has issues
         }
       }
 
-      const result = comments.map(comment => ({
+      return comments.map(comment => ({
         id: comment.id,
         discussionId: comment.discussionId,
         authorId: comment.authorId,
@@ -4685,12 +4680,11 @@ export class DatabaseStorage implements IStorage {
         author: {
           id: comment.authorId,
           name: comment.authorName as string || 'Unknown User',
-          profileImage: comment.authorAvatar
+          firstName: comment.authorName as string || 'Unknown',
+          lastName: '',
+          profileImageUrl: comment.authorAvatar
         }
       }));
-
-      // Returning comment results
-      return result;
     } catch (error) {
       console.error('Error fetching discussion comments:', error);
       return [];

@@ -93,7 +93,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
 
   // Initialize liked comments state from fetched data
   useEffect(() => {
-    if (comments && isOpen) {
+    if (comments && comments.length > 0 && isOpen) {
       const initialLikedComments = new Set<number>();
       comments.forEach((comment: any) => {
         if (comment.isLiked) {
@@ -101,6 +101,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
         }
       });
       setLikedComments(initialLikedComments);
+      console.log('Initialized liked comments from server:', Array.from(initialLikedComments));
     }
   }, [comments, isOpen]);
 
@@ -193,13 +194,12 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
         } else {
           newSet.delete(commentId);
         }
+        console.log('Updated liked comments:', Array.from(newSet));
         return newSet;
       });
       
-      // Delay invalidation to preserve UI state
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
-      }, 2000);
+      // Immediately refresh to get updated counts
+      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
       
       // Show different messages based on post type and points earned
       const pointsEarned = postType === 'prayer' ? 5 : 3;
@@ -210,7 +210,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
         title: result.liked ? "Comment liked!" : "Comment unliked!",
         description: result.liked ? 
           `You liked this ${activityType} and earned ${pointsEarned} SoapBox Points!` : 
-          "You removed your like",
+          `You unliked this ${activityType} and lost ${pointsEarned} SoapBox Points`,
       });
     },
     onError: (error: any) => {
@@ -320,9 +320,10 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
                           size="sm"
                           onClick={() => likeCommentMutation.mutate(comment.id)}
                           className={`text-xs p-1 ${(comment.isLiked || likedComments.has(comment.id)) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                          disabled={likeCommentMutation.isPending}
                         >
                           <Heart className={`w-3 h-3 mr-1 ${(comment.isLiked || likedComments.has(comment.id)) ? 'fill-current' : ''}`} />
-                          {comment.likeCount > 0 && comment.likeCount}
+                          <span className="text-xs">{comment.likeCount || 0}</span>
                         </Button>
                         <Button variant="ghost" size="sm" className="text-xs text-gray-400 hover:text-blue-500 p-1">
                           <Reply className="w-3 h-3 mr-1" />
