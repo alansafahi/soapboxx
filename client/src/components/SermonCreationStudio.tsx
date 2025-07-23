@@ -105,20 +105,20 @@ export default function SermonCreationStudio() {
 
   // Fetch saved sermon drafts
   const { data: savedDrafts, isLoading: draftsLoading, refetch: refetchDrafts } = useQuery({
-    queryKey: ['/api/sermon/drafts'],
-    queryFn: () => apiRequest('GET', '/api/sermon/drafts'),
+    queryKey: ['/api/sermon-studio/drafts'],
+    queryFn: () => apiRequest('GET', '/api/sermon-studio/drafts'),
   });
 
   // Fetch completed sermons
   const { data: completedSermons, isLoading: completedLoading, refetch: refetchCompleted } = useQuery({
-    queryKey: ['/api/sermon/completed'],
-    queryFn: () => apiRequest('GET', '/api/sermon/completed'),
+    queryKey: ['/api/sermon-studio/completed'],
+    queryFn: () => apiRequest('GET', '/api/sermon-studio/completed'),
   });
 
   // Save Draft mutation
   const saveDraftMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest('POST', '/api/sermon/save-draft', { ...data, draftId: currentDraftId });
+      return await apiRequest('POST', '/api/sermon-studio/save-draft', { ...data, draftId: currentDraftId });
     },
     onSuccess: (data) => {
       setCurrentDraftId(data.draftId);
@@ -289,7 +289,7 @@ export default function SermonCreationStudio() {
   // Sermon Outline Mutation
   const outlineMutation = useMutation({
     mutationFn: async (data: { scripture: string; topic: string; audience: string; length: string }) => {
-      return apiRequest('POST', '/api/sermon/outline', data);
+      return apiRequest('POST', '/api/sermon-studio/outline', data);
     },
     onSuccess: (data) => {
       setCurrentOutline(data);
@@ -310,7 +310,7 @@ export default function SermonCreationStudio() {
   // Illustrations Mutation for generating stories and presentation content
   const illustrationsMutation = useMutation({
     mutationFn: async (data: { topic: string; mainPoints: string[]; audience: string }) => {
-      return apiRequest('POST', '/api/sermon/illustrations', data);
+      return apiRequest('POST', '/api/sermon-studio/illustrations', data);
     },
     onSuccess: (data) => {
       setIllustrations(data);
@@ -331,7 +331,7 @@ export default function SermonCreationStudio() {
   // Enhancement Mutation
   const enhanceMutation = useMutation({
     mutationFn: async (data: { outline: SermonOutline; research: BiblicalResearch; selectedStories?: SermonIllustration[] }) => {
-      return apiRequest('POST', '/api/sermon/enhance', data);
+      return apiRequest('POST', '/api/sermon-studio/enhance', data);
     },
     onSuccess: (data) => {
       setEnhancedOutline(data.enhancedOutline);
@@ -347,7 +347,7 @@ export default function SermonCreationStudio() {
   // Save Completed Sermon mutation
   const saveCompletedMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest('POST', '/api/sermon/save-completed', data);
+      return await apiRequest('POST', '/api/sermon-studio/save-completed', data);
     },
     onSuccess: () => {
       toast({

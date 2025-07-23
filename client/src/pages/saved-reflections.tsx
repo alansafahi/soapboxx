@@ -16,10 +16,10 @@ export default function SavedReflections() {
 
   const removeSavedMutation = useMutation({
     mutationFn: async (soapId: number) => {
-      await apiRequest('DELETE', `/api/soap/saved/${soapId}`);
+      await apiRequest('DELETE', `/api/soap-entries/saved/${soapId}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/user/saved-soap'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-profiles/saved-soap-entries'] });
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       toast({
         title: "Removed from collection",

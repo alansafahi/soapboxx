@@ -73,18 +73,18 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
 
   // Fetch comments for this SOAP post to show inline
   const { data: inlineComments = [] } = useQuery({
-    queryKey: [`/api/soap/${post.id}/comments`],
+    queryKey: [`/api/soap-entries/${post.id}/comments`],
     enabled: !!post.id,
   });
 
   // Save/Unsave mutations
   const saveMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest('POST', '/api/soap/save', { soapId: post.id });
+      await apiRequest('POST', '/api/soap-entries/save', { soapId: post.id });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/user/saved-soap'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-profiles/saved-soap-entries'] });
       toast({
         title: "Saved to your collection",
         description: "This reflection has been added to your saved reflections.",
@@ -100,11 +100,11 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
 
   const unsaveMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest('DELETE', `/api/soap/saved/${post.id}`);
+      await apiRequest('DELETE', `/api/soap-entries/saved/${post.id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/user/saved-soap'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user-profiles/saved-soap-entries'] });
       toast({
         title: "Removed from collection",
         description: "This reflection is no longer saved.",
@@ -121,12 +121,12 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
   // Delete SOAP entry mutation
   const deleteSoapMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest('DELETE', `/api/soap/${post.id}`);
+      await apiRequest('DELETE', `/api/soap-entries/${post.id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/soap'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/soap-entries'] });
       setDeleteDialogOpen(false);
       toast({
         title: "S.O.A.P. entry deleted",
@@ -159,7 +159,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
 
   const handleReaction = async (reactionType: string) => {
     try {
-      const response = await apiRequest('POST', '/api/soap/reaction', {
+      const response = await apiRequest('POST', '/api/soap-entries/reactions', {
         soapId: post.id,
         reactionType,
         emoji: reactionType === 'amen' ? '🙏' : '❤️'
@@ -197,7 +197,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
       // Copy only Scripture and reference to user's personal journal for their own reflection
       const soapData = post.soapData;
       if (soapData) {
-        await apiRequest('POST', '/api/soap/reflect', {
+        await apiRequest('POST', '/api/soap-entries/reflect', {
           originalSoapId: post.id,
           scripture: soapData.scripture,
           scriptureReference: soapData.scriptureReference
@@ -218,7 +218,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
 
   const handleSave = async () => {
     try {
-      await apiRequest('POST', '/api/soap/save', {
+      await apiRequest('POST', '/api/soap-entries/save', {
         soapId: post.id
       });
       toast({

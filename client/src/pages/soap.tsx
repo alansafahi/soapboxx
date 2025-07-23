@@ -34,38 +34,38 @@ export default function SoapPage() {
 
   // Fetch user's S.O.A.P. entries
   const { data: userEntries = [], isLoading: userLoading } = useQuery({
-    queryKey: ['/api/soap'],
-    queryFn: () => apiRequest('GET', '/api/soap'),
+    queryKey: ['/api/soap-entries'],
+    queryFn: () => apiRequest('GET', '/api/soap-entries'),
   });
 
   // Fetch ALL public S.O.A.P. entries platform-wide
   const { data: allEntries = [], isLoading: allLoading } = useQuery({
-    queryKey: ['/api/soap/all'],
-    queryFn: () => apiRequest('GET', '/api/soap/all'),
+    queryKey: ['/api/soap-entries/all'],
+    queryFn: () => apiRequest('GET', '/api/soap-entries/all'),
   });
 
   // Fetch public S.O.A.P. entries for community feed (same church)
   const { data: publicEntries = [], isLoading: publicLoading } = useQuery({
-    queryKey: ['/api/soap/public'],
-    queryFn: () => apiRequest('GET', '/api/soap/public'),
+    queryKey: ['/api/soap-entries/public'],
+    queryFn: () => apiRequest('GET', '/api/soap-entries/public'),
   });
 
   // Fetch user's S.O.A.P. streak
   const { data: streakData } = useQuery({
-    queryKey: ['/api/soap/streak/current'],
+    queryKey: ['/api/soap-entries/streak/current'],
     queryFn: async () => {
       const user = await apiRequest('GET', '/api/auth/user');
-      return apiRequest('GET', `/api/soap/streak/${user.id}`);
+      return apiRequest('GET', `/api/soap-entries/streak/${user.id}`);
     },
   });
 
   // Delete S.O.A.P. entry mutation
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest('DELETE', `/api/soap/${id}`),
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/soap-entries/${id}`),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/soap'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/soap/all'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/soap/public'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/soap-entries'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/soap-entries/all'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/soap-entries/public'] });
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       setDeleteDialogOpen(false);
@@ -108,9 +108,9 @@ export default function SoapPage() {
   };
 
   const handleFormSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['/api/soap'] });
-    queryClient.invalidateQueries({ queryKey: ['/api/soap/all'] });
-    queryClient.invalidateQueries({ queryKey: ['/api/soap/public'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/soap-entries'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/soap-entries/all'] });
+    queryClient.invalidateQueries({ queryKey: ['/api/soap-entries/public'] });
     queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
     queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
     handleFormClose();

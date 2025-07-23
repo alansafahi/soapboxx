@@ -98,7 +98,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
           endpoint = `/api/prayers/${postId}/like`;
           break;
         case 'soap':
-          endpoint = `/api/soap/${postId}/like`;
+          endpoint = `/api/soap-entries/${postId}/like`;
           break;
         case 'discussion':
         case 'community':
@@ -181,7 +181,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       try {
         let response;
         if (postType === 'soap_reflection') {
-          response = await apiRequest('DELETE', `/api/soap/${postId}`);
+          response = await apiRequest('DELETE', `/api/soap-entries/${postId}`);
         } else {
           response = await apiRequest('DELETE', `/api/discussions/${postId}`);
         }
@@ -195,7 +195,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       setAllPosts(prev => prev.filter(post => post.id !== postToDelete));
       // Invalidate queries to refresh feed
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/soap"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/soap-entries"] });
       // Close dialog
 
       // Reset dialog state first to prevent UI issues

@@ -38,14 +38,14 @@ function ChurchManagementTab() {
   
   // Query for churches by status
   const { data: churches, isLoading, refetch } = useQuery({
-    queryKey: ['/api/admin/churches', statusFilter],
-    queryFn: () => fetch(`/api/admin/churches?status=${statusFilter}`).then(res => res.json())
+    queryKey: ['/api/admin-portal/churches', statusFilter],
+    queryFn: () => fetch(`/api/admin-portal/churches?status=${statusFilter}`).then(res => res.json())
   });
 
   // Mutation for approving churches
   const approveChurchMutation = useMutation({
     mutationFn: async (churchId: number) => {
-      const response = await apiRequest('POST', '/api/admin/churches/approve', { churchId });
+      const response = await apiRequest('POST', '/api/admin-portal/churches/approve', { churchId });
       return response;
     },
     onSuccess: () => {
@@ -67,7 +67,7 @@ function ChurchManagementTab() {
   // Mutation for rejecting churches
   const rejectChurchMutation = useMutation({
     mutationFn: async ({ churchId, reason }: { churchId: number; reason: string }) => {
-      const response = await apiRequest('POST', '/api/admin/churches/reject', { churchId, reason });
+      const response = await apiRequest('POST', '/api/admin-portal/churches/reject', { churchId, reason });
       return response;
     },
     onSuccess: () => {
@@ -89,7 +89,7 @@ function ChurchManagementTab() {
   // Mutation for suspending churches
   const suspendChurchMutation = useMutation({
     mutationFn: async ({ churchId, reason }: { churchId: number; reason: string }) => {
-      const response = await apiRequest('POST', '/api/admin/churches/suspend', { churchId, reason });
+      const response = await apiRequest('POST', '/api/admin-portal/churches/suspend', { churchId, reason });
       return response;
     },
     onSuccess: () => {

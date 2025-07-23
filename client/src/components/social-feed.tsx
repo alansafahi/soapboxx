@@ -203,7 +203,7 @@ export default function SocialFeed() {
 
   // Fetch user's SOAP entries
   const { data: soapEntries = [] } = useQuery<any[]>({
-    queryKey: ['/api/soap'],
+    queryKey: ['/api/soap-entries'],
     enabled: showSoapDialog,
   });
 
@@ -394,7 +394,7 @@ export default function SocialFeed() {
       try {
         let response;
         if (postType === 'soap_reflection') {
-          response = await apiRequest('DELETE', `/api/soap/${postId}`);
+          response = await apiRequest('DELETE', `/api/soap-entries/${postId}`);
         } else {
           response = await apiRequest('DELETE', `/api/discussions/${postId}`);
         }

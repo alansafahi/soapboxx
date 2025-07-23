@@ -150,49 +150,49 @@ export default function ChurchAdminDashboard() {
 
   // Fetch analytics data
   const { data: analytics, isLoading: analyticsLoading } = useQuery<MemberAnalytics>({
-    queryKey: ["/api/admin/analytics"],
+    queryKey: ["/api/admin-portal/analytics"],
   });
 
   const { data: campaigns, isLoading: campaignsLoading } = useQuery<CommunicationCampaign[]>({
-    queryKey: ["/api/admin/campaigns"],
+    queryKey: ["/api/admin-portal/campaigns"],
   });
 
   const { data: volunteerRoles, isLoading: volunteerRolesLoading } = useQuery<VolunteerRole[]>({
-    queryKey: ["/api/admin/volunteer-roles"],
+    queryKey: ["/api/admin-portal/volunteer-roles"],
   });
 
   const { data: donationSummary, isLoading: donationLoading } = useQuery<DonationSummary>({
-    queryKey: ["/api/admin/donations/summary"],
+    queryKey: ["/api/admin-portal/donations/summary"],
   });
 
   const { data: campuses, isLoading: campusesLoading } = useQuery<Campus[]>({
-    queryKey: ["/api/admin/campuses"],
+    queryKey: ["/api/admin-portal/campuses"],
   });
 
   // Mutations
   const createCampaignMutation = useMutation({
     mutationFn: (data: z.infer<typeof campaignSchema>) => 
-      apiRequest("/api/admin/campaigns", "POST", data),
+      apiRequest("/api/admin-portal/campaigns", "POST", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/campaigns"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin-portal/campaigns"] });
       toast({ title: "Campaign created successfully" });
     }
   });
 
   const createVolunteerRoleMutation = useMutation({
     mutationFn: (data: z.infer<typeof volunteerRoleSchema>) => 
-      apiRequest("/api/admin/volunteer-roles", "POST", data),
+      apiRequest("/api/admin-portal/volunteer-roles", "POST", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/volunteer-roles"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin-portal/volunteer-roles"] });
       toast({ title: "Volunteer role created successfully" });
     }
   });
 
   const createCampusMutation = useMutation({
     mutationFn: (data: z.infer<typeof campusSchema>) => 
-      apiRequest("/api/admin/campuses", "POST", data),
+      apiRequest("/api/admin-portal/campuses", "POST", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/campuses"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin-portal/campuses"] });
       toast({ title: "Campus created successfully" });
     }
   });

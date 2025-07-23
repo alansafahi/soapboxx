@@ -103,7 +103,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   });
 
   const { data: churchAffiliation } = useQuery({
-    queryKey: ['/api/user/church-affiliation'],
+    queryKey: ['/api/user-profiles/church-affiliation'],
   });
 
   // Fetch contextual information for AI enhancement
@@ -232,7 +232,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     onSuccess: () => {
       // Invalidate relevant caches to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/soap'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/soap/public'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/soap-entries/public'] });
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       
@@ -312,7 +312,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
         generateComplete: !currentData.scripture || !currentData.scriptureReference // Generate complete S.O.A.P. if no scripture provided
       };
 
-      const suggestions = await apiRequest('POST', '/api/soap/ai/suggestions', requestBody);
+      const suggestions = await apiRequest('POST', '/api/soap-entries/ai/suggestions', requestBody);
       
       setAiSuggestions(suggestions);
       
@@ -353,7 +353,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
     setIsEnhancing(true);
     try {
-      const enhanced = await apiRequest('POST', '/api/soap/ai/enhance', {
+      const enhanced = await apiRequest('POST', '/api/soap-entries/ai/enhance', {
         scripture: currentData.scripture,
         scriptureReference: currentData.scriptureReference,
         observation: currentData.observation,
@@ -394,7 +394,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     }
 
     try {
-      const response = await apiRequest('POST', '/api/soap/ai/questions', {
+      const response = await apiRequest('POST', '/api/soap-entries/ai/questions', {
         scripture: currentData.scripture,
         scriptureReference: currentData.scriptureReference,
       });
@@ -431,7 +431,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
     setIsEnhancing(true);
     try {
-      const enhanced = await apiRequest('POST', '/api/soap/ai/enhance', {
+      const enhanced = await apiRequest('POST', '/api/soap-entries/ai/enhance', {
         scripture: currentData.scripture,
         scriptureReference: currentData.scriptureReference,
         observation: section === 'observation' ? currentData.observation : '',

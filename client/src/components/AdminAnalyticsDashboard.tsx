@@ -68,33 +68,33 @@ export function AdminAnalyticsDashboard() {
   const { user } = useAuth();
   
   const { data: engagementData, isLoading: engagementLoading } = useQuery<EngagementOverview>({
-    queryKey: ['/api/admin/engagement-overview'],
+    queryKey: ['/api/admin-portal/engagement-overview'],
     enabled: !!user
   });
 
   const { data: checkInsData, isLoading: checkInsLoading } = useQuery<MemberCheckInsData>({
-    queryKey: ['/api/admin/member-checkins'],
+    queryKey: ['/api/admin-portal/member-checkins'],
     enabled: !!user
   });
 
   const { data: devotionData, isLoading: devotionLoading } = useQuery<DevotionAnalytics>({
-    queryKey: ['/api/admin/devotion-analytics'],
+    queryKey: ['/api/admin-portal/devotion-analytics'],
     enabled: !!user
   });
 
   const { data: atRiskMembers, isLoading: atRiskLoading } = useQuery<AtRiskMember[]>({
-    queryKey: ['/api/admin/at-risk-members'],
+    queryKey: ['/api/admin-portal/at-risk-members'],
     enabled: !!user
   });
 
   const { data: prayerData, isLoading: prayerLoading } = useQuery({
-    queryKey: ['/api/admin/analytics/prayer-engagement'],
+    queryKey: ['/api/admin-portal/analytics/prayer-engagement'],
     enabled: !!user
   });
 
   const { data: devotionalData, isLoading: devotionalLoading } = useQuery({
-    queryKey: ['/api/admin/analytics/devotional-completions'],
-    queryFn: () => fetch('/api/admin/analytics/devotional-completions?devotional=Lent').then(res => res.json()),
+    queryKey: ['/api/admin-portal/analytics/devotional-completions'],
+    queryFn: () => fetch('/api/admin-portal/analytics/devotional-completions?devotional=Lent').then(res => res.json()),
     enabled: !!user
   });
 
