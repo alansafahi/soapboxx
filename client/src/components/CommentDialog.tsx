@@ -66,7 +66,28 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
   // Add comment mutation
   const addCommentMutation = useMutation({
     mutationFn: async (content: string) => {
-      return apiRequest('POST', apiEndpoint, { content });
+      try {
+        const response = await fetch(apiEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Referer': window.location.href,
+          },
+          credentials: 'include',
+          body: JSON.stringify({ content })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(`HTTP ${response.status}: ${errorData}`);
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error('Comment submission error:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
@@ -77,13 +98,12 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
         title: "Comment added!",
         description: "Your comment has been posted successfully",
       });
-      // Close dialog after successful comment submission
-      onClose();
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Failed to add comment:', error);
       toast({
-        title: "Error",
-        description: "Failed to add comment",
+        title: "Unable to post comment",
+        description: error.message || "Please try again in a moment",
         variant: "destructive"
       });
     }
@@ -95,7 +115,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
       return apiRequest('POST', `/api/comments/${commentId}/like`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/discussions', postId, 'comments'] });
+      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
     },
     onError: () => {
       toast({
@@ -123,7 +143,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
+      <DialogContent className="sm:max-w-2xl max-w-[95vw] max-h-[90vh] h-[90vh] flex flex-col p-4 m-2">
         <DialogHeader>
           <DialogTitle>Comments</DialogTitle>
           <DialogDescription>
@@ -131,15 +151,15 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
           </DialogDescription>
         </DialogHeader>
 
-        {/* Sort Options */}
-        <div className="flex items-center justify-between pb-4 border-b">
+        {/* Sort Options - Mobile Responsive */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b space-y-2 sm:space-y-0">
           <div className="flex items-center space-x-2">
             <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Sort by:</span>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSortBy('newest')}
-              className={`text-xs ${sortBy === 'newest' ? 'text-blue-600 font-medium bg-blue-50' : 'text-gray-500'}`}
+              className={`text-xs px-2 py-1 ${sortBy === 'newest' ? 'text-blue-600 font-medium bg-blue-50' : 'text-gray-500'}`}
             >
               Newest
             </Button>
@@ -148,7 +168,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
               variant="ghost"
               size="sm"
               onClick={() => setSortBy('most_liked')}
-              className={`text-xs ${sortBy === 'most_liked' ? 'text-blue-600 font-medium bg-blue-50' : 'text-gray-500'}`}
+              className={`text-xs px-2 py-1 ${sortBy === 'most_liked' ? 'text-blue-600 font-medium bg-blue-50' : 'text-gray-500'}`}
             >
               Most liked
             </Button>
@@ -157,7 +177,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
         </div>
 
         {/* Comments List */}
-        <ScrollArea className="flex-1 pr-4 min-h-[300px] max-h-[400px]">
+        <ScrollArea className="flex-1 pr-2 min-h-0">
           {isLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
@@ -166,7 +186,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
           ) : (comments && comments.length > 0) ? (
             <div className="space-y-4">
               {sortedComments.map((comment) => (
-                <div key={comment.id} className="flex space-x-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                <div key={comment.id} className="flex space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                   <Avatar className="w-8 h-8">
                     <AvatarImage src={comment.author?.profileImageUrl || ""} />
                     <AvatarFallback className="bg-purple-600 text-white text-sm">
@@ -189,21 +209,21 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
                     </div>
                     <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{comment.content}</p>
                     
-                    {/* Comment Actions */}
+                    {/* Comment Actions - Mobile Optimized */}
                     <div className="flex items-center justify-between mt-2">
-                      <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2 sm:space-x-4">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => likeCommentMutation.mutate(comment.id)}
-                          className={`text-xs ${comment.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                          className={`text-xs p-1 ${comment.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
                         >
                           <Heart className={`w-3 h-3 mr-1 ${comment.isLiked ? 'fill-current' : ''}`} />
                           {comment.likeCount > 0 && comment.likeCount}
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-xs text-gray-400 hover:text-blue-500">
+                        <Button variant="ghost" size="sm" className="text-xs text-gray-400 hover:text-blue-500 p-1">
                           <Reply className="w-3 h-3 mr-1" />
-                          Reply
+                          <span className="hidden sm:inline">Reply</span>
                         </Button>
                       </div>
                       
@@ -237,36 +257,46 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
           )}
         </ScrollArea>
 
-        {/* Add Comment Form */}
-        <div className="border-t pt-4 mt-4">
-          <div className="flex items-start space-x-3">
-            <Avatar className="w-8 h-8">
+        {/* Add Comment Form - Mobile Optimized */}
+        <div className="border-t pt-4 mt-4 flex-shrink-0">
+          <div className="flex items-start space-x-2 sm:space-x-3">
+            <Avatar className="w-8 h-8 flex-shrink-0">
               <AvatarImage src={user?.profileImageUrl || ""} />
               <AvatarFallback className="bg-purple-600 text-white text-sm">
                 {user?.firstName?.[0] || 'U'}{user?.lastName?.[0] || ''}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <Textarea
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder="Write a thoughtful comment..."
-                className="min-h-[80px] text-sm resize-none"
+                className="min-h-[60px] sm:min-h-[80px] text-sm resize-none w-full"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
                     handleSubmitComment();
                   }
                 }}
               />
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-xs text-gray-400">Press Cmd+Enter to post</span>
-                <Button
-                  onClick={handleSubmitComment}
-                  disabled={addCommentMutation.isPending || !commentText.trim()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
-                >
-                  {addCommentMutation.isPending ? "Posting..." : "Post Comment"}
-                </Button>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-3 space-y-2 sm:space-y-0">
+                <span className="text-xs text-gray-400 order-2 sm:order-1">Press Cmd+Enter to post</span>
+                <div className="flex space-x-2 order-1 sm:order-2">
+                  <Button
+                    variant="outline"
+                    onClick={onClose}
+                    disabled={addCommentMutation.isPending}
+                    className="flex-1 sm:flex-none h-9"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSubmitComment}
+                    disabled={addCommentMutation.isPending || !commentText.trim()}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium flex-1 sm:flex-none h-9"
+                  >
+                    {addCommentMutation.isPending ? "Posting..." : "Post"}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
