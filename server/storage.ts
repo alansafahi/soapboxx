@@ -2419,6 +2419,14 @@ export class DatabaseStorage implements IStorage {
           WHERE user_id = ${userId} AND discussion_id = ${discussionId}
         `);
         
+        // Remove points for unliking
+        await this.trackUserActivity({
+          userId: userId,
+          activityType: 'unlike_discussion',
+          entityId: discussionId,
+          points: -5, // Remove 5 points for unliking
+        });
+        
         return { success: true, liked: false, message: 'Like removed' };
       } else {
         // Like - add the like
@@ -2427,12 +2435,12 @@ export class DatabaseStorage implements IStorage {
           VALUES (${userId}, ${discussionId}, ${new Date()})
         `);
         
-        // Track user activity
+        // Track user activity and award points
         await this.trackUserActivity({
           userId: userId,
           activityType: 'like_discussion',
           entityId: discussionId,
-          points: 2,
+          points: 5, // Award 5 points for liking
         });
         
         return { success: true, liked: true, message: 'Like added' };

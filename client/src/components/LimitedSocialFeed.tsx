@@ -123,11 +123,6 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         )
       );
       
-      // Delay invalidation to preserve UI state
-      setTimeout(() => {
-        queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
-      }, 1000);
-      
       const postType = getPostType(postId);
       const pointsEarned = postType === 'prayer' ? 10 : postType === 'soap' ? 15 : 5;
       const activityType = postType === 'prayer' ? 'prayer request' : 
@@ -139,6 +134,11 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
           `You liked this ${activityType} and earned ${pointsEarned} SoapBox Points!` : 
           "Your like has been removed",
       });
+
+      // Delay invalidation to preserve UI state
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      }, 1000);
     },
     onError: (error: any) => {
       console.error('Post like error:', error);
