@@ -122,7 +122,8 @@ export default function DivinePhase2Dashboard() {
 
     createCampusMutation.mutate({
       ...newCampusData,
-      capacity: parseInt(newCampusData.capacity) || 0
+      capacity: parseInt(newCampusData.capacity) || 0,
+      churchId: 1 // Default church ID for SoapBox Super App
     });
   };
 
