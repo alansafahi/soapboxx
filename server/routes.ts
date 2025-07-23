@@ -8094,16 +8094,8 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
       
-      // Award points for liking a discussion comment
-      await storage.trackUserActivity({
-        userId: userId,
-        activityType: 'like_discussion_comment',
-        entityId: commentId,
-        points: 3,
-      });
-      
-      // For now, return static response (consistent with other comment systems)
-      res.json({ liked: true, likeCount: 1 });
+      const result = await storage.toggleDiscussionCommentLike(commentId, userId);
+      res.json(result);
     } catch (error) {
       console.error('Error liking discussion comment:', error);
       res.status(500).json({ message: "Failed to like comment" });

@@ -4761,6 +4761,78 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Toggle discussion comment like
+  async toggleDiscussionCommentLike(commentId: number, userId: string): Promise<{ liked: boolean; likeCount: number }> {
+    try {
+      // Check if user already liked this comment
+      const existingLike = await db.execute(sql`
+        SELECT * FROM discussion_comment_likes 
+        WHERE comment_id = ${commentId} AND user_id = ${userId}
+      `);
+      
+      if (existingLike.rows.length > 0) {
+        // Unlike: Remove like and decrement counter
+        await db.execute(sql`
+          DELETE FROM discussion_comment_likes 
+          WHERE comment_id = ${commentId} AND user_id = ${userId}
+        `);
+        
+        await db.execute(sql`
+          UPDATE discussion_comments 
+          SET like_count = GREATEST(like_count - 1, 0) 
+          WHERE id = ${commentId}
+        `);
+        
+        // Remove points for unliking
+        await this.trackUserActivity({
+          userId: userId,
+          activityType: 'unlike_discussion_comment',
+          entityId: commentId,
+          points: -3,
+        });
+        
+        // Get updated count
+        const countResult = await db.execute(sql`
+          SELECT like_count FROM discussion_comments WHERE id = ${commentId}
+        `);
+        const likeCount = countResult.rows[0]?.like_count || 0;
+        
+        return { liked: false, likeCount };
+      } else {
+        // Like: Add like and increment counter
+        await db.execute(sql`
+          INSERT INTO discussion_comment_likes (comment_id, user_id, created_at) 
+          VALUES (${commentId}, ${userId}, ${new Date().toISOString()})
+        `);
+        
+        await db.execute(sql`
+          UPDATE discussion_comments 
+          SET like_count = like_count + 1 
+          WHERE id = ${commentId}
+        `);
+        
+        // Award points for liking
+        await this.trackUserActivity({
+          userId: userId,
+          activityType: 'like_discussion_comment',
+          entityId: commentId,
+          points: 3,
+        });
+        
+        // Get updated count
+        const countResult = await db.execute(sql`
+          SELECT like_count FROM discussion_comments WHERE id = ${commentId}
+        `);
+        const likeCount = countResult.rows[0]?.like_count || 1;
+        
+        return { liked: true, likeCount };
+      }
+    } catch (error) {
+      console.error('Error toggling discussion comment like:', error);
+      throw error;
+    }
+  }
+
   // Track user activity for rewards system
   async trackUserActivity(activity: InsertUserActivity): Promise<void> {
     try {
