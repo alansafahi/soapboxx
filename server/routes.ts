@@ -8320,7 +8320,7 @@ Return JSON with this exact structure:
   app.post('/api/prayers/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const prayerRequestId = parseInt(req.params.id);
-      const userId = req.session.userId;
+      const userId = req.session.userId || req.user?.id;
       
       if (!userId) {
         return res.status(401).json({ message: 'User authentication required' });
@@ -8337,8 +8337,7 @@ Return JSON with this exact structure:
         await storage.prayForRequest({
           prayerRequestId,
           userId,
-          responseType: 'prayer',
-          content: null
+          responseType: 'prayer'
         });
         
         // Award points for liking/praying for a prayer request
