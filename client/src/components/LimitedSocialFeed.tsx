@@ -106,7 +106,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
           break;
       }
       
-      console.log('Liking post with endpoint:', endpoint, 'for postType:', postType);
+
       return apiRequest('POST', endpoint);
     },
     onSuccess: (data, postId) => {

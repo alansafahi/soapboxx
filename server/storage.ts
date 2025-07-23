@@ -4584,7 +4584,6 @@ export class DatabaseStorage implements IStorage {
   // Discussion comment operations implementation
   async createDiscussionComment(comment: InsertDiscussionComment): Promise<DiscussionComment> {
     try {
-      console.log('Creating discussion comment with data:', comment);
       
       const [newComment] = await db
         .insert(discussionComments)
@@ -4598,7 +4597,6 @@ export class DatabaseStorage implements IStorage {
         })
         .returning();
 
-      console.log('Created comment:', newComment);
 
       // Record user activity for engagement tracking
       try {

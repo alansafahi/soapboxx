@@ -42,7 +42,6 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
 
   // Get the correct API endpoint based on post type
   const getApiEndpoint = (type: string) => {
-    console.log('Determining API endpoint for postType:', type, 'postId:', postId);
     switch (type) {
       case 'soap':
         return `/api/soap/${postId}/comments`;
@@ -53,8 +52,6 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
       case 'community':
         return `/api/discussions/${postId}/comments`;
       default:
-        // Fallback: Check if postId exists in prayer_requests table
-        console.warn('Using default endpoint for unknown postType:', type);
         return `/api/discussions/${postId}/comments`;
     }
   };
@@ -101,7 +98,6 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
         }
       });
       setLikedComments(initialLikedComments);
-      console.log('Initialized liked comments from server:', Array.from(initialLikedComments));
     }
   }, [comments, isOpen]);
 
@@ -168,7 +164,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
           likeEndpoint = `/api/comments/${commentId}/like`;
           break;
       }
-      console.log('Liking comment with endpoint:', likeEndpoint);
+
       
       const response = await fetch(likeEndpoint, {
         method: 'POST',
@@ -194,7 +190,6 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
         } else {
           newSet.delete(commentId);
         }
-        console.log('Updated liked comments:', Array.from(newSet));
         return newSet;
       });
       

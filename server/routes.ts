@@ -7965,7 +7965,6 @@ Return JSON with this exact structure:
       const discussionId = parseInt(req.params.id);
       const { content } = req.body;
       
-      console.log('Comment request:', { userId, discussionId, content });
       
       if (!userId) {
         return res.status(401).json({ success: false, message: 'Unauthorized' });
@@ -7982,12 +7981,9 @@ Return JSON with this exact structure:
       // Check if discussion exists - simplified check with better logging
       try {
         const discussion = await storage.getDiscussion(discussionId);
-        console.log('Discussion lookup result:', { discussionId, found: !!discussion });
         if (!discussion) {
-          console.log('Discussion not found for ID:', discussionId);
           // Check if this might be a SOAP entry or prayer request instead
           const availableIds = await db.select({ id: discussions.id }).from(discussions).limit(10);
-          console.log('Available discussion IDs:', availableIds.map(d => d.id));
           return res.status(404).json({ success: false, message: "Post not found" });
         }
       } catch (discussionError) {
@@ -8356,7 +8352,6 @@ Return JSON with this exact structure:
       const prayerId = parseInt(req.params.id);
       const { content } = req.body;
       
-      console.log('Creating prayer comment:', { userId, prayerId, content: content?.substring(0, 50) });
       
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
@@ -8369,7 +8364,6 @@ Return JSON with this exact structure:
       // Check if prayer request exists
       const prayerRequest = await storage.getPrayerRequest(prayerId);
       if (!prayerRequest) {
-        console.log('Prayer request not found:', prayerId);
         return res.status(404).json({ message: "Prayer request not found" });
       }
       
@@ -8380,7 +8374,6 @@ Return JSON with this exact structure:
         responseType: 'support'
       });
       
-      console.log('Prayer comment created successfully');
       res.status(201).json(response);
     } catch (error) {
       console.error('Error creating prayer comment:', error);
@@ -8391,18 +8384,15 @@ Return JSON with this exact structure:
   app.get("/api/prayers/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
       const prayerId = parseInt(req.params.id);
-      console.log('Fetching prayer comments for ID:', prayerId);
       
       // Check if prayer request exists
       const prayerRequest = await storage.getPrayerRequest(prayerId);
       if (!prayerRequest) {
-        console.log('Prayer request not found:', prayerId);
         return res.status(404).json({ message: "Prayer request not found" });
       }
       
       // Get prayer responses/comments
       const responses = await storage.getPrayerSupportMessages(prayerId);
-      console.log('Found prayer responses:', responses.length);
       res.json(responses);
     } catch (error) {
       console.error('Error fetching prayer comments:', error);
@@ -8457,7 +8447,6 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
       
-      console.log('Liking prayer response:', { responseId, userId });
       
       const result = await storage.likePrayerResponse(responseId, userId);
       res.json(result);

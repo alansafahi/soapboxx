@@ -233,13 +233,13 @@ export default function SocialFeed() {
   // Helper function to determine post type for CommentDialog
   const getPostType = (postId: number): 'discussion' | 'soap' | 'community' | 'prayer' => {
     const currentPost = (feedPosts as any[])?.find((post: any) => post.id === postId);
-    console.log('getPostType called for postId:', postId, 'found post:', !!currentPost, 'post type:', currentPost?.type);
+
     
     if (!currentPost) {
-      console.warn('Post not found in current feed for ID:', postId);
+
       // For known prayer request IDs, return 'prayer' even if not in current feed
       if (postId === 2645) {
-        console.log('Detected hardcoded prayer request ID 2645');
+
         return 'prayer';
       }
       return 'discussion';
@@ -247,7 +247,7 @@ export default function SocialFeed() {
     
     // Check for prayer request
     if (currentPost?.type === 'prayer_request' || currentPost?.isPrayerRequest || currentPost?.category) {
-      console.log('Detected prayer request type');
+
       return 'prayer';
     }
     
@@ -257,11 +257,11 @@ export default function SocialFeed() {
                        currentPost?.postType === 'soap' ||
                        currentPost?.soapEntry;
     if (isSOAPEntry) {
-      console.log('Detected SOAP entry type');
+
       return 'soap';
     }
     
-    console.log('Defaulting to discussion type');
+
     return 'discussion';
   };
 
