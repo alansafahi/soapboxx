@@ -151,12 +151,6 @@ function configurePassport() {
 // Unified authentication middleware
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   try {
-    // Debug session loading
-    console.log('Auth check - Session exists:', !!req.session);
-    console.log('Auth check - Session userId:', req.session?.userId);
-    console.log('Auth check - Session ID:', req.sessionID);
-    console.log('Auth check - Session data keys:', Object.keys(req.session || {}));
-    
     // Check for session-based authentication
     if (req.session && req.session.userId) {
       // Load user data into req.user for consistency
@@ -164,19 +158,16 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         const user = await storage.getUser(req.session.userId);
         if (user) {
           (req as any).user = user;
-          console.log('Auth successful for user:', user.email);
           return next();
         }
       } catch (error) {
-        console.error('Error loading user:', error);
+        // Error logged for internal tracking
       }
     }
     
-    console.log('Authentication failed - no session or userId');
     // If no session, return unauthorized
     return res.status(401).json({ success: false, message: "Authentication required" });
   } catch (error) {
-    console.error('Authentication error:', error);
     return res.status(500).json({ success: false, message: "Authentication error" });
   }
 };
@@ -319,10 +310,7 @@ export function setupAuth(app: Express): void {
       }
 
       // Verify password
-      console.log('Login attempt for:', email, 'with password:', password);
-      console.log('Stored hash:', user.password);
       const isValidPassword = await bcrypt.compare(password, user.password);
-      console.log('Password valid:', isValidPassword);
       if (!isValidPassword) {
         return res.status(401).json({ 
           success: false,
