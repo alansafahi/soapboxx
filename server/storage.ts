@@ -2014,6 +2014,36 @@ export class DatabaseStorage implements IStorage {
     await db.delete(discussions).where(eq(discussions.id, id));
   }
 
+  async deletePrayerRequest(prayerId: number, userId: string): Promise<void> {
+    try {
+      // Verify the user owns this prayer request
+      const [prayerRequest] = await db
+        .select()
+        .from(prayerRequests)
+        .where(eq(prayerRequests.id, prayerId));
+      
+      if (!prayerRequest) {
+        throw new Error('Prayer request not found');
+      }
+      
+      if (prayerRequest.authorId !== userId) {
+        throw new Error('You can only delete your own prayer requests');
+      }
+      
+      // Delete related data first to handle foreign key constraints
+      await db.delete(prayerResponses).where(eq(prayerResponses.prayerRequestId, prayerId));
+      await db.delete(prayerBookmarks).where(eq(prayerBookmarks.prayerId, prayerId));
+      await db.delete(contentReports).where(eq(contentReports.contentId, prayerId));
+      await db.delete(reactions).where(eq(reactions.targetId, prayerId));
+      
+      // Delete the prayer request
+      await db.delete(prayerRequests).where(eq(prayerRequests.id, prayerId));
+      
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getUpcomingEvents(churchId?: number, limit = 10): Promise<Event[]> {
     const now = new Date();
     const query = db
