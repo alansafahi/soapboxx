@@ -23,7 +23,7 @@ export function CommentConfirmationDialog({
 }: CommentConfirmationDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto">
+      <DialogContent className="max-w-md mx-auto" aria-describedby="comment-confirmation-description">
         <DialogHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="relative">
@@ -40,7 +40,7 @@ export function CommentConfirmationDialog({
           <DialogTitle className="text-xl font-semibold text-gray-900 dark:text-white">
             Comment Posted Successfully!
           </DialogTitle>
-          <DialogDescription className="text-gray-600 dark:text-gray-300">
+          <DialogDescription id="comment-confirmation-description" className="text-gray-600 dark:text-gray-300">
             Your thoughtful comment has been shared with the SoapBox community
           </DialogDescription>
         </DialogHeader>

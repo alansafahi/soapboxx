@@ -8005,6 +8005,45 @@ Return JSON with this exact structure:
     }
   });
 
+  // SOAP Entry Comments - Add missing endpoints
+  app.post("/api/soap/:id/comments", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId;
+      const soapId = parseInt(req.params.id);
+      const { content } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'Unauthorized' });
+      }
+      
+      if (!content || !content.trim()) {
+        return res.status(400).json({ success: false, message: "Comment content is required" });
+      }
+      
+      const comment = await storage.createDiscussionComment({
+        discussionId: soapId,
+        authorId: userId,
+        content: content.trim()
+      });
+      
+      res.status(201).json({ success: true, data: comment });
+    } catch (error) {
+      console.error('Error creating SOAP comment:', error);
+      res.status(500).json({ success: false, message: "Failed to add comment", error: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
+  app.get("/api/soap/:id/comments", isAuthenticated, async (req: any, res) => {
+    try {
+      const soapId = parseInt(req.params.id);
+      const comments = await storage.getDiscussionComments(soapId);
+      res.json(comments);
+    } catch (error) {
+      console.error('Error fetching SOAP comments:', error);
+      res.status(500).json({ message: "Failed to fetch comments" });
+    }
+  });
+
   // Prayer request endpoints
   app.get('/api/prayers', isAuthenticated, async (req: any, res) => {
     try {
