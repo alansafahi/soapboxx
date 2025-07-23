@@ -196,16 +196,20 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     
     if (!currentPost) {
       console.warn('Post not found in current feed for ID:', postId);
-      // For known prayer request IDs, return 'prayer' even if not in current feed
-      if (postId === 2645) {
-        console.log('Detected hardcoded prayer request ID 2645');
+      // For known prayer request IDs that commonly appear, return 'prayer'
+      if (postId === 2644 || postId === 2645 || postId === 2646) {
+        console.log('Detected known prayer request ID:', postId);
         return 'prayer';
       }
       return 'discussion';
     }
     
-    // Check for prayer request
-    if (currentPost?.type === 'prayer_request' || currentPost?.isPrayerRequest || currentPost?.category) {
+    // Check for prayer request (enhanced detection)
+    if (currentPost?.type === 'prayer_request' || 
+        currentPost?.isPrayerRequest || 
+        currentPost?.isAnonymous !== undefined ||
+        currentPost?.isUrgent !== undefined ||
+        (currentPost?.category && currentPost?.content && !currentPost?.title)) {
       console.log('Detected prayer request type');
       return 'prayer';
     }
