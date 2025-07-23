@@ -232,40 +232,43 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
   // Helper function to determine post type for CommentDialog
   const getPostType = (postId: number): 'discussion' | 'soap' | 'community' | 'prayer' => {
-    const currentPost = allPosts.find((post: any) => post.id === postId);
-    console.log('LimitedSocialFeed getPostType called for postId:', postId, 'found post:', !!currentPost, 'post type:', currentPost?.type);
+    // First check in posts array
+    const currentPost = posts.find((post: any) => post.id === postId);
     
     if (!currentPost) {
-      console.warn('Post not found in current feed for ID:', postId);
-      // For known prayer request IDs that commonly appear, return 'prayer'
-      if (postId === 2644 || postId === 2645 || postId === 2646 || postId === 2647) {
-        console.log('Detected known prayer request ID:', postId);
-        return 'prayer';
+      // If not found in current page, check allPosts
+      const allPost = allPosts.find((post: any) => post.id === postId);
+      if (allPost) {
+        return getTypeFromPost(allPost);
       }
+      
+      // Default to discussion for posts not in current feed
       return 'discussion';
     }
     
+    return getTypeFromPost(currentPost);
+  };
+
+  // Helper to determine type from post object
+  const getTypeFromPost = (post: any): 'discussion' | 'soap' | 'community' | 'prayer' => {
     // Check for prayer request (enhanced detection)
-    if (currentPost?.type === 'prayer_request' || 
-        currentPost?.isPrayerRequest || 
-        currentPost?.isAnonymous !== undefined ||
-        currentPost?.isUrgent !== undefined ||
-        (currentPost?.category && currentPost?.content && !currentPost?.title)) {
-      console.log('Detected prayer request type');
+    if (post?.type === 'prayer_request' || 
+        post?.isPrayerRequest || 
+        post?.isAnonymous !== undefined ||
+        post?.isUrgent !== undefined ||
+        (post?.category && post?.content && !post?.title)) {
       return 'prayer';
     }
     
     // Check for SOAP entry
-    const isSOAPEntry = currentPost?.type === 'soap' || 
-                       currentPost?.type === 'soap_reflection' || 
-                       currentPost?.postType === 'soap' ||
-                       currentPost?.soapEntry;
+    const isSOAPEntry = post?.type === 'soap' || 
+                       post?.type === 'soap_reflection' || 
+                       post?.postType === 'soap' ||
+                       post?.soapEntry;
     if (isSOAPEntry) {
-      console.log('Detected SOAP entry type');
       return 'soap';
     }
     
-    console.log('Defaulting to discussion type');
     return 'discussion';
   };
 

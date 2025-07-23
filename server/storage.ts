@@ -2340,11 +2340,75 @@ export class DatabaseStorage implements IStorage {
         isLiked: false
       }));
 
-      // Return just discussions for now - SOAP entries will be added back after testing
-      return discussions;
+      // Get comment counts for discussions
+      const discussionIds = discussions.map(d => d.id).filter(Boolean);
+      let discussionCommentCounts: Record<number, number> = {};
+      
+      if (discussionIds.length > 0) {
+        const commentCountResult = await db.execute(sql`
+          SELECT discussion_id, COUNT(*) as comment_count 
+          FROM discussion_comments 
+          WHERE discussion_id IN (${sql.join(discussionIds, sql`, `)})
+          GROUP BY discussion_id
+        `);
+        
+        discussionCommentCounts = commentCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
+          acc[row.discussion_id] = Number(row.comment_count);
+          return acc;
+        }, {});
+      }
+
+      // Add comment counts to discussions
+      const discussionsWithCounts = discussions.map(discussion => ({
+        ...discussion,
+        commentCount: discussionCommentCounts[discussion.id] || 0,
+        likeCount: 0 // Will be added later
+      }));
+
+      return discussionsWithCounts;
     } catch (error) {
       console.error('Error fetching discussions:', error);
       return [];
+    }
+  }
+
+  // Missing toggleDiscussionLike method
+  async toggleDiscussionLike(userId: string, discussionId: number): Promise<any> {
+    try {
+      // Check if user already liked this discussion
+      const existingLike = await db.execute(sql`
+        SELECT * FROM discussion_likes 
+        WHERE user_id = ${userId} AND discussion_id = ${discussionId}
+      `);
+
+      if (existingLike.rows.length > 0) {
+        // Unlike - remove the like
+        await db.execute(sql`
+          DELETE FROM discussion_likes 
+          WHERE user_id = ${userId} AND discussion_id = ${discussionId}
+        `);
+        
+        return { success: true, liked: false, message: 'Like removed' };
+      } else {
+        // Like - add the like
+        await db.execute(sql`
+          INSERT INTO discussion_likes (user_id, discussion_id, created_at)
+          VALUES (${userId}, ${discussionId}, ${new Date()})
+        `);
+        
+        // Track user activity
+        await this.trackUserActivity({
+          userId: userId,
+          activityType: 'like_discussion',
+          entityId: discussionId,
+          points: 2,
+        });
+        
+        return { success: true, liked: true, message: 'Like added' };
+      }
+    } catch (error) {
+      console.error('Error toggling discussion like:', error);
+      throw new Error('Failed to toggle like');
     }
   }
 
