@@ -8301,8 +8301,21 @@ Return JSON with this exact structure:
       const prayerId = parseInt(req.params.id);
       const { content } = req.body;
       
+      console.log('Creating prayer comment:', { userId, prayerId, content: content?.substring(0, 50) });
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
       if (!content || !content.trim()) {
         return res.status(400).json({ message: "Prayer response content is required" });
+      }
+      
+      // Check if prayer request exists
+      const prayerRequest = await storage.getPrayerRequest(prayerId);
+      if (!prayerRequest) {
+        console.log('Prayer request not found:', prayerId);
+        return res.status(404).json({ message: "Prayer request not found" });
       }
       
       const response = await storage.prayForRequest({
@@ -8312,8 +8325,10 @@ Return JSON with this exact structure:
         responseType: 'support'
       });
       
+      console.log('Prayer comment created successfully');
       res.status(201).json(response);
     } catch (error) {
+      console.error('Error creating prayer comment:', error);
       res.status(500).json({ message: "Failed to create prayer response" });
     }
   });
@@ -8321,12 +8336,21 @@ Return JSON with this exact structure:
   app.get("/api/prayers/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
       const prayerId = parseInt(req.params.id);
-      // For now, return empty array as we need to implement getPrayerResponses method
-      // or use existing prayer responses from the prayer request data
+      console.log('Fetching prayer comments for ID:', prayerId);
+      
+      // Check if prayer request exists
       const prayerRequest = await storage.getPrayerRequest(prayerId);
-      const responses = prayerRequest ? await storage.getPrayerResponses(prayerRequest.id) : [];
+      if (!prayerRequest) {
+        console.log('Prayer request not found:', prayerId);
+        return res.status(404).json({ message: "Prayer request not found" });
+      }
+      
+      // Get prayer responses/comments
+      const responses = await storage.getPrayerSupportMessages(prayerId);
+      console.log('Found prayer responses:', responses.length);
       res.json(responses);
     } catch (error) {
+      console.error('Error fetching prayer comments:', error);
       res.status(500).json({ message: "Failed to fetch prayer responses" });
     }
   });

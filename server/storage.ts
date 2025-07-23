@@ -4081,6 +4081,93 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Prayer-related methods implementation
+  async getPrayerRequest(id: number): Promise<PrayerRequest | undefined> {
+    try {
+      const [prayer] = await db
+        .select()
+        .from(prayerRequests)
+        .where(eq(prayerRequests.id, id));
+      return prayer;
+    } catch (error) {
+      console.error('Error getting prayer request:', error);
+      return undefined;
+    }
+  }
+
+  async getPrayerSupportMessages(prayerRequestId: number): Promise<any[]> {
+    try {
+      const messages = await db
+        .select({
+          id: prayerResponses.id,
+          content: prayerResponses.content,
+          responseType: prayerResponses.responseType,
+          createdAt: prayerResponses.createdAt,
+          userId: prayerResponses.userId,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          profileImageUrl: users.profileImageUrl
+        })
+        .from(prayerResponses)
+        .leftJoin(users, eq(prayerResponses.userId, users.id))
+        .where(eq(prayerResponses.prayerRequestId, prayerRequestId))
+        .orderBy(asc(prayerResponses.createdAt));
+
+      return messages.map(msg => ({
+        id: msg.id,
+        content: msg.content,
+        author: {
+          id: msg.userId,
+          firstName: msg.firstName || 'Anonymous',
+          lastName: msg.lastName || '',
+          email: msg.email,
+          profileImageUrl: msg.profileImageUrl
+        },
+        createdAt: msg.createdAt,
+        likeCount: 0,
+        isLiked: false
+      }));
+    } catch (error) {
+      console.error('Error getting prayer support messages:', error);
+      return [];
+    }
+  }
+
+  async prayForRequest(response: InsertPrayerResponse): Promise<PrayerResponse> {
+    try {
+      const [prayerResponse] = await db
+        .insert(prayerResponses)
+        .values({
+          ...response,
+          createdAt: new Date()
+        })
+        .returning();
+
+      // Update prayer count on the prayer request
+      await db
+        .update(prayerRequests)
+        .set({ 
+          prayerCount: sql`${prayerRequests.prayerCount} + 1`
+        })
+        .where(eq(prayerRequests.id, response.prayerRequestId));
+
+      // Record user activity for engagement tracking
+      await db.insert(userActivities).values({
+        userId: response.userId,
+        activityType: 'prayer_response',
+        entityId: prayerResponse.id,
+        points: 10, // Points for praying for someone
+        createdAt: new Date(),
+      });
+
+      return prayerResponse;
+    } catch (error) {
+      console.error('Error creating prayer response:', error);
+      throw new Error('Failed to create prayer response');
+    }
+  }
+
   async getUserBookmarkedPrayers(userId: string, churchId?: number): Promise<any[]> {
     try {
       const query = db
