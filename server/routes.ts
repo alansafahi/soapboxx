@@ -9688,52 +9688,7 @@ Return JSON with this exact structure:
     }
   }
 
-  // SOAP Comments endpoints
-  app.get("/api/soap/:id/comments", isAuthenticated, async (req: any, res) => {
-    try {
-      const soapId = parseInt(req.params.id);
-      // TODO: Implement getSoapComments method in storage
-      // For now, return empty array to prevent 500 errors
-      const comments: any[] = [];
-      res.json(comments);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch comments" });
-    }
-  });
 
-  app.post("/api/soap/:id/comments", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.session?.userId;
-      const soapId = parseInt(req.params.id);
-      const { content } = req.body;
-      
-      
-      if (!userId) {
-        return res.status(401).json({ success: false, message: 'Unauthorized' });
-      }
-      
-      if (!content || !content.trim()) {
-        return res.status(400).json({ success: false, message: "Comment content is required" });
-      }
-      
-      // Check if SOAP entry exists
-      const soapEntry = await storage.getSoapEntry(soapId);
-      if (!soapEntry) {
-        return res.status(404).json({ success: false, message: "SOAP entry not found" });
-      }
-      
-
-      const comment = await storage.createSoapComment({
-        soapId,
-        authorId: userId,
-        content: content.trim()
-      });
-      
-      res.status(201).json({ success: true, data: comment });
-    } catch (error) {
-      res.status(500).json({ success: false, message: "Failed to create comment", error: error instanceof Error ? error.message : String(error) });
-    }
-  });
 
   app.delete('/api/soap/:id/feature', isAuthenticated, async (req: any, res) => {
     try {

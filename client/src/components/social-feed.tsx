@@ -233,7 +233,19 @@ export default function SocialFeed() {
   // Comment submission mutation - enhanced with better user feedback
   const commentMutation = useMutation({
     mutationFn: async ({ postId, content }: { postId: number; content: string }) => {
-      return apiRequest('POST', `/api/discussions/${postId}/comments`, { content });
+      // Find the post to determine its type
+      const currentPost = (feedPosts as any[])?.find((post: any) => post.id === postId);
+      const isSOAPEntry = currentPost?.type === 'soap' || 
+                         currentPost?.type === 'soap_reflection' || 
+                         currentPost?.postType === 'soap' ||
+                         currentPost?.soapEntry;
+      
+      // Use the correct endpoint based on post type
+      const endpoint = isSOAPEntry 
+        ? `/api/soap/${postId}/comments` 
+        : `/api/discussions/${postId}/comments`;
+      
+      return apiRequest('POST', endpoint, { content });
     },
     onSuccess: (data, { postId, content }) => {
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });

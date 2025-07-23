@@ -191,7 +191,19 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   // Comment mutation
   const commentMutation = useMutation({
     mutationFn: async ({ postId, content }: { postId: number; content: string }) => {
-      const response = await fetch(`/api/discussions/${postId}/comments`, {
+      // Find the post to determine its type
+      const currentPost = allPosts.find((post: any) => post.id === postId);
+      const isSOAPEntry = currentPost?.type === 'soap' || 
+                         currentPost?.type === 'soap_reflection' || 
+                         currentPost?.postType === 'soap' ||
+                         currentPost?.soapEntry;
+      
+      // Use the correct endpoint based on post type
+      const endpoint = isSOAPEntry 
+        ? `/api/soap/${postId}/comments` 
+        : `/api/discussions/${postId}/comments`;
+      
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

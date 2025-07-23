@@ -23,6 +23,7 @@ interface Comment {
   content: string;
   author: {
     id: string;
+    email?: string;
     firstName: string;
     lastName: string;
     profileImageUrl?: string;
@@ -39,20 +40,36 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Get the correct API endpoint based on post type
+  const getApiEndpoint = (type: string) => {
+    switch (type) {
+      case 'soap':
+        return `/api/soap/${postId}/comments`;
+      case 'discussion':
+        return `/api/discussions/${postId}/comments`;
+      case 'community':
+        return `/api/discussions/${postId}/comments`;
+      default:
+        return `/api/discussions/${postId}/comments`;
+    }
+  };
+
+  const apiEndpoint = getApiEndpoint(postType);
+
   // Fetch comments
   const { data: comments = [], isLoading } = useQuery<Comment[]>({
-    queryKey: ['/api/discussions', postId, 'comments'],
-    queryFn: () => apiRequest('GET', `/api/discussions/${postId}/comments`),
+    queryKey: [apiEndpoint],
+    queryFn: () => apiRequest('GET', apiEndpoint),
     enabled: isOpen,
   });
 
   // Add comment mutation
   const addCommentMutation = useMutation({
     mutationFn: async (content: string) => {
-      return apiRequest('POST', `/api/discussions/${postId}/comments`, { content });
+      return apiRequest('POST', apiEndpoint, { content });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/discussions', postId, 'comments'] });
+      queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       setCommentText("");
