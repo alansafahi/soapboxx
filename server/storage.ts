@@ -2363,6 +2363,24 @@ export class DatabaseStorage implements IStorage {
         }
       }));
 
+      // Get comment counts for prayer requests (using prayer_responses table)
+      const prayerIds = prayerRequestsData.map(row => row.prayer_requests?.id).filter(Boolean);
+      let prayerCommentCounts: Record<number, number> = {};
+      
+      if (prayerIds.length > 0) {
+        const prayerCommentCountResult = await db.execute(sql`
+          SELECT prayer_request_id, COUNT(*) as comment_count 
+          FROM prayer_responses 
+          WHERE prayer_request_id IN (${sql.join(prayerIds, sql`, `)})
+          GROUP BY prayer_request_id
+        `);
+        
+        prayerCommentCounts = prayerCommentCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
+          acc[row.prayer_request_id] = Number(row.comment_count);
+          return acc;
+        }, {});
+      }
+
       const transformedPrayerRequests = prayerRequestsData.map(row => ({
         ...row.prayer_requests,
         id: row.prayer_requests?.id,
@@ -2371,7 +2389,7 @@ export class DatabaseStorage implements IStorage {
         content: row.prayer_requests?.content,
         category: row.prayer_requests?.category || 'general',
         likeCount: 0,
-        commentCount: 0,
+        commentCount: prayerCommentCounts[row.prayer_requests?.id || 0] || 0,
         prayerCount: row.prayer_requests?.prayerCount || 0,
         author: row.users,
         type: 'prayer_request',
@@ -2528,19 +2546,23 @@ export class DatabaseStorage implements IStorage {
         allPosts.push(...soapWithType);
       }
 
-      // Get prayer requests using raw SQL
+      // Get prayer requests using raw SQL with actual comment counts
       if (type === 'all' || type === 'prayer_request') {
         const prayerResult = await db.execute(sql`
-          SELECT * FROM prayer_requests 
-          WHERE author_id = ${userId} 
-          ORDER BY created_at DESC
+          SELECT pr.*, 
+                 COUNT(prs.id) as comment_count
+          FROM prayer_requests pr
+          LEFT JOIN prayer_responses prs ON pr.id = prs.prayer_request_id 
+          WHERE pr.author_id = ${userId} 
+          GROUP BY pr.id
+          ORDER BY pr.created_at DESC
         `);
 
         const prayerRequestsWithCount = prayerResult.rows.map(prayer => ({
           ...prayer,
           type: 'prayer_request',
           likeCount: 0,
-          commentCount: 0,
+          commentCount: Number(prayer.comment_count) || 0,
           mood: prayer.mood || null,
           prayerCount: prayer.prayer_count || 0,
           authorId: prayer.author_id,
