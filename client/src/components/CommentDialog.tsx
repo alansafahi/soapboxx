@@ -64,6 +64,19 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
   // State to track liked comments locally
   const [likedComments, setLikedComments] = useState<Set<number>>(new Set());
 
+  // Initialize liked comments state from fetched data
+  useEffect(() => {
+    if (comments && isOpen) {
+      const initialLikedComments = new Set<number>();
+      comments.forEach((comment: any) => {
+        if (comment.isLiked) {
+          initialLikedComments.add(comment.id);
+        }
+      });
+      setLikedComments(initialLikedComments);
+    }
+  }, [comments, isOpen]);
+
   // Fetch comments
   const { data: comments = [], isLoading } = useQuery<Comment[]>({
     queryKey: [apiEndpoint],

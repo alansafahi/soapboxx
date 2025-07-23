@@ -8011,7 +8011,8 @@ Return JSON with this exact structure:
   app.get("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
       const discussionId = parseInt(req.params.id);
-      const comments = await storage.getDiscussionComments(discussionId);
+      const userId = req.session?.userId;
+      const comments = await storage.getDiscussionComments(discussionId, userId);
       res.json(comments);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch comments" });
