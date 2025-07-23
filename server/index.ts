@@ -94,6 +94,10 @@ app.use((req, res, next) => {
   // D.I.V.I.N.E. Volunteer Management Routes (register after auth is configured)
   const { default: volunteerRoutes } = await import('./routes/volunteer-routes');
   app.use('/api/volunteers', volunteerRoutes);
+  
+  // Enhanced routes with field mapping
+  const enhancedRoutes = await import('./enhanced-routes');
+  app.use('/api', enhancedRoutes.default);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

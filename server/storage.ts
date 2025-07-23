@@ -1,3 +1,4 @@
+import MappingService from "./mapping-service";
 import {
   users,
   notifications,
@@ -4844,6 +4845,216 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error tracking user activity:', error);
       // Don't throw error to avoid breaking main functionality
+    }
+  }
+
+  // ============================================================================
+  // ENHANCED METHODS WITH MAPPING SERVICE (Phase 1 of Naming Convention Fix)
+  // ============================================================================
+  
+  /**
+   * Enhanced discussion creation with standardized field mapping
+   * Replaces createDiscussion with better field handling
+   */
+  async createDiscussionEnhanced(discussionData: any): Promise<any> {
+    try {
+      // Use mapping service to prepare data for database
+      const dbData = MappingService.prepareContentForDatabase(discussionData);
+      
+      const [discussion] = await db
+        .insert(discussions)
+        .values({
+          ...dbData,
+          // Ensure required fields are present
+          author_id: discussionData.authorId || discussionData.author_id,
+          title: discussionData.title,
+          content: discussionData.content,
+          is_public: discussionData.isPublic ?? true,
+          created_at: new Date(),
+          updated_at: new Date(),
+        })
+        .returning();
+
+      // Return mapped response for frontend
+      return MappingService.mapDiscussion(discussion);
+    } catch (error) {
+      throw new Error(`Failed to create discussion: ${error}`);
+    }
+  }
+
+  /**
+   * Enhanced discussion retrieval with standardized mapping
+   */
+  async getDiscussionEnhanced(discussionId: number): Promise<any> {
+    try {
+      const result = await db.execute(sql`
+        SELECT 
+          d.*,
+          u.id as author_id,
+          u.email as author_email,
+          u.first_name as author_first_name,
+          u.last_name as author_last_name,
+          u.profile_image as author_profile_image,
+          CONCAT(u.first_name, ' ', u.last_name) as author_name,
+          COUNT(DISTINCT dl.id) as like_count,
+          COUNT(DISTINCT dc.id) as comment_count
+        FROM discussions d
+        LEFT JOIN users u ON d.author_id = u.id
+        LEFT JOIN discussion_likes dl ON d.id = dl.discussion_id
+        LEFT JOIN discussion_comments dc ON d.id = dc.discussion_id
+        WHERE d.id = ${discussionId}
+        GROUP BY d.id, u.id
+      `);
+
+      if (result.rows.length === 0) {
+        return null;
+      }
+
+      // Use mapping service to standardize response
+      return MappingService.mapDiscussion(result.rows[0]);
+    } catch (error) {
+      throw new Error(`Failed to get discussion: ${error}`);
+    }
+  }
+
+  /**
+   * Enhanced comment creation with proper field mapping
+   */
+  async createDiscussionCommentEnhanced(commentData: any): Promise<any> {
+    try {
+      // Use mapping service to prepare data
+      const dbData = MappingService.prepareCommentForDatabase(commentData);
+      
+      const [comment] = await db
+        .insert(discussionComments)
+        .values({
+          ...dbData,
+          discussion_id: commentData.discussionId || commentData.discussion_id,
+          author_id: commentData.authorId || commentData.author_id,
+          content: commentData.content,
+          created_at: new Date(),
+        })
+        .returning();
+
+      // Return mapped comment with author info
+      const result = await db.execute(sql`
+        SELECT 
+          dc.*,
+          u.id as author_id,
+          u.email as author_email,
+          u.first_name as author_first_name,
+          u.last_name as author_last_name,
+          u.profile_image as author_profile_image,
+          CONCAT(u.first_name, ' ', u.last_name) as author_name,
+          EXISTS(
+            SELECT 1 FROM discussion_comment_likes dcl 
+            WHERE dcl.comment_id = dc.id 
+            AND dcl.user_id = '${commentData.authorId || commentData.author_id}'
+          ) as is_liked,
+          COUNT(DISTINCT dcl.id) as like_count
+        FROM discussion_comments dc
+        LEFT JOIN users u ON dc.author_id = u.id
+        LEFT JOIN discussion_comment_likes dcl ON dc.id = dcl.comment_id
+        WHERE dc.id = ${comment.id}
+        GROUP BY dc.id, u.id
+      `);
+
+      return MappingService.mapComment(result.rows[0]);
+    } catch (error) {
+      throw new Error(`Failed to create comment: ${error}`);
+    }
+  }
+
+  /**
+   * Enhanced user mapping for consistent user objects
+   */
+  async getUserEnhanced(userId: string): Promise<any> {
+    try {
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, userId));
+
+      if (!user) {
+        return null;
+      }
+
+      // Use mapping service for consistent user structure
+      return MappingService.mapUser(user);
+    } catch (error) {
+      throw new Error(`Failed to get user: ${error}`);
+    }
+  }
+
+  /**
+   * Enhanced discussion feed with proper field mapping
+   */
+  async getDiscussionsEnhanced(limit: number = 20): Promise<any[]> {
+    try {
+      const result = await db.execute(sql`
+        SELECT DISTINCT
+          d.id,
+          'discussion' as type,
+          d.title,
+          d.content,
+          d.is_public,
+          d.created_at,
+          d.updated_at,
+          d.author_id,
+          u.email as author_email,
+          u.first_name as author_first_name,
+          u.last_name as author_last_name,
+          u.profile_image as author_profile_image,
+          CONCAT(u.first_name, ' ', u.last_name) as author_name,
+          COUNT(DISTINCT dl.id) as like_count,
+          COUNT(DISTINCT dc.id) as comment_count,
+          d.attached_media
+        FROM discussions d
+        LEFT JOIN users u ON d.author_id = u.id
+        LEFT JOIN discussion_likes dl ON d.id = dl.discussion_id
+        LEFT JOIN discussion_comments dc ON d.id = dc.discussion_id
+        WHERE d.is_public = true
+        GROUP BY d.id, u.id
+        
+        UNION ALL
+        
+        SELECT DISTINCT
+          se.id,
+          'soap' as type,
+          'S.O.A.P. Reflection' as title,
+          CONCAT('Scripture: ', se.scripture, ' | ', se.observation) as content,
+          se.is_public,
+          se.created_at,
+          se.updated_at,
+          se.user_id as author_id,
+          u2.email as author_email,
+          u2.first_name as author_first_name,
+          u2.last_name as author_last_name,
+          u2.profile_image as author_profile_image,
+          CONCAT(u2.first_name, ' ', u2.last_name) as author_name,
+          0 as like_count,
+          COUNT(DISTINCT sc.id) as comment_count,
+          NULL as attached_media
+        FROM soap_entries se
+        LEFT JOIN users u2 ON se.user_id = u2.id
+        LEFT JOIN soap_comments sc ON se.id = sc.soap_entry_id
+        WHERE se.is_public = true
+        GROUP BY se.id, u2.id
+        
+        ORDER BY created_at DESC
+        LIMIT ${limit}
+      `);
+
+      // Map all results using mapping service
+      return result.rows.map(row => {
+        if (row.type === 'soap') {
+          return MappingService.mapSoapEntry(row);
+        }
+        return MappingService.mapDiscussion(row);
+      });
+    } catch (error) {
+      console.error('Enhanced getDiscussions error:', error);
+      throw new Error(`Failed to get discussions: ${error}`);
     }
   }
 }

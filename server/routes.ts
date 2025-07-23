@@ -47,6 +47,8 @@ import { lookupBibleVerse } from "./bible-api.js";
 import { LearningIntegration } from "./learning-integration.js";
 
 import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";
+import enhancedRoutes from "./enhanced-routes";
+import MappingService from "./mapping-service";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
