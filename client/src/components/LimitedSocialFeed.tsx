@@ -293,23 +293,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     },
   });
 
-  // Function to fetch comments for a post
-  const { data: allPostComments = {} } = useQuery({
-    queryKey: ['/api/discussions/all-comments'],
-    queryFn: async () => {
-      const commentData: any = {};
-      for (const post of posts) {
-        const response = await fetch(`/api/discussions/${post.id}/comments`, {
-          credentials: "include",
-        });
-        if (response.ok) {
-          commentData[post.id] = await response.json();
-        }
-      }
-      return commentData;
-    },
-    enabled: posts.length > 0,
-  });
+  // Comments are now only displayed in the dialog, removing bulk fetching for cleaner performance
 
   // Enhanced SOAP content detection for all posts (new and legacy)
   const detectSoapContent = (post: any) => {
@@ -638,42 +622,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                     </div>
                   </div>
 
-                  {/* Comments Section - Show comments below each post */}
-                  {allPostComments[post.id] && allPostComments[post.id].length > 0 && (
-                    <div className="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-                      <div className="space-y-3">
-                        {allPostComments[post.id].slice(0, 3).map((comment: any) => (
-                          <div key={comment.id} className="flex space-x-3">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={comment.author?.profileImageUrl || undefined} />
-                              <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
-                                {comment.author?.firstName?.[0] || comment.authorId?.[0]?.toUpperCase() || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center space-x-2 mb-1">
-                                <span className="font-medium text-sm text-gray-900 dark:text-white">
-                                  {comment.author?.firstName ? `${comment.author.firstName} ${comment.author.lastName || ''}`.trim() : 'Community Member'}
-                                </span>
-                                <span className="text-xs text-gray-500">
-                                  {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true })}
-                                </span>
-                              </div>
-                              <p className="text-gray-700 dark:text-gray-300 text-sm">{comment.content}</p>
-                            </div>
-                          </div>
-                        ))}
-                        {allPostComments[post.id].length > 3 && (
-                          <button
-                            onClick={() => setCommentDialogOpen(post.id)}
-                            className="text-sm text-purple-600 hover:text-purple-800 font-medium"
-                          >
-                            View all {allPostComments[post.id].length} comments
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                  {/* Comments are now only shown in the dialog for cleaner UI */}
                 </div>
               </div>
             </CardContent>
