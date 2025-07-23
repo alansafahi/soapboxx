@@ -35,7 +35,7 @@ export class MultiCampusService {
 
       return campus;
     } catch (error) {
-      throw new Error(`Failed to create campus: ${error.message}`);
+      throw new Error(`Failed to create campus: ${(error as Error).message}`);
     }
   }
 
@@ -55,7 +55,7 @@ export class MultiCampusService {
 
       return churchCampuses;
     } catch (error) {
-      throw new Error(`Failed to get campuses: ${error.message}`);
+      throw new Error(`Failed to get campuses: ${(error as Error).message}`);
     }
   }
 
@@ -191,7 +191,7 @@ export class MultiCampusService {
         user: row.user
       }));
     } catch (error) {
-      throw new Error(`Failed to get campus volunteers: ${error.message}`);
+      throw new Error(`Failed to get campus volunteers: ${(error as Error).message}`);
     }
   }
 
@@ -257,7 +257,7 @@ export class MultiCampusService {
 
       return assignment;
     } catch (error) {
-      throw new Error(`Failed to assign volunteer to campus: ${error.message}`);
+      throw new Error(`Failed to assign volunteer to campus: ${(error as Error).message}`);
     }
   }
 

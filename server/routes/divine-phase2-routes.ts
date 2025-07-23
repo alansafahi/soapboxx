@@ -633,11 +633,15 @@ router.post('/campuses', async (req, res) => {
 
     const { name, address, city, state, capacity } = req.body;
     
-    // Basic validation
-    if (!name || !address || !city || !state) {
+    // Enhanced validation with detailed error logging
+    console.log('Campus creation request body:', req.body);
+    console.log('User info:', { role: user.role, churchId: user.churchId });
+    
+    if (!name || !city) {
       return res.status(400).json({ 
         error: 'Missing required fields',
-        required: ['name', 'address', 'city', 'state']
+        details: 'Campus name and city are required',
+        received: { name, address, city, state, capacity }
       });
     }
 
@@ -648,7 +652,8 @@ router.post('/campuses', async (req, res) => {
       state,
       capacity: capacity ? parseInt(capacity) : null,
       churchId: user.churchId || 1, // Default church
-      timezone: 'America/Los_Angeles', // Default timezone
+      timeZone: 'America/Los_Angeles', // Default timezone (note: timeZone not timezone)
+      country: 'United States',
       isActive: true
     });
 
@@ -659,9 +664,11 @@ router.post('/campuses', async (req, res) => {
     });
 
   } catch (error) {
+    console.error('Campus creation error:', error);
     res.status(500).json({ 
       error: 'Failed to create campus',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
     });
   }
 });
