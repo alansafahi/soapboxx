@@ -31,11 +31,8 @@ export class MappingService {
   static mapUser(userData: any): any {
     if (!userData) return null;
     
-    return safeMappingWithValidation(
-      userData,
-      mapUserFields,
-      ['id'] // Only require ID as essential field
-    );
+    // Don't validate required fields for user mapping to allow partial user data
+    return mapUserFields(userData);
   }
 
   /**
@@ -150,10 +147,10 @@ export class MappingService {
     if (!databaseResult) return null;
 
     if (Array.isArray(databaseResult)) {
-      return databaseResult.map(item => fromDatabase(item));
+      return databaseResult.map(item => fromDatabase(item as Record<string, any>));
     }
 
-    return fromDatabase(databaseResult);
+    return fromDatabase(databaseResult as Record<string, any>);
   }
 
   /**
@@ -164,10 +161,10 @@ export class MappingService {
     if (!frontendData) return null;
 
     if (Array.isArray(frontendData)) {
-      return frontendData.map(item => toDatabase(item));
+      return frontendData.map(item => toDatabase(item as Record<string, any>));
     }
 
-    return toDatabase(frontendData);
+    return toDatabase(frontendData as Record<string, any>);
   }
 
   // ============================================================================

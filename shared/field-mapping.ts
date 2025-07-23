@@ -160,13 +160,17 @@ export function fromDatabase<T extends Record<string, any>>(databaseData: T): Re
  * Maps user-related fields for consistent user object structure
  */
 export function mapUserFields(userData: any): any {
+  if (!userData || (!userData.id && !userData.email)) {
+    return null; // Return null for completely invalid user data
+  }
+  
   return {
     id: userData.id,
     email: userData.email,
-    firstName: userData.first_name || userData.firstName,
-    lastName: userData.last_name || userData.lastName,
-    profileImage: userData.profile_image || userData.profileImage || userData.profile_image_url || userData.profileImageUrl,
-    name: userData.name || `${userData.first_name || userData.firstName || ''} ${userData.last_name || userData.lastName || ''}`.trim(),
+    firstName: userData.first_name || userData.firstName || '',
+    lastName: userData.last_name || userData.lastName || '',
+    profileImage: userData.profile_image || userData.profileImage || userData.profile_image_url || userData.profileImageUrl || null,
+    name: userData.name || `${userData.first_name || userData.firstName || ''} ${userData.last_name || userData.lastName || ''}`.trim() || 'Anonymous',
     createdAt: userData.created_at || userData.createdAt,
     updatedAt: userData.updated_at || userData.updatedAt,
   };
@@ -176,11 +180,23 @@ export function mapUserFields(userData: any): any {
  * Maps post/content fields for consistent feed display
  */
 export function mapContentFields(contentData: any): any {
+  // Handle author data properly
+  const authorData = contentData.author || {};
+  if (!authorData.id && contentData.author_id) {
+    // Construct author object from flattened fields
+    authorData.id = contentData.author_id;
+    authorData.email = contentData.author_email;
+    authorData.first_name = contentData.author_first_name;
+    authorData.last_name = contentData.author_last_name;
+    authorData.profile_image = contentData.author_profile_image;
+    authorData.name = contentData.author_name;
+  }
+  
   return {
     id: contentData.id,
     title: contentData.title || contentData.title_text,
     content: contentData.content || contentData.body_text || contentData.text,
-    author: mapUserFields(contentData.author || {}),
+    author: mapUserFields(authorData),
     authorId: contentData.author_id || contentData.authorId,
     userId: contentData.user_id || contentData.userId,
     type: contentData.type || contentData.content_type,
@@ -202,9 +218,7 @@ export function mapContentFields(contentData: any): any {
 export function validateMappedData(data: any, requiredFields: string[]): boolean {
   return requiredFields.every(field => {
     const hasField = data.hasOwnProperty(field) && data[field] !== undefined && data[field] !== null;
-    if (!hasField) {
-      console.warn(`Missing required field after mapping: ${field}`);
-    }
+    // Remove console warning for cleaner production experience
     return hasField;
   });
 }
@@ -221,13 +235,13 @@ export function safeMappingWithValidation<T>(
     const mapped = mappingFn(data);
     
     if (requiredFields.length > 0 && !validateMappedData(mapped, requiredFields)) {
-      console.error('Mapping validation failed for data:', data);
+      // Remove console error for cleaner production experience
       return null;
     }
     
     return mapped;
   } catch (error) {
-    console.error('Mapping function failed:', error);
+    // Remove console error for cleaner production experience
     return null;
   }
 }

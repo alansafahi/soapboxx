@@ -213,9 +213,7 @@ export async function apiRequestCompatible(
 export function validateMappedData(data: any, requiredFields: string[]): boolean {
   return requiredFields.every(field => {
     const hasField = data && data[field] !== undefined && data[field] !== null;
-    if (!hasField) {
-      console.warn(`Missing required field: ${field}`, data);
-    }
+    // Remove console warning for cleaner production experience
     return hasField;
   });
 }
