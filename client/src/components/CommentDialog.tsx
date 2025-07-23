@@ -134,15 +134,31 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
     }
   });
 
-  // Like comment mutation
+  // Like comment mutation - dynamic endpoint based on post type
   const likeCommentMutation = useMutation({
     mutationFn: async (commentId: number) => {
-      return apiRequest('POST', `/api/comments/${commentId}/like`);
+      let likeEndpoint: string;
+      switch (postType) {
+        case 'prayer':
+          likeEndpoint = `/api/prayers/responses/${commentId}/like`;
+          break;
+        case 'soap':
+          likeEndpoint = `/api/soap/comments/${commentId}/like`;
+          break;
+        case 'discussion':
+        case 'community':
+        default:
+          likeEndpoint = `/api/comments/${commentId}/like`;
+          break;
+      }
+      console.log('Liking comment with endpoint:', likeEndpoint);
+      return apiRequest('POST', likeEndpoint);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Like comment error:', error);
       toast({
         title: "Error",
         description: "Failed to like comment",

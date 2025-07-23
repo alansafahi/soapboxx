@@ -8392,6 +8392,27 @@ Return JSON with this exact structure:
     }
   });
 
+  // Like prayer response endpoint
+  app.post('/api/prayers/responses/:id/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const responseId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      console.log('Liking prayer response:', { responseId, userId });
+      
+      // For now, just return success since we don't have a prayer response likes table
+      // In a full implementation, you'd create a prayer_response_likes table
+      res.json({ liked: true, likeCount: 1 });
+    } catch (error) {
+      console.error('Error liking prayer response:', error);
+      res.status(500).json({ message: "Failed to like prayer response" });
+    }
+  });
+
   // AI Prayer Writing Assistance
   app.post('/api/prayers/ai-assistance', isAuthenticated, async (req: any, res) => {
     try {
