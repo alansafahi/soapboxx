@@ -52,7 +52,7 @@ router.post('/background-checks/request', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to request background check',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -76,7 +76,7 @@ router.get('/background-checks/status/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to check background check status',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -96,7 +96,7 @@ router.get('/background-checks/requirements/:opportunityId', async (req, res) =>
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to get background check requirements',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -119,7 +119,7 @@ router.post('/background-checks/validate', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to validate background check',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -151,7 +151,7 @@ router.get('/background-checks/expiring', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to get expiring background checks',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -195,7 +195,7 @@ router.post('/campuses', async (req, res) => {
 
     res.status(500).json({ 
       error: 'Failed to create campus',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -221,7 +221,7 @@ router.get('/campuses', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to get campuses',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -241,7 +241,7 @@ router.get('/campuses/:id', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to get campus details',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -279,7 +279,7 @@ router.post('/campuses/:id/administrators', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to assign campus administrator',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -313,7 +313,7 @@ router.get('/campuses/:id/volunteers', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to get campus volunteers',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -345,7 +345,7 @@ router.post('/campuses/:id/volunteers', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to assign volunteer to campus',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -370,7 +370,7 @@ router.get('/campuses/statistics', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to get cross-campus statistics',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -397,7 +397,7 @@ router.post('/analytics/engagement/:volunteerId', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to calculate engagement metrics',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -427,7 +427,7 @@ router.post('/analytics/ministry', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to generate ministry analytics',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -449,7 +449,7 @@ router.get('/analytics/engagement/:volunteerId/trends', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to get engagement trends',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -477,7 +477,7 @@ router.get('/analytics/ministry/performance', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to get ministry performance',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -501,7 +501,7 @@ router.get('/analytics/retention/:volunteerId', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to generate retention prediction',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -526,7 +526,7 @@ router.get('/analytics/cross-campus', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to get cross-campus analytics',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -569,7 +569,7 @@ router.get('/dashboard/configuration', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to get dashboard configuration',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
 });
@@ -587,7 +587,149 @@ router.post('/background-checks/webhook', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to process webhook',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
+});
+
+// ===== CAMPUS MANAGEMENT =====
+
+// Get all campuses
+router.get('/campuses', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const campuses = await multiCampusService.getAllCampuses();
+    
+    res.json({
+      success: true,
+      campuses
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to fetch campuses',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Create new campus
+router.post('/campuses', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    // Verify user has permission to create campuses
+    const user = req.user as any;
+    const hasPermission = ['church_admin', 'admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(user.role);
+    
+    if (!hasPermission) {
+      return res.status(403).json({ error: 'Insufficient permissions to create campuses' });
+    }
+
+    const { name, address, city, state, capacity } = req.body;
+    
+    // Basic validation
+    if (!name || !address || !city || !state) {
+      return res.status(400).json({ 
+        error: 'Missing required fields',
+        required: ['name', 'address', 'city', 'state']
+      });
+    }
+
+    const campus = await multiCampusService.createCampus({
+      name,
+      address,
+      city,
+      state,
+      capacity: capacity ? parseInt(capacity) : null,
+      churchId: user.churchId || 1, // Default church
+      timezone: 'America/Los_Angeles', // Default timezone
+      isActive: true
+    });
+
+    res.json({
+      success: true,
+      campus,
+      message: 'Campus created successfully'
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to create campus',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Get campus statistics
+router.get('/campuses/statistics', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const statistics = await multiCampusService.getCampusStatistics();
+    
+    res.json({
+      success: true,
+      statistics
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to fetch campus statistics',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// ===== ANALYTICS ENDPOINTS =====
+
+// Get ministry performance analytics
+router.get('/analytics/ministry/performance', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const performance = await analyticsService.getMinistryPerformanceAnalytics();
+    
+    res.json({
+      success: true,
+      performance
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to fetch ministry performance',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Get volunteer engagement analytics
+router.get('/analytics/volunteer/engagement', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const engagement = await analyticsService.getVolunteerEngagementAnalytics();
+    
+    res.json({
+      success: true,
+      engagement
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to fetch volunteer engagement',
+      details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 });

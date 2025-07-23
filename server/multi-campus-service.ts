@@ -422,6 +422,71 @@ export class MultiCampusService {
       throw new Error(`Failed to get volunteer campus assignments: ${error.message}`);
     }
   }
+
+  /**
+   * Get all campuses (for enterprise dashboard)
+   */
+  async getAllCampuses(): Promise<Campus[]> {
+    try {
+      const allCampuses = await db
+        .select()
+        .from(campuses)
+        .where(eq(campuses.isActive, true))
+        .orderBy(asc(campuses.name));
+
+      return allCampuses;
+    } catch (error) {
+      throw new Error(`Failed to get all campuses: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Get campus statistics for enterprise dashboard
+   */
+  async getCampusStatistics(): Promise<any> {
+    try {
+      const allCampuses = await this.getAllCampuses();
+      
+      const statistics = await Promise.all(
+        allCampuses.map(async (campus) => {
+          // Get volunteer count for campus
+          const volunteerCount = await db
+            .select({ count: sql`count(*)` })
+            .from(volunteerCampusAssignments)
+            .where(and(
+              eq(volunteerCampusAssignments.campusId, campus.id),
+              eq(volunteerCampusAssignments.isActive, true)
+            ));
+
+          // Get opportunity count for campus (using churchId since campusId may not exist)
+          const opportunityCount = await db
+            .select({ count: sql`count(*)` })
+            .from(volunteerOpportunities)
+            .where(eq(volunteerOpportunities.churchId, campus.churchId));
+
+          return {
+            campus: campus,
+            volunteerCount: Number(volunteerCount[0]?.count || 0),
+            opportunityCount: Number(opportunityCount[0]?.count || 0),
+            capacity: campus.capacity || 0,
+            utilizationRate: campus.capacity ? 
+              Math.round((Number(volunteerCount[0]?.count || 0) / campus.capacity) * 100) : 0
+          };
+        })
+      );
+
+      return {
+        totalCampuses: allCampuses.length,
+        totalVolunteers: statistics.reduce((sum, s) => sum + s.volunteerCount, 0),
+        totalOpportunities: statistics.reduce((sum, s) => sum + s.opportunityCount, 0),
+        averageUtilization: statistics.length > 0 ? 
+          Math.round(statistics.reduce((sum, s) => sum + s.utilizationRate, 0) / statistics.length) : 0,
+        campusBreakdown: statistics
+      };
+    } catch (error) {
+      throw new Error(`Failed to get campus statistics: ${(error as Error).message}`);
+    }
+  }
 }
 
 export const multiCampusService = new MultiCampusService();
