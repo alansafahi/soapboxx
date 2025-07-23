@@ -486,6 +486,68 @@ export class MultiCampusService {
       throw new Error(`Failed to get campus statistics: ${(error as Error).message}`);
     }
   }
+
+  /**
+   * Update campus information
+   */
+  async updateCampus(campusId: number, updateData: Partial<InsertCampus>): Promise<Campus> {
+    try {
+      const [updatedCampus] = await db
+        .update(campuses)
+        .set({
+          ...updateData,
+          updatedAt: new Date()
+        })
+        .where(eq(campuses.id, campusId))
+        .returning();
+
+      if (!updatedCampus) {
+        throw new Error('Campus not found');
+      }
+
+      return updatedCampus;
+    } catch (error) {
+      throw new Error(`Failed to update campus: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Delete campus (soft delete by setting isActive to false)
+   */
+  async deleteCampus(campusId: number): Promise<void> {
+    try {
+      // Check if campus has any active volunteer assignments
+      const activeAssignments = await db
+        .select({ count: sql`count(*)` })
+        .from(volunteerCampusAssignments)
+        .where(and(
+          eq(volunteerCampusAssignments.campusId, campusId),
+          eq(volunteerCampusAssignments.isActive, true)
+        ));
+
+      const assignmentCount = Number(activeAssignments[0]?.count || 0);
+      
+      if (assignmentCount > 0) {
+        throw new Error(`Cannot delete campus with ${assignmentCount} active volunteer assignments. Please reassign volunteers first.`);
+      }
+
+      // Soft delete the campus
+      const [deletedCampus] = await db
+        .update(campuses)
+        .set({
+          isActive: false,
+          updatedAt: new Date()
+        })
+        .where(eq(campuses.id, campusId))
+        .returning();
+
+      if (!deletedCampus) {
+        throw new Error('Campus not found');
+      }
+    } catch (error) {
+      throw new Error(`Failed to delete campus: ${(error as Error).message}`);
+    }
+  }
 }
 
 export const multiCampusService = new MultiCampusService();

@@ -284,6 +284,78 @@ router.post('/campuses/:id/administrators', async (req, res) => {
   }
 });
 
+// Update campus
+router.put('/campuses/:id', async (req, res) => {
+  try {
+    const campusId = parseInt(req.params.id);
+    
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const user = req.user as any;
+    const hasPermission = ['church_admin', 'admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(user.role);
+    
+    if (!hasPermission) {
+      return res.status(403).json({ error: 'Insufficient permissions to update campus' });
+    }
+
+    const validatedData = insertCampusSchema.partial().parse(req.body);
+    
+    const campus = await multiCampusService.updateCampus(campusId, validatedData);
+
+    res.json({
+      success: true,
+      campus,
+      message: 'Campus updated successfully'
+    });
+
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ 
+        error: 'Validation error',
+        details: error.errors 
+      });
+    }
+
+    res.status(500).json({ 
+      error: 'Failed to update campus',
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
+});
+
+// Delete campus
+router.delete('/campuses/:id', async (req, res) => {
+  try {
+    const campusId = parseInt(req.params.id);
+    
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const user = req.user as any;
+    const hasPermission = ['church_admin', 'admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(user.role);
+    
+    if (!hasPermission) {
+      return res.status(403).json({ error: 'Insufficient permissions to delete campus' });
+    }
+
+    await multiCampusService.deleteCampus(campusId);
+
+    res.json({
+      success: true,
+      message: 'Campus deleted successfully'
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to delete campus',
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
+});
+
 // Get campus volunteers
 router.get('/campuses/:id/volunteers', async (req, res) => {
   try {

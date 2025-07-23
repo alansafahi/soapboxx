@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building2, Users, TrendingUp, Shield, CheckCircle, AlertTriangle, BarChart3, UserCheck } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Building2, Users, TrendingUp, Shield, CheckCircle, AlertTriangle, BarChart3, UserCheck, Edit3, Trash2, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 
@@ -44,6 +45,15 @@ interface AnalyticsData {
 export default function DivinePhase2Dashboard() {
   const [selectedCampus, setSelectedCampus] = useState<number | null>(null);
   const [newCampusData, setNewCampusData] = useState({
+    name: '',
+    address: '',
+    city: '',
+    state: '',
+    capacity: ''
+  });
+  const [manageCampusDialog, setManageCampusDialog] = useState(false);
+  const [editingCampus, setEditingCampus] = useState<Campus | null>(null);
+  const [editCampusData, setEditCampusData] = useState({
     name: '',
     address: '',
     city: '',
@@ -97,6 +107,49 @@ export default function DivinePhase2Dashboard() {
     }
   });
 
+  // Update campus mutation
+  const updateCampusMutation = useMutation({
+    mutationFn: ({ id, ...data }: { id: number } & any) => 
+      apiRequest(`/api/divine-phase2/campuses/${id}`, 'PUT', data),
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Campus updated successfully!"
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/divine-phase2/campuses'] });
+      setManageCampusDialog(false);
+      setEditingCampus(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update campus",
+        variant: "destructive"
+      });
+    }
+  });
+
+  // Delete campus mutation
+  const deleteCampusMutation = useMutation({
+    mutationFn: (id: number) => apiRequest(`/api/divine-phase2/campuses/${id}`, 'DELETE'),
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Campus deleted successfully!"
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/divine-phase2/campuses'] });
+      setManageCampusDialog(false);
+      setEditingCampus(null);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete campus",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Request background check mutation
   const requestBackgroundCheckMutation = useMutation({
     mutationFn: (data: { volunteerId: number; checkType: string }) => 
@@ -125,6 +178,44 @@ export default function DivinePhase2Dashboard() {
       capacity: parseInt(newCampusData.capacity) || 0,
       churchId: 1 // Default church ID for SoapBox Super App
     });
+  };
+
+  const handleManageCampus = (campus: Campus) => {
+    setEditingCampus(campus);
+    setEditCampusData({
+      name: campus.name,
+      address: campus.address || '',
+      city: campus.city,
+      state: campus.state,
+      capacity: campus.capacity.toString()
+    });
+    setManageCampusDialog(true);
+  };
+
+  const handleUpdateCampus = () => {
+    if (!editingCampus || !editCampusData.name || !editCampusData.city) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in campus name and city",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    updateCampusMutation.mutate({
+      id: editingCampus.id,
+      ...editCampusData,
+      capacity: parseInt(editCampusData.capacity) || 0,
+      churchId: 1
+    });
+  };
+
+  const handleDeleteCampus = () => {
+    if (!editingCampus) return;
+    
+    if (confirm(`Are you sure you want to delete ${editingCampus.name}? This action cannot be undone.`)) {
+      deleteCampusMutation.mutate(editingCampus.id);
+    }
   };
 
   return (
@@ -307,7 +398,7 @@ export default function DivinePhase2Dashboard() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => setSelectedCampus(campus.id)}
+                              onClick={() => handleManageCampus(campus)}
                             >
                               Manage
                             </Button>
@@ -471,6 +562,98 @@ export default function DivinePhase2Dashboard() {
           </TabsContent>
 
         </Tabs>
+
+        {/* Campus Management Dialog */}
+        <Dialog open={manageCampusDialog} onOpenChange={setManageCampusDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-blue-600" />
+                Manage Campus
+              </DialogTitle>
+              <DialogDescription>
+                Edit or delete this campus location
+              </DialogDescription>
+            </DialogHeader>
+            
+            {editingCampus && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-campus-name">Campus Name</Label>
+                    <Input
+                      id="edit-campus-name"
+                      value={editCampusData.name}
+                      onChange={(e) => setEditCampusData(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="e.g., East Campus"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-campus-capacity">Capacity</Label>
+                    <Input
+                      id="edit-campus-capacity"
+                      type="number"
+                      value={editCampusData.capacity}
+                      onChange={(e) => setEditCampusData(prev => ({ ...prev, capacity: e.target.value }))}
+                      placeholder="500"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="edit-campus-address">Address</Label>
+                  <Input
+                    id="edit-campus-address"
+                    value={editCampusData.address}
+                    onChange={(e) => setEditCampusData(prev => ({ ...prev, address: e.target.value }))}
+                    placeholder="123 Main Street"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-campus-city">City</Label>
+                    <Input
+                      id="edit-campus-city"
+                      value={editCampusData.city}
+                      onChange={(e) => setEditCampusData(prev => ({ ...prev, city: e.target.value }))}
+                      placeholder="Springfield"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-campus-state">State</Label>
+                    <Input
+                      id="edit-campus-state"
+                      value={editCampusData.state}
+                      onChange={(e) => setEditCampusData(prev => ({ ...prev, state: e.target.value }))}
+                      placeholder="IL"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex gap-3 pt-4">
+                  <Button 
+                    onClick={handleUpdateCampus}
+                    disabled={updateCampusMutation.isPending}
+                    className="flex-1"
+                  >
+                    <Edit3 className="w-4 h-4 mr-2" />
+                    {updateCampusMutation.isPending ? 'Updating...' : 'Update Campus'}
+                  </Button>
+                  <Button 
+                    variant="destructive"
+                    onClick={handleDeleteCampus}
+                    disabled={deleteCampusMutation.isPending}
+                    className="flex-1"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    {deleteCampusMutation.isPending ? 'Deleting...' : 'Delete'}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
       </div>
     </div>
