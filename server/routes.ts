@@ -8020,8 +8020,8 @@ Return JSON with this exact structure:
         return res.status(400).json({ success: false, message: "Comment content is required" });
       }
       
-      const comment = await storage.createDiscussionComment({
-        discussionId: soapId,
+      const comment = await storage.createSoapComment({
+        soapId,
         authorId: userId,
         content: content.trim()
       });
@@ -8036,7 +8036,7 @@ Return JSON with this exact structure:
   app.get("/api/soap/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
       const soapId = parseInt(req.params.id);
-      const comments = await storage.getDiscussionComments(soapId);
+      const comments = await storage.getSoapComments(soapId);
       res.json(comments);
     } catch (error) {
       console.error('Error fetching SOAP comments:', error);

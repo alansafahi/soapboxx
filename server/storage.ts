@@ -4209,6 +4209,76 @@ export class DatabaseStorage implements IStorage {
       return [];
     }
   }
+
+  // SOAP comment operations implementation
+  async createSoapComment(comment: { soapId: number; authorId: string; content: string }): Promise<any> {
+    try {
+      const [newComment] = await db
+        .insert(soapComments)
+        .values({
+          soapId: comment.soapId,
+          authorId: comment.authorId,
+          content: comment.content,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          likeCount: 0
+        })
+        .returning();
+
+      // Record user activity for engagement tracking
+      await db.insert(userActivities).values({
+        userId: comment.authorId,
+        activityType: 'soap_comment',
+        entityId: newComment.id,
+        points: 5, // Points for adding comment
+        createdAt: new Date(),
+      });
+
+      return newComment;
+    } catch (error) {
+      console.error('Error creating SOAP comment:', error);
+      throw new Error('Failed to create SOAP comment');
+    }
+  }
+
+  async getSoapComments(soapId: number): Promise<any[]> {
+    try {
+      const comments = await db
+        .select({
+          id: soapComments.id,
+          soapId: soapComments.soapId,
+          authorId: soapComments.authorId,
+          content: soapComments.content,
+          likeCount: soapComments.likeCount,
+          createdAt: soapComments.createdAt,
+          updatedAt: soapComments.updatedAt,
+          authorName: sql`COALESCE(${users.firstName}, 'Unknown')`.as('authorName'),
+          authorAvatar: users.profileImageUrl
+        })
+        .from(soapComments)
+        .leftJoin(users, eq(soapComments.authorId, users.id))
+        .where(eq(soapComments.soapId, soapId))
+        .orderBy(asc(soapComments.createdAt));
+
+      return comments.map(comment => ({
+        id: comment.id,
+        soapId: comment.soapId,
+        authorId: comment.authorId,
+        content: comment.content,
+        likeCount: comment.likeCount || 0,
+        createdAt: comment.createdAt || new Date(),
+        updatedAt: comment.updatedAt || new Date(),
+        author: {
+          id: comment.authorId,
+          name: comment.authorName as string || 'Unknown User',
+          profileImage: comment.authorAvatar
+        }
+      }));
+    } catch (error) {
+      console.error('Error fetching SOAP comments:', error);
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
