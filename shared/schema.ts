@@ -187,7 +187,7 @@ export const churches = pgTable("churches", {
   phone: varchar("phone", { length: 20 }),
   email: varchar("email", { length: 255 }),
   website: varchar("website", { length: 255 }),
-  logoUrl: varchar("logo_url"), // Changed from imageUrl for clarity
+  logoUrl: varchar("logo_url"), // Standardized column name (image_url removed)
   size: varchar("size", { length: 50 }), // Weekly attendance category
   hoursOfOperation: jsonb("hours_of_operation"), // Operating hours for each day of the week
   socialLinks: jsonb("social_links"), // Facebook, Instagram, Twitter, YouTube, etc.
@@ -698,7 +698,7 @@ export const discussions = pgTable("discussions", {
   category: varchar("category", { length: 50 }), // general, prayer, bible_study, events
   isPublic: boolean("is_public").default(true),
   audience: varchar("audience", { length: 20 }).default("public"), // 'public', 'church', 'private'
-  mood: varchar("mood", { length: 255 }), // Facebook-style mood/activity tag (supports multiple moods)
+  moodTag: varchar("mood_tag", { length: 255 }), // Facebook-style mood/activity tag (supports multiple moods)
   suggestedVerses: jsonb("suggested_verses"), // AI-generated Bible verse suggestions
   attachedMedia: jsonb("attached_media"), // Array of uploaded media files
   linkedVerse: jsonb("linked_verse"), // User-selected Bible verse to link with post

@@ -2614,7 +2614,7 @@ export class DatabaseStorage implements IStorage {
         type: 'prayer_request',
         soapData: null,
         isAnonymous: row.prayer_requests?.isAnonymous || false,
-        mood: row.prayer_requests?.mood,
+        moodTag: row.prayer_requests?.moodTag,
         isLiked: prayerLikeStatus[row.prayer_requests?.id || 0] || false
       }));
 
@@ -2783,7 +2783,7 @@ export class DatabaseStorage implements IStorage {
           type: 'prayer_request',
           likeCount: 0,
           commentCount: Number(prayer.comment_count) || 0,
-          mood: prayer.mood || null,
+          moodTag: prayer.moodTag || null,
           prayerCount: prayer.prayer_count || 0,
           authorId: prayer.author_id,
           churchId: prayer.church_id,
@@ -3406,7 +3406,7 @@ export class DatabaseStorage implements IStorage {
         observation: row.soap_entries.observation,
         application: row.soap_entries.application,
         prayer: row.soap_entries.prayer,
-        mood: row.soap_entries.mood,
+        moodTag: row.soap_entries.moodTag,
         tags: row.soap_entries.tags,
         isPublic: row.soap_entries.isPublic,
         churchId: row.soap_entries.churchId,
