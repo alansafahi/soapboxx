@@ -4894,7 +4894,7 @@ export class DatabaseStorage implements IStorage {
           u.email as author_email,
           u.first_name as author_first_name,
           u.last_name as author_last_name,
-          u.profile_image as author_profile_image,
+          u.profile_image_url as author_profile_image,
           CONCAT(u.first_name, ' ', u.last_name) as author_name,
           COUNT(DISTINCT dl.id) as like_count,
           COUNT(DISTINCT dc.id) as comment_count
@@ -5004,7 +5004,7 @@ export class DatabaseStorage implements IStorage {
           u.email as author_email,
           u.first_name as author_first_name,
           u.last_name as author_last_name,
-          u.profile_image as author_profile_image,
+          u.profile_image_url as author_profile_image,
           CONCAT(u.first_name, ' ', u.last_name) as author_name,
           COUNT(DISTINCT dl.id) as like_count,
           COUNT(DISTINCT dc.id) as comment_count,
@@ -5030,14 +5030,14 @@ export class DatabaseStorage implements IStorage {
           u2.email as author_email,
           u2.first_name as author_first_name,
           u2.last_name as author_last_name,
-          u2.profile_image as author_profile_image,
+          u2.profile_image_url as author_profile_image,
           CONCAT(u2.first_name, ' ', u2.last_name) as author_name,
           0 as like_count,
           COUNT(DISTINCT sc.id) as comment_count,
           NULL as attached_media
         FROM soap_entries se
         LEFT JOIN users u2 ON se.user_id = u2.id
-        LEFT JOIN soap_comments sc ON se.id = sc.soap_entry_id
+        LEFT JOIN soap_comments sc ON se.id = sc.soap_id
         WHERE se.is_public = true
         GROUP BY se.id, u2.id
         

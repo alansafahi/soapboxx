@@ -10,6 +10,7 @@ import FormattedContent from "../utils/FormattedContent";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequestEnhanced, mapDiscussion, validateMappedData } from "../lib/field-mapping-client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
 import ShareDialog from "./ShareDialog";
@@ -277,19 +278,42 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
   // Remove unused comments query - now handled by shared CommentDialog
 
-  // Fetch posts with pagination
+  // Enhanced fetch posts with field mapping and fallback
   const { data: posts = [], isLoading, error } = useQuery({
-    queryKey: ["/api/discussions", page],
+    queryKey: ["/api/discussions-enhanced", page],
     queryFn: async () => {
-      const response = await fetch(`/api/discussions?page=${page}&limit=10`, {
-        credentials: "include",
-      });
+      try {
+        // Try enhanced endpoint first
+        const enhancedData = await apiRequestEnhanced('GET', `/api/discussions-enhanced?page=${page}&limit=10`);
+        
+        // Validate and map the response
+        const mappedPosts = enhancedData.map((post: any) => {
+          const mapped = mapDiscussion(post);
+          
+          // Validate required fields
+          if (!validateMappedData(mapped, ['id', 'content', 'author'])) {
+            console.warn('Invalid post data received:', post);
+            return null;
+          }
+          
+          return mapped;
+        }).filter(Boolean);
+        
+        return mappedPosts;
+      } catch (error) {
+        console.warn('Enhanced endpoint failed, using fallback:', error);
+        
+        // Fallback to original endpoint
+        const response = await fetch(`/api/discussions?page=${page}&limit=10`, {
+          credentials: "include",
+        });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch posts: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch posts: ${response.status}`);
+        }
+
+        return await response.json();
       }
-
-      return await response.json();
     },
   });
 

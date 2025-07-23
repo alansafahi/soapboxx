@@ -3,6 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
 import { useLocation } from "wouter";
 import SocialFeed from "../components/social-feed";
+import { EnhancedSocialFeed } from "../components/enhanced-social-feed";
 import MyPostsFeed from "../components/my-posts-feed";
 import MobileNav from "../components/mobile-nav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
@@ -64,7 +65,8 @@ export default function SocialFeedPage() {
           </TabsList>
           
           <TabsContent value="all">
-            <SocialFeed />
+            {/* Phase 3: Enhanced Social Feed with standardized field mapping */}
+            <EnhancedSocialFeed limit={50} showCreatePost={true} />
           </TabsContent>
           
           <TabsContent value="myposts">

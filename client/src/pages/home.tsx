@@ -13,6 +13,7 @@ import LeaderboardPreview from "../components/LeaderboardPreview";
 import UpcomingEventsPreview from "../components/UpcomingEventsPreview";
 import CompactPostComposer from "../components/CompactPostComposer";
 import LimitedSocialFeed from "../components/LimitedSocialFeed";
+import { EnhancedSocialFeed } from "../components/enhanced-social-feed";
 import MyPostsFeed from "../components/my-posts-feed";
 import MobileNav from "../components/mobile-nav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
@@ -193,6 +194,7 @@ export default function Home({ referralCode }: HomeProps = {}) {
               </TabsList>
               
               <TabsContent value="all">
+                {/* Phase 3: Enhanced Limited Social Feed with field mapping */}
                 <LimitedSocialFeed initialLimit={5} />
               </TabsContent>
               
