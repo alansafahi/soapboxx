@@ -4632,6 +4632,8 @@ export class DatabaseStorage implements IStorage {
 
   async getDiscussionComments(discussionId: number, userId?: string): Promise<DiscussionComment[]> {
     try {
+      console.log('Fetching comments for discussion:', discussionId, 'user:', userId);
+      
       const comments = await db
         .select({
           id: discussionComments.id,
@@ -4650,6 +4652,8 @@ export class DatabaseStorage implements IStorage {
         .where(eq(discussionComments.discussionId, discussionId))
         .orderBy(asc(discussionComments.createdAt));
 
+      console.log('Found comments:', comments.length);
+
       // Get user's liked comments if userId provided
       let userLikedComments: Set<number> = new Set();
       if (userId && comments.length > 0) {
@@ -4663,7 +4667,7 @@ export class DatabaseStorage implements IStorage {
         userLikedComments = new Set(userLikesResult.rows.map((row: any) => row.comment_id));
       }
 
-      return comments.map(comment => ({
+      const result = comments.map(comment => ({
         id: comment.id,
         discussionId: comment.discussionId,
         authorId: comment.authorId,
@@ -4679,7 +4683,11 @@ export class DatabaseStorage implements IStorage {
           profileImage: comment.authorAvatar
         }
       }));
+
+      console.log('Returning comments:', result.length);
+      return result;
     } catch (error) {
+      console.error('Error fetching discussion comments:', error);
       return [];
     }
   }
