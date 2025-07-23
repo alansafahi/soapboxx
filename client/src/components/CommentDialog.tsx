@@ -59,7 +59,27 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
   // Fetch comments
   const { data: comments = [], isLoading } = useQuery<Comment[]>({
     queryKey: [apiEndpoint],
-    queryFn: () => apiRequest('GET', apiEndpoint),
+    queryFn: async () => {
+      try {
+        const response = await fetch(apiEndpoint, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error('Error fetching comments:', error);
+        throw error;
+      }
+    },
     enabled: isOpen,
   });
 
@@ -127,9 +147,15 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
   });
 
   const handleSubmitComment = () => {
-    if (commentText.trim()) {
-      addCommentMutation.mutate(commentText.trim());
+    if (!commentText.trim()) {
+      toast({
+        title: "Please enter a comment",
+        description: "Comment cannot be empty",
+        variant: "destructive"
+      });
+      return;
     }
+    addCommentMutation.mutate(commentText.trim());
   };
 
   // Sort comments

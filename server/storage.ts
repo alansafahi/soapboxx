@@ -3633,48 +3633,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // Discussion comments implementation - missing method causing 500 errors
-  async getDiscussionComments(discussionId: number): Promise<DiscussionComment[]> {
-    try {
-      const comments = await db
-        .select({
-          id: discussionComments.id,
-          discussionId: discussionComments.discussionId,
-          authorId: discussionComments.authorId,
-          content: discussionComments.content,
-          parentId: discussionComments.parentId,
-          likeCount: discussionComments.likeCount,
-          createdAt: discussionComments.createdAt,
-          updatedAt: discussionComments.updatedAt,
-          author: {
-            id: users.id,
-            firstName: users.firstName,
-            lastName: users.lastName,
-            email: users.email,
-            profileImageUrl: users.profileImageUrl
-          }
-        })
-        .from(discussionComments)
-        .leftJoin(users, eq(discussionComments.authorId, users.id))
-        .where(eq(discussionComments.discussionId, discussionId))
-        .orderBy(asc(discussionComments.createdAt));
 
-      return comments.map(comment => ({
-        id: comment.id,
-        discussionId: comment.discussionId,
-        authorId: comment.authorId,
-        content: comment.content,
-        parentId: comment.parentId,
-        likeCount: comment.likeCount || 0,
-        createdAt: comment.createdAt,
-        updatedAt: comment.updatedAt,
-        author: comment.author
-      }));
-    } catch (error) {
-      // Silent error logging for production
-      return [];
-    }
-  }
 
   // Gallery Methods Implementation
   async getGalleryImages(churchId?: number, filters?: { 
@@ -4212,24 +4171,35 @@ export class DatabaseStorage implements IStorage {
   // Discussion comment operations implementation
   async createDiscussionComment(comment: InsertDiscussionComment): Promise<DiscussionComment> {
     try {
+      console.log('Creating discussion comment with data:', comment);
+      
       const [newComment] = await db
         .insert(discussionComments)
         .values({
-          ...comment,
+          discussionId: comment.discussionId,
+          authorId: comment.authorId,
+          content: comment.content,
           createdAt: new Date(),
           updatedAt: new Date(),
           likeCount: 0
         })
         .returning();
 
+      console.log('Created comment:', newComment);
+
       // Record user activity for engagement tracking
-      await db.insert(userActivities).values({
-        userId: comment.authorId,
-        activityType: 'discussion_comment',
-        entityId: newComment.id,
-        points: 5, // Points for adding comment
-        createdAt: new Date(),
-      });
+      try {
+        await db.insert(userActivities).values({
+          userId: comment.authorId,
+          activityType: 'discussion_comment',
+          entityId: newComment.id,
+          points: 5, // Points for adding comment
+          createdAt: new Date(),
+        });
+      } catch (activityError) {
+        console.error('Failed to record user activity:', activityError);
+        // Continue even if activity recording fails
+      }
 
       // Return comment with proper structure expected by frontend
       return {
@@ -4242,7 +4212,8 @@ export class DatabaseStorage implements IStorage {
         updatedAt: newComment.updatedAt || new Date()
       };
     } catch (error) {
-      throw new Error('Failed to create discussion comment');
+      console.error('Database error creating discussion comment:', error);
+      throw new Error(`Failed to create discussion comment: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -4254,6 +4225,7 @@ export class DatabaseStorage implements IStorage {
           discussionId: discussionComments.discussionId,
           authorId: discussionComments.authorId,
           content: discussionComments.content,
+          parentId: discussionComments.parentId,
           likeCount: discussionComments.likeCount,
           createdAt: discussionComments.createdAt,
           updatedAt: discussionComments.updatedAt,
@@ -4270,6 +4242,7 @@ export class DatabaseStorage implements IStorage {
         discussionId: comment.discussionId,
         authorId: comment.authorId,
         content: comment.content,
+        parentId: comment.parentId,
         likeCount: comment.likeCount || 0,
         createdAt: comment.createdAt || new Date(),
         updatedAt: comment.updatedAt || new Date(),

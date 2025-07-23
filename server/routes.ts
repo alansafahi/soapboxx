@@ -7965,7 +7965,7 @@ Return JSON with this exact structure:
       const discussionId = parseInt(req.params.id);
       const { content } = req.body;
       
-
+      console.log('Comment request:', { userId, discussionId, content });
       
       if (!userId) {
         return res.status(401).json({ success: false, message: 'Unauthorized' });
@@ -7975,13 +7975,20 @@ Return JSON with this exact structure:
         return res.status(400).json({ success: false, message: "Comment content is required" });
       }
       
-      // Check if discussion exists
-      const discussions = await storage.getDiscussions();
-      const discussion = discussions.find(d => d.id === discussionId);
-      if (!discussion) {
-        return res.status(404).json({ success: false, message: "Post not found" });
+      if (isNaN(discussionId)) {
+        return res.status(400).json({ success: false, message: "Invalid discussion ID" });
       }
       
+      // Check if discussion exists - simplified check
+      try {
+        const discussion = await storage.getDiscussion(discussionId);
+        if (!discussion) {
+          return res.status(404).json({ success: false, message: "Post not found" });
+        }
+      } catch (discussionError) {
+        console.error('Error checking discussion:', discussionError);
+        return res.status(404).json({ success: false, message: "Post not found" });
+      }
 
       const comment = await storage.createDiscussionComment({
         discussionId,
@@ -7991,7 +7998,8 @@ Return JSON with this exact structure:
       
       res.status(201).json({ success: true, data: comment });
     } catch (error) {
-      res.status(500).json({ success: false, message: "Failed to create comment", error: error instanceof Error ? error.message : String(error) });
+      console.error('Error in comment endpoint:', error);
+      res.status(500).json({ success: false, message: "Failed to create discussion comment", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
