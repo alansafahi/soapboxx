@@ -7965,7 +7965,7 @@ Return JSON with this exact structure:
     try {
       const userId = req.session?.userId;
       const discussionId = parseInt(req.params.id);
-      const { content } = req.body;
+      const { content, parentId } = req.body;
       
       
       if (!userId) {
@@ -7996,7 +7996,8 @@ Return JSON with this exact structure:
       const comment = await storage.createDiscussionComment({
         discussionId,
         authorId: userId,
-        content: content.trim()
+        content: content.trim(),
+        parentId: parentId || null
       });
       
       res.status(201).json({ success: true, data: comment });

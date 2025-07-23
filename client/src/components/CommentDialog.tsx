@@ -36,6 +36,8 @@ interface Comment {
 export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDialogProps) {
   const [commentText, setCommentText] = useState("");
   const [sortBy, setSortBy] = useState<'newest' | 'most_liked'>('newest');
+  const [replyingTo, setReplyingTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
   const { toast } = useToast();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -101,10 +103,11 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
     }
   }, [comments, isOpen]);
 
-  // Add comment mutation
+  // Add comment mutation (supports both regular comments and replies)
   const addCommentMutation = useMutation({
-    mutationFn: async (content: string) => {
+    mutationFn: async ({ content, parentId }: { content: string; parentId?: number }) => {
       try {
+        const requestBody = parentId ? { content, parentId } : { content };
         const response = await fetch(apiEndpoint, {
           method: 'POST',
           headers: {
@@ -113,7 +116,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
             'Referer': window.location.href,
           },
           credentials: 'include',
-          body: JSON.stringify({ content })
+          body: JSON.stringify(requestBody)
         });
 
         if (!response.ok) {
@@ -132,6 +135,8 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       setCommentText("");
+      setReplyText("");
+      setReplyingTo(null);
       toast({
         title: "Comment added!",
         description: "Your comment has been posted successfully",
@@ -227,7 +232,19 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
       });
       return;
     }
-    addCommentMutation.mutate(commentText.trim());
+    addCommentMutation.mutate({ content: commentText.trim() });
+  };
+
+  const handleSubmitReply = (parentId: number) => {
+    if (!replyText.trim()) {
+      toast({
+        title: "Please enter a reply",
+        description: "Reply cannot be empty",
+        variant: "destructive"
+      });
+      return;
+    }
+    addCommentMutation.mutate({ content: replyText.trim(), parentId });
   };
 
   // Sort comments
@@ -320,7 +337,12 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
                           <Heart className={`w-3 h-3 mr-1 ${(comment.isLiked || likedComments.has(comment.id)) ? 'fill-current' : ''}`} />
                           <span className="text-xs">{comment.likeCount || 0}</span>
                         </Button>
-                        <Button variant="ghost" size="sm" className="text-xs text-gray-400 hover:text-blue-500 p-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-xs text-gray-400 hover:text-blue-500 p-1"
+                          onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                        >
                           <Reply className="w-3 h-3 mr-1" />
                           <span className="hidden sm:inline">Reply</span>
                         </Button>
@@ -344,6 +366,57 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
                         />
                       )}
                     </div>
+
+                    {/* Reply Form */}
+                    {replyingTo === comment.id && (
+                      <div className="mt-3 pl-4 border-l-2 border-blue-200 dark:border-blue-700">
+                        <div className="flex items-start space-x-2">
+                          <Avatar className="w-6 h-6 flex-shrink-0">
+                            <AvatarImage src={user?.profileImageUrl || ""} />
+                            <AvatarFallback className="bg-purple-600 text-white text-xs">
+                              {user?.firstName?.[0] || 'U'}{user?.lastName?.[0] || ''}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <Textarea
+                              value={replyText}
+                              onChange={(e) => setReplyText(e.target.value)}
+                              placeholder={`Reply to ${comment.author?.firstName || 'this comment'}...`}
+                              className="min-h-[60px] text-sm resize-none"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                                  handleSubmitReply(comment.id);
+                                }
+                              }}
+                            />
+                            <div className="flex justify-between items-center mt-2">
+                              <span className="text-xs text-gray-400">Press Cmd+Enter to reply</span>
+                              <div className="flex space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setReplyingTo(null);
+                                    setReplyText("");
+                                  }}
+                                  className="text-xs h-7"
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  onClick={() => handleSubmitReply(comment.id)}
+                                  disabled={addCommentMutation.isPending || !replyText.trim()}
+                                  size="sm"
+                                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs h-7"
+                                >
+                                  {addCommentMutation.isPending ? "Replying..." : "Reply"}
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

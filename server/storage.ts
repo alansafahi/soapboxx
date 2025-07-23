@@ -4592,6 +4592,7 @@ export class DatabaseStorage implements IStorage {
           discussionId: comment.discussionId,
           authorId: comment.authorId,
           content: comment.content,
+          parentId: comment.parentId || null,
           createdAt: new Date(),
           updatedAt: new Date(),
           likeCount: 0
