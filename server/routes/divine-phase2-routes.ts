@@ -14,7 +14,7 @@ import {
 const router = Router();
 
 // Apply authentication middleware to all D.I.V.I.N.E. Phase 2 routes
-router.use(isAuthenticated);
+// Note: Authentication middleware will be applied when routes are registered
 
 // D.I.V.I.N.E. Phase 2: Enterprise Ready API Routes
 

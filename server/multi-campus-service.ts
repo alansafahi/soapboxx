@@ -100,7 +100,7 @@ export class MultiCampusService {
         administrators
       };
     } catch (error) {
-      throw new Error(`Failed to get campus details: ${error.message}`);
+      throw new Error(`Failed to get campus details: ${(error as Error).message}`);
     }
   }
 
@@ -155,7 +155,7 @@ export class MultiCampusService {
 
       return administrator;
     } catch (error) {
-      throw new Error(`Failed to assign campus administrator: ${error.message}`);
+      throw new Error(`Failed to assign campus administrator: ${(error as Error).message}`);
     }
   }
 
@@ -281,7 +281,7 @@ export class MultiCampusService {
       // This is a simplified version - in practice you might want a direct campus_id field
       return opportunities;
     } catch (error) {
-      throw new Error(`Failed to get campus opportunities: ${error.message}`);
+      throw new Error(`Failed to get campus opportunities: ${(error as Error).message}`);
     }
   }
 
@@ -328,7 +328,7 @@ export class MultiCampusService {
         totalCampuses: campusList.length
       };
     } catch (error) {
-      throw new Error(`Failed to get cross-campus statistics: ${error.message}`);
+      throw new Error(`Failed to get cross-campus statistics: ${(error as Error).message}`);
     }
   }
 
@@ -347,8 +347,7 @@ export class MultiCampusService {
       await db
         .update(volunteerCampusAssignments)
         .set({ 
-          isActive: false,
-          notes: notes || `Transferred to campus ${toCampusId} by ${transferredBy}`
+          isActive: false
         })
         .where(and(
           eq(volunteerCampusAssignments.volunteerId, volunteerId),
@@ -360,7 +359,7 @@ export class MultiCampusService {
       await this.assignVolunteerToCampus(volunteerId, toCampusId, true, transferredBy);
 
     } catch (error) {
-      throw new Error(`Failed to transfer volunteer: ${error.message}`);
+      throw new Error(`Failed to transfer volunteer: ${(error as Error).message}`);
     }
   }
 
@@ -419,7 +418,7 @@ export class MultiCampusService {
         campus: row.campus
       }));
     } catch (error) {
-      throw new Error(`Failed to get volunteer campus assignments: ${error.message}`);
+      throw new Error(`Failed to get volunteer campus assignments: ${(error as Error).message}`);
     }
   }
 
