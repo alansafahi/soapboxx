@@ -8404,9 +8404,8 @@ Return JSON with this exact structure:
       
       console.log('Liking prayer response:', { responseId, userId });
       
-      // For now, just return success since we don't have a prayer response likes table
-      // In a full implementation, you'd create a prayer_response_likes table
-      res.json({ liked: true, likeCount: 1 });
+      const result = await storage.likePrayerResponse(responseId, userId);
+      res.json(result);
     } catch (error) {
       console.error('Error liking prayer response:', error);
       res.status(500).json({ message: "Failed to like prayer response" });

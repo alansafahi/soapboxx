@@ -63,6 +63,16 @@ export const prayerReactions = pgTable("prayer_reactions", {
   userPrayerReactionUnique: unique().on(table.userId, table.prayerRequestId, table.reactionType),
 }));
 
+// Prayer response likes (for liking individual comments on prayer requests)
+export const prayerResponseLikes = pgTable("prayer_response_likes", {
+  id: serial("id").primaryKey(),
+  prayerResponseId: integer("prayer_response_id").notNull().references(() => prayerResponses.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userResponseLikeUnique: unique().on(table.userId, table.prayerResponseId),
+}));
+
 export const answeredPrayerComments = pgTable("answered_prayer_comments", {
   id: serial("id").primaryKey(),
   testimonyId: integer("testimony_id").notNull().references(() => answeredPrayerTestimonies.id),
@@ -4155,3 +4165,7 @@ export type ChurchFeatureSetting = typeof churchFeatureSettings.$inferSelect;
 export type InsertChurchFeatureSetting = z.infer<typeof insertChurchFeatureSettingSchema>;
 export type DefaultFeatureSetting = typeof defaultFeatureSettings.$inferSelect;
 export type InsertDefaultFeatureSetting = z.infer<typeof insertDefaultFeatureSettingSchema>;
+
+// Prayer response likes type definitions
+export type PrayerResponseLike = typeof prayerResponseLikes.$inferSelect;
+export type InsertPrayerResponseLike = typeof prayerResponseLikes.$inferInsert;

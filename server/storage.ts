@@ -20,6 +20,7 @@ import {
   reactions,
   prayerRequests,
   prayerResponses,
+  prayerResponseLikes,
   prayerBookmarks,
   prayerFollowUps,
   prayerUpdates,
@@ -467,6 +468,8 @@ export interface IStorage {
   getUserPrayerResponse(prayerRequestId: number, userId: string): Promise<PrayerResponse | undefined>;
   removePrayerResponse(prayerRequestId: number, userId: string): Promise<void>;
   getPrayerSupportMessages(prayerRequestId: number): Promise<any[]>;
+  likePrayerResponse(responseId: number, userId: string): Promise<{ liked: boolean; likeCount: number }>;
+  getPrayerResponseLikeStatus(responseId: number, userId: string): Promise<boolean>;
   markPrayerAnswered(id: number): Promise<void>;
   updatePrayerStatus(prayerId: number, status: string, moderationNotes?: string): Promise<PrayerRequest>;
   createPrayerAssignment(assignment: InsertPrayerAssignment): Promise<PrayerAssignment>;
@@ -4114,6 +4117,26 @@ export class DatabaseStorage implements IStorage {
         .where(eq(prayerResponses.prayerRequestId, prayerRequestId))
         .orderBy(asc(prayerResponses.createdAt));
 
+      // Get like counts for each response
+      const responseIds = messages.map(msg => msg.id);
+      let likeCounts: Record<number, number> = {};
+      
+      if (responseIds.length > 0) {
+        const likeCountResult = await db
+          .select({
+            responseId: prayerResponseLikes.prayerResponseId,
+            count: sql<number>`count(*)`
+          })
+          .from(prayerResponseLikes)
+          .where(sql`${prayerResponseLikes.prayerResponseId} IN (${sql.join(responseIds, sql`, `)})`)
+          .groupBy(prayerResponseLikes.prayerResponseId);
+
+        likeCounts = likeCountResult.reduce((acc: Record<number, number>, row: any) => {
+          acc[row.responseId] = Number(row.count);
+          return acc;
+        }, {});
+      }
+
       return messages.map(msg => ({
         id: msg.id,
         content: msg.content,
@@ -4125,8 +4148,8 @@ export class DatabaseStorage implements IStorage {
           profileImageUrl: msg.profileImageUrl
         },
         createdAt: msg.createdAt,
-        likeCount: 0,
-        isLiked: false
+        likeCount: likeCounts[msg.id] || 0,
+        isLiked: false // Will be set on frontend based on user
       }));
     } catch (error) {
       console.error('Error getting prayer support messages:', error);
@@ -4165,6 +4188,75 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error creating prayer response:', error);
       throw new Error('Failed to create prayer response');
+    }
+  }
+
+  // Prayer response like methods
+  async likePrayerResponse(responseId: number, userId: string): Promise<{ liked: boolean; likeCount: number }> {
+    try {
+      // Check if already liked
+      const existingLike = await db
+        .select()
+        .from(prayerResponseLikes)
+        .where(and(
+          eq(prayerResponseLikes.prayerResponseId, responseId),
+          eq(prayerResponseLikes.userId, userId)
+        ));
+
+      if (existingLike.length > 0) {
+        // Unlike - remove the like
+        await db
+          .delete(prayerResponseLikes)
+          .where(and(
+            eq(prayerResponseLikes.prayerResponseId, responseId),
+            eq(prayerResponseLikes.userId, userId)
+          ));
+
+        // Get updated like count
+        const likeCount = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(prayerResponseLikes)
+          .where(eq(prayerResponseLikes.prayerResponseId, responseId));
+
+        return { liked: false, likeCount: Number(likeCount[0]?.count || 0) };
+      } else {
+        // Like - add the like
+        await db
+          .insert(prayerResponseLikes)
+          .values({
+            prayerResponseId: responseId,
+            userId,
+            createdAt: new Date()
+          });
+
+        // Get updated like count
+        const likeCount = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(prayerResponseLikes)
+          .where(eq(prayerResponseLikes.prayerResponseId, responseId));
+
+        return { liked: true, likeCount: Number(likeCount[0]?.count || 0) };
+      }
+    } catch (error) {
+      console.error('Error liking prayer response:', error);
+      throw new Error('Failed to like prayer response');
+    }
+  }
+
+  async getPrayerResponseLikeStatus(responseId: number, userId: string): Promise<boolean> {
+    try {
+      const like = await db
+        .select()
+        .from(prayerResponseLikes)
+        .where(and(
+          eq(prayerResponseLikes.prayerResponseId, responseId),
+          eq(prayerResponseLikes.userId, userId)
+        ));
+
+      return like.length > 0;
+    } catch (error) {
+      console.error('Error getting prayer response like status:', error);
+      return false;
     }
   }
 

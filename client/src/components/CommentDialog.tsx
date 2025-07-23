@@ -61,6 +61,9 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
 
   const apiEndpoint = getApiEndpoint(postType);
 
+  // State to track liked comments locally
+  const [likedComments, setLikedComments] = useState<Set<number>>(new Set());
+
   // Fetch comments
   const { data: comments = [], isLoading } = useQuery<Comment[]>({
     queryKey: [apiEndpoint],
@@ -152,10 +155,41 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
           break;
       }
       console.log('Liking comment with endpoint:', likeEndpoint);
-      return apiRequest('POST', likeEndpoint);
+      
+      const response = await fetch(likeEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${await response.text()}`);
+      }
+
+      return await response.json();
     },
-    onSuccess: () => {
+    onSuccess: (result, commentId) => {
+      // Update local state immediately for better UX
+      setLikedComments(prev => {
+        const newSet = new Set(prev);
+        if (result.liked) {
+          newSet.add(commentId);
+        } else {
+          newSet.delete(commentId);
+        }
+        return newSet;
+      });
+      
+      // Refresh comment data from server
       queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
+      
+      toast({
+        title: result.liked ? "Comment liked!" : "Comment unliked!",
+        description: result.liked ? "You liked this comment" : "You removed your like",
+      });
     },
     onError: (error: any) => {
       console.error('Like comment error:', error);
@@ -263,9 +297,9 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
                           variant="ghost"
                           size="sm"
                           onClick={() => likeCommentMutation.mutate(comment.id)}
-                          className={`text-xs p-1 ${comment.isLiked ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
+                          className={`text-xs p-1 ${(comment.isLiked || likedComments.has(comment.id)) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'}`}
                         >
-                          <Heart className={`w-3 h-3 mr-1 ${comment.isLiked ? 'fill-current' : ''}`} />
+                          <Heart className={`w-3 h-3 mr-1 ${(comment.isLiked || likedComments.has(comment.id)) ? 'fill-current' : ''}`} />
                           {comment.likeCount > 0 && comment.likeCount}
                         </Button>
                         <Button variant="ghost" size="sm" className="text-xs text-gray-400 hover:text-blue-500 p-1">
