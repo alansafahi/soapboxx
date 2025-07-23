@@ -13421,6 +13421,10 @@ Please provide suggestions for the missing or incomplete sections.`
   const divinePhase2Routes = await import('./routes/divine-phase2-routes.js');
   app.use('/api/divine-phase2', isAuthenticated, divinePhase2Routes.default);
 
+  // Import and register church campus routes
+  const churchCampusRoutes = await import('./routes/church-campus-routes.js');
+  app.use('/api', churchCampusRoutes.default);
+
   // Simple health check endpoint
   app.get('/health', (req, res) => {
     res.json({ 

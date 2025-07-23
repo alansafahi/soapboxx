@@ -30,6 +30,7 @@ import ContentManagementSystem from "../components/ContentManagementSystem";
 import { AnalyticsTab } from "../components/AnalyticsTab";
 import ChurchFeatureManager from "../components/ChurchFeatureManager";
 import { ChurchAdminManagement } from "../components/church-admin-management";
+import CampusManagement from "../components/CampusManagement";
 
 // Church Management Component
 function ChurchManagementTab() {
@@ -440,16 +441,18 @@ function MembersPage() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-10">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-11">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="soapbox-admin">SoapBox Admin</TabsTrigger>
             <TabsTrigger value="church-admin">Church Admin</TabsTrigger>
             <TabsTrigger value="features">Features</TabsTrigger>
+            <TabsTrigger value="campuses">Campuses</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="content" className="hidden lg:block">Content</TabsTrigger>
             <TabsTrigger value="media" className="hidden lg:block">Media</TabsTrigger>
             <TabsTrigger value="analytics" className="hidden lg:block">Analytics</TabsTrigger>
+            <TabsTrigger value="volunteers" className="hidden lg:block">Volunteers</TabsTrigger>
             <TabsTrigger value="settings" className="hidden lg:block">Settings</TabsTrigger>
           </TabsList>
 
@@ -572,6 +575,27 @@ function MembersPage() {
                 <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
                 <h2 className="text-xl font-semibold mb-2">Access Restricted</h2>
                 <p className="text-gray-600">Feature management is only accessible to SoapBox administrators.</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="campuses" className="space-y-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Building2 className="h-6 w-6" />
+                Multi-Campus Management
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                Manage multiple campus locations for your church. Add, edit, and organize campus operations from one central dashboard.
+              </p>
+            </div>
+            {selectedChurch ? (
+              <CampusManagement churchId={selectedChurch} />
+            ) : (
+              <Card className="p-8 text-center">
+                <Building2 className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+                <h2 className="text-xl font-semibold mb-2">Select a Church</h2>
+                <p className="text-gray-600">Please select a church to manage its campus locations.</p>
               </Card>
             )}
           </TabsContent>
