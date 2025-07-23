@@ -70,6 +70,7 @@ const SavedReflectionsPage = lazy(() => import("./pages/saved-reflections"));
 const FAQPage = lazy(() => import("./pages/faq"));
 const ModerationDashboardPage = lazy(() => import("./pages/moderation-dashboard"));
 const DIVINEPage = lazy(() => import("./pages/ServeWellPage"));
+const DivinePhase2Dashboard = lazy(() => import("./pages/DivinePhase2Dashboard"));
 
 function AppRouter() {
     const { user, isAuthenticated, isLoading, logout } = useImmediateAuth();
@@ -181,6 +182,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/content-distribution" component={ContentDistributionPage} />
                                     <ProtectedRoute path="/engagement-analytics" component={EngagementAnalyticsPage} />
                                     <ProtectedRoute path="/moderation-dashboard" component={ModerationDashboardPage} />
+                                    <ProtectedRoute path="/divine-phase2" component={DivinePhase2Dashboard} />
 
 
                                     <ProtectedRoute path="/ai-guidance" component={PersonalizedGuidancePage} />

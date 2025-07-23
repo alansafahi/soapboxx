@@ -13417,6 +13417,10 @@ Please provide suggestions for the missing or incomplete sections.`
   const volunteerRoutes = await import('./routes/volunteer-routes.js');
   app.use('/api/volunteer', volunteerRoutes.default);
 
+  // D.I.V.I.N.E. Phase 2: Enterprise Ready API Routes
+  const divinePhase2Routes = await import('./routes/divine-phase2-routes.js');
+  app.use('/api/divine-phase2', divinePhase2Routes.default);
+
   // Simple health check endpoint
   app.get('/health', (req, res) => {
     res.json({ 

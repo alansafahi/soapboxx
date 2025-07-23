@@ -2023,6 +2023,157 @@ export const bibleVerseShares = pgTable("bible_verse_shares", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// D.I.V.I.N.E. Phase 2: Enterprise Ready - Multi-Campus Support
+export const campuses = pgTable("campuses", {
+  id: serial("id").primaryKey(),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  name: varchar("name", { length: 100 }).notNull(),
+  address: text("address"),
+  city: varchar("city", { length: 100 }),
+  state: varchar("state", { length: 50 }),
+  zipCode: varchar("zip_code", { length: 20 }),
+  country: varchar("country", { length: 50 }).default("United States"),
+  phoneNumber: varchar("phone_number", { length: 20 }),
+  primaryContactId: varchar("primary_contact_id").references(() => users.id),
+  capacity: integer("capacity"),
+  isActive: boolean("is_active").default(true),
+  settings: jsonb("settings"), // Campus-specific settings and configurations
+  timeZone: varchar("time_zone", { length: 50 }).default("America/New_York"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Campus administrators for multi-campus management
+export const campusAdministrators = pgTable("campus_administrators", {
+  id: serial("id").primaryKey(),
+  campusId: integer("campus_id").notNull().references(() => campuses.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  permissions: text("permissions").array(), // ["volunteer_management", "event_planning", "reports", "settings"]
+  isActive: boolean("is_active").default(true),
+  assignedBy: varchar("assigned_by").references(() => users.id),
+  assignedAt: timestamp("assigned_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Volunteer campus assignments for multi-campus volunteer management
+export const volunteerCampusAssignments = pgTable("volunteer_campus_assignments", {
+  id: serial("id").primaryKey(),
+  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
+  campusId: integer("campus_id").notNull().references(() => campuses.id),
+  isPrimaryCampus: boolean("is_primary_campus").default(false),
+  assignedBy: varchar("assigned_by").references(() => users.id),
+  assignedAt: timestamp("assigned_at").defaultNow(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Background check providers for enterprise integration
+export const backgroundCheckProviders = pgTable("background_check_providers", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(), // MinistrySafe, Checkr, ProtectMyMinistry
+  apiEndpoint: varchar("api_endpoint", { length: 500 }),
+  apiKey: varchar("api_key", { length: 255 }), // Encrypted storage
+  webhookUrl: varchar("webhook_url", { length: 500 }),
+  isActive: boolean("is_active").default(true),
+  supportedCheckTypes: text("supported_check_types").array(),
+  averageProcessingDays: integer("average_processing_days").default(7),
+  costPerCheck: decimal("cost_per_check", { precision: 6, scale: 2 }),
+  settings: jsonb("settings"), // Provider-specific configuration
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Background check requirements by role
+export const backgroundCheckRequirements = pgTable("background_check_requirements", {
+  id: serial("id").primaryKey(),
+  roleId: integer("role_id").references(() => volunteerRoles.id),
+  opportunityId: integer("opportunity_id").references(() => volunteerOpportunities.id),
+  checkType: varchar("check_type", { length: 50 }).notNull(), // basic, comprehensive, child_protection, fingerprint
+  providerId: integer("provider_id").references(() => backgroundCheckProviders.id),
+  renewalMonths: integer("renewal_months").default(24), // How often to renew
+  isRequired: boolean("is_required").default(true),
+  gracePeriodDays: integer("grace_period_days").default(30), // Days after expiration before blocking
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Enhanced volunteer metrics for analytics
+export const volunteerMetrics = pgTable("volunteer_metrics", {
+  id: serial("id").primaryKey(),
+  volunteerId: integer("volunteer_id").notNull().references(() => volunteers.id),
+  campusId: integer("campus_id").references(() => campuses.id),
+  date: timestamp("date").notNull(),
+  hoursLogged: decimal("hours_logged", { precision: 8, scale: 2 }).default("0"),
+  engagementScore: decimal("engagement_score", { precision: 5, scale: 2 }), // 0-100 calculated score
+  activitiesCompleted: integer("activities_completed").default(0),
+  eventsAttended: integer("events_attended").default(0),
+  trainingSessionsCompleted: integer("training_sessions_completed").default(0),
+  feedbackRating: decimal("feedback_rating", { precision: 3, scale: 2 }), // Average feedback rating
+  impactScore: decimal("impact_score", { precision: 5, scale: 2 }), // Calculated impact metric
+  notes: text("notes"),
+  recordedBy: varchar("recorded_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Ministry analytics for leadership dashboard
+export const ministryAnalytics = pgTable("ministry_analytics", {
+  id: serial("id").primaryKey(),
+  ministryName: varchar("ministry_name", { length: 100 }).notNull(),
+  campusId: integer("campus_id").references(() => campuses.id),
+  period: varchar("period", { length: 20 }).notNull(), // daily, weekly, monthly, quarterly, yearly
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  volunteerCount: integer("volunteer_count").default(0),
+  activeVolunteers: integer("active_volunteers").default(0),
+  newVolunteers: integer("new_volunteers").default(0),
+  retainedVolunteers: integer("retained_volunteers").default(0),
+  totalHours: decimal("total_hours", { precision: 10, scale: 2 }).default("0"),
+  averageHoursPerVolunteer: decimal("average_hours_per_volunteer", { precision: 8, scale: 2 }),
+  completionRate: decimal("completion_rate", { precision: 5, scale: 2 }), // Percentage of tasks completed
+  satisfactionScore: decimal("satisfaction_score", { precision: 3, scale: 2 }), // Average satisfaction rating
+  impactMetrics: jsonb("impact_metrics"), // Custom ministry-specific metrics
+  notes: text("notes"),
+  generatedBy: varchar("generated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Dashboard configurations for personalized ministry leader views
+export const dashboardConfigurations = pgTable("dashboard_configurations", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  dashboardType: varchar("dashboard_type", { length: 50 }).notNull(), // ministry_leader, campus_admin, volunteer_coordinator
+  layoutSettings: jsonb("layout_settings"), // Widget positions, sizes, preferences
+  widgets: text("widgets").array(), // Active widgets: ["volunteer_overview", "engagement_metrics", "upcoming_events"]
+  filters: jsonb("filters"), // Default filters for reports and views
+  refreshInterval: integer("refresh_interval").default(300), // Seconds
+  isDefault: boolean("is_default").default(false),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Ministry leader communication tracking
+export const ministryLeaderCommunications = pgTable("ministry_leader_communications", {
+  id: serial("id").primaryKey(),
+  senderId: varchar("sender_id").notNull().references(() => users.id),
+  recipientIds: text("recipient_ids").array(), // Multiple volunteers can receive same message
+  campusId: integer("campus_id").references(() => campuses.id),
+  subject: varchar("subject", { length: 200 }).notNull(),
+  content: text("content").notNull(),
+  messageType: varchar("message_type", { length: 30 }).notNull(), // announcement, training_reminder, schedule_update, appreciation
+  priority: varchar("priority", { length: 20 }).default("normal"), // low, normal, high, urgent
+  scheduledFor: timestamp("scheduled_for"),
+  deliveredAt: timestamp("delivered_at"),
+  readCount: integer("read_count").default(0),
+  responseCount: integer("response_count").default(0),
+  attachments: text("attachments").array(),
+  tags: text("tags").array(), // For categorization and filtering
+  isArchived: boolean("is_archived").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Contact submissions from marketing website
 export const contactSubmissions = pgTable("contact_submissions", {
   id: serial("id").primaryKey(),
@@ -2089,6 +2240,26 @@ export type ChatConversation = typeof chatConversations.$inferSelect;
 export const insertChatMessageSchema = createInsertSchema(chatMessages);
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
+
+// D.I.V.I.N.E. Phase 2 Enterprise Types
+export type Campus = typeof campuses.$inferSelect;
+export type InsertCampus = typeof campuses.$inferInsert;
+export type CampusAdministrator = typeof campusAdministrators.$inferSelect;
+export type InsertCampusAdministrator = typeof campusAdministrators.$inferInsert;
+export type VolunteerCampusAssignment = typeof volunteerCampusAssignments.$inferSelect;
+export type InsertVolunteerCampusAssignment = typeof volunteerCampusAssignments.$inferInsert;
+export type BackgroundCheckProvider = typeof backgroundCheckProviders.$inferSelect;
+export type InsertBackgroundCheckProvider = typeof backgroundCheckProviders.$inferInsert;
+export type BackgroundCheckRequirement = typeof backgroundCheckRequirements.$inferSelect;
+export type InsertBackgroundCheckRequirement = typeof backgroundCheckRequirements.$inferInsert;
+export type VolunteerMetric = typeof volunteerMetrics.$inferSelect;
+export type InsertVolunteerMetric = typeof volunteerMetrics.$inferInsert;
+export type MinistryAnalytics = typeof ministryAnalytics.$inferSelect;
+export type InsertMinistryAnalytics = typeof ministryAnalytics.$inferInsert;
+export type DashboardConfiguration = typeof dashboardConfigurations.$inferSelect;
+export type InsertDashboardConfiguration = typeof dashboardConfigurations.$inferInsert;
+export type MinistryLeaderCommunication = typeof ministryLeaderCommunications.$inferSelect;
+export type InsertMinistryLeaderCommunication = typeof ministryLeaderCommunications.$inferInsert;
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
@@ -3231,55 +3402,7 @@ export const donationReports = pgTable("donation_reports", {
   expiresAt: timestamp("expires_at"),
 });
 
-// Multi-Campus Support
-export const campuses = pgTable("campuses", {
-  id: serial("id").primaryKey(),
-  churchId: integer("church_id").notNull().references(() => churches.id),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description"),
-  address: text("address"),
-  city: varchar("city", { length: 100 }),
-  state: varchar("state", { length: 50 }),
-  zipCode: varchar("zip_code", { length: 10 }),
-  phone: varchar("phone", { length: 20 }),
-  email: varchar("email", { length: 255 }),
-  campusCode: varchar("campus_code", { length: 20 }).notNull(), // MAIN, EAST, WEST, ONLINE, etc.
-  latitude: real("latitude"),
-  longitude: real("longitude"),
-  capacity: integer("capacity"),
-  facilities: text("facilities").array(), // sanctuary, classrooms, gym, kitchen, parking
-  servicesOffered: text("services_offered").array(), // worship, childcare, counseling, food_bank
-  staffCount: integer("staff_count").default(0),
-  memberCount: integer("member_count").default(0),
-  isActive: boolean("is_active").default(true),
-  isPrimary: boolean("is_primary").default(false),
-  openingDate: timestamp("opening_date"),
-  campusLeaderId: varchar("campus_leader_id").references(() => users.id),
-  operatingHours: jsonb("operating_hours"), // {monday: {open: '09:00', close: '17:00'}}
-  specialFeatures: text("special_features").array(), // wheelchair_accessible, live_streaming, translation
-  budgetAllocation: decimal("budget_allocation", { precision: 12, scale: 2 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => ({
-  churchCampusCodeUnique: unique().on(table.churchId, table.campusCode),
-}));
 
-export const campusAssignments = pgTable("campus_assignments", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  campusId: integer("campus_id").notNull().references(() => campuses.id),
-  role: varchar("role", { length: 50 }).default("member"), // member, volunteer, staff, leader, pastor
-  assignedBy: varchar("assigned_by").references(() => users.id),
-  isPrimary: boolean("is_primary").default(true), // Primary campus assignment
-  startDate: timestamp("start_date").defaultNow(),
-  endDate: timestamp("end_date"),
-  notes: text("notes"),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => ({
-  userCampusUnique: unique().on(table.userId, table.campusId),
-}));
 
 // TypeScript types for church management tables
 export type MemberEngagementMetric = typeof memberEngagementMetrics.$inferSelect;
@@ -3384,7 +3507,14 @@ export const insertDonationCategorySchema = createInsertSchema(donationCategorie
 export const insertDonationSchema = createInsertSchema(donations).omit({ id: true, createdAt: true, updatedAt: true });
 export const insertDonationReportSchema = createInsertSchema(donationReports).omit({ id: true, generatedAt: true });
 export const insertCampusSchema = createInsertSchema(campuses).omit({ id: true, createdAt: true, updatedAt: true });
-export const insertCampusAssignmentSchema = createInsertSchema(campusAssignments).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCampusAdministratorSchema = createInsertSchema(campusAdministrators).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertVolunteerCampusAssignmentSchema = createInsertSchema(volunteerCampusAssignments).omit({ id: true, createdAt: true });
+export const insertBackgroundCheckProviderSchema = createInsertSchema(backgroundCheckProviders).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertBackgroundCheckRequirementSchema = createInsertSchema(backgroundCheckRequirements).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertVolunteerMetricSchema = createInsertSchema(volunteerMetrics).omit({ id: true, createdAt: true });
+export const insertMinistryAnalyticsSchema = createInsertSchema(ministryAnalytics).omit({ id: true, createdAt: true });
+export const insertDashboardConfigurationSchema = createInsertSchema(dashboardConfigurations).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertMinistryLeaderCommunicationSchema = createInsertSchema(ministryLeaderCommunications).omit({ id: true, createdAt: true });
 
 // Bible verses handling is now done via API.Bible and ChatGPT fallback only - no database cache
 
