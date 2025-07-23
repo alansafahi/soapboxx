@@ -4134,6 +4134,81 @@ export class DatabaseStorage implements IStorage {
       throw new Error('Failed to toggle prayer bookmark');
     }
   }
+
+  // Discussion comment operations implementation
+  async createDiscussionComment(comment: InsertDiscussionComment): Promise<DiscussionComment> {
+    try {
+      const [newComment] = await db
+        .insert(discussionComments)
+        .values({
+          ...comment,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          likeCount: 0
+        })
+        .returning();
+
+      // Record user activity for engagement tracking
+      await db.insert(userActivities).values({
+        userId: comment.authorId,
+        activityType: 'discussion_comment',
+        entityId: newComment.id,
+        points: 5, // Points for adding comment
+        createdAt: new Date(),
+      });
+
+      // Return comment with proper structure expected by frontend
+      return {
+        id: newComment.id,
+        discussionId: newComment.discussionId,
+        authorId: newComment.authorId,
+        content: newComment.content,
+        likeCount: 0,
+        createdAt: newComment.createdAt || new Date(),
+        updatedAt: newComment.updatedAt || new Date()
+      };
+    } catch (error) {
+      throw new Error('Failed to create discussion comment');
+    }
+  }
+
+  async getDiscussionComments(discussionId: number): Promise<DiscussionComment[]> {
+    try {
+      const comments = await db
+        .select({
+          id: discussionComments.id,
+          discussionId: discussionComments.discussionId,
+          authorId: discussionComments.authorId,
+          content: discussionComments.content,
+          likeCount: discussionComments.likeCount,
+          createdAt: discussionComments.createdAt,
+          updatedAt: discussionComments.updatedAt,
+          authorName: sql`COALESCE(${users.firstName}, 'Unknown')`.as('authorName'),
+          authorAvatar: users.profileImageUrl
+        })
+        .from(discussionComments)
+        .leftJoin(users, eq(discussionComments.authorId, users.id))
+        .where(eq(discussionComments.discussionId, discussionId))
+        .orderBy(asc(discussionComments.createdAt));
+
+      return comments.map(comment => ({
+        id: comment.id,
+        discussionId: comment.discussionId,
+        authorId: comment.authorId,
+        content: comment.content,
+        likeCount: comment.likeCount || 0,
+        createdAt: comment.createdAt || new Date(),
+        updatedAt: comment.updatedAt || new Date(),
+        author: {
+          id: comment.authorId,
+          name: comment.authorName as string || 'Unknown User',
+          profileImage: comment.authorAvatar
+        }
+      }));
+    } catch (error) {
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
