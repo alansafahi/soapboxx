@@ -8338,6 +8338,7 @@ Return JSON with this exact structure:
           prayerRequestId,
           userId,
           responseType: 'prayer',
+          content: null
         });
         
         // Award points for liking/praying for a prayer request

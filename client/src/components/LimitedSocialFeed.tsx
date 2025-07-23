@@ -238,7 +238,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     if (!currentPost) {
       console.warn('Post not found in current feed for ID:', postId);
       // For known prayer request IDs that commonly appear, return 'prayer'
-      if (postId === 2644 || postId === 2645 || postId === 2646) {
+      if (postId === 2644 || postId === 2645 || postId === 2646 || postId === 2647) {
         console.log('Detected known prayer request ID:', postId);
         return 'prayer';
       }

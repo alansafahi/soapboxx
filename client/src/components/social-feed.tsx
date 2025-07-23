@@ -185,7 +185,7 @@ export default function SocialFeed() {
 
   // Fetch feed posts
   const { data: feedPosts = [], isLoading, error } = useQuery({
-    queryKey: ['/api/feed'],
+    queryKey: ['/api/discussions'],
   });
 
   // Display a limited number of posts initially
@@ -214,7 +214,6 @@ export default function SocialFeed() {
     },
     onSuccess: (data, postId) => {
       // Simply invalidate to refetch and show updated counts
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       
       toast({
@@ -276,7 +275,6 @@ export default function SocialFeed() {
       });
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       const message = data?.data?.isPraying ? "Added to your prayer list" : "Removed from prayer list";
       toast({
@@ -299,7 +297,7 @@ export default function SocialFeed() {
       return apiRequest('POST', `/api/discussions/${postId}/share`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       toast({
         title: "Success",
         description: "Post shared successfully"
@@ -361,10 +359,10 @@ export default function SocialFeed() {
   // Create post mutation
   const createPostMutation = useMutation({
     mutationFn: async (postData: any) => {
-      return apiRequest('POST', '/api/feed/posts', postData);
+      return apiRequest('POST', '/api/discussions', postData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       
       // Reset form
       setNewPost('');
@@ -408,7 +406,7 @@ export default function SocialFeed() {
     onSuccess: () => {
       try {
         // Safely update cache without triggering route changes
-        queryClient.setQueryData(['/api/feed'], (oldData: any) => {
+        queryClient.setQueryData(['/api/discussions'], (oldData: any) => {
           if (!oldData || !Array.isArray(oldData)) return oldData;
           return oldData.filter((post: any) => post.id !== postToDelete);
         });
@@ -428,7 +426,7 @@ export default function SocialFeed() {
         
       } catch (error) {
         // Fallback: refresh the feed data if cache update fails
-        queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       }
     },
     onError: (error: any) => {
