@@ -2325,6 +2325,24 @@ export class DatabaseStorage implements IStorage {
         soapData: null
       }));
 
+      // Get comment counts for SOAP entries
+      const soapIds = soapEntriesData.map(row => row.soap_entries?.id).filter(Boolean);
+      let soapCommentCounts: Record<number, number> = {};
+      
+      if (soapIds.length > 0) {
+        const commentCountResult = await db.execute(sql`
+          SELECT soap_id, COUNT(*) as comment_count 
+          FROM soap_comments 
+          WHERE soap_id IN (${sql.join(soapIds, sql`, `)})
+          GROUP BY soap_id
+        `);
+        
+        soapCommentCounts = commentCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
+          acc[row.soap_id] = Number(row.comment_count);
+          return acc;
+        }, {});
+      }
+
       const transformedSoap = soapEntriesData.map(row => ({
         ...row.soap_entries,
         id: row.soap_entries?.id,
@@ -2333,7 +2351,7 @@ export class DatabaseStorage implements IStorage {
         content: row.soap_entries?.scripture,
         category: 'soap_reflection',
         likeCount: 0,
-        commentCount: 0,
+        commentCount: soapCommentCounts[row.soap_entries?.id || 0] || 0,
         author: row.users,
         type: 'soap_reflection',
         soapData: {
@@ -2479,12 +2497,16 @@ export class DatabaseStorage implements IStorage {
         allPosts.push(...discussionsWithType);
       }
 
-      // Get SOAP entries using raw SQL
+      // Get SOAP entries using raw SQL with actual comment counts
       if (type === 'all' || type === 'soap_reflection') {
         const soapResult = await db.execute(sql`
-          SELECT * FROM soap_entries 
-          WHERE user_id = ${userId} 
-          ORDER BY created_at DESC
+          SELECT se.*, 
+                 COUNT(sc.id) as comment_count
+          FROM soap_entries se
+          LEFT JOIN soap_comments sc ON se.id = sc.soap_id 
+          WHERE se.user_id = ${userId} 
+          GROUP BY se.id
+          ORDER BY se.created_at DESC
         `);
 
         const soapWithType = soapResult.rows.map(s => ({
@@ -2493,7 +2515,7 @@ export class DatabaseStorage implements IStorage {
           title: 'S.O.A.P. Reflection',
           category: 'soap_reflection',
           likeCount: 0,
-          commentCount: 0,
+          commentCount: Number(s.comment_count) || 0,
           mood: s.mood || null,
           content: s.scripture || s.observation || s.application || s.prayer || 'S.O.A.P. Entry',
           userId: s.user_id,

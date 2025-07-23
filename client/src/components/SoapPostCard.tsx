@@ -85,8 +85,11 @@ function CommentDialog({ isOpen, onClose, postId }: CommentDialogProps) {
       return await response.json();
     },
     onSuccess: () => {
+      // Invalidate all relevant queries to refresh comment counts
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
       queryClient.invalidateQueries({ queryKey: [`/api/soap/${postId}/comments`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/soap"] });
       setCommentText("");
       onClose(); // Close dialog after successful comment
       toast({
