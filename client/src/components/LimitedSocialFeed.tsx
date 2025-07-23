@@ -110,6 +110,19 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       return apiRequest('POST', endpoint);
     },
     onSuccess: (data, postId) => {
+      // Update the local state optimistically
+      setAllPosts(prevPosts => 
+        prevPosts.map(post => 
+          post.id === postId 
+            ? { 
+                ...post, 
+                isLiked: data.liked,
+                likeCount: data.liked ? (post.likeCount || 0) + 1 : Math.max((post.likeCount || 0) - 1, 0)
+              }
+            : post
+        )
+      );
+      
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
       
       const postType = getPostType(postId);
@@ -565,9 +578,12 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                     <div className="flex items-center space-x-6">
                       <button 
                         onClick={() => likeMutation.mutate(post.id)}
-                        className="flex items-center space-x-2 hover:text-red-500 transition-colors"
+                        className={`flex items-center space-x-2 transition-colors ${
+                          post.isLiked ? 'text-red-500' : 'hover:text-red-500 text-gray-700 dark:text-gray-300'
+                        }`}
+                        disabled={likeMutation.isPending}
                       >
-                        <Heart className="w-4 h-4" />
+                        <Heart className={`w-4 h-4 ${post.isLiked ? 'fill-current' : ''}`} />
                         <span className="text-sm">{post.likeCount || 0}</span>
                       </button>
                       <button 

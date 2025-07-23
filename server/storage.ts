@@ -2350,12 +2350,31 @@ export class DatabaseStorage implements IStorage {
         .orderBy(desc(prayerRequests.createdAt))
         .limit(limit || 25);
 
+      // Get discussion like status for current user if provided
+      const discussionIds = regularDiscussions.map(row => row.discussions?.id).filter(Boolean);
+      let discussionLikeStatus: Record<number, boolean> = {};
+      if (currentUserId && discussionIds.length > 0) {
+        const discussionLikeResult = await db.execute(sql`
+          SELECT discussion_id, COUNT(*) as is_liked
+          FROM discussion_likes 
+          WHERE discussion_id IN (${sql.join(discussionIds, sql`, `)})
+          AND user_id = ${currentUserId}
+          GROUP BY discussion_id
+        `);
+        
+        discussionLikeStatus = discussionLikeResult.rows.reduce((acc: Record<number, boolean>, row: any) => {
+          acc[row.discussion_id] = Number(row.is_liked) > 0;
+          return acc;
+        }, {});
+      }
+
       // Transform and combine results
       const transformedDiscussions = regularDiscussions.map(row => ({
         ...row.discussions,
         author: row.users,
         type: 'general',
-        soapData: null
+        soapData: null,
+        isLiked: discussionLikeStatus[row.discussions?.id || 0] || false
       }));
 
       // Get comment counts for SOAP entries
@@ -2372,6 +2391,23 @@ export class DatabaseStorage implements IStorage {
         
         soapCommentCounts = commentCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
           acc[row.soap_id] = Number(row.comment_count);
+          return acc;
+        }, {});
+      }
+
+      // Get SOAP like status for current user if provided  
+      let soapLikeStatus: Record<number, boolean> = {};
+      if (currentUserId && soapIds.length > 0) {
+        const soapLikeResult = await db.execute(sql`
+          SELECT soap_id, COUNT(*) as is_liked
+          FROM soap_likes 
+          WHERE soap_id IN (${sql.join(soapIds, sql`, `)})
+          AND user_id = ${currentUserId}
+          GROUP BY soap_id
+        `);
+        
+        soapLikeStatus = soapLikeResult.rows.reduce((acc: Record<number, boolean>, row: any) => {
+          acc[row.soap_id] = Number(row.is_liked) > 0;
           return acc;
         }, {});
       }
@@ -2393,7 +2429,8 @@ export class DatabaseStorage implements IStorage {
           observation: row.soap_entries?.observation,
           application: row.soap_entries?.application,
           prayer: row.soap_entries?.prayer,
-        }
+        },
+        isLiked: soapLikeStatus[row.soap_entries?.id || 0] || false
       }));
 
       // Get comment counts for prayer requests (using prayer_responses table)
@@ -2414,6 +2451,24 @@ export class DatabaseStorage implements IStorage {
         }, {});
       }
 
+      // Get prayer like status for current user if provided
+      let prayerLikeStatus: Record<number, boolean> = {};
+      if (currentUserId && prayerIds.length > 0) {
+        const prayerLikeResult = await db.execute(sql`
+          SELECT prayer_request_id, COUNT(*) as is_liked
+          FROM prayer_responses 
+          WHERE prayer_request_id IN (${sql.join(prayerIds, sql`, `)})
+          AND user_id = ${currentUserId}
+          AND response_type = 'prayer'
+          GROUP BY prayer_request_id
+        `);
+        
+        prayerLikeStatus = prayerLikeResult.rows.reduce((acc: Record<number, boolean>, row: any) => {
+          acc[row.prayer_request_id] = Number(row.is_liked) > 0;
+          return acc;
+        }, {});
+      }
+
       const transformedPrayerRequests = prayerRequestsData.map(row => ({
         ...row.prayer_requests,
         id: row.prayer_requests?.id,
@@ -2421,14 +2476,15 @@ export class DatabaseStorage implements IStorage {
         title: 'Prayer Request',
         content: row.prayer_requests?.content,
         category: row.prayer_requests?.category || 'general',
-        likeCount: 0,
+        likeCount: row.prayer_requests?.prayerCount || 0,
         commentCount: prayerCommentCounts[row.prayer_requests?.id || 0] || 0,
         prayerCount: row.prayer_requests?.prayerCount || 0,
         author: row.users,
         type: 'prayer_request',
         soapData: null,
         isAnonymous: row.prayer_requests?.isAnonymous || false,
-        mood: row.prayer_requests?.mood
+        mood: row.prayer_requests?.mood,
+        isLiked: prayerLikeStatus[row.prayer_requests?.id || 0] || false
       }));
 
       // Combine and sort all posts
