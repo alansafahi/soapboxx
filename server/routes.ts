@@ -578,7 +578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete SOAP entry endpoint
-  app.delete("/api/soap/:id", isAuthenticated, async (req, res) => {
+  app.delete("/api/soap-entries/:id", isAuthenticated, async (req, res) => {
     try {
       const soapId = parseInt(req.params.id);
       const userId = req.session.userId;
@@ -607,7 +607,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // SOAP reaction endpoints
-  app.post("/api/soap/reaction", isAuthenticated, async (req, res) => {
+  app.post("/api/soap-entries/reactions", isAuthenticated, async (req, res) => {
     try {
       const { soapId, reactionType, emoji } = req.body;
       const userId = req.session.userId;
@@ -624,7 +624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/soap/reflect", isAuthenticated, async (req, res) => {
+  app.post("/api/soap-entries/reflect", isAuthenticated, async (req, res) => {
     try {
       const { originalSoapId, scripture, scriptureReference } = req.body;
       const userId = req.session.userId;
@@ -656,7 +656,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/soap/save", isAuthenticated, async (req, res) => {
+  app.post("/api/soap-entries/save", isAuthenticated, async (req, res) => {
     try {
       const { soapId } = req.body;
       const userId = req.session.userId;
@@ -673,8 +673,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user's saved SOAP entries
+  // LEGACY COMPATIBILITY: Deprecated endpoints (WILL BE REMOVED September 30, 2025)
+  app.post("/api/soap/save", isAuthenticated, async (req, res) => {
+    console.warn(`🚨 DEPRECATED: /api/soap/save used - migrate to /api/soap-entries/save by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/soap-entries/save');
+    try {
+      const { soapId } = req.body;
+      const userId = req.session.userId;
+      if (!userId) return res.status(401).json({ error: "User not authenticated" });
+      await storage.saveSoapEntry(soapId, userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/soap/reaction", isAuthenticated, async (req, res) => {
+    console.warn(`🚨 DEPRECATED: /api/soap/reaction used - migrate to /api/soap-entries/reactions by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/soap-entries/reactions');
+    try {
+      const { soapId, reactionType, emoji } = req.body;
+      const userId = req.session.userId;
+      if (!userId) return res.status(401).json({ error: "User not authenticated" });
+      const result = await storage.addSoapReaction(soapId, userId, reactionType, emoji);
+      res.json({ success: true, ...result });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post("/api/soap/reflect", isAuthenticated, async (req, res) => {
+    console.warn(`🚨 DEPRECATED: /api/soap/reflect used - migrate to /api/soap-entries/reflect by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/soap-entries/reflect');
+    try {
+      const { originalSoapId, scripture, scriptureReference } = req.body;
+      const userId = req.session.userId;
+      if (!userId) return res.status(401).json({ error: "User not authenticated" });
+      await storage.createSoapEntry({
+        userId, scripture, scriptureReference, 
+        observation: "[Add your observations about this scripture...]",
+        application: "[How does this apply to your life?...]",
+        prayer: "[Write your prayer based on this scripture...]",
+        isPublic: false, originalSoapId, churchId: null,
+        devotionalDate: new Date(), createdAt: new Date(), updatedAt: new Date()
+      });
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/soap/:id", isAuthenticated, async (req, res) => {
+    console.warn(`🚨 DEPRECATED: /api/soap/:id used - migrate to /api/soap-entries/:id by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/soap-entries/:id');
+    try {
+      const soapId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      if (!userId) return res.status(401).json({ error: "User not authenticated" });
+      const soapEntry = await storage.getSoapEntry(soapId);
+      if (!soapEntry) return res.status(404).json({ error: "S.O.A.P. entry not found" });
+      if (soapEntry.userId !== userId) return res.status(403).json({ error: "You can only delete your own S.O.A.P. entries" });
+      await storage.deleteSoapEntry(soapId);
+      res.json({ success: true, message: "S.O.A.P. entry deleted successfully" });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message || "Failed to delete S.O.A.P. entry" });
+    }
+  });
+
   app.get("/api/user/saved-soap", isAuthenticated, async (req, res) => {
+    console.warn(`🚨 DEPRECATED: /api/user/saved-soap used - migrate to /api/user-profiles/saved-soap-entries by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-profiles/saved-soap-entries');
+    try {
+      const userId = req.session.userId;
+      if (!userId) return res.status(401).json({ error: "User not authenticated" });
+      const savedEntries = await storage.getSavedSoapEntries(userId);
+      res.json(savedEntries);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.delete("/api/soap/saved/:id", isAuthenticated, async (req, res) => {
+    console.warn(`🚨 DEPRECATED: /api/soap/saved/:id used - migrate to /api/soap-entries/saved/:id by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/soap-entries/saved/:id');
+    try {
+      const soapId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      if (!userId) return res.status(401).json({ error: "User not authenticated" });
+      await storage.removeSavedSoapEntry(soapId, userId);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Get user's saved SOAP entries (STANDARDIZED)
+  app.get("/api/user-profiles/saved-soap-entries", isAuthenticated, async (req, res) => {
     try {
       const userId = req.session.userId;
 
@@ -689,8 +783,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Remove saved SOAP entry
-  app.delete("/api/soap/saved/:id", isAuthenticated, async (req, res) => {
+  // Remove saved SOAP entry (STANDARDIZED)
+  app.delete("/api/soap-entries/saved/:id", isAuthenticated, async (req, res) => {
     try {
       const soapId = parseInt(req.params.id);
       const userId = req.session.userId;
@@ -1048,8 +1142,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tour completion routes
-  app.get('/api/tours/:userId/completion/:tourType', async (req, res) => {
+  // Tour completion routes (STANDARDIZED)
+  app.get('/api/user-tours/:userId/completion/:tourType', async (req, res) => {
     try {
       const { userId, tourType } = req.params;
       const completion = await storage.getTourCompletion(userId, tourType);
@@ -1059,7 +1153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/tours/:userId/completion', async (req, res) => {
+  app.post('/api/user-tours/:userId/completion', async (req, res) => {
     try {
       const { userId } = req.params;
       const { tourType, stepIndex, completed } = req.body;
@@ -1078,7 +1172,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put('/api/tours/:userId/completion/:tourType', async (req, res) => {
+  app.put('/api/user-tours/:userId/completion/:tourType', async (req, res) => {
     try {
       const { userId, tourType } = req.params;
       const { stepIndex, completed } = req.body;
@@ -1095,8 +1189,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Tour status endpoint
-  app.get('/api/tour/status', isAuthenticated, async (req: any, res) => {
+  // Tour status endpoint (STANDARDIZED)
+  app.get('/api/user-tours/status', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
@@ -1167,7 +1261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Complete tour endpoint
-  app.post('/api/tour/complete', isAuthenticated, async (req: any, res) => {
+  app.post('/api/user-tours/complete', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const { role } = req.body;
@@ -1184,6 +1278,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
         completedAt: new Date()
       });
       
+      res.json({ success: true, message: "Tour marked as completed" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to complete tour" });
+    }
+  });
+
+  // LEGACY COMPATIBILITY: Tour endpoints (WILL BE REMOVED September 30, 2025)
+  app.get('/api/tours/:userId/completion/:tourType', async (req, res) => {
+    console.warn(`🚨 DEPRECATED: /api/tours/:userId/completion/:tourType used - migrate to /api/user-tours/:userId/completion/:tourType by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-tours/:userId/completion/:tourType');
+    try {
+      const { userId, tourType } = req.params;
+      const completion = await storage.getTourCompletion(userId, tourType);
+      res.json(completion);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch tour completion" });
+    }
+  });
+
+  app.post('/api/tours/:userId/completion', async (req, res) => {
+    console.warn(`🚨 DEPRECATED: /api/tours/:userId/completion used - migrate to /api/user-tours/:userId/completion by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-tours/:userId/completion');
+    try {
+      const { userId } = req.params;
+      const { tourType, stepIndex, completed } = req.body;
+      const completion = await storage.saveTourCompletion({ userId, tourType, stepIndex, completed, completedAt: completed ? new Date() : null });
+      res.json(completion);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to save tour completion" });
+    }
+  });
+
+  app.put('/api/tours/:userId/completion/:tourType', async (req, res) => {
+    console.warn(`🚨 DEPRECATED: /api/tours/:userId/completion/:tourType used - migrate to /api/user-tours/:userId/completion/:tourType by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-tours/:userId/completion/:tourType');
+    try {
+      const { userId, tourType } = req.params;
+      const { stepIndex, completed } = req.body;
+      const completion = await storage.updateTourCompletion(userId, tourType, { stepIndex, completed, completedAt: completed ? new Date() : null });
+      res.json(completion);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update tour completion" });
+    }
+  });
+
+  app.get('/api/tour/status', isAuthenticated, async (req: any, res) => {
+    console.warn(`🚨 DEPRECATED: /api/tour/status used - migrate to /api/user-tours/status by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-tours/status');
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ message: "User not found" });
+      const platformRoles = ['soapbox_owner', 'system_admin', 'support_agent'];
+      const memberRoles = ['member', 'new_member', 'volunteer', 'small_group_leader'];
+      const userChurches = await storage.getUserChurches(userId);
+      let userRole = 'member';
+      if (user.email && user.email.includes('admin')) userRole = 'system_admin';
+      else if (user.email && user.email.includes('owner')) userRole = 'soapbox_owner';
+      else if (user.email && user.email.includes('support')) userRole = 'support_agent';
+      else if (userChurches && userChurches.length > 0) userRole = userChurches[0].role || 'member';
+      const hasCompletedTour = await storage.getUserTourCompletion(userId, userRole);
+      res.json({ role: userRole, hasCompletedTour: !!hasCompletedTour, tourRequired: !hasCompletedTour });
+    } catch (error) {
+      res.json({ role: 'member', hasCompletedTour: false, tourRequired: true });
+    }
+  });
+
+  app.post('/api/tour/complete', isAuthenticated, async (req: any, res) => {
+    console.warn(`🚨 DEPRECATED: /api/tour/complete used - migrate to /api/user-tours/complete by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-tours/complete');
+    try {
+      const userId = req.user.claims.sub;
+      const { role } = req.body;
+      if (!role) return res.status(400).json({ message: "Role is required" });
+      await storage.saveTourCompletion({ userId, tourType: role, stepIndex: -1, completed: true, completedAt: new Date() });
       res.json({ success: true, message: "Tour marked as completed" });
     } catch (error) {
       res.status(500).json({ message: "Failed to complete tour" });
@@ -1258,7 +1427,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get user's church-specific role for navigation
-  app.get('/api/users/role', isAuthenticated, async (req: any, res) => {
+  app.get('/api/user-profiles/role', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub || req.user?.id;
       
@@ -1330,7 +1499,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Sermon Creation Studio API Endpoints
-  app.post('/api/sermon/research', isAuthenticated, async (req: any, res) => {
+  app.post('/api/sermon-studio/research', isAuthenticated, async (req: any, res) => {
     try {
       const { scripture, topic } = req.body;
       const userId = req.user.claims.sub;
@@ -1394,7 +1563,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/sermon/outline', isAuthenticated, async (req: any, res) => {
+  app.post('/api/sermon-studio/outline', isAuthenticated, async (req: any, res) => {
     try {
       const { scripture, topic, audience, length } = req.body;
       const userId = req.session.userId;
@@ -1481,7 +1650,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/sermon/illustrations', isAuthenticated, async (req: any, res) => {
+  app.post('/api/sermon-studio/illustrations', isAuthenticated, async (req: any, res) => {
     try {
       const { topic, mainPoints, audience } = req.body;
       const userId = req.session.userId;
@@ -1602,7 +1771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/sermon/enhance', isAuthenticated, async (req: any, res) => {
+  app.post('/api/sermon-studio/enhance', isAuthenticated, async (req: any, res) => {
     try {
       const { outline, research, selectedStories } = req.body;
       const userId = req.session.userId;
@@ -1690,7 +1859,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Save sermon draft endpoint
-  app.post('/api/sermon/save-draft', isAuthenticated, async (req: any, res) => {
+  app.post('/api/sermon-studio/save-draft', isAuthenticated, async (req: any, res) => {
     try {
       const { title, outline, research, illustrations, enhancement, draftId } = req.body;
       const userId = req.session.userId;
@@ -1743,7 +1912,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Save completed sermon endpoint
-  app.post('/api/sermon/save-completed', isAuthenticated, async (req: any, res) => {
+  app.post('/api/sermon-studio/save-completed', isAuthenticated, async (req: any, res) => {
     try {
       const { title, outline, research, illustrations, enhancement, completedAt } = req.body;
       const userId = req.session.userId;
@@ -1778,7 +1947,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get user's completed sermons
-  app.get('/api/sermon/completed', isAuthenticated, async (req: any, res) => {
+  app.get('/api/sermon-studio/completed', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
       const completedSermons = await storage.getUserCompletedSermons(userId);
@@ -1790,7 +1959,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get user's sermon drafts
-  app.get('/api/sermon/drafts', isAuthenticated, async (req: any, res) => {
+  app.get('/api/sermon-studio/drafts', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
       const drafts = await storage.getUserSermonDrafts(userId);
@@ -1802,7 +1971,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get specific sermon draft
-  app.get('/api/sermon/drafts/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/sermon-studio/drafts/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const draftId = parseInt(req.params.id);
@@ -1820,7 +1989,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update sermon draft
-  app.put('/api/sermon/drafts/:id', isAuthenticated, async (req: any, res) => {
+  app.put('/api/sermon-studio/drafts/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const draftId = parseInt(req.params.id);
@@ -1853,7 +2022,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete sermon draft
-  app.delete('/api/sermon/drafts/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/sermon-studio/drafts/:id', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const draftId = parseInt(req.params.id);
@@ -1866,6 +2035,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete sermon draft" });
+    }
+  });
+
+  // ===============================================================================
+  // LEGACY COMPATIBILITY SECTION - WILL BE REMOVED SEPTEMBER 30, 2025
+  // All endpoints below are deprecated and maintained for backward compatibility only
+  // Developers must migrate to new kebab-case endpoints before the deadline
+  // ===============================================================================
+
+  // LEGACY: Sermon Studio endpoints
+  app.post('/api/sermon/research', isAuthenticated, async (req: any, res) => {
+    console.warn(`🚨 DEPRECATED: /api/sermon/research used - migrate to /api/sermon-studio/research by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/sermon-studio/research');
+    try {
+      const { scripture, topic } = req.body;
+      const userId = req.user.claims.sub;
+      if (!userId) return res.status(401).json({ message: "User not authenticated" });
+      const userRole = await storage.getUserRole(userId);
+      if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'system_admin', 'soapbox_owner'].includes(userRole)) {
+        return res.status(403).json({ message: "Pastor or admin access required" });
+      }
+      const research = await storage.generateSermonResearch(scripture, topic, userId);
+      res.json({ research, success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to generate sermon research" });
+    }
+  });
+
+  app.post('/api/sermon/outline', isAuthenticated, async (req: any, res) => {
+    console.warn(`🚨 DEPRECATED: /api/sermon/outline used - migrate to /api/sermon-studio/outline by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/sermon-studio/outline');
+    try {
+      const { scripture, topic, audience, length } = req.body;
+      const userId = req.session.userId;
+      if (!userId) return res.status(401).json({ message: "User not authenticated" });
+      const outline = await storage.generateSermonOutline(scripture, topic, audience, length, userId);
+      res.json({ outline, success: true });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to generate sermon outline" });
+    }
+  });
+
+  app.get('/api/users/role', isAuthenticated, async (req: any, res) => {
+    console.warn(`🚨 DEPRECATED: /api/users/role used - migrate to /api/user-profiles/role by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-profiles/role');
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub || req.user?.id;
+      if (!userId) return res.status(401).json({ message: "User not authenticated" });
+      const userChurch = await storage.getUserChurch(userId);
+      if (!userChurch) return res.json({ role: 'new_member', churchId: null });
+      res.json({ role: userChurch.role || 'member', churchId: userChurch.churchId });
+    } catch (error) {
+      res.json({ role: 'member', churchId: null });
+    }
+  });
+
+  app.post('/api/admin/knowledge', async (req, res) => {
+    console.warn(`🚨 DEPRECATED: /api/admin/knowledge used - migrate to /api/admin-portal/knowledge by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/admin-portal/knowledge');
+    try {
+      if (!req.session?.userId) return res.status(401).json({ error: 'Authentication required' });
+      const { question, answer, category, keywords } = req.body;
+      if (!question || !answer) return res.status(400).json({ error: 'Question and answer are required' });
+      const newEntry = { question, answer, category: category || 'general', keywords: keywords || [] };
+      res.json({ success: true, message: 'Knowledge entry added successfully', entry: newEntry });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to add knowledge entry' });
+    }
+  });
+
+  app.post('/api/admin/import-verses', isAuthenticated, async (req: any, res) => {
+    console.warn(`🚨 DEPRECATED: /api/admin/import-verses used - migrate to /api/admin-portal/import-verses by September 30, 2025`);
+    res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/admin-portal/import-verses');
+    try {
+      const userRole = req.session?.user?.role;
+      if (userRole !== 'soapbox_owner' && userRole !== 'system_admin') {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+      const { verses } = req.body;
+      if (!verses || !Array.isArray(verses)) {
+        return res.status(400).json({ message: 'Verses array is required' });
+      }
+      let importedCount = 0;
+      for (const verse of verses) {
+        if (verse.book && verse.chapter && verse.verse && verse.text) {
+          await storage.storeBibleVerse(verse.book, verse.chapter, verse.verse, verse.text, verse.translation || 'KJV');
+          importedCount++;
+        }
+      }
+      res.json({ success: true, message: `Imported ${importedCount} verses successfully`, importedCount });
+    } catch (error: any) {
+      res.status(500).json({ message: error.message || 'Failed to import verses' });
     }
   });
 
@@ -3545,7 +3806,7 @@ Context: ${context || 'General support chat'}`;
   });
 
   // Endpoint to add new knowledge entries (for daily growth)
-  app.post('/api/admin/knowledge', async (req, res) => {
+  app.post('/api/admin-portal/knowledge', async (req, res) => {
     try {
       // Only allow authenticated admin users
       if (!req.session?.userId) {
@@ -4145,7 +4406,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   // MOVED: Bible search endpoint moved to public section above
 
   // Import 1000 popular Bible verses - Admin only
-  app.post('/api/admin/import-verses', isAuthenticated, async (req: any, res) => {
+  app.post('/api/admin-portal/import-verses', isAuthenticated, async (req: any, res) => {
     try {
       const userRole = req.session?.user?.role;
       if (userRole !== 'soapbox_owner' && userRole !== 'system_admin') {
