@@ -86,21 +86,49 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
   const [postType, setPostType] = useState<string>('discussion');
 
-  // Like mutation
+  // Like mutation with dynamic endpoint based on post type
   const likeMutation = useMutation({
     mutationFn: async (postId: number) => {
-      return apiRequest('POST', `/api/discussions/${postId}/like`);
+      const postType = getPostType(postId);
+      let endpoint: string;
+      
+      switch (postType) {
+        case 'prayer':
+          endpoint = `/api/prayers/${postId}/like`;
+          break;
+        case 'soap':
+          endpoint = `/api/soap/${postId}/like`;
+          break;
+        case 'discussion':
+        case 'community':
+        default:
+          endpoint = `/api/discussions/${postId}/like`;
+          break;
+      }
+      
+      console.log('Liking post with endpoint:', endpoint, 'for postType:', postType);
+      return apiRequest('POST', endpoint);
     },
-    onSuccess: (data) => {
+    onSuccess: (data, postId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      
+      const postType = getPostType(postId);
+      const pointsEarned = postType === 'prayer' ? 10 : postType === 'soap' ? 15 : 5;
+      const activityType = postType === 'prayer' ? 'prayer request' : 
+                          postType === 'soap' ? 'SOAP reflection' : 'discussion';
+      
       toast({
         title: data.liked ? "Post liked!" : "Like removed",
-        description: data.liked ? "Your reaction has been added" : "Your like has been removed",
+        description: data.liked ? 
+          `You liked this ${activityType} and earned ${pointsEarned} SoapBox Points!` : 
+          "Your like has been removed",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Post like error:', error);
       toast({
         title: "Failed to like post",
+        description: `Error: ${error.message || 'Please try again'}`,
         variant: "destructive",
       });
     }

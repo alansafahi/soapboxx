@@ -8339,9 +8339,19 @@ Return JSON with this exact structure:
           userId,
           responseType: 'prayer',
         });
+        
+        // Award points for liking/praying for a prayer request
+        await storage.trackUserActivity({
+          userId: userId,
+          activityType: 'like_prayer_request',
+          entityId: prayerRequestId,
+          points: 10,
+        });
+        
         res.json({ liked: true });
       }
     } catch (error) {
+      console.error('Error toggling prayer like:', error);
       res.status(500).json({ message: "Failed to toggle like" });
     }
   });
