@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles } from "lucide-react";
+import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles, Building2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useTheme } from "../hooks/useTheme";
@@ -281,6 +281,12 @@ export default function TopHeader() {
                 <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Admin Portal
                 </div>
+                <Link href="/admin">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Building2 className="w-4 h-4 mr-2" />
+                    Church Administration
+                  </DropdownMenuItem>
+                </Link>
                 <Link href="/members">
                   <DropdownMenuItem className="cursor-pointer">
                     <Users className="w-4 h-4 mr-2" />
