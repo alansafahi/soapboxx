@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -53,11 +53,34 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Fetch church details to identify main church
+  const { data: churchDetails } = useQuery({
+    queryKey: ['/api/churches', churchId],
+    queryFn: () => apiRequest(`/api/churches/${churchId}`, 'GET')
+  });
+
   // Fetch campuses for the church
   const { data: campuses, isLoading: campusesLoading } = useQuery<Campus[]>({
     queryKey: ['/api/churches/campuses', churchId],
     queryFn: () => apiRequest(`/api/churches/${churchId}/campuses`, 'GET').then(res => res.campuses)
   });
+
+  // Sort campuses with main church first, then satellite campuses
+  const sortedCampuses = React.useMemo(() => {
+    if (!campuses || !churchDetails) return campuses || [];
+    
+    return [...campuses].sort((a, b) => {
+      // Main church (matches church name) comes first
+      const aIsMain = a.name === churchDetails.name || a.name.toLowerCase().includes('main');
+      const bIsMain = b.name === churchDetails.name || b.name.toLowerCase().includes('main');
+      
+      if (aIsMain && !bIsMain) return -1;
+      if (!aIsMain && bIsMain) return 1;
+      
+      // Otherwise, sort alphabetically
+      return a.name.localeCompare(b.name);
+    });
+  }, [campuses, churchDetails]);
 
   // Create campus mutation
   const createCampusMutation = useMutation({
@@ -187,7 +210,7 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{campuses?.length || 0}</div>
+            <div className="text-2xl font-bold">{sortedCampuses?.length || 0}</div>
           </CardContent>
         </Card>
         
@@ -198,7 +221,7 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {campuses?.reduce((sum, campus) => sum + campus.capacity, 0) || 0}
+              {sortedCampuses?.reduce((sum, campus) => sum + campus.capacity, 0) || 0}
             </div>
           </CardContent>
         </Card>
@@ -210,7 +233,7 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {campuses?.filter(c => c.isActive).length || 0}
+              {sortedCampuses?.filter(c => c.isActive).length || 0}
             </div>
           </CardContent>
         </Card>
@@ -304,32 +327,51 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
           <CardContent>
             {campusesLoading ? (
               <div className="text-center py-8">Loading campuses...</div>
-            ) : campuses?.length ? (
+            ) : sortedCampuses?.length ? (
               <div className="space-y-4">
-                {campuses.map((campus) => (
-                  <div key={campus.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <h3 className="font-semibold">{campus.name}</h3>
-                      <div className="flex items-center gap-1 text-sm text-gray-600">
-                        <MapPin className="w-3 h-3" />
-                        {campus.city}, {campus.state}
+                {sortedCampuses.map((campus, index) => {
+                  const isMainCampus = churchDetails && (
+                    campus.name === churchDetails.name || 
+                    campus.name.toLowerCase().includes('main')
+                  );
+                  
+                  return (
+                    <div key={campus.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold">{campus.name}</h3>
+                          {isMainCampus && (
+                            <Badge variant="outline" className="text-blue-600 border-blue-600">
+                              Main Campus
+                            </Badge>
+                          )}
+                          {!isMainCampus && index > 0 && (
+                            <Badge variant="outline" className="text-green-600 border-green-600">
+                              Satellite Campus
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1 text-sm text-gray-600">
+                          <MapPin className="w-3 h-3" />
+                          {campus.city}, {campus.state}
+                        </div>
+                        <p className="text-xs text-gray-500">Capacity: {campus.capacity}</p>
                       </div>
-                      <p className="text-xs text-gray-500">Capacity: {campus.capacity}</p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={campus.isActive ? "default" : "secondary"}>
+                          {campus.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleManageCampus(campus)}
+                        >
+                          Manage
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={campus.isActive ? "default" : "secondary"}>
-                        {campus.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleManageCampus(campus)}
-                      >
-                        Manage
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-8 text-gray-500">

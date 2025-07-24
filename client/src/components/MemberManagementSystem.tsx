@@ -35,16 +35,6 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
   const [selectedChurch, setSelectedChurch] = useState("all");
   const { toast } = useToast();
 
-  // Auto-select first admin church if user has only one admin church
-  React.useEffect(() => {
-    if (adminChurches.length === 1 && selectedChurch === "all") {
-      setSelectedChurch(adminChurches[0].churchId.toString());
-    }
-  }, [adminChurches, selectedChurch]);
-
-  // Use the prop selectedChurch if provided, otherwise fall back to internal state
-  const effectiveSelectedChurch = propSelectedChurch ? propSelectedChurch.toString() : selectedChurch;
-
   // Get only churches where user has admin permissions
   const { data: userChurches = [] } = useQuery({
     queryKey: ["/api/user/churches"],
@@ -55,6 +45,16 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
     const adminRoles = ['church_admin', 'admin', 'pastor', 'lead_pastor', 'system_admin', 'super_admin', 'soapbox_owner'];
     return adminRoles.includes(uc.role);
   });
+
+  // Auto-select first admin church if user has only one admin church
+  React.useEffect(() => {
+    if (adminChurches.length === 1 && selectedChurch === "all") {
+      setSelectedChurch(adminChurches[0].churchId.toString());
+    }
+  }, [adminChurches, selectedChurch]);
+
+  // Use the prop selectedChurch if provided, otherwise fall back to internal state
+  const effectiveSelectedChurch = propSelectedChurch ? propSelectedChurch.toString() : selectedChurch;
 
   const { data: members = [], isLoading, error } = useQuery({
     queryKey: ["/api/members", effectiveSelectedChurch],
