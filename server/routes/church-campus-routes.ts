@@ -20,8 +20,18 @@ router.get('/churches/:churchId/campuses', isAuthenticated, async (req, res) => 
 
     // Verify user has permission to view this church's campuses
     const user = req.user as any;
-    const hasPermission = ['church_admin', 'admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(user.role) || 
-                         user.churchId === churchId;
+    
+    // Check if user is global admin or has church-specific admin role
+    let hasPermission = false;
+    
+    if (['soapbox_owner', 'system_admin'].includes(user.role)) {
+      hasPermission = true;
+    } else {
+      // Check if user has admin role in this specific church
+      const userChurches = await multiCampusService.storage.getUserChurches(user.id);
+      const churchRole = userChurches.find(uc => uc.id === churchId);
+      hasPermission = churchRole && ['church_admin', 'admin', 'pastor', 'lead_pastor'].includes(churchRole.role);
+    }
     
     if (!hasPermission) {
       return res.status(403).json({ error: 'Insufficient permissions to view church campuses' });
@@ -53,8 +63,18 @@ router.post('/churches/:churchId/campuses', isAuthenticated, async (req, res) =>
     }
 
     const user = req.user as any;
-    const hasPermission = ['church_admin', 'admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(user.role) || 
-                         user.churchId === churchId;
+    
+    // Check if user is global admin or has church-specific admin role
+    let hasPermission = false;
+    
+    if (['soapbox_owner', 'system_admin'].includes(user.role)) {
+      hasPermission = true;
+    } else {
+      // Check if user has admin role in this specific church
+      const userChurches = await multiCampusService.storage.getUserChurches(user.id);
+      const churchRole = userChurches.find(uc => uc.id === churchId);
+      hasPermission = churchRole && ['church_admin', 'admin', 'pastor', 'lead_pastor'].includes(churchRole.role);
+    }
     
     if (!hasPermission) {
       return res.status(403).json({ error: 'Insufficient permissions to create campus' });

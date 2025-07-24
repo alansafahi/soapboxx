@@ -476,6 +476,7 @@ export interface IStorage {
   createPrayerAssignment(assignment: InsertPrayerAssignment): Promise<PrayerAssignment>;
   createPrayerFollowUp(followUp: InsertPrayerFollowUp): Promise<PrayerFollowUp>;
   getAllUsers(): Promise<User[]>;
+  getAllMembers(): Promise<any[]>;
   
   // Prayer circle operations
   getPrayerCircles(churchId?: number): Promise<PrayerCircle[]>;
@@ -3184,6 +3185,36 @@ export class DatabaseStorage implements IStorage {
 
   async createNotification(notification: any): Promise<any> {
     return {};
+  }
+
+  async getAllMembers(): Promise<any[]> {
+    try {
+      const result = await pool.query(`
+        SELECT 
+          u.id,
+          u.email,
+          u.first_name as "firstName",
+          u.last_name as "lastName", 
+          u.phone_number as "phoneNumber",
+          u.city,
+          u.state,
+          u.profile_image_url as "profileImageUrl",
+          u.role,
+          uc.is_active as "isActive",
+          u.created_at as "createdAt",
+          uc.church_id as "churchId",
+          c.name as "churchName"
+        FROM users u
+        LEFT JOIN user_churches uc ON u.id = uc.user_id
+        LEFT JOIN churches c ON uc.church_id = c.id
+        WHERE uc.church_id IS NOT NULL
+        ORDER BY u.created_at DESC
+      `);
+      return result.rows;
+    } catch (error) {
+      console.error('Error getting all members:', error);
+      return [];
+    }
   }
 
   async getChurchFeatureSettings(churchId: number): Promise<any[]> {
