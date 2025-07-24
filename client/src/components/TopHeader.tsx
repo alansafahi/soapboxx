@@ -287,12 +287,6 @@ export default function TopHeader() {
                     Church Administration
                   </DropdownMenuItem>
                 </Link>
-                <Link href="/members">
-                  <DropdownMenuItem className="cursor-pointer">
-                    <Users className="w-4 h-4 mr-2" />
-                    Member Directory
-                  </DropdownMenuItem>
-                </Link>
                 <Link href="/donation-analytics">
                   <DropdownMenuItem className="cursor-pointer">
                     <BarChart3 className="w-4 h-4 mr-2" />
