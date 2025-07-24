@@ -1,3 +1,4 @@
+import * as React from "react";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
@@ -34,12 +35,26 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
   const [selectedChurch, setSelectedChurch] = useState("all");
   const { toast } = useToast();
 
+  // Auto-select first admin church if user has only one admin church
+  React.useEffect(() => {
+    if (adminChurches.length === 1 && selectedChurch === "all") {
+      setSelectedChurch(adminChurches[0].churchId.toString());
+    }
+  }, [adminChurches, selectedChurch]);
+
   // Use the prop selectedChurch if provided, otherwise fall back to internal state
   const effectiveSelectedChurch = propSelectedChurch ? propSelectedChurch.toString() : selectedChurch;
 
-  const { data: churches = [] } = useQuery({
-    queryKey: ["/api/churches"],
+  // Get only churches where user has admin permissions
+  const { data: userChurches = [] } = useQuery({
+    queryKey: ["/api/user/churches"],
   }) as { data: any[] };
+
+  // Filter to only admin churches
+  const adminChurches = userChurches.filter((uc: any) => {
+    const adminRoles = ['church_admin', 'admin', 'pastor', 'lead_pastor', 'system_admin', 'super_admin', 'soapbox_owner'];
+    return adminRoles.includes(uc.role);
+  });
 
   const { data: members = [], isLoading, error } = useQuery({
     queryKey: ["/api/members", effectiveSelectedChurch],
@@ -123,10 +138,12 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
             <SelectValue placeholder="Filter by church" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Churches</SelectItem>
-            {churches.map((church: any) => (
-              <SelectItem key={church.id} value={church.id.toString()}>
-                {church.name}
+            {adminChurches.length > 1 && (
+              <SelectItem value="all">All My Churches</SelectItem>
+            )}
+            {adminChurches.map((userChurch: any) => (
+              <SelectItem key={userChurch.churchId} value={userChurch.churchId.toString()}>
+                {userChurch.churchName}
               </SelectItem>
             ))}
           </SelectContent>
