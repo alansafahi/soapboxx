@@ -3188,9 +3188,14 @@ export class DatabaseStorage implements IStorage {
 
   async getChurchFeatureSettings(churchId: number): Promise<any[]> {
     try {
-      // Return empty array for now - church features system needs implementation
-      return [];
+      // Direct database query to avoid compilation issues
+      const result = await pool.query(
+        'SELECT * FROM church_feature_settings WHERE church_id = $1 ORDER BY feature_category, feature_name',
+        [churchId]
+      );
+      return result.rows;
     } catch (error) {
+      console.error('Error getting church feature settings:', error);
       return [];
     }
   }
