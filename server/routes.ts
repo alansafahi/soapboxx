@@ -10657,11 +10657,25 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
-  // Get members with optional church filtering
-  app.get('/api/members', async (req: any, res) => {
+  // Get members filtered by current admin's church
+  app.get('/api/members', isAuthenticated, async (req: any, res) => {
     try {
-      // Use storage method to get members properly
-      const members = await storage.getAllMembers();
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      // Get the admin's church
+      const userChurch = await storage.getUserChurch(userId);
+      if (!userChurch) {
+        return res.status(403).json({ message: "User not associated with any church" });
+      }
+      
+      // Check if user has admin permissions
+      const adminRoles = ['admin', 'church_admin', 'system_admin', 'super_admin', 'pastor', 'lead_pastor', 'soapbox_owner', 'soapbox_support', 'platform_admin', 'regional_admin'];
+      if (!adminRoles.includes(userChurch.role)) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      // Get only members from the admin's church
+      const members = await storage.getChurchMembers(userChurch.churchId);
       
       // Transform members to include required display fields
       const transformedMembers = members.map((member: any) => {
@@ -10687,7 +10701,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(transformedMembers);
     } catch (error) {
-      
+      console.error('Error getting church members:', error);
       res.status(500).json({ message: "Failed to fetch members", error: (error as Error).message });
     }
   });
