@@ -26,7 +26,7 @@ interface Campus {
   zipCode?: string;
   capacity: number;
   phoneNumber?: string;
-  workNumber?: string;
+  website?: string;
   email?: string;
   campusAdminName?: string;
   campusAdminEmail?: string;
@@ -48,7 +48,7 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
     zipCode: '',
     capacity: '',
     phoneNumber: '',
-    workNumber: '',
+    website: '',
     email: '',
     campusAdminName: '',
     campusAdminEmail: '',
@@ -64,7 +64,7 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
     zipCode: '',
     capacity: '',
     phoneNumber: '',
-    workNumber: '',
+    website: '',
     email: '',
     campusAdminName: '',
     campusAdminEmail: '',
@@ -120,7 +120,7 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
         zipCode: '',
         capacity: '',
         phoneNumber: '',
-        workNumber: '',
+        website: '',
         email: '',
         campusAdminName: '',
         campusAdminEmail: '',
@@ -206,7 +206,7 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
       zipCode: campus.zipCode || '',
       capacity: campus.capacity.toString(),
       phoneNumber: campus.phoneNumber || '',
-      workNumber: campus.workNumber || '',
+      website: campus.website || '',
       email: campus.email || '',
       campusAdminName: campus.campusAdminName || '',
       campusAdminEmail: campus.campusAdminEmail || '',
@@ -367,12 +367,12 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
                 />
               </div>
               <div>
-                <Label htmlFor="campus-work">Work Number</Label>
+                <Label htmlFor="campus-website">Website</Label>
                 <Input
-                  id="campus-work"
-                  value={newCampusData.workNumber}
-                  onChange={(e) => setNewCampusData(prev => ({ ...prev, workNumber: e.target.value }))}
-                  placeholder="(555) 987-6543"
+                  id="campus-website"
+                  value={newCampusData.website}
+                  onChange={(e) => setNewCampusData(prev => ({ ...prev, website: e.target.value }))}
+                  placeholder="https://campus.church.org"
                 />
               </div>
             </div>
@@ -588,12 +588,12 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="edit-campus-work">Work Number</Label>
+                  <Label htmlFor="edit-campus-website">Website</Label>
                   <Input
-                    id="edit-campus-work"
-                    value={editCampusData.workNumber}
-                    onChange={(e) => setEditCampusData(prev => ({ ...prev, workNumber: e.target.value }))}
-                    placeholder="(555) 987-6543"
+                    id="edit-campus-website"
+                    value={editCampusData.website}
+                    onChange={(e) => setEditCampusData(prev => ({ ...prev, website: e.target.value }))}
+                    placeholder="https://campus.church.org"
                   />
                 </div>
               </div>

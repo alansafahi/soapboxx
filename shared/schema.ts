@@ -2034,7 +2034,7 @@ export const campuses = pgTable("campuses", {
   zipCode: varchar("zip_code", { length: 20 }),
   country: varchar("country", { length: 50 }).default("United States"),
   phoneNumber: varchar("phone_number", { length: 20 }),
-  workNumber: varchar("work_number", { length: 20 }),
+  website: varchar("website", { length: 255 }),
   email: varchar("email", { length: 255 }),
   campusAdminName: varchar("campus_admin_name", { length: 255 }),
   campusAdminEmail: varchar("campus_admin_email", { length: 255 }),
@@ -3446,11 +3446,7 @@ export type InsertDonation = typeof donations.$inferInsert;
 export type DonationReport = typeof donationReports.$inferSelect;
 export type InsertDonationReport = typeof donationReports.$inferInsert;
 
-export type Campus = typeof campuses.$inferSelect;
-export type InsertCampus = typeof campuses.$inferInsert;
-
-export type CampusAssignment = typeof campusAssignments.$inferSelect;
-export type InsertCampusAssignment = typeof campusAssignments.$inferInsert;
+// Campus types already defined earlier in the file
 
 // Sermon Illustration Types
 export interface SermonIllustration {
