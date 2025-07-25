@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
 import { Users, Search, Mail, MessageSquare, Shield, Info } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { useLocation } from "wouter";
 import { Alert, AlertDescription } from "../components/ui/alert";
 
 interface SearchUser {
@@ -23,6 +24,7 @@ interface SearchUser {
 
 export default function PeoplePage() {
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
@@ -192,7 +194,7 @@ export default function PeoplePage() {
                           size="sm" 
                           variant="outline" 
                           className="flex-1"
-                          onClick={() => window.location.href = `/messages?user=${member.id}`}
+                          onClick={() => setLocation(`/messages?contact=${member.id}&name=${encodeURIComponent(`${member.firstName} ${member.lastName}`)}`)}
                         >
                           <MessageSquare className="h-4 w-4 mr-1" />
                           Message
