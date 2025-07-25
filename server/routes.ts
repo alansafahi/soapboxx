@@ -1063,6 +1063,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User search endpoint - search for users by name or email
+  app.get('/api/users/search', isAuthenticated, async (req: any, res) => {
+    try {
+      const { q: query } = req.query;
+      const userId = req.session.userId || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "Authentication required" });
+      }
+
+      if (!query || typeof query !== 'string' || query.trim().length < 2) {
+        return res.json({ success: true, users: [] });
+      }
+
+      // Get user's church for scoped search
+      const currentUserChurch = await storage.getUserChurch(userId);
+      
+      // Search for users
+      const searchResults = await storage.searchUsers(query.trim());
+      
+      // Filter results based on privacy and church scope
+      const filteredResults = searchResults
+        .filter(user => user.id !== userId) // Exclude current user
+        .map(user => ({
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          profileImageUrl: user.profileImageUrl,
+          // Include church info if user is in same church
+          churchId: currentUserChurch?.churchId === user.churchId ? user.churchId : null,
+          role: currentUserChurch?.churchId === user.churchId ? user.role : null
+        }))
+        .slice(0, 10); // Limit to 10 results
+
+      res.json({ 
+        success: true, 
+        users: filteredResults,
+        query: query.trim()
+      });
+    } catch (error) {
+      console.error('User search error:', error);
+      res.status(500).json({ success: false, message: "Search failed" });
+    }
+  });
+
   // Role Management Routes
   app.get('/api/auth/available-roles', isAuthenticated, async (req: any, res) => {
     try {
