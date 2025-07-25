@@ -884,6 +884,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Validate reset token endpoint
+  app.post("/api/auth/validate-reset-token", async (req, res) => {
+    try {
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ valid: false, message: "Token is required" });
+      }
+
+      // Verify reset token
+      const user = await storage.verifyPasswordResetToken(token);
+      
+      if (!user) {
+        return res.status(400).json({ valid: false, message: "Invalid or expired reset token" });
+      }
+
+      res.json({ valid: true, message: "Token is valid" });
+    } catch (error) {
+      res.status(500).json({ valid: false, message: "Token validation failed" });
+    }
+  });
+
   // Reset password endpoint
   app.post("/api/auth/reset-password", async (req, res) => {
     try {

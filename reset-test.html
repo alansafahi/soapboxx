@@ -6,13 +6,29 @@
 <body>
     <h2>Reset Password Test</h2>
     <p>Click the link below to test the reset password functionality:</p>
-    <a href="/reset-password?token=08ba4b63a88918f3e0cb740c264df4e4e56d3dc761dbce969e1ebd9b6d68e4a2" 
+    <a href="/reset-password?token=e02cc6834ef37c608e92ce2a9f28a80645b5800f86a014fcfcfa66d635e9415d" 
        target="_blank" 
        style="background-color: #7C3AED; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
        Test Reset Password
     </a>
     
-    <p>Current valid token: <code>08ba4b63a88918f3e0cb740c264df4e4e56d3dc761dbce969e1ebd9b6d68e4a2</code></p>
-    <p>Token expires: 2025-07-26 00:20:23.966</p>
+    <p>Current valid token: <code>e02cc6834ef37c608e92ce2a9f28a80645b5800f86a014fcfcfa66d635e9415d</code></p>
+    <p>Token expires: 2025-07-26 00:23:31.713</p>
+    
+    <h3>Test Steps:</h3>
+    <ol>
+      <li>Click the "Test Reset Password" link above</li>
+      <li>Enter a new password meeting requirements:
+        <ul>
+          <li>At least 8 characters</li>
+          <li>One uppercase letter (A-Z)</li>
+          <li>One lowercase letter (a-z)</li>
+          <li>One number (0-9)</li>
+          <li>One special character (@$!%*?&)</li>
+        </ul>
+      </li>
+      <li>Click "Update Password"</li>
+      <li>You should see success message and redirect to login</li>
+    </ol>
 </body>
 </html>

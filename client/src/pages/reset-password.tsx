@@ -33,9 +33,33 @@ export default function ResetPassword() {
       return;
     }
     
-    setToken(resetToken);
-    setIsValidToken(true);
-    setIsLoading(false);
+    // Validate token with backend
+    const validateToken = async () => {
+      try {
+        const response = await fetch('/api/auth/validate-reset-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ token: resetToken }),
+        });
+        
+        if (response.ok) {
+          setToken(resetToken);
+          setIsValidToken(true);
+        } else {
+          setError("Invalid or expired reset token");
+          setIsValidToken(false);
+        }
+      } catch (error) {
+        // If validation fails, still allow token but let backend handle final validation
+        setToken(resetToken);
+        setIsValidToken(true);
+      }
+      setIsLoading(false);
+    };
+    
+    validateToken();
   }, []);
 
   const validatePassword = (pwd: string) => {
