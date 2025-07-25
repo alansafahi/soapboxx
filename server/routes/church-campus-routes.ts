@@ -58,11 +58,19 @@ router.post('/churches/:churchId/campuses', isAuthenticated, async (req, res) =>
   try {
     const churchId = parseInt(req.params.churchId);
     
+    // Enhanced authentication check with logging
     if (!req.user) {
+      console.error('Campus creation failed: No user in session');
       return res.status(401).json({ error: 'Authentication required' });
     }
 
     const user = req.user as any;
+    
+    // Validate user object has required properties
+    if (!user.id) {
+      console.error('Campus creation failed: Invalid user object', user);
+      return res.status(401).json({ error: 'Invalid user session' });
+    }
     
     // Check if user is global admin or has church-specific admin role
     let hasPermission = false;
@@ -70,10 +78,23 @@ router.post('/churches/:churchId/campuses', isAuthenticated, async (req, res) =>
     if (['soapbox_owner', 'system_admin'].includes(user.role)) {
       hasPermission = true;
     } else {
-      // Check if user has admin role in this specific church
-      const userChurches = await multiCampusService.storage.getUserChurches(user.id);
-      const churchRole = userChurches.find(uc => uc.id === churchId);
-      hasPermission = churchRole && ['church_admin', 'admin', 'pastor', 'lead_pastor'].includes(churchRole.role);
+      // Enhanced error handling for getUserChurches call
+      try {
+        if (!multiCampusService?.storage?.getUserChurches) {
+          console.error('Campus creation failed: getUserChurches method not available');
+          return res.status(500).json({ error: 'Service not available' });
+        }
+        
+        const userChurches = await multiCampusService.storage.getUserChurches(user.id);
+        const churchRole = userChurches?.find(uc => uc.id === churchId);
+        hasPermission = churchRole && ['church_admin', 'admin', 'pastor', 'lead_pastor'].includes(churchRole.role);
+      } catch (getUserChurchesError) {
+        console.error('Campus creation failed: Error getting user churches', getUserChurchesError);
+        return res.status(500).json({ 
+          error: 'Failed to verify permissions',
+          details: getUserChurchesError instanceof Error ? getUserChurchesError.message : 'Unknown error'
+        });
+      }
     }
     
     if (!hasPermission) {
@@ -94,6 +115,8 @@ router.post('/churches/:churchId/campuses', isAuthenticated, async (req, res) =>
     });
 
   } catch (error) {
+    console.error('Campus creation error:', error);
+    
     if (error instanceof z.ZodError) {
       return res.status(400).json({ 
         error: 'Validation error',
@@ -103,7 +126,8 @@ router.post('/churches/:churchId/campuses', isAuthenticated, async (req, res) =>
 
     res.status(500).json({ 
       error: 'Failed to create campus',
-      details: error instanceof Error ? error.message : 'Unknown error' 
+      details: error instanceof Error ? error.message : 'Unknown error',
+      stack: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : undefined) : undefined
     });
   }
 });

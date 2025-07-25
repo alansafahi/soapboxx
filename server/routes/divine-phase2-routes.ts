@@ -14,7 +14,7 @@ import {
 const router = Router();
 
 // Apply authentication middleware to all D.I.V.I.N.E. Phase 2 routes
-// Note: Authentication middleware will be applied when routes are registered
+// Note: Authentication middleware is applied when routes are registered in main server
 
 // D.I.V.I.N.E. Phase 2: Enterprise Ready API Routes
 
@@ -161,14 +161,27 @@ router.get('/background-checks/expiring', async (req, res) => {
 // Create new campus
 router.post('/campuses', async (req, res) => {
   try {
+    // Enhanced authentication check with detailed logging
+    console.log('Divine Phase 2 campus creation request received');
+    console.log('User object:', req.user);
+    
     if (!req.user) {
+      console.error('Divine Phase 2 campus creation failed: No user in session');
       return res.status(401).json({ error: 'Authentication required' });
     }
 
     const user = req.user as any;
+    
+    // Validate user object has required properties
+    if (!user.id) {
+      console.error('Divine Phase 2 campus creation failed: Invalid user object', user);
+      return res.status(401).json({ error: 'Invalid user session' });
+    }
+    
     const hasPermission = ['church_admin', 'admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(user.role);
     
     if (!hasPermission) {
+      console.error('Divine Phase 2 campus creation failed: Insufficient permissions', { userRole: user.role });
       return res.status(403).json({ error: 'Insufficient permissions to create campus' });
     }
 
@@ -186,6 +199,8 @@ router.post('/campuses', async (req, res) => {
     });
 
   } catch (error) {
+    console.error('Divine Phase 2 campus creation error:', error);
+    
     if (error instanceof z.ZodError) {
       return res.status(400).json({ 
         error: 'Validation error',
@@ -195,7 +210,8 @@ router.post('/campuses', async (req, res) => {
 
     res.status(500).json({ 
       error: 'Failed to create campus',
-      details: error instanceof Error ? error.message : 'Unknown error' 
+      details: error instanceof Error ? error.message : 'Unknown error',
+      stack: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : undefined) : undefined
     });
   }
 });
@@ -688,79 +704,8 @@ router.get('/campuses', async (req, res) => {
   }
 });
 
-// Create new campus
-router.post('/campuses', async (req, res) => {
-  try {
-    // Enhanced authentication logging
-    console.log('Campus creation request received');
-    console.log('Session info:', req.session);
-    console.log('User info:', req.user);
-    console.log('Request body:', req.body);
-    
-    if (!req.user) {
-      console.log('Authentication failed - no user in session');
-      return res.status(401).json({ 
-        error: 'Authentication required',
-        session: !!req.session,
-        sessionId: req.session?.id
-      });
-    }
-
-    // Verify user has permission to create campuses
-    const user = req.user as any;
-    console.log('User role check:', user.role);
-    const hasPermission = ['church_admin', 'admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(user.role);
-    
-    if (!hasPermission) {
-      console.log('Permission denied for role:', user.role);
-      return res.status(403).json({ 
-        error: 'Insufficient permissions to create campuses',
-        userRole: user.role,
-        requiredRoles: ['church_admin', 'admin', 'pastor', 'lead_pastor', 'soapbox_owner']
-      });
-    }
-
-    const { name, address, city, state, capacity } = req.body;
-    
-    // Enhanced validation with detailed error logging
-    console.log('Campus creation request body:', req.body);
-    console.log('User info:', { role: user.role, churchId: user.churchId });
-    
-    if (!name || !city) {
-      return res.status(400).json({ 
-        error: 'Missing required fields',
-        details: 'Campus name and city are required',
-        received: { name, address, city, state, capacity }
-      });
-    }
-
-    const campus = await multiCampusService.createCampus({
-      name,
-      address,
-      city,
-      state,
-      capacity: capacity ? parseInt(capacity) : null,
-      churchId: user.churchId || 1, // Default church
-      timeZone: 'America/Los_Angeles', // Default timezone (note: timeZone not timezone)
-      country: 'United States',
-      isActive: true
-    });
-
-    res.json({
-      success: true,
-      campus,
-      message: 'Campus created successfully'
-    });
-
-  } catch (error) {
-    console.error('Campus creation error:', error);
-    res.status(500).json({ 
-      error: 'Failed to create campus',
-      details: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
-    });
-  }
-});
+// Note: Duplicate POST /campuses route removed to prevent conflicts
+// Campus creation is handled by the first POST /campuses route above
 
 // Get campus statistics
 router.get('/campuses/statistics', async (req, res) => {
