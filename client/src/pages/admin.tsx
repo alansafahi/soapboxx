@@ -425,6 +425,7 @@ function MembersPage() {
   React.useEffect(() => {
     if (adminChurch && !selectedChurch) {
       setSelectedChurch(adminChurch.id);
+      console.log("Setting selected church to:", adminChurch.id, adminChurch.name);
     }
   }, [adminChurch, selectedChurch]);
 
@@ -477,6 +478,8 @@ function MembersPage() {
             <TabsContent value="cross-campus" className="space-y-6">
               {selectedChurch ? (
                 <CrossCampusMemberManagement churchId={selectedChurch} />
+              ) : adminChurch ? (
+                <CrossCampusMemberManagement churchId={adminChurch.id} />
               ) : (
                 <Card className="p-8 text-center">
                   <Users className="h-12 w-12 text-purple-500 mx-auto mb-4" />

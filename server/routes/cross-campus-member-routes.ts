@@ -37,6 +37,9 @@ router.get('/members/:churchId/campus/:campusId?', async (req, res) => {
     }
 
     const members = await crossCampusMemberService.getMembersByCampus(churchId, campusId);
+    
+    console.log('API Route: Fetched', members.length, 'members for church', churchId);
+    console.log('API Route: Members data sample:', members.slice(0, 2));
 
     res.json({
       success: true,

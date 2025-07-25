@@ -146,6 +146,8 @@ function MemberTransfer({ churchId }: { churchId: number }) {
 
   console.log("Members data:", membersByCampus);
   console.log("Church ID:", churchId);
+  console.log("Members structure:", membersByCampus?.members || 'No members key');
+  console.log("Raw data length:", Array.isArray(membersByCampus) ? membersByCampus.length : 'Not array');
 
   // Transfer member mutation
   const transferMutation = useMutation({

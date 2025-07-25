@@ -21,6 +21,7 @@ export class CrossCampusMemberService {
   // Get all members across campuses for a church
   async getMembersByCampus(churchId: number, campusId?: number) {
     try {
+      console.log('CrossCampusMemberService: Fetching members for church', churchId, 'campus', campusId);
       // First try to get members with campus assignments
       const membersWithCampus = await db
         .select({
@@ -69,9 +70,11 @@ export class CrossCampusMemberService {
           .where(eq(userChurches.churchId, churchId))
           .orderBy(sql`CONCAT(${users.firstName}, ' ', ${users.lastName})`);
 
+        console.log('CrossCampusMemberService: Returning', allChurchMembers.length, 'unassigned members');
         return allChurchMembers;
       }
 
+      console.log('CrossCampusMemberService: Returning', membersWithCampus.length, 'members with campus assignments');
       return membersWithCampus;
     } catch (error) {
       console.error('Error fetching members by campus:', error);
