@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { storage } from "./storage";
 import { 
   campuses, 
   campusAdministrators, 
@@ -17,6 +18,9 @@ import { eq, and, desc, asc, sql } from "drizzle-orm";
 // D.I.V.I.N.E. Phase 2: Enterprise Multi-Campus Management Service
 
 export class MultiCampusService {
+  
+  // Reference to storage for user church operations
+  public storage = storage;
 
   /**
    * Create a new campus
