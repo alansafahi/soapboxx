@@ -507,14 +507,14 @@ function ContactsPage() {
           </Card>
 
           <Card 
-            className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+            className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
             onClick={() => setShowPendingDialog(true)}
           >
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pending Invites</p>
-                  <p className="text-3xl font-bold text-gray-900">{pendingInvites.length}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Pending Invites</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{pendingInvites.length}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
                   <Mail className="h-6 w-6 text-white" />
@@ -523,12 +523,12 @@ function ContactsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+          <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">SoapBox Points</p>
-                  <p className="text-3xl font-bold text-gray-900">{referralStats?.points || 0}</p>
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">SoapBox Points</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{referralStats?.points || 0}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">
                   <Star className="h-6 w-6 text-white" />
@@ -540,16 +540,16 @@ function ContactsPage() {
 
         {/* Enhanced Main Content */}
         <Tabs defaultValue="contacts" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3 bg-white/60 backdrop-blur-sm border-0 p-1 h-14">
-            <TabsTrigger value="contacts" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
+          <TabsList className="grid w-full grid-cols-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-0 p-1 h-14">
+            <TabsTrigger value="contacts" className="gap-2 text-gray-700 dark:text-gray-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
               <Users className="h-4 w-4" />
               My Contacts
             </TabsTrigger>
-            <TabsTrigger value="pending" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
+            <TabsTrigger value="pending" className="gap-2 text-gray-700 dark:text-gray-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
               <Clock className="h-4 w-4" />
               Pending Invites
             </TabsTrigger>
-            <TabsTrigger value="referrals" className="gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
+            <TabsTrigger value="referrals" className="gap-2 text-gray-700 dark:text-gray-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
               <Crown className="h-4 w-4" />
               SoapBox Rewards
             </TabsTrigger>
@@ -673,7 +673,7 @@ function ContactsPage() {
             ) : (
               <div className="grid gap-4">
                 {pendingInvites.map((invite: any) => (
-                  <Card key={invite.id} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <Card key={invite.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
                         <div className="space-y-2">
@@ -682,14 +682,14 @@ function ContactsPage() {
                               <Mail className="h-5 w-5 text-white" />
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-900 text-lg">{invite.email}</h3>
-                              <p className="text-sm text-gray-600">
+                              <h3 className="font-semibold text-gray-900 dark:text-white text-lg">{invite.email}</h3>
+                              <p className="text-sm text-gray-600 dark:text-gray-300">
                                 Invited on {new Date(invite.createdAt).toLocaleDateString()}
                               </p>
                             </div>
                           </div>
                           {invite.message && (
-                            <p className="text-sm text-gray-700 ml-13 italic bg-gray-50 p-3 rounded-lg border-l-4 border-orange-400">
+                            <p className="text-sm text-gray-700 dark:text-gray-300 ml-13 italic bg-gray-50 dark:bg-gray-700 p-3 rounded-lg border-l-4 border-orange-400">
                               "{invite.message.length > 150 ? invite.message.substring(0, 150) + '...' : invite.message}"
                             </p>
                           )}
