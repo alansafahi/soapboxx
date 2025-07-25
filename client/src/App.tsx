@@ -130,6 +130,7 @@ function AppRouter() {
                             <Suspense fallback={<div>Loading...</div>}>
                                 <Switch>
                                     <Route path="/login" component={LoginPage} />
+                                    <Route path="/auto-login" component={() => import('./pages/auto-login')} />
                                     <Route path="/reset-password" component={ResetPasswordPage} />
                                     <Route path="/email-verification" component={EmailVerificationPage} />
                                     <Route path="/landing" component={SimpleLanding} />
