@@ -142,7 +142,36 @@ router.put('/churches/campuses/:campusId', isAuthenticated, async (req, res) => 
     }
 
     const user = req.user as any;
-    const hasPermission = ['church_admin', 'admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(user.role);
+    
+    // Check church-specific permissions similar to creation route
+    let hasPermission = false;
+    
+    if (['soapbox_owner', 'platform_admin'].includes(user.role)) {
+      hasPermission = true;
+    } else {
+      try {
+        if (!multiCampusService.storage || !multiCampusService.storage.getUserChurches) {
+          console.error('Campus update failed: getUserChurches method not available');
+          return res.status(500).json({ error: 'Service not available' });
+        }
+        
+        // Get the campus to find its church ID
+        const campus = await multiCampusService.getCampusById(campusId);
+        if (!campus) {
+          return res.status(404).json({ error: 'Campus not found' });
+        }
+        
+        const userChurches = await multiCampusService.storage.getUserChurches(user.id);
+        const churchRole = userChurches?.find(uc => uc.id === campus.churchId);
+        hasPermission = churchRole && ['church_admin', 'admin', 'pastor', 'lead_pastor'].includes(churchRole.role);
+      } catch (getUserChurchesError) {
+        console.error('Campus update failed: Error getting user churches', getUserChurchesError);
+        return res.status(500).json({ 
+          error: 'Failed to verify permissions',
+          details: getUserChurchesError instanceof Error ? getUserChurchesError.message : 'Unknown error'
+        });
+      }
+    }
     
     if (!hasPermission) {
       return res.status(403).json({ error: 'Insufficient permissions to update campus' });
@@ -159,6 +188,8 @@ router.put('/churches/campuses/:campusId', isAuthenticated, async (req, res) => 
     });
 
   } catch (error) {
+    console.error('Campus update error:', error);
+    
     if (error instanceof z.ZodError) {
       return res.status(400).json({ 
         error: 'Validation error',

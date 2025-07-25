@@ -64,6 +64,40 @@ export class MultiCampusService {
   }
 
   /**
+   * Get campus by ID
+   */
+  async getCampusById(campusId: number): Promise<Campus | null> {
+    try {
+      const [campus] = await db
+        .select()
+        .from(campuses)
+        .where(eq(campuses.id, campusId))
+        .limit(1);
+
+      return campus || null;
+    } catch (error) {
+      throw new Error(`Failed to get campus: ${(error as Error).message}`);
+    }
+  }
+
+  /**
+   * Get campus by ID
+   */
+  async getCampusById(campusId: number): Promise<Campus | null> {
+    try {
+      const [campus] = await db
+        .select()
+        .from(campuses)
+        .where(eq(campuses.id, campusId))
+        .limit(1);
+
+      return campus || null;
+    } catch (error) {
+      throw new Error(`Failed to get campus: ${(error as Error).message}`);
+    }
+  }
+
+  /**
    * Get campus details with administrators
    */
   async getCampusWithAdministrators(campusId: number): Promise<any> {

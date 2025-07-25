@@ -23,7 +23,14 @@ interface Campus {
   address: string;
   city: string;
   state: string;
+  zipCode?: string;
   capacity: number;
+  phoneNumber?: string;
+  workNumber?: string;
+  email?: string;
+  campusAdminName?: string;
+  campusAdminEmail?: string;
+  campusAdminMobile?: string;
   isActive: boolean;
   churchId: number;
 }
@@ -38,7 +45,14 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
     address: '',
     city: '',
     state: '',
-    capacity: ''
+    zipCode: '',
+    capacity: '',
+    phoneNumber: '',
+    workNumber: '',
+    email: '',
+    campusAdminName: '',
+    campusAdminEmail: '',
+    campusAdminMobile: ''
   });
   const [manageCampusDialog, setManageCampusDialog] = useState(false);
   const [editingCampus, setEditingCampus] = useState<Campus | null>(null);
@@ -47,7 +61,14 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
     address: '',
     city: '',
     state: '',
-    capacity: ''
+    zipCode: '',
+    capacity: '',
+    phoneNumber: '',
+    workNumber: '',
+    email: '',
+    campusAdminName: '',
+    campusAdminEmail: '',
+    campusAdminMobile: ''
   });
 
   const { toast } = useToast();
@@ -91,7 +112,20 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
         description: "Campus created successfully!"
       });
       queryClient.invalidateQueries({ queryKey: ['/api/churches/campuses', churchId] });
-      setNewCampusData({ name: '', address: '', city: '', state: '', capacity: '' });
+      setNewCampusData({ 
+        name: '', 
+        address: '', 
+        city: '', 
+        state: '', 
+        zipCode: '',
+        capacity: '',
+        phoneNumber: '',
+        workNumber: '',
+        email: '',
+        campusAdminName: '',
+        campusAdminEmail: '',
+        campusAdminMobile: ''
+      });
     },
     onError: (error: any) => {
       toast({
@@ -169,7 +203,14 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
       address: campus.address || '',
       city: campus.city,
       state: campus.state,
-      capacity: campus.capacity.toString()
+      zipCode: campus.zipCode || '',
+      capacity: campus.capacity.toString(),
+      phoneNumber: campus.phoneNumber || '',
+      workNumber: campus.workNumber || '',
+      email: campus.email || '',
+      campusAdminName: campus.campusAdminName || '',
+      campusAdminEmail: campus.campusAdminEmail || '',
+      campusAdminMobile: campus.campusAdminMobile || ''
     });
     setManageCampusDialog(true);
   };
@@ -285,7 +326,7 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
               />
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <Label htmlFor="campus-city">City</Label>
                 <Input
@@ -303,6 +344,83 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
                   onChange={(e) => setNewCampusData(prev => ({ ...prev, state: e.target.value }))}
                   placeholder="IL"
                 />
+              </div>
+              <div>
+                <Label htmlFor="campus-zipcode">Zip Code</Label>
+                <Input
+                  id="campus-zipcode"
+                  value={newCampusData.zipCode}
+                  onChange={(e) => setNewCampusData(prev => ({ ...prev, zipCode: e.target.value }))}
+                  placeholder="62701"
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="campus-phone">Phone Number</Label>
+                <Input
+                  id="campus-phone"
+                  value={newCampusData.phoneNumber}
+                  onChange={(e) => setNewCampusData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+              <div>
+                <Label htmlFor="campus-work">Work Number</Label>
+                <Input
+                  id="campus-work"
+                  value={newCampusData.workNumber}
+                  onChange={(e) => setNewCampusData(prev => ({ ...prev, workNumber: e.target.value }))}
+                  placeholder="(555) 987-6543"
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="campus-email">Email Address</Label>
+              <Input
+                id="campus-email"
+                type="email"
+                value={newCampusData.email}
+                onChange={(e) => setNewCampusData(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="campus@church.org"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Campus Administrator</Label>
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <Label htmlFor="admin-name">Administrator Name</Label>
+                  <Input
+                    id="admin-name"
+                    value={newCampusData.campusAdminName}
+                    onChange={(e) => setNewCampusData(prev => ({ ...prev, campusAdminName: e.target.value }))}
+                    placeholder="John Smith"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="admin-email">Administrator Email</Label>
+                    <Input
+                      id="admin-email"
+                      type="email"
+                      value={newCampusData.campusAdminEmail}
+                      onChange={(e) => setNewCampusData(prev => ({ ...prev, campusAdminEmail: e.target.value }))}
+                      placeholder="john@church.org"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="admin-mobile">Administrator Mobile</Label>
+                    <Input
+                      id="admin-mobile"
+                      value={newCampusData.campusAdminMobile}
+                      onChange={(e) => setNewCampusData(prev => ({ ...prev, campusAdminMobile: e.target.value }))}
+                      placeholder="(555) 456-7890"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -384,7 +502,7 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
 
       {/* Campus Management Dialog */}
       <Dialog open={manageCampusDialog} onOpenChange={setManageCampusDialog}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Building2 className="w-5 h-5 text-blue-600" />
@@ -429,7 +547,7 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
                 />
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="edit-campus-city">City</Label>
                   <Input
@@ -447,6 +565,83 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
                     onChange={(e) => setEditCampusData(prev => ({ ...prev, state: e.target.value }))}
                     placeholder="IL"
                   />
+                </div>
+                <div>
+                  <Label htmlFor="edit-campus-zipcode">Zip Code</Label>
+                  <Input
+                    id="edit-campus-zipcode"
+                    value={editCampusData.zipCode}
+                    onChange={(e) => setEditCampusData(prev => ({ ...prev, zipCode: e.target.value }))}
+                    placeholder="62701"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit-campus-phone">Phone Number</Label>
+                  <Input
+                    id="edit-campus-phone"
+                    value={editCampusData.phoneNumber}
+                    onChange={(e) => setEditCampusData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-campus-work">Work Number</Label>
+                  <Input
+                    id="edit-campus-work"
+                    value={editCampusData.workNumber}
+                    onChange={(e) => setEditCampusData(prev => ({ ...prev, workNumber: e.target.value }))}
+                    placeholder="(555) 987-6543"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-campus-email">Email Address</Label>
+                <Input
+                  id="edit-campus-email"
+                  type="email"
+                  value={editCampusData.email}
+                  onChange={(e) => setEditCampusData(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="campus@church.org"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Campus Administrator</Label>
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <Label htmlFor="edit-admin-name">Administrator Name</Label>
+                    <Input
+                      id="edit-admin-name"
+                      value={editCampusData.campusAdminName}
+                      onChange={(e) => setEditCampusData(prev => ({ ...prev, campusAdminName: e.target.value }))}
+                      placeholder="John Smith"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="edit-admin-email">Administrator Email</Label>
+                      <Input
+                        id="edit-admin-email"
+                        type="email"
+                        value={editCampusData.campusAdminEmail}
+                        onChange={(e) => setEditCampusData(prev => ({ ...prev, campusAdminEmail: e.target.value }))}
+                        placeholder="john@church.org"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="edit-admin-mobile">Administrator Mobile</Label>
+                      <Input
+                        id="edit-admin-mobile"
+                        value={editCampusData.campusAdminMobile}
+                        onChange={(e) => setEditCampusData(prev => ({ ...prev, campusAdminMobile: e.target.value }))}
+                        placeholder="(555) 456-7890"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
               
