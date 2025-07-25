@@ -33,6 +33,7 @@ import ChurchFeatureManager from "../components/ChurchFeatureManager";
 import { ChurchAdminManagement } from "../components/church-admin-management";
 import CampusManagement from "../components/CampusManagement";
 import { CrossCampusMemberManagement } from "../components/CrossCampusMemberManagement";
+import { ChurchManagementHub } from "../components/ChurchManagementHub";
 
 // Church Management Component
 function ChurchManagementTab() {
@@ -425,78 +426,17 @@ function MembersPage() {
     return adminRoles.includes(uc.role);
   });
 
-  // Set default selected church to the one user is admin of
+  // Set default selected church to the one user is admin of (moved before conditional return)
   React.useEffect(() => {
     if (adminChurch && !selectedChurch) {
       setSelectedChurch(adminChurch.id);
       console.log("Admin page setting selected church to:", adminChurch.id, adminChurch.name);
-      console.log("Admin church details:", adminChurch);
     }
   }, [adminChurch, selectedChurch]);
 
-  // Show simplified member directory for church admins who are not soapbox owners
-  // But allow them to access campus management for their church
+  // Show simplified church management hub for church admins
   if (hasChurchAdminRole && user?.role !== 'soapbox_owner') {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Church Administration</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Manage your church members and campus operations
-            </p>
-          </div>
-
-          <Tabs defaultValue="members" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="members">Members</TabsTrigger>
-              <TabsTrigger value="campuses">Campuses</TabsTrigger>
-              <TabsTrigger value="cross-campus">Cross-Campus</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="members" className="space-y-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Member Management</h2>
-              <MemberManagementSystem selectedChurch={selectedChurch} />
-            </TabsContent>
-
-            <TabsContent value="campuses" className="space-y-6">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Building2 className="h-6 w-6" />
-                  Campus Management
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400 mt-2">
-                  Manage campus locations for your church
-                </p>
-              </div>
-              {selectedChurch ? (
-                <CampusManagement churchId={selectedChurch} />
-              ) : (
-                <Card className="p-8 text-center">
-                  <Building2 className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                  <h2 className="text-xl font-semibold mb-2">Loading Church Data</h2>
-                  <p className="text-gray-600">Setting up your church administration...</p>
-                </Card>
-              )}
-            </TabsContent>
-
-            <TabsContent value="cross-campus" className="space-y-6">
-              {selectedChurch ? (
-                <CrossCampusMemberManagement churchId={selectedChurch} />
-              ) : adminChurch ? (
-                <CrossCampusMemberManagement churchId={adminChurch.id} />
-              ) : (
-                <Card className="p-8 text-center">
-                  <Users className="h-12 w-12 text-purple-500 mx-auto mb-4" />
-                  <h2 className="text-xl font-semibold mb-2">Loading Church Data</h2>
-                  <p className="text-gray-600">Setting up cross-campus member management...</p>
-                </Card>
-              )}
-            </TabsContent>
-          </Tabs>
-        </main>
-      </div>
-    );
+    return <ChurchManagementHub />;
   }
 
   return (
