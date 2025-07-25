@@ -151,20 +151,33 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await apiRequest('/api/auth/forgot-password', {
+      const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
-        body: { email: forgotPasswordEmail },
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: forgotPasswordEmail }),
       });
 
-      toast({
-        title: "Password reset email sent",
-        description: "Check your email for password reset instructions.",
-      });
+      const result = await response.json();
 
-      setShowForgotPassword(false);
-      setForgotPasswordEmail("");
+      if (response.ok) {
+        toast({
+          title: "Password reset email sent",
+          description: "Check your email for password reset instructions.",
+        });
+
+        setShowForgotPassword(false);
+        setForgotPasswordEmail("");
+      } else {
+        throw new Error(result.message || 'Failed to send reset email');
+      }
     } catch (error: any) {
-      toast(formatErrorForToast(error, 'general'));
+      toast({
+        title: "Error",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
     }
