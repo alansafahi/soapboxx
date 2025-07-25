@@ -58,6 +58,16 @@ app.use('/api/media', async (req, res, next) => {
   }
 });
 
+// D.I.V.I.N.E. Phase 3A: Cross-Campus Member Management routes
+app.use('/api/cross-campus-members', async (req, res, next) => {
+  try {
+    const { default: crossCampusMemberRoutes } = await import('./routes/cross-campus-member-routes.js');
+    return crossCampusMemberRoutes(req, res, next);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

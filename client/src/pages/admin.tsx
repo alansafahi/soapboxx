@@ -32,6 +32,7 @@ import { AnalyticsTab } from "../components/AnalyticsTab";
 import ChurchFeatureManager from "../components/ChurchFeatureManager";
 import { ChurchAdminManagement } from "../components/church-admin-management";
 import CampusManagement from "../components/CampusManagement";
+import { CrossCampusMemberManagement } from "../components/CrossCampusMemberManagement";
 
 // Church Management Component
 function ChurchManagementTab() {
@@ -441,9 +442,10 @@ function MembersPage() {
           </div>
 
           <Tabs defaultValue="members" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="members">Members</TabsTrigger>
               <TabsTrigger value="campuses">Campuses</TabsTrigger>
+              <TabsTrigger value="cross-campus">Cross-Campus</TabsTrigger>
             </TabsList>
 
             <TabsContent value="members" className="space-y-6">
@@ -468,6 +470,18 @@ function MembersPage() {
                   <Building2 className="h-12 w-12 text-blue-500 mx-auto mb-4" />
                   <h2 className="text-xl font-semibold mb-2">Loading Church Data</h2>
                   <p className="text-gray-600">Setting up your church administration...</p>
+                </Card>
+              )}
+            </TabsContent>
+
+            <TabsContent value="cross-campus" className="space-y-6">
+              {selectedChurch ? (
+                <CrossCampusMemberManagement churchId={selectedChurch} />
+              ) : (
+                <Card className="p-8 text-center">
+                  <Users className="h-12 w-12 text-purple-500 mx-auto mb-4" />
+                  <h2 className="text-xl font-semibold mb-2">Loading Church Data</h2>
+                  <p className="text-gray-600">Setting up cross-campus member management...</p>
                 </Card>
               )}
             </TabsContent>

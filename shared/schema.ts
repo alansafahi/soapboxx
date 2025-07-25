@@ -2048,6 +2048,59 @@ export const campuses = pgTable("campuses", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// D.I.V.I.N.E. Phase 3A: Cross-Campus Member Management
+export const memberCampusAssignments = pgTable("member_campus_assignments", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  campusId: integer("campus_id").notNull().references(() => campuses.id),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  isPrimaryCampus: boolean("is_primary_campus").default(false),
+  membershipStatus: varchar("membership_status", { length: 50 }).default("active"), // active, inactive, transferred, pending
+  assignedBy: varchar("assigned_by").references(() => users.id),
+  assignedAt: timestamp("assigned_at").defaultNow(),
+  transferredFrom: integer("transferred_from").references(() => campuses.id),
+  transferReason: text("transfer_reason"),
+  notes: text("notes"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Campus-specific roles for members
+export const campusMemberRoles = pgTable("campus_member_roles", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  campusId: integer("campus_id").notNull().references(() => campuses.id),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  roleTitle: varchar("role_title", { length: 100 }).notNull(), // "Campus Coordinator", "Ministry Leader", etc.
+  roleDescription: text("role_description"),
+  permissions: text("permissions").array(), // ["events", "members", "communications"]
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  isActive: boolean("is_active").default(true),
+  assignedBy: varchar("assigned_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Member transfer history tracking
+export const memberTransferHistory = pgTable("member_transfer_history", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  fromCampusId: integer("from_campus_id").references(() => campuses.id),
+  toCampusId: integer("to_campus_id").notNull().references(() => campuses.id),
+  churchId: integer("church_id").notNull().references(() => churches.id),
+  transferReason: text("transfer_reason"),
+  transferType: varchar("transfer_type", { length: 50 }).default("manual"), // manual, automatic, request
+  requestedBy: varchar("requested_by").references(() => users.id),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  transferDate: timestamp("transfer_date").defaultNow(),
+  previousRoles: jsonb("previous_roles"), // Store roles from previous campus
+  notes: text("notes"),
+  status: varchar("status", { length: 50 }).default("completed"), // pending, approved, rejected, completed
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Campus administrators for multi-campus management
 export const campusAdministrators = pgTable("campus_administrators", {
   id: serial("id").primaryKey(),
@@ -2253,6 +2306,14 @@ export type CampusAdministrator = typeof campusAdministrators.$inferSelect;
 export type InsertCampusAdministrator = typeof campusAdministrators.$inferInsert;
 export type VolunteerCampusAssignment = typeof volunteerCampusAssignments.$inferSelect;
 export type InsertVolunteerCampusAssignment = typeof volunteerCampusAssignments.$inferInsert;
+
+// D.I.V.I.N.E. Phase 3A: Cross-Campus Member Management Types
+export type MemberCampusAssignment = typeof memberCampusAssignments.$inferSelect;
+export type InsertMemberCampusAssignment = typeof memberCampusAssignments.$inferInsert;
+export type CampusMemberRole = typeof campusMemberRoles.$inferSelect;
+export type InsertCampusMemberRole = typeof campusMemberRoles.$inferInsert;
+export type MemberTransferHistory = typeof memberTransferHistory.$inferSelect;
+export type InsertMemberTransferHistory = typeof memberTransferHistory.$inferInsert;
 export type BackgroundCheckProvider = typeof backgroundCheckProviders.$inferSelect;
 export type InsertBackgroundCheckProvider = typeof backgroundCheckProviders.$inferInsert;
 export type BackgroundCheckRequirement = typeof backgroundCheckRequirements.$inferSelect;
