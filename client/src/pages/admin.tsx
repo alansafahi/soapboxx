@@ -391,7 +391,7 @@ function MembersPage() {
   const { data: userChurches = [] } = useQuery({
     queryKey: ["/api/users/churches"],
     enabled: !!user,
-  });
+  }) as { data: any[] };
 
   // Check if user has admin role in any church
   const hasChurchAdminRole = userChurches.some((uc: any) => {
@@ -403,18 +403,6 @@ function MembersPage() {
   const allowedRoles = ['soapbox_owner', 'church_admin', 'pastor', 'lead_pastor', 'admin', 'system_admin'];
   const hasGlobalAccess = allowedRoles.includes(user?.role || '') || user?.role === 'soapbox_owner';
   const hasAccess = hasGlobalAccess || hasChurchAdminRole;
-
-  if (!hasAccess) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="p-8 text-center">
-          <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Access Restricted</h2>
-          <p className="text-gray-600">This page is only accessible to church administrators and SoapBox administrators.</p>
-        </Card>
-      </div>
-    );
-  }
 
   // Get the first church that user is admin of for default selection
   // Prioritize SGA Church (2807) if user has access
@@ -433,6 +421,19 @@ function MembersPage() {
       console.log("Admin page setting selected church to:", adminChurch.id, adminChurch.name);
     }
   }, [adminChurch, selectedChurch]);
+
+  // Early returns after all hooks are called
+  if (!hasAccess) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="p-8 text-center">
+          <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Access Restricted</h2>
+          <p className="text-gray-600">This page is only accessible to church administrators and SoapBox administrators.</p>
+        </Card>
+      </div>
+    );
+  }
 
   // Show simplified church management hub for church admins
   if (hasChurchAdminRole && user?.role !== 'soapbox_owner') {
@@ -641,7 +642,7 @@ function MembersPage() {
 
           <TabsContent value="settings" className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Church Settings</h2>
-            <ChurchProfileManager churchId={selectedChurch} />
+            <ChurchProfileManager churchId={selectedChurch || 0} />
           </TabsContent>
         </Tabs>
       </main>
