@@ -660,13 +660,186 @@ export function ChurchManagementHub() {
                 </TabsContent>
 
                 <TabsContent value="staff" className="space-y-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {/* Invite Members */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Plus className="h-5 w-5" />
+                          Invite Members
+                        </CardTitle>
+                        <CardDescription>Send invitations to new members</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2">
+                          <Label>Email Address</Label>
+                          <Input placeholder="pastor@church.org" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Default Role</Label>
+                          <Select>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select role" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="member">Member</SelectItem>
+                              <SelectItem value="staff">Staff</SelectItem>
+                              <SelectItem value="minister">Minister</SelectItem>
+                              <SelectItem value="pastor">Pastor</SelectItem>
+                              <SelectItem value="church_admin">Church Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Personal Message (Optional)</Label>
+                          <Textarea placeholder="Welcome to our church community!" rows={3} />
+                        </div>
+                        <Button className="w-full">
+                          <Mail className="h-4 w-4 mr-2" />
+                          Send Invitation
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Current Staff Roles */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="h-5 w-5" />
+                          Current Staff & Roles
+                        </CardTitle>
+                        <CardDescription>Manage existing member roles</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <p className="font-medium">Alan Safahi</p>
+                              <p className="text-sm text-gray-500">alan@soapboxsuperapp.com</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">Church Admin</Badge>
+                              <Button size="sm" variant="outline">
+                                <Settings className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between p-3 border rounded-lg">
+                            <div>
+                              <p className="font-medium">Alan SGA</p>
+                              <p className="text-sm text-gray-500">alan@safahi.com</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline">Church Admin</Badge>
+                              <Button size="sm" variant="outline">
+                                <Settings className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <Button variant="outline" className="w-full mt-4">
+                          View All Members
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Role Templates */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Staff Management</CardTitle>
-                      <CardDescription>Manage church staff roles and permissions</CardDescription>
+                      <CardTitle>Role Templates</CardTitle>
+                      <CardDescription>
+                        Quick setup templates based on your organization size and structure
+                      </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-center text-gray-500 py-8">Staff management coming soon...</p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <Card className="border-2 border-dashed border-gray-200 hover:border-blue-300 cursor-pointer">
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm">Small Church</CardTitle>
+                            <CardDescription className="text-xs">Under 50 members</CardDescription>
+                          </CardHeader>
+                          <CardContent className="pt-2">
+                            <div className="space-y-1 text-xs">
+                              <div className="flex justify-between">
+                                <span>Church Admin</span>
+                                <Badge variant="outline" className="text-xs">1</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Pastor</span>
+                                <Badge variant="outline" className="text-xs">1-2</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Staff</span>
+                                <Badge variant="outline" className="text-xs">2-5</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Members</span>
+                                <Badge variant="outline" className="text-xs">Rest</Badge>
+                              </div>
+                            </div>
+                            <Button size="sm" className="w-full mt-3">Apply Template</Button>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="border-2 border-dashed border-gray-200 hover:border-blue-300 cursor-pointer">
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm">Mid-size Church</CardTitle>
+                            <CardDescription className="text-xs">50-200 members</CardDescription>
+                          </CardHeader>
+                          <CardContent className="pt-2">
+                            <div className="space-y-1 text-xs">
+                              <div className="flex justify-between">
+                                <span>Church Admin</span>
+                                <Badge variant="outline" className="text-xs">1-2</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Pastor/Minister</span>
+                                <Badge variant="outline" className="text-xs">2-4</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Staff</span>
+                                <Badge variant="outline" className="text-xs">5-10</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Members</span>
+                                <Badge variant="outline" className="text-xs">Rest</Badge>
+                              </div>
+                            </div>
+                            <Button size="sm" className="w-full mt-3">Apply Template</Button>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="border-2 border-dashed border-gray-200 hover:border-blue-300 cursor-pointer">
+                          <CardHeader className="pb-2">
+                            <CardTitle className="text-sm">Large Church</CardTitle>
+                            <CardDescription className="text-xs">200+ members</CardDescription>
+                          </CardHeader>
+                          <CardContent className="pt-2">
+                            <div className="space-y-1 text-xs">
+                              <div className="flex justify-between">
+                                <span>Church Admin</span>
+                                <Badge variant="outline" className="text-xs">2-3</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Lead Pastor</span>
+                                <Badge variant="outline" className="text-xs">1</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Ministers</span>
+                                <Badge variant="outline" className="text-xs">5-10</Badge>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Staff</span>
+                                <Badge variant="outline" className="text-xs">10+</Badge>
+                              </div>
+                            </div>
+                            <Button size="sm" className="w-full mt-3">Apply Template</Button>
+                          </CardContent>
+                        </Card>
+                      </div>
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -698,7 +871,54 @@ export function ChurchManagementHub() {
           {/* Member Directory Tab */}
           <TabsContent value="directory" className="space-y-6">
             {primaryChurch ? (
-              <MemberManagementSystem selectedChurch={primaryChurch.churchId} />
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold">Member Directory</h2>
+                    <p className="text-gray-600">View and manage all church members</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={() => setActiveTab("management")}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Invite Members
+                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline">
+                          <Settings className="h-4 w-4 mr-2" />
+                          Bulk Actions
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Bulk Member Actions</DialogTitle>
+                          <DialogDescription>
+                            Perform actions on multiple members at once
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label>Action Type</Label>
+                            <Select>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select action" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="change_role">Change Role</SelectItem>
+                                <SelectItem value="send_message">Send Message</SelectItem>
+                                <SelectItem value="export_list">Export List</SelectItem>
+                                <SelectItem value="add_to_group">Add to Group</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <Button className="w-full">Execute Action</Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
+                <MemberManagementSystem selectedChurch={primaryChurch.churchId} />
+              </div>
             ) : (
               <Card className="p-8 text-center">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
