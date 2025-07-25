@@ -22,23 +22,27 @@ export default function ResetPassword() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log("Reset Password useEffect triggered");
+    console.log("=== RESET PASSWORD PAGE LOADED ===");
     console.log("Current URL:", window.location.href);
     console.log("Current search params:", window.location.search);
+    console.log("Current pathname:", window.location.pathname);
     
     // Extract token from URL
     const urlParams = new URLSearchParams(window.location.search);
     const resetToken = urlParams.get('token');
     
     console.log("Extracted token:", resetToken);
+    console.log("Token length:", resetToken ? resetToken.length : 0);
     
     if (!resetToken) {
-      console.log("No token found, showing error");
-      setError("Invalid or missing reset token");
+      console.log("NO TOKEN FOUND - This should show the forgot password form");
+      setError("No reset token provided");
       setIsValidToken(false);
       setIsLoading(false);
       return;
     }
+    
+    console.log("TOKEN FOUND - Proceeding to validate with backend");
     
     // Validate token with backend
     const validateToken = async () => {
@@ -160,7 +164,7 @@ export default function ResetPassword() {
         <Card className="w-full max-w-md">
           <CardContent className="flex items-center justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-            <span className="ml-3 text-gray-600 dark:text-gray-400">Loading...</span>
+            <span className="ml-3 text-gray-600 dark:text-gray-400">Loading reset page...</span>
           </CardContent>
         </Card>
       </div>
@@ -175,7 +179,7 @@ export default function ResetPassword() {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl text-red-600">Invalid Reset Link</CardTitle>
             <CardDescription>
-              This password reset link is invalid or has expired.
+              This password reset link is invalid or has expired. Please request a new password reset.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -185,6 +189,42 @@ export default function ResetPassword() {
             >
               Return to Login
             </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // If no token in URL, show forgot password form instead of error
+  if (!token && isValidToken !== true) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Reset Password</CardTitle>
+            <CardDescription>
+              Enter your email to receive reset instructions
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-medium">Email</label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="alan@soapboxsuperapp.com"
+                  value=""
+                  onChange={() => {}}
+                />
+              </div>
+              <Button className="w-full" onClick={() => setLocation('/login')}>
+                Send Reset Email
+              </Button>
+              <Button variant="ghost" className="w-full" onClick={() => setLocation('/login')}>
+                ← Back to Sign In
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
