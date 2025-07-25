@@ -144,6 +144,9 @@ function MemberTransfer({ churchId }: { churchId: number }) {
     queryFn: () => apiRequest(`/api/cross-campus-members/members/${churchId}/campus`, "GET")
   });
 
+  console.log("Members data:", membersByCampus);
+  console.log("Church ID:", churchId);
+
   // Transfer member mutation
   const transferMutation = useMutation({
     mutationFn: (transferData: any) => 
@@ -208,9 +211,9 @@ function MemberTransfer({ churchId }: { churchId: number }) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {membersByCampus.members?.map((member: any) => (
+                          {(membersByCampus.members || membersByCampus)?.map((member: any) => (
                             <SelectItem key={member.userId} value={member.userId}>
-                              {member.fullName} - {member.campusName}
+                              {member.fullName} - {member.campusName || 'Unassigned'}
                             </SelectItem>
                           ))}
                         </SelectContent>

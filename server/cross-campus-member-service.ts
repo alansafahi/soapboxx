@@ -21,10 +21,11 @@ export class CrossCampusMemberService {
   // Get all members across campuses for a church
   async getMembersByCampus(churchId: number, campusId?: number) {
     try {
-      const query = db
+      // First try to get members with campus assignments
+      const membersWithCampus = await db
         .select({
           userId: users.id,
-          fullName: users.fullName,
+          fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
           email: users.email,
           profileImageUrl: users.profileImageUrl,
           role: users.role,
@@ -45,9 +46,33 @@ export class CrossCampusMemberService {
             campusId ? eq(memberCampusAssignments.campusId, campusId) : undefined
           )
         )
-        .orderBy(asc(campuses.name), asc(users.fullName));
+        .orderBy(asc(campuses.name), sql`CONCAT(${users.firstName}, ' ', ${users.lastName})`);
 
-      return await query;
+      // If no campus assignments exist, fall back to all church members
+      if (membersWithCampus.length === 0) {
+        const allChurchMembers = await db
+          .select({
+            userId: users.id,
+            fullName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
+            email: users.email,
+            profileImageUrl: users.profileImageUrl,
+            role: userChurches.role,
+            campusId: sql<number | null>`NULL`,
+            campusName: sql<string>`'Unassigned'`,
+            isPrimaryCampus: sql<boolean>`false`,
+            membershipStatus: sql<string>`'active'`,
+            assignedAt: sql<string | null>`NULL`,
+            notes: sql<string | null>`NULL`
+          })
+          .from(users)
+          .innerJoin(userChurches, eq(users.id, userChurches.userId))
+          .where(eq(userChurches.churchId, churchId))
+          .orderBy(sql`CONCAT(${users.firstName}, ' ', ${users.lastName})`);
+
+        return allChurchMembers;
+      }
+
+      return membersWithCampus;
     } catch (error) {
       console.error('Error fetching members by campus:', error);
       throw error;
@@ -302,7 +327,7 @@ export class CrossCampusMemberService {
         .select({
           id: memberTransferHistory.id,
           userId: memberTransferHistory.userId,
-          userName: users.fullName,
+          userName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
           fromCampusId: memberTransferHistory.fromCampusId,
           fromCampusName: sql<string>`from_campus.name`,
           toCampusId: memberTransferHistory.toCampusId,
