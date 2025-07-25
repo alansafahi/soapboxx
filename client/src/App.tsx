@@ -131,7 +131,9 @@ function AppRouter() {
                                 <Switch>
                                     <Route path="/login" component={LoginPage} />
                                     <Route path="/auto-login" component={() => import('./pages/auto-login')} />
-                                    <Route path="/reset-password" component={ResetPasswordPage} />
+                                    <Route path="/reset-password">
+                                        <ResetPasswordPage />
+                                    </Route>
                                     <Route path="/email-verification" component={EmailVerificationPage} />
                                     <Route path="/landing" component={SimpleLanding} />
                                     <ProtectedRoute path="/dashboard" component={Home} />
