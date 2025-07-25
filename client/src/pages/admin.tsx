@@ -416,7 +416,11 @@ function MembersPage() {
   }
 
   // Get the first church that user is admin of for default selection
+  // Prioritize SGA Church (2807) if user has access
   const adminChurch = userChurches.find((uc: any) => {
+    const adminRoles = ['church_admin', 'church-admin', 'admin', 'pastor', 'lead-pastor', 'elder', 'system_admin'];
+    return adminRoles.includes(uc.role) && uc.churchId === 2807;
+  }) || userChurches.find((uc: any) => {
     const adminRoles = ['church_admin', 'church-admin', 'admin', 'pastor', 'lead-pastor', 'elder', 'system_admin'];
     return adminRoles.includes(uc.role);
   });
@@ -425,7 +429,8 @@ function MembersPage() {
   React.useEffect(() => {
     if (adminChurch && !selectedChurch) {
       setSelectedChurch(adminChurch.id);
-      console.log("Setting selected church to:", adminChurch.id, adminChurch.name);
+      console.log("Admin page setting selected church to:", adminChurch.id, adminChurch.name);
+      console.log("Admin church details:", adminChurch);
     }
   }, [adminChurch, selectedChurch]);
 

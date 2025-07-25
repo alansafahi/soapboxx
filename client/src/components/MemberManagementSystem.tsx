@@ -46,10 +46,14 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
     return adminRoles.includes(uc.role);
   });
 
-  // Auto-select first admin church if user has only one admin church
+  // Auto-select first admin church prioritizing SGA Church (2807)
   React.useEffect(() => {
-    if (adminChurches.length === 1 && selectedChurch === "all") {
-      setSelectedChurch(adminChurches[0].churchId.toString());
+    if (adminChurches.length >= 1 && selectedChurch === "all") {
+      // Prioritize SGA Church if available
+      const sgaChurch = adminChurches.find((church: any) => church.churchId === 2807);
+      const selectedChurchObj = sgaChurch || adminChurches[0];
+      console.log("Auto-selecting church from MemberManagementSystem:", selectedChurchObj.churchId, selectedChurchObj.name);
+      setSelectedChurch(selectedChurchObj.churchId.toString());
     }
   }, [adminChurches, selectedChurch]);
 
