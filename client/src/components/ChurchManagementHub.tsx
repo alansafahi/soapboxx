@@ -23,13 +23,28 @@ import CampusManagement from "./CampusManagement";
 import { MemberManagementSystem } from "./MemberManagementSystem";
 import { CrossCampusMemberManagement } from "./CrossCampusMemberManagement";
 
-// Common church denominations list
-const DENOMINATIONS = [
-  "Baptist", "Methodist", "Presbyterian", "Lutheran", "Episcopal", "Catholic", "Orthodox",
-  "Pentecostal", "Assembly of God", "Church of Christ", "Disciples of Christ", "Adventist",
-  "Mennonite", "Quaker", "Congregational", "Reformed", "Evangelical", "Non-denominational",
-  "Interdenominational", "Unity", "Unitarian Universalist"
-];
+// Organization-specific affiliation lists
+const AFFILIATIONS = {
+  church: [
+    "Baptist", "Methodist", "Presbyterian", "Lutheran", "Episcopal", "Catholic", "Orthodox",
+    "Pentecostal", "Assembly of God", "Church of Christ", "Disciples of Christ", "Adventist",
+    "Mennonite", "Quaker", "Congregational", "Reformed", "Evangelical", "Non-denominational",
+    "Interdenominational", "Unity", "Unitarian Universalist"
+  ],
+  group: [
+    "Community Organization", "Non-Profit", "Educational", "Support Group", "Recovery Group",
+    "Parent Group", "Youth Organization", "Senior Group", "Health & Wellness", "Environmental",
+    "Cultural Organization", "Arts & Music", "Sports & Recreation", "Professional Association",
+    "Volunteer Group", "Advocacy Group", "Religious Study Group", "Social Club"
+  ],
+  ministry: [
+    "Youth Ministry", "Children's Ministry", "Young Adults Ministry", "Senior Ministry", 
+    "Women's Ministry", "Men's Ministry", "Music Ministry", "Worship Ministry", "Prayer Ministry",
+    "Outreach Ministry", "Missions Ministry", "Education Ministry", "Pastoral Care Ministry",
+    "Community Service Ministry", "Recovery Ministry", "Family Ministry", "Singles Ministry",
+    "Small Groups Ministry", "Discipleship Ministry", "Evangelism Ministry"
+  ]
+};
 
 // Church/Group creation schema
 const createChurchSchema = z.object({
@@ -94,6 +109,9 @@ export function ChurchManagementHub() {
       description: ""
     }
   });
+
+  // Watch the type field to update affiliation options
+  const selectedType = createForm.watch("type") as keyof typeof AFFILIATIONS;
 
   // Claim church form
   const claimForm = useForm({
@@ -294,7 +312,11 @@ export function ChurchManagementHub() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Type</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
+                                <Select onValueChange={(value) => {
+                                  field.onChange(value);
+                                  // Clear denomination when type changes
+                                  createForm.setValue("denomination", "");
+                                }} value={field.value}>
                                   <FormControl>
                                     <SelectTrigger>
                                       <SelectValue />
@@ -314,60 +336,63 @@ export function ChurchManagementHub() {
                           <FormField
                             control={createForm.control}
                             name="denomination"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Denomination/Affiliation</FormLabel>
-                                <Select onValueChange={(value) => {
-                                  if (value === "other") {
-                                    // Clear the field for custom input
-                                    field.onChange("");
-                                  } else {
-                                    field.onChange(value);
-                                  }
-                                }} value={field.value || ""}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select denomination or type custom" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent className="max-h-60 overflow-y-auto">
-                                    <SelectItem value="Baptist">Baptist</SelectItem>
-                                    <SelectItem value="Methodist">Methodist</SelectItem>
-                                    <SelectItem value="Presbyterian">Presbyterian</SelectItem>
-                                    <SelectItem value="Lutheran">Lutheran</SelectItem>
-                                    <SelectItem value="Episcopal">Episcopal</SelectItem>
-                                    <SelectItem value="Catholic">Catholic</SelectItem>
-                                    <SelectItem value="Orthodox">Orthodox</SelectItem>
-                                    <SelectItem value="Pentecostal">Pentecostal</SelectItem>
-                                    <SelectItem value="Assembly of God">Assembly of God</SelectItem>
-                                    <SelectItem value="Church of Christ">Church of Christ</SelectItem>
-                                    <SelectItem value="Disciples of Christ">Disciples of Christ</SelectItem>
-                                    <SelectItem value="Adventist">Adventist</SelectItem>
-                                    <SelectItem value="Mennonite">Mennonite</SelectItem>
-                                    <SelectItem value="Quaker">Quaker</SelectItem>
-                                    <SelectItem value="Congregational">Congregational</SelectItem>
-                                    <SelectItem value="Reformed">Reformed</SelectItem>
-                                    <SelectItem value="Evangelical">Evangelical</SelectItem>
-                                    <SelectItem value="Non-denominational">Non-denominational</SelectItem>
-                                    <SelectItem value="Interdenominational">Interdenominational</SelectItem>
-                                    <SelectItem value="Unity">Unity</SelectItem>
-                                    <SelectItem value="Unitarian Universalist">Unitarian Universalist</SelectItem>
-                                    <SelectItem value="other">Other (type custom)</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                {(!field.value || field.value === "" || !DENOMINATIONS.includes(field.value)) && (
-                                  <FormControl>
-                                    <Input
-                                      placeholder="Enter custom denomination..."
-                                      value={field.value || ""}
-                                      onChange={(e) => field.onChange(e.target.value)}
-                                      className="mt-2"
-                                    />
-                                  </FormControl>
-                                )}
-                                <FormMessage />
-                              </FormItem>
-                            )}
+                            render={({ field }) => {
+                              const currentAffiliations = AFFILIATIONS[selectedType] || AFFILIATIONS.church;
+                              const isCustomValue = !currentAffiliations.includes(field.value || "");
+                              
+                              return (
+                                <FormItem>
+                                  <FormLabel>
+                                    {selectedType === 'church' ? 'Denomination' : 'Affiliation'}
+                                  </FormLabel>
+                                  <Select onValueChange={(value) => {
+                                    if (value === "other") {
+                                      // Clear the field for custom input
+                                      field.onChange("");
+                                    } else {
+                                      field.onChange(value);
+                                    }
+                                  }} value={field.value || ""}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder={
+                                          selectedType === 'church' 
+                                            ? "Select denomination or type custom"
+                                            : selectedType === 'group'
+                                            ? "Select group type or type custom"
+                                            : "Select ministry type or type custom"
+                                        } />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent className="max-h-60 overflow-y-auto">
+                                      {currentAffiliations.map((affiliation) => (
+                                        <SelectItem key={affiliation} value={affiliation}>
+                                          {affiliation}
+                                        </SelectItem>
+                                      ))}
+                                      <SelectItem value="other">Other (type custom)</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  {(!field.value || field.value === "" || isCustomValue) && (
+                                    <FormControl>
+                                      <Input
+                                        placeholder={
+                                          selectedType === 'church' 
+                                            ? "Enter custom denomination..."
+                                            : selectedType === 'group'
+                                            ? "Enter custom group type..."
+                                            : "Enter custom ministry type..."
+                                        }
+                                        value={field.value || ""}
+                                        onChange={(e) => field.onChange(e.target.value)}
+                                        className="mt-2"
+                                      />
+                                    </FormControl>
+                                  )}
+                                  <FormMessage />
+                                </FormItem>
+                              );
+                            }}
                           />
 
                           <FormField
