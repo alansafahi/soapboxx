@@ -169,6 +169,7 @@ export const users = pgTable("users", {
   verificationNotes: text("verification_notes"), // Admin notes for verification
   realNameVerified: boolean("real_name_verified").default(false), // Manual verification flag
   independentCircleLimit: integer("independent_circle_limit").default(2), // Configurable limit per user
+  isDiscoverable: boolean("is_discoverable").default(true), // Privacy control for user search
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

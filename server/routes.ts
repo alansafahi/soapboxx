@@ -1085,7 +1085,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User search endpoint - search for users by name or email
+  // User search endpoint - search for users by name or email with church-scoped privacy
   app.get('/api/users/search', isAuthenticated, async (req: any, res) => {
     try {
       const { q: query } = req.query;
@@ -1102,24 +1102,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get user's church for scoped search
       const currentUserChurch = await storage.getUserChurch(userId);
       
-      // Search for users
-      const searchResults = await storage.searchUsers(query.trim());
+      if (!currentUserChurch) {
+        return res.json({ 
+          success: true, 
+          users: [],
+          message: "Church membership required for user search"
+        });
+      }
       
-      // Filter results based on privacy and church scope
-      const filteredResults = searchResults
-        .filter(user => user.id !== userId) // Exclude current user
-        .map(user => ({
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          profileImageUrl: user.profileImageUrl,
-          // Include church info if user is in same church
-          churchId: currentUserChurch?.churchId === user.churchId ? user.churchId : null,
-          role: currentUserChurch?.churchId === user.churchId ? user.role : null
-        }))
-        .slice(0, 10); // Limit to 10 results
+      // Search for users with safety constraints
+      const searchResults = await storage.searchUsers(
+        query.trim(), 
+        userId, 
+        currentUserChurch.churchId
+      );
+      
+      // Format results with privacy protection
+      const filteredResults = searchResults.map(user => ({
+        id: user.id,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
+        churchId: user.churchId,
+        role: user.role,
+        // Only show email to church staff
+        email: ['church_admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(currentUserChurch.role) 
+          ? user.email 
+          : undefined
+      })); // Limit to 10 results
 
       res.json({ 
         success: true, 

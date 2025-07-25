@@ -47,6 +47,7 @@ const AudioRoutines = lazy(() => import("./pages/AudioRoutines"));
 const VideoLibrary = lazy(() => import("./pages/video-library"));
 const ImageGallery = lazy(() => import("./pages/ImageGallery"));
 const ContactsPage = lazy(() => import("./pages/contacts"));
+const PeoplePage = lazy(() => import("./pages/people"));
 const EmailVerificationPage = lazy(() => import("./pages/EmailVerification"));
 
 // Admin Portal Pages
@@ -169,6 +170,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/chat" component={Chat} />
                                     <ProtectedRoute path="/leaderboard" component={Leaderboard} />
                                     <ProtectedRoute path="/contacts" component={ContactsPage} />
+                                    <ProtectedRoute path="/people" component={PeoplePage} />
                                     <ProtectedRoute path="/profile" component={Profile} />
                                     <ProtectedRoute path="/settings" component={SettingsPage} />
                                     <ProtectedRoute path="/divine" component={DIVINEPage} />

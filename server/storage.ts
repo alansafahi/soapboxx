@@ -1014,20 +1014,43 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async searchUsers(query: string): Promise<User[]> {
+  async searchUsers(query: string, currentUserId?: string, churchId?: number): Promise<User[]> {
     const searchTerm = `%${query.toLowerCase()}%`;
-    const foundUsers = await db
-      .select()
+    
+    // Build the query with safety constraints
+    let queryBuilder = db
+      .select({
+        id: users.id,
+        email: users.email,
+        username: users.username,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        churchId: userChurches.churchId,
+        role: userChurches.role,
+        isDiscoverable: sql`${users.isDiscoverable}::boolean`
+      })
       .from(users)
+      .leftJoin(userChurches, eq(users.id, userChurches.userId))
       .where(
-        or(
-          ilike(users.firstName, searchTerm),
-          ilike(users.lastName, searchTerm),
-          ilike(users.email, searchTerm)
+        and(
+          // Basic search criteria
+          or(
+            ilike(users.firstName, searchTerm),
+            ilike(users.lastName, searchTerm),
+            ilike(users.email, searchTerm)
+          ),
+          // Safety constraints
+          currentUserId ? ne(users.id, currentUserId) : undefined, // Exclude current user
+          churchId ? eq(userChurches.churchId, churchId) : undefined, // Church-scoped search
+          eq(sql`${users.isDiscoverable}::boolean`, true), // Only discoverable users
+          eq(userChurches.isActive, true) // Only active church members
         )
       )
       .limit(10);
-    return foundUsers;
+    
+    const foundUsers = await queryBuilder;
+    return foundUsers as User[];
   }
 
   async completeOnboarding(userId: string, onboardingData: any): Promise<void> {
