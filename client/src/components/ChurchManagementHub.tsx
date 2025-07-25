@@ -23,6 +23,14 @@ import CampusManagement from "./CampusManagement";
 import { MemberManagementSystem } from "./MemberManagementSystem";
 import { CrossCampusMemberManagement } from "./CrossCampusMemberManagement";
 
+// Common church denominations list
+const DENOMINATIONS = [
+  "Baptist", "Methodist", "Presbyterian", "Lutheran", "Episcopal", "Catholic", "Orthodox",
+  "Pentecostal", "Assembly of God", "Church of Christ", "Disciples of Christ", "Adventist",
+  "Mennonite", "Quaker", "Congregational", "Reformed", "Evangelical", "Non-denominational",
+  "Interdenominational", "Unity", "Unitarian Universalist"
+];
+
 // Church/Group creation schema
 const createChurchSchema = z.object({
   name: z.string().min(1, "Organization name is required"),
@@ -309,9 +317,54 @@ export function ChurchManagementHub() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Denomination/Affiliation</FormLabel>
-                                <FormControl>
-                                  <Input placeholder="Baptist, Methodist, etc." {...field} />
-                                </FormControl>
+                                <Select onValueChange={(value) => {
+                                  if (value === "other") {
+                                    // Clear the field for custom input
+                                    field.onChange("");
+                                  } else {
+                                    field.onChange(value);
+                                  }
+                                }} value={field.value || ""}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select denomination or type custom" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent className="max-h-60 overflow-y-auto">
+                                    <SelectItem value="Baptist">Baptist</SelectItem>
+                                    <SelectItem value="Methodist">Methodist</SelectItem>
+                                    <SelectItem value="Presbyterian">Presbyterian</SelectItem>
+                                    <SelectItem value="Lutheran">Lutheran</SelectItem>
+                                    <SelectItem value="Episcopal">Episcopal</SelectItem>
+                                    <SelectItem value="Catholic">Catholic</SelectItem>
+                                    <SelectItem value="Orthodox">Orthodox</SelectItem>
+                                    <SelectItem value="Pentecostal">Pentecostal</SelectItem>
+                                    <SelectItem value="Assembly of God">Assembly of God</SelectItem>
+                                    <SelectItem value="Church of Christ">Church of Christ</SelectItem>
+                                    <SelectItem value="Disciples of Christ">Disciples of Christ</SelectItem>
+                                    <SelectItem value="Adventist">Adventist</SelectItem>
+                                    <SelectItem value="Mennonite">Mennonite</SelectItem>
+                                    <SelectItem value="Quaker">Quaker</SelectItem>
+                                    <SelectItem value="Congregational">Congregational</SelectItem>
+                                    <SelectItem value="Reformed">Reformed</SelectItem>
+                                    <SelectItem value="Evangelical">Evangelical</SelectItem>
+                                    <SelectItem value="Non-denominational">Non-denominational</SelectItem>
+                                    <SelectItem value="Interdenominational">Interdenominational</SelectItem>
+                                    <SelectItem value="Unity">Unity</SelectItem>
+                                    <SelectItem value="Unitarian Universalist">Unitarian Universalist</SelectItem>
+                                    <SelectItem value="other">Other (type custom)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                {(!field.value || field.value === "" || !DENOMINATIONS.includes(field.value)) && (
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Enter custom denomination..."
+                                      value={field.value || ""}
+                                      onChange={(e) => field.onChange(e.target.value)}
+                                      className="mt-2"
+                                    />
+                                  </FormControl>
+                                )}
                                 <FormMessage />
                               </FormItem>
                             )}
