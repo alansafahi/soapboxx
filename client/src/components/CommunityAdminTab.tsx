@@ -13,6 +13,7 @@ import { Building2, Settings, Users, Eye, Save, MapPin, Phone, Mail, Globe, Cale
 import { CommunitySettings } from "./CommunitySettings";
 import { ChurchFeatureManager } from "./ChurchFeatureManager";
 import { EventManagement } from "./EventManagement";
+import CampusManagement from "./CampusManagement";
 
 interface CommunityProfile {
   id: number;
@@ -189,7 +190,7 @@ export function CommunityAdminTab() {
 
       {selectedCommunity && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile" className="flex items-center space-x-2">
               <Building2 className="h-4 w-4" />
               <span>Profile</span>
@@ -201,6 +202,10 @@ export function CommunityAdminTab() {
             <TabsTrigger value="events" className="flex items-center space-x-2">
               <Calendar className="h-4 w-4" />
               <span>Events</span>
+            </TabsTrigger>
+            <TabsTrigger value="campuses" className="flex items-center space-x-2">
+              <Building2 className="h-4 w-4" />
+              <span>Campuses</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center space-x-2">
               <Users className="h-4 w-4" />
@@ -372,6 +377,18 @@ export function CommunityAdminTab() {
               </p>
             </div>
             <EventManagement />
+          </TabsContent>
+
+          <TabsContent value="campuses" className="space-y-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Campus Management</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Manage multiple campus locations for your community
+              </p>
+            </div>
+            {selectedCommunityId && (
+              <CampusManagement churchId={parseInt(selectedCommunityId)} />
+            )}
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
