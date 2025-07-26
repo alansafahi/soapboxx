@@ -50,48 +50,17 @@ export function CommunityAdminTab() {
   const [activeTab, setActiveTab] = useState("profile");
   const [editedProfile, setEditedProfile] = useState<Partial<CommunityProfile>>({});
 
-  // Show authentication prompt if user is not logged in
-  if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Loading your communities...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center max-w-md mx-auto">
-          <Building2 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Authentication Required
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            You need to be logged in to access Community Administration.
-          </p>
-          <Button onClick={() => window.location.href = '/api/login'} className="bg-blue-600 hover:bg-blue-700 text-white">
-            Sign In
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Get communities where user has admin role
+  // Get communities where user has admin role - always call hooks in same order
   const { data: adminCommunities = [], isLoading: communitiesLoading, error: communitiesError } = useQuery({
     queryKey: ["/api/users/communities"],
-    enabled: !!user,
+    enabled: !!user && isAuthenticated,
     retry: 2,
   }) as { data: any[], isLoading: boolean, error: any };
 
-  // Get communities created by user
+  // Get communities created by user - always call hooks in same order
   const { data: createdCommunities = [], isLoading: createdLoading, error: createdError } = useQuery({
     queryKey: ["/api/users/created-churches"],
-    enabled: !!user,
+    enabled: !!user && isAuthenticated,
     retry: 2,
   }) as { data: any[], isLoading: boolean, error: any };
 
@@ -109,14 +78,7 @@ export function CommunityAdminTab() {
     }
   });
 
-  // Auto-select first community if none selected
-  useEffect(() => {
-    if (!selectedCommunityId && allAdminCommunities.length > 0) {
-      setSelectedCommunityId(allAdminCommunities[0].id.toString());
-    }
-  }, [allAdminCommunities, selectedCommunityId]);
-
-  // Get selected community details
+  // Get selected community details - always call hooks in same order
   const { data: selectedCommunity, isLoading: communityLoading } = useQuery({
     queryKey: ['community-details', selectedCommunityId],
     queryFn: async () => {
@@ -127,8 +89,15 @@ export function CommunityAdminTab() {
       }
       return await response.json();
     },
-    enabled: !!selectedCommunityId,
+    enabled: !!selectedCommunityId && isAuthenticated,
   }) as { data: CommunityProfile | null, isLoading: boolean };
+
+  // Auto-select first community if none selected
+  useEffect(() => {
+    if (!selectedCommunityId && allAdminCommunities.length > 0) {
+      setSelectedCommunityId(allAdminCommunities[0].id.toString());
+    }
+  }, [allAdminCommunities, selectedCommunityId]);
 
   // Initialize edited profile when community data loads
   useEffect(() => {
@@ -169,6 +138,37 @@ export function CommunityAdminTab() {
   const handleInputChange = (field: keyof CommunityProfile, value: string) => {
     setEditedProfile(prev => ({ ...prev, [field]: value }));
   };
+
+  // Show authentication prompt if user is not logged in
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading your communities...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center max-w-md mx-auto">
+          <Building2 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            Authentication Required
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            You need to be logged in to access Community Administration.
+          </p>
+          <Button onClick={() => window.location.href = '/api/login'} className="bg-blue-600 hover:bg-blue-700 text-white">
+            Sign In
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Show error states for debugging
   if (communitiesError || createdError) {
