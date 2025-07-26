@@ -7297,6 +7297,8 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       const churchId = parseInt(req.params.churchId);
       
+      console.log('Getting church details for churchId:', churchId, 'userId:', userId);
+      
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
@@ -7306,13 +7308,15 @@ Return JSON with this exact structure:
       }
 
       const church = await storage.getChurch(churchId);
+      console.log('Church found:', church ? church.name : 'Not found');
+      
       if (!church) {
         return res.status(404).json({ error: 'Church not found' });
       }
 
       res.json(church);
     } catch (error) {
-      // Error getting church details - silent error handling
+      console.error('Error getting church details:', error);
       res.status(500).json({ error: 'Failed to get church details' });
     }
   });
