@@ -7601,18 +7601,13 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       const churchId = parseInt(req.params.churchId);
       
-      console.log('Church features request:', { userId, churchId });
-      
       if (!userId) {
-        console.log('No userId in session');
         return res.status(401).json({ error: 'Authentication required' });
       }
 
       // Check if user has access to this church
       const userChurch = await storage.getUserChurchRole(userId, churchId);
       const user = await storage.getUser(userId);
-      
-      console.log('Church features access check:', { userChurch, userRole: user?.role });
       
       // Allow access for global admins or church creators
       let hasAccess = false;
@@ -7627,14 +7622,11 @@ Return JSON with this exact structure:
         hasAccess = adminChurches.some(church => church.id === churchId);
       }
       
-      console.log('Church features hasAccess:', hasAccess);
-      
       if (!hasAccess) {
         return res.status(403).json({ error: 'Access denied to this church' });
       }
 
       const features = await storage.getChurchFeatureSettings(churchId);
-      console.log('Church features retrieved:', features?.length || 0, 'features');
       res.json(features);
     } catch (error) {
       console.error('Error getting church features:', error);
@@ -7683,8 +7675,6 @@ Return JSON with this exact structure:
         return res.status(403).json({ error: 'Admin access required' });
       }
 
-      console.log('Updating feature:', { featureId, isEnabled, feature: feature.feature_name });
-      
       const updatedFeature = await storage.updateChurchFeatureSetting({
         churchId: feature.church_id,
         featureCategory: feature.feature_category,
@@ -7693,7 +7683,6 @@ Return JSON with this exact structure:
         enabledBy: userId
       });
       
-      console.log('Feature update successful:', updatedFeature);
       res.json(updatedFeature);
     } catch (error) {
       console.error('Error updating church feature:', error);

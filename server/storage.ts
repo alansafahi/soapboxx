@@ -1870,20 +1870,15 @@ export class DatabaseStorage implements IStorage {
 
   async getUserChurchRole(userId: string, churchId: number): Promise<{ role: string } | undefined> {
     try {
-      console.log('Getting user church role:', { userId, churchId });
-      
-      // Use raw SQL to avoid Drizzle ORM issues with table aliases
       const result = await pool.query(
         'SELECT role FROM user_churches WHERE user_id = $1 AND church_id = $2 AND is_active = true LIMIT 1',
         [userId, churchId]
       );
 
       if (result.rows.length === 0) {
-        console.log('No user church found');
         return undefined;
       }
 
-      console.log('User church role found:', result.rows[0]);
       return {
         role: result.rows[0].role || 'member'
       };

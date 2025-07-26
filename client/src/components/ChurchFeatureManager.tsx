@@ -404,13 +404,6 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
                   const feature = featureLookup[featureKey];
                   const IconComponent = featureDefinition.icon;
                   
-                  console.log('Rendering feature:', { 
-                    featureKey, 
-                    feature: feature || 'NOT FOUND', 
-                    isEnabled: feature?.is_enabled,
-                    isDisabled: updateFeatureMutation.isPending || !feature
-                  });
-                  
                   return (
                     <div 
                       key={featureKey}
