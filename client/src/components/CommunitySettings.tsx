@@ -205,9 +205,9 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
 
   // Get current value for a setting with fallbacks
   const getSetting = (section: string, field: string, defaultValue: any = false) => {
-    return settings[section as keyof CommunitySettings]?.[field] ?? 
-           currentSettings?.[section]?.[field] ?? 
-           defaultValue;
+    const sectionData = settings[section as keyof CommunitySettings] as any;
+    const currentSectionData = currentSettings?.[section] as any;
+    return sectionData?.[field] ?? currentSectionData?.[field] ?? defaultValue;
   };
 
   const hasAdminAccess = () => {
