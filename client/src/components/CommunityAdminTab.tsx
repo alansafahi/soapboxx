@@ -199,13 +199,13 @@ export function CommunityAdminTab() {
               <Building2 className="h-4 w-4" />
               <span>Campuses</span>
             </TabsTrigger>
-            <TabsTrigger value="features" className="flex items-center space-x-2">
-              <Settings className="h-4 w-4" />
-              <span>Features</span>
-            </TabsTrigger>
             <TabsTrigger value="events" className="flex items-center space-x-2">
               <Calendar className="h-4 w-4" />
               <span>Events</span>
+            </TabsTrigger>
+            <TabsTrigger value="features" className="flex items-center space-x-2">
+              <Settings className="h-4 w-4" />
+              <span>Features</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center space-x-2">
               <Users className="h-4 w-4" />
