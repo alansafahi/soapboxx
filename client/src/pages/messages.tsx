@@ -91,26 +91,6 @@ export default function MessagesPage() {
   const [selectedContact, setSelectedContact] = useState<string | null>(null);
   const [expandedConversations, setExpandedConversations] = useState<Set<number>>(new Set());
 
-  // Handle auto-selection of contact from URL parameters
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const contactId = urlParams.get('contact');
-    const contactName = urlParams.get('name');
-    
-    if (contactId && contactName) {
-      setSelectedContact(contactId);
-      setShowNewMessageDialog(true);
-      toast({
-        title: "Contact Selected",
-        description: `Ready to message ${decodeURIComponent(contactName)}`,
-      });
-      
-      // Clear URL parameters after handling them
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
-    }
-  }, [location, toast]);
-
   // Fetch conversations
   const { data: conversations = [], isLoading: conversationsLoading } = useQuery<ConversationDisplay[]>({
     queryKey: ["/api/chat/conversations"],
@@ -128,6 +108,32 @@ export default function MessagesPage() {
     queryKey: ["/api/contacts"],
     enabled: !!user,
   });
+
+  // Handle auto-selection of contact from URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const contactId = urlParams.get('contact');
+    const contactName = urlParams.get('name');
+    
+    if (contactId && contactName) {
+      console.log('Auto-selecting contact:', { contactId, contactName });
+      if (contacts && contacts.length > 0) {
+        console.log('Available contacts:', contacts.map(c => ({ id: c.id, name: `${c.firstName} ${c.lastName}` })));
+      }
+      
+      setSelectedContact(contactId);
+      setSearchQuery(""); // Clear search to show all contacts
+      setShowNewMessageDialog(true);
+      toast({
+        title: "Contact Selected",
+        description: `Ready to message ${decodeURIComponent(contactName)}`,
+      });
+      
+      // Clear URL parameters after handling them
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [location, toast, contacts]);
 
   // Send message mutation
   const sendMessageMutation = useMutation({
@@ -193,9 +199,12 @@ export default function MessagesPage() {
     conv.participantName?.toLowerCase().includes(searchQuery.toLowerCase()) || false
   );
 
-  const filteredContacts = contacts.filter((contact) =>
-    `${contact.firstName} ${contact.lastName}`.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredContacts = contacts.filter((contact) => {
+    const searchMatch = `${contact.firstName} ${contact.lastName}`.toLowerCase().includes(searchQuery.toLowerCase());
+    const isSelected = selectedContact === contact.id;
+    // Always show selected contact even if it doesn't match search
+    return searchMatch || isSelected;
+  });
 
   const getInitials = (firstName: string, lastName: string) => {
     return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`;
