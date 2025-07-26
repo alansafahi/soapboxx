@@ -17,6 +17,7 @@ interface Community {
   address: string;
   city: string;
   state: string;
+  zipCode?: string;
   memberCount?: number;
   logoUrl?: string;
   description?: string;
@@ -34,6 +35,8 @@ export default function EnhancedCommunityDiscovery() {
   
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
+  const [proximityFilter, setProximityFilter] = useState("");
+  const [zipCodeFilter, setZipCodeFilter] = useState("");
   const [communityTypeFilter, setCommunityTypeFilter] = useState("churches"); // Primary filter: churches, groups, ministries
   const [denominationFilter, setDenominationFilter] = useState(""); // Secondary filter based on type
   const [sizeFilter, setSizeFilter] = useState("");
@@ -102,8 +105,51 @@ export default function EnhancedCommunityDiscovery() {
     if (locationFilter) {
       filtered = filtered.filter(community => 
         community.city.toLowerCase().includes(locationFilter.toLowerCase()) ||
-        community.state.toLowerCase().includes(locationFilter.toLowerCase())
+        community.state.toLowerCase().includes(locationFilter.toLowerCase()) ||
+        community.address?.toLowerCase().includes(locationFilter.toLowerCase())
       );
+    }
+
+    if (zipCodeFilter) {
+      filtered = filtered.filter(community => 
+        community.zipCode?.includes(zipCodeFilter) ||
+        community.address?.includes(zipCodeFilter)
+      );
+    }
+
+    // Enhanced proximity filtering with ZIP code-based distance estimation
+    if (proximityFilter && proximityFilter !== "all" && zipCodeFilter) {
+      const maxDistance = parseInt(proximityFilter);
+      filtered = filtered.filter(community => {
+        if (!community.zipCode) return false;
+        
+        // Enhanced ZIP code distance estimation
+        const userZipPrefix = zipCodeFilter.substring(0, 3);
+        const communityZipPrefix = community.zipCode.substring(0, 3);
+        
+        // Same ZIP prefix = within 10 miles typically
+        if (userZipPrefix === communityZipPrefix) {
+          return maxDistance >= 5;
+        }
+        
+        // Adjacent ZIP prefixes = within 25-50 miles typically
+        const zipDiff = Math.abs(parseInt(userZipPrefix) - parseInt(communityZipPrefix));
+        if (zipDiff <= 1) {
+          return maxDistance >= 25;
+        }
+        
+        // Regional ZIP codes = within 50-100 miles for larger differences
+        if (zipDiff <= 3) {
+          return maxDistance >= 50;
+        }
+        
+        // Wider regional = within 100+ miles
+        if (zipDiff <= 10) {
+          return maxDistance >= 100;
+        }
+        
+        return false;
+      });
     }
 
     if (denominationFilter && denominationFilter !== "all") {
@@ -125,7 +171,7 @@ export default function EnhancedCommunityDiscovery() {
     }
 
     return filtered;
-  }, [communities, searchQuery, locationFilter, communityTypeFilter, denominationFilter, sizeFilter, userCommunities]);
+  }, [communities, searchQuery, locationFilter, zipCodeFilter, proximityFilter, communityTypeFilter, denominationFilter, sizeFilter, userCommunities]);
 
   // Adaptive secondary filter options based on primary selection
   const getSecondaryFilterOptions = useMemo(() => {
@@ -368,8 +414,8 @@ export default function EnhancedCommunityDiscovery() {
   return (
     <div className="space-y-6">
       {/* Search and Filters */}
-      <div className="space-y-4">
-        {/* Search Bar */}
+      <div className="space-y-6">
+        {/* Global Search */}
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
           <Input
@@ -380,7 +426,56 @@ export default function EnhancedCommunityDiscovery() {
           />
         </div>
 
-        {/* Primary and Secondary Filters */}
+        {/* Location-Based Search Section */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+            <MapPin className="h-4 w-4 mr-2" />
+            Find Communities Near You
+          </h3>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* City/State Location Filter */}
+          <div className="relative">
+            <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search by city, state, or address..."
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* ZIP Code Filter */}
+          <Input
+            placeholder="Enter ZIP code..."
+            value={zipCodeFilter}
+            onChange={(e) => setZipCodeFilter(e.target.value)}
+            maxLength={5}
+          />
+
+          {/* Proximity Filter */}
+          <Select value={proximityFilter} onValueChange={setProximityFilter}>
+            <SelectTrigger>
+              <MapPin className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="Distance from me" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Any Distance</SelectItem>
+              <SelectItem value="5">Within 5 miles</SelectItem>
+              <SelectItem value="10">Within 10 miles</SelectItem>
+              <SelectItem value="25">Within 25 miles</SelectItem>
+              <SelectItem value="50">Within 50 miles</SelectItem>
+              <SelectItem value="100">Within 100 miles</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        </div>
+
+        {/* Community Type and Detailed Filters */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+            <Filter className="h-4 w-4 mr-2" />
+            Refine Your Search
+          </h3>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {/* Primary Filter: Community Type */}
           <Select value={communityTypeFilter} onValueChange={(value) => {
@@ -412,11 +507,11 @@ export default function EnhancedCommunityDiscovery() {
             </SelectContent>
           </Select>
 
-          {/* Location Filter */}
+          {/* Name Search */}
           <Input
-            placeholder="Filter by location..."
-            value={locationFilter}
-            onChange={(e) => setLocationFilter(e.target.value)}
+            placeholder="Search by community name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
 
           {/* Size Filter */}
@@ -433,14 +528,34 @@ export default function EnhancedCommunityDiscovery() {
             </SelectContent>
           </Select>
         </div>
+        </div>
       </div>
 
-      {/* Results Summary */}
+      {/* Enhanced Results Summary */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-600 dark:text-gray-400">
           Found {filteredCommunities.length} communities
           {searchQuery && ` for "${searchQuery}"`}
+          {zipCodeFilter && proximityFilter && proximityFilter !== "all" && 
+            ` within ${proximityFilter} miles of ${zipCodeFilter}`}
         </p>
+        {(searchQuery || locationFilter || zipCodeFilter || denominationFilter || sizeFilter !== "all") && (
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              setSearchQuery("");
+              setLocationFilter("");
+              setZipCodeFilter("");
+              setProximityFilter("");
+              setCommunityTypeFilter("churches");
+              setDenominationFilter("");
+              setSizeFilter("");
+            }}
+          >
+            Clear Filters
+          </Button>
+        )}
       </div>
 
       {/* Community Grid */}
@@ -460,6 +575,8 @@ export default function EnhancedCommunityDiscovery() {
                 onClick={() => {
                   setSearchQuery("");
                   setLocationFilter("");
+                  setZipCodeFilter("");
+                  setProximityFilter("");
                   setCommunityTypeFilter("churches");
                   setDenominationFilter("");
                   setSizeFilter("");
