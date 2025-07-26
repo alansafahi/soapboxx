@@ -9,9 +9,10 @@ import { Textarea } from "./ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useToast } from "../hooks/use-toast";
-import { Building2, Settings, Users, Eye, Save, MapPin, Phone, Mail, Globe } from "lucide-react";
+import { Building2, Settings, Users, Eye, Save, MapPin, Phone, Mail, Globe, Calendar } from "lucide-react";
 import { CommunitySettings } from "./CommunitySettings";
 import { ChurchFeatureManager } from "./ChurchFeatureManager";
+import { EventManagement } from "./EventManagement";
 
 interface CommunityProfile {
   id: number;
@@ -188,7 +189,7 @@ export function CommunityAdminTab() {
 
       {selectedCommunity && (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="profile" className="flex items-center space-x-2">
               <Building2 className="h-4 w-4" />
               <span>Profile</span>
@@ -196,6 +197,10 @@ export function CommunityAdminTab() {
             <TabsTrigger value="features" className="flex items-center space-x-2">
               <Settings className="h-4 w-4" />
               <span>Features</span>
+            </TabsTrigger>
+            <TabsTrigger value="events" className="flex items-center space-x-2">
+              <Calendar className="h-4 w-4" />
+              <span>Events</span>
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center space-x-2">
               <Users className="h-4 w-4" />
@@ -357,6 +362,16 @@ export function CommunityAdminTab() {
                 communityType={selectedCommunity.type}
               />
             )}
+          </TabsContent>
+
+          <TabsContent value="events" className="space-y-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Event Management</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Create and manage events for your community
+              </p>
+            </div>
+            <EventManagement />
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">

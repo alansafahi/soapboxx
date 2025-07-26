@@ -115,12 +115,10 @@ function MembersPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="community-admin">Community Admin</TabsTrigger>
-            <TabsTrigger value="features">Features</TabsTrigger>
             <TabsTrigger value="campuses">Campuses</TabsTrigger>
-            <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="media" className="hidden lg:block">Media</TabsTrigger>
             <TabsTrigger value="analytics" className="hidden lg:block">Analytics</TabsTrigger>
             <TabsTrigger value="settings" className="hidden lg:block">Settings</TabsTrigger>
@@ -213,26 +211,7 @@ function MembersPage() {
 
 
 
-          <TabsContent value="features" className="space-y-6">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Settings className="h-6 w-6" />
-                Church Feature Management
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Configure which SoapBox features are available to church members. Perfect for mega churches that want to use only specific SoapBox features while maintaining their existing systems.
-              </p>
-            </div>
-            {user?.role === 'soapbox_owner' ? (
-              <ChurchFeatureManager churchId={3} userRole={user.role} />
-            ) : (
-              <Card className="p-8 text-center">
-                <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-                <h2 className="text-xl font-semibold mb-2">Access Restricted</h2>
-                <p className="text-gray-600">Feature management is only accessible to SoapBox administrators.</p>
-              </Card>
-            )}
-          </TabsContent>
+
 
           <TabsContent value="campuses" className="space-y-6">
             <div className="mb-6">
@@ -255,10 +234,7 @@ function MembersPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="events" className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Event Management</h2>
-            <EventManagement />
-          </TabsContent>
+
 
           <TabsContent value="media" className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Media Management</h2>

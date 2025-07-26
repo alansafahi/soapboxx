@@ -151,6 +151,14 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes
+- July 26, 2025: FEATURES AND EVENTS TABS REMOVAL WITH COMMUNITY ADMINISTRATION INTEGRATION COMPLETED - Successfully removed redundant Features and Events tabs from main Admin Portal and integrated Events into Community Administration
+  - FEATURES TAB REMOVED: Eliminated redundant "Features" tab from main Admin Portal since functionality already exists in Community Administration
+  - EVENTS TAB REMOVED: Moved Events functionality from main Admin Portal into Community Administration for better organization
+  - EVENTS INTEGRATED: Added Events tab to CommunityAdminTab with full EventManagement functionality accessible per community
+  - GRID LAYOUT OPTIMIZED: Updated TabsList grid from 7 columns to 5 columns after removing Features and Events tabs
+  - COMMUNITY ADMINISTRATION ENHANCED: Now includes Profile, Features, Events, and Settings tabs for comprehensive community management
+  - LOGICAL ORGANIZATION: Events management now properly scoped to individual communities rather than global admin function
+  - CONSISTENT ARCHITECTURE: All community-specific functions (profile, features, events, settings) now consolidated under Community Administration
 - July 26, 2025: CHURCH ADMIN TAB REMOVAL AND COMMUNITY ADMIN ENHANCEMENT COMPLETED - Successfully removed redundant Church Admin tab and enhanced Community Admin to handle both admin roles and created communities
   - CHURCH ADMIN TAB REMOVED: Eliminated "Church Admin" tab from main Admin Portal as functionality was redundant with Community Admin
   - ENHANCED COMMUNITY ADMIN: Updated CommunityAdminTab to show both communities where user has admin role AND communities user created
