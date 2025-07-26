@@ -13,7 +13,7 @@ import { Separator } from "../components/ui/separator";
 import { ScrollArea } from "../components/ui/scroll-area";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
-import { Search, Plus, Send, Users, MoreVertical, Mail, MessageCircle, ChevronDown, ChevronRight } from "lucide-react";
+import { Search, Plus, Send, Users, MoreVertical, Mail, MessageCircle, ChevronDown, ChevronRight, Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -104,6 +104,10 @@ export default function MessagesPage() {
         title: "Contact Selected",
         description: `Ready to message ${decodeURIComponent(contactName)}`,
       });
+      
+      // Clear URL parameters after handling them
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
     }
   }, [location, toast]);
 
@@ -220,7 +224,14 @@ export default function MessagesPage() {
             <p className="text-gray-600 dark:text-gray-300 mt-1">Connect with your faith community</p>
           </div>
 
-          <Dialog open={showNewMessageDialog} onOpenChange={setShowNewMessageDialog}>
+          <Dialog open={showNewMessageDialog} onOpenChange={(open) => {
+            setShowNewMessageDialog(open);
+            if (!open) {
+              setSelectedContact(null);
+              setSearchQuery("");
+              setNewMessage("");
+            }
+          }}>
             <DialogTrigger asChild>
               <Button className="bg-purple-600 hover:bg-purple-700">
                 <Plus className="w-4 h-4 mr-2" />
@@ -231,7 +242,10 @@ export default function MessagesPage() {
               <DialogHeader>
                 <DialogTitle>Start New Conversation</DialogTitle>
                 <DialogDescription>
-                  Choose someone from your contacts to start messaging
+                  {selectedContact ? 
+                    "Contact already selected. Type your message below." : 
+                    "Choose someone from your contacts to start messaging"
+                  }
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
@@ -249,7 +263,9 @@ export default function MessagesPage() {
                     {filteredContacts.map((contact: Contact) => (
                       <div
                         key={contact.id}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+                        className={`flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors ${
+                          selectedContact === contact.id ? 'bg-purple-100 dark:bg-purple-900/30 border-2 border-purple-500 ring-2 ring-purple-300' : ''
+                        }`}
                         onClick={() => setSelectedContact(contact.id)}
                       >
                         <Avatar className="w-10 h-10">
@@ -266,9 +282,16 @@ export default function MessagesPage() {
                             {contact.role} {contact.churchName && `• ${contact.churchName}`}
                           </p>
                         </div>
-                        {contact.isOnline && (
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {contact.isOnline && (
+                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          )}
+                          {selectedContact === contact.id && (
+                            <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center">
+                              <Check className="w-4 h-4 text-white" />
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
