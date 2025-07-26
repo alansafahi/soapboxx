@@ -7563,25 +7563,34 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       const churchId = parseInt(req.params.churchId);
       
+      console.log('Church profile update request:', { userId, churchId, updates: req.body });
+      
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
       // Check if user has admin access to this church
       const userChurch = await storage.getUserChurchRole(userId, churchId);
+      console.log('User church role for profile update:', userChurch);
+      
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
       
       const user = await storage.getUser(userId);
+      console.log('User details for profile update:', user ? { id: user.id, role: user.role } : 'Not found');
+      
       if (!userChurch || (!adminRoles.includes(userChurch.role) && user?.role !== 'soapbox_owner')) {
+        console.log('Access denied for church profile update:', { userChurch, userRole: user?.role });
         return res.status(403).json({ error: 'Admin access required' });
       }
 
       const updates = req.body;
+      console.log('Performing church profile update with:', updates);
       const updatedChurch = await storage.updateChurch(churchId, updates);
+      console.log('Church profile update successful:', updatedChurch?.id);
       
       res.json(updatedChurch);
     } catch (error) {
-      // Error updating church - silent error handling
+      console.error('Church profile update error:', error);
       res.status(500).json({ error: 'Failed to update church' });
     }
   });

@@ -1749,11 +1749,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateChurch(id: number, updates: Partial<Church>): Promise<Church> {
+    console.log('Updating church with data:', updates);
+    
+    // Filter out any fields that don't exist in the database schema
+    const allowedFields = [
+      'name', 'type', 'denomination', 'description', 'bio', 'address', 'city', 
+      'state', 'zipCode', 'phone', 'email', 'website', 'logoUrl', 'size', 
+      'hoursOfOperation', 'socialLinks', 'communityTags', 'latitude', 'longitude', 
+      'rating', 'memberCount', 'isActive', 'isClaimed', 'adminEmail', 'adminPhone', 
+      'verificationStatus', 'rejectionReason'
+    ];
+    
+    const filteredUpdates = Object.keys(updates)
+      .filter(key => allowedFields.includes(key))
+      .reduce((obj, key) => {
+        obj[key] = updates[key];
+        return obj;
+      }, {} as any);
+    
+    console.log('Filtered updates for database:', filteredUpdates);
+    
     const [updatedChurch] = await db
       .update(communities)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...filteredUpdates, updatedAt: new Date() })
       .where(eq(communities.id, id))
       .returning();
+    
+    console.log('Database update successful:', updatedChurch?.id);
     return updatedChurch;
   }
 
