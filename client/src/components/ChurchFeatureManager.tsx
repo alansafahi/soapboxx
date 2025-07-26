@@ -418,7 +418,12 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
             Feature Configuration
           </CardTitle>
           <p className="text-sm text-gray-600 dark:text-gray-300">
-            Enable or disable SoapBox features for your church. Changes take effect immediately for all members.
+            {communityType === 'church' 
+              ? 'Enable or disable SoapBox features for your church. Changes take effect immediately for all members.'
+              : communityType === 'group'
+              ? 'Enable or disable SoapBox features for your group. Changes take effect immediately for all group members.'
+              : 'Enable or disable SoapBox features for your ministry. Changes take effect immediately for all ministry participants.'
+            }
           </p>
         </CardHeader>
       </Card>
@@ -500,7 +505,12 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
               <strong>Core Features:</strong> Home, Messages, Contacts, S.O.A.P. Journal, Engagement Board, Profile, and Settings are always available.
             </p>
             <p>
-              Feature changes apply to all church members immediately and affect navigation menu visibility.
+              {communityType === 'church' 
+                ? 'Feature changes apply to all church members immediately and affect navigation menu visibility.'
+                : communityType === 'group'
+                ? 'Feature changes apply to all group members immediately and affect navigation menu visibility.'
+                : 'Feature changes apply to all ministry participants immediately and affect navigation menu visibility.'
+              }
             </p>
           </div>
         </CardContent>
