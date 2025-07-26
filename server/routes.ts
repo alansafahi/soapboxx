@@ -7346,6 +7346,54 @@ Return JSON with this exact structure:
     }
   });
 
+  // Discover communities (new terminology)
+  app.get('/api/communities/discover', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      const allCommunities = await storage.getAllChurches();
+      res.json(allCommunities || []);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to discover communities' });
+    }
+  });
+
+  // Join community (new terminology)
+  app.post('/api/communities/:communityId/join', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const communityId = parseInt(req.params.communityId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      if (isNaN(communityId)) {
+        return res.status(400).json({ error: 'Invalid community ID' });
+      }
+
+      // Check if community exists
+      const community = await storage.getChurch(communityId);
+      if (!community) {
+        return res.status(404).json({ error: 'Community not found' });
+      }
+
+      // Create user-community relationship with member role
+      await storage.createUserChurchRelationship(userId, communityId, 'member');
+
+      res.json({
+        success: true,
+        message: 'Successfully joined community'
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to join community' });
+    }
+  });
+
   // Update community profile (new terminology)
   app.put('/api/communities/:communityId', isAuthenticated, async (req: any, res) => {
     try {

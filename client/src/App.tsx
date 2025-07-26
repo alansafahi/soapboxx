@@ -33,6 +33,7 @@ const Home = lazy(() => import("./pages/home"));
 const BiblePage = lazy(() => import("./pages/bible"));
 const Community = lazy(() => import("./pages/community"));
 const Churches = lazy(() => import("./pages/churches"));
+const Communities = lazy(() => import("./pages/communities"));
 const Events = lazy(() => import("./pages/events"));
 const Prayer = lazy(() => import("./pages/prayer"));
 const SoapPage = lazy(() => import("./pages/soap"));
@@ -157,6 +158,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/discussions" component={Community} />
                                     <ProtectedRoute path="/social-feed" component={SocialFeedPage} />
                                     <ProtectedRoute path="/churches" component={Churches} />
+                                    <ProtectedRoute path="/communities" component={Communities} />
                                     <ProtectedRoute path="/church-claiming" component={ChurchClaiming} />
                                     <ProtectedRoute path="/church-management/:churchId" component={ChurchManagementPage} />
                                     <ProtectedRoute path="/events" component={Events} />
