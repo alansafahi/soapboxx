@@ -151,6 +151,14 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes
+- July 26, 2025: ARCHITECTURAL RESTRUCTURING TO ADMIN PORTAL COMMUNITY ADMIN TAB COMPLETED - Successfully implemented major architectural restructuring moving all community management functionality from separate /community-management routes to unified Admin Portal "Community Admin" tab with role-based access control
+  - ADMIN PORTAL INTEGRATION: Added "Community Admin" tab to Admin Portal as primary community management interface accessible via /admin?tab=community-admin
+  - ROLE-BASED ACCESS CONTROL: Implemented sophisticated permission system where Settings icon only appears for community admins (church_admin, admin, pastor, lead-pastor, elder) redirecting to Admin Portal; regular members see "View Details" with basic information
+  - COMMUNITYADMINTAB.TSX COMPONENT: Created comprehensive component with 3-tab interface (Profile, Features, Settings) providing complete community administration functionality
+  - COMMUNITYVIEWDIALOG.TSX COMPONENT: Built elegant dialog for basic community information display for regular members with contact details, community stats, and join functionality  
+  - MYCOMMUNITIES.TSX ENHANCED: Updated to use role-based button rendering - Settings icon for admins leading to Admin Portal, View Details button for all users opening CommunityViewDialog
+  - SIDEBAR NAVIGATION UPDATED: Added "Community Admin" to Admin Portal section in sidebar navigation with Building2 icon and proper role-based visibility
+  - SEPARATION OF CONCERNS: Clean separation between admin functions (consolidated in Admin Portal) and member interactions (basic community discovery and viewing)
 - July 26, 2025: COMPREHENSIVE STAFF MANAGEMENT SYSTEM IMPLEMENTATION COMPLETED - Successfully implemented complete Staff Management system for community administration with role-based permissions, email invitation workflows, and permission matrices
   - STAFF MANAGEMENT ARCHITECTURE: Built comprehensive system with 6 predefined roles (Lead Pastor, Associate Pastor, Youth Pastor, Worship Leader, Ministry Leader, Administrator) and hierarchical permission levels
   - STAFFMANAGEMENT.TSX COMPONENT: Created full-featured component with email invitation system, role assignment matrix, and administrative controls for community staff management

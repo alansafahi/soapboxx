@@ -34,6 +34,7 @@ import { ChurchAdminManagement } from "../components/church-admin-management";
 import CampusManagement from "../components/CampusManagement";
 import { CrossCampusMemberManagement } from "../components/CrossCampusMemberManagement";
 import { ChurchManagementHub } from "../components/ChurchManagementHub";
+import { CommunityAdminTab } from "../components/CommunityAdminTab";
 
 // Church Management Component
 function ChurchManagementTab() {
@@ -451,8 +452,9 @@ function MembersPage() {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-11">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-12">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="community-admin">Community Admin</TabsTrigger>
             <TabsTrigger value="soapbox-admin">SoapBox Admin</TabsTrigger>
             <TabsTrigger value="church-admin">Church Admin</TabsTrigger>
             <TabsTrigger value="features">Features</TabsTrigger>
@@ -465,6 +467,10 @@ function MembersPage() {
             <TabsTrigger value="volunteers" className="hidden lg:block">Volunteers</TabsTrigger>
             <TabsTrigger value="settings" className="hidden lg:block">Settings</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="community-admin" className="space-y-6">
+            <CommunityAdminTab />
+          </TabsContent>
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

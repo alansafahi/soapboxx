@@ -4,7 +4,8 @@ import { useAuth } from "../hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Building, MapPin, Users, Calendar, Plus, Settings } from "lucide-react";
+import { Building, MapPin, Users, Calendar, Plus, Settings, Eye } from "lucide-react";
+import { CommunityViewDialog } from "./CommunityViewDialog";
 import { Link } from "wouter";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
@@ -76,6 +77,8 @@ export default function MyCommunities() {
   const queryClient = useQueryClient();
   const [createCommunityOpen, setCreateCommunityOpen] = useState(false);
   const [showCustomDenomination, setShowCustomDenomination] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   
   const { data: userCommunities = [], isLoading, error } = useQuery<Community[]>({
     queryKey: ["/api/users/communities"],
@@ -578,18 +581,28 @@ export default function MyCommunities() {
                       )}
 
                       <div className="flex gap-2 pt-2">
-                        <Link href={`/community-management/${community.id}`} className="flex-1">
-                          <Button variant="outline" size="sm" className="w-full">
-                            <Calendar className="h-4 w-4 mr-2" />
-                            View Details
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => {
+                            setSelectedCommunityId(community.id.toString());
+                            setViewDialogOpen(true);
+                          }}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
+                        {(community.role === 'church_admin' || community.role === 'admin' || community.role === 'pastor' || community.role === 'lead-pastor' || community.role === 'elder') && (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              window.location.href = `/admin?tab=community-admin&communityId=${community.id}`;
+                            }}
+                          >
+                            <Settings className="h-4 w-4" />
                           </Button>
-                        </Link>
-                        {(community.role === 'church_admin' || community.role === 'admin' || community.role === 'pastor') && (
-                          <Link href={`/admin?communityId=${community.id}`}>
-                            <Button size="sm" variant="outline">
-                              <Settings className="h-4 w-4" />
-                            </Button>
-                          </Link>
                         )}
                       </div>
                     </CardContent>
@@ -748,18 +761,28 @@ export default function MyCommunities() {
                       )}
 
                       <div className="flex gap-2 pt-2">
-                        <Link href={`/community-management/${community.id}`} className="flex-1">
-                          <Button variant="outline" size="sm" className="w-full">
-                            <Calendar className="h-4 w-4 mr-2" />
-                            View Details
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => {
+                            setSelectedCommunityId(community.id.toString());
+                            setViewDialogOpen(true);
+                          }}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
+                        {(community.role === 'church_admin' || community.role === 'admin' || community.role === 'pastor' || community.role === 'lead-pastor' || community.role === 'elder') && (
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              window.location.href = `/admin?tab=community-admin&communityId=${community.id}`;
+                            }}
+                          >
+                            <Settings className="h-4 w-4" />
                           </Button>
-                        </Link>
-                        {(community.role === 'church_admin' || community.role === 'admin' || community.role === 'pastor') && (
-                          <Link href={`/admin?communityId=${community.id}`}>
-                            <Button size="sm" variant="outline">
-                              <Settings className="h-4 w-4" />
-                            </Button>
-                          </Link>
                         )}
                       </div>
                     </CardContent>
@@ -769,6 +792,19 @@ export default function MyCommunities() {
             </div>
           )}
         </div>
+      )}
+      
+      {/* Community View Dialog */}
+      {selectedCommunityId && (
+        <CommunityViewDialog
+          isOpen={viewDialogOpen}
+          onClose={() => {
+            setViewDialogOpen(false);
+            setSelectedCommunityId(null);
+          }}
+          communityId={selectedCommunityId}
+          userRole={userCommunities.find(c => c.id.toString() === selectedCommunityId)?.role}
+        />
       )}
     </div>
   );
