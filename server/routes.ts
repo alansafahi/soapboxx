@@ -7390,8 +7390,8 @@ Return JSON with this exact structure:
       const newCommunity = await storage.createChurch(communityData);
       console.log('Community created:', newCommunity);
 
-      // Create user-community relationship
-      await storage.createUserChurchRelationship(userId, newCommunity.id, 'church_admin');
+      // Create user-community relationship (automatically join as admin)
+      await storage.joinCommunity(userId, newCommunity.id);
 
       res.json({
         success: true,

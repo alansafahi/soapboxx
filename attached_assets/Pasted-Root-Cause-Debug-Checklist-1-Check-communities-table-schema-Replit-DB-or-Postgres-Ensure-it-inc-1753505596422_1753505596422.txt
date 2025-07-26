@@ -1,0 +1,105 @@
+Root Cause Debug Checklist
+✅ 1. Check communities table schema (Replit DB or Postgres)
+Ensure it includes the following:
+
+Column	Type	Required	Default
+name	VARCHAR	✅	—
+type	VARCHAR(50)	✅	'church'
+address	VARCHAR	✅	—
+city	VARCHAR	✅	—
+state	VARCHAR	✅	—
+zip_code	VARCHAR	✅	—
+admin_email	VARCHAR	✅	—
+admin_phone	VARCHAR(20)	✅	—
+created_by	VARCHAR(255)	✅	—
+website	VARCHAR	❌	nullable
+description	TEXT	❌	nullable
+
+Check for:
+
+Typos (e.g., zipCode vs zip_code)
+
+Missing or null constraints that break the insert query
+
+✅ 2. Validate API Route Code
+Inspect your API handler for POST /api/communities (or wherever the createCommunity function lives):
+
+Common issues:
+Attempting to insert undefined into a required column
+
+Failing to handle camelCase → snake_case mapping
+
+Trying to insert into renamed table (churches vs communities)
+
+Not catching thrown errors (try/catch missing)
+
+🔧 Add a console.log(req.body) and console.error(err) to confirm payload + backend error stack
+
+✅ 3. Confirm Frontend → API Payload
+Your payload from React should look like this before sending:
+
+json
+Copy
+Edit
+{
+  "name": "Group",             // or use a proper name field
+  "type": "group",
+  "address": "123 Main street",
+  "city": "LA",
+  "state": "CA",
+  "zip_code": "90210",
+  "admin_email": "alan@safahi.com",
+  "admin_phone": "7149062548",
+  "website": "safahi.com",
+  "description": "Help reunited lost animals with their owners",
+  "created_by": "USER_ID"
+}
+Make sure you're:
+
+Not missing name
+
+Not sending raw "null" or undefined for required fields
+
+Using the correct snake_case naming if sending directly to SQL
+
+✅ Fix Recommendations
+If you're using a prisma or sequelize model, make sure it maps to the communities table.
+
+ts
+Copy
+Edit
+await db.insertInto('communities').values({
+  name,
+  type,
+  address,
+  city,
+  state,
+  zip_code,
+  admin_email,
+  admin_phone,
+  website,
+  description,
+  created_by,
+});
+And wrap it:
+
+ts
+Copy
+Edit
+try {
+  // creation logic
+} catch (err) {
+  console.error('Error creating community:', err);
+  res.status(500).json({ message: 'Internal Server Error', error: err.message });
+}
+✅ Next Steps
+Log request body and errors on backend
+
+Confirm name is passed (currently just “Group”? Might need full name)
+
+Match all required schema fields
+
+Re-deploy or restart Replit backend if schema or DB was changed
+
+Once fixed, test community creation again
+

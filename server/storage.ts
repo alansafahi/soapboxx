@@ -2829,10 +2829,10 @@ export class DatabaseStorage implements IStorage {
           WHERE user_id = ${userId} AND church_id = ${communityId}
         `);
       } else {
-        // Create new membership
+        // Create new membership with admin role for community creator
         await db.execute(sql`
           INSERT INTO user_churches (user_id, church_id, role, joined_at, last_accessed_at, is_active)
-          VALUES (${userId}, ${communityId}, 'member', NOW(), NOW(), true)
+          VALUES (${userId}, ${communityId}, 'church_admin', NOW(), NOW(), true)
         `);
       }
 
