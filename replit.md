@@ -151,6 +151,14 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes
+- July 26, 2025: SOAPBOX ADMIN FUNCTIONALITY REMOVAL COMPLETED - Successfully removed all SoapBox Admin functionality from current application as user plans to build separate SoapBox Admin app
+  - SOAPBOX ADMIN TAB REMOVED: Eliminated "SoapBox Admin" tab from Admin Portal interface and updated tab grid layout from 12 to 11 columns
+  - CHURCHMANAGEMENTTAB FUNCTION DELETED: Removed entire ChurchManagementTab component (347 lines) including church approval/rejection/suspension functionality 
+  - ADMIN PORTAL ACCESS FIXED: Removed redirect that prevented church admins from accessing Admin Portal - they can now properly access Community Admin tab
+  - URL PARAMETER HANDLING: Added proper tab state management with URL synchronization for Admin Portal navigation
+  - STAFFMANAGEMENT TYPESCRIPT FIXED: Resolved React Query cache invalidation issues and TypeScript errors in StaffManagement component
+  - ADMIN PORTAL STREAMLINED: Admin Portal now focuses on Community Admin functionality while SoapBox-specific features moved to separate app
+  - NAVIGATION SIMPLIFIED: Clean tab structure with Overview, Community Admin, Church Admin, Features, Campuses, Members, Events, Content, Media, Analytics, Volunteers, Settings
 - July 26, 2025: COMPLETE COMMUNITY MANAGEMENT INTEGRATION INTO ADMIN PORTAL FINISHED - Successfully integrated all community-management functionality (Profile, Features, Settings) into unified Admin Portal "Community Admin" tab with full operational capability
   - FULL PROFILE MANAGEMENT: Integrated complete community profile editing interface with Basic Information, Contact Information, and Location sections directly in Admin Portal
   - REAL COMMUNITY DATA: CommunityAdminTab now populates with actual community details from user's admin communities with proper data binding and save functionality

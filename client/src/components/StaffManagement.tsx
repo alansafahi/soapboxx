@@ -173,7 +173,7 @@ export function StaffManagement({ communityId }: { communityId: number }) {
   const { data: staffMembers = [], isLoading } = useQuery({
     queryKey: [`/api/communities/${communityId}/staff`],
     enabled: !!communityId
-  });
+  }) as { data: any[], isLoading: boolean };
 
   // Invite staff member mutation
   const inviteStaffMutation = useMutation({
@@ -195,7 +195,7 @@ export function StaffManagement({ communityId }: { communityId: number }) {
       setSelectedRole("");
       setInviteTitle("");
       setInviteDepartment("");
-      queryClient.invalidateQueries([`/api/communities/${communityId}/staff`]);
+      queryClient.invalidateQueries({ queryKey: [`/api/communities/${communityId}/staff`] });
     },
     onError: () => {
       toast({
@@ -216,7 +216,7 @@ export function StaffManagement({ communityId }: { communityId: number }) {
         title: "Role Updated",
         description: "Staff member role has been updated successfully",
       });
-      queryClient.invalidateQueries([`/api/communities/${communityId}/staff`]);
+      queryClient.invalidateQueries({ queryKey: [`/api/communities/${communityId}/staff`] });
     },
   });
 
