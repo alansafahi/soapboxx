@@ -466,7 +466,293 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
           </Card>
         </TabsContent>
 
-        {/* More tabs to be implemented... */}
+        {/* Communication Settings Tab */}
+        <TabsContent value="communication" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Communication Preferences
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Push Notifications</Label>
+                  <p className="text-sm text-gray-600">Receive notifications for important updates</p>
+                </div>
+                <Switch
+                  checked={settings.communication?.notificationsEnabled || currentSettings?.communication?.notificationsEnabled || true}
+                  onCheckedChange={(checked) => updateSetting('communication', 'notificationsEnabled', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Email Newsletters</Label>
+                  <p className="text-sm text-gray-600">Send weekly newsletters to members</p>
+                </div>
+                <Switch
+                  checked={settings.communication?.emailNewsletters || currentSettings?.communication?.emailNewsletters || true}
+                  onCheckedChange={(checked) => updateSetting('communication', 'emailNewsletters', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Emergency Alerts</Label>
+                  <p className="text-sm text-gray-600">Allow emergency notifications to bypass quiet hours</p>
+                </div>
+                <Switch
+                  checked={settings.communication?.emergencyAlerts || currentSettings?.communication?.emergencyAlerts || true}
+                  onCheckedChange={(checked) => updateSetting('communication', 'emergencyAlerts', checked)}
+                />
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Quiet Hours</Label>
+                    <p className="text-sm text-gray-600">Set times when notifications are limited</p>
+                  </div>
+                  <Switch
+                    checked={settings.communication?.quietHours?.enabled || currentSettings?.communication?.quietHours?.enabled || false}
+                    onCheckedChange={(checked) => updateSetting('communication', 'quietHours', { 
+                      ...settings.communication?.quietHours, 
+                      enabled: checked 
+                    })}
+                  />
+                </div>
+                
+                {(settings.communication?.quietHours?.enabled || currentSettings?.communication?.quietHours?.enabled) && (
+                  <div className="grid grid-cols-2 gap-4 pl-4">
+                    <div>
+                      <Label>Start Time</Label>
+                      <Input
+                        type="time"
+                        value={settings.communication?.quietHours?.startTime || currentSettings?.communication?.quietHours?.startTime || '22:00'}
+                        onChange={(e) => updateSetting('communication', 'quietHours', {
+                          ...settings.communication?.quietHours,
+                          startTime: e.target.value
+                        })}
+                      />
+                    </div>
+                    <div>
+                      <Label>End Time</Label>
+                      <Input
+                        type="time"
+                        value={settings.communication?.quietHours?.endTime || currentSettings?.communication?.quietHours?.endTime || '08:00'}
+                        onChange={(e) => updateSetting('communication', 'quietHours', {
+                          ...settings.communication?.quietHours,
+                          endTime: e.target.value
+                        })}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Privacy & Safety Tab */}
+        <TabsContent value="privacy" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Privacy & Safety Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Member Directory Visible</Label>
+                  <p className="text-sm text-gray-600">Allow members to view the community directory</p>
+                </div>
+                <Switch
+                  checked={settings.privacy?.memberDirectoryVisible || currentSettings?.privacy?.memberDirectoryVisible || true}
+                  onCheckedChange={(checked) => updateSetting('privacy', 'memberDirectoryVisible', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Photo Sharing</Label>
+                  <p className="text-sm text-gray-600">Allow members to share photos in posts</p>
+                </div>
+                <Switch
+                  checked={settings.privacy?.photoSharingEnabled || currentSettings?.privacy?.photoSharingEnabled || true}
+                  onCheckedChange={(checked) => updateSetting('privacy', 'photoSharingEnabled', checked)}
+                />
+              </div>
+
+              <div>
+                <Label>Content Moderation</Label>
+                <Select
+                  value={settings.privacy?.contentModeration || currentSettings?.privacy?.contentModeration || 'automatic'}
+                  onValueChange={(value) => updateSetting('privacy', 'contentModeration', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="automatic">Automatic AI Moderation</SelectItem>
+                    <SelectItem value="manual">Manual Admin Review</SelectItem>
+                    <SelectItem value="community">Community Reporting</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Background Checks Required</Label>
+                  <p className="text-sm text-gray-600">Require background checks for volunteer positions</p>
+                </div>
+                <Switch
+                  checked={settings.privacy?.backgroundChecksRequired || currentSettings?.privacy?.backgroundChecksRequired || false}
+                  onCheckedChange={(checked) => updateSetting('privacy', 'backgroundChecksRequired', checked)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Financial Tab (Churches & Ministries Only) */}
+        {(communityType === "church" || communityType === "ministry") && (
+          <TabsContent value="financial" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="h-5 w-5" />
+                  Financial Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Enable Donations</Label>
+                    <p className="text-sm text-gray-600">Allow members to make donations through the app</p>
+                  </div>
+                  <Switch
+                    checked={settings.financial?.donationsEnabled || currentSettings?.financial?.donationsEnabled || true}
+                    onCheckedChange={(checked) => updateSetting('financial', 'donationsEnabled', checked)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Recurring Giving</Label>
+                    <p className="text-sm text-gray-600">Enable automatic recurring donations</p>
+                  </div>
+                  <Switch
+                    checked={settings.financial?.recurringGivingEnabled || currentSettings?.financial?.recurringGivingEnabled || true}
+                    onCheckedChange={(checked) => updateSetting('financial', 'recurringGivingEnabled', checked)}
+                  />
+                </div>
+
+                <div>
+                  <Label>Financial Transparency</Label>
+                  <Select
+                    value={settings.financial?.financialTransparency || currentSettings?.financial?.financialTransparency || 'summary'}
+                    onValueChange={(value) => updateSetting('financial', 'financialTransparency', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="full">Full Financial Reports</SelectItem>
+                      <SelectItem value="summary">Summary Reports Only</SelectItem>
+                      <SelectItem value="private">Private - Admin Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Stripe Integration</Label>
+                    <p className="text-sm text-gray-600">Connect Stripe for payment processing</p>
+                  </div>
+                  <Switch
+                    checked={settings.financial?.stripeIntegration || currentSettings?.financial?.stripeIntegration || false}
+                    onCheckedChange={(checked) => updateSetting('financial', 'stripeIntegration', checked)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {/* Integrations Tab */}
+        <TabsContent value="integrations" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5" />
+                External Integrations
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Calendar Sync</Label>
+                  <p className="text-sm text-gray-600">Sync events with external calendar apps</p>
+                </div>
+                <Switch
+                  checked={settings.integrations?.calendarSync || currentSettings?.integrations?.calendarSync || false}
+                  onCheckedChange={(checked) => updateSetting('integrations', 'calendarSync', checked)}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Social Media Sharing</Label>
+                  <p className="text-sm text-gray-600">Enable sharing to social media platforms</p>
+                </div>
+                <Switch
+                  checked={settings.integrations?.socialMediaSharing || currentSettings?.integrations?.socialMediaSharing || true}
+                  onCheckedChange={(checked) => updateSetting('integrations', 'socialMediaSharing', checked)}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Email Provider</Label>
+                  <Select
+                    value={settings.integrations?.emailProvider || currentSettings?.integrations?.emailProvider || 'default'}
+                    onValueChange={(value) => updateSetting('integrations', 'emailProvider', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">SoapBox Email</SelectItem>
+                      <SelectItem value="sendgrid">SendGrid</SelectItem>
+                      <SelectItem value="mailchimp">Mailchimp</SelectItem>
+                      <SelectItem value="constant-contact">Constant Contact</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>SMS Provider</Label>
+                  <Select
+                    value={settings.integrations?.smsProvider || currentSettings?.integrations?.smsProvider || 'default'}
+                    onValueChange={(value) => updateSetting('integrations', 'smsProvider', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="default">SoapBox SMS</SelectItem>
+                      <SelectItem value="twilio">Twilio</SelectItem>
+                      <SelectItem value="textmagic">TextMagic</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
         
       </Tabs>
     </div>

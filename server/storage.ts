@@ -4344,6 +4344,135 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Community Settings Methods
+  async getCommunitySettings(communityId: number): Promise<any> {
+    try {
+      // Get basic community information
+      const [community] = await db
+        .select()
+        .from(communities)
+        .where(eq(communities.id, communityId))
+        .limit(1);
+
+      if (!community) {
+        throw new Error('Community not found');
+      }
+
+      // Return current community data formatted as settings
+      return {
+        basicInfo: {
+          name: community.name || '',
+          description: community.description || '',
+          website: community.website || '',
+          phone: community.phone || '',
+          email: community.email || '',
+          address: community.address || '',
+          city: community.city || '',
+          state: community.state || '',
+          zipCode: community.zipCode || ''
+        },
+        administrative: community.type === 'church' ? {
+          multiCampusEnabled: false, // Default value
+          denominationSettings: community.denomination || '',
+          churchSize: community.size || 'medium',
+          serviceTimesEnabled: true, // Default value
+          verificationStatus: community.verificationStatus || 'pending'
+        } : undefined,
+        community: {
+          memberApprovalRequired: false, // Default value
+          directoryVisibility: 'members' as const,
+          allowGroupCreation: true, // Default value
+          ageGroupFocus: []
+        },
+        communication: {
+          notificationsEnabled: true,
+          emailNewsletters: true,
+          emergencyAlerts: true,
+          quietHours: {
+            enabled: false,
+            startTime: '22:00',
+            endTime: '08:00'
+          }
+        },
+        financial: (community.type === 'church' || community.type === 'ministry') ? {
+          donationsEnabled: true,
+          recurringGivingEnabled: true,
+          financialTransparency: 'summary' as const,
+          stripeIntegration: false
+        } : undefined,
+        privacy: {
+          memberDirectoryVisible: true,
+          photoSharingEnabled: true,
+          contentModeration: 'automatic' as const,
+          backgroundChecksRequired: false
+        },
+        integrations: {
+          calendarSync: false,
+          socialMediaSharing: true,
+          emailProvider: 'default',
+          smsProvider: 'default'
+        }
+      };
+    } catch (error) {
+      throw new Error('Failed to retrieve community settings');
+    }
+  }
+
+  async updateCommunitySettings(communityId: number, settingsData: any, userId: string): Promise<any> {
+    try {
+      // Update basic community information if provided
+      if (settingsData.basicInfo) {
+        const basicUpdates: any = {};
+        
+        if (settingsData.basicInfo.name) basicUpdates.name = settingsData.basicInfo.name;
+        if (settingsData.basicInfo.description) basicUpdates.description = settingsData.basicInfo.description;
+        if (settingsData.basicInfo.website) basicUpdates.website = settingsData.basicInfo.website;
+        if (settingsData.basicInfo.phone) basicUpdates.phone = settingsData.basicInfo.phone;
+        if (settingsData.basicInfo.email) basicUpdates.email = settingsData.basicInfo.email;
+        if (settingsData.basicInfo.address) basicUpdates.address = settingsData.basicInfo.address;
+        if (settingsData.basicInfo.city) basicUpdates.city = settingsData.basicInfo.city;
+        if (settingsData.basicInfo.state) basicUpdates.state = settingsData.basicInfo.state;
+        if (settingsData.basicInfo.zipCode) basicUpdates.zipCode = settingsData.basicInfo.zipCode;
+
+        if (Object.keys(basicUpdates).length > 0) {
+          basicUpdates.updatedAt = new Date();
+          await db
+            .update(communities)
+            .set(basicUpdates)
+            .where(eq(communities.id, communityId));
+        }
+      }
+
+      // Update administrative settings for churches
+      if (settingsData.administrative) {
+        const adminUpdates: any = {};
+        
+        if (settingsData.administrative.denominationSettings) {
+          adminUpdates.denomination = settingsData.administrative.denominationSettings;
+        }
+        if (settingsData.administrative.churchSize) {
+          adminUpdates.size = settingsData.administrative.churchSize;
+        }
+
+        if (Object.keys(adminUpdates).length > 0) {
+          adminUpdates.updatedAt = new Date();
+          await db
+            .update(communities)
+            .set(adminUpdates)
+            .where(eq(communities.id, communityId));
+        }
+      }
+
+      // For now, other settings (communication, privacy, etc.) would need additional tables
+      // This is a basic implementation that updates the core community data
+
+      // Return updated settings
+      return await this.getCommunitySettings(communityId);
+    } catch (error) {
+      throw new Error('Failed to update community settings');
+    }
+  }
+
   // Gallery interaction methods
   async likeGalleryImage(userId: string, imageId: number): Promise<GalleryImageLike> {
     try {

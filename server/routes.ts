@@ -12520,6 +12520,56 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Community Settings API endpoints
+  app.get('/api/communities/:id/settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const communityId = parseInt(req.params.id);
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Check if user has access to community settings
+      const userRole = await storage.getUserChurchRole(userId, communityId);
+      const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'ministry_leader'];
+      
+      if (!userRole || !adminRoles.includes(userRole.role)) {
+        return res.status(403).json({ error: 'Insufficient permissions to access settings' });
+      }
+
+      const settings = await storage.getCommunitySettings(communityId);
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to retrieve community settings' });
+    }
+  });
+
+  app.put('/api/communities/:id/settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const communityId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      const settingsData = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Check if user has admin access
+      const userRole = await storage.getUserChurchRole(userId, communityId);
+      const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'ministry_leader'];
+      
+      if (!userRole || !adminRoles.includes(userRole.role)) {
+        return res.status(403).json({ error: 'Insufficient permissions to modify settings' });
+      }
+
+      const updatedSettings = await storage.updateCommunitySettings(communityId, settingsData, userId);
+      res.json(updatedSettings);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update community settings' });
+    }
+  });
+
   app.get('/api/default-features/:churchSize', isAuthenticated, async (req: any, res) => {
     try {
       const { churchSize } = req.params;
