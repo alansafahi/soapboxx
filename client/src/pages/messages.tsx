@@ -115,25 +115,34 @@ export default function MessagesPage() {
     const contactId = urlParams.get('contact');
     const contactName = urlParams.get('name');
     
-    if (contactId && contactName) {
+    // Only process if we have URL params AND contacts have loaded
+    if (contactId && contactName && contacts && contacts.length > 0) {
       console.log('Auto-selecting contact:', { contactId, contactName });
-      if (contacts && contacts.length > 0) {
-        console.log('Available contacts:', contacts.map(c => ({ id: c.id, name: `${c.firstName} ${c.lastName}` })));
-        const foundContact = contacts.find(c => c.id === contactId);
-        console.log('Found matching contact:', foundContact);
+      console.log('Available contacts:', contacts.map(c => ({ id: c.id, name: `${c.firstName} ${c.lastName}` })));
+      
+      const foundContact = contacts.find(c => c.id === contactId);
+      console.log('Found matching contact:', foundContact);
+      
+      if (foundContact) {
+        setSelectedContact(contactId);
+        setSearchQuery(""); // Clear search to show all contacts
+        setShowNewMessageDialog(true);
+        toast({
+          title: "Contact Selected",
+          description: `Ready to message ${decodeURIComponent(contactName)}`,
+        });
+        
+        // Clear URL parameters after handling them
+        const newUrl = window.location.pathname;
+        window.history.replaceState({}, '', newUrl);
+      } else {
+        console.log('Contact not found in contacts list');
+        toast({
+          title: "Contact Not Found",
+          description: `Could not find ${decodeURIComponent(contactName)} in your contacts`,
+          variant: "destructive"
+        });
       }
-      
-      setSelectedContact(contactId);
-      setSearchQuery(""); // Clear search to show all contacts
-      setShowNewMessageDialog(true);
-      toast({
-        title: "Contact Selected",
-        description: `Ready to message ${decodeURIComponent(contactName)}`,
-      });
-      
-      // Clear URL parameters after handling them
-      const newUrl = window.location.pathname;
-      window.history.replaceState({}, '', newUrl);
     }
   }, [location, toast, contacts]);
 
