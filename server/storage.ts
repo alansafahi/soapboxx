@@ -1872,25 +1872,20 @@ export class DatabaseStorage implements IStorage {
     try {
       console.log('Getting user church role:', { userId, churchId });
       
-      // Use the working Drizzle ORM approach instead of raw SQL
-      const [userChurch] = await db
-        .select({ role: userChurches.role })
-        .from(userChurches)
-        .where(and(
-          eq(userChurches.userId, userId),
-          eq(userChurches.churchId, churchId),
-          eq(userChurches.isActive, true)
-        ))
-        .limit(1);
+      // Use raw SQL to avoid Drizzle ORM issues with table aliases
+      const result = await pool.query(
+        'SELECT role FROM user_churches WHERE user_id = $1 AND church_id = $2 AND is_active = true LIMIT 1',
+        [userId, churchId]
+      );
 
-      if (!userChurch) {
+      if (result.rows.length === 0) {
         console.log('No user church found');
         return undefined;
       }
 
-      console.log('User church role found:', userChurch);
+      console.log('User church role found:', result.rows[0]);
       return {
-        role: userChurch.role || 'member'
+        role: result.rows[0].role || 'member'
       };
     } catch (error) {
       console.error('Error in getUserChurchRole:', error);
