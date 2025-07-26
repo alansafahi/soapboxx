@@ -45,7 +45,16 @@ const createCommunitySchema = z.object({
   adminEmail: z.string().email("Valid email required"),
   adminPhone: z.string().optional(),
   website: z.string().optional(),
-  description: z.string().optional()
+  description: z.string().optional(),
+  logoUrl: z.string().optional(),
+  establishedYear: z.string().optional(),
+  weeklyAttendance: z.string().optional(),
+  parentChurchName: z.string().optional(),
+  missionStatement: z.string().optional(),
+  facebookUrl: z.string().optional(),
+  instagramUrl: z.string().optional(),
+  sundayService: z.string().optional(),
+  wednesdayService: z.string().optional()
 });
 
 // Organization-specific affiliation lists
@@ -98,7 +107,16 @@ export default function MyCommunities() {
       adminEmail: "",
       adminPhone: "",
       website: "",
-      description: ""
+      description: "",
+      logoUrl: "",
+      establishedYear: "",
+      weeklyAttendance: "",
+      parentChurchName: "",
+      missionStatement: "",
+      facebookUrl: "",
+      instagramUrl: "",
+      sundayService: "",
+      wednesdayService: ""
     }
   });
 
@@ -457,6 +475,136 @@ export default function MyCommunities() {
                               rows={3}
                               {...field} 
                             />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="logoUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Community Logo URL</FormLabel>
+                          <FormControl>
+                            <Input placeholder="https://example.com/logo.png" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="establishedYear"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Established Year</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="2020" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="weeklyAttendance"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Weekly Attendance</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="150" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="parentChurchName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Parent Church (if applicable)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Main Campus Church Name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="missionStatement"
+                      render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Mission Statement</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Our mission is to..."
+                              rows={3}
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="facebookUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Facebook URL</FormLabel>
+                          <FormControl>
+                            <Input placeholder="https://facebook.com/community" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="instagramUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Instagram URL</FormLabel>
+                          <FormControl>
+                            <Input placeholder="https://instagram.com/community" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="sundayService"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Sunday Service Time</FormLabel>
+                          <FormControl>
+                            <Input placeholder="10:00 AM" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="wednesdayService"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Wednesday Service Time</FormLabel>
+                          <FormControl>
+                            <Input placeholder="7:00 PM" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

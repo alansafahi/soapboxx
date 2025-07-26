@@ -7434,7 +7434,29 @@ Return JSON with this exact structure:
   // Create new community (new terminology)
   app.post('/api/communities', isAuthenticated, upload.single('logo'), async (req: any, res) => {
     try {
-      const { name, type, denomination, address, city, state, zipCode, adminPhone, adminEmail, website, description, size } = req.body;
+      const { 
+        name, 
+        type, 
+        denomination, 
+        address, 
+        city, 
+        state, 
+        zipCode, 
+        adminPhone, 
+        adminEmail, 
+        website, 
+        description, 
+        size,
+        logoUrl,
+        establishedYear,
+        weeklyAttendance,
+        parentChurchName,
+        missionStatement,
+        facebookUrl,
+        instagramUrl,
+        sundayService,
+        wednesdayService
+      } = req.body;
       const userId = req.session.userId;
 
       if (!userId) {
@@ -7449,7 +7471,18 @@ Return JSON with this exact structure:
         return res.status(400).json({ error: 'Admin email is required' });
       }
 
-      const logoUrl = req.file ? `/uploads/${req.file.filename}` : null;
+      const uploadedLogoUrl = req.file ? `/uploads/${req.file.filename}` : null;
+      const finalLogoUrl = uploadedLogoUrl || logoUrl || null;
+
+      // Prepare social links object
+      const socialLinks: any = {};
+      if (facebookUrl) socialLinks.facebook = facebookUrl;
+      if (instagramUrl) socialLinks.instagram = instagramUrl;
+
+      // Prepare hours of operation object
+      const hoursOfOperation: any = {};
+      if (sundayService) hoursOfOperation.sunday = sundayService;
+      if (wednesdayService) hoursOfOperation.wednesday = wednesdayService;
 
       const communityData = {
         name: name?.trim(),
@@ -7463,7 +7496,7 @@ Return JSON with this exact structure:
         email: adminEmail?.trim(),
         website: website?.trim(),
         description: description?.trim(),
-        logoUrl,
+        logoUrl: finalLogoUrl,
         adminEmail: adminEmail?.trim(),
         createdBy: userId,
         size: size?.trim() || 'small',
@@ -7471,6 +7504,13 @@ Return JSON with this exact structure:
         verificationStatus: 'pending',
         isDemo: false,
         isClaimed: true,
+        // Enhanced fields
+        establishedYear: establishedYear ? parseInt(establishedYear) : null,
+        weeklyAttendance: weeklyAttendance ? parseInt(weeklyAttendance) : null,
+        parentChurchId: parentChurchName ? null : null, // Would need to lookup actual parent church ID
+        missionStatement: missionStatement?.trim(),
+        socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : null,
+        hoursOfOperation: Object.keys(hoursOfOperation).length > 0 ? hoursOfOperation : null,
         createdAt: new Date(),
         updatedAt: new Date()
       };

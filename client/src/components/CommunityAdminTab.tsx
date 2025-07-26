@@ -9,7 +9,7 @@ import { Textarea } from "./ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useToast } from "../hooks/use-toast";
-import { Building2, Settings, Users, Eye, Save, MapPin, Phone, Mail, Globe, Calendar } from "lucide-react";
+import { Building2, Settings, Users, Eye, Save, MapPin, Phone, Mail, Globe, Calendar, Church, Clock, Share2, Image, Trophy } from "lucide-react";
 import { CommunitySettings } from "./CommunitySettings";
 import { ChurchFeatureManager } from "./ChurchFeatureManager";
 import { EventManagement } from "./EventManagement";
@@ -20,6 +20,7 @@ interface CommunityProfile {
   name: string;
   type: string;
   denomination: string;
+  customDenomination?: string;
   description?: string;
   address: string;
   city: string;
@@ -31,6 +32,13 @@ interface CommunityProfile {
   logoUrl?: string;
   bio?: string;
   memberCount: number;
+  hoursOfOperation?: any;
+  socialLinks?: any;
+  parentChurchId?: number;
+  parentChurchName?: string;
+  establishedYear?: number;
+  missionStatement?: string;
+  weeklyAttendance?: number;
   role?: string;
 }
 
@@ -248,11 +256,36 @@ export function CommunityAdminTab() {
                   </div>
                   <div>
                     <Label htmlFor="denomination">Type/Denomination</Label>
-                    <Input
-                      id="denomination"
+                    <Select
                       value={editedProfile.denomination || ''}
-                      onChange={(e) => handleInputChange('denomination', e.target.value)}
-                    />
+                      onValueChange={(value) => handleInputChange('denomination', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select denomination" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Baptist">Baptist</SelectItem>
+                        <SelectItem value="Methodist">Methodist</SelectItem>
+                        <SelectItem value="Presbyterian">Presbyterian</SelectItem>
+                        <SelectItem value="Lutheran">Lutheran</SelectItem>
+                        <SelectItem value="Episcopal">Episcopal</SelectItem>
+                        <SelectItem value="Catholic">Catholic</SelectItem>
+                        <SelectItem value="Orthodox">Orthodox</SelectItem>
+                        <SelectItem value="Pentecostal">Pentecostal</SelectItem>
+                        <SelectItem value="Evangelical">Evangelical</SelectItem>
+                        <SelectItem value="Non-denominational">Non-denominational</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {editedProfile.denomination === 'Other' && (
+                      <div className="mt-2">
+                        <Input
+                          placeholder="Please specify denomination"
+                          value={editedProfile.customDenomination || ''}
+                          onChange={(e) => handleInputChange('customDenomination', e.target.value)}
+                        />
+                      </div>
+                    )}
                   </div>
                   <div>
                     <Label htmlFor="description">Description</Label>
@@ -262,6 +295,15 @@ export function CommunityAdminTab() {
                       value={editedProfile.description || ''}
                       onChange={(e) => handleInputChange('description', e.target.value)}
                       placeholder="Tell people about your community..."
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="logoUrl">Community Logo URL</Label>
+                    <Input
+                      id="logoUrl"
+                      value={editedProfile.logoUrl || ''}
+                      onChange={(e) => handleInputChange('logoUrl', e.target.value)}
+                      placeholder="https://example.com/logo.png"
                     />
                   </div>
                 </CardContent>
@@ -303,6 +345,106 @@ export function CommunityAdminTab() {
                       onChange={(e) => handleInputChange('website', e.target.value)}
                       placeholder="https://community.org"
                     />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Additional Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Church className="h-5 w-5" />
+                    Additional Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="establishedYear">Established Year</Label>
+                    <Input
+                      id="establishedYear"
+                      type="number"
+                      value={editedProfile.establishedYear || ''}
+                      onChange={(e) => handleInputChange('establishedYear', e.target.value)}
+                      placeholder="2020"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="weeklyAttendance">Weekly Attendance</Label>
+                    <Input
+                      id="weeklyAttendance"
+                      type="number"
+                      value={editedProfile.weeklyAttendance || ''}
+                      onChange={(e) => handleInputChange('weeklyAttendance', e.target.value)}
+                      placeholder="150"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="parentChurchName">Parent Church (if applicable)</Label>
+                    <Input
+                      id="parentChurchName"
+                      value={editedProfile.parentChurchName || ''}
+                      onChange={(e) => handleInputChange('parentChurchName', e.target.value)}
+                      placeholder="Main Campus Church Name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="missionStatement">Mission Statement</Label>
+                    <Textarea
+                      id="missionStatement"
+                      rows={3}
+                      value={editedProfile.missionStatement || ''}
+                      onChange={(e) => handleInputChange('missionStatement', e.target.value)}
+                      placeholder="Our mission is to..."
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Social Media & Hours */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Share2 className="h-5 w-5" />
+                    Social & Hours
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label>Social Media Links</Label>
+                    <div className="space-y-2 mt-2">
+                      <Input
+                        placeholder="Facebook URL"
+                        value={editedProfile.socialLinks?.facebook || ''}
+                        onChange={(e) => handleInputChange('socialLinks', {...(editedProfile.socialLinks || {}), facebook: e.target.value})}
+                      />
+                      <Input
+                        placeholder="Instagram URL"
+                        value={editedProfile.socialLinks?.instagram || ''}
+                        onChange={(e) => handleInputChange('socialLinks', {...(editedProfile.socialLinks || {}), instagram: e.target.value})}
+                      />
+                      <Input
+                        placeholder="YouTube URL"
+                        value={editedProfile.socialLinks?.youtube || ''}
+                        onChange={(e) => handleInputChange('socialLinks', {...(editedProfile.socialLinks || {}), youtube: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Operating Hours</Label>
+                    <div className="space-y-2 mt-2">
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          placeholder="Sunday Service Time"
+                          value={editedProfile.hoursOfOperation?.sunday || ''}
+                          onChange={(e) => handleInputChange('hoursOfOperation', {...(editedProfile.hoursOfOperation || {}), sunday: e.target.value})}
+                        />
+                        <Input
+                          placeholder="Wednesday Service Time"
+                          value={editedProfile.hoursOfOperation?.wednesday || ''}
+                          onChange={(e) => handleInputChange('hoursOfOperation', {...(editedProfile.hoursOfOperation || {}), wednesday: e.target.value})}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
