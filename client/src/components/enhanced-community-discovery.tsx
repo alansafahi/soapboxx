@@ -78,7 +78,7 @@ export default function EnhancedCommunityDiscovery() {
     let filtered = communities;
 
     // Filter out communities user has already joined
-    const joinedCommunityIds = userCommunities.map((uc: any) => uc.id);
+    const joinedCommunityIds = Array.isArray(userCommunities) ? userCommunities.map((uc: any) => uc.id) : [];
     filtered = filtered.filter(community => !joinedCommunityIds.includes(community.id));
 
     if (searchQuery) {
@@ -118,7 +118,7 @@ export default function EnhancedCommunityDiscovery() {
   }, [communities, searchQuery, locationFilter, denominationFilter, sizeFilter, userCommunities]);
 
   const denominations = useMemo(() => {
-    const unique = [...new Set(communities.map(c => c.denomination))];
+    const unique = Array.from(new Set(communities.map(c => c.denomination)));
     return unique.sort();
   }, [communities]);
 
@@ -206,7 +206,7 @@ export default function EnhancedCommunityDiscovery() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Sizes</SelectItem>
-            <SelectItem value="small">Small (< 100)</SelectItem>
+            <SelectItem value="small">Small (&lt; 100)</SelectItem>
             <SelectItem value="medium">Medium (100-500)</SelectItem>
             <SelectItem value="large">Large (500+)</SelectItem>
           </SelectContent>
