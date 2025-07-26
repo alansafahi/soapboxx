@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useToast } from "../hooks/use-toast";
-import { Building2, Settings, Users, Eye } from "lucide-react";
+import { Building2, Settings, Users, Eye, Save, MapPin, Phone, Mail, Globe } from "lucide-react";
 import { CommunitySettings } from "./CommunitySettings";
 import { ChurchFeatureManager } from "./ChurchFeatureManager";
 
@@ -32,8 +35,10 @@ interface CommunityProfile {
 export function CommunityAdminTab() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("profile");
+  const [editedProfile, setEditedProfile] = useState<Partial<CommunityProfile>>({});
 
   // Get communities where user has admin role
   const { data: adminCommunities = [], isLoading: communitiesLoading } = useQuery({
@@ -67,6 +72,46 @@ export function CommunityAdminTab() {
     },
     enabled: !!selectedCommunityId,
   }) as { data: CommunityProfile | null, isLoading: boolean };
+
+  // Initialize edited profile when community data loads
+  useEffect(() => {
+    if (selectedCommunity && Object.keys(editedProfile).length === 0) {
+      setEditedProfile(selectedCommunity);
+    }
+  }, [selectedCommunity, editedProfile]);
+
+  // Save profile mutation
+  const saveProfileMutation = useMutation({
+    mutationFn: async (profileData: Partial<CommunityProfile>) => {
+      const response = await fetch(`/api/churches/${selectedCommunityId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(profileData),
+      });
+      if (!response.ok) throw new Error('Failed to save community profile');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Community profile updated successfully!" });
+      queryClient.invalidateQueries({ queryKey: ['community-details', selectedCommunityId] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Failed to update community profile", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    },
+  });
+
+  const handleSave = () => {
+    saveProfileMutation.mutate(editedProfile);
+  };
+
+  const handleInputChange = (field: keyof CommunityProfile, value: string) => {
+    setEditedProfile(prev => ({ ...prev, [field]: value }));
+  };
 
   if (communitiesLoading) {
     return (
@@ -143,53 +188,167 @@ export function CommunityAdminTab() {
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Building2 className="h-5 w-5" />
-                  <span>Community Profile Management</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Eye className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Profile Management</h3>
-                  <p className="text-gray-600 mb-4">
-                    Manage your community's basic information, contact details, and public profile.
-                  </p>
-                  <Button onClick={() => window.open(`/community-management/${selectedCommunityId}`, '_blank')}>
-                    Open Profile Manager
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Header with Save Button */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Community Profile</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Manage your community's basic information and contact details
+                </p>
+              </div>
+              <Button onClick={handleSave} disabled={saveProfileMutation.isPending}>
+                <Save className="h-4 w-4 mr-2" />
+                {saveProfileMutation.isPending ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Basic Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Basic Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Community Name</Label>
+                    <Input
+                      id="name"
+                      value={editedProfile.name || ''}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="denomination">Type/Denomination</Label>
+                    <Input
+                      id="denomination"
+                      value={editedProfile.denomination || ''}
+                      onChange={(e) => handleInputChange('denomination', e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      rows={3}
+                      value={editedProfile.description || ''}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      placeholder="Tell people about your community..."
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Contact Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Phone className="h-5 w-5" />
+                    Contact Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      value={editedProfile.phone || ''}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      placeholder="(555) 123-4567"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={editedProfile.email || ''}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      placeholder="contact@community.org"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="website">Website</Label>
+                    <Input
+                      id="website"
+                      value={editedProfile.website || ''}
+                      onChange={(e) => handleInputChange('website', e.target.value)}
+                      placeholder="https://community.org"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Location Information */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Location Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="md:col-span-2">
+                      <Label htmlFor="address">Street Address</Label>
+                      <Input
+                        id="address"
+                        value={editedProfile.address || ''}
+                        onChange={(e) => handleInputChange('address', e.target.value)}
+                        placeholder="123 Main Street"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        value={editedProfile.city || ''}
+                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        placeholder="City"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="state">State</Label>
+                      <Input
+                        id="state"
+                        value={editedProfile.state || ''}
+                        onChange={(e) => handleInputChange('state', e.target.value)}
+                        placeholder="CA"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="zipCode">Zip Code</Label>
+                      <Input
+                        id="zipCode"
+                        value={editedProfile.zipCode || ''}
+                        onChange={(e) => handleInputChange('zipCode', e.target.value)}
+                        placeholder="90210"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="features" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Settings className="h-5 w-5" />
-                  <span>Feature Management</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {selectedCommunityId && (
-                  <ChurchFeatureManager 
-                    churchId={parseInt(selectedCommunityId)}
-                    userRole="church_admin"
-                  />
-                )}
-              </CardContent>
-            </Card>
+            {selectedCommunityId && selectedCommunity && (
+              <ChurchFeatureManager 
+                churchId={parseInt(selectedCommunityId)}
+                userRole="church_admin"
+                communityType={selectedCommunity.type}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
             {selectedCommunityId && selectedCommunity && (
               <CommunitySettings 
-                communityId={selectedCommunityId}
-                communityName={selectedCommunity.name}
+                communityId={parseInt(selectedCommunityId)}
                 communityType={selectedCommunity.type as "church" | "group" | "ministry"}
+                userRole="church_admin"
               />
             )}
           </TabsContent>
