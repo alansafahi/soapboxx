@@ -510,7 +510,7 @@ export function ChurchManagementHub() {
                               <FormItem>
                                 <FormLabel>Website</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="www.church.org (https:// will be added automatically)" {...field} />
+                                  <Input placeholder="https://www.church.org" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
