@@ -6933,19 +6933,24 @@ Return JSON with this exact structure:
 
       const {
         name,
+        type,
         denomination,
         description,
         address,
         city,
         state,
         zipCode,
-        phone,
-        email,
+        adminPhone,
+        adminEmail,
         website,
         size,
         hoursOfOperation,
         socialMedia
       } = req.body;
+
+      // Map frontend field names to backend field names
+      const phone = adminPhone;
+      const email = adminEmail;
 
       // Handle logo file upload
       let logoUrl = null;
@@ -7026,6 +7031,7 @@ Return JSON with this exact structure:
       // Create church using storage method
       const newChurch = await storage.createChurch({
         name: name.trim(),
+        type: type?.trim() || 'church',
         denomination: denomination?.trim() || 'Non-denominational',
         description: description?.trim() || null,
         address: address?.trim() || null,
