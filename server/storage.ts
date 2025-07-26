@@ -5505,6 +5505,216 @@ export class DatabaseStorage implements IStorage {
       throw new Error(`Failed to get discussions: ${error}`);
     }
   }
+
+  // Staff Management Operations
+  async getStaffMembers(communityId: number): Promise<any[]> {
+    try {
+      const result = await pool.query(`
+        SELECT 
+          u.id,
+          u.email,
+          u.first_name,
+          u.last_name,
+          uc.role,
+          uc.title,
+          uc.department,
+          CASE 
+            WHEN u.id IS NOT NULL THEN 'active'
+            ELSE 'pending'
+          END as status,
+          uc.assigned_at as invited_at,
+          uc.joined_at,
+          u.last_login as last_active
+        FROM user_communities uc
+        LEFT JOIN users u ON uc.user_id = u.id
+        WHERE uc.community_id = $1 
+        AND uc.role IN ('lead_pastor', 'associate_pastor', 'youth_pastor', 'worship_leader', 'ministry_leader', 'administrator', 'church_admin')
+        ORDER BY 
+          CASE uc.role
+            WHEN 'lead_pastor' THEN 1
+            WHEN 'associate_pastor' THEN 2
+            WHEN 'youth_pastor' THEN 3
+            WHEN 'worship_leader' THEN 4
+            WHEN 'ministry_leader' THEN 5
+            WHEN 'administrator' THEN 6
+            WHEN 'church_admin' THEN 7
+            ELSE 8
+          END,
+          uc.assigned_at ASC
+      `, [communityId]);
+
+      return result.rows.map(row => ({
+        id: row.id,
+        email: row.email,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        role: row.role,
+        title: row.title,
+        department: row.department,
+        status: row.status,
+        invitedAt: row.invited_at,
+        joinedAt: row.joined_at,
+        lastActive: row.last_active,
+        permissions: this.getRolePermissions(row.role)
+      }));
+    } catch (error) {
+      throw new Error(`Failed to get staff members: ${error}`);
+    }
+  }
+
+  async inviteStaffMember(data: {
+    communityId: number;
+    email: string;
+    role: string;
+    title: string;
+    department: string;
+    invitedBy: string;
+  }): Promise<any> {
+    try {
+      // Check if user already exists
+      const existingUser = await this.getUserByEmail(data.email);
+      
+      if (existingUser) {
+        // Add existing user to community with role
+        const [userCommunity] = await db
+          .insert(userCommunities)
+          .values({
+            userId: existingUser.id,
+            communityId: data.communityId,
+            role: data.role,
+            title: data.title,
+            department: data.department,
+            assignedBy: data.invitedBy,
+            assignedAt: new Date(),
+            joinedAt: new Date(),
+            isActive: true
+          })
+          .onConflictDoUpdate({
+            target: [userCommunities.userId, userCommunities.communityId],
+            set: {
+              role: data.role,
+              title: data.title,
+              department: data.department,
+              assignedBy: data.invitedBy,
+              assignedAt: new Date()
+            }
+          })
+          .returning();
+
+        return {
+          id: existingUser.id,
+          email: data.email,
+          firstName: existingUser.firstName,
+          lastName: existingUser.lastName,
+          role: data.role,
+          title: data.title,
+          department: data.department,
+          status: 'active'
+        };
+      } else {
+        // Create invitation record for new user
+        const [invitation] = await db
+          .insert(invitations)
+          .values({
+            email: data.email,
+            invitedBy: data.invitedBy,
+            role: 'member',
+            communityId: data.communityId,
+            status: 'pending',
+            createdAt: new Date()
+          })
+          .returning();
+
+        // Create pending user community record
+        await pool.query(`
+          INSERT INTO user_communities (user_id, community_id, role, title, department, assigned_by, assigned_at, is_active)
+          VALUES (NULL, $1, $2, $3, $4, $5, NOW(), false)
+        `, [data.communityId, data.role, data.title, data.department, data.invitedBy]);
+
+        return {
+          id: `pending_${invitation.id}`,
+          email: data.email,
+          firstName: '',
+          lastName: '',
+          role: data.role,
+          title: data.title,
+          department: data.department,
+          status: 'pending'
+        };
+      }
+    } catch (error) {
+      throw new Error(`Failed to invite staff member: ${error}`);
+    }
+  }
+
+  async updateStaffRole(communityId: number, staffId: string, role: string): Promise<void> {
+    try {
+      await db
+        .update(userCommunities)
+        .set({ 
+          role: role,
+          updatedAt: new Date()
+        })
+        .where(and(
+          eq(userCommunities.userId, staffId),
+          eq(userCommunities.communityId, communityId)
+        ));
+    } catch (error) {
+      throw new Error(`Failed to update staff role: ${error}`);
+    }
+  }
+
+  async removeStaffMember(communityId: number, staffId: string): Promise<void> {
+    try {
+      await db
+        .update(userCommunities)
+        .set({ 
+          isActive: false,
+          updatedAt: new Date()
+        })
+        .where(and(
+          eq(userCommunities.userId, staffId),
+          eq(userCommunities.communityId, communityId)
+        ));
+    } catch (error) {
+      throw new Error(`Failed to remove staff member: ${error}`);
+    }
+  }
+
+  private getRolePermissions(role: string): string[] {
+    const rolePermissions: Record<string, string[]> = {
+      lead_pastor: [
+        "manage_staff", "approve_content", "moderate_prayers", "manage_events", 
+        "access_analytics", "manage_finances", "send_communications", "manage_settings"
+      ],
+      associate_pastor: [
+        "approve_content", "moderate_prayers", "manage_events", 
+        "access_analytics", "send_communications"
+      ],
+      youth_pastor: [
+        "manage_youth_events", "moderate_prayers", "create_content", 
+        "send_youth_communications", "access_youth_analytics"
+      ],
+      worship_leader: [
+        "manage_worship_events", "upload_music", "create_worship_content",
+        "manage_worship_team", "access_worship_analytics"
+      ],
+      ministry_leader: [
+        "manage_ministry_events", "create_content", "moderate_ministry_prayers",
+        "send_ministry_communications", "manage_volunteers"
+      ],
+      administrator: [
+        "manage_members", "manage_events", "access_analytics",
+        "send_communications", "manage_facilities"
+      ],
+      church_admin: [
+        "manage_members", "manage_events", "access_analytics",
+        "send_communications", "manage_facilities"
+      ]
+    };
+
+    return rolePermissions[role] || ["basic_access"];
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -3054,6 +3054,119 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
     }
   });
 
+  // Staff Management API Endpoints
+  // Get staff members for a community
+  app.get('/api/communities/:id/staff', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const communityId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Check if user has permission to view staff (must be admin/pastor of this community)
+      const userRole = await storage.getUserCommunityRole(userId, communityId);
+      if (!userRole || !['lead_pastor', 'associate_pastor', 'administrator', 'church_admin', 'soapbox_owner'].includes(userRole)) {
+        return res.status(403).json({ message: 'Insufficient permissions to view staff' });
+      }
+
+      const staffMembers = await storage.getStaffMembers(communityId);
+      res.json(staffMembers);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch staff members', error: (error as Error).message });
+    }
+  });
+
+  // Invite staff member to community
+  app.post('/api/communities/:id/staff/invite', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const communityId = parseInt(req.params.id);
+      const { email, role, title, department } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Check if user has permission to invite staff (must be admin/pastor of this community)
+      const userRole = await storage.getUserCommunityRole(userId, communityId);
+      if (!userRole || !['lead_pastor', 'associate_pastor', 'administrator', 'church_admin', 'soapbox_owner'].includes(userRole)) {
+        return res.status(403).json({ message: 'Insufficient permissions to invite staff' });
+      }
+
+      if (!email || !role) {
+        return res.status(400).json({ message: 'Email and role are required' });
+      }
+
+      const staffMember = await storage.inviteStaffMember({
+        communityId,
+        email,
+        role,
+        title: title || '',
+        department: department || '',
+        invitedBy: userId
+      });
+
+      res.json(staffMember);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to invite staff member', error: (error as Error).message });
+    }
+  });
+
+  // Update staff member role
+  app.put('/api/communities/:id/staff/:staffId/role', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const communityId = parseInt(req.params.id);
+      const staffId = req.params.staffId;
+      const { role } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Check if user has permission to manage staff (must be admin/pastor of this community)
+      const userRole = await storage.getUserCommunityRole(userId, communityId);
+      if (!userRole || !['lead_pastor', 'administrator', 'church_admin', 'soapbox_owner'].includes(userRole)) {
+        return res.status(403).json({ message: 'Insufficient permissions to manage staff' });
+      }
+
+      if (!role) {
+        return res.status(400).json({ message: 'Role is required' });
+      }
+
+      await storage.updateStaffRole(communityId, staffId, role);
+      res.json({ success: true, message: 'Staff role updated successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update staff role', error: (error as Error).message });
+    }
+  });
+
+  // Remove staff member from community
+  app.delete('/api/communities/:id/staff/:staffId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const communityId = parseInt(req.params.id);
+      const staffId = req.params.staffId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Check if user has permission to manage staff (must be admin/pastor of this community)
+      const userRole = await storage.getUserCommunityRole(userId, communityId);
+      if (!userRole || !['lead_pastor', 'administrator', 'church_admin', 'soapbox_owner'].includes(userRole)) {
+        return res.status(403).json({ message: 'Insufficient permissions to manage staff' });
+      }
+
+      await storage.removeStaffMember(communityId, staffId);
+      res.json({ success: true, message: 'Staff member removed successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to remove staff member', error: (error as Error).message });
+    }
+  });
+
   app.get('/api/personalized-content/:contentId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
