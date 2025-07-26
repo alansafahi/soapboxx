@@ -7009,7 +7009,7 @@ Return JSON with this exact structure:
         // Continue with creation if search fails
       }
 
-      // Create church using storage method
+      // Create church using storage method - auto-approved for now
       const newChurch = await storage.createChurch({
         name: name.trim(),
         type: type?.trim() || 'church',
@@ -7029,6 +7029,8 @@ Return JSON with this exact structure:
         isActive: true,
         isClaimed: true, // Immediately claimed by creator
         isDemo: false, // New churches are not demo data
+        verificationStatus: 'verified', // Auto-approve all churches until SoapBox Admin verification system is built
+        verifiedAt: new Date(), // Mark as verified immediately
         createdAt: new Date(),
         updatedAt: new Date()
       });
@@ -7055,9 +7057,10 @@ Return JSON with this exact structure:
 
       res.json({
         success: true,
-        message: 'Church created successfully',
+        message: 'Church created and automatically verified successfully',
         church: newChurch,
-        featuresInitialized: true
+        featuresInitialized: true,
+        verificationStatus: 'verified'
       });
 
     } catch (error: any) {

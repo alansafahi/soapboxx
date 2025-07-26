@@ -433,19 +433,13 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
                   <div>
                     <Label>Verification Status</Label>
                     <div className="flex items-center gap-2 pt-2">
-                      <Badge variant={currentSettings?.administrative?.verificationStatus === 'verified' ? 'default' : 'secondary'}>
-                        {currentSettings?.administrative?.verificationStatus === 'verified' ? (
-                          <>
-                            <CheckCircle className="h-3 w-3 mr-1" />
-                            Verified
-                          </>
-                        ) : (
-                          <>
-                            <AlertTriangle className="h-3 w-3 mr-1" />
-                            Pending
-                          </>
-                        )}
-                      </Badge>
+                      <div className="space-y-1">
+                        <Badge variant="default" className="bg-green-100 text-green-800 border-green-300">
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Verified
+                        </Badge>
+                        <p className="text-xs text-gray-500">Auto-approved until SoapBox Admin verification system is implemented</p>
+                      </div>
                     </div>
                   </div>
                 </div>
