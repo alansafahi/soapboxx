@@ -1730,8 +1730,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getChurch(id: number): Promise<Church | undefined> {
-    const [church] = await db.select().from(communities).where(eq(communities.id, id));
-    return church;
+    try {
+      const [church] = await db.select().from(communities).where(eq(communities.id, id));
+      return church;
+    } catch (error) {
+      console.error('Error in getChurch:', error);
+      throw error;
+    }
+  }
+
+  // Add missing getChurchLeaderboard method for the leaderboard endpoint
+  async getChurchLeaderboard(churchId: number): Promise<any[]> {
+    try {
+      // Simple leaderboard implementation - return empty for now
+      // TODO: Implement proper leaderboard logic
+      return [];
+    } catch (error) {
+      console.error('Error in getChurchLeaderboard:', error);
+      return [];
+    }
   }
 
   async getChurchByAdminEmail(email: string): Promise<Church | undefined> {

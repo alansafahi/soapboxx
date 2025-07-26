@@ -180,7 +180,7 @@ export const communities = pgTable("communities", {
   name: varchar("name", { length: 255 }).notNull(),
   type: varchar("type", { length: 50 }).default("church"), // church, ministry, group, school, other
   denomination: varchar("denomination", { length: 100 }),
-  customDenomination: varchar("custom_denomination", { length: 255 }), // For "Other" denomination entries
+  // customDenomination: varchar("custom_denomination", { length: 255 }), // For "Other" denomination entries - Column doesn't exist in database
   description: text("description"),
   bio: text("bio"), // Extended biography/about section
   address: text("address"),
@@ -194,20 +194,20 @@ export const communities = pgTable("communities", {
   size: varchar("size", { length: 50 }), // Weekly attendance category
   hoursOfOperation: jsonb("hours_of_operation"), // Operating hours for each day of the week
   socialLinks: jsonb("social_links"), // Facebook, Instagram, Twitter, YouTube, etc.
-  parentChurchId: integer("parent_church_id").references((): any => communities.id), // For satellite campuses/ministries
-  parentChurchName: varchar("parent_church_name", { length: 255 }), // Display name of parent church
-  establishedYear: integer("established_year"), // Year the community was established
-  communityLanguages: text("community_languages").array(), // Languages spoken/services offered in
-  specialPrograms: text("special_programs").array(), // Special programs offered
-  facilities: text("facilities").array(), // Available facilities (gym, nursery, etc.)
-  missionStatement: text("mission_statement"), // Community mission statement
-  coreValues: text("core_values").array(), // Core values of the community
+  // parentChurchId: integer("parent_church_id").references((): any => communities.id), // For satellite campuses/ministries - Column doesn't exist in database
+  // parentChurchName: varchar("parent_church_name", { length: 255 }), // Display name of parent church - Column doesn't exist in database
+  // establishedYear: integer("established_year"), // Year the community was established - Column doesn't exist in database
+  // communityLanguages: text("community_languages").array(), // Languages spoken/services offered in - Column doesn't exist in database
+  // specialPrograms: text("special_programs").array(), // Special programs offered - Column doesn't exist in database
+  // facilities: text("facilities").array(), // Available facilities (gym, nursery, etc.) - Column doesn't exist in database
+  // missionStatement: text("mission_statement"), // Community mission statement - Column doesn't exist in database
+  // coreValues: text("core_values").array(), // Core values of the community - Column doesn't exist in database
   communityTags: text("community_tags").array(), // Custom tags for community categorization
   latitude: real("latitude"),
   longitude: real("longitude"),
   rating: real("rating").default(0),
   memberCount: integer("member_count").default(0),
-  weeklyAttendance: integer("weekly_attendance"), // Average weekly attendance
+  // weeklyAttendance: integer("weekly_attendance"), // Average weekly attendance - Column doesn't exist in database
   isActive: boolean("is_active").default(true),
   isClaimed: boolean("is_claimed").default(false), // Track if community has been claimed by admin
   adminEmail: varchar("admin_email", { length: 255 }), // Email of designated admin for claiming

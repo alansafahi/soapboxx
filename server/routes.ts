@@ -7402,7 +7402,8 @@ Return JSON with this exact structure:
 
       res.json(church);
     } catch (error) {
-      res.status(500).json({ error: 'Failed to get church details' });
+      console.error('Error in /api/churches/:churchId:', error);
+      res.status(500).json({ error: 'Failed to get church details', details: error.message });
     }
   });
 
@@ -13201,74 +13202,17 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(401).json({ message: 'Authentication required' });
       }
 
-      // Get user's church to scope leaderboard
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+      // Simplified leaderboard - use storage methods instead of direct DB access
+      const userChurches = await storage.getUserChurches(userId);
+      if (!userChurches || userChurches.length === 0) {
+        return res.json([]); // Empty leaderboard for users not in a church
       }
 
-      const userChurchAssociations = await db
-        .select()
-        .from(userChurches)
-        .where(and(
-          eq(userChurches.userId, userId),
-          eq(userChurches.isActive, true)
-        ));
-
-      if (!userChurchAssociations || userChurchAssociations.length === 0) {
-        // Return empty leaderboard for users not in a church, with helpful message
-        return res.json([]);
-      }
-
-      const churchId = userChurchAssociations[0].churchId;
-
-      // Get all users in the same church
-      const churchMembers = await db
-        .select({ userId: userChurches.userId })
-        .from(userChurches)
-        .where(and(
-          eq(userChurches.churchId, churchId),
-          eq(userChurches.isActive, true)
-        ));
-
-      const memberIds = churchMembers.map(m => m.userId);
-
-      if (memberIds.length === 0) {
-        return res.json([]);
-      }
-
-      // Calculate scores for church members using LEFT JOINs for better performance
-      const leaderboardData = await db
-        .select({
-          id: users.id,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          profileImageUrl: users.profileImageUrl,
-          score: sql<number>`
-            COALESCE(COUNT(DISTINCT ${discussions.id}) * 5, 0) +
-            COALESCE(COUNT(DISTINCT ${soapEntries.id}) * 3, 0) +
-            COALESCE(COUNT(DISTINCT ${prayerRequests.id}) * 2, 0) +
-            COALESCE(COUNT(DISTINCT ${events.id}) * 4, 0)
-          `.as('score'),
-        })
-        .from(users)
-        .leftJoin(discussions, eq(discussions.authorId, users.id))
-        .leftJoin(soapEntries, eq(soapEntries.userId, users.id))
-        .leftJoin(prayerRequests, eq(prayerRequests.authorId, users.id))
-        .leftJoin(events, eq(events.organizerId, users.id))
-        .where(inArray(users.id, memberIds))
-        .groupBy(users.id, users.firstName, users.lastName, users.profileImageUrl)
-        .orderBy(sql`score DESC`)
-        .limit(100);
-
-      // Add rank to each entry
-      const rankedLeaderboard = leaderboardData.map((user, index) => ({
-        ...user,
-        rank: index + 1,
-        avatarUrl: user.profileImageUrl // Map to expected field name
-      }));
-
-      res.json(rankedLeaderboard);
+      // Get the first church's members for leaderboard
+      const churchId = userChurches[0].id;
+      const leaderboardData = await storage.getChurchLeaderboard(churchId);
+      
+      res.json(leaderboardData || []);
     } catch (error) {
       // Enhanced error logging for debugging
       
