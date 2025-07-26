@@ -7653,7 +7653,7 @@ Return JSON with this exact structure:
   // Get churches created by user (church admin)
   app.get('/api/users/created-churches', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.user?.claims?.sub || req.session?.userId;
       
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
@@ -7662,7 +7662,8 @@ Return JSON with this exact structure:
       const churches = await storage.getUserCreatedChurches(userId);
       res.json(churches);
     } catch (error) {
-      res.status(500).json({ error: 'Failed to get created churches' });
+      console.error('getUserCreatedChurches route error:', error);
+      res.status(500).json({ error: 'Failed to get created churches', details: error.message });
     }
   });
 

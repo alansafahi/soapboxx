@@ -1788,37 +1788,70 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserCreatedChurches(userId: string): Promise<Church[]> {
-    return await db
-      .select({
-        id: communities.id,
-        name: communities.name,
-        denomination: communities.denomination,
-        address: communities.address,
-        city: communities.city,
-        state: communities.state,
-        country: communities.address,
-        zipCode: communities.zipCode,
-        phone: communities.phone,
-        email: communities.email,
-        website: communities.website,
-        description: communities.description,
-        imageUrl: communities.logoUrl,
-        capacity: communities.memberCapacity,
-        status: communities.verificationStatus,
-        isActive: communities.isActive,
-        createdAt: communities.createdAt,
-        updatedAt: communities.updatedAt,
-        adminEmail: communities.adminEmail,
-      })
-      .from(communities)
-      .innerJoin(userChurches, eq(communities.id, userChurches.churchId))
-      .where(and(
-        eq(userChurches.userId, userId),
-        eq(userChurches.role, 'church_admin'),
-        eq(communities.isActive, true),
-        eq(userChurches.isActive, true)
-      ))
-      .orderBy(desc(communities.createdAt));
+    try {
+      // Get communities where user has admin role
+      const result = await db
+        .select({
+          id: communities.id,
+          name: communities.name,
+          denomination: communities.denomination,
+          address: communities.address,
+          city: communities.city,
+          state: communities.state,
+          zipCode: communities.zipCode,
+          phone: communities.phone,
+          email: communities.email,
+          website: communities.website,
+          description: communities.description,
+          logoUrl: communities.logoUrl,
+          verificationStatus: communities.verificationStatus,
+          isActive: communities.isActive,
+          createdAt: communities.createdAt,
+          updatedAt: communities.updatedAt,
+          adminEmail: communities.adminEmail,
+          type: communities.type,
+          size: communities.size,
+          memberCount: communities.memberCount,
+          createdBy: communities.createdBy
+        })
+        .from(communities)
+        .innerJoin(userChurches, eq(communities.id, userChurches.churchId))
+        .where(and(
+          eq(userChurches.userId, userId),
+          or(
+            eq(userChurches.role, 'church_admin'),
+            eq(userChurches.role, 'admin'),
+            eq(userChurches.role, 'pastor'),
+            eq(userChurches.role, 'lead-pastor')
+          ),
+          eq(communities.isActive, true),
+          eq(userChurches.isActive, true)
+        ))
+        .orderBy(desc(communities.createdAt));
+
+      console.log(`getUserCreatedChurches: Found ${result.length} communities for user ${userId}`);
+      return result;
+    } catch (error) {
+      console.error('getUserCreatedChurches error:', error);
+      
+      // Try alternative query using direct createdBy field
+      try {
+        const directResult = await db
+          .select()
+          .from(communities)
+          .where(and(
+            eq(communities.createdBy, userId),
+            eq(communities.isActive, true)
+          ))
+          .orderBy(desc(communities.createdAt));
+        
+        console.log(`getUserCreatedChurches fallback: Found ${directResult.length} communities created by user ${userId}`);
+        return directResult;
+      } catch (fallbackError) {
+        console.error('getUserCreatedChurches fallback error:', fallbackError);
+        return [];
+      }
+    }
   }
 
   async getUserChurch(userId: string): Promise<(UserChurch & { role: string }) | undefined> {
