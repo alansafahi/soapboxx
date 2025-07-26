@@ -46,18 +46,32 @@ export function CommunityAdminTab() {
     enabled: !!user,
   }) as { data: any[], isLoading: boolean };
 
+  // Get communities created by user
+  const { data: createdCommunities = [], isLoading: createdLoading } = useQuery({
+    queryKey: ["/api/users/created-churches"],
+    enabled: !!user,
+  }) as { data: any[], isLoading: boolean };
+
   // Filter to only communities where user has admin access
   const adminAccessCommunities = (adminCommunities || []).filter((community: any) => {
     const adminRoles = ['church_admin', 'church-admin', 'admin', 'pastor', 'lead-pastor', 'elder', 'soapbox_owner'];
     return adminRoles.includes(community.role);
   });
 
+  // Combine both admin and created communities, avoiding duplicates
+  const allAdminCommunities = [...adminAccessCommunities];
+  createdCommunities.forEach((created: any) => {
+    if (!allAdminCommunities.find(admin => admin.id === created.id)) {
+      allAdminCommunities.push({ ...created, role: 'creator' });
+    }
+  });
+
   // Auto-select first community if none selected
   useEffect(() => {
-    if (!selectedCommunityId && adminAccessCommunities.length > 0) {
-      setSelectedCommunityId(adminAccessCommunities[0].id.toString());
+    if (!selectedCommunityId && allAdminCommunities.length > 0) {
+      setSelectedCommunityId(allAdminCommunities[0].id.toString());
     }
-  }, [adminAccessCommunities, selectedCommunityId]);
+  }, [allAdminCommunities, selectedCommunityId]);
 
   // Get selected community details
   const { data: selectedCommunity, isLoading: communityLoading } = useQuery({
@@ -113,7 +127,7 @@ export function CommunityAdminTab() {
     setEditedProfile(prev => ({ ...prev, [field]: value }));
   };
 
-  if (communitiesLoading) {
+  if (communitiesLoading || createdLoading) {
     return (
       <Card>
         <CardContent className="text-center py-8">
@@ -124,7 +138,7 @@ export function CommunityAdminTab() {
     );
   }
 
-  if (adminAccessCommunities.length === 0) {
+  if (allAdminCommunities.length === 0) {
     return (
       <Card>
         <CardContent className="text-center py-8">
@@ -150,18 +164,20 @@ export function CommunityAdminTab() {
           </p>
         </div>
         
-        {adminAccessCommunities.length > 1 && (
+        {allAdminCommunities.length > 1 && (
           <Select value={selectedCommunityId || ""} onValueChange={setSelectedCommunityId}>
             <SelectTrigger className="w-64">
               <SelectValue placeholder="Select a community" />
             </SelectTrigger>
             <SelectContent>
-              {adminAccessCommunities.map((community: any) => (
+              {allAdminCommunities.map((community: any) => (
                 <SelectItem key={community.id} value={community.id.toString()}>
                   <div className="flex items-center space-x-2">
                     <Building2 className="h-4 w-4" />
                     <span>{community.name}</span>
-                    <span className="text-xs text-gray-500">({community.role})</span>
+                    <span className="text-xs text-gray-500">
+                      ({community.role === 'creator' ? 'Creator' : community.role})
+                    </span>
                   </div>
                 </SelectItem>
               ))}

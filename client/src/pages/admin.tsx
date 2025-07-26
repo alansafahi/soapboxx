@@ -115,10 +115,9 @@ function MembersPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="community-admin">Community Admin</TabsTrigger>
-            <TabsTrigger value="church-admin">Church Admin</TabsTrigger>
             <TabsTrigger value="features">Features</TabsTrigger>
             <TabsTrigger value="campuses">Campuses</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
@@ -212,18 +211,7 @@ function MembersPage() {
 
 
 
-          <TabsContent value="church-admin" className="space-y-6">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Building className="h-6 w-6" />
-                Church Management
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mt-2">
-                Edit and manage the churches you've created as a church administrator.
-              </p>
-            </div>
-            <ChurchAdminManagement />
-          </TabsContent>
+
 
           <TabsContent value="features" className="space-y-6">
             <div className="mb-6">
