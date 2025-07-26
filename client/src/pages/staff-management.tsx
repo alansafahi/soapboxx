@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { StaffManagement } from "../components/StaffManagement";
@@ -11,16 +11,24 @@ export default function StaffManagementPage() {
   const { user } = useAuth();
   const [selectedCommunityId, setSelectedCommunityId] = useState<number | null>(null);
 
-  // Fetch user's admin communities
-  const { data: adminCommunities = [], isLoading } = useQuery({
-    queryKey: ["/api/user/admin-communities"],
-    enabled: !!user
+  // Fetch user's communities and filter for admin access
+  const { data: userCommunities = [], isLoading } = useQuery({
+    queryKey: ["/api/users/communities"],
+    enabled: !!user,
+  }) as { data: any[], isLoading: boolean };
+
+  // Filter to only communities where user has admin access
+  const adminCommunities = (userCommunities || []).filter((community: any) => {
+    const adminRoles = ['church_admin', 'church-admin', 'admin', 'pastor', 'lead-pastor', 'elder', 'soapbox_owner'];
+    return adminRoles.includes(community.role);
   });
 
   // Auto-select first community if only one exists
-  if (!selectedCommunityId && adminCommunities.length === 1) {
-    setSelectedCommunityId(adminCommunities[0].id);
-  }
+  useEffect(() => {
+    if (!selectedCommunityId && adminCommunities.length === 1) {
+      setSelectedCommunityId(adminCommunities[0].id);
+    }
+  }, [adminCommunities, selectedCommunityId]);
 
   if (isLoading) {
     return (
