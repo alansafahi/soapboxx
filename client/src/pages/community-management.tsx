@@ -376,6 +376,7 @@ export default function CommunityManagement() {
             <ChurchFeatureManager 
               churchId={communityId} 
               userRole={userRole?.role || 'member'} 
+              communityType={community.type}
             />
           </TabsContent>
 

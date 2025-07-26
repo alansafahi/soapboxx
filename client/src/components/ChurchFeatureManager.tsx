@@ -16,7 +16,9 @@ import {
   VideoIcon,
   ImageIcon,
   MicIcon,
-  TrendingUpIcon
+  TrendingUpIcon,
+  BookOpen,
+  Package
 } from "lucide-react";
 
 interface ChurchFeature {
@@ -37,106 +39,222 @@ interface ChurchFeature {
 interface ChurchFeatureManagerProps {
   churchId: number;
   userRole: string;
+  communityType?: string;
 }
 
-const featureDefinitions = {
-  // Community Features
-  'community': {
-    'donation': {
-      name: 'Donation System',
-      description: 'Accept donations and manage fundraising campaigns',
-      icon: DollarSign,
-      color: 'text-green-600',
-      bgColor: 'bg-green-50 dark:bg-green-950/20',
-      priority: 'high'
+// Community-type-specific feature definitions
+const getFeatureDefinitions = (communityType: string = 'church') => {
+  const baseFeatures = {
+    // Church Features (full feature set)
+    'church': {
+      'community': {
+        'donation': {
+          name: 'Donation System',
+          description: 'Accept donations and manage fundraising campaigns',
+          icon: DollarSign,
+          color: 'text-green-600',
+          bgColor: 'bg-green-50 dark:bg-green-950/20',
+          priority: 'high'
+        },
+        'events': {
+          name: 'Event Management',
+          description: 'Create and manage church events with RSVP tracking',
+          icon: Calendar,
+          color: 'text-blue-600',
+          bgColor: 'bg-blue-50 dark:bg-blue-950/20',
+          priority: 'high'
+        },
+        'communication_hub': {
+          name: 'Communication Hub',
+          description: 'Send announcements and messages to members',
+          icon: MessageSquare,
+          color: 'text-purple-600',
+          bgColor: 'bg-purple-50 dark:bg-purple-950/20',
+          priority: 'high'
+        }
+      },
+      'spiritual_tools': {
+        'prayer_wall': {
+          name: 'Prayer Wall',
+          description: 'Community prayer requests and prayer circles',
+          icon: Heart,
+          color: 'text-indigo-600',
+          bgColor: 'bg-indigo-50 dark:bg-indigo-950/20',
+          priority: 'high'
+        },
+        'audio_bible': {
+          name: 'Audio Bible',
+          description: 'Narrated Bible readings and study tools',
+          icon: Headphones,
+          color: 'text-orange-600',
+          bgColor: 'bg-orange-50 dark:bg-orange-950/20',
+          priority: 'medium'
+        },
+        'audio_routines': {
+          name: 'Audio Routines',
+          description: 'Guided prayer and meditation sessions',
+          icon: MicIcon,
+          color: 'text-teal-600',
+          bgColor: 'bg-teal-50 dark:bg-teal-950/20',
+          priority: 'low'
+        }
+      },
+      'media_contents': {
+        'video_library': {
+          name: 'Video Library',
+          description: 'Manage and share sermon videos and content',
+          icon: VideoIcon,
+          color: 'text-red-600',
+          bgColor: 'bg-red-50 dark:bg-red-950/20',
+          priority: 'low'
+        },
+        'image_gallery': {
+          name: 'Image Gallery',
+          description: 'Photo sharing and church media gallery',
+          icon: ImageIcon,
+          color: 'text-pink-600',
+          bgColor: 'bg-pink-50 dark:bg-pink-950/20',
+          priority: 'low'
+        }
+      },
+      'admin_features': {
+        'sermon_studio': {
+          name: 'Sermon Studio',
+          description: 'AI-powered sermon creation and biblical research',
+          icon: MicIcon,
+          color: 'text-amber-600',
+          bgColor: 'bg-amber-50 dark:bg-amber-950/20',
+          priority: 'medium'
+        },
+        'engagement_analytics': {
+          name: 'Engagement Analytics',
+          description: 'Track member engagement and church growth metrics',
+          icon: TrendingUpIcon,
+          color: 'text-violet-600',
+          bgColor: 'bg-violet-50 dark:bg-violet-950/20',
+          priority: 'medium'
+        }
+      }
     },
-    'events': {
-      name: 'Event Management',
-      description: 'Create and manage church events with RSVP tracking',
-      icon: Calendar,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50 dark:bg-blue-950/20',
-      priority: 'high'
+    
+    // Group Features (Bible Studies, Support Groups, etc.)
+    'group': {
+      'community': {
+        'events': {
+          name: 'Meeting Management',
+          description: 'Schedule group meetings and activities',
+          icon: Calendar,
+          color: 'text-blue-600',
+          bgColor: 'bg-blue-50 dark:bg-blue-950/20',
+          priority: 'high'
+        },
+        'communication_hub': {
+          name: 'Group Communication',
+          description: 'Send updates and messages to group members',
+          icon: MessageSquare,
+          color: 'text-purple-600',
+          bgColor: 'bg-purple-50 dark:bg-purple-950/20',
+          priority: 'high'
+        }
+      },
+      'group_tools': {
+        'resource_sharing': {
+          name: 'Resource Sharing',
+          description: 'Share study materials and group resources',
+          icon: BookOpen,
+          color: 'text-green-600',
+          bgColor: 'bg-green-50 dark:bg-green-950/20',
+          priority: 'medium'
+        },
+        'member_directory': {
+          name: 'Member Directory',
+          description: 'Connect with other group members',
+          icon: Users,
+          color: 'text-slate-600',
+          bgColor: 'bg-slate-50 dark:bg-slate-950/20',
+          priority: 'medium'
+        }
+      },
+      'media_contents': {
+        'image_gallery': {
+          name: 'Photo Gallery',
+          description: 'Share group photos and memories',
+          icon: ImageIcon,
+          color: 'text-pink-600',
+          bgColor: 'bg-pink-50 dark:bg-pink-950/20',
+          priority: 'low'
+        }
+      }
     },
-    'communication_hub': {
-      name: 'Communication Hub',
-      description: 'Send announcements and messages to members',
-      icon: MessageSquare,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50 dark:bg-purple-950/20',
-      priority: 'high'
+    
+    // Ministry Features (specific ministry functions)
+    'ministry': {
+      'community': {
+        'events': {
+          name: 'Ministry Events',
+          description: 'Organize ministry activities and outreach',
+          icon: Calendar,
+          color: 'text-blue-600',
+          bgColor: 'bg-blue-50 dark:bg-blue-950/20',
+          priority: 'high'
+        },
+        'communication_hub': {
+          name: 'Team Communication',
+          description: 'Send updates to ministry team and volunteers',
+          icon: MessageSquare,
+          color: 'text-purple-600',
+          bgColor: 'bg-purple-50 dark:bg-purple-950/20',
+          priority: 'high'
+        }
+      },
+      'ministry_tools': {
+        'volunteer_management': {
+          name: 'Volunteer Management',
+          description: 'Recruit and coordinate ministry volunteers',
+          icon: Users,
+          color: 'text-orange-600',
+          bgColor: 'bg-orange-50 dark:bg-orange-950/20',
+          priority: 'high'
+        },
+        'resource_management': {
+          name: 'Resource Management',
+          description: 'Track ministry resources and equipment',
+          icon: Package,
+          color: 'text-teal-600',
+          bgColor: 'bg-teal-50 dark:bg-teal-950/20',
+          priority: 'medium'
+        },
+        'impact_tracking': {
+          name: 'Impact Tracking',
+          description: 'Measure ministry effectiveness and outcomes',
+          icon: TrendingUpIcon,
+          color: 'text-violet-600',
+          bgColor: 'bg-violet-50 dark:bg-violet-950/20',
+          priority: 'medium'
+        }
+      },
+      'funding': {
+        'donation': {
+          name: 'Ministry Funding',
+          description: 'Accept donations for ministry projects',
+          icon: DollarSign,
+          color: 'text-green-600',
+          bgColor: 'bg-green-50 dark:bg-green-950/20',
+          priority: 'low'
+        }
+      }
     }
-  },
-  // Spiritual Tools
-  'spiritual_tools': {
-    'prayer_wall': {
-      name: 'Prayer Wall',
-      description: 'Community prayer requests and prayer circles',
-      icon: Heart,
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-50 dark:bg-indigo-950/20',
-      priority: 'high'
-    },
-    'audio_bible': {
-      name: 'Audio Bible',
-      description: 'Narrated Bible readings and study tools',
-      icon: Headphones,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50 dark:bg-orange-950/20',
-      priority: 'medium'
-    },
-    'audio_routines': {
-      name: 'Audio Routines',
-      description: 'Guided prayer and meditation sessions',
-      icon: MicIcon,
-      color: 'text-teal-600',
-      bgColor: 'bg-teal-50 dark:bg-teal-950/20',
-      priority: 'low'
-    }
-  },
-  // Media Contents
-  'media_contents': {
-    'video_library': {
-      name: 'Video Library',
-      description: 'Manage and share sermon videos and content',
-      icon: VideoIcon,
-      color: 'text-red-600',
-      bgColor: 'bg-red-50 dark:bg-red-950/20',
-      priority: 'low'
-    },
-    'image_gallery': {
-      name: 'Image Gallery',
-      description: 'Photo sharing and church media gallery',
-      icon: ImageIcon,
-      color: 'text-pink-600',
-      bgColor: 'bg-pink-50 dark:bg-pink-950/20',
-      priority: 'low'
-    }
-  },
-  // Admin Features
-  'admin_features': {
-    'sermon_studio': {
-      name: 'Sermon Studio',
-      description: 'AI-powered sermon creation and biblical research',
-      icon: MicIcon,
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-50 dark:bg-amber-950/20',
-      priority: 'medium'
-    },
-    'engagement_analytics': {
-      name: 'Engagement Analytics',
-      description: 'Track member engagement and church growth metrics',
-      icon: TrendingUpIcon,
-      color: 'text-violet-600',
-      bgColor: 'bg-violet-50 dark:bg-violet-950/20',
-      priority: 'medium'
-    }
-  }
+  };
+
+  return baseFeatures[communityType] || baseFeatures['church'];
 };
 
-export function ChurchFeatureManager({ churchId, userRole }: ChurchFeatureManagerProps) {
+export function ChurchFeatureManager({ churchId, userRole, communityType = 'church' }: ChurchFeatureManagerProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Get feature definitions for this community type
+  const featureDefinitions = getFeatureDefinitions(communityType);
 
   // Get church features
   const { data: features, isLoading } = useQuery({
@@ -245,7 +363,7 @@ export function ChurchFeatureManager({ churchId, userRole }: ChurchFeatureManage
         </CardHeader>
       </Card>
 
-      {Object.entries(featureDefinitions).map(([categoryKey, categoryFeatures]) => {
+      {Object.entries(getFeatureDefinitions(communityType)).map(([categoryKey, categoryFeatures]) => {
         const categoryName = categoryKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
         const categoryFeatureList = categorizedFeatures[categoryKey] || [];
 
