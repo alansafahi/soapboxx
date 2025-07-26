@@ -100,12 +100,7 @@ export default function MyCommunities() {
             Communities you're part of and your roles
           </p>
         </div>
-        <Link href="/church-claiming">
-          <Button className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Join Community
-          </Button>
-        </Link>
+
       </div>
 
       {userCommunities.length === 0 ? (
@@ -120,12 +115,18 @@ export default function MyCommunities() {
                 You haven't joined any communities yet. Discover and connect with faith communities in your area.
               </p>
               <div className="flex gap-3 justify-center">
-                <Link href="/church-claiming">
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Join a Community
-                  </Button>
-                </Link>
+                <Button 
+                  onClick={() => {
+                    // Scroll to the community discovery section
+                    const discoverySection = document.querySelector('#community-discovery');
+                    if (discoverySection) {
+                      discoverySection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Join a Community
+                </Button>
               </div>
             </div>
           </CardContent>
