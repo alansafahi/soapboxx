@@ -500,8 +500,8 @@ export default function EnhancedCommunityDiscovery() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="churches">Churches</SelectItem>
-              <SelectItem value="groups">Groups</SelectItem>
               <SelectItem value="ministries">Ministries</SelectItem>
+              <SelectItem value="groups">Groups</SelectItem>
             </SelectContent>
           </Select>
 
