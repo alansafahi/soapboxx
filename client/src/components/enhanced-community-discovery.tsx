@@ -133,17 +133,186 @@ export default function EnhancedCommunityDiscovery() {
       case "churches":
         return {
           label: "Denomination",
-          options: Array.from(new Set(communities.map(c => c.denomination))).sort()
+          options: [
+            // Traditional Protestant Denominations
+            "Baptist", "Methodist", "Presbyterian", "Lutheran", "Episcopal", "Anglican", 
+            "Pentecostal", "Assembly of God", "Church of God", "Nazarene", "Wesleyan",
+            "Reformed", "Calvinist", "Congregational", "Disciples of Christ", "United Church of Christ",
+            "Adventist", "Mennonite", "Brethren", "Quaker", "Friends",
+            
+            // Catholic and Orthodox
+            "Roman Catholic", "Eastern Orthodox", "Greek Orthodox", "Russian Orthodox", 
+            "Coptic Orthodox", "Armenian Orthodox", "Ethiopian Orthodox",
+            
+            // Evangelical and Fundamentalist
+            "Evangelical", "Fundamentalist", "Independent Baptist", "Bible Church", 
+            "Community Church", "Calvary Chapel", "Vineyard", "Foursquare Gospel",
+            
+            // Charismatic and Pentecostal
+            "Charismatic", "Full Gospel", "Apostolic", "United Pentecostal", 
+            "Church of God in Christ", "International Church of the Foursquare Gospel",
+            
+            // Historic Churches
+            "Moravian", "Waldensian", "Coptic", "Maronite", "Chaldean", 
+            "Syriac Orthodox", "Malankara Orthodox",
+            
+            // Modern Movements
+            "Non-denominational", "Interdenominational", "Multi-denominational", 
+            "Emerging Church", "House Church", "Organic Church",
+            
+            // Restorationist
+            "Church of Christ", "Christian Church", "Stone-Campbell", "Restoration Movement",
+            
+            // Holiness and Sanctification
+            "Church of the Nazarene", "Salvation Army", "Christian and Missionary Alliance",
+            
+            // Reformed Traditions
+            "Presbyterian Church (USA)", "Presbyterian Church in America", "Orthodox Presbyterian Church",
+            "Christian Reformed Church", "Reformed Church in America", "Protestant Reformed Churches",
+            
+            // Baptist Varieties
+            "Southern Baptist", "American Baptist", "Independent Fundamental Baptist", 
+            "Missionary Baptist", "Primitive Baptist", "Free Will Baptist", "Reformed Baptist",
+            
+            // Lutheran Varieties
+            "Lutheran Church-Missouri Synod", "Evangelical Lutheran Church in America", 
+            "Wisconsin Evangelical Lutheran Synod", "Lutheran Church-Canada",
+            
+            // Methodist Varieties
+            "United Methodist", "Free Methodist", "African Methodist Episcopal", 
+            "Christian Methodist Episcopal", "Primitive Methodist",
+            
+            // Other Significant Groups
+            "Seventh-day Adventist", "Jehovah's Witnesses", "Church of Jesus Christ of Latter-day Saints",
+            "Unity", "Unitarian Universalist", "Christian Science", "New Thought"
+          ].sort()
         };
       case "groups": 
         return {
           label: "Affiliation",
-          options: ["Bible Study", "Youth Group", "Prayer Group", "Community Service", "Support Group"]
+          options: [
+            // Bible Study Groups
+            "Bible Study", "Scripture Study", "Verse by Verse Study", "Topical Bible Study", 
+            "Inductive Bible Study", "Expository Study", "Book Study", "Character Study",
+            "Prophecy Study", "Doctrinal Study", "Apologetics Study", "Hebrew Roots Study",
+            
+            // Prayer Groups
+            "Prayer Group", "Intercessory Prayer", "Prayer Warriors", "Prayer Chain", 
+            "Contemplative Prayer", "Healing Prayer", "Prayer Walk", "24/7 Prayer Room",
+            "Mothers in Prayer", "Men's Prayer Group", "Prayer and Fasting",
+            
+            // Fellowship Groups
+            "Fellowship Group", "Home Fellowship", "Cell Group", "Life Group", 
+            "Connect Group", "Community Group", "Covenant Group", "Accountability Group",
+            "Discipleship Circle", "Mentorship Group", "Spiritual Formation Group",
+            
+            // Support and Recovery
+            "Support Group", "Grief Support", "Addiction Recovery", "Celebrate Recovery", 
+            "Divorce Recovery", "Cancer Support", "Mental Health Support", "Caregivers Support",
+            "Military Support", "Widows Support", "Single Parents Support", "Special Needs Support",
+            
+            // Service and Outreach
+            "Community Service", "Homeless Ministry", "Food Pantry", "Soup Kitchen", 
+            "Prison Ministry", "Hospital Ministry", "Nursing Home Ministry", "Missions Group",
+            "Evangelism Team", "Street Ministry", "Refugee Ministry", "Disaster Relief",
+            
+            // Age-Specific Groups
+            "Youth Group", "Teen Group", "Young Adults", "College Group", "Singles Group", 
+            "Young Professionals", "Married Couples", "Parents Group", "Seniors Group", 
+            "Golden Agers", "Empty Nesters", "Grandparents Group",
+            
+            // Interest-Based Groups
+            "Book Club", "Christian Book Club", "Movie Discussion", "Theology Discussion", 
+            "Philosophy Group", "History Group", "Art Group", "Cooking Group", "Gardening Group",
+            "Sports Group", "Hiking Group", "Crafts Group", "Photography Group",
+            
+            // Women's and Men's Groups
+            "Women's Group", "Ladies Bible Study", "Women's Fellowship", "Proverbs 31 Women", 
+            "Women's Retreat Group", "Men's Group", "Men's Fellowship", "Men's Breakfast", 
+            "Promise Keepers", "Iron Sharpens Iron", "Men's Retreat Group",
+            
+            // Family Groups
+            "Family Group", "Parenting Group", "Marriage Group", "Couples Group", 
+            "Homeschool Group", "Christian Families", "Adoption Support", "Foster Care Support",
+            
+            // Spiritual Growth
+            "Spiritual Growth", "Discipleship Group", "Spiritual Direction", "Contemplative Group", 
+            "Meditation Group", "Lectio Divina", "Centering Prayer", "Spiritual Disciplines"
+          ].sort()
         };
       case "ministries":
         return {
           label: "Ministry Type", 
-          options: ["Worship", "Outreach", "Children", "Youth", "Seniors", "Missions", "Music"]
+          options: [
+            // Worship and Music Ministries
+            "Worship", "Music Ministry", "Choir", "Praise Team", "Orchestra", "Instrumental", 
+            "Piano Ministry", "Guitar Ministry", "Drums Ministry", "Sound Ministry", 
+            "Media Ministry", "Video Ministry", "Livestream Ministry", "Lighting Ministry",
+            "Creative Arts", "Dance Ministry", "Drama Ministry", "Mime Ministry",
+            
+            // Children's Ministries
+            "Children", "Kids Ministry", "Sunday School", "Vacation Bible School", "AWANA", 
+            "Children's Church", "Nursery Ministry", "Preschool Ministry", "Elementary Ministry",
+            "Children's Choir", "Kids Worship", "Puppet Ministry", "Children's Drama",
+            
+            // Youth Ministries
+            "Youth", "Student Ministry", "High School Ministry", "Middle School Ministry", 
+            "Youth Group", "Youth Worship", "Youth Missions", "Youth Camps", "Youth Sports",
+            "Youth Discipleship", "Confirmation Class", "Teen Leadership",
+            
+            // Young Adult Ministries
+            "Young Adults", "College Ministry", "Young Professionals", "Singles Ministry", 
+            "Campus Ministry", "University Outreach", "Graduate Student Ministry",
+            
+            // Adult Ministries
+            "Adult Ministry", "Men's Ministry", "Women's Ministry", "Couples Ministry", 
+            "Marriage Ministry", "Parenting Ministry", "Seniors Ministry", "Prime Time Ministry",
+            "50+ Ministry", "Golden Years Ministry", "Retirement Ministry",
+            
+            // Outreach and Evangelism
+            "Outreach", "Evangelism", "Street Ministry", "Neighborhood Outreach", 
+            "Community Outreach", "Homeless Ministry", "Food Bank", "Soup Kitchen", 
+            "Clothing Closet", "Angel Tree", "Adopt-a-Family", "Backpack Ministry",
+            
+            // Missions
+            "Missions", "Local Missions", "Foreign Missions", "Short-term Missions", 
+            "Mission Trips", "Cross-cultural Ministry", "International Ministry", 
+            "Refugee Ministry", "ESL Ministry", "Immigrant Ministry", "Global Missions",
+            
+            // Pastoral Care
+            "Pastoral Care", "Hospital Ministry", "Nursing Home Ministry", "Shut-in Ministry", 
+            "Grief Ministry", "Counseling Ministry", "Prayer Ministry", "Healing Ministry",
+            "Deliverance Ministry", "Restoration Ministry", "Recovery Ministry",
+            
+            // Education and Discipleship
+            "Education", "Bible Study", "Discipleship", "Small Groups", "Sunday School", 
+            "Christian Education", "Leadership Development", "Mentoring", "Coaching",
+            "Seminary Extension", "Theological Education", "Bible College Ministry",
+            
+            // Special Needs and Support
+            "Special Needs", "Disability Ministry", "Autism Ministry", "Mental Health Ministry", 
+            "Addiction Recovery", "Celebrate Recovery", "Support Groups", "Crisis Ministry",
+            "Counseling", "Family Counseling", "Marriage Counseling",
+            
+            // Sports and Recreation
+            "Sports Ministry", "Recreation Ministry", "Church Softball", "Basketball Ministry", 
+            "Soccer Ministry", "Golf Ministry", "Fitness Ministry", "Outdoor Ministry",
+            "Adventure Ministry", "Camping Ministry", "Hiking Ministry",
+            
+            // Technology and Media
+            "Technology Ministry", "Website Ministry", "Social Media Ministry", "IT Ministry", 
+            "Computer Ministry", "Audio/Visual Ministry", "Photography Ministry", 
+            "Communications Ministry", "Publications Ministry",
+            
+            // Administrative and Support
+            "Administration", "Finance Ministry", "Stewardship Ministry", "Facilities Ministry", 
+            "Maintenance Ministry", "Security Ministry", "Transportation Ministry", 
+            "Kitchen Ministry", "Hospitality Ministry", "Ushering Ministry", "Greeting Ministry",
+            
+            // Special Events
+            "Events Ministry", "Wedding Ministry", "Funeral Ministry", "Holiday Ministry", 
+            "Festival Ministry", "Conference Ministry", "Retreat Ministry", "Camp Ministry"
+          ].sort()
         };
       default:
         return {
