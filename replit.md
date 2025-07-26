@@ -151,6 +151,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes
+- July 26, 2025: STAFF MANAGEMENT MOVED TO DEDICATED ADMIN PORTAL TAB COMPLETED - Successfully moved all staff management functionality from Community Settings to dedicated "Staff Management" tab under ADMIN PORTAL section
+  - DEDICATED STAFF MANAGEMENT TAB: Created new "Staff Management" tab under ADMIN PORTAL with UserCog icon positioned between Community Admin and Volunteer Management
+  - STAFF MANAGEMENT PAGE: Created dedicated staff-management.tsx page with community selection, proper routing, and role-based access control
+  - COMMUNITY SETTINGS CLEANUP: Removed Staff Management tab from CommunitySettings component and updated tab grid layout from 6 to 5 columns
+  - SEPARATION OF CONCERNS: Clean separation between community settings (basic configuration) and administrative functions (staff management) 
+  - ADMIN PORTAL CONSOLIDATION: All administrative functions now properly organized under ADMIN PORTAL section for better navigation structure
 - July 26, 2025: SOAPBOX ADMIN FUNCTIONALITY REMOVAL COMPLETED - Successfully removed all SoapBox Admin functionality from current application as user plans to build separate SoapBox Admin app
   - SOAPBOX ADMIN TAB REMOVED: Eliminated "SoapBox Admin" tab from Admin Portal interface and updated tab grid layout from 12 to 11 columns
   - CHURCHMANAGEMENTTAB FUNCTION DELETED: Removed entire ChurchManagementTab component (347 lines) including church approval/rejection/suspension functionality 

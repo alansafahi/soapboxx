@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Badge } from "./ui/badge";
 import { useToast } from "../hooks/use-toast";
-import { StaffManagement } from "./StaffManagement";
+
 import {
   Settings,
   Users,
@@ -29,7 +29,7 @@ import {
   AlertTriangle,
   CheckCircle,
   Save,
-  UserCog
+
 } from "lucide-react";
 
 interface CommunitySettingsProps {
@@ -242,7 +242,6 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
   const getAvailableTabs = () => {
     const baseTabs = [
       { id: "basic", label: "Basic Info", icon: Settings },
-      { id: "staff", label: "Staff Management", icon: UserCog },
       { id: "community", label: "Community", icon: Users },
       { id: "communication", label: "Communication", icon: Bell },
       { id: "privacy", label: "Privacy & Safety", icon: Shield },
@@ -282,7 +281,7 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid grid-cols-6 lg:grid-cols-8">
+        <TabsList className="grid grid-cols-5 lg:grid-cols-7">
           {getAvailableTabs().map((tab) => {
             const IconComponent = tab.icon;
             return (
@@ -391,11 +390,6 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* Staff Management Tab */}
-        <TabsContent value="staff" className="space-y-6">
-          <StaffManagement communityId={communityId} />
         </TabsContent>
 
         {/* Administrative Tab (Churches Only) */}
