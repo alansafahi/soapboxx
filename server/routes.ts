@@ -7683,6 +7683,8 @@ Return JSON with this exact structure:
         return res.status(403).json({ error: 'Admin access required' });
       }
 
+      console.log('Updating feature:', { featureId, isEnabled, feature: feature.featureName });
+      
       const updatedFeature = await storage.updateChurchFeatureSetting({
         churchId: feature.churchId,
         featureCategory: feature.featureCategory,
@@ -7691,9 +7693,10 @@ Return JSON with this exact structure:
         enabledBy: userId
       });
       
+      console.log('Feature update successful:', updatedFeature);
       res.json(updatedFeature);
     } catch (error) {
-      // Error updating church feature - silent error handling
+      console.error('Error updating church feature:', error);
       res.status(500).json({ error: 'Failed to update church feature' });
     }
   });

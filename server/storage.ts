@@ -3430,12 +3430,39 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async updateChurchFeatureSetting(churchId: number, featureId: string, enabled: boolean): Promise<void> {
-    return;
+  async updateChurchFeatureSetting(data: {
+    churchId: number;
+    featureCategory: string;
+    featureName: string;
+    isEnabled: boolean;
+    enabledBy: string;
+  }): Promise<any> {
+    try {
+      const result = await pool.query(`
+        UPDATE church_feature_settings 
+        SET is_enabled = $1, enabled_by = $2, last_modified = NOW()
+        WHERE church_id = $3 AND feature_category = $4 AND feature_name = $5
+        RETURNING *
+      `, [data.isEnabled, data.enabledBy, data.churchId, data.featureCategory, data.featureName]);
+      
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error updating church feature setting:', error);
+      throw new Error('Failed to update feature setting');
+    }
   }
 
-  async getChurchFeatureSettingById(featureId: string): Promise<any> {
-    return {};
+  async getChurchFeatureSettingById(featureId: number): Promise<any> {
+    try {
+      const result = await pool.query(
+        'SELECT * FROM church_feature_settings WHERE id = $1',
+        [featureId]
+      );
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error getting church feature setting by ID:', error);
+      return null;
+    }
   }
 
   // Prayer request operations implementation
