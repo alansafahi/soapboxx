@@ -9,6 +9,7 @@ import { Textarea } from "../components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useToast } from "../hooks/use-toast";
 import { ChurchFeatureManager } from "../components/ChurchFeatureManager";
+import { ChurchManagementHub } from "../components/ChurchManagementHub";
 import { useParams, useLocation } from "wouter";
 import {
   Building2,
@@ -48,6 +49,11 @@ export default function ChurchManagement() {
   const { churchId } = useParams<{ churchId: string }>();
   const [editedProfile, setEditedProfile] = useState<Partial<ChurchProfile>>({});
   const [activeTab, setActiveTab] = useState("profile");
+
+  // If no churchId is provided, show the ChurchManagementHub for community creation
+  if (!churchId) {
+    return <ChurchManagementHub />;
+  }
 
   // Get church details
   const { data: church, isLoading } = useQuery({

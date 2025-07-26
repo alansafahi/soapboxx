@@ -160,6 +160,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/churches" component={Churches} />
                                     <ProtectedRoute path="/communities" component={Communities} />
                                     <ProtectedRoute path="/church-claiming" component={ChurchClaiming} />
+                                    <ProtectedRoute path="/church-management" component={ChurchManagementPage} />
                                     <ProtectedRoute path="/church-management/:churchId" component={ChurchManagementPage} />
                                     <ProtectedRoute path="/events" component={Events} />
                                     <ProtectedRoute path="/prayer" component={Prayer} />
