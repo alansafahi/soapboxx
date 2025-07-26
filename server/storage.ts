@@ -2749,6 +2749,7 @@ export class DatabaseStorage implements IStorage {
       return result.rows.map((row: any) => ({
         id: row.id,
         name: row.name,
+        type: row.type || 'church', // Include community type
         denomination: row.denomination,
         address: row.address,
         city: row.city,

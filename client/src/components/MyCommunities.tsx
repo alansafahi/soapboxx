@@ -19,6 +19,7 @@ import { z } from "zod";
 interface Community {
   id: number;
   name: string;
+  type: string; // church, group, ministry
   denomination: string;
   address: string;
   city: string;
@@ -512,77 +513,60 @@ export default function MyCommunities() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {userCommunities.map((community) => (
-            <Card key={community.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    {community.logoUrl ? (
-                      <img 
-                        src={community.logoUrl} 
-                        alt={`${community.name} logo`}
-                        className="w-12 h-12 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                        <Building className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg leading-6 truncate">
-                        {community.name}
-                      </CardTitle>
-                      <CardDescription>
-                        {community.denomination}
-                      </CardDescription>
-                    </div>
-                  </div>
-                  <Badge className={getRoleBadgeColor(community.role)}>
-                    {formatRole(community.role)}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <MapPin className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">
-                      {community.city}, {community.state}
-                    </span>
-                  </div>
-                  {community.memberCount && (
-                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                      <Users className="h-4 w-4 flex-shrink-0" />
-                      <span>{community.memberCount} members</span>
-                    </div>
-                  )}
-                </div>
-                
-                {community.description && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                    {community.description}
-                  </p>
-                )}
+        <div className="space-y-8">
+          {/* Churches Section */}
+          {userCommunities.filter(c => c.type === 'church').length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Churches</h3>
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  {userCommunities.filter(c => c.type === 'church').length}
+                </Badge>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {userCommunities.filter(c => c.type === 'church').map((community) => (
+                  <CommunityCard key={community.id} community={community} colorTheme="blue" />
+                ))}
+              </div>
+            </div>
+          )}
 
-                <div className="flex gap-2 pt-2">
-                  <Link href={`/community-management/${community.id}`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      View Details
-                    </Button>
-                  </Link>
-                  {(community.role === 'church_admin' || community.role === 'admin' || community.role === 'pastor') && (
-                    <Link href={`/admin?communityId=${community.id}`}>
-                      <Button size="sm" variant="outline">
-                        <Settings className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {/* Groups Section */}
+          {userCommunities.filter(c => c.type === 'group').length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Groups</h3>
+                <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  {userCommunities.filter(c => c.type === 'group').length}
+                </Badge>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {userCommunities.filter(c => c.type === 'group').map((community) => (
+                  <CommunityCard key={community.id} community={community} colorTheme="green" />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Ministries Section */}
+          {userCommunities.filter(c => c.type === 'ministry').length > 0 && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ministries</h3>
+                <Badge variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                  {userCommunities.filter(c => c.type === 'ministry').length}
+                </Badge>
+              </div>
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {userCommunities.filter(c => c.type === 'ministry').map((community) => (
+                  <CommunityCard key={community.id} community={community} colorTheme="purple" />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
