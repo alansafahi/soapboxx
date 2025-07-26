@@ -10,6 +10,7 @@ import { Building, MapPin, Users, Search, Filter, Phone, Mail, Globe, Calendar }
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "../hooks/use-toast";
 
+
 interface Community {
   id: number;
   name: string;
@@ -472,10 +473,22 @@ export default function EnhancedCommunityDiscovery() {
 
         {/* Community Type and Detailed Filters */}
         <div className="space-y-3">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
-            <Filter className="h-4 w-4 mr-2" />
-            Refine Your Search
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
+              <Filter className="h-4 w-4 mr-2" />
+              Refine Your Search
+            </h3>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Can't find your community? 
+              <Button 
+                variant="link" 
+                className="h-auto p-0 ml-1 text-purple-600 dark:text-purple-400"
+                onClick={() => window.location.href = '/church-management'}
+              >
+                Create one
+              </Button>
+            </div>
+          </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {/* Primary Filter: Community Type */}
           <Select value={communityTypeFilter} onValueChange={(value) => {

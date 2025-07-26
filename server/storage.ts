@@ -1792,12 +1792,12 @@ export class DatabaseStorage implements IStorage {
         adminEmail: communities.adminEmail,
       })
       .from(communities)
-      .innerJoin(userCommunities, eq(communities.id, userCommunities.communityId))
+      .innerJoin(userChurches, eq(communities.id, userChurches.churchId))
       .where(and(
-        eq(userCommunities.userId, userId),
-        eq(userCommunities.role, 'church_admin'),
+        eq(userChurches.userId, userId),
+        eq(userChurches.role, 'church_admin'),
         eq(communities.isActive, true),
-        eq(userCommunities.isActive, true)
+        eq(userChurches.isActive, true)
       ))
       .orderBy(desc(communities.createdAt));
   }
@@ -1806,10 +1806,10 @@ export class DatabaseStorage implements IStorage {
     // First try to get primary church
     const [primaryChurch] = await db
       .select()
-      .from(userCommunities)
+      .from(userChurches)
       .where(and(
-        eq(userCommunities.userId, userId),
-        eq(userCommunities.isActive, true),
+        eq(userChurches.userId, userId),
+        eq(userChurches.isActive, true),
         sql`is_primary = true`
       ))
       .limit(1);
@@ -1817,12 +1817,12 @@ export class DatabaseStorage implements IStorage {
     // If no primary church set, fall back to first church joined
     const [userChurch] = primaryChurch ? [primaryChurch] : await db
       .select()
-      .from(userCommunities)
+      .from(userChurches)
       .where(and(
-        eq(userCommunities.userId, userId),
-        eq(userCommunities.isActive, true)
+        eq(userChurches.userId, userId),
+        eq(userChurches.isActive, true)
       ))
-      .orderBy(userCommunities.joinedAt)
+      .orderBy(userChurches.joinedAt)
       .limit(1);
     
     if (!userChurch) {
