@@ -171,9 +171,9 @@ export function ChurchManagementHub() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Church Administration</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Community Administration</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Manage your church organization, campuses, and members
+            Manage your community organization, campuses, and members
           </p>
         </div>
 
@@ -181,7 +181,7 @@ export function ChurchManagementHub() {
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="churches">Communities</TabsTrigger>
-            <TabsTrigger value="management">Church Management</TabsTrigger>
+            <TabsTrigger value="management">Community Management</TabsTrigger>
             <TabsTrigger value="directory">Member Directory</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
@@ -191,7 +191,7 @@ export function ChurchManagementHub() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Your Churches</CardTitle>
+                  <CardTitle className="text-sm font-medium">Your Communities</CardTitle>
                   <Building2 className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
@@ -206,7 +206,7 @@ export function ChurchManagementHub() {
                 <>
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Primary Church</CardTitle>
+                      <CardTitle className="text-sm font-medium">Primary Community</CardTitle>
                       <Crown className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -250,7 +250,7 @@ export function ChurchManagementHub() {
             {!primaryChurch && (
               <Card className="p-8 text-center">
                 <Building2 className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-                <h2 className="text-xl font-semibold mb-2">Welcome to Church Administration</h2>
+                <h2 className="text-xl font-semibold mb-2">Welcome to Community Administration</h2>
                 <p className="text-gray-600 mb-6">
                   Get started by creating a new community or claiming an existing one
                 </p>
@@ -695,13 +695,13 @@ export function ChurchManagementHub() {
                               <SelectItem value="staff">Staff</SelectItem>
                               <SelectItem value="minister">Minister</SelectItem>
                               <SelectItem value="pastor">Pastor</SelectItem>
-                              <SelectItem value="church_admin">Church Admin</SelectItem>
+                              <SelectItem value="church_admin">Community Admin</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-2">
                           <Label>Personal Message (Optional)</Label>
-                          <Textarea placeholder="Welcome to our church community!" rows={3} />
+                          <Textarea placeholder="Welcome to our community!" rows={3} />
                         </div>
                         <Button className="w-full">
                           <Mail className="h-4 w-4 mr-2" />
@@ -727,7 +727,7 @@ export function ChurchManagementHub() {
                               <p className="text-sm text-gray-500">alan@soapboxsuperapp.com</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge variant="outline">Church Admin</Badge>
+                              <Badge variant="outline">Community Admin</Badge>
                               <Button size="sm" variant="outline">
                                 <Settings className="h-4 w-4" />
                               </Button>
@@ -740,7 +740,7 @@ export function ChurchManagementHub() {
                               <p className="text-sm text-gray-500">alan@safahi.com</p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Badge variant="outline">Church Admin</Badge>
+                              <Badge variant="outline">Community Admin</Badge>
                               <Button size="sm" variant="outline">
                                 <Settings className="h-4 w-4" />
                               </Button>
@@ -767,13 +767,13 @@ export function ChurchManagementHub() {
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         <Card className="border-2 border-dashed border-gray-200 hover:border-blue-300 cursor-pointer">
                           <CardHeader className="pb-2">
-                            <CardTitle className="text-sm">Small Church</CardTitle>
+                            <CardTitle className="text-sm">Small Community</CardTitle>
                             <CardDescription className="text-xs">Under 50 members</CardDescription>
                           </CardHeader>
                           <CardContent className="pt-2">
                             <div className="space-y-1 text-xs">
                               <div className="flex justify-between">
-                                <span>Church Admin</span>
+                                <span>Community Admin</span>
                                 <Badge variant="outline" className="text-xs">1</Badge>
                               </div>
                               <div className="flex justify-between">
@@ -795,13 +795,13 @@ export function ChurchManagementHub() {
 
                         <Card className="border-2 border-dashed border-gray-200 hover:border-blue-300 cursor-pointer">
                           <CardHeader className="pb-2">
-                            <CardTitle className="text-sm">Mid-size Church</CardTitle>
+                            <CardTitle className="text-sm">Mid-size Community</CardTitle>
                             <CardDescription className="text-xs">50-200 members</CardDescription>
                           </CardHeader>
                           <CardContent className="pt-2">
                             <div className="space-y-1 text-xs">
                               <div className="flex justify-between">
-                                <span>Church Admin</span>
+                                <span>Community Admin</span>
                                 <Badge variant="outline" className="text-xs">1-2</Badge>
                               </div>
                               <div className="flex justify-between">
@@ -823,13 +823,13 @@ export function ChurchManagementHub() {
 
                         <Card className="border-2 border-dashed border-gray-200 hover:border-blue-300 cursor-pointer">
                           <CardHeader className="pb-2">
-                            <CardTitle className="text-sm">Large Church</CardTitle>
+                            <CardTitle className="text-sm">Large Community</CardTitle>
                             <CardDescription className="text-xs">200+ members</CardDescription>
                           </CardHeader>
                           <CardContent className="pt-2">
                             <div className="space-y-1 text-xs">
                               <div className="flex justify-between">
-                                <span>Church Admin</span>
+                                <span>Community Admin</span>
                                 <Badge variant="outline" className="text-xs">2-3</Badge>
                               </div>
                               <div className="flex justify-between">
@@ -856,11 +856,11 @@ export function ChurchManagementHub() {
                 <TabsContent value="settings" className="space-y-6">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Church Settings</CardTitle>
-                      <CardDescription>Update church information and preferences</CardDescription>
+                      <CardTitle>Community Settings</CardTitle>
+                      <CardDescription>Update community information and preferences</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-center text-gray-500 py-8">Church settings coming soon...</p>
+                      <p className="text-center text-gray-500 py-8">Community settings coming soon...</p>
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -868,10 +868,10 @@ export function ChurchManagementHub() {
             ) : (
               <Card className="p-8 text-center">
                 <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Church Selected</h3>
-                <p className="text-gray-600 mb-4">Create or claim a church first to access management features</p>
+                <h3 className="text-lg font-semibold mb-2">No Community Selected</h3>
+                <p className="text-gray-600 mb-4">Create or claim a community first to access management features</p>
                 <Button onClick={() => setActiveTab("churches")}>
-                  Go to Churches
+                  Go to Communities
                 </Button>
               </Card>
             )}
@@ -884,7 +884,7 @@ export function ChurchManagementHub() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-2xl font-bold">Member Directory</h2>
-                    <p className="text-gray-600">View and manage all church members</p>
+                    <p className="text-gray-600">View and manage all community members</p>
                   </div>
                   <div className="flex gap-2">
                     <Button onClick={() => setActiveTab("management")}>
@@ -931,10 +931,10 @@ export function ChurchManagementHub() {
             ) : (
               <Card className="p-8 text-center">
                 <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Church Selected</h3>
-                <p className="text-gray-600 mb-4">Create or claim a church first to manage members</p>
+                <h3 className="text-lg font-semibold mb-2">No Community Selected</h3>
+                <p className="text-gray-600 mb-4">Create or claim a community first to manage members</p>
                 <Button onClick={() => setActiveTab("churches")}>
-                  Go to Churches
+                  Go to Communities
                 </Button>
               </Card>
             )}
@@ -947,10 +947,10 @@ export function ChurchManagementHub() {
             ) : (
               <Card className="p-8 text-center">
                 <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No Church Selected</h3>
-                <p className="text-gray-600 mb-4">Create or claim a church first to view analytics</p>
+                <h3 className="text-lg font-semibold mb-2">No Community Selected</h3>
+                <p className="text-gray-600 mb-4">Create or claim a community first to view analytics</p>
                 <Button onClick={() => setActiveTab("churches")}>
-                  Go to Churches
+                  Go to Communities
                 </Button>
               </Card>
             )}
