@@ -122,10 +122,25 @@ export function ChurchManagementHub() {
     }
   });
 
+  // Helper function to normalize website URL
+  const normalizeWebsiteUrl = (url: string) => {
+    if (!url || !url.trim()) return "";
+    const trimmedUrl = url.trim();
+    if (trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://")) {
+      return trimmedUrl;
+    }
+    return `https://${trimmedUrl}`;
+  };
+
   // Create church mutation
   const createChurchMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest("/api/churches", "POST", data);
+      // Normalize website URL before sending
+      const processedData = {
+        ...data,
+        website: data.website ? normalizeWebsiteUrl(data.website) : ""
+      };
+      return await apiRequest("/api/churches", "POST", processedData);
     },
     onSuccess: () => {
       toast({ title: "Church created successfully!" });
@@ -495,7 +510,7 @@ export function ChurchManagementHub() {
                               <FormItem>
                                 <FormLabel>Website</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="https://church.org" {...field} />
+                                  <Input placeholder="www.church.org (https:// will be added automatically)" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -508,7 +523,7 @@ export function ChurchManagementHub() {
                             Cancel
                           </Button>
                           <Button type="submit" disabled={createChurchMutation.isPending}>
-                            {createChurchMutation.isPending ? "Creating..." : "Create Organization"}
+                            {createChurchMutation.isPending ? "Creating..." : "Create Community"}
                           </Button>
                         </DialogFooter>
                       </form>
