@@ -7247,6 +7247,44 @@ Return JSON with this exact structure:
     }
   });
 
+  // Get discoverable communities for community discovery
+  app.get('/api/communities/discover', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      console.log('Getting discoverable communities for user:', userId);
+      const discoverableCommunities = await storage.getDiscoverableCommunities(userId);
+      console.log('Discoverable communities found:', discoverableCommunities.length);
+      res.json(discoverableCommunities);
+    } catch (error) {
+      console.error('Error in /api/communities/discover:', error);
+      res.status(500).json({ error: 'Failed to get discoverable communities' });
+    }
+  });
+
+  // Join a community
+  app.post('/api/communities/:id/join', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const communityId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      console.log('User', userId, 'joining community', communityId);
+      const result = await storage.joinCommunity(userId, communityId);
+      res.json({ success: true, message: 'Successfully joined community' });
+    } catch (error) {
+      console.error('Error joining community:', error);
+      res.status(500).json({ error: 'Failed to join community' });
+    }
+  });
+
   // Get specific church details for church management (legacy endpoint)
   app.get('/api/churches/:churchId', isAuthenticated, async (req: any, res) => {
     try {

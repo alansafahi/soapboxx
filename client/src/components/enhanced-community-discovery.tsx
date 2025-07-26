@@ -34,7 +34,8 @@ export default function EnhancedCommunityDiscovery() {
   
   const [searchQuery, setSearchQuery] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
-  const [denominationFilter, setDenominationFilter] = useState("");
+  const [communityTypeFilter, setCommunityTypeFilter] = useState("churches"); // Primary filter: churches, groups, ministries
+  const [denominationFilter, setDenominationFilter] = useState(""); // Secondary filter based on type
   const [sizeFilter, setSizeFilter] = useState("");
   const [displayedCount, setDisplayedCount] = useState(6);
 
@@ -81,6 +82,15 @@ export default function EnhancedCommunityDiscovery() {
     const joinedCommunityIds = Array.isArray(userCommunities) ? userCommunities.map((uc: any) => uc.id) : [];
     filtered = filtered.filter(community => !joinedCommunityIds.includes(community.id));
 
+    // Primary filter by community type (churches, groups, ministries)
+    if (communityTypeFilter && communityTypeFilter !== "all") {
+      filtered = filtered.filter(community => {
+        // For now, classify all as churches since we're dealing with church data
+        // This can be expanded when we have actual community type data
+        return communityTypeFilter === "churches";
+      });
+    }
+
     if (searchQuery) {
       filtered = filtered.filter(community => 
         community.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -115,7 +125,33 @@ export default function EnhancedCommunityDiscovery() {
     }
 
     return filtered;
-  }, [communities, searchQuery, locationFilter, denominationFilter, sizeFilter, userCommunities]);
+  }, [communities, searchQuery, locationFilter, communityTypeFilter, denominationFilter, sizeFilter, userCommunities]);
+
+  // Adaptive secondary filter options based on primary selection
+  const getSecondaryFilterOptions = useMemo(() => {
+    switch (communityTypeFilter) {
+      case "churches":
+        return {
+          label: "Denomination",
+          options: Array.from(new Set(communities.map(c => c.denomination))).sort()
+        };
+      case "groups": 
+        return {
+          label: "Affiliation",
+          options: ["Bible Study", "Youth Group", "Prayer Group", "Community Service", "Support Group"]
+        };
+      case "ministries":
+        return {
+          label: "Ministry Type", 
+          options: ["Worship", "Outreach", "Children", "Youth", "Seniors", "Missions", "Music"]
+        };
+      default:
+        return {
+          label: "Denomination",
+          options: Array.from(new Set(communities.map(c => c.denomination))).sort()
+        };
+    }
+  }, [communityTypeFilter, communities]);
 
   const denominations = useMemo(() => {
     const unique = Array.from(new Set(communities.map(c => c.denomination)));
@@ -163,8 +199,9 @@ export default function EnhancedCommunityDiscovery() {
   return (
     <div className="space-y-6">
       {/* Search and Filters */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="relative lg:col-span-2">
+      <div className="space-y-4">
+        {/* Search Bar */}
+        <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
           <Input
             placeholder="Search communities by name, denomination, or description..."
@@ -173,24 +210,60 @@ export default function EnhancedCommunityDiscovery() {
             className="pl-10"
           />
         </div>
-        <Input
-          placeholder="Filter by location..."
-          value={locationFilter}
-          onChange={(e) => setLocationFilter(e.target.value)}
-        />
-        <Select value={denominationFilter} onValueChange={setDenominationFilter}>
-          <SelectTrigger>
-            <SelectValue placeholder="All denominations" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Denominations</SelectItem>
-            {denominations.map((denomination) => (
-              <SelectItem key={denomination} value={denomination}>
-                {denomination}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+
+        {/* Primary and Secondary Filters */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {/* Primary Filter: Community Type */}
+          <Select value={communityTypeFilter} onValueChange={(value) => {
+            setCommunityTypeFilter(value);
+            setDenominationFilter(""); // Reset secondary filter when primary changes
+          }}>
+            <SelectTrigger>
+              <SelectValue placeholder="Community Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="churches">Churches</SelectItem>
+              <SelectItem value="groups">Groups</SelectItem>
+              <SelectItem value="ministries">Ministries</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Secondary Filter: Adaptive based on primary selection */}
+          <Select value={denominationFilter} onValueChange={setDenominationFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder={`All ${getSecondaryFilterOptions.label.toLowerCase()}s`} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All {getSecondaryFilterOptions.label}s</SelectItem>
+              {getSecondaryFilterOptions.options.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Location Filter */}
+          <Input
+            placeholder="Filter by location..."
+            value={locationFilter}
+            onChange={(e) => setLocationFilter(e.target.value)}
+          />
+
+          {/* Size Filter */}
+          <Select value={sizeFilter} onValueChange={setSizeFilter}>
+            <SelectTrigger>
+              <Filter className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="All sizes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Sizes</SelectItem>
+              <SelectItem value="small">Small (&lt; 100)</SelectItem>
+              <SelectItem value="medium">Medium (100-500)</SelectItem>
+              <SelectItem value="large">Large (500+)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Results Summary */}
@@ -199,18 +272,6 @@ export default function EnhancedCommunityDiscovery() {
           Found {filteredCommunities.length} communities
           {searchQuery && ` for "${searchQuery}"`}
         </p>
-        <Select value={sizeFilter} onValueChange={setSizeFilter}>
-          <SelectTrigger className="w-40">
-            <Filter className="h-4 w-4 mr-2" />
-            <SelectValue placeholder="All sizes" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Sizes</SelectItem>
-            <SelectItem value="small">Small (&lt; 100)</SelectItem>
-            <SelectItem value="medium">Medium (100-500)</SelectItem>
-            <SelectItem value="large">Large (500+)</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       {/* Community Grid */}
@@ -230,6 +291,7 @@ export default function EnhancedCommunityDiscovery() {
                 onClick={() => {
                   setSearchQuery("");
                   setLocationFilter("");
+                  setCommunityTypeFilter("churches");
                   setDenominationFilter("");
                   setSizeFilter("");
                 }}

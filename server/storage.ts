@@ -2772,6 +2772,86 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getDiscoverableCommunities(userId: string): Promise<any[]> {
+    try {
+      // Get communities user is not already a member of
+      const result = await db.execute(sql`
+        SELECT 
+          c.*
+        FROM churches c
+        WHERE c.is_active = true 
+          AND c.id NOT IN (
+            SELECT uc.church_id 
+            FROM user_churches uc 
+            WHERE uc.user_id = ${userId} AND uc.is_active = true
+          )
+        ORDER BY c.member_count DESC, c.name ASC
+        LIMIT 50
+      `);
+      
+      return result.rows.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        denomination: row.denomination,
+        address: row.address,
+        city: row.city,
+        state: row.state,
+        zipCode: row.zip_code,
+        phone: row.phone,
+        email: row.email,
+        website: row.website,
+        description: row.description,
+        logoUrl: row.logo_url,
+        isActive: row.is_active,
+        memberCount: row.member_count || 0,
+        isJoined: false, // By definition, these are communities the user hasn't joined
+      }));
+    } catch (error) {
+      console.error('Error getting discoverable communities:', error);
+      return [];
+    }
+  }
+
+  async joinCommunity(userId: string, communityId: number): Promise<any> {
+    try {
+      // Check if user is already a member
+      const existingMembership = await db.execute(sql`
+        SELECT id FROM user_churches 
+        WHERE user_id = ${userId} AND church_id = ${communityId}
+      `);
+
+      if (existingMembership.rows.length > 0) {
+        // Reactivate if membership exists but is inactive
+        await db.execute(sql`
+          UPDATE user_churches 
+          SET is_active = true, last_accessed_at = NOW()
+          WHERE user_id = ${userId} AND church_id = ${communityId}
+        `);
+      } else {
+        // Create new membership
+        await db.execute(sql`
+          INSERT INTO user_churches (user_id, church_id, role, joined_at, last_accessed_at, is_active)
+          VALUES (${userId}, ${communityId}, 'member', NOW(), NOW(), true)
+        `);
+      }
+
+      // Update member count
+      await db.execute(sql`
+        UPDATE churches 
+        SET member_count = (
+          SELECT COUNT(*) FROM user_churches 
+          WHERE church_id = ${communityId} AND is_active = true
+        )
+        WHERE id = ${communityId}
+      `);
+
+      return { success: true, message: 'Successfully joined community' };
+    } catch (error) {
+      console.error('Error joining community:', error);
+      throw error;
+    }
+  }
+
   async createDiscussion(discussion: InsertDiscussion): Promise<Discussion> {
     const [newDiscussion] = await db.insert(discussions).values(discussion).returning();
     
