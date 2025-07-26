@@ -305,7 +305,7 @@ export function ChurchManagementHub() {
                             name="name"
                             render={({ field }) => (
                               <FormItem className="col-span-2">
-                                <FormLabel>Organization Name *</FormLabel>
+                                <FormLabel>Community Name *</FormLabel>
                                 <FormControl>
                                   <Input placeholder="First Baptist Church" {...field} />
                                 </FormControl>
@@ -333,8 +333,8 @@ export function ChurchManagementHub() {
                                   </FormControl>
                                   <SelectContent>
                                     <SelectItem value="church">Church</SelectItem>
-                                    <SelectItem value="group">Group</SelectItem>
                                     <SelectItem value="ministry">Ministry</SelectItem>
+                                    <SelectItem value="group">Group</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <FormMessage />
