@@ -23,12 +23,29 @@ import {
   Gift,
   Calendar,
   Star,
-  Clock
+  Clock,
+  Search,
+  MessageSquare,
+  Shield,
+  Info
 } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 import { apiRequest } from "../lib/queryClient";
 import { useAuth } from "../hooks/useAuth";
 import { useLocation } from "wouter";
+import { Alert, AlertDescription } from "../components/ui/alert";
+
+interface SearchUser {
+  id: string;
+  email: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  profileImageUrl?: string;
+  churchId?: number;
+  role?: string;
+  isDiscoverable?: boolean;
+}
 
 function ContactsPage() {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
@@ -40,6 +57,12 @@ function ContactsPage() {
   const [inviteMessage, setInviteMessage] = useState("");
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [isImportingContacts, setIsImportingContacts] = useState(false);
+  
+  // Church member search state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -57,6 +80,12 @@ function ContactsPage() {
 
   const { data: pendingInvites = [] } = useQuery({
     queryKey: ["/api/invitations/pending"],
+  });
+
+  // Get user's church info for context
+  const { data: userChurch } = useQuery<{ name: string; id: number }>({
+    queryKey: ["/api/user/church"],
+    enabled: !!user,
   });
 
   // Send invitation mutation
@@ -203,6 +232,56 @@ function ContactsPage() {
     },
   });
 
+  // Church member search functionality
+  const handleSearch = async () => {
+    if (!searchTerm.trim() || searchTerm.length < 2) {
+      return;
+    }
+
+    setIsSearching(true);
+    setHasSearched(true);
+
+    try {
+      const response = await fetch(`/api/users/search?q=${encodeURIComponent(searchTerm.trim())}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setSearchResults(data.users || []);
+      } else {
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error("Search error:", error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  const getContactInitials = (firstName: string, lastName: string) => {
+    return `${firstName?.[0] || ""}${lastName?.[0] || ""}`.toUpperCase();
+  };
+
+  const getRoleDisplayName = (role: string) => {
+    const roleMap: Record<string, string> = {
+      'lead-pastor': 'Lead Pastor',
+      'pastor': 'Pastor', 
+      'elder': 'Elder',
+      'deacon': 'Deacon',
+      'ministry-leader': 'Ministry Leader',
+      'church-admin': 'Church Admin',
+      'member': 'Member',
+      'visitor': 'Visitor'
+    };
+    return roleMap[role] || role;
+  };
+
   const handleSendInvite = () => {
     if (!inviteEmail.trim()) {
       toast({
@@ -328,17 +407,7 @@ function ContactsPage() {
     }
   };
 
-  const getInitials = (name: string | undefined | null) => {
-    if (!name || typeof name !== 'string') {
-      return 'UN'; // Unknown user fallback
-    }
-    return name
-      .split(" ")
-      .map(n => n && n[0] ? n[0] : '')
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) || 'UN';
-  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -540,10 +609,14 @@ function ContactsPage() {
 
         {/* Enhanced Main Content */}
         <Tabs defaultValue="contacts" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-0 p-1 h-14">
+          <TabsList className="grid w-full grid-cols-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-0 p-1 h-14">
             <TabsTrigger value="contacts" className="gap-2 text-gray-700 dark:text-gray-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
               <Users className="h-4 w-4" />
               My Contacts
+            </TabsTrigger>
+            <TabsTrigger value="church-members" className="gap-2 text-gray-700 dark:text-gray-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
+              <Search className="h-4 w-4" />
+              Church Members
             </TabsTrigger>
             <TabsTrigger value="pending" className="gap-2 text-gray-700 dark:text-gray-200 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300">
               <Clock className="h-4 w-4" />
@@ -597,7 +670,7 @@ function ContactsPage() {
                           <Avatar className="w-12 h-12 border-2 border-purple-200">
                             <AvatarImage src={contact.profileImageUrl} />
                             <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold">
-                              {getInitials(contact.name || (contact.firstName && contact.lastName ? `${contact.firstName} ${contact.lastName}` : contact.firstName) || contact.email?.split('@')[0] || 'Unknown User')}
+                              {getContactInitials(contact.firstName || contact.name?.split(' ')[0] || '', contact.lastName || contact.name?.split(' ')[1] || contact.email?.split('@')[0] || 'U')}
                             </AvatarFallback>
                           </Avatar>
                           <div className="space-y-1">
@@ -643,6 +716,125 @@ function ContactsPage() {
                 ))}
               </div>
             )}
+          </TabsContent>
+
+          {/* Church Members Tab */}
+          <TabsContent value="church-members" className="space-y-6">
+            <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Search className="h-5 w-5 text-purple-600" />
+                  Find Church Members
+                </CardTitle>
+                <p className="text-gray-600">
+                  Search for members within your church community
+                  {userChurch && ` (${userChurch.name})`}
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-3">
+                  <Input
+                    placeholder="Search by name or email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={handleSearch}
+                    disabled={isSearching || searchTerm.length < 2}
+                    className="gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  >
+                    <Search className="h-4 w-4" />
+                    {isSearching ? "Searching..." : "Search"}
+                  </Button>
+                </div>
+
+                <Alert className="border-blue-200 bg-blue-50 text-blue-800">
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    Only search for members within your church. Contact information is protected - only church staff can see email addresses.
+                  </AlertDescription>
+                </Alert>
+
+                {hasSearched && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <Users className="h-5 w-5 text-purple-600" />
+                      Search Results ({searchResults.length})
+                    </h3>
+                    
+                    {searchResults.length === 0 ? (
+                      <Card className="bg-gray-50 border-dashed border-2 border-gray-200">
+                        <CardContent className="p-8 text-center">
+                          <div className="space-y-3">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
+                              <Users className="h-8 w-8 text-gray-400" />
+                            </div>
+                            <h4 className="text-lg font-medium text-gray-900">No members found</h4>
+                            <p className="text-gray-600">
+                              Try a different search term or check spelling. Only members from your church will appear in results.
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <div className="grid gap-4">
+                        {searchResults.map((member) => (
+                          <Card key={member.id} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                            <CardContent className="p-6">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-4">
+                                  <Avatar className="w-12 h-12 border-2 border-purple-200">
+                                    <AvatarImage src={member.profileImageUrl} />
+                                    <AvatarFallback className="bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold">
+                                      {getContactInitials(member.firstName, member.lastName)}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="space-y-1">
+                                    <h3 className="font-semibold text-gray-900 text-lg">
+                                      {member.firstName} {member.lastName}
+                                    </h3>
+                                    <p className="text-sm text-gray-600">@{member.username}</p>
+                                    {member.role && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {getRoleDisplayName(member.role)}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="flex items-center space-x-3">
+                                  {member.role && ['pastor', 'lead-pastor', 'elder', 'church-admin'].includes(member.role) && (
+                                    <Button 
+                                      size="sm" 
+                                      variant="outline" 
+                                      className="flex-1"
+                                      onClick={() => window.open(`mailto:${member.email}`, '_blank')}
+                                    >
+                                      <Mail className="h-4 w-4 mr-1" />
+                                      Email
+                                    </Button>
+                                  )}
+                                  <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    className="flex-1"
+                                    onClick={() => setLocation(`/messages?contact=${member.id}&name=${encodeURIComponent(`${member.firstName} ${member.lastName}`)}`)}
+                                  >
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    Message
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Enhanced Pending Invites Tab */}
