@@ -43,8 +43,8 @@ interface ChurchFeatureManagerProps {
 }
 
 // Community-type-specific feature definitions
-const getFeatureDefinitions = (communityType: string = 'church') => {
-  const baseFeatures = {
+const getFeatureDefinitions = (communityType: string = 'church'): Record<string, Record<string, any>> => {
+  const baseFeatures: Record<string, Record<string, Record<string, any>>> = {
     // Church Features (full feature set)
     'church': {
       'community': {
@@ -257,12 +257,12 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
   const featureDefinitions = getFeatureDefinitions(communityType);
 
   // Get church features
-  const { data: features, isLoading } = useQuery({
+  const { data: features, isLoading } = useQuery<ChurchFeature[]>({
     queryKey: ['church-features', churchId],
     queryFn: async () => {
       const response = await fetch(`/api/churches/${churchId}/features`, { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch church features');
-      return response.json() as ChurchFeature[];
+      return response.json();
     },
   });
 
@@ -380,7 +380,7 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
         </CardHeader>
       </Card>
 
-      {Object.entries(getFeatureDefinitions(communityType)).map(([categoryKey, categoryFeatures]) => {
+      {Object.entries(getFeatureDefinitions(communityType)).map(([categoryKey, categoryFeatures]: [string, any]) => {
         const categoryName = categoryKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
         const categoryFeatureList = categorizedFeatures[categoryKey] || [];
 
@@ -393,7 +393,7 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {Object.entries(categoryFeatures).map(([featureKey, featureDefinition]) => {
+                {Object.entries(categoryFeatures).map(([featureKey, featureDefinition]: [string, any]) => {
                   const feature = categoryFeatureList.find(f => f.featureName === featureKey);
                   const IconComponent = featureDefinition.icon;
                   
@@ -432,7 +432,12 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
                           </Badge>
                           <Switch
                             checked={feature?.isEnabled || false}
-                            onCheckedChange={() => feature && handleFeatureToggle(feature)}
+                            onCheckedChange={() => {
+                              console.log('Switch onCheckedChange triggered!', feature);
+                              if (feature) {
+                                handleFeatureToggle(feature);
+                              }
+                            }}
                             disabled={updateFeatureMutation.isPending || !feature}
                           />
                         </div>
