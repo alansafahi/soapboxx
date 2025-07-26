@@ -89,8 +89,8 @@ export default function SidebarFixed() {
   const isFeatureEnabled = useIsFeatureEnabled();
 
   // Get user's churches to check for admin roles
-  const { data: userChurches = [], isLoading: churchesLoading, error: churchesError } = useQuery({
-    queryKey: ["/api/users/churches"],
+  const { data: userCommunities = [], isLoading: communitiesLoading, error: communitiesError } = useQuery({
+    queryKey: ["/api/users/communities"],
     enabled: !!user,
   });
 
@@ -99,15 +99,15 @@ export default function SidebarFixed() {
   
 
 
-  // Check if user has admin role in any church
-  const hasChurchAdminRole = useMemo(() => {
-    if (!userChurches || !Array.isArray(userChurches) || userChurches.length === 0) {
+  // Check if user has admin role in any community
+  const hasCommunityAdminRole = useMemo(() => {
+    if (!userCommunities || !Array.isArray(userCommunities) || userCommunities.length === 0) {
       return false;
     }
     
     const adminRoles = ['church_admin', 'church-admin', 'admin', 'pastor', 'lead-pastor', 'elder'];
-    return userChurches.some((uc: any) => adminRoles.includes(uc.role));
-  }, [userChurches]);
+    return userCommunities.some((uc: any) => adminRoles.includes(uc.role));
+  }, [userCommunities]);
 
   // Responsive sidebar behavior
   useEffect(() => {
@@ -151,7 +151,7 @@ export default function SidebarFixed() {
         { label: "Home", href: "/", icon: Home },
         { label: "Messages", href: "/messages", icon: Mail },
         { label: "Contacts", href: "/contacts", icon: UserPlus },
-        { label: "Churches", href: "/churches", icon: Building },
+        { label: "Communities", href: "/communities", icon: Building },
         { label: "Events", href: "/events", icon: Calendar },
         { label: "Discussions", href: "/discussions", icon: MessageSquare },
         { label: "Donation", href: "/donation", icon: DollarSign },
@@ -181,7 +181,7 @@ export default function SidebarFixed() {
     {
       label: "ADMIN PORTAL",
       items: [
-        { label: "Church Administration", href: "/admin", icon: Building2, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Community Administration", href: "/admin", icon: Building2, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
         { label: "QR Code Management", href: "/qr-management", icon: QrCode, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
         { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
         { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
@@ -289,7 +289,7 @@ export default function SidebarFixed() {
             const isExpanded = expandedGroups.has(group.label) || 
               group.label === 'SPIRITUAL TOOLS' ||
               (user?.role === 'soapbox_owner' && (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL')) ||
-              (hasChurchAdminRole && group.label === 'ADMIN PORTAL');
+              (hasCommunityAdminRole && group.label === 'ADMIN PORTAL');
             
             return (
               <div key={`${group.label}-${group.items.length}-${idx}`}>
@@ -319,8 +319,8 @@ export default function SidebarFixed() {
                       if (item.roles) {
                         if (!user) return false;
                         const hasGlobalRole = item.roles.includes(user.role || '');
-                        const hasChurchRole = hasChurchAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
-                        if (!hasGlobalRole && !hasChurchRole) return false;
+                        const hasCommunityRole = hasCommunityAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
+                        if (!hasGlobalRole && !hasCommunityRole) return false;
                       }
                       
                       // Apply direct church feature filtering to bypass React caching
@@ -380,8 +380,8 @@ export default function SidebarFixed() {
                 if (item.roles) {
                   if (!user) return null;
                   const hasGlobalRole = item.roles.includes(user.role || '');
-                  const hasChurchRole = hasChurchAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
-                  if (!hasGlobalRole && !hasChurchRole) return null;
+                  const hasCommunityRole = hasCommunityAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
+                  if (!hasGlobalRole && !hasCommunityRole) return null;
                 }
               }
               

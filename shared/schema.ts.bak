@@ -358,7 +358,7 @@ export const userPersonalization = pgTable("user_personalization", {
 export const socialMediaCredentials = pgTable("social_media_credentials", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   platform: varchar("platform", { length: 20 }).notNull(), // facebook, twitter, instagram, linkedin
   credentialType: varchar("credential_type", { length: 30 }).notNull(), // oauth_token, api_key, app_password
   accessToken: text("access_token"), // Encrypted OAuth access token
@@ -374,7 +374,7 @@ export const socialMediaCredentials = pgTable("social_media_credentials", {
 }, (table) => [
   unique("unique_user_platform").on(table.userId, table.platform),
   index("social_credentials_user_idx").on(table.userId),
-  index("social_credentials_community_idx").on(table.communityId),
+  index("social_credentials_church_idx").on(table.churchId),
 ]);
 
 // Social Media Publishing History
@@ -459,7 +459,7 @@ export const communityGroups = pgTable("community_groups", {
   description: text("description"),
   category: varchar("category", { length: 50 }).notNull(), // bible_study, prayer, youth, worship, etc.
   type: varchar("type", { length: 30 }).notNull().default("open"), // open, closed, private
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   coverImageUrl: varchar("cover_image_url"),
   rules: text("rules"),
@@ -701,7 +701,7 @@ export const eventMetrics = pgTable("event_metrics", {
 export const discussions = pgTable("discussions", {
   id: serial("id").primaryKey(),
   authorId: varchar("author_id").notNull().references(() => users.id),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   title: varchar("title", { length: 255 }).notNull(),
   content: text("content").notNull(),
   category: varchar("category", { length: 50 }), // general, prayer, bible_study, events
@@ -749,7 +749,7 @@ export const discussionLikes = pgTable("discussion_likes", {
 export const prayerRequests = pgTable("prayer_requests", {
   id: serial("id").primaryKey(),
   authorId: varchar("author_id").notNull().references(() => users.id),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   title: varchar("title", { length: 255 }),
   content: text("content").notNull(),
   isAnonymous: boolean("is_anonymous").default(false),
@@ -826,7 +826,7 @@ export const prayerCircles = pgTable("prayer_circles", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
-  communityId: integer("community_id").references(() => communities.id), // Optional for independent circles
+  churchId: integer("church_id").references(() => churches.id), // Optional for independent circles
   createdBy: varchar("created_by").notNull().references(() => users.id),
   isPublic: boolean("is_public").default(true),
   memberLimit: integer("member_limit").default(50), // Optional limit
@@ -839,7 +839,7 @@ export const prayerCircles = pgTable("prayer_circles", {
   // Enhanced guardrails and features
   inviteCode: varchar("invite_code", { length: 8 }).unique(), // For easy sharing
   connectToChurchRequested: boolean("connect_to_church_requested").default(false), // User wants church connection
-  requestedCommunityId: integer("requested_community_id").references(() => communities.id), // Requested church affiliation
+  requestedChurchId: integer("requested_church_id").references(() => churches.id), // Requested church affiliation
   guestPastorEmail: varchar("guest_pastor_email", { length: 255 }), // Optional guest pastor invitation
   answeredPrayersCount: integer("answered_prayers_count").default(0), // Track answered prayers
   reportCount: integer("report_count").default(0), // Track reports for moderation
@@ -929,7 +929,7 @@ export const dailyInspirations = pgTable("daily_inspirations", {
 // Devotionals table
 export const devotionals = pgTable("devotionals", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   authorId: varchar("author_id").notNull().references(() => users.id),
   title: varchar("title", { length: 200 }).notNull(),
   content: text("content").notNull(),
@@ -948,7 +948,7 @@ export const devotionals = pgTable("devotionals", {
 // Weekly series table
 export const weeklySeries = pgTable("weekly_series", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   authorId: varchar("author_id").notNull().references(() => users.id),
   title: varchar("title", { length: 200 }).notNull(),
   description: text("description"),
@@ -965,7 +965,7 @@ export const weeklySeries = pgTable("weekly_series", {
 // Sermon media table
 export const sermonMedia = pgTable("sermon_media", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   authorId: varchar("author_id").notNull().references(() => users.id),
   title: varchar("title", { length: 200 }).notNull(),
   description: text("description"),
@@ -1080,7 +1080,7 @@ export const invitations = pgTable("invitations", {
 export const checkIns = pgTable("check_ins", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   eventId: integer("event_id").references(() => events.id),
   checkInType: varchar("check_in_type", { length: 50 }).notNull(),
   mood: varchar("mood", { length: 20 }),
@@ -1113,7 +1113,7 @@ export const moodCheckins = pgTable("mood_checkins", {
   socialConnection: integer("social_connection"), // 1-5 how connected they feel
   spiritualConnection: integer("spiritual_connection"), // 1-5 closeness to God
   shareable: boolean("shareable").default(false), // Can be shared with church staff
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   aiContentGenerated: boolean("ai_content_generated").default(false), // Track if AI content was created
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -1171,7 +1171,7 @@ export const inspirationBookmarks = pgTable("inspiration_bookmarks", {
 export const soapEntries = pgTable("soap_entries", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   scripture: text("scripture").notNull(), // The Bible verse or passage
   scriptureReference: varchar("scripture_reference", { length: 100 }), // e.g., "John 3:16"
   observation: text("observation").notNull(), // What does the passage say?
@@ -1199,7 +1199,7 @@ export const soapEntries = pgTable("soap_entries", {
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("soap_entries_user_idx").on(table.userId),
-  index("soap_entries_community_idx").on(table.communityId),
+  index("soap_entries_church_idx").on(table.churchId),
   index("soap_entries_date_idx").on(table.devotionalDate),
   index("soap_entries_public_idx").on(table.isPublic),
   index("soap_entries_expires_idx").on(table.expiresAt), // Index for expiration queries
@@ -1321,7 +1321,7 @@ export const leaderboards = pgTable("leaderboards", {
   name: varchar("name", { length: 100 }).notNull(),
   type: varchar("type", { length: 30 }).notNull(),
   category: varchar("category", { length: 50 }).notNull(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   startDate: timestamp("start_date").notNull(),
   endDate: timestamp("end_date").notNull(),
   isActive: boolean("is_active").default(true),
@@ -1333,14 +1333,14 @@ export const leaderboardEntries = pgTable("leaderboard_entries", {
   id: serial("id").primaryKey(),
   leaderboardId: integer("leaderboard_id").notNull().references(() => leaderboards.id),
   userId: varchar("user_id").references(() => users.id),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   rank: integer("rank").notNull(),
   score: integer("score").notNull(),
   entityName: varchar("entity_name", { length: 100 }),
   lastUpdated: timestamp("last_updated").defaultNow(),
 }, (table) => ({
   leaderboardUserUnique: unique().on(table.leaderboardId, table.userId),
-  leaderboardCommunityUnique: unique().on(table.leaderboardId, table.communityId),
+  leaderboardChurchUnique: unique().on(table.leaderboardId, table.churchId),
 }));
 
 // AI Scripture History for preventing repetition in SOAP generation
@@ -1380,7 +1380,7 @@ export const challenges = pgTable("challenges", {
   targetActivity: varchar("target_activity", { length: 50 }),
   targetCount: integer("target_count").default(0),
   rewardPoints: integer("reward_points").default(0),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -1431,7 +1431,7 @@ export const notificationSettings = pgTable("notification_settings", {
 
 export const scheduledNotifications = pgTable("scheduled_notifications", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   type: varchar("type", { length: 20 }).notNull(), // scripture, event, message, prayer, emergency, reminder, birthday, anniversary
   title: varchar("title", { length: 255 }).notNull(),
@@ -1497,7 +1497,7 @@ export const userDevices = pgTable("user_devices", {
 
 export const scriptureSchedules = pgTable("scripture_schedules", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
@@ -1527,7 +1527,7 @@ export const userTags = pgTable("user_tags", {
   userId: varchar("user_id").notNull().references(() => users.id),
   tag: varchar("tag", { length: 50 }).notNull(),
   value: text("value"), // Optional tag value
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdBy: varchar("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -1536,7 +1536,7 @@ export const userTags = pgTable("user_tags", {
 export const userEngagementMetrics = pgTable("user_engagement_metrics", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   notificationsReceived: integer("notifications_received").default(0),
   notificationsOpened: integer("notifications_opened").default(0),
   notificationsClicked: integer("notifications_clicked").default(0),
@@ -1555,7 +1555,7 @@ export const sermonDrafts = pgTable("sermon_drafts", {
   title: varchar("title", { length: 255 }).notNull(),
   content: jsonb("content").notNull(), // Stores outline, research, illustrations, enhancement
   userId: varchar("user_id").notNull().references(() => users.id),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   isPublished: boolean("is_published").default(false),
   publishedAt: timestamp("published_at"),
   tags: text("tags").array(),
@@ -1568,7 +1568,7 @@ export const sermonDrafts = pgTable("sermon_drafts", {
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("sermon_drafts_user_idx").on(table.userId),
-  index("sermon_drafts_community_idx").on(table.communityId),
+  index("sermon_drafts_church_idx").on(table.churchId),
   index("sermon_drafts_published_idx").on(table.isPublished),
 ]);
 
@@ -1582,7 +1582,7 @@ export const notificationAbTests = pgTable("notification_ab_tests", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   testType: varchar("test_type", { length: 20 }).notNull(), // subject, content, time, frequency
   variantA: text("variant_a").notNull(), // JSON configuration
   variantB: text("variant_b").notNull(), // JSON configuration
@@ -1602,7 +1602,7 @@ export const notificationAbTests = pgTable("notification_ab_tests", {
 // Emergency broadcast system
 export const emergencyBroadcasts = pgTable("emergency_broadcasts", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
@@ -1626,7 +1626,7 @@ export const emergencyBroadcasts = pgTable("emergency_broadcasts", {
 // Weather-based notification triggers
 export const weatherTriggers = pgTable("weather_triggers", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   name: varchar("name", { length: 255 }).notNull(),
   location: varchar("location", { length: 100 }).notNull(), // City, State or coordinates
   conditions: text("conditions").array().notNull(), // rain, snow, temperature, wind, etc.
@@ -1660,7 +1660,7 @@ export const families = pgTable("families", {
   zipCode: varchar("zip_code", { length: 10 }),
   homePhone: varchar("home_phone", { length: 20 }),
   familyPhoto: varchar("family_photo", { length: 255 }),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1678,7 +1678,7 @@ export const familyMembers = pgTable("family_members", {
 export const attendanceRecords = pgTable("attendance_records", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   serviceDate: timestamp("service_date").notNull(),
   serviceType: varchar("service_type", { length: 50 }).notNull(), // sunday_service, wednesday_service, special_event
   checkedInAt: timestamp("checked_in_at").defaultNow(),
@@ -1699,7 +1699,7 @@ export const memberEvents = pgTable("member_events", {
   celebrant: varchar("celebrant", { length: 255 }), // Pastor or officiant
   witnesses: text("witnesses").array(),
   photos: text("photos").array(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdBy: varchar("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -1718,7 +1718,7 @@ export const pastoralCareRecords = pgTable("pastoral_care_records", {
   followUpNeeded: boolean("follow_up_needed").default(false),
   followUpDate: timestamp("follow_up_date"),
   privacy: varchar("privacy", { length: 20 }).default("confidential"), // public, private, confidential
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1749,7 +1749,7 @@ export const ministryRoles = pgTable("ministry_roles", {
   isActive: boolean("is_active").default(true),
   responsibilities: text("responsibilities").array(),
   timeCommitment: varchar("time_commitment", { length: 100 }), // weekly hours or description
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1768,7 +1768,7 @@ export const givingRecords = pgTable("giving_records", {
   recurringFrequency: varchar("recurring_frequency", { length: 20 }), // weekly, monthly, yearly
   taxDeductible: boolean("tax_deductible").default(true),
   acknowledgmentSent: boolean("acknowledgment_sent").default(false),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdBy: varchar("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -1786,7 +1786,7 @@ export const memberOnboarding = pgTable("member_onboarding", {
   completedDate: timestamp("completed_date"),
   isCompleted: boolean("is_completed").default(false),
   notes: text("notes"),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1804,7 +1804,7 @@ export const memberCommunications = pgTable("member_communications", {
   deliveryStatus: varchar("delivery_status", { length: 20 }).default("sent"), // sent, delivered, read, failed
   responseReceived: boolean("response_received").default(false),
   followUpRequired: boolean("follow_up_required").default(false),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1823,7 +1823,7 @@ export const counselingSessions = pgTable("counseling_sessions", {
   notes: text("notes"),
   followUpNeeded: boolean("follow_up_needed").default(false),
   confidential: boolean("confidential").default(true),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1842,7 +1842,7 @@ export const legacyVolunteerOpportunities = pgTable("legacy_volunteer_opportunit
   location: varchar("location", { length: 255 }),
   contactPersonId: varchar("contact_person_id").references(() => users.id),
   isActive: boolean("is_active").default(true),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdBy: varchar("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1857,7 +1857,7 @@ export const volunteerSignUps = pgTable("volunteer_sign_ups", {
   notes: text("notes"),
   hoursServed: real("hours_served"),
   feedback: text("feedback"),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1871,7 +1871,7 @@ export const eventSignUps = pgTable("event_sign_ups", {
   signUpDate: timestamp("sign_up_date").defaultNow(),
   status: varchar("status", { length: 20 }).default("confirmed"), // confirmed, completed, cancelled
   notes: text("notes"),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
 });
 
 // Livestream & Sermon Archive
@@ -1893,7 +1893,7 @@ export const livestreams = pgTable("livestreams", {
   recordingUrl: varchar("recording_url", { length: 500 }),
   thumbnailUrl: varchar("thumbnail_url", { length: 500 }),
   tags: text("tags").array(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdBy: varchar("created_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1918,7 +1918,7 @@ export const sermonArchive = pgTable("sermon_archive", {
   category: varchar("category", { length: 50 }).default("sermon"), // sermon, teaching, testimony, special
   isPublic: boolean("is_public").default(true),
   featured: boolean("featured").default(false),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   uploadedBy: varchar("uploaded_by").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -2403,34 +2403,28 @@ export const messagesRelations = relations(messages, ({ one }) => ({
   }),
 }));
 
-export const communitiesRelations = relations(communities, ({ many }) => ({
-  userCommunities: many(userCommunities),
+export const churchesRelations = relations(churches, ({ many }) => ({
+  userChurches: many(userChurches),
   events: many(events),
   discussions: many(discussions),
   prayerRequests: many(prayerRequests),
 }));
 
-// Legacy churches relations alias for backward compatibility
-export const churchesRelations = communitiesRelations;
-
-export const userCommunitiesRelations = relations(userCommunities, ({ one }) => ({
+export const userChurchesRelations = relations(userChurches, ({ one }) => ({
   user: one(users, {
-    fields: [userCommunities.userId],
+    fields: [userChurches.userId],
     references: [users.id],
   }),
-  community: one(communities, {
-    fields: [userCommunities.communityId],
-    references: [communities.id],
+  church: one(churches, {
+    fields: [userChurches.churchId],
+    references: [churches.id],
   }),
 }));
 
-// Legacy userChurches relations alias for backward compatibility
-export const userChurchesRelations = userCommunitiesRelations;
-
 export const eventsRelations = relations(events, ({ one, many }) => ({
-  community: one(communities, {
+  church: one(churches, {
     fields: [events.churchId],
-    references: [communities.id],
+    references: [churches.id],
   }),
   organizer: one(users, {
     fields: [events.organizerId],
@@ -2455,9 +2449,9 @@ export const discussionsRelations = relations(discussions, ({ one, many }) => ({
     fields: [discussions.authorId],
     references: [users.id],
   }),
-  community: one(communities, {
-    fields: [discussions.communityId],
-    references: [communities.id],
+  church: one(churches, {
+    fields: [discussions.churchId],
+    references: [churches.id],
   }),
   comments: many(discussionComments),
   likes: many(discussionLikes),
@@ -2495,9 +2489,9 @@ export const prayerRequestsRelations = relations(prayerRequests, ({ one, many })
     fields: [prayerRequests.authorId],
     references: [users.id],
   }),
-  community: one(communities, {
-    fields: [prayerRequests.communityId],
-    references: [communities.id],
+  church: one(churches, {
+    fields: [prayerRequests.churchId],
+    references: [churches.id],
   }),
   prayerResponses: many(prayerResponses),
 }));
@@ -2514,9 +2508,9 @@ export const prayerResponsesRelations = relations(prayerResponses, ({ one }) => 
 }));
 
 export const prayerCirclesRelations = relations(prayerCircles, ({ one, many }) => ({
-  community: one(communities, {
-    fields: [prayerCircles.communityId],
-    references: [communities.id],
+  church: one(churches, {
+    fields: [prayerCircles.churchId],
+    references: [churches.id],
   }),
   creator: one(users, {
     fields: [prayerCircles.createdBy],
@@ -2749,7 +2743,7 @@ export const spiritualGifts = pgTable("spiritual_gifts", {
 // Enhanced volunteer roles with ministry focus
 export const volunteerRoles = pgTable("volunteer_roles", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
   category: varchar("category", { length: 50 }).notNull(), // worship, children, youth, hospitality, tech, admin
@@ -2774,7 +2768,7 @@ export const volunteerRoles = pgTable("volunteer_roles", {
 export const volunteers = pgTable("volunteers", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   firstName: varchar("first_name", { length: 50 }).notNull(),
   lastName: varchar("last_name", { length: 50 }).notNull(),
   email: varchar("email", { length: 255 }).notNull(),
@@ -2841,7 +2835,7 @@ export const volunteerRoleAssignments = pgTable("volunteer_role_assignments", {
 // Volunteer opportunities/events
 export const volunteerOpportunities = pgTable("volunteer_opportunities", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   title: varchar("title", { length: 500 }).notNull(),
   description: text("description"),
   roleId: integer("role_id").references(() => volunteerRoles.id),
@@ -3007,7 +3001,7 @@ export const volunteerAwards = pgTable("volunteer_awards", {
 export const volunteerCommunications = pgTable("volunteer_communications", {
   id: serial("id").primaryKey(),
   ministryId: varchar("ministry", { length: 50 }).notNull(), // worship, children, youth, etc.
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   messageType: varchar("message_type", { length: 30 }).notNull(), // announcement, reminder, appreciation, urgent
   subject: varchar("subject", { length: 200 }).notNull(),
   message: text("message").notNull(),
@@ -3797,7 +3791,7 @@ export const insertSermonMediaSchema = createInsertSchema(sermonMedia).omit({
 // Media files table for comprehensive media management
 export const mediaFiles = pgTable("media_files", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   uploadedBy: varchar("uploaded_by").notNull().references(() => users.id),
   fileName: varchar("file_name", { length: 255 }).notNull(),
   originalName: varchar("original_name", { length: 255 }).notNull(),
@@ -3828,7 +3822,7 @@ export const mediaFiles = pgTable("media_files", {
 // Media collections/albums for organizing media
 export const mediaCollections = pgTable("media_collections", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
@@ -3853,7 +3847,7 @@ export const mediaCollectionItems = pgTable("media_collection_items", {
 // Gallery images table for Image Gallery feature
 export const galleryImages = pgTable("gallery_images", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   uploadedBy: varchar("uploaded_by").notNull().references(() => users.id),
   title: varchar("title", { length: 300 }).notNull(),
   description: text("description"),
@@ -3907,7 +3901,7 @@ export const galleryImageSaves = pgTable("gallery_image_saves", {
 // Video content table for comprehensive video system
 export const videoContent = pgTable("video_content", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   uploadedBy: varchar("uploaded_by").notNull().references(() => users.id),
   title: varchar("title", { length: 300 }).notNull(),
   description: text("description"),
@@ -3933,7 +3927,7 @@ export const videoContent = pgTable("video_content", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
-  index("video_content_community_idx").on(table.communityId),
+  index("video_content_church_idx").on(table.churchId),
   index("video_content_category_idx").on(table.category),
   index("video_content_speaker_idx").on(table.speaker),
   index("video_content_phase_idx").on(table.phase),
@@ -3942,7 +3936,7 @@ export const videoContent = pgTable("video_content", {
 // Video series table for organizing related videos
 export const videoSeries = pgTable("video_series", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   title: varchar("title", { length: 300 }).notNull(),
   description: text("description"),
@@ -4004,7 +3998,7 @@ export const videoLikes = pgTable("video_likes", {
 // Video playlists for curated content
 export const videoPlaylists = pgTable("video_playlists", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   title: varchar("title", { length: 300 }).notNull(),
   description: text("description"),
@@ -4144,7 +4138,7 @@ export const userModerationHistory = pgTable("user_moderation_history", {
 
 export const contentModerationSettings = pgTable("content_moderation_settings", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => churches.id),
   aiModerationEnabled: boolean("ai_moderation_enabled").default(true),
   autoRemoveThreshold: real("auto_remove_threshold").default(0.9), // AI confidence threshold
   requireApprovalForNewUsers: boolean("require_approval_for_new_users").default(false),
@@ -4326,7 +4320,7 @@ export const insertFamilyContentSchema = createInsertSchema(familyContent).omit(
 // Church Feature Toggle System
 export const churchFeatureSettings = pgTable("church_feature_settings", {
   id: serial("id").primaryKey(),
-  communityId: integer("community_id").notNull().references(() => communities.id),
+  churchId: integer("church_id").notNull().references(() => churches.id),
   featureCategory: varchar("feature_category", { length: 50 }).notNull(), // 'community', 'spiritual_tools', 'media_contents', 'admin_portal'
   featureName: varchar("feature_name", { length: 50 }).notNull(), // 'prayer_wall', 'donation', 'sermon_studio'
   isEnabled: boolean("is_enabled").default(true),
@@ -4336,9 +4330,9 @@ export const churchFeatureSettings = pgTable("church_feature_settings", {
   lastModified: timestamp("last_modified").defaultNow(),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
-  communityFeatureUnique: unique().on(table.communityId, table.featureCategory, table.featureName),
-  communityFeatureSettingsIdx: index().on(table.communityId),
-  communityFeatureSettingsCategoryIdx: index().on(table.featureCategory),
+  churchFeatureUnique: unique().on(table.churchId, table.featureCategory, table.featureName),
+  churchFeatureSettingsChurchIdx: index().on(table.churchId),
+  churchFeatureSettingsCategoryIdx: index().on(table.featureCategory),
 }));
 
 // Default feature settings for new churches based on size

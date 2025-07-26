@@ -2,7 +2,8 @@ import MappingService from "./mapping-service";
 import {
   users,
   notifications,
-  churches,
+  communities,
+  churches, // Legacy alias for backward compatibility
   events,
   eventRsvps,
   eventVolunteers,
@@ -32,7 +33,8 @@ import {
   prayerCircleUpdates,
   userAchievements,
   userActivities,
-  userChurches,
+  userCommunities,
+  userChurches, // Legacy alias for backward compatibility
   roles,
   friendships,
   conversations,
@@ -1026,12 +1028,12 @@ export class DatabaseStorage implements IStorage {
         firstName: users.firstName,
         lastName: users.lastName,
         profileImageUrl: users.profileImageUrl,
-        churchId: userChurches.churchId,
-        role: userChurches.role,
+        communityId: userCommunities.communityId,
+        role: userCommunities.role,
         isDiscoverable: sql`${users.isDiscoverable}::boolean`
       })
       .from(users)
-      .leftJoin(userChurches, eq(users.id, userChurches.userId))
+      .leftJoin(userCommunities, eq(users.id, userCommunities.userId))
       .where(
         and(
           // Basic search criteria
@@ -1042,9 +1044,9 @@ export class DatabaseStorage implements IStorage {
           ),
           // Safety constraints
           currentUserId ? ne(users.id, currentUserId) : undefined, // Exclude current user
-          churchId ? eq(userChurches.churchId, churchId) : undefined, // Church-scoped search
+          churchId ? eq(userCommunities.communityId, churchId) : undefined, // Church-scoped search
           eq(sql`${users.isDiscoverable}::boolean`, true), // Only discoverable users
-          eq(userChurches.isActive, true) // Only active church members
+          eq(userCommunities.isActive, true) // Only active church members
         )
       )
       .limit(10);
@@ -1474,9 +1476,9 @@ export class DatabaseStorage implements IStorage {
   async getChurches(): Promise<Church[]> {
     return await db
       .select()
-      .from(churches)
-      .where(eq(churches.isActive, true))
-      .orderBy(asc(churches.name));
+      .from(communities)
+      .where(eq(communities.isActive, true))
+      .orderBy(asc(communities.name));
   }
 
   async getNearbyChurches(lat?: number, lng?: number, limit: number = 10): Promise<Church[]> {
@@ -1484,39 +1486,39 @@ export class DatabaseStorage implements IStorage {
     if (!lat || !lng) {
       return await db
         .select()
-        .from(churches)
-        .where(eq(churches.isActive, true))
-        .orderBy(desc(churches.createdAt))
+        .from(communities)
+        .where(eq(communities.isActive, true))
+        .orderBy(desc(communities.createdAt))
         .limit(limit);
     }
     
     // In a real implementation, you'd use PostGIS for distance calculations
     return await db
       .select()
-      .from(churches)
-      .where(eq(churches.isActive, true))
-      .orderBy(desc(churches.createdAt))
+      .from(communities)
+      .where(eq(communities.isActive, true))
+      .orderBy(desc(communities.createdAt))
       .limit(limit);
   }
 
   async searchChurches(params: { denomination?: string; location?: string; churchName?: string; size?: string; proximity?: number; limit?: number }): Promise<any[]> {
     try {
       let whereConditions = [
-        eq(churches.isActive, true),
-        eq(churches.isDemo, false), // Only show production churches, not demo churches
-        eq(churches.verificationStatus, 'approved') // Only show approved churches
+        eq(communities.isActive, true),
+        eq(communities.isDemo, false), // Only show production churches, not demo churches
+        eq(communities.verificationStatus, 'approved') // Only show approved churches
       ];
       
       // Filter by denomination (only if not "all")
       if (params.denomination && params.denomination !== "all") {
-        whereConditions.push(eq(churches.denomination, params.denomination));
+        whereConditions.push(eq(communities.denomination, params.denomination));
       }
       
       // Filter by church name
       if (params.churchName && params.churchName.trim()) {
         const nameTerm = `%${params.churchName.trim()}%`;
         whereConditions.push(
-          sql`${churches.name} ILIKE ${nameTerm}`
+          sql`${communities.name} ILIKE ${nameTerm}`
         );
       }
       
@@ -1524,49 +1526,49 @@ export class DatabaseStorage implements IStorage {
       if (params.location && params.location.trim() && (!params.denomination || params.denomination === "all")) {
         const locationTerm = `%${params.location.trim()}%`;
         whereConditions.push(
-          sql`(${churches.city} ILIKE ${locationTerm} OR ${churches.state} ILIKE ${locationTerm} OR ${churches.zipCode} ILIKE ${locationTerm})`
+          sql`(${communities.city} ILIKE ${locationTerm} OR ${communities.state} ILIKE ${locationTerm} OR ${communities.zipCode} ILIKE ${locationTerm})`
         );
       }
       
       // Optimized single query with left join for member counts
       const results = await db
         .select({
-          id: churches.id,
-          name: churches.name,
-          denomination: churches.denomination,
-          description: churches.description,
-          bio: churches.bio,
-          address: churches.address,
-          city: churches.city,
-          state: churches.state,
-          zipCode: churches.zipCode,
-          website: churches.website,
-          phone: churches.phone,
-          email: churches.email,
-          logoUrl: churches.logoUrl,
-          socialLinks: churches.socialLinks,
-          communityTags: churches.communityTags,
-          latitude: churches.latitude,
-          longitude: churches.longitude,
-          rating: churches.rating,
-          memberCount: churches.memberCount,
-          isActive: churches.isActive,
-          isClaimed: churches.isClaimed,
-          adminEmail: churches.adminEmail,
-          isDemo: churches.isDemo,
-          createdAt: churches.createdAt,
-          updatedAt: churches.updatedAt,
-          actualMemberCount: sql<number>`COALESCE(COUNT(${userChurches.churchId}), 0)::int`,
+          id: communities.id,
+          name: communities.name,
+          denomination: communities.denomination,
+          description: communities.description,
+          bio: communities.bio,
+          address: communities.address,
+          city: communities.city,
+          state: communities.state,
+          zipCode: communities.zipCode,
+          website: communities.website,
+          phone: communities.phone,
+          email: communities.email,
+          logoUrl: communities.logoUrl,
+          socialLinks: communities.socialLinks,
+          communityTags: communities.communityTags,
+          latitude: communities.latitude,
+          longitude: communities.longitude,
+          rating: communities.rating,
+          memberCount: communities.memberCount,
+          isActive: communities.isActive,
+          isClaimed: communities.isClaimed,
+          adminEmail: communities.adminEmail,
+          isDemo: communities.isDemo,
+          createdAt: communities.createdAt,
+          updatedAt: communities.updatedAt,
+          actualMemberCount: sql<number>`COALESCE(COUNT(${userCommunities.communityId}), 0)::int`,
           distance: sql<number>`0` // Placeholder for distance
         })
-        .from(churches)
-        .leftJoin(userChurches, and(
-          eq(userChurches.churchId, churches.id),
-          eq(userChurches.isActive, true)
+        .from(communities)
+        .leftJoin(userCommunities, and(
+          eq(userCommunities.communityId, communities.id),
+          eq(userCommunities.isActive, true)
         ))
         .where(whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0])
-        .groupBy(churches.id)
-        .orderBy(asc(churches.name))
+        .groupBy(communities.id)
+        .orderBy(asc(communities.name))
         .limit(params.limit || 2000);
       
       // Filter by size if specified (exclude "all" value)
@@ -1598,8 +1600,8 @@ export class DatabaseStorage implements IStorage {
       try {
         const simpleResults = await db
           .select()
-          .from(churches)
-          .where(eq(churches.isActive, true))
+          .from(communities)
+          .where(eq(communities.isActive, true))
           .limit(params.limit || 100);
           
         return simpleResults.map(church => ({
@@ -1615,14 +1617,14 @@ export class DatabaseStorage implements IStorage {
 
   async getChurchDenominations(): Promise<string[]> {
     const result = await db
-      .select({ denomination: churches.denomination })
-      .from(churches)
+      .select({ denomination: communities.denomination })
+      .from(communities)
       .where(and(
-        eq(churches.isActive, true),
-        isNotNull(churches.denomination)
+        eq(communities.isActive, true),
+        isNotNull(communities.denomination)
       ))
-      .groupBy(churches.denomination)
-      .orderBy(asc(churches.denomination));
+      .groupBy(communities.denomination)
+      .orderBy(asc(communities.denomination));
     
     return result
       .map(row => row.denomination)
@@ -1634,13 +1636,13 @@ export class DatabaseStorage implements IStorage {
     let whereCondition;
     
     if (status === 'pending') {
-      whereCondition = eq(churches.verificationStatus, 'pending');
+      whereCondition = eq(communities.verificationStatus, 'pending');
     } else if (status === 'approved') {
-      whereCondition = eq(churches.verificationStatus, 'approved');
+      whereCondition = eq(communities.verificationStatus, 'approved');
     } else if (status === 'rejected') {
-      whereCondition = eq(churches.verificationStatus, 'rejected');
+      whereCondition = eq(communities.verificationStatus, 'rejected');
     } else if (status === 'suspended') {
-      whereCondition = eq(churches.verificationStatus, 'suspended');
+      whereCondition = eq(communities.verificationStatus, 'suspended');
     } else {
       // Return all churches if no status filter
       whereCondition = undefined;
@@ -1648,40 +1650,40 @@ export class DatabaseStorage implements IStorage {
     
     const query = db
       .select({
-        id: churches.id,
-        name: churches.name,
-        denomination: churches.denomination,
-        description: churches.description,
-        bio: churches.bio,
-        address: churches.address,
-        city: churches.city,
-        state: churches.state,
-        zipCode: churches.zipCode,
-        phone: churches.phone,
-        email: churches.email,
-        website: churches.website,
-        logoUrl: churches.logoUrl,
-        size: churches.size,
-        hoursOfOperation: churches.hoursOfOperation,
-        socialLinks: churches.socialLinks,
-        communityTags: churches.communityTags,
-        latitude: churches.latitude,
-        longitude: churches.longitude,
-        rating: churches.rating,
-        memberCount: churches.memberCount,
-        isActive: churches.isActive,
-        isClaimed: churches.isClaimed,
-        adminEmail: churches.adminEmail,
-        isDemo: churches.isDemo,
-        status: churches.verificationStatus, // Map verificationStatus to status for frontend
-        verifiedAt: churches.verifiedAt,
-        verifiedBy: churches.verifiedBy,
-        rejectionReason: churches.rejectionReason,
-        createdAt: churches.createdAt,
-        updatedAt: churches.updatedAt,
+        id: communities.id,
+        name: communities.name,
+        denomination: communities.denomination,
+        description: communities.description,
+        bio: communities.bio,
+        address: communities.address,
+        city: communities.city,
+        state: communities.state,
+        zipCode: communities.zipCode,
+        phone: communities.phone,
+        email: communities.email,
+        website: communities.website,
+        logoUrl: communities.logoUrl,
+        size: communities.size,
+        hoursOfOperation: communities.hoursOfOperation,
+        socialLinks: communities.socialLinks,
+        communityTags: communities.communityTags,
+        latitude: communities.latitude,
+        longitude: communities.longitude,
+        rating: communities.rating,
+        memberCount: communities.memberCount,
+        isActive: communities.isActive,
+        isClaimed: communities.isClaimed,
+        adminEmail: communities.adminEmail,
+        isDemo: communities.isDemo,
+        status: communities.verificationStatus, // Map verificationStatus to status for frontend
+        verifiedAt: communities.verifiedAt,
+        verifiedBy: communities.verifiedBy,
+        rejectionReason: communities.rejectionReason,
+        createdAt: communities.createdAt,
+        updatedAt: communities.updatedAt,
       })
-      .from(churches)
-      .orderBy(desc(churches.createdAt));
+      .from(communities)
+      .orderBy(desc(communities.createdAt));
     
     if (whereCondition) {
       query.where(whereCondition);
@@ -1692,7 +1694,7 @@ export class DatabaseStorage implements IStorage {
 
   async approveChurch(churchId: number, approvedBy: string): Promise<void> {
     await db
-      .update(churches)
+      .update(communities)
       .set({
         verificationStatus: 'approved',
         verifiedBy: approvedBy,
@@ -1700,24 +1702,24 @@ export class DatabaseStorage implements IStorage {
         isActive: true,
         updatedAt: new Date()
       })
-      .where(eq(churches.id, churchId));
+      .where(eq(communities.id, churchId));
   }
 
   async rejectChurch(churchId: number, reason: string, rejectedBy: string): Promise<void> {
     await db
-      .update(churches)
+      .update(communities)
       .set({
         verificationStatus: 'rejected',
         verifiedBy: rejectedBy,
         rejectionReason: reason,
         updatedAt: new Date()
       })
-      .where(eq(churches.id, churchId));
+      .where(eq(communities.id, churchId));
   }
 
   async suspendChurch(churchId: number, reason: string, suspendedBy: string): Promise<void> {
     await db
-      .update(churches)
+      .update(communities)
       .set({
         verificationStatus: 'suspended',
         verifiedBy: suspendedBy,
@@ -1725,32 +1727,32 @@ export class DatabaseStorage implements IStorage {
         isActive: false,
         updatedAt: new Date()
       })
-      .where(eq(churches.id, churchId));
+      .where(eq(communities.id, churchId));
   }
 
   async getChurch(id: number): Promise<Church | undefined> {
-    const [church] = await db.select().from(churches).where(eq(churches.id, id));
+    const [church] = await db.select().from(communities).where(eq(communities.id, id));
     return church;
   }
 
   async getChurchByAdminEmail(email: string): Promise<Church | undefined> {
     const [church] = await db
       .select()
-      .from(churches)
-      .where(eq(churches.adminEmail, email));
+      .from(communities)
+      .where(eq(communities.adminEmail, email));
     return church;
   }
 
   async createChurch(church: InsertChurch): Promise<Church> {
-    const [newChurch] = await db.insert(churches).values(church).returning();
+    const [newChurch] = await db.insert(communities).values(church).returning();
     return newChurch;
   }
 
   async updateChurch(id: number, updates: Partial<Church>): Promise<Church> {
     const [updatedChurch] = await db
-      .update(churches)
+      .update(communities)
       .set({ ...updates, updatedAt: new Date() })
-      .where(eq(churches.id, id))
+      .where(eq(communities.id, id))
       .returning();
     return updatedChurch;
   }
@@ -1758,56 +1760,56 @@ export class DatabaseStorage implements IStorage {
   async deleteChurch(id: number): Promise<void> {
     // Soft delete by marking as inactive
     await db
-      .update(churches)
+      .update(communities)
       .set({ 
         isActive: false,
         updatedAt: new Date()
       })
-      .where(eq(churches.id, id));
+      .where(eq(communities.id, id));
   }
 
   async getUserCreatedChurches(userId: string): Promise<Church[]> {
     return await db
       .select({
-        id: churches.id,
-        name: churches.name,
-        denomination: churches.denomination,
-        address: churches.address,
-        city: churches.city,
-        state: churches.state,
-        country: churches.country,
-        zipCode: churches.zipCode,
-        phone: churches.phone,
-        email: churches.email,
-        website: churches.website,
-        description: churches.description,
-        imageUrl: churches.imageUrl,
-        capacity: churches.capacity,
-        status: churches.status,
-        isActive: churches.isActive,
-        createdAt: churches.createdAt,
-        updatedAt: churches.updatedAt,
-        adminEmail: churches.adminEmail,
+        id: communities.id,
+        name: communities.name,
+        denomination: communities.denomination,
+        address: communities.address,
+        city: communities.city,
+        state: communities.state,
+        country: communities.address,
+        zipCode: communities.zipCode,
+        phone: communities.phone,
+        email: communities.email,
+        website: communities.website,
+        description: communities.description,
+        imageUrl: communities.logoUrl,
+        capacity: communities.memberCapacity,
+        status: communities.verificationStatus,
+        isActive: communities.isActive,
+        createdAt: communities.createdAt,
+        updatedAt: communities.updatedAt,
+        adminEmail: communities.adminEmail,
       })
-      .from(churches)
-      .innerJoin(userChurches, eq(churches.id, userChurches.churchId))
+      .from(communities)
+      .innerJoin(userCommunities, eq(communities.id, userCommunities.communityId))
       .where(and(
-        eq(userChurches.userId, userId),
-        eq(userChurches.role, 'church_admin'),
-        eq(churches.isActive, true),
-        eq(userChurches.isActive, true)
+        eq(userCommunities.userId, userId),
+        eq(userCommunities.role, 'church_admin'),
+        eq(communities.isActive, true),
+        eq(userCommunities.isActive, true)
       ))
-      .orderBy(desc(churches.createdAt));
+      .orderBy(desc(communities.createdAt));
   }
 
   async getUserChurch(userId: string): Promise<(UserChurch & { role: string }) | undefined> {
     // First try to get primary church
     const [primaryChurch] = await db
       .select()
-      .from(userChurches)
+      .from(userCommunities)
       .where(and(
-        eq(userChurches.userId, userId),
-        eq(userChurches.isActive, true),
+        eq(userCommunities.userId, userId),
+        eq(userCommunities.isActive, true),
         sql`is_primary = true`
       ))
       .limit(1);
@@ -1815,12 +1817,12 @@ export class DatabaseStorage implements IStorage {
     // If no primary church set, fall back to first church joined
     const [userChurch] = primaryChurch ? [primaryChurch] : await db
       .select()
-      .from(userChurches)
+      .from(userCommunities)
       .where(and(
-        eq(userChurches.userId, userId),
-        eq(userChurches.isActive, true)
+        eq(userCommunities.userId, userId),
+        eq(userCommunities.isActive, true)
       ))
-      .orderBy(userChurches.joinedAt)
+      .orderBy(userCommunities.joinedAt)
       .limit(1);
     
     if (!userChurch) {
@@ -1847,11 +1849,11 @@ export class DatabaseStorage implements IStorage {
   async getUserChurchRole(userId: string, churchId: number): Promise<{ role: string } | undefined> {
     const [userChurch] = await db
       .select()
-      .from(userChurches)
+      .from(userCommunities)
       .where(and(
-        eq(userChurches.userId, userId),
-        eq(userChurches.churchId, churchId),
-        eq(userChurches.isActive, true)
+        eq(userCommunities.userId, userId),
+        eq(userCommunities.communityId, churchId),
+        eq(userCommunities.isActive, true)
       ));
 
     if (!userChurch) {
@@ -1877,16 +1879,16 @@ export class DatabaseStorage implements IStorage {
   async getChurchFeature(featureId: number): Promise<any> {
     const [feature] = await db
       .select()
-      .from(churchFeatures)
-      .where(eq(churchFeatures.id, featureId));
+      .from(communityFeatures)
+      .where(eq(communityFeatures.id, featureId));
     return feature;
   }
 
   async updateChurchFeature(featureId: number, updates: any): Promise<any> {
     const [updatedFeature] = await db
-      .update(churchFeatures)
+      .update(communityFeatures)
       .set(updates)
-      .where(eq(churchFeatures.id, featureId))
+      .where(eq(communityFeatures.id, featureId))
       .returning();
     return updatedFeature;
   }
@@ -1894,17 +1896,17 @@ export class DatabaseStorage implements IStorage {
   async getChurchMembers(churchId: number): Promise<(UserChurch & { user: User })[]> {
     return await db
       .select({
-        id: userChurches.id,
-        userId: userChurches.userId,
-        churchId: userChurches.churchId,
-        roleId: userChurches.roleId,
-        title: userChurches.title,
-        department: userChurches.department,
-        bio: userChurches.bio,
-        additionalPermissions: userChurches.additionalPermissions,
-        restrictedPermissions: userChurches.restrictedPermissions,
-        joinedAt: userChurches.joinedAt,
-        isActive: userChurches.isActive,
+        id: userCommunities.id,
+        userId: userCommunities.userId,
+        communityId: userCommunities.communityId,
+        roleId: userCommunities.roleId,
+        title: userCommunities.title,
+        department: userCommunities.department,
+        bio: userCommunities.bio,
+        additionalPermissions: userCommunities.additionalPermissions,
+        restrictedPermissions: userCommunities.restrictedPermissions,
+        joinedAt: userCommunities.joinedAt,
+        isActive: userCommunities.isActive,
         user: {
           id: users.id,
           email: users.email,
@@ -1926,11 +1928,11 @@ export class DatabaseStorage implements IStorage {
           updatedAt: users.updatedAt,
         }
       })
-      .from(userChurches)
-      .innerJoin(users, eq(userChurches.userId, users.id))
+      .from(userCommunities)
+      .innerJoin(users, eq(userCommunities.userId, users.id))
       .where(and(
-        eq(userChurches.churchId, churchId),
-        eq(userChurches.isActive, true)
+        eq(userCommunities.communityId, churchId),
+        eq(userCommunities.isActive, true)
       )) as any;
   }
 
@@ -1951,8 +1953,8 @@ export class DatabaseStorage implements IStorage {
         bio 
       })
       .where(and(
-        eq(userChurches.churchId, churchId),
-        eq(userChurches.userId, userId)
+        eq(userCommunities.communityId, churchId),
+        eq(userCommunities.userId, userId)
       ))
       .returning();
     return updatedMember;
@@ -1963,8 +1965,8 @@ export class DatabaseStorage implements IStorage {
       .update(userChurches)
       .set({ isActive: false })
       .where(and(
-        eq(userChurches.churchId, churchId),
-        eq(userChurches.userId, userId)
+        eq(userCommunities.communityId, churchId),
+        eq(userCommunities.userId, userId)
       ));
   }
 
@@ -1973,7 +1975,7 @@ export class DatabaseStorage implements IStorage {
     const query = db
       .select()
       .from(events)
-      .where(churchId ? eq(events.churchId, churchId) : undefined)
+      .where(churchId ? eq(events.communityId, churchId) : undefined)
       .orderBy(asc(events.eventDate));
     
     return await query;
@@ -2109,7 +2111,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(events)
       .where(and(
-        churchId ? eq(events.churchId, churchId) : undefined,
+        churchId ? eq(events.communityId, churchId) : undefined,
         sql`${events.eventDate} >= ${now}`
       ))
       .orderBy(asc(events.eventDate))
@@ -2123,7 +2125,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(events)
       .where(and(
-        churchId ? eq(events.churchId, churchId) : undefined,
+        churchId ? eq(events.communityId, churchId) : undefined,
         or(
           ilike(events.title, `%${query}%`),
           ilike(events.description, `%${query}%`),
@@ -2537,7 +2539,7 @@ export class DatabaseStorage implements IStorage {
         .limit(limit || 25);
 
       // Get discussion like status for current user if provided
-      const discussionIds = regularDiscussions.map(row => row.discussions?.id).filter(Boolean);
+      const discussionIds = allDiscussions.map(row => row.discussions?.id).filter(Boolean);
       let discussionLikeStatus: Record<number, boolean> = {};
       if (currentUserId && discussionIds.length > 0) {
         const discussionLikeResult = await db.execute(sql`
@@ -2555,7 +2557,7 @@ export class DatabaseStorage implements IStorage {
       }
 
       // Transform and combine results
-      const transformedDiscussions = regularDiscussions.map(row => ({
+      const transformedDiscussions = allDiscussions.map(row => ({
         ...row.discussions,
         author: row.users,
         type: 'general',
@@ -2733,15 +2735,15 @@ export class DatabaseStorage implements IStorage {
       const result = await db
         .select({
           church: churches,
-          userChurch: userChurches,
+          userChurch: userCommunities,
         })
-        .from(userChurches)
-        .leftJoin(churches, eq(userChurches.churchId, churches.id))
+        .from(userCommunities)
+        .leftJoin(communities, eq(userCommunities.communityId, communities.id))
         .where(and(
-          eq(userChurches.userId, userId),
-          eq(userChurches.isActive, true)
+          eq(userCommunities.userId, userId),
+          eq(userCommunities.isActive, true)
         ))
-        .orderBy(desc(userChurches.lastAccessedAt));
+        .orderBy(desc(userCommunities.lastAccessedAt));
       
       return result.map(r => ({
         ...r.church,
@@ -2960,7 +2962,7 @@ export class DatabaseStorage implements IStorage {
     try {
       // Get user's church for additional context
       const user = await this.getUser(checkInData.userId);
-      const churchId = user?.churchId;
+      const churchId = user?.communityId;
       
       // Calculate streak
       const currentStreak = await this.getUserCheckInStreak(checkInData.userId);
@@ -3078,7 +3080,7 @@ export class DatabaseStorage implements IStorage {
     try {
       // Get user's church for additional context
       const user = await this.getUser(moodCheckinData.userId);
-      const churchId = user?.churchId;
+      const churchId = user?.communityId;
       
       // Create mood check-in record
       const [moodCheckin] = await db
@@ -3385,7 +3387,7 @@ export class DatabaseStorage implements IStorage {
       }
 
       if (churchId) {
-        conditions.push(eq(soapEntries.churchId, churchId));
+        conditions.push(eq(soapEntries.communityId, churchId));
       }
 
       const entries = await baseQuery
@@ -3478,11 +3480,11 @@ export class DatabaseStorage implements IStorage {
       // Only filter by church if churchId is provided AND we want church-specific results
       if (churchId && excludeUserId) {
         // For church-specific feed with user exclusion, get entries from same church excluding user
-        conditions.push(eq(soapEntries.churchId, churchId));
+        conditions.push(eq(soapEntries.communityId, churchId));
         conditions.push(ne(soapEntries.userId, excludeUserId));
       } else if (churchId) {
         // For church-specific feed without exclusion
-        conditions.push(eq(soapEntries.churchId, churchId));
+        conditions.push(eq(soapEntries.communityId, churchId));
       } else if (excludeUserId) {
         // For global feed excluding specific user
         conditions.push(ne(soapEntries.userId, excludeUserId));
@@ -3533,7 +3535,7 @@ export class DatabaseStorage implements IStorage {
         moodTag: row.soap_entries.moodTag,
         tags: row.soap_entries.tags,
         isPublic: row.soap_entries.isPublic,
-        churchId: row.soap_entries.churchId,
+        churchId: row.soap_entries.communityId,
         createdAt: row.soap_entries.createdAt,
         updatedAt: row.soap_entries.updatedAt,
         firstName: row.users?.firstName,
@@ -3548,7 +3550,7 @@ export class DatabaseStorage implements IStorage {
 
       //     id: entries[0].id,
       //     authorEmail: entries[0].email,
-      //     churchId: entries[0].churchId,
+      //     churchId: entries[0].communityId,
       //     scriptureRef: entries[0].scriptureReference
       //   });
       // }
@@ -3612,7 +3614,7 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(soapEntries)
         .where(and(
-          eq(soapEntries.churchId, churchId),
+          eq(soapEntries.communityId, churchId),
           eq(soapEntries.isSharedWithPastor, true)
         ))
         .orderBy(desc(soapEntries.createdAt));
@@ -3731,7 +3733,7 @@ export class DatabaseStorage implements IStorage {
   async getCommunicationTemplates(userId: string, churchId?: number): Promise<any[]> {
     try {
       const user = await this.getUser(userId);
-      const userChurchId = churchId || user?.churchId;
+      const userChurchId = churchId || user?.communityId;
 
       if (!userChurchId) {
         return [];
@@ -3741,7 +3743,7 @@ export class DatabaseStorage implements IStorage {
         .select()
         .from(communicationTemplates)
         .where(and(
-          eq(communicationTemplates.churchId, userChurchId),
+          eq(communicationTemplates.communityId, userChurchId),
           eq(communicationTemplates.isActive, true)
         ))
         .orderBy(desc(communicationTemplates.usageCount), desc(communicationTemplates.createdAt));
@@ -3802,7 +3804,7 @@ export class DatabaseStorage implements IStorage {
       const history = await db
         .select()
         .from(memberCommunications)
-        .where(eq(memberCommunications.churchId, churchId))
+        .where(eq(memberCommunications.communityId, churchId))
         .orderBy(desc(memberCommunications.sentAt));
 
       return history;
@@ -3927,7 +3929,7 @@ export class DatabaseStorage implements IStorage {
       const [newRecord] = await db
         .insert(memberCommunications)
         .values({
-          churchId: record.churchId,
+          churchId: record.communityId,
           subject: record.subject,
           content: record.content,
           memberId: record.sentBy,
@@ -3966,7 +3968,7 @@ export class DatabaseStorage implements IStorage {
       const directQuery = await db
         .select()
         .from(galleryImages)
-        .where(eq(galleryImages.churchId, churchId || 2804))
+        .where(eq(galleryImages.communityId, churchId || 2804))
         .limit(limit)
         .offset(offset);
       
@@ -3985,7 +3987,7 @@ export class DatabaseStorage implements IStorage {
           uploadedAt: galleryImages.uploadedAt,
           likes: galleryImages.likes,
           comments: galleryImages.comments,
-          churchId: galleryImages.churchId,
+          churchId: galleryImages.communityId,
           isPublic: galleryImages.isPublic,
           uploaderName: users.firstName,
           uploaderAvatar: users.profileImageUrl
@@ -3996,7 +3998,7 @@ export class DatabaseStorage implements IStorage {
       let conditions = [];
       
       if (churchId) {
-        conditions.push(eq(galleryImages.churchId, churchId));
+        conditions.push(eq(galleryImages.communityId, churchId));
       }
       
       if (collection && collection !== 'all') {
@@ -4034,7 +4036,7 @@ export class DatabaseStorage implements IStorage {
         commentsCount: image.comments || 0,
         isLiked: false, // Will be set by API layer
         isSaved: false, // Will be set by API layer
-        churchId: image.churchId
+        churchId: image.communityId
       }));
 
       
@@ -4059,7 +4061,7 @@ export class DatabaseStorage implements IStorage {
           uploadedAt: galleryImages.uploadedAt,
           likes: galleryImages.likes,
           comments: galleryImages.comments,
-          churchId: galleryImages.churchId,
+          churchId: galleryImages.communityId,
           uploaderName: users.firstName,
           uploaderAvatar: users.profileImageUrl
         })
@@ -4084,7 +4086,7 @@ export class DatabaseStorage implements IStorage {
         commentsCount: result.comments || 0,
         isLiked: false,
         isSaved: false,
-        churchId: result.churchId
+        churchId: result.communityId
       };
     } catch (error) {
       return undefined;
@@ -4378,7 +4380,7 @@ export class DatabaseStorage implements IStorage {
         .from(galleryImages);
 
       if (churchId) {
-        query = query.where(eq(galleryImages.churchId, churchId));
+        query = query.where(eq(galleryImages.communityId, churchId));
       }
 
       const collections = await query;

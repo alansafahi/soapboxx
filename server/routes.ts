@@ -7,8 +7,10 @@ import { setupAuth, isAuthenticated } from "./auth";
 import { db } from "./db";
 import { 
   users, 
-  churches, 
-  userChurches,
+  communities,
+  churches, // Legacy alias for backward compatibility
+  userCommunities,
+  userChurches, // Legacy alias for backward compatibility
   soapEntries, 
   discussions, 
   events,
@@ -107,7 +109,7 @@ const getFileType = (mimeType: string): string => {
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-import { userChurches } from "@shared/schema";
+// Import moved to main schema imports above
 
 
 // AI-powered post categorization
@@ -1163,8 +1165,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Get all church members (excluding current user) using raw SQL to avoid schema issues
-      const churchMembersQuery = `
+      // Get all church members (excluding current user)
+      const churchMembers = await db.execute(sql`
         SELECT 
           u.id,
           u.username,
@@ -1176,12 +1178,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           uc.church_id as "churchId"
         FROM users u
         INNER JOIN user_churches uc ON u.id = uc.user_id
-        WHERE uc.church_id = $1 
+        WHERE uc.church_id = ${currentUserChurch.churchId}
         AND uc.is_active = true
-        AND u.id != $2
-      `;
-      
-      const churchMembers = await db.execute(sql.raw(churchMembersQuery, [currentUserChurch.churchId, userId]));
+        AND u.id != ${userId}
+      `);
       
       // Format results with privacy protection
       const filteredResults = churchMembers.rows.map(user => ({
@@ -7208,7 +7208,7 @@ Return JSON with this exact structure:
 
   // Demo churches route removed to reduce app size
 
-  // Get user's churches for feature filtering
+  // Get user's churches for feature filtering (legacy endpoint)
   app.get('/api/users/churches', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
@@ -7225,7 +7225,25 @@ Return JSON with this exact structure:
     }
   });
 
-  // Get specific church details for church management
+  // NEW COMMUNITIES ENDPOINTS
+
+  // Get user's communities (new terminology)
+  app.get('/api/users/communities', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      const userCommunities = await storage.getUserChurches(userId);
+      res.json(userCommunities);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get user communities' });
+    }
+  });
+
+  // Get specific church details for church management (legacy endpoint)
   app.get('/api/churches/:churchId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
@@ -7248,6 +7266,111 @@ Return JSON with this exact structure:
     } catch (error) {
       // Error getting church details - silent error handling
       res.status(500).json({ error: 'Failed to get church details' });
+    }
+  });
+
+  // Get specific community details (new terminology)
+  app.get('/api/communities/:communityId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const communityId = parseInt(req.params.communityId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      if (isNaN(communityId)) {
+        return res.status(400).json({ error: 'Invalid community ID' });
+      }
+
+      const community = await storage.getChurch(communityId);
+      if (!community) {
+        return res.status(404).json({ error: 'Community not found' });
+      }
+
+      res.json(community);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to get community details' });
+    }
+  });
+
+  // Create new community (new terminology)
+  app.post('/api/communities', isAuthenticated, upload.single('logo'), async (req: any, res) => {
+    try {
+      const { name, denomination, address, city, state, zipCode, phone, email, website, description, size } = req.body;
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      if (!name || !denomination) {
+        return res.status(400).json({ error: 'Community name and denomination are required' });
+      }
+
+      const logoUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+      const communityData = {
+        name,
+        denomination: denomination === 'Other' ? req.body.customDenomination : denomination,
+        address,
+        city,
+        state,
+        zipCode,
+        phone,
+        email,
+        website,
+        description,
+        logoUrl,
+        adminEmail: email,
+        createdBy: userId,
+        size: size || 'small',
+        isActive: true,
+        verificationStatus: 'pending',
+        isDemo: false,
+        type: 'community'
+      };
+
+      const newCommunity = await storage.createChurch(communityData);
+
+      // Create user-community relationship
+      await storage.createUserChurchRelationship(userId, newCommunity.id, 'church_admin');
+
+      res.json({
+        success: true,
+        message: 'Community created successfully',
+        community: newCommunity
+      });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to create community' });
+    }
+  });
+
+  // Update community profile (new terminology)
+  app.put('/api/communities/:communityId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const communityId = parseInt(req.params.communityId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Check if user has admin access to this community
+      const userCommunity = await storage.getUserChurchRole(userId, communityId);
+      const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
+      
+      const user = await storage.getUser(userId);
+      if (!userCommunity || (!adminRoles.includes(userCommunity.role) && user?.role !== 'soapbox_owner')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const updates = req.body;
+      const updatedCommunity = await storage.updateChurch(communityId, updates);
+      
+      res.json(updatedCommunity);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update community' });
     }
   });
 
