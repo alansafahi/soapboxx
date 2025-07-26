@@ -6,6 +6,8 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Building, MapPin, Users, Calendar, Plus, Settings } from "lucide-react";
 import { Link } from "wouter";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { ChurchManagementHub } from "./ChurchManagementHub";
 
 interface Community {
   id: number;
@@ -24,6 +26,7 @@ interface Community {
 
 export default function MyCommunities() {
   const { user } = useAuth();
+  const [createCommunityOpen, setCreateCommunityOpen] = useState(false);
   
   const { data: userCommunities = [], isLoading, error } = useQuery<Community[]>({
     queryKey: ["/api/users/communities"],
@@ -101,12 +104,23 @@ export default function MyCommunities() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Link href="/community-management">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create A Community
-            </Button>
-          </Link>
+          <Dialog open={createCommunityOpen} onOpenChange={setCreateCommunityOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Create A Community
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Community Management</DialogTitle>
+                <DialogDescription>
+                  Create a new community or manage existing ones
+                </DialogDescription>
+              </DialogHeader>
+              <ChurchManagementHub />
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
