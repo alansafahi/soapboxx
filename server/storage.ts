@@ -2741,7 +2741,7 @@ export class DatabaseStorage implements IStorage {
           uc.last_accessed_at,
           uc.is_active as user_is_active
         FROM user_churches uc
-        LEFT JOIN churches c ON uc.church_id = c.id
+        LEFT JOIN communities c ON uc.church_id = c.id
         WHERE uc.user_id = ${userId} AND uc.is_active = true
         ORDER BY uc.last_accessed_at DESC
       `);
@@ -2778,7 +2778,7 @@ export class DatabaseStorage implements IStorage {
       const result = await db.execute(sql`
         SELECT 
           c.*
-        FROM churches c
+        FROM communities c
         WHERE c.is_active = true 
           AND c.id NOT IN (
             SELECT uc.church_id 
@@ -2838,7 +2838,7 @@ export class DatabaseStorage implements IStorage {
 
       // Update member count
       await db.execute(sql`
-        UPDATE churches 
+        UPDATE communities 
         SET member_count = (
           SELECT COUNT(*) FROM user_churches 
           WHERE church_id = ${communityId} AND is_active = true
@@ -3358,7 +3358,7 @@ export class DatabaseStorage implements IStorage {
           c.name as "churchName"
         FROM users u
         LEFT JOIN user_churches uc ON u.id = uc.user_id
-        LEFT JOIN churches c ON uc.church_id = c.id
+        LEFT JOIN communities c ON uc.church_id = c.id
         WHERE uc.church_id IS NOT NULL
         ORDER BY u.created_at DESC
       `);
@@ -3388,7 +3388,7 @@ export class DatabaseStorage implements IStorage {
           c.name as "churchName"
         FROM users u
         LEFT JOIN user_churches uc ON u.id = uc.user_id
-        LEFT JOIN churches c ON uc.church_id = c.id
+        LEFT JOIN communities c ON uc.church_id = c.id
         WHERE uc.church_id = $1
         ORDER BY u.created_at DESC
       `, [churchId]);
