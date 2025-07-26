@@ -4164,7 +4164,7 @@ export class DatabaseStorage implements IStorage {
               is_enabled = EXCLUDED.is_enabled,
               enabled_by = EXCLUDED.enabled_by,
               last_modified = NOW()
-          `, [churchId, feature.category, feature.name, feature.enabled, enabledBy || 'system']);
+          `, [churchId, feature.category, feature.name, feature.enabled, enabledBy]);
         } catch (error) {
           console.error(`Error initializing feature ${feature.category}:${feature.name}:`, error);
         }
