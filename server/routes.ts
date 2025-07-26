@@ -1163,43 +1163,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Get all church members (excluding current user)
-      const churchMembers = await db
-        .select({
-          id: users.id,
-          username: users.username,
-          firstName: users.firstName,
-          lastName: users.lastName,
-          email: users.email,
-          profileImageUrl: users.profileImageUrl,
-          role: userChurches.role,
-          churchId: userChurches.churchId
-        })
-        .from(users)
-        .innerJoin(userChurches, eq(users.id, userChurches.userId))
-        .where(
-          and(
-            eq(userChurches.churchId, currentUserChurch.churchId),
-            eq(users.isActive, true)
-          )
-        );
+      // Get all church members (excluding current user) using raw SQL to avoid schema issues
+      const churchMembersQuery = `
+        SELECT 
+          u.id,
+          u.username,
+          u.first_name as "firstName",
+          u.last_name as "lastName", 
+          u.email,
+          u.profile_image_url as "profileImageUrl",
+          uc.role,
+          uc.church_id as "churchId"
+        FROM users u
+        INNER JOIN user_churches uc ON u.id = uc.user_id
+        WHERE uc.church_id = $1 
+        AND uc.is_active = true
+        AND u.id != $2
+      `;
+      
+      const churchMembers = await db.execute(sql.raw(churchMembersQuery, [currentUserChurch.churchId, userId]));
       
       // Format results with privacy protection
-      const filteredResults = churchMembers
-        .filter(member => member.id !== userId) // Exclude current user
-        .map(user => ({
-          id: user.id,
-          username: user.username,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          profileImageUrl: user.profileImageUrl,
-          churchId: user.churchId,
-          role: user.role,
-          // Only show email to church staff
-          email: ['church_admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(currentUserChurch.role) 
-            ? user.email 
-            : undefined
-        }));
+      const filteredResults = churchMembers.rows.map(user => ({
+        id: user.id,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profileImageUrl: user.profileImageUrl,
+        churchId: user.churchId,
+        role: user.role,
+        // Only show email to church staff
+        email: ['church_admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(currentUserChurch.role) 
+          ? user.email 
+          : undefined
+      }));
 
       res.json({ 
         success: true, 
@@ -1208,6 +1205,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Church members fetch error:', error);
       res.status(500).json({ success: false, message: "Failed to fetch church members" });
+    }
+  });
+
+  // Set primary church endpoint
+  app.post('/api/users/set-primary-church', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.id;
+      const { churchId } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "Authentication required" });
+      }
+
+      if (!churchId) {
+        return res.status(400).json({ success: false, message: "Church ID is required" });
+      }
+
+      // Verify user is a member of this church
+      const userChurch = await db
+        .select()
+        .from(userChurches)
+        .where(
+          and(
+            eq(userChurches.userId, userId),
+            eq(userChurches.churchId, parseInt(churchId)),
+            eq(userChurches.isActive, true)
+          )
+        )
+        .limit(1);
+
+      if (userChurch.length === 0) {
+        return res.status(403).json({ success: false, message: "You are not a member of this church" });
+      }
+
+      // Clear any existing primary church
+      await db
+        .update(userChurches)
+        .set({ is_primary: false })
+        .where(eq(userChurches.userId, userId));
+
+      // Set new primary church
+      await db
+        .update(userChurches)
+        .set({ is_primary: true })
+        .where(
+          and(
+            eq(userChurches.userId, userId),
+            eq(userChurches.churchId, parseInt(churchId))
+          )
+        );
+
+      res.json({ 
+        success: true, 
+        message: "Primary church updated successfully" 
+      });
+    } catch (error) {
+      console.error('Set primary church error:', error);
+      res.status(500).json({ success: false, message: "Failed to set primary church" });
     }
   });
 

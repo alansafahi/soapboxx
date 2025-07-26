@@ -1801,14 +1801,27 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserChurch(userId: string): Promise<(UserChurch & { role: string }) | undefined> {
-    const [userChurch] = await db
+    // First try to get primary church
+    const [primaryChurch] = await db
+      .select()
+      .from(userChurches)
+      .where(and(
+        eq(userChurches.userId, userId),
+        eq(userChurches.isActive, true),
+        sql`is_primary = true`
+      ))
+      .limit(1);
+    
+    // If no primary church set, fall back to first church joined
+    const [userChurch] = primaryChurch ? [primaryChurch] : await db
       .select()
       .from(userChurches)
       .where(and(
         eq(userChurches.userId, userId),
         eq(userChurches.isActive, true)
       ))
-      .orderBy(userChurches.joinedAt); // Get the first church they joined
+      .orderBy(userChurches.joinedAt)
+      .limit(1);
     
     if (!userChurch) {
       return undefined;

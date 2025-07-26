@@ -1,0 +1,67 @@
+renaming “Churches” to “Communities” is the strongest and cleanest option for the following reasons:
+
+✅ Why “Communities” Works Perfectly
+Benefit	Explanation
+Inclusive	Covers churches, ministries, groups, fellowships, and future orgs (like PTAs or AA)
+Faith-Aligned	“Community” is a core value in Christian and spiritual language
+Simple & Scalable	Future-proof without needing more tabs like “Groups” or “Organizations”
+Elegant UX	Keeps the left nav clean: Home, Messages, Contacts, Communities…
+Backend-Ready	Easily expand with a type field (church, group, ministry, etc.)
+
+🔧 Suggested Backend Adjustments
+Old Table	New Table	Notes
+churches	communities	Add type enum: church, group, ministry, school
+campuses	Keep as-is	Each community can have multiple locations
+church_members	community_members	Adjust foreign key references
+church_roles	community_roles	Roles tied to community_id
+
+🎨 UI/UX Copy Changes
+Element	Replace With
+“Discover Churches”	“Discover Communities”
+“Add Church”	“Start a Community”
+“Claim Church”	“Claim a Community”
+Filters	Add Type filter: Church, Ministry, Group, Other
+
+📣 Suggested Replit Dev Instructions (for implementation)
+ts
+Copy
+Edit
+// 1. Rename `churches` table to `communities`
+// 2. Add column `type` ENUM('church', 'ministry', 'group', 'other') DEFAULT 'church'
+// 3. Update all foreign key references in member/role tables
+// 4. Update routes: 
+//    - /api/communities
+//    - /api/communities/:id/claim
+//    - /api/communities/:id/members
+// 5. Refactor frontend nav & pages:
+//    - “Churches” tab → “Communities”
+//    - “Add Church” → “Start a Community”
+//    - “Claim Church” → “Claim a Community”
+//    - “Discover Churches” → “Discover Communities”
+// 6. Update filters to support filtering by `type`
+// 7. Adjust modals, dropdowns, and toast messages
+🧭 Final UX Flow (Summary)
+User registers
+
+Navigates to “Communities”
+
+Sees options to Search, Claim, or Start New Community
+
+Community can be:
+
+Church
+
+Ministry
+
+Fellowship Group
+
+School, PTA, etc.
+
+Admins can:
+
+Add campuses/locations
+
+Invite staff
+
+Manage members
+
