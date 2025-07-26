@@ -161,12 +161,15 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
           return next();
         }
       } catch (error) {
-        // Error logged for internal tracking
+        // User lookup failed
       }
     }
     
     // If no session, return unauthorized
-    return res.status(401).json({ success: false, message: "Authentication required" });
+    return res.status(401).json({ 
+      success: false, 
+      message: "Authentication required"
+    });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Authentication error" });
   }

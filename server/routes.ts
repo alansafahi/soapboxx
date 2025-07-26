@@ -1030,9 +1030,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes with secure authentication check
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      
       // Use session data for user retrieval
       const userId = req.session?.userId || req.user?.claims?.sub;
+      
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
       }
@@ -7683,8 +7683,7 @@ Return JSON with this exact structure:
       const churches = await storage.getUserCreatedChurches(userId);
       res.json(churches);
     } catch (error) {
-      console.error('getUserCreatedChurches route error:', error);
-      res.status(500).json({ error: 'Failed to get created churches', details: error.message });
+      res.status(500).json({ error: 'Failed to get created churches' });
     }
   });
 
