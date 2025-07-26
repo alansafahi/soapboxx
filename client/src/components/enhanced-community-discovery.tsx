@@ -483,7 +483,7 @@ export default function EnhancedCommunityDiscovery() {
               <Button 
                 variant="link" 
                 className="h-auto p-0 ml-1 text-purple-600 dark:text-purple-400"
-                onClick={() => window.location.href = '/church-management'}
+                onClick={() => window.location.href = '/community-management'}
               >
                 Create one
               </Button>

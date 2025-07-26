@@ -101,7 +101,7 @@ export default function MyCommunities() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Link href="/church-management">
+          <Link href="/community-management">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
               Create A Community
