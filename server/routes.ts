@@ -7661,7 +7661,7 @@ Return JSON with this exact structure:
       }
 
       // Check if user has admin access to this church
-      const userChurch = await storage.getUserChurchRole(userId, feature.churchId);
+      const userChurch = await storage.getUserChurchRole(userId, feature.church_id);
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
       
       const user = await storage.getUser(userId);
@@ -7676,19 +7676,19 @@ Return JSON with this exact structure:
       } else {
         // Check if user created this church by looking for admin churches
         const adminChurches = await storage.getUserCreatedChurches(userId);
-        hasAccess = adminChurches.some(church => church.id === feature.churchId);
+        hasAccess = adminChurches.some(church => church.id === feature.church_id);
       }
       
       if (!hasAccess) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
-      console.log('Updating feature:', { featureId, isEnabled, feature: feature.featureName });
+      console.log('Updating feature:', { featureId, isEnabled, feature: feature.feature_name });
       
       const updatedFeature = await storage.updateChurchFeatureSetting({
-        churchId: feature.churchId,
-        featureCategory: feature.featureCategory,
-        featureName: feature.featureName,
+        churchId: feature.church_id,
+        featureCategory: feature.feature_category,
+        featureName: feature.feature_name,
         isEnabled,
         enabledBy: userId
       });

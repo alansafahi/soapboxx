@@ -1870,21 +1870,27 @@ export class DatabaseStorage implements IStorage {
 
   async getUserChurchRole(userId: string, churchId: number): Promise<{ role: string } | undefined> {
     try {
-      // Use raw SQL to avoid Drizzle schema aliasing issues
-      const result = await db.execute(sql`
-        SELECT role FROM user_churches 
-        WHERE user_id = ${userId} 
-        AND church_id = ${churchId} 
-        AND is_active = true 
-        LIMIT 1
-      `);
+      console.log('Getting user church role:', { userId, churchId });
+      
+      // Use the working Drizzle ORM approach instead of raw SQL
+      const [userChurch] = await db
+        .select({ role: userChurches.role })
+        .from(userChurches)
+        .where(and(
+          eq(userChurches.userId, userId),
+          eq(userChurches.churchId, churchId),
+          eq(userChurches.isActive, true)
+        ))
+        .limit(1);
 
-      if (result.rows.length === 0) {
+      if (!userChurch) {
+        console.log('No user church found');
         return undefined;
       }
 
+      console.log('User church role found:', userChurch);
       return {
-        role: (result.rows[0] as any).role || 'member'
+        role: userChurch.role || 'member'
       };
     } catch (error) {
       console.error('Error in getUserChurchRole:', error);
