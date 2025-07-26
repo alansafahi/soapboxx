@@ -23,17 +23,17 @@ import {
 
 interface ChurchFeature {
   id: number;
-  churchId: number;
-  featureCategory: string;
-  featureName: string;
-  isEnabled: boolean;
+  church_id: number;
+  feature_category: string;
+  feature_name: string;
+  is_enabled: boolean;
   configuration: {
     priority: 'high' | 'medium' | 'low';
     description?: string;
   };
-  enabledBy: string;
-  enabledAt: string;
-  lastModified: string;
+  enabled_by: string;
+  enabled_at: string;
+  last_modified: string;
 }
 
 interface ChurchFeatureManagerProps {
@@ -314,14 +314,14 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
   const handleFeatureToggle = (feature: ChurchFeature) => {
     console.log('Frontend: Toggle clicked for feature:', { 
       id: feature.id, 
-      name: feature.featureName, 
-      currentState: feature.isEnabled,
-      newState: !feature.isEnabled 
+      name: feature.feature_name, 
+      currentState: feature.is_enabled,
+      newState: !feature.is_enabled 
     });
     
     updateFeatureMutation.mutate({
       featureId: feature.id,
-      isEnabled: !feature.isEnabled
+      isEnabled: !feature.is_enabled
     });
   };
 
@@ -342,6 +342,14 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
     );
   }
 
+  console.log('ChurchFeatureManager render:', {
+    features: features?.length || 0,
+    featureNames: features?.map(f => f.feature_name) || [],
+    communityType,
+    hasAdminAccess: hasAdminAccess(),
+    featureDefinitions: Object.keys(getFeatureDefinitions(communityType))
+  });
+
   if (!hasAdminAccess()) {
     return (
       <Card>
@@ -358,13 +366,13 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
     );
   }
 
-  const categorizedFeatures = features?.reduce((acc, feature) => {
-    if (!acc[feature.featureCategory]) {
-      acc[feature.featureCategory] = [];
-    }
-    acc[feature.featureCategory].push(feature);
+  // Create a flat lookup of all features by name (not categorized)
+  const featureLookup = features?.reduce((acc, feature) => {
+    acc[feature.feature_name] = feature;
     return acc;
-  }, {} as Record<string, ChurchFeature[]>) || {};
+  }, {} as Record<string, ChurchFeature>) || {};
+  
+  console.log('Feature lookup created:', featureLookup);
 
   return (
     <div className="space-y-6">
@@ -382,7 +390,6 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
 
       {Object.entries(getFeatureDefinitions(communityType)).map(([categoryKey, categoryFeatures]: [string, any]) => {
         const categoryName = categoryKey.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-        const categoryFeatureList = categorizedFeatures[categoryKey] || [];
 
         return (
           <Card key={categoryKey}>
@@ -394,8 +401,15 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
             <CardContent>
               <div className="space-y-4">
                 {Object.entries(categoryFeatures).map(([featureKey, featureDefinition]: [string, any]) => {
-                  const feature = categoryFeatureList.find(f => f.featureName === featureKey);
+                  const feature = featureLookup[featureKey];
                   const IconComponent = featureDefinition.icon;
+                  
+                  console.log('Rendering feature:', { 
+                    featureKey, 
+                    feature: feature || 'NOT FOUND', 
+                    isEnabled: feature?.is_enabled,
+                    isDisabled: updateFeatureMutation.isPending || !feature
+                  });
                   
                   return (
                     <div 
@@ -427,11 +441,11 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
-                          <Badge variant={feature?.isEnabled ? 'default' : 'outline'}>
-                            {feature?.isEnabled ? 'Enabled' : 'Disabled'}
+                          <Badge variant={feature?.is_enabled ? 'default' : 'outline'}>
+                            {feature?.is_enabled ? 'Enabled' : 'Disabled'}
                           </Badge>
                           <Switch
-                            checked={feature?.isEnabled || false}
+                            checked={feature?.is_enabled || false}
                             onCheckedChange={() => {
                               console.log('Switch onCheckedChange triggered!', feature);
                               if (feature) {
