@@ -7345,41 +7345,50 @@ Return JSON with this exact structure:
   // Create new community (new terminology)
   app.post('/api/communities', isAuthenticated, upload.single('logo'), async (req: any, res) => {
     try {
-      const { name, denomination, address, city, state, zipCode, phone, email, website, description, size } = req.body;
+      const { name, type, denomination, address, city, state, zipCode, adminPhone, adminEmail, website, description, size } = req.body;
       const userId = req.session.userId;
 
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      if (!name || !denomination) {
-        return res.status(400).json({ error: 'Community name and denomination are required' });
+      if (!name) {
+        return res.status(400).json({ error: 'Community name is required' });
+      }
+
+      if (!adminEmail) {
+        return res.status(400).json({ error: 'Admin email is required' });
       }
 
       const logoUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
       const communityData = {
-        name,
-        denomination: denomination === 'Other' ? req.body.customDenomination : denomination,
-        address,
-        city,
-        state,
-        zipCode,
-        phone,
-        email,
-        website,
-        description,
+        name: name?.trim(),
+        type: type?.trim() || 'church',
+        denomination: denomination?.trim() || 'Non-denominational',
+        address: address?.trim(),
+        city: city?.trim(),
+        state: state?.trim(),
+        zipCode: zipCode?.trim(),
+        phone: adminPhone?.trim(),
+        email: adminEmail?.trim(),
+        website: website?.trim(),
+        description: description?.trim(),
         logoUrl,
-        adminEmail: email,
+        adminEmail: adminEmail?.trim(),
         createdBy: userId,
-        size: size || 'small',
+        size: size?.trim() || 'small',
         isActive: true,
         verificationStatus: 'pending',
         isDemo: false,
-        type: 'community'
+        isClaimed: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
 
+      console.log('Creating community with data:', communityData);
       const newCommunity = await storage.createChurch(communityData);
+      console.log('Community created:', newCommunity);
 
       // Create user-community relationship
       await storage.createUserChurchRelationship(userId, newCommunity.id, 'church_admin');
@@ -7390,7 +7399,8 @@ Return JSON with this exact structure:
         community: newCommunity
       });
     } catch (error) {
-      res.status(500).json({ error: 'Failed to create community' });
+      console.error('Community creation error:', error);
+      res.status(500).json({ error: 'Failed to create community', details: error.message });
     }
   });
 
