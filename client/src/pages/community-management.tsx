@@ -56,30 +56,43 @@ export default function CommunityManagement() {
   }
 
   // Get community details
-  const { data: community, isLoading } = useQuery({
+  const { data: community, isLoading, error } = useQuery({
     queryKey: ['community-details', communityId],
     queryFn: async () => {
+      console.log('Fetching community details for ID:', communityId);
       const response = await fetch(`/api/churches/${communityId}`, { credentials: 'include' });
-      if (!response.ok) throw new Error('Failed to fetch community details');
-      return response.json() as CommunityProfile;
+      console.log('Response status:', response.status);
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('API Error:', response.status, errorData);
+        throw new Error(`Failed to fetch community details: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Community data received:', data);
+      return data as CommunityProfile;
     },
     enabled: !!communityId,
+    retry: 1,
   });
 
   // Check if user has admin access
   const { data: userRole, error: roleError } = useQuery({
     queryKey: ['user-community-role', communityId],
     queryFn: async () => {
+      console.log('Checking user role for community:', communityId);
       const response = await fetch(`/api/users/churches/${communityId}/role`, { credentials: 'include' });
+      console.log('Role check response status:', response.status);
       if (!response.ok) {
-        // If user is not found for this community, they might still be an admin through other means
-        const errorData = await response.json();
+        const errorData = await response.text();
+        console.error('Role check error:', response.status, errorData);
         if (response.status === 404) {
           throw new Error('not_member');
         }
-        throw new Error(errorData.error || 'Failed to check permissions');
+        throw new Error(errorData || 'Failed to check permissions');
       }
-      return response.json();
+      const roleData = await response.json();
+      console.log('User role data:', roleData);
+      return roleData;
     },
     enabled: !!communityId,
     retry: false,

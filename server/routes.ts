@@ -7490,6 +7490,8 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       const churchId = parseInt(req.params.churchId);
       
+      console.log('Checking role for user:', userId, 'church:', churchId);
+      
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
@@ -7500,27 +7502,31 @@ Return JSON with this exact structure:
 
       // First try to get user's role in this church
       const userChurch = await storage.getUserChurchRole(userId, churchId);
+      console.log('User church role found:', userChurch);
       if (userChurch) {
         return res.json({ role: userChurch.role });
       }
 
       // If not found, check if this user is a global admin or created this church
       const user = await storage.getUser(userId);
+      console.log('User details:', user ? { id: user.id, role: user.role } : 'Not found');
       if (user?.role === 'soapbox_owner' || user?.role === 'system_admin') {
         return res.json({ role: user.role });
       }
 
       // Check if user created this church by looking for admin churches
       const adminChurches = await storage.getUserCreatedChurches(userId);
+      console.log('Admin churches:', adminChurches.length);
       const isCreator = adminChurches.some(church => church.id === churchId);
       
       if (isCreator) {
         return res.json({ role: 'church_admin' });
       }
 
+      console.log('User not associated with church');
       return res.status(404).json({ error: 'User not associated with this church' });
     } catch (error) {
-      // Error getting user church role - silent error handling
+      console.error('Error getting user church role:', error);
       res.status(500).json({ error: 'Failed to get user role' });
     }
   });

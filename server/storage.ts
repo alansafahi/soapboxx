@@ -1847,33 +1847,28 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserChurchRole(userId: string, churchId: number): Promise<{ role: string } | undefined> {
-    const [userChurch] = await db
-      .select()
-      .from(userCommunities)
-      .where(and(
-        eq(userCommunities.userId, userId),
-        eq(userCommunities.communityId, churchId),
-        eq(userCommunities.isActive, true)
-      ));
+    try {
+      // Use the actual user_churches table (which is what exists in the database)
+      const [userChurch] = await db
+        .select()
+        .from(userChurches)
+        .where(and(
+          eq(userChurches.userId, userId),
+          eq(userChurches.churchId, churchId),
+          eq(userChurches.isActive, true)
+        ));
 
-    if (!userChurch) {
+      if (!userChurch) {
+        return undefined;
+      }
+
+      return {
+        role: userChurch.role || 'member'
+      };
+    } catch (error) {
+      console.error('Error in getUserChurchRole:', error);
       return undefined;
     }
-
-    // Use the role field directly from user_churches table, fall back to roles table if needed
-    let roleName = userChurch.role;
-    
-    if (!roleName && userChurch.roleId) {
-      const [role] = await db
-        .select()
-        .from(roles)
-        .where(eq(roles.id, userChurch.roleId));
-      roleName = role?.name;
-    }
-    
-    return {
-      role: roleName || 'member'
-    };
   }
 
   async getChurchFeature(featureId: number): Promise<any> {
