@@ -7462,24 +7462,34 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       const communityId = parseInt(req.params.communityId);
       
+      console.log('Community update request:', { userId, communityId, updates: req.body });
+      
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
       // Check if user has admin access to this community
       const userCommunity = await storage.getUserChurchRole(userId, communityId);
+      console.log('User community role for update:', userCommunity);
+      
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
       
       const user = await storage.getUser(userId);
+      console.log('User details for update:', user ? { id: user.id, role: user.role } : 'Not found');
+      
       if (!userCommunity || (!adminRoles.includes(userCommunity.role) && user?.role !== 'soapbox_owner')) {
+        console.log('Access denied:', { userCommunity, userRole: user?.role });
         return res.status(403).json({ error: 'Admin access required' });
       }
 
       const updates = req.body;
+      console.log('Performing community update with:', updates);
       const updatedCommunity = await storage.updateChurch(communityId, updates);
+      console.log('Community update successful:', updatedCommunity?.id);
       
       res.json(updatedCommunity);
     } catch (error) {
+      console.error('Community update error:', error);
       res.status(500).json({ error: 'Failed to update community' });
     }
   });
