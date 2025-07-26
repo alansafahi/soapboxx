@@ -119,6 +119,8 @@ export default function MessagesPage() {
       console.log('Auto-selecting contact:', { contactId, contactName });
       if (contacts && contacts.length > 0) {
         console.log('Available contacts:', contacts.map(c => ({ id: c.id, name: `${c.firstName} ${c.lastName}` })));
+        const foundContact = contacts.find(c => c.id === contactId);
+        console.log('Found matching contact:', foundContact);
       }
       
       setSelectedContact(contactId);
