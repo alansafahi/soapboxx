@@ -180,7 +180,7 @@ export function ChurchManagementHub() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="churches">Churches / Groups</TabsTrigger>
+            <TabsTrigger value="churches">Communities</TabsTrigger>
             <TabsTrigger value="management">Church Management</TabsTrigger>
             <TabsTrigger value="directory">Member Directory</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -252,12 +252,12 @@ export function ChurchManagementHub() {
                 <Building2 className="h-12 w-12 text-blue-500 mx-auto mb-4" />
                 <h2 className="text-xl font-semibold mb-2">Welcome to Church Administration</h2>
                 <p className="text-gray-600 mb-6">
-                  Get started by creating a new church or claiming an existing one
+                  Get started by creating a new community or claiming an existing one
                 </p>
                 <div className="flex gap-4 justify-center">
                   <Button onClick={() => {setActiveTab("churches"); setCreateDialog(true);}}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Create Church
+                    Create A Community
                   </Button>
                   <Button variant="outline" onClick={() => {setActiveTab("churches"); setClaimDialog(true);}}>
                     <Search className="h-4 w-4 mr-2" />
@@ -272,8 +272,8 @@ export function ChurchManagementHub() {
           <TabsContent value="churches" className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-2xl font-bold">Churches & Groups</h2>
-                <p className="text-gray-600">Create new organizations or claim existing ones</p>
+                <h2 className="text-2xl font-bold">Communities</h2>
+                <p className="text-gray-600">Create new communities or claim existing ones</p>
               </div>
               <div className="flex gap-2">
                 <Dialog open={createDialog} onOpenChange={(open) => {
@@ -291,9 +291,9 @@ export function ChurchManagementHub() {
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                      <DialogTitle>Create New Church/Group</DialogTitle>
+                      <DialogTitle>Create A New Community</DialogTitle>
                       <DialogDescription>
-                        Set up a new organization and become its administrator
+                        Set up a new community and become its administrator
                       </DialogDescription>
                     </DialogHeader>
                     

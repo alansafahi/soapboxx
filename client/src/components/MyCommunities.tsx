@@ -104,7 +104,7 @@ export default function MyCommunities() {
           <Link href="/church-management">
             <Button>
               <Plus className="h-4 w-4 mr-2" />
-              Create Community
+              Create A Community
             </Button>
           </Link>
         </div>
