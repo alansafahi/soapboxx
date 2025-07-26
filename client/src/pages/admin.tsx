@@ -115,18 +115,15 @@ function MembersPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-11">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="community-admin">Community Admin</TabsTrigger>
             <TabsTrigger value="church-admin">Church Admin</TabsTrigger>
             <TabsTrigger value="features">Features</TabsTrigger>
             <TabsTrigger value="campuses">Campuses</TabsTrigger>
-            <TabsTrigger value="members">Members</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
-            <TabsTrigger value="content" className="hidden lg:block">Content</TabsTrigger>
             <TabsTrigger value="media" className="hidden lg:block">Media</TabsTrigger>
             <TabsTrigger value="analytics" className="hidden lg:block">Analytics</TabsTrigger>
-            <TabsTrigger value="volunteers" className="hidden lg:block">Volunteers</TabsTrigger>
             <TabsTrigger value="settings" className="hidden lg:block">Settings</TabsTrigger>
           </TabsList>
 
@@ -270,19 +267,9 @@ function MembersPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="members" className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Member Management</h2>
-            <MemberManagementSystem />
-          </TabsContent>
-
           <TabsContent value="events" className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Event Management</h2>
             <EventManagement />
-          </TabsContent>
-
-          <TabsContent value="content" className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Content Management</h2>
-            <ContentManagementSystem />
           </TabsContent>
 
           <TabsContent value="media" className="space-y-6">
@@ -293,11 +280,6 @@ function MembersPage() {
           <TabsContent value="analytics" className="space-y-6">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics</h2>
             <AnalyticsTab />
-          </TabsContent>
-
-          <TabsContent value="volunteers" className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Volunteer Management</h2>
-            <VolunteerManagementSystem />
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
