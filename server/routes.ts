@@ -7601,13 +7601,18 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       const churchId = parseInt(req.params.churchId);
       
+      console.log('Church features request:', { userId, churchId });
+      
       if (!userId) {
+        console.log('No userId in session');
         return res.status(401).json({ error: 'Authentication required' });
       }
 
       // Check if user has access to this church
       const userChurch = await storage.getUserChurchRole(userId, churchId);
       const user = await storage.getUser(userId);
+      
+      console.log('Church features access check:', { userChurch, userRole: user?.role });
       
       // Allow access for global admins or church creators
       let hasAccess = false;
@@ -7622,14 +7627,17 @@ Return JSON with this exact structure:
         hasAccess = adminChurches.some(church => church.id === churchId);
       }
       
+      console.log('Church features hasAccess:', hasAccess);
+      
       if (!hasAccess) {
         return res.status(403).json({ error: 'Access denied to this church' });
       }
 
       const features = await storage.getChurchFeatureSettings(churchId);
+      console.log('Church features retrieved:', features?.length || 0, 'features');
       res.json(features);
     } catch (error) {
-      // Error getting church features - silent error handling
+      console.error('Error getting church features:', error);
       res.status(500).json({ error: 'Failed to get church features' });
     }
   });
