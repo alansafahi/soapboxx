@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { useToast } from "../hooks/use-toast";
 import { ChurchFeatureManager } from "../components/ChurchFeatureManager";
 import { ChurchManagementHub } from "../components/ChurchManagementHub";
+import { CommunitySettings } from "../components/CommunitySettings";
 import { useParams, useLocation } from "wouter";
 import {
   Building2,
@@ -378,14 +379,11 @@ export default function CommunityManagement() {
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Community Settings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-center text-gray-500 py-8">Community settings coming soon...</p>
-              </CardContent>
-            </Card>
+            <CommunitySettings 
+              communityId={parseInt(communityId)}
+              communityType={community.type as "church" | "group" | "ministry"}
+              userRole={userRole?.role || 'member'}
+            />
           </TabsContent>
         </Tabs>
       </main>
