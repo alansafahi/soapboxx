@@ -269,6 +269,8 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
   // Update feature mutation
   const updateFeatureMutation = useMutation({
     mutationFn: async ({ featureId, isEnabled }: { featureId: number; isEnabled: boolean }) => {
+      console.log('Frontend: Updating feature:', { featureId, isEnabled });
+      
       const response = await fetch(`/api/churches/features/${featureId}`, {
         method: 'PUT',
         headers: {
@@ -278,13 +280,20 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
         body: JSON.stringify({ isEnabled }),
       });
       
+      console.log('Frontend: Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to update feature');
+        const errorText = await response.text();
+        console.error('Frontend: Update failed:', errorText);
+        throw new Error(`Failed to update feature: ${errorText}`);
       }
       
-      return response.json();
+      const result = await response.json();
+      console.log('Frontend: Update successful:', result);
+      return result;
     },
     onSuccess: () => {
+      console.log('Frontend: Invalidating cache and showing success');
       queryClient.invalidateQueries({ queryKey: ['church-features', churchId] });
       queryClient.invalidateQueries({ queryKey: ['user-churches'] });
       toast({
@@ -293,6 +302,7 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
       });
     },
     onError: (error: any) => {
+      console.error('Frontend: Mutation error:', error);
       toast({
         title: "Update Failed",
         description: error.message || "Failed to update church feature.",
@@ -302,6 +312,13 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
   });
 
   const handleFeatureToggle = (feature: ChurchFeature) => {
+    console.log('Frontend: Toggle clicked for feature:', { 
+      id: feature.id, 
+      name: feature.featureName, 
+      currentState: feature.isEnabled,
+      newState: !feature.isEnabled 
+    });
+    
     updateFeatureMutation.mutate({
       featureId: feature.id,
       isEnabled: !feature.isEnabled
