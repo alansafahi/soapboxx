@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -257,7 +257,7 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
   const featureDefinitions = getFeatureDefinitions(communityType);
 
   // Get church features
-  const { data: features, isLoading } = useQuery<ChurchFeature[]>({
+  const { data: features, isLoading, refetch } = useQuery<ChurchFeature[]>({
     queryKey: ['church-features', churchId],
     queryFn: async () => {
       const response = await fetch(`/api/churches/${churchId}/features`, { credentials: 'include' });
@@ -265,6 +265,41 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
       return response.json();
     },
   });
+
+  // Auto-initialize features if none exist
+  const initializeFeaturesMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/church/${churchId}/features/initialize`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ churchSize: 'small' })
+      });
+      if (!response.ok) throw new Error('Failed to initialize features');
+      return response.json();
+    },
+    onSuccess: () => {
+      refetch(); // Refresh the features list
+      toast({
+        title: "Features Initialized",
+        description: `${communityType === 'church' ? 'Church' : communityType === 'group' ? 'Group' : 'Ministry'} features have been set up with default settings.`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Initialization Failed",
+        description: "Unable to set up default features. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  // Auto-initialize if no features found and not loading
+  useEffect(() => {
+    if (!isLoading && features && features.length === 0 && hasAdminAccess()) {
+      initializeFeaturesMutation.mutate();
+    }
+  }, [isLoading, features]);
 
   // Update feature mutation
   const updateFeatureMutation = useMutation({

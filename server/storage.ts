@@ -4087,6 +4087,94 @@ export class DatabaseStorage implements IStorage {
 
 
 
+  // Get community by ID
+  async getCommunity(communityId: number): Promise<any> {
+    try {
+      const [community] = await db
+        .select()
+        .from(communities)
+        .where(eq(communities.id, communityId));
+      return community;
+    } catch (error) {
+      console.error('Error getting community:', error);
+      return null;
+    }
+  }
+
+  // Feature initialization for all community types
+  async initializeChurchFeatures(churchId: number, churchSize: string = 'small', enabledBy?: string): Promise<void> {
+    try {
+      // Get community type to determine which features to initialize
+      const community = await this.getCommunity(churchId);
+      if (!community) {
+        throw new Error('Community not found');
+      }
+
+      // Define default features by community type
+      const featuresByType: Record<string, Array<{category: string, name: string, enabled: boolean}>> = {
+        'church': [
+          // Community features
+          { category: 'community', name: 'donation', enabled: true },
+          { category: 'community', name: 'events', enabled: true },
+          { category: 'community', name: 'communication_hub', enabled: true },
+          // Spiritual tools
+          { category: 'spiritual_tools', name: 'prayer_wall', enabled: true },
+          { category: 'spiritual_tools', name: 'audio_bible', enabled: true },
+          { category: 'spiritual_tools', name: 'audio_routines', enabled: false },
+          // Media contents
+          { category: 'media_contents', name: 'video_library', enabled: false },
+          { category: 'media_contents', name: 'image_gallery', enabled: false },
+          // Admin features
+          { category: 'admin_features', name: 'sermon_studio', enabled: true },
+          { category: 'admin_features', name: 'engagement_analytics', enabled: true }
+        ],
+        'group': [
+          // Community features
+          { category: 'community', name: 'events', enabled: true },
+          { category: 'community', name: 'communication_hub', enabled: true },
+          // Group tools
+          { category: 'group_tools', name: 'resource_sharing', enabled: true },
+          { category: 'group_tools', name: 'member_directory', enabled: true },
+          // Media contents
+          { category: 'media_contents', name: 'image_gallery', enabled: true }
+        ],
+        'ministry': [
+          // Community features
+          { category: 'community', name: 'events', enabled: true },
+          { category: 'community', name: 'communication_hub', enabled: true },
+          // Ministry tools
+          { category: 'ministry_tools', name: 'volunteer_management', enabled: true },
+          { category: 'ministry_tools', name: 'resource_management', enabled: true },
+          // Media contents
+          { category: 'media_contents', name: 'training_library', enabled: true }
+        ]
+      };
+
+      const defaultFeatures = featuresByType[community.type] || featuresByType['church'];
+      
+      // Insert default features for this community
+      for (const feature of defaultFeatures) {
+        try {
+          await pool.query(`
+            INSERT INTO church_feature_settings (
+              church_id, feature_category, feature_name, is_enabled, enabled_by, enabled_at, last_modified
+            ) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
+            ON CONFLICT (church_id, feature_category, feature_name) 
+            DO UPDATE SET 
+              is_enabled = EXCLUDED.is_enabled,
+              enabled_by = EXCLUDED.enabled_by,
+              last_modified = NOW()
+          `, [churchId, feature.category, feature.name, feature.enabled, enabledBy || 'system']);
+        } catch (error) {
+          console.error(`Error initializing feature ${feature.category}:${feature.name}:`, error);
+        }
+      }
+    } catch (error) {
+      console.error('Error initializing community features:', error);
+      throw new Error('Failed to initialize community features');
+    }
+  }
+
   // Gallery Methods Implementation
   async getGalleryImages(churchId?: number, filters?: { 
     collection?: string; 
