@@ -109,42 +109,91 @@ export default function MessagesPage() {
     enabled: !!user,
   });
 
+  // Fetch church members (users) for messaging 
+  const { data: churchMembers = [], isLoading: membersLoading } = useQuery<any[]>({
+    queryKey: ["/api/users/church-members"],
+    queryFn: async () => {
+      const response = await fetch('/api/users/church-members');
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data.users || [];
+    },
+    enabled: !!user,
+  });
+
   // Handle auto-selection of contact from URL parameters
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const contactId = urlParams.get('contact');
     const contactName = urlParams.get('name');
     
-    // Only process if we have URL params AND contacts have loaded
-    if (contactId && contactName && contacts && contacts.length > 0) {
+    // Only process if we have URL params
+    if (contactId && contactName) {
       console.log('Auto-selecting contact:', { contactId, contactName });
-      console.log('Available contacts:', contacts.map(c => ({ id: c.id, name: `${c.firstName} ${c.lastName}` })));
       
-      const foundContact = contacts.find(c => c.id === contactId);
-      console.log('Found matching contact:', foundContact);
-      
-      if (foundContact) {
-        setSelectedContact(contactId);
-        setSearchQuery(""); // Clear search to show all contacts
-        setShowNewMessageDialog(true);
-        toast({
-          title: "Contact Selected",
-          description: `Ready to message ${decodeURIComponent(contactName)}`,
-        });
+      // First check in contacts list
+      if (contacts && contacts.length > 0) {
+        console.log('Available contacts:', contacts.map(c => ({ id: c.id, name: `${c.firstName} ${c.lastName}` })));
+        const foundContact = contacts.find(c => c.id === contactId);
         
-        // Clear URL parameters after handling them
-        const newUrl = window.location.pathname;
-        window.history.replaceState({}, '', newUrl);
-      } else {
-        console.log('Contact not found in contacts list');
-        toast({
-          title: "Contact Not Found",
-          description: `Could not find ${decodeURIComponent(contactName)} in your contacts`,
-          variant: "destructive"
-        });
+        if (foundContact) {
+          console.log('Found matching contact:', foundContact);
+          setSelectedContact(contactId);
+          setSearchQuery(""); // Clear search to show all contacts
+          setShowNewMessageDialog(true);
+          toast({
+            title: "Contact Selected",
+            description: `Ready to message ${decodeURIComponent(contactName)}`,
+          });
+          
+          // Clear URL parameters after handling them
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, '', newUrl);
+          return;
+        }
       }
+      
+      // If not found in contacts, check in church members
+      if (churchMembers && churchMembers.length > 0) {
+        console.log('Available church members:', churchMembers.map(m => ({ id: m.id, name: `${m.firstName} ${m.lastName}` })));
+        const foundMember = churchMembers.find(m => m.id.toString() === contactId);
+        
+        if (foundMember) {
+          console.log('Found matching church member:', foundMember);
+          // Create a pseudo-contact object for the member
+          const pseudoContact = {
+            id: foundMember.id.toString(),
+            firstName: foundMember.firstName,
+            lastName: foundMember.lastName,
+            email: foundMember.email,
+            profileImageUrl: foundMember.profileImageUrl,
+            isChurchMember: true
+          };
+          
+          setSelectedContact(contactId);
+          setSearchQuery(""); 
+          setShowNewMessageDialog(true);
+          toast({
+            title: "Contact Selected", 
+            description: `Ready to message ${decodeURIComponent(contactName)}`,
+          });
+          
+          // Clear URL parameters after handling them
+          const newUrl = window.location.pathname;
+          window.history.replaceState({}, '', newUrl);
+          return;
+        }
+      }
+      
+      // If not found anywhere, show error
+      console.log('Contact not found in either contacts or church members');
+      toast({
+        title: "Contact Not Found",
+        description: `Could not find ${decodeURIComponent(contactName)}`,
+        variant: "destructive"
+      });
     }
-  }, [location, toast, contacts]);
+  }, [location, toast, contacts, churchMembers]);
 
   // Send message mutation
   const sendMessageMutation = useMutation({
@@ -210,7 +259,21 @@ export default function MessagesPage() {
     conv.participantName?.toLowerCase().includes(searchQuery.toLowerCase()) || false
   );
 
-  const filteredContacts = contacts.filter((contact) => {
+  // Combine contacts and church members into a unified list
+  const allContacts = [
+    ...contacts,
+    ...churchMembers.map(member => ({
+      id: member.id.toString(),
+      firstName: member.firstName,
+      lastName: member.lastName,
+      profileImageUrl: member.profileImageUrl,
+      role: member.role || 'Church Member',
+      churchName: 'Church Member',
+      isOnline: false
+    }))
+  ];
+
+  const filteredContacts = allContacts.filter((contact) => {
     const searchMatch = `${contact.firstName} ${contact.lastName}`.toLowerCase().includes(searchQuery.toLowerCase());
     const isSelected = selectedContact === contact.id;
     // Always show selected contact even if it doesn't match search
@@ -264,7 +327,7 @@ export default function MessagesPage() {
                 <DialogDescription>
                   {selectedContact ? 
                     "Contact already selected. Type your message below." : 
-                    "Choose someone from your contacts to start messaging"
+                    "Choose someone from your contacts or church members to start messaging"
                   }
                 </DialogDescription>
               </DialogHeader>
@@ -272,7 +335,7 @@ export default function MessagesPage() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
-                    placeholder="Search contacts..."
+                    placeholder="Search contacts & church members..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"

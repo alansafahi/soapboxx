@@ -1143,6 +1143,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Church members endpoint - get all members from user's church for messaging
+  app.get('/api/users/church-members', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ success: false, message: "Authentication required" });
+      }
+
+      // Get user's church for scoped search
+      const currentUserChurch = await storage.getUserChurch(userId);
+      
+      if (!currentUserChurch) {
+        return res.json({ 
+          success: true, 
+          users: [],
+          message: "Church membership required"
+        });
+      }
+      
+      // Get all church members (excluding current user)
+      const churchMembers = await db
+        .select({
+          id: users.id,
+          username: users.username,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email,
+          profileImageUrl: users.profileImageUrl,
+          role: userChurches.role,
+          churchId: userChurches.churchId
+        })
+        .from(users)
+        .innerJoin(userChurches, eq(users.id, userChurches.userId))
+        .where(
+          and(
+            eq(userChurches.churchId, currentUserChurch.churchId),
+            eq(users.isActive, true)
+          )
+        );
+      
+      // Format results with privacy protection
+      const filteredResults = churchMembers
+        .filter(member => member.id !== userId) // Exclude current user
+        .map(user => ({
+          id: user.id,
+          username: user.username,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          profileImageUrl: user.profileImageUrl,
+          churchId: user.churchId,
+          role: user.role,
+          // Only show email to church staff
+          email: ['church_admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(currentUserChurch.role) 
+            ? user.email 
+            : undefined
+        }));
+
+      res.json({ 
+        success: true, 
+        users: filteredResults
+      });
+    } catch (error) {
+      console.error('Church members fetch error:', error);
+      res.status(500).json({ success: false, message: "Failed to fetch church members" });
+    }
+  });
+
   // Role Management Routes
   app.get('/api/auth/available-roles', isAuthenticated, async (req: any, res) => {
     try {
