@@ -7650,6 +7650,27 @@ Return JSON with this exact structure:
     }
   });
 
+  // Test endpoint to verify database connection (temporary)
+  app.get('/api/test-communities', async (req: any, res) => {
+    try {
+      const testUserId = 'xinjk1vlu2l'; // Known user from database
+      const churches = await storage.getUserCreatedChurches(testUserId);
+      res.json({ 
+        status: 'success', 
+        testUserId,
+        churches: churches,
+        count: churches.length 
+      });
+    } catch (error) {
+      console.error('Test endpoint error:', error);
+      res.status(500).json({ 
+        status: 'error', 
+        error: error.message,
+        stack: error.stack 
+      });
+    }
+  });
+
   // Get churches created by user (church admin)
   app.get('/api/users/created-churches', isAuthenticated, async (req: any, res) => {
     try {

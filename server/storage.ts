@@ -1788,64 +1788,39 @@ export class DatabaseStorage implements IStorage {
 
   async getUserCreatedChurches(userId: string): Promise<Church[]> {
     try {
-      // Get communities where user has admin role
-      const result = await db
-        .select({
-          id: communities.id,
-          name: communities.name,
-          denomination: communities.denomination,
-          address: communities.address,
-          city: communities.city,
-          state: communities.state,
-          zipCode: communities.zipCode,
-          phone: communities.phone,
-          email: communities.email,
-          website: communities.website,
-          description: communities.description,
-          logoUrl: communities.logoUrl,
-          verificationStatus: communities.verificationStatus,
-          isActive: communities.isActive,
-          createdAt: communities.createdAt,
-          updatedAt: communities.updatedAt,
-          adminEmail: communities.adminEmail,
-          type: communities.type,
-          size: communities.size,
-          memberCount: communities.memberCount,
-          createdBy: communities.createdBy
-        })
-        .from(communities)
-        .innerJoin(userChurches, eq(communities.id, userChurches.churchId))
-        .where(and(
-          eq(userChurches.userId, userId),
-          or(
-            eq(userChurches.role, 'church_admin'),
-            eq(userChurches.role, 'admin'),
-            eq(userChurches.role, 'pastor'),
-            eq(userChurches.role, 'lead-pastor')
-          ),
-          eq(communities.isActive, true),
-          eq(userChurches.isActive, true)
-        ))
-        .orderBy(desc(communities.createdAt));
+      // Use raw SQL to avoid Drizzle ORM table reference issues
+      const result = await db.execute(sql`
+        SELECT 
+          c.id, c.name, c.denomination, c.address, c.city, c.state, c.zip_code as "zipCode",
+          c.phone, c.email, c.website, c.description, c.logo_url as "logoUrl",
+          c.verification_status as "verificationStatus", c.is_active as "isActive",
+          c.created_at as "createdAt", c.updated_at as "updatedAt", c.admin_email as "adminEmail",
+          c.type, c.size, c.member_count as "memberCount", c.created_by as "createdBy"
+        FROM communities c
+        INNER JOIN user_churches uc ON c.id = uc.church_id
+        WHERE uc.user_id = ${userId}
+          AND uc.role IN ('church_admin', 'admin', 'pastor', 'lead-pastor')
+          AND c.is_active = true
+          AND uc.is_active = true
+        ORDER BY c.created_at DESC
+      `);
 
-      console.log(`getUserCreatedChurches: Found ${result.length} communities for user ${userId}`);
-      return result;
+      console.log(`getUserCreatedChurches: Found ${result.rows.length} communities for user ${userId}`);
+      return result.rows as Church[];
     } catch (error) {
       console.error('getUserCreatedChurches error:', error);
       
       // Try alternative query using direct createdBy field
       try {
-        const directResult = await db
-          .select()
-          .from(communities)
-          .where(and(
-            eq(communities.createdBy, userId),
-            eq(communities.isActive, true)
-          ))
-          .orderBy(desc(communities.createdAt));
+        const fallbackResult = await db.execute(sql`
+          SELECT * FROM communities 
+          WHERE created_by = ${userId} 
+            AND is_active = true 
+          ORDER BY created_at DESC
+        `);
         
-        console.log(`getUserCreatedChurches fallback: Found ${directResult.length} communities created by user ${userId}`);
-        return directResult;
+        console.log(`getUserCreatedChurches fallback: Found ${fallbackResult.rows.length} communities created by user ${userId}`);
+        return fallbackResult.rows as Church[];
       } catch (fallbackError) {
         console.error('getUserCreatedChurches fallback error:', fallbackError);
         return [];
