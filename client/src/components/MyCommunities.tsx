@@ -7,7 +7,14 @@ import { Badge } from "./ui/badge";
 import { Building, MapPin, Users, Calendar, Plus, Settings } from "lucide-react";
 import { Link } from "wouter";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { ChurchManagementHub } from "./ChurchManagementHub";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { useForm } from "react-hook-form";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useToast } from "../hooks/use-toast";
+import { z } from "zod";
 
 interface Community {
   id: number;
@@ -24,13 +31,124 @@ interface Community {
   phone?: string;
 }
 
+// Community creation schema
+const createCommunitySchema = z.object({
+  name: z.string().min(1, "Community name is required"),
+  address: z.string().min(1, "Address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  zipCode: z.string().min(1, "Zip code is required"),
+  type: z.string().default("church"),
+  denomination: z.string().optional(),
+  adminEmail: z.string().email("Valid email required"),
+  adminPhone: z.string().optional(),
+  website: z.string().optional(),
+  description: z.string().optional()
+});
+
+// Organization-specific affiliation lists
+const AFFILIATIONS = {
+  church: [
+    "Baptist", "Methodist", "Presbyterian", "Lutheran", "Episcopal", "Catholic", "Orthodox",
+    "Pentecostal", "Assembly of God", "Church of Christ", "Disciples of Christ", "Adventist",
+    "Mennonite", "Quaker", "Congregational", "Reformed", "Evangelical", "Non-denominational",
+    "Interdenominational", "Unity", "Unitarian Universalist"
+  ],
+  group: [
+    "Community Organization", "Non-Profit", "Educational", "Support Group", "Recovery Group",
+    "Parent Group", "Youth Organization", "Senior Group", "Health & Wellness", "Environmental",
+    "Cultural Organization", "Arts & Music", "Sports & Recreation", "Professional Association",
+    "Volunteer Group", "Advocacy Group", "Religious Study Group", "Social Club"
+  ],
+  ministry: [
+    "Youth Ministry", "Children's Ministry", "Young Adults Ministry", "Senior Ministry", 
+    "Women's Ministry", "Men's Ministry", "Music Ministry", "Worship Ministry", "Prayer Ministry",
+    "Outreach Ministry", "Missions Ministry", "Education Ministry", "Pastoral Care Ministry",
+    "Community Service Ministry", "Recovery Ministry", "Family Ministry", "Singles Ministry",
+    "Small Groups Ministry", "Discipleship Ministry", "Evangelism Ministry"
+  ]
+};
+
 export default function MyCommunities() {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [createCommunityOpen, setCreateCommunityOpen] = useState(false);
+  const [showCustomDenomination, setShowCustomDenomination] = useState(false);
   
   const { data: userCommunities = [], isLoading, error } = useQuery<Community[]>({
     queryKey: ["/api/users/communities"],
     enabled: !!user,
+  });
+
+  // Create community form
+  const createForm = useForm({
+    defaultValues: {
+      name: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      type: "church",
+      denomination: "",
+      adminEmail: "",
+      adminPhone: "",
+      website: "",
+      description: ""
+    }
+  });
+
+  // Watch the type field to update affiliation options
+  const selectedType = createForm.watch("type") as keyof typeof AFFILIATIONS;
+
+  // Helper function to normalize website URL
+  const normalizeWebsiteUrl = (url: string) => {
+    if (!url?.trim()) return "";
+    const trimmedUrl = url.trim();
+    if (trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://")) {
+      return trimmedUrl;
+    }
+    return `https://${trimmedUrl}`;
+  };
+
+  // Create community mutation
+  const createCommunityMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const normalizedData = {
+        ...data,
+        website: normalizeWebsiteUrl(data.website)
+      };
+      
+      const response = await fetch("/api/churches", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(normalizedData),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create community");
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Community created successfully!",
+        description: "Your new community has been created and you are now the administrator.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/users/communities"] });
+      setCreateCommunityOpen(false);
+      createForm.reset();
+      setShowCustomDenomination(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to create community",
+        description: error.message || "Please try again later.",
+        variant: "destructive",
+      });
+    }
   });
 
   if (isLoading) {
@@ -111,14 +229,255 @@ export default function MyCommunities() {
                 Create A Community
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Community Management</DialogTitle>
+                <DialogTitle>Create A New Community</DialogTitle>
                 <DialogDescription>
-                  Create a new community or manage existing ones
+                  Set up a new community and become its administrator
                 </DialogDescription>
               </DialogHeader>
-              <ChurchManagementHub />
+              
+              <Form {...createForm}>
+                <form onSubmit={createForm.handleSubmit((data) => createCommunityMutation.mutate(data))} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={createForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Community Name *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="First Baptist Church" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Type</FormLabel>
+                          <Select onValueChange={(value) => {
+                            field.onChange(value);
+                            createForm.setValue("denomination", "");
+                            setShowCustomDenomination(false);
+                          }} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="church">Church</SelectItem>
+                              <SelectItem value="ministry">Ministry</SelectItem>
+                              <SelectItem value="group">Group</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="denomination"
+                      render={({ field }) => {
+                        const currentAffiliations = AFFILIATIONS[selectedType] || AFFILIATIONS.church;
+                        
+                        return (
+                          <FormItem>
+                            <FormLabel>
+                              {selectedType === 'church' ? 'Denomination' : 'Affiliation'}
+                            </FormLabel>
+                            <Select onValueChange={(value) => {
+                              if (value === "other") {
+                                setShowCustomDenomination(true);
+                                field.onChange("");
+                              } else {
+                                setShowCustomDenomination(false);
+                                field.onChange(value);
+                              }
+                            }} value={showCustomDenomination ? "other" : field.value || ""}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder={
+                                    selectedType === 'church' 
+                                      ? "Select denomination or type..."
+                                      : selectedType === 'group'
+                                      ? "Select group type or type..."
+                                      : "Select ministry type or type..."
+                                  } />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent className="max-h-60 overflow-y-auto">
+                                {currentAffiliations.map((affiliation) => (
+                                  <SelectItem key={affiliation} value={affiliation}>
+                                    {affiliation}
+                                  </SelectItem>
+                                ))}
+                                <SelectItem value="other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {showCustomDenomination && (
+                              <FormControl>
+                                <Input
+                                  placeholder={
+                                    selectedType === 'church' 
+                                      ? "Enter custom denomination..."
+                                      : selectedType === 'group'
+                                      ? "Enter custom group type..."
+                                      : "Enter custom ministry type..."
+                                  }
+                                  value={field.value || ""}
+                                  onChange={(e) => field.onChange(e.target.value)}
+                                  className="mt-2"
+                                />
+                              </FormControl>
+                            )}
+                            <FormMessage />
+                          </FormItem>
+                        );
+                      }}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="address"
+                      render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Address *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="123 Main Street" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>City *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Los Angeles" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="state"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>State *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="CA" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="zipCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Zip Code *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="90210" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="adminEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Admin Email *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="pastor@church.org" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="adminPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Admin Phone</FormLabel>
+                          <FormControl>
+                            <Input placeholder="(555) 123-4567" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="website"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Website</FormLabel>
+                          <FormControl>
+                            <Input placeholder="https://www.church.org" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Tell us about your community..."
+                              rows={3}
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => {
+                        setCreateCommunityOpen(false);
+                        createForm.reset();
+                        setShowCustomDenomination(false);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={createCommunityMutation.isPending}>
+                      {createCommunityMutation.isPending ? "Creating..." : "Create Community"}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
             </DialogContent>
           </Dialog>
         </div>
