@@ -77,6 +77,7 @@ const DivinePhase2Dashboard = lazy(() => import("./pages/DivinePhase2Dashboard")
 const VolunteerManagementPage = lazy(() => import("./pages/volunteer-management"));
 const StaffManagementPage = lazy(() => import("./pages/staff-management"));
 const MemberManagementPage = lazy(() => import("./pages/member-management"));
+const CommunityAdministrationPage = lazy(() => import("./pages/community-administration"));
 
 function AppRouter() {
     const { user, isAuthenticated, isLoading, logout } = useImmediateAuth();
@@ -186,6 +187,7 @@ function AppRouter() {
                                     
                                     {/* Admin Portal Routes */}
                                     <ProtectedRoute path="/admin" component={AdminPage} />
+                                    <ProtectedRoute path="/community-administration" component={CommunityAdministrationPage} />
                                     <ProtectedRoute path="/staff-management" component={StaffManagementPage} />
                                     <ProtectedRoute path="/member-management" component={MemberManagementPage} />
                                     <ProtectedRoute path="/volunteer-management" component={VolunteerManagementPage} />

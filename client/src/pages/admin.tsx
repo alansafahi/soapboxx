@@ -117,15 +117,37 @@ function MembersPage() {
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 lg:grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="community-admin">Community Admin</TabsTrigger>
+            <TabsTrigger value="admin-portal">Admin Portal</TabsTrigger>
             <TabsTrigger value="campuses">Campuses</TabsTrigger>
             <TabsTrigger value="media" className="hidden lg:block">Media</TabsTrigger>
             <TabsTrigger value="analytics" className="hidden lg:block">Analytics</TabsTrigger>
             <TabsTrigger value="settings" className="hidden lg:block">Settings</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="community-admin" className="space-y-6">
-            <CommunityAdminTab />
+          <TabsContent value="admin-portal" className="space-y-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Portal</h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                Access administrative functions and platform management tools
+              </p>
+            </div>
+            {/* Admin Portal navigation will go here */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card 
+                className="cursor-pointer hover:shadow-lg transition-shadow"
+                onClick={() => window.location.href = '/community-administration'}
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Community Administration
+                  </CardTitle>
+                  <CardDescription>
+                    Manage community profiles, features, events, and settings
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="overview" className="space-y-6">
