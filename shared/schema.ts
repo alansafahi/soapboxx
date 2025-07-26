@@ -201,6 +201,8 @@ export const communities = pgTable("communities", {
   isActive: boolean("is_active").default(true),
   isClaimed: boolean("is_claimed").default(false), // Track if community has been claimed by admin
   adminEmail: varchar("admin_email", { length: 255 }), // Email of designated admin for claiming
+  adminPhone: varchar("admin_phone", { length: 20 }), // Phone of designated admin for claiming
+  createdBy: varchar("created_by", { length: 255 }), // ID of user who created the community
   isDemo: boolean("is_demo").default(true), // Mark as demo community unless imported from production CSV
   verificationStatus: varchar("verification_status", { length: 20 }).default("pending"), // pending, approved, rejected
   verifiedAt: timestamp("verified_at"),
