@@ -387,6 +387,20 @@ function ChurchManagementTab() {
 function MembersPage() {
   const { user } = useAuth();
   const [selectedChurch, setSelectedChurch] = useState<number | null>(null);
+  
+  // Handle URL tab parameter with proper state management
+  const [activeTab, setActiveTab] = useState(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('tab') || 'overview';
+  });
+
+  // Handle tab change with URL update
+  const handleTabChange = (newTab: string) => {
+    setActiveTab(newTab);
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', newTab);
+    window.history.replaceState({}, '', url.toString());
+  };
 
   // Get user's churches to check for admin roles
   const { data: userChurches = [] } = useQuery({
@@ -436,10 +450,7 @@ function MembersPage() {
     );
   }
 
-  // Show simplified church management hub for church admins
-  if (hasChurchAdminRole && user?.role !== 'soapbox_owner') {
-    return <ChurchManagementHub />;
-  }
+  // Note: Removed redirect to ChurchManagementHub to allow church admins access to Admin Portal Community Admin tab
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -451,7 +462,7 @@ function MembersPage() {
           </p>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 lg:grid-cols-12">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="community-admin">Community Admin</TabsTrigger>
