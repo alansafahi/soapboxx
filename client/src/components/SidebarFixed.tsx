@@ -51,7 +51,8 @@ import {
   QrCode,
   Bookmark,
   Flag,
-  Building2
+  Building2,
+  Building
 } from "lucide-react";
 
 interface NavigationItem {
@@ -150,7 +151,8 @@ export default function SidebarFixed() {
         { label: "Home", href: "/", icon: Home },
         { label: "Messages", href: "/messages", icon: Mail },
         { label: "Contacts", href: "/contacts", icon: UserPlus },
-        { label: "Churches", href: "/churches", icon: Users },
+        { label: "Church Members", href: "/people", icon: Users },
+        { label: "Churches", href: "/churches", icon: Building },
         { label: "Events", href: "/events", icon: Calendar },
         { label: "Discussions", href: "/discussions", icon: MessageSquare },
         { label: "Donation", href: "/donation", icon: DollarSign },
