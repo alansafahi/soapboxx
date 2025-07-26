@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -109,6 +109,7 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("basic");
   const [settings, setSettings] = useState<Partial<CommunitySettings>>({});
+  const [hasChanges, setHasChanges] = useState(false);
 
   // Fetch current community settings
   const { data: currentSettings, isLoading } = useQuery({
@@ -122,7 +123,40 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
     },
   });
 
-  // Save settings mutation
+  // Initialize settings state when data loads
+  useEffect(() => {
+    if (currentSettings && Object.keys(settings).length === 0) {
+      setSettings(currentSettings);
+    }
+  }, [currentSettings, settings]);
+
+  // Auto-save settings mutation (saves immediately on toggle)
+  const autoSaveSettingsMutation = useMutation({
+    mutationFn: async (settingsData: Partial<CommunitySettings>) => {
+      const response = await fetch(`/api/communities/${communityId}/settings`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(settingsData),
+      });
+      if (!response.ok) throw new Error('Failed to save settings');
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Setting updated successfully!" });
+      queryClient.invalidateQueries({ queryKey: ['community-settings', communityId] });
+      setHasChanges(false);
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: "Failed to update setting", 
+        description: error.message,
+        variant: "destructive" 
+      });
+    },
+  });
+
+  // Manual save settings mutation
   const saveSettingsMutation = useMutation({
     mutationFn: async (settingsData: Partial<CommunitySettings>) => {
       const response = await fetch(`/api/communities/${communityId}/settings`, {
@@ -137,6 +171,7 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
     onSuccess: () => {
       toast({ title: "Settings updated successfully!" });
       queryClient.invalidateQueries({ queryKey: ['community-settings', communityId] });
+      setHasChanges(false);
     },
     onError: (error: any) => {
       toast({ 
@@ -152,13 +187,25 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
   };
 
   const updateSetting = (section: string, field: string, value: any) => {
-    setSettings(prev => ({
-      ...prev,
+    const newSettings = {
+      ...settings,
       [section]: {
-        ...prev[section as keyof CommunitySettings],
+        ...settings[section as keyof CommunitySettings],
         [field]: value
       }
-    }));
+    };
+    setSettings(newSettings);
+    setHasChanges(true);
+    
+    // Auto-save for toggle switches to provide immediate feedback
+    autoSaveSettingsMutation.mutate(newSettings);
+  };
+
+  // Get current value for a setting with fallbacks
+  const getSetting = (section: string, field: string, defaultValue: any = false) => {
+    return settings[section as keyof CommunitySettings]?.[field] ?? 
+           currentSettings?.[section]?.[field] ?? 
+           defaultValue;
   };
 
   const hasAdminAccess = () => {
@@ -221,9 +268,13 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
             Configure your {communityType} preferences and management options
           </p>
         </div>
-        <Button onClick={handleSave} disabled={saveSettingsMutation.isPending}>
+        <Button 
+          onClick={handleSave} 
+          disabled={saveSettingsMutation.isPending || !hasChanges}
+          variant={hasChanges ? "default" : "secondary"}
+        >
           <Save className="h-4 w-4 mr-2" />
-          {saveSettingsMutation.isPending ? "Saving..." : "Save Changes"}
+          {saveSettingsMutation.isPending ? "Saving..." : hasChanges ? "Save All Changes" : "All Saved"}
         </Button>
       </div>
 
@@ -257,7 +308,7 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
                   </Label>
                   <Input
                     id="name"
-                    value={settings.basicInfo?.name || currentSettings?.basicInfo?.name || ''}
+                    value={getSetting('basicInfo', 'name', '')}
                     onChange={(e) => updateSetting('basicInfo', 'name', e.target.value)}
                     placeholder="Enter name"
                   />
@@ -356,7 +407,7 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
                     <p className="text-sm text-gray-600">Enable management of multiple church campuses</p>
                   </div>
                   <Switch
-                    checked={settings.administrative?.multiCampusEnabled || currentSettings?.administrative?.multiCampusEnabled || false}
+                    checked={getSetting('administrative', 'multiCampusEnabled', false)}
                     onCheckedChange={(checked) => updateSetting('administrative', 'multiCampusEnabled', checked)}
                   />
                 </div>
@@ -482,7 +533,7 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
                   <p className="text-sm text-gray-600">Receive notifications for important updates</p>
                 </div>
                 <Switch
-                  checked={settings.communication?.notificationsEnabled || currentSettings?.communication?.notificationsEnabled || true}
+                  checked={getSetting('communication', 'notificationsEnabled', true)}
                   onCheckedChange={(checked) => updateSetting('communication', 'notificationsEnabled', checked)}
                 />
               </div>
@@ -493,7 +544,7 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
                   <p className="text-sm text-gray-600">Send weekly newsletters to members</p>
                 </div>
                 <Switch
-                  checked={settings.communication?.emailNewsletters || currentSettings?.communication?.emailNewsletters || true}
+                  checked={getSetting('communication', 'emailNewsletters', true)}
                   onCheckedChange={(checked) => updateSetting('communication', 'emailNewsletters', checked)}
                 />
               </div>
@@ -504,7 +555,7 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
                   <p className="text-sm text-gray-600">Allow emergency notifications to bypass quiet hours</p>
                 </div>
                 <Switch
-                  checked={settings.communication?.emergencyAlerts || currentSettings?.communication?.emergencyAlerts || true}
+                  checked={getSetting('communication', 'emergencyAlerts', true)}
                   onCheckedChange={(checked) => updateSetting('communication', 'emergencyAlerts', checked)}
                 />
               </div>
@@ -516,23 +567,23 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
                     <p className="text-sm text-gray-600">Set times when notifications are limited</p>
                   </div>
                   <Switch
-                    checked={settings.communication?.quietHours?.enabled || currentSettings?.communication?.quietHours?.enabled || false}
+                    checked={getSetting('communication', 'quietHours', { enabled: false }).enabled}
                     onCheckedChange={(checked) => updateSetting('communication', 'quietHours', { 
-                      ...settings.communication?.quietHours, 
+                      ...getSetting('communication', 'quietHours', { enabled: false, startTime: '22:00', endTime: '08:00' }), 
                       enabled: checked 
                     })}
                   />
                 </div>
                 
-                {(settings.communication?.quietHours?.enabled || currentSettings?.communication?.quietHours?.enabled) && (
+                {getSetting('communication', 'quietHours', { enabled: false }).enabled && (
                   <div className="grid grid-cols-2 gap-4 pl-4">
                     <div>
                       <Label>Start Time</Label>
                       <Input
                         type="time"
-                        value={settings.communication?.quietHours?.startTime || currentSettings?.communication?.quietHours?.startTime || '22:00'}
+                        value={getSetting('communication', 'quietHours', { startTime: '22:00' }).startTime || '22:00'}
                         onChange={(e) => updateSetting('communication', 'quietHours', {
-                          ...settings.communication?.quietHours,
+                          ...getSetting('communication', 'quietHours', { enabled: false, startTime: '22:00', endTime: '08:00' }),
                           startTime: e.target.value
                         })}
                       />
@@ -541,9 +592,9 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
                       <Label>End Time</Label>
                       <Input
                         type="time"
-                        value={settings.communication?.quietHours?.endTime || currentSettings?.communication?.quietHours?.endTime || '08:00'}
+                        value={getSetting('communication', 'quietHours', { endTime: '08:00' }).endTime || '08:00'}
                         onChange={(e) => updateSetting('communication', 'quietHours', {
-                          ...settings.communication?.quietHours,
+                          ...getSetting('communication', 'quietHours', { enabled: false, startTime: '22:00', endTime: '08:00' }),
                           endTime: e.target.value
                         })}
                       />
@@ -571,7 +622,7 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
                   <p className="text-sm text-gray-600">Allow members to view the community directory</p>
                 </div>
                 <Switch
-                  checked={settings.privacy?.memberDirectoryVisible || currentSettings?.privacy?.memberDirectoryVisible || true}
+                  checked={getSetting('privacy', 'memberDirectoryVisible', true)}
                   onCheckedChange={(checked) => updateSetting('privacy', 'memberDirectoryVisible', checked)}
                 />
               </div>
@@ -582,7 +633,7 @@ export function CommunitySettings({ communityId, communityType, userRole }: Comm
                   <p className="text-sm text-gray-600">Allow members to share photos in posts</p>
                 </div>
                 <Switch
-                  checked={settings.privacy?.photoSharingEnabled || currentSettings?.privacy?.photoSharingEnabled || true}
+                  checked={getSetting('privacy', 'photoSharingEnabled', true)}
                   onCheckedChange={(checked) => updateSetting('privacy', 'photoSharingEnabled', checked)}
                 />
               </div>
