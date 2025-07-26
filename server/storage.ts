@@ -33,8 +33,7 @@ import {
   prayerCircleUpdates,
   userAchievements,
   userActivities,
-  userCommunities,
-  userChurches, // Legacy alias for backward compatibility
+  userChurches,
   roles,
   friendships,
   conversations,
@@ -1028,12 +1027,12 @@ export class DatabaseStorage implements IStorage {
         firstName: users.firstName,
         lastName: users.lastName,
         profileImageUrl: users.profileImageUrl,
-        communityId: userCommunities.communityId,
-        role: userCommunities.role,
+        communityId: userChurches.churchId,
+        role: userChurches.role,
         isDiscoverable: sql`${users.isDiscoverable}::boolean`
       })
       .from(users)
-      .leftJoin(userCommunities, eq(users.id, userCommunities.userId))
+      .leftJoin(userChurches, eq(users.id, userChurches.userId))
       .where(
         and(
           // Basic search criteria
@@ -1044,9 +1043,9 @@ export class DatabaseStorage implements IStorage {
           ),
           // Safety constraints
           currentUserId ? ne(users.id, currentUserId) : undefined, // Exclude current user
-          churchId ? eq(userCommunities.communityId, churchId) : undefined, // Church-scoped search
+          churchId ? eq(userChurches.churchId, churchId) : undefined, // Church-scoped search
           eq(sql`${users.isDiscoverable}::boolean`, true), // Only discoverable users
-          eq(userCommunities.isActive, true) // Only active church members
+          eq(userChurches.isActive, true) // Only active church members
         )
       )
       .limit(10);
@@ -1558,13 +1557,13 @@ export class DatabaseStorage implements IStorage {
           isDemo: communities.isDemo,
           createdAt: communities.createdAt,
           updatedAt: communities.updatedAt,
-          actualMemberCount: sql<number>`COALESCE(COUNT(${userCommunities.communityId}), 0)::int`,
+          actualMemberCount: sql<number>`COALESCE(COUNT(${userChurches.churchId}), 0)::int`,
           distance: sql<number>`0` // Placeholder for distance
         })
         .from(communities)
-        .leftJoin(userCommunities, and(
-          eq(userCommunities.communityId, communities.id),
-          eq(userCommunities.isActive, true)
+        .leftJoin(userChurches, and(
+          eq(userChurches.churchId, communities.id),
+          eq(userChurches.isActive, true)
         ))
         .where(whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0])
         .groupBy(communities.id)
@@ -1937,17 +1936,17 @@ export class DatabaseStorage implements IStorage {
   async getChurchMembers(churchId: number): Promise<(UserChurch & { user: User })[]> {
     return await db
       .select({
-        id: userCommunities.id,
-        userId: userCommunities.userId,
-        communityId: userCommunities.communityId,
-        roleId: userCommunities.roleId,
-        title: userCommunities.title,
-        department: userCommunities.department,
-        bio: userCommunities.bio,
-        additionalPermissions: userCommunities.additionalPermissions,
-        restrictedPermissions: userCommunities.restrictedPermissions,
-        joinedAt: userCommunities.joinedAt,
-        isActive: userCommunities.isActive,
+        id: userChurches.id,
+        userId: userChurches.userId,
+        communityId: userChurches.churchId,
+        roleId: userChurches.roleId,
+        title: userChurches.title,
+        department: userChurches.department,
+        bio: userChurches.bio,
+        additionalPermissions: userChurches.additionalPermissions,
+        restrictedPermissions: userChurches.restrictedPermissions,
+        joinedAt: userChurches.joinedAt,
+        isActive: userChurches.isActive,
         user: {
           id: users.id,
           email: users.email,
@@ -1969,11 +1968,11 @@ export class DatabaseStorage implements IStorage {
           updatedAt: users.updatedAt,
         }
       })
-      .from(userCommunities)
-      .innerJoin(users, eq(userCommunities.userId, users.id))
+      .from(userChurches)
+      .innerJoin(users, eq(userChurches.userId, users.id))
       .where(and(
-        eq(userCommunities.communityId, churchId),
-        eq(userCommunities.isActive, true)
+        eq(userChurches.churchId, churchId),
+        eq(userChurches.isActive, true)
       )) as any;
   }
 
@@ -1994,8 +1993,8 @@ export class DatabaseStorage implements IStorage {
         bio 
       })
       .where(and(
-        eq(userCommunities.communityId, churchId),
-        eq(userCommunities.userId, userId)
+        eq(userChurches.churchId, churchId),
+        eq(userChurches.userId, userId)
       ))
       .returning();
     return updatedMember;
@@ -2006,8 +2005,8 @@ export class DatabaseStorage implements IStorage {
       .update(userChurches)
       .set({ isActive: false })
       .where(and(
-        eq(userCommunities.communityId, churchId),
-        eq(userCommunities.userId, userId)
+        eq(userChurches.churchId, churchId),
+        eq(userChurches.userId, userId)
       ));
   }
 
@@ -5610,10 +5609,10 @@ export class DatabaseStorage implements IStorage {
       if (existingUser) {
         // Add existing user to community with role
         const [userCommunity] = await db
-          .insert(userCommunities)
+          .insert(userChurches)
           .values({
             userId: existingUser.id,
-            communityId: data.communityId,
+            churchId: data.communityId,
             role: data.role,
             title: data.title,
             department: data.department,
@@ -5623,7 +5622,7 @@ export class DatabaseStorage implements IStorage {
             isActive: true
           })
           .onConflictDoUpdate({
-            target: [userCommunities.userId, userCommunities.communityId],
+            target: [userChurches.userId, userChurches.churchId],
             set: {
               role: data.role,
               title: data.title,
@@ -5683,14 +5682,14 @@ export class DatabaseStorage implements IStorage {
   async updateStaffRole(communityId: number, staffId: string, role: string): Promise<void> {
     try {
       await db
-        .update(userCommunities)
+        .update(userChurches)
         .set({ 
           role: role,
           updatedAt: new Date()
         })
         .where(and(
-          eq(userCommunities.userId, staffId),
-          eq(userCommunities.communityId, communityId)
+          eq(userChurches.userId, staffId),
+          eq(userChurches.churchId, communityId)
         ));
     } catch (error) {
       throw new Error(`Failed to update staff role: ${error}`);
@@ -5700,14 +5699,14 @@ export class DatabaseStorage implements IStorage {
   async removeStaffMember(communityId: number, staffId: string): Promise<void> {
     try {
       await db
-        .update(userCommunities)
+        .update(userChurches)
         .set({ 
           isActive: false,
           updatedAt: new Date()
         })
         .where(and(
-          eq(userCommunities.userId, staffId),
-          eq(userCommunities.communityId, communityId)
+          eq(userChurches.userId, staffId),
+          eq(userChurches.churchId, communityId)
         ));
     } catch (error) {
       throw new Error(`Failed to remove staff member: ${error}`);
