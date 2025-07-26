@@ -151,6 +151,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes
+- July 26, 2025: COMMUNITY TERMINOLOGY STANDARDIZATION COMPLETED - Updated all messaging, error messages, and button text from "Church/Organization" to "Community" terminology for consistent branding. Fixed automatic https:// prepending for website URLs to improve user experience.
 - July 26, 2025: COMMUNITY MANAGEMENT URL STRUCTURE STANDARDIZED - Updated URLs from `/church-management` to `/community-management` for proper semantic consistency since this section handles all community types (Churches, Groups, Ministries)
 - July 26, 2025: COMMUNITY CREATION FORM TERMINOLOGY UPDATES COMPLETED - Changed "Organization Name" to "Community Name" and reordered dropdown options to show Ministry below Churches for better categorization
 - July 26, 2025: COMPREHENSIVE CHURCH ADMINISTRATION TO COMMUNITY ADMINISTRATION RENAME COMPLETED - Updated all page titles, section headers, role templates, admin badges, and navigation elements from "Church" to "Community" terminology throughout the administration interface

@@ -143,7 +143,7 @@ export function ChurchManagementHub() {
       return await apiRequest("/api/churches", "POST", processedData);
     },
     onSuccess: () => {
-      toast({ title: "Church created successfully!" });
+      toast({ title: "Community created successfully!" });
       setCreateDialog(false);
       setShowCustomDenomination(false);
       createForm.reset();
@@ -151,7 +151,7 @@ export function ChurchManagementHub() {
     },
     onError: (error: any) => {
       toast({ 
-        title: "Failed to create church", 
+        title: "Failed to create community", 
         description: error.message,
         variant: "destructive" 
       });
