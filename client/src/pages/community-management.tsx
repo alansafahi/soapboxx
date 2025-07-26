@@ -373,7 +373,10 @@ export default function CommunityManagement() {
           </TabsContent>
 
           <TabsContent value="features" className="space-y-6">
-            <ChurchFeatureManager churchId={communityId} />
+            <ChurchFeatureManager 
+              churchId={communityId} 
+              userRole={userRole?.role || 'member'} 
+            />
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
