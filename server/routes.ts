@@ -7233,12 +7233,16 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       
       if (!userId) {
+        console.error('No userId in session:', req.session);
         return res.status(401).json({ error: 'Authentication required' });
       }
 
+      console.log('Getting communities for user:', userId);
       const userCommunities = await storage.getUserChurches(userId);
+      console.log('User communities found:', userCommunities.length);
       res.json(userCommunities);
     } catch (error) {
+      console.error('Error in /api/users/communities:', error);
       res.status(500).json({ error: 'Failed to get user communities' });
     }
   });

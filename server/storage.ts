@@ -2732,27 +2732,42 @@ export class DatabaseStorage implements IStorage {
 
   async getUserChurches(userId: string): Promise<any[]> {
     try {
-      const result = await db
-        .select({
-          church: churches,
-          userChurch: userCommunities,
-        })
-        .from(userCommunities)
-        .leftJoin(communities, eq(userCommunities.communityId, communities.id))
-        .where(and(
-          eq(userCommunities.userId, userId),
-          eq(userCommunities.isActive, true)
-        ))
-        .orderBy(desc(userCommunities.lastAccessedAt));
+      // Use raw SQL to avoid Drizzle ORM issues with field mappings
+      const result = await db.execute(sql`
+        SELECT 
+          c.*,
+          uc.role,
+          uc.joined_at,
+          uc.last_accessed_at,
+          uc.is_active as user_is_active
+        FROM user_churches uc
+        LEFT JOIN churches c ON uc.church_id = c.id
+        WHERE uc.user_id = ${userId} AND uc.is_active = true
+        ORDER BY uc.last_accessed_at DESC
+      `);
       
-      return result.map(r => ({
-        ...r.church,
-        role: r.userChurch?.role || 'member', // Use 'role' for consistency with admin portal checks
-        userRole: r.userChurch?.role || 'member',
-        lastAccessedAt: r.userChurch?.lastAccessedAt,
+      return result.rows.map((row: any) => ({
+        id: row.id,
+        name: row.name,
+        denomination: row.denomination,
+        address: row.address,
+        city: row.city,
+        state: row.state,
+        zipCode: row.zip_code,
+        phone: row.phone,
+        email: row.email,
+        website: row.website,
+        description: row.description,
+        logoUrl: row.logo_url,
+        isActive: row.is_active,
+        memberCount: row.member_count || 0,
+        role: row.role || 'member',
+        userRole: row.role || 'member',
+        lastAccessedAt: row.last_accessed_at,
+        joinedAt: row.joined_at,
       }));
     } catch (error) {
-      // Silent error logging for production
+      console.error('Error getting user churches:', error);
       return [];
     }
   }
