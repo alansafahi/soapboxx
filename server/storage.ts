@@ -1848,22 +1848,21 @@ export class DatabaseStorage implements IStorage {
 
   async getUserChurchRole(userId: string, churchId: number): Promise<{ role: string } | undefined> {
     try {
-      // Use the actual user_churches table (which is what exists in the database)
-      const [userChurch] = await db
-        .select()
-        .from(userChurches)
-        .where(and(
-          eq(userChurches.userId, userId),
-          eq(userChurches.churchId, churchId),
-          eq(userChurches.isActive, true)
-        ));
+      // Use raw SQL to avoid Drizzle schema aliasing issues
+      const result = await db.execute(sql`
+        SELECT role FROM user_churches 
+        WHERE user_id = ${userId} 
+        AND church_id = ${churchId} 
+        AND is_active = true 
+        LIMIT 1
+      `);
 
-      if (!userChurch) {
+      if (result.rows.length === 0) {
         return undefined;
       }
 
       return {
-        role: userChurch.role || 'member'
+        role: (result.rows[0] as any).role || 'member'
       };
     } catch (error) {
       console.error('Error in getUserChurchRole:', error);
