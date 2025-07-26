@@ -72,6 +72,7 @@ export function ChurchManagementHub() {
   const [createDialog, setCreateDialog] = useState(false);
   const [claimDialog, setClaimDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showCustomDenomination, setShowCustomDenomination] = useState(false);
   const { toast } = useToast();
 
   // Get user's admin churches
@@ -129,6 +130,7 @@ export function ChurchManagementHub() {
     onSuccess: () => {
       toast({ title: "Church created successfully!" });
       setCreateDialog(false);
+      setShowCustomDenomination(false);
       createForm.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/user/churches"] });
     },
@@ -274,7 +276,13 @@ export function ChurchManagementHub() {
                 <p className="text-gray-600">Create new organizations or claim existing ones</p>
               </div>
               <div className="flex gap-2">
-                <Dialog open={createDialog} onOpenChange={setCreateDialog}>
+                <Dialog open={createDialog} onOpenChange={(open) => {
+                  setCreateDialog(open);
+                  if (!open) {
+                    setShowCustomDenomination(false);
+                    createForm.reset();
+                  }
+                }}>
                   <DialogTrigger asChild>
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
@@ -316,6 +324,7 @@ export function ChurchManagementHub() {
                                   field.onChange(value);
                                   // Clear denomination when type changes
                                   createForm.setValue("denomination", "");
+                                  setShowCustomDenomination(false);
                                 }} value={field.value}>
                                   <FormControl>
                                     <SelectTrigger>
@@ -338,7 +347,6 @@ export function ChurchManagementHub() {
                             name="denomination"
                             render={({ field }) => {
                               const currentAffiliations = AFFILIATIONS[selectedType] || AFFILIATIONS.church;
-                              const isCustomValue = !currentAffiliations.includes(field.value || "");
                               
                               return (
                                 <FormItem>
@@ -347,20 +355,21 @@ export function ChurchManagementHub() {
                                   </FormLabel>
                                   <Select onValueChange={(value) => {
                                     if (value === "other") {
-                                      // Clear the field for custom input
+                                      setShowCustomDenomination(true);
                                       field.onChange("");
                                     } else {
+                                      setShowCustomDenomination(false);
                                       field.onChange(value);
                                     }
-                                  }} value={field.value || ""}>
+                                  }} value={showCustomDenomination ? "other" : field.value || ""}>
                                     <FormControl>
                                       <SelectTrigger>
                                         <SelectValue placeholder={
                                           selectedType === 'church' 
-                                            ? "Select denomination or type custom"
+                                            ? "Select denomination or type..."
                                             : selectedType === 'group'
-                                            ? "Select group type or type custom"
-                                            : "Select ministry type or type custom"
+                                            ? "Select group type or type..."
+                                            : "Select ministry type or type..."
                                         } />
                                       </SelectTrigger>
                                     </FormControl>
@@ -370,10 +379,10 @@ export function ChurchManagementHub() {
                                           {affiliation}
                                         </SelectItem>
                                       ))}
-                                      <SelectItem value="other">Other (type custom)</SelectItem>
+                                      <SelectItem value="other">Other</SelectItem>
                                     </SelectContent>
                                   </Select>
-                                  {(!field.value || field.value === "" || isCustomValue) && (
+                                  {showCustomDenomination && (
                                     <FormControl>
                                       <Input
                                         placeholder={
