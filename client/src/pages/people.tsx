@@ -54,7 +54,7 @@ export default function PeoplePage() {
         setSearchResults([]);
       }
     } catch (error) {
-      console.error("Search error:", error);
+      
       setSearchResults([]);
     } finally {
       setIsSearching(false);

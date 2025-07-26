@@ -418,7 +418,7 @@ function MembersPage() {
   React.useEffect(() => {
     if (adminChurch && !selectedChurch) {
       setSelectedChurch(adminChurch.id);
-      console.log("Admin page setting selected church to:", adminChurch.id, adminChurch.name);
+      
     }
   }, [adminChurch, selectedChurch]);
 

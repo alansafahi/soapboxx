@@ -144,10 +144,10 @@ function MemberTransfer({ churchId }: { churchId: number }) {
     queryFn: () => apiRequest(`/api/cross-campus-members/members/${churchId}/campus`, "GET")
   });
 
-  console.log("Members data:", membersByCampus);
-  console.log("Church ID:", churchId);
-  console.log("Members structure:", membersByCampus?.members || 'No members key');
-  console.log("Raw data length:", Array.isArray(membersByCampus) ? membersByCampus.length : 'Not array');
+  
+  
+  
+  
 
   // Transfer member mutation
   const transferMutation = useMutation({

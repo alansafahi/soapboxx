@@ -1749,7 +1749,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateChurch(id: number, updates: Partial<Church>): Promise<Church> {
-    console.log('Updating church with data:', updates);
     
     // Filter out any fields that don't exist in the database schema
     const allowedFields = [
@@ -1767,7 +1766,6 @@ export class DatabaseStorage implements IStorage {
         return obj;
       }, {} as any);
     
-    console.log('Filtered updates for database:', filteredUpdates);
     
     const [updatedChurch] = await db
       .update(communities)
@@ -1775,7 +1773,6 @@ export class DatabaseStorage implements IStorage {
       .where(eq(communities.id, id))
       .returning();
     
-    console.log('Database update successful:', updatedChurch?.id);
     return updatedChurch;
   }
 
@@ -1883,7 +1880,6 @@ export class DatabaseStorage implements IStorage {
         role: result.rows[0].role || 'member'
       };
     } catch (error) {
-      console.error('Error in getUserChurchRole:', error);
       return undefined;
     }
   }
@@ -1891,16 +1887,16 @@ export class DatabaseStorage implements IStorage {
   async getChurchFeature(featureId: number): Promise<any> {
     const [feature] = await db
       .select()
-      .from(communityFeatures)
-      .where(eq(communityFeatures.id, featureId));
+      .from(churchFeatures)
+      .where(eq(churchFeatures.id, featureId));
     return feature;
   }
 
   async updateChurchFeature(featureId: number, updates: any): Promise<any> {
     const [updatedFeature] = await db
-      .update(communityFeatures)
+      .update(churchFeatures)
       .set(updates)
-      .where(eq(communityFeatures.id, featureId))
+      .where(eq(churchFeatures.id, featureId))
       .returning();
     return updatedFeature;
   }
@@ -2468,7 +2464,6 @@ export class DatabaseStorage implements IStorage {
 
       return discussionsWithCounts;
     } catch (error) {
-      console.error('Error fetching discussions:', error);
       return [];
     }
   }
@@ -2516,7 +2511,6 @@ export class DatabaseStorage implements IStorage {
         return { success: true, liked: true, message: 'Like added' };
       }
     } catch (error) {
-      console.error('Error toggling discussion like:', error);
       throw new Error('Failed to toggle like');
     }
   }
@@ -2780,7 +2774,6 @@ export class DatabaseStorage implements IStorage {
         joinedAt: row.joined_at,
       }));
     } catch (error) {
-      console.error('Error getting user churches:', error);
       return [];
     }
   }
@@ -2821,7 +2814,6 @@ export class DatabaseStorage implements IStorage {
         isJoined: false, // By definition, these are communities the user hasn't joined
       }));
     } catch (error) {
-      console.error('Error getting discoverable communities:', error);
       return [];
     }
   }
@@ -2861,7 +2853,6 @@ export class DatabaseStorage implements IStorage {
 
       return { success: true, message: 'Successfully joined community' };
     } catch (error) {
-      console.error('Error joining community:', error);
       throw error;
     }
   }
@@ -3377,7 +3368,6 @@ export class DatabaseStorage implements IStorage {
       `);
       return result.rows;
     } catch (error) {
-      console.error('Error getting all members:', error);
       return [];
     }
   }
@@ -3407,7 +3397,6 @@ export class DatabaseStorage implements IStorage {
       `, [churchId]);
       return result.rows;
     } catch (error) {
-      console.error('Error getting church members:', error);
       return [];
     }
   }
@@ -3421,7 +3410,6 @@ export class DatabaseStorage implements IStorage {
       );
       return result.rows;
     } catch (error) {
-      console.error('Error getting church feature settings:', error);
       return [];
     }
   }
@@ -3443,7 +3431,6 @@ export class DatabaseStorage implements IStorage {
       
       return result.rows[0];
     } catch (error) {
-      console.error('Error updating church feature setting:', error);
       throw new Error('Failed to update feature setting');
     }
   }
@@ -3456,7 +3443,6 @@ export class DatabaseStorage implements IStorage {
       );
       return result.rows[0];
     } catch (error) {
-      console.error('Error getting church feature setting by ID:', error);
       return null;
     }
   }
@@ -4096,7 +4082,6 @@ export class DatabaseStorage implements IStorage {
         .where(eq(communities.id, communityId));
       return community;
     } catch (error) {
-      console.error('Error getting community:', error);
       return null;
     }
   }
@@ -4166,11 +4151,9 @@ export class DatabaseStorage implements IStorage {
               last_modified = NOW()
           `, [churchId, feature.category, feature.name, feature.enabled, enabledBy]);
         } catch (error) {
-          console.error(`Error initializing feature ${feature.category}:${feature.name}:`, error);
         }
       }
     } catch (error) {
-      console.error('Error initializing community features:', error);
       throw new Error('Failed to initialize community features');
     }
   }
@@ -4630,7 +4613,6 @@ export class DatabaseStorage implements IStorage {
         .where(eq(prayerRequests.id, id));
       return prayer;
     } catch (error) {
-      console.error('Error getting prayer request:', error);
       return undefined;
     }
   }
@@ -4689,7 +4671,6 @@ export class DatabaseStorage implements IStorage {
         isLiked: false // Will be set on frontend based on user
       }));
     } catch (error) {
-      console.error('Error getting prayer support messages:', error);
       return [];
     }
   }
@@ -4723,7 +4704,6 @@ export class DatabaseStorage implements IStorage {
 
       return prayerResponse;
     } catch (error) {
-      console.error('Error creating prayer response:', error);
       throw new Error('Failed to create prayer response');
     }
   }
@@ -4740,7 +4720,6 @@ export class DatabaseStorage implements IStorage {
         ));
       return response;
     } catch (error) {
-      console.error('Error getting user prayer response:', error);
       return undefined;
     }
   }
@@ -4763,7 +4742,6 @@ export class DatabaseStorage implements IStorage {
         })
         .where(eq(prayerRequests.id, prayerRequestId));
     } catch (error) {
-      console.error('Error removing prayer response:', error);
       throw new Error('Failed to remove prayer response');
     }
   }
@@ -4823,7 +4801,6 @@ export class DatabaseStorage implements IStorage {
         return { liked: true, likeCount: Number(likeCount[0]?.count || 0) };
       }
     } catch (error) {
-      console.error('Error liking prayer response:', error);
       throw new Error('Failed to like prayer response');
     }
   }
@@ -4840,7 +4817,6 @@ export class DatabaseStorage implements IStorage {
 
       return like.length > 0;
     } catch (error) {
-      console.error('Error getting prayer response like status:', error);
       return false;
     }
   }
@@ -4960,7 +4936,6 @@ export class DatabaseStorage implements IStorage {
           createdAt: new Date(),
         });
       } catch (activityError) {
-        console.error('Failed to record user activity:', activityError);
         // Continue even if activity recording fails
       }
 
@@ -4975,7 +4950,6 @@ export class DatabaseStorage implements IStorage {
         updatedAt: newComment.updatedAt || new Date()
       };
     } catch (error) {
-      console.error('Database error creating discussion comment:', error);
       throw new Error(`Failed to create discussion comment: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
@@ -5036,7 +5010,6 @@ export class DatabaseStorage implements IStorage {
         }
       }));
     } catch (error) {
-      console.error('Error fetching discussion comments:', error);
       return [];
     }
   }
@@ -5067,7 +5040,6 @@ export class DatabaseStorage implements IStorage {
 
       return newComment;
     } catch (error) {
-      console.error('Error creating SOAP comment:', error);
       throw new Error('Failed to create SOAP comment');
     }
   }
@@ -5106,7 +5078,6 @@ export class DatabaseStorage implements IStorage {
         }
       }));
     } catch (error) {
-      console.error('Error fetching SOAP comments:', error);
       return [];
     }
   }
@@ -5178,7 +5149,6 @@ export class DatabaseStorage implements IStorage {
         return { liked: true, likeCount };
       }
     } catch (error) {
-      console.error('Error toggling discussion comment like:', error);
       throw error;
     }
   }
@@ -5194,7 +5164,6 @@ export class DatabaseStorage implements IStorage {
         createdAt: new Date(),
       });
     } catch (error) {
-      console.error('Error tracking user activity:', error);
       // Don't throw error to avoid breaking main functionality
     }
   }
@@ -5404,7 +5373,6 @@ export class DatabaseStorage implements IStorage {
         return MappingService.mapDiscussion(row);
       });
     } catch (error) {
-      console.error('Enhanced getDiscussions error:', error);
       throw new Error(`Failed to get discussions: ${error}`);
     }
   }

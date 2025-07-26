@@ -162,11 +162,8 @@ router.get('/background-checks/expiring', async (req, res) => {
 router.post('/campuses', async (req, res) => {
   try {
     // Enhanced authentication check with detailed logging
-    console.log('Divine Phase 2 campus creation request received');
-    console.log('User object:', req.user);
     
     if (!req.user) {
-      console.error('Divine Phase 2 campus creation failed: No user in session');
       return res.status(401).json({ error: 'Authentication required' });
     }
 
@@ -174,14 +171,12 @@ router.post('/campuses', async (req, res) => {
     
     // Validate user object has required properties
     if (!user.id) {
-      console.error('Divine Phase 2 campus creation failed: Invalid user object', user);
       return res.status(401).json({ error: 'Invalid user session' });
     }
     
     const hasPermission = ['church_admin', 'admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(user.role);
     
     if (!hasPermission) {
-      console.error('Divine Phase 2 campus creation failed: Insufficient permissions', { userRole: user.role });
       return res.status(403).json({ error: 'Insufficient permissions to create campus' });
     }
 
@@ -199,7 +194,6 @@ router.post('/campuses', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Divine Phase 2 campus creation error:', error);
     
     if (error instanceof z.ZodError) {
       return res.status(400).json({ 

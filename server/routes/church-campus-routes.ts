@@ -60,7 +60,6 @@ router.post('/churches/:churchId/campuses', isAuthenticated, async (req, res) =>
     
     // Enhanced authentication check with logging
     if (!req.user) {
-      console.error('Campus creation failed: No user in session');
       return res.status(401).json({ error: 'Authentication required' });
     }
 
@@ -68,7 +67,6 @@ router.post('/churches/:churchId/campuses', isAuthenticated, async (req, res) =>
     
     // Validate user object has required properties
     if (!user.id) {
-      console.error('Campus creation failed: Invalid user object', user);
       return res.status(401).json({ error: 'Invalid user session' });
     }
     
@@ -81,7 +79,6 @@ router.post('/churches/:churchId/campuses', isAuthenticated, async (req, res) =>
       // Enhanced error handling for getUserChurches call
       try {
         if (!multiCampusService?.storage?.getUserChurches) {
-          console.error('Campus creation failed: getUserChurches method not available');
           return res.status(500).json({ error: 'Service not available' });
         }
         
@@ -89,7 +86,6 @@ router.post('/churches/:churchId/campuses', isAuthenticated, async (req, res) =>
         const churchRole = userChurches?.find(uc => uc.id === churchId);
         hasPermission = churchRole && ['church_admin', 'admin', 'pastor', 'lead_pastor'].includes(churchRole.role);
       } catch (getUserChurchesError) {
-        console.error('Campus creation failed: Error getting user churches', getUserChurchesError);
         return res.status(500).json({ 
           error: 'Failed to verify permissions',
           details: getUserChurchesError instanceof Error ? getUserChurchesError.message : 'Unknown error'
@@ -115,7 +111,6 @@ router.post('/churches/:churchId/campuses', isAuthenticated, async (req, res) =>
     });
 
   } catch (error) {
-    console.error('Campus creation error:', error);
     
     if (error instanceof z.ZodError) {
       return res.status(400).json({ 
@@ -151,7 +146,6 @@ router.put('/churches/campuses/:campusId', isAuthenticated, async (req, res) => 
     } else {
       try {
         if (!multiCampusService.storage || !multiCampusService.storage.getUserChurches) {
-          console.error('Campus update failed: getUserChurches method not available');
           return res.status(500).json({ error: 'Service not available' });
         }
         
@@ -165,7 +159,6 @@ router.put('/churches/campuses/:campusId', isAuthenticated, async (req, res) => 
         const churchRole = userChurches?.find(uc => uc.id === campus.churchId);
         hasPermission = churchRole && ['church_admin', 'admin', 'pastor', 'lead_pastor'].includes(churchRole.role);
       } catch (getUserChurchesError) {
-        console.error('Campus update failed: Error getting user churches', getUserChurchesError);
         return res.status(500).json({ 
           error: 'Failed to verify permissions',
           details: getUserChurchesError instanceof Error ? getUserChurchesError.message : 'Unknown error'
@@ -188,7 +181,6 @@ router.put('/churches/campuses/:campusId', isAuthenticated, async (req, res) => 
     });
 
   } catch (error) {
-    console.error('Campus update error:', error);
     
     if (error instanceof z.ZodError) {
       return res.status(400).json({ 

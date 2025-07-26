@@ -142,7 +142,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       }, 1000);
     },
     onError: (error: any) => {
-      console.error('Post like error:', error);
+      
       toast({
         title: "Failed to like post",
         description: `Error: ${error.message || 'Please try again'}`,
@@ -292,7 +292,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
           
           // Validate required fields
           if (!validateMappedData(mapped, ['id', 'content', 'author'])) {
-            console.warn('Invalid post data received:', post);
+            
             return null;
           }
           
@@ -301,7 +301,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
         
         return mappedPosts;
       } catch (error) {
-        console.warn('Enhanced endpoint failed, using fallback:', error);
+        
         
         // Fallback to original endpoint
         const response = await fetch(`/api/discussions?page=${page}&limit=10`, {

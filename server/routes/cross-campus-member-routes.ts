@@ -38,8 +38,6 @@ router.get('/members/:churchId/campus/:campusId?', async (req, res) => {
 
     const members = await crossCampusMemberService.getMembersByCampus(churchId, campusId);
     
-    console.log('API Route: Fetched', members.length, 'members for church', churchId);
-    console.log('API Route: Members data sample:', members.slice(0, 2));
 
     res.json({
       success: true,
@@ -48,7 +46,6 @@ router.get('/members/:churchId/campus/:campusId?', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching campus members:', error);
     res.status(500).json({ 
       error: 'Failed to fetch members',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -81,7 +78,6 @@ router.post('/members/assign', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error assigning member to campus:', error);
     
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -132,7 +128,6 @@ router.post('/members/transfer', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error transferring member:', error);
     
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -171,7 +166,6 @@ router.get('/members/:userId/assignments/:churchId', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching member assignments:', error);
     res.status(500).json({
       error: 'Failed to fetch assignments',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -200,7 +194,6 @@ router.get('/analytics/:churchId/campus/:campusId?', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching campus analytics:', error);
     res.status(500).json({
       error: 'Failed to fetch analytics',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -235,7 +228,6 @@ router.get('/transfers/:churchId', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching transfer history:', error);
     res.status(500).json({
       error: 'Failed to fetch transfer history',
       details: error instanceof Error ? error.message : 'Unknown error'
@@ -268,7 +260,6 @@ router.post('/members/roles', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error assigning campus role:', error);
     
     if (error instanceof z.ZodError) {
       return res.status(400).json({
@@ -305,7 +296,6 @@ router.get('/members/:userId/roles/:campusId?', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching member campus roles:', error);
     res.status(500).json({
       error: 'Failed to fetch roles',
       details: error instanceof Error ? error.message : 'Unknown error'

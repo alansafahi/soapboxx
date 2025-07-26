@@ -21,7 +21,6 @@ export class CrossCampusMemberService {
   // Get all members across campuses for a church
   async getMembersByCampus(churchId: number, campusId?: number) {
     try {
-      console.log('CrossCampusMemberService: Fetching members for church', churchId, 'campus', campusId);
       // First try to get members with campus assignments
       const membersWithCampus = await db
         .select({
@@ -70,14 +69,11 @@ export class CrossCampusMemberService {
           .where(eq(userChurches.churchId, churchId))
           .orderBy(sql`CONCAT(${users.firstName}, ' ', ${users.lastName})`);
 
-        console.log('CrossCampusMemberService: Returning', allChurchMembers.length, 'unassigned members');
         return allChurchMembers;
       }
 
-      console.log('CrossCampusMemberService: Returning', membersWithCampus.length, 'members with campus assignments');
       return membersWithCampus;
     } catch (error) {
-      console.error('Error fetching members by campus:', error);
       throw error;
     }
   }
@@ -122,7 +118,6 @@ export class CrossCampusMemberService {
 
       return newAssignment;
     } catch (error) {
-      console.error('Error assigning member to campus:', error);
       throw error;
     }
   }
@@ -243,7 +238,6 @@ export class CrossCampusMemberService {
         transferredRoles: currentRoles
       };
     } catch (error) {
-      console.error('Error transferring member:', error);
       throw error;
     }
   }
@@ -274,7 +268,6 @@ export class CrossCampusMemberService {
 
       return assignments;
     } catch (error) {
-      console.error('Error fetching member campus assignments:', error);
       throw error;
     }
   }
@@ -309,7 +302,6 @@ export class CrossCampusMemberService {
 
       return stats;
     } catch (error) {
-      console.error('Error fetching campus member analytics:', error);
       throw error;
     }
   }
@@ -359,7 +351,6 @@ export class CrossCampusMemberService {
 
       return history;
     } catch (error) {
-      console.error('Error fetching transfer history:', error);
       throw error;
     }
   }
@@ -374,7 +365,6 @@ export class CrossCampusMemberService {
 
       return newRole;
     } catch (error) {
-      console.error('Error assigning campus role:', error);
       throw error;
     }
   }
@@ -410,7 +400,6 @@ export class CrossCampusMemberService {
 
       return roles;
     } catch (error) {
-      console.error('Error fetching member campus roles:', error);
       throw error;
     }
   }

@@ -42,7 +42,6 @@ router.post('/discussions-enhanced', isAuthenticated, async (req, res) => {
     // Return mapped response
     res.json(MappingService.createCompatibleResponse(discussion));
   } catch (error) {
-    console.error('Error creating discussion:', error);
     res.status(500).json({ error: 'Failed to create discussion' });
   }
 });
@@ -61,7 +60,6 @@ router.get('/discussions-enhanced/:id', async (req, res) => {
     
     res.json(MappingService.createCompatibleResponse(discussion));
   } catch (error) {
-    console.error('Error getting discussion:', error);
     res.status(500).json({ error: 'Failed to get discussion' });
   }
 });
@@ -76,7 +74,6 @@ router.get('/discussions-enhanced', async (req, res) => {
     
     res.json(MappingService.createCompatibleResponse(discussions));
   } catch (error) {
-    console.error('Error getting discussions:', error);
     res.status(500).json({ error: 'Failed to get discussions' });
   }
 });
@@ -104,7 +101,6 @@ router.post('/discussions-enhanced/:id/comments', isAuthenticated, async (req, r
     
     res.json(MappingService.createCompatibleResponse(comment));
   } catch (error) {
-    console.error('Error creating comment:', error);
     res.status(500).json({ error: 'Failed to create comment' });
   }
 });
@@ -122,7 +118,6 @@ router.get('/discussions-enhanced/:id/comments', async (req, res) => {
     
     res.json(MappingService.createCompatibleResponse(mappedComments));
   } catch (error) {
-    console.error('Error getting comments:', error);
     res.status(500).json({ error: 'Failed to get comments' });
   }
 });
@@ -145,7 +140,6 @@ router.get('/users-enhanced/:id', async (req, res) => {
     
     res.json(MappingService.createCompatibleResponse(user));
   } catch (error) {
-    console.error('Error getting user:', error);
     res.status(500).json({ error: 'Failed to get user' });
   }
 });
@@ -164,7 +158,6 @@ router.get('/me-enhanced', isAuthenticated, async (req, res) => {
     
     res.json(MappingService.createCompatibleResponse(userData));
   } catch (error) {
-    console.error('Error getting current user:', error);
     res.status(500).json({ error: 'Failed to get user profile' });
   }
 });

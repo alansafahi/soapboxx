@@ -52,7 +52,7 @@ function MemberDirectory({ selectedChurch: propSelectedChurch }: { selectedChurc
       // Prioritize SGA Church if available
       const sgaChurch = adminChurches.find((church: any) => church.churchId === 2807);
       const selectedChurchObj = sgaChurch || adminChurches[0];
-      console.log("Auto-selecting church from MemberManagementSystem:", selectedChurchObj.churchId, selectedChurchObj.name);
+      
       setSelectedChurch(selectedChurchObj.churchId.toString());
     }
   }, [adminChurches, selectedChurch]);

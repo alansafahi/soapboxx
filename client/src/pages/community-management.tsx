@@ -26,6 +26,7 @@ import {
 interface CommunityProfile {
   id: number;
   name: string;
+  type: string;
   denomination: string;
   description?: string;
   address: string;
@@ -59,16 +60,12 @@ export default function CommunityManagement() {
   const { data: community, isLoading, error } = useQuery({
     queryKey: ['community-details', communityId],
     queryFn: async () => {
-      console.log('Fetching community details for ID:', communityId);
       const response = await fetch(`/api/churches/${communityId}`, { credentials: 'include' });
-      console.log('Response status:', response.status);
       if (!response.ok) {
         const errorData = await response.text();
-        console.error('API Error:', response.status, errorData);
         throw new Error(`Failed to fetch community details: ${response.status}`);
       }
       const data = await response.json();
-      console.log('Community data received:', data);
       return data as CommunityProfile;
     },
     enabled: !!communityId,
@@ -79,19 +76,19 @@ export default function CommunityManagement() {
   const { data: userRole, error: roleError } = useQuery({
     queryKey: ['user-community-role', communityId],
     queryFn: async () => {
-      console.log('Checking user role for community:', communityId);
+      
       const response = await fetch(`/api/users/churches/${communityId}/role`, { credentials: 'include' });
-      console.log('Role check response status:', response.status);
+      
       if (!response.ok) {
         const errorData = await response.text();
-        console.error('Role check error:', response.status, errorData);
+        
         if (response.status === 404) {
           throw new Error('not_member');
         }
         throw new Error(errorData || 'Failed to check permissions');
       }
       const roleData = await response.json();
-      console.log('User role data:', roleData);
+      
       return roleData;
     },
     enabled: !!communityId,
@@ -374,7 +371,7 @@ export default function CommunityManagement() {
 
           <TabsContent value="features" className="space-y-6">
             <ChurchFeatureManager 
-              churchId={communityId} 
+              churchId={parseInt(communityId)} 
               userRole={userRole?.role || 'member'} 
               communityType={community.type}
             />

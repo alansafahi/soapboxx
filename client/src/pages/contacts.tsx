@@ -251,7 +251,7 @@ function ContactsPage() {
         setSearchResults([]);
       }
     } catch (error) {
-      console.error("Search error:", error);
+      
       setSearchResults([]);
     } finally {
       setIsSearching(false);

@@ -677,7 +677,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // LEGACY COMPATIBILITY: Deprecated endpoints (WILL BE REMOVED September 30, 2025)
   app.post("/api/soap/save", isAuthenticated, async (req, res) => {
-    console.warn(`🚨 DEPRECATED: /api/soap/save used - migrate to /api/soap-entries/save by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/soap-entries/save');
     try {
       const { soapId } = req.body;
@@ -691,7 +690,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/soap/reaction", isAuthenticated, async (req, res) => {
-    console.warn(`🚨 DEPRECATED: /api/soap/reaction used - migrate to /api/soap-entries/reactions by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/soap-entries/reactions');
     try {
       const { soapId, reactionType, emoji } = req.body;
@@ -705,7 +703,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/soap/reflect", isAuthenticated, async (req, res) => {
-    console.warn(`🚨 DEPRECATED: /api/soap/reflect used - migrate to /api/soap-entries/reflect by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/soap-entries/reflect');
     try {
       const { originalSoapId, scripture, scriptureReference } = req.body;
@@ -726,7 +723,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete("/api/soap/:id", isAuthenticated, async (req, res) => {
-    console.warn(`🚨 DEPRECATED: /api/soap/:id used - migrate to /api/soap-entries/:id by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/soap-entries/:id');
     try {
       const soapId = parseInt(req.params.id);
@@ -743,7 +739,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/api/user/saved-soap", isAuthenticated, async (req, res) => {
-    console.warn(`🚨 DEPRECATED: /api/user/saved-soap used - migrate to /api/user-profiles/saved-soap-entries by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-profiles/saved-soap-entries');
     try {
       const userId = req.session.userId;
@@ -756,7 +751,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.delete("/api/soap/saved/:id", isAuthenticated, async (req, res) => {
-    console.warn(`🚨 DEPRECATED: /api/soap/saved/:id used - migrate to /api/soap-entries/saved/:id by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/soap-entries/saved/:id');
     try {
       const soapId = parseInt(req.params.id);
@@ -1140,7 +1134,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         query: query.trim()
       });
     } catch (error) {
-      console.error('User search error:', error);
       res.status(500).json({ success: false, message: "Search failed" });
     }
   });
@@ -1203,7 +1196,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         users: filteredResults
       });
     } catch (error) {
-      console.error('Church members fetch error:', error);
       res.status(500).json({ success: false, message: "Failed to fetch church members" });
     }
   });
@@ -1261,7 +1253,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "Primary church updated successfully" 
       });
     } catch (error) {
-      console.error('Set primary church error:', error);
       res.status(500).json({ success: false, message: "Failed to set primary church" });
     }
   });
@@ -1489,7 +1480,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // LEGACY COMPATIBILITY: Tour endpoints (WILL BE REMOVED September 30, 2025)
   app.get('/api/tours/:userId/completion/:tourType', async (req, res) => {
-    console.warn(`🚨 DEPRECATED: /api/tours/:userId/completion/:tourType used - migrate to /api/user-tours/:userId/completion/:tourType by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-tours/:userId/completion/:tourType');
     try {
       const { userId, tourType } = req.params;
@@ -1501,7 +1491,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/tours/:userId/completion', async (req, res) => {
-    console.warn(`🚨 DEPRECATED: /api/tours/:userId/completion used - migrate to /api/user-tours/:userId/completion by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-tours/:userId/completion');
     try {
       const { userId } = req.params;
@@ -1514,7 +1503,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.put('/api/tours/:userId/completion/:tourType', async (req, res) => {
-    console.warn(`🚨 DEPRECATED: /api/tours/:userId/completion/:tourType used - migrate to /api/user-tours/:userId/completion/:tourType by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-tours/:userId/completion/:tourType');
     try {
       const { userId, tourType } = req.params;
@@ -1527,7 +1515,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get('/api/tour/status', isAuthenticated, async (req: any, res) => {
-    console.warn(`🚨 DEPRECATED: /api/tour/status used - migrate to /api/user-tours/status by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-tours/status');
     try {
       const userId = req.user.claims.sub;
@@ -1549,7 +1536,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/tour/complete', isAuthenticated, async (req: any, res) => {
-    console.warn(`🚨 DEPRECATED: /api/tour/complete used - migrate to /api/user-tours/complete by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-tours/complete');
     try {
       const userId = req.user.claims.sub;
@@ -2249,7 +2235,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // LEGACY: Sermon Studio endpoints
   app.post('/api/sermon/research', isAuthenticated, async (req: any, res) => {
-    console.warn(`🚨 DEPRECATED: /api/sermon/research used - migrate to /api/sermon-studio/research by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/sermon-studio/research');
     try {
       const { scripture, topic } = req.body;
@@ -2267,7 +2252,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/sermon/outline', isAuthenticated, async (req: any, res) => {
-    console.warn(`🚨 DEPRECATED: /api/sermon/outline used - migrate to /api/sermon-studio/outline by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/sermon-studio/outline');
     try {
       const { scripture, topic, audience, length } = req.body;
@@ -2281,7 +2265,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get('/api/users/role', isAuthenticated, async (req: any, res) => {
-    console.warn(`🚨 DEPRECATED: /api/users/role used - migrate to /api/user-profiles/role by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-profiles/role');
     try {
       const userId = req.session.userId || req.user?.claims?.sub || req.user?.id;
@@ -2295,7 +2278,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/admin/knowledge', async (req, res) => {
-    console.warn(`🚨 DEPRECATED: /api/admin/knowledge used - migrate to /api/admin-portal/knowledge by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/admin-portal/knowledge');
     try {
       if (!req.session?.userId) return res.status(401).json({ error: 'Authentication required' });
@@ -2309,7 +2291,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post('/api/admin/import-verses', isAuthenticated, async (req: any, res) => {
-    console.warn(`🚨 DEPRECATED: /api/admin/import-verses used - migrate to /api/admin-portal/import-verses by September 30, 2025`);
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/admin-portal/import-verses');
     try {
       const userRole = req.session?.user?.role;
@@ -7239,16 +7220,12 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       
       if (!userId) {
-        console.error('No userId in session:', req.session);
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      console.log('Getting communities for user:', userId);
       const userCommunities = await storage.getUserChurches(userId);
-      console.log('User communities found:', userCommunities.length);
       res.json(userCommunities);
     } catch (error) {
-      console.error('Error in /api/users/communities:', error);
       res.status(500).json({ error: 'Failed to get user communities' });
     }
   });
@@ -7262,12 +7239,9 @@ Return JSON with this exact structure:
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      console.log('Getting discoverable communities for user:', userId);
       const discoverableCommunities = await storage.getDiscoverableCommunities(userId);
-      console.log('Discoverable communities found:', discoverableCommunities.length);
       res.json(discoverableCommunities);
     } catch (error) {
-      console.error('Error in /api/communities/discover:', error);
       res.status(500).json({ error: 'Failed to get discoverable communities' });
     }
   });
@@ -7282,11 +7256,9 @@ Return JSON with this exact structure:
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      console.log('User', userId, 'joining community', communityId);
       const result = await storage.joinCommunity(userId, communityId);
       res.json({ success: true, message: 'Successfully joined community' });
     } catch (error) {
-      console.error('Error joining community:', error);
       res.status(500).json({ error: 'Failed to join community' });
     }
   });
@@ -7297,7 +7269,6 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       const churchId = parseInt(req.params.churchId);
       
-      console.log('Getting church details for churchId:', churchId, 'userId:', userId);
       
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
@@ -7308,7 +7279,6 @@ Return JSON with this exact structure:
       }
 
       const church = await storage.getChurch(churchId);
-      console.log('Church found:', church ? church.name : 'Not found');
       
       if (!church) {
         return res.status(404).json({ error: 'Church not found' });
@@ -7316,7 +7286,6 @@ Return JSON with this exact structure:
 
       res.json(church);
     } catch (error) {
-      console.error('Error getting church details:', error);
       res.status(500).json({ error: 'Failed to get church details' });
     }
   });
@@ -7390,9 +7359,7 @@ Return JSON with this exact structure:
         updatedAt: new Date()
       };
 
-      console.log('Creating community with data:', communityData);
       const newCommunity = await storage.createChurch(communityData);
-      console.log('Community created:', newCommunity);
 
       // Create user-community relationship (automatically join as admin)
       await storage.joinCommunity(userId, newCommunity.id);
@@ -7403,7 +7370,6 @@ Return JSON with this exact structure:
         community: newCommunity
       });
     } catch (error) {
-      console.error('Community creation error:', error);
       res.status(500).json({ error: 'Failed to create community', details: error.message });
     }
   });
@@ -7462,7 +7428,6 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       const communityId = parseInt(req.params.communityId);
       
-      console.log('Community update request:', { userId, communityId, updates: req.body });
       
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
@@ -7470,26 +7435,20 @@ Return JSON with this exact structure:
 
       // Check if user has admin access to this community
       const userCommunity = await storage.getUserChurchRole(userId, communityId);
-      console.log('User community role for update:', userCommunity);
       
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
       
       const user = await storage.getUser(userId);
-      console.log('User details for update:', user ? { id: user.id, role: user.role } : 'Not found');
       
       if (!userCommunity || (!adminRoles.includes(userCommunity.role) && user?.role !== 'soapbox_owner')) {
-        console.log('Access denied:', { userCommunity, userRole: user?.role });
         return res.status(403).json({ error: 'Admin access required' });
       }
 
       const updates = req.body;
-      console.log('Performing community update with:', updates);
       const updatedCommunity = await storage.updateChurch(communityId, updates);
-      console.log('Community update successful:', updatedCommunity?.id);
       
       res.json(updatedCommunity);
     } catch (error) {
-      console.error('Community update error:', error);
       res.status(500).json({ error: 'Failed to update community' });
     }
   });
@@ -7500,7 +7459,6 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       const churchId = parseInt(req.params.churchId);
       
-      console.log('Checking role for user:', userId, 'church:', churchId);
       
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
@@ -7512,31 +7470,26 @@ Return JSON with this exact structure:
 
       // First try to get user's role in this church
       const userChurch = await storage.getUserChurchRole(userId, churchId);
-      console.log('User church role found:', userChurch);
       if (userChurch) {
         return res.json({ role: userChurch.role });
       }
 
       // If not found, check if this user is a global admin or created this church
       const user = await storage.getUser(userId);
-      console.log('User details:', user ? { id: user.id, role: user.role } : 'Not found');
       if (user?.role === 'soapbox_owner' || user?.role === 'system_admin') {
         return res.json({ role: user.role });
       }
 
       // Check if user created this church by looking for admin churches
       const adminChurches = await storage.getUserCreatedChurches(userId);
-      console.log('Admin churches:', adminChurches.length);
       const isCreator = adminChurches.some(church => church.id === churchId);
       
       if (isCreator) {
         return res.json({ role: 'church_admin' });
       }
 
-      console.log('User not associated with church');
       return res.status(404).json({ error: 'User not associated with this church' });
     } catch (error) {
-      console.error('Error getting user church role:', error);
       res.status(500).json({ error: 'Failed to get user role' });
     }
   });
@@ -7563,7 +7516,6 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       const churchId = parseInt(req.params.churchId);
       
-      console.log('Church profile update request:', { userId, churchId, updates: req.body });
       
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
@@ -7571,26 +7523,20 @@ Return JSON with this exact structure:
 
       // Check if user has admin access to this church
       const userChurch = await storage.getUserChurchRole(userId, churchId);
-      console.log('User church role for profile update:', userChurch);
       
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
       
       const user = await storage.getUser(userId);
-      console.log('User details for profile update:', user ? { id: user.id, role: user.role } : 'Not found');
       
       if (!userChurch || (!adminRoles.includes(userChurch.role) && user?.role !== 'soapbox_owner')) {
-        console.log('Access denied for church profile update:', { userChurch, userRole: user?.role });
         return res.status(403).json({ error: 'Admin access required' });
       }
 
       const updates = req.body;
-      console.log('Performing church profile update with:', updates);
       const updatedChurch = await storage.updateChurch(churchId, updates);
-      console.log('Church profile update successful:', updatedChurch?.id);
       
       res.json(updatedChurch);
     } catch (error) {
-      console.error('Church profile update error:', error);
       res.status(500).json({ error: 'Failed to update church' });
     }
   });
@@ -7629,7 +7575,6 @@ Return JSON with this exact structure:
       const features = await storage.getChurchFeatureSettings(churchId);
       res.json(features);
     } catch (error) {
-      console.error('Error getting church features:', error);
       res.status(500).json({ error: 'Failed to get church features' });
     }
   });
@@ -7685,7 +7630,6 @@ Return JSON with this exact structure:
       
       res.json(updatedFeature);
     } catch (error) {
-      console.error('Error updating church feature:', error);
       res.status(500).json({ error: 'Failed to update church feature' });
     }
   });
@@ -8711,7 +8655,6 @@ Return JSON with this exact structure:
           return res.status(404).json({ success: false, message: "Post not found" });
         }
       } catch (discussionError) {
-        console.error('Error checking discussion:', discussionError);
         return res.status(404).json({ success: false, message: "Post not found" });
       }
 
@@ -8724,7 +8667,6 @@ Return JSON with this exact structure:
       
       res.status(201).json({ success: true, data: comment });
     } catch (error) {
-      console.error('Error in comment endpoint:', error);
       res.status(500).json({ success: false, message: "Failed to create discussion comment", error: error instanceof Error ? error.message : String(error) });
     }
   });
@@ -8763,7 +8705,6 @@ Return JSON with this exact structure:
       
       res.status(201).json({ success: true, data: comment });
     } catch (error) {
-      console.error('Error creating SOAP comment:', error);
       res.status(500).json({ success: false, message: "Failed to add comment", error: error instanceof Error ? error.message : String(error) });
     }
   });
@@ -8774,7 +8715,6 @@ Return JSON with this exact structure:
       const comments = await storage.getSoapComments(soapId);
       res.json(comments);
     } catch (error) {
-      console.error('Error fetching SOAP comments:', error);
       res.status(500).json({ message: "Failed to fetch comments" });
     }
   });
@@ -8800,7 +8740,6 @@ Return JSON with this exact structure:
       // For now, return static response (like other comment systems)
       res.json({ liked: true, likeCount: 1 });
     } catch (error) {
-      console.error('Error liking SOAP comment:', error);
       res.status(500).json({ message: "Failed to like comment" });
     }
   });
@@ -8818,7 +8757,6 @@ Return JSON with this exact structure:
       const result = await storage.toggleDiscussionCommentLike(commentId, userId);
       res.json(result);
     } catch (error) {
-      console.error('Error liking discussion comment:', error);
       res.status(500).json({ message: "Failed to like comment" });
     }
   });
@@ -9065,7 +9003,6 @@ Return JSON with this exact structure:
         res.json({ liked: true });
       }
     } catch (error) {
-      console.error('Error toggling prayer like:', error);
       res.status(500).json({ message: "Failed to toggle like" });
     }
   });
@@ -9101,7 +9038,6 @@ Return JSON with this exact structure:
       
       res.status(201).json(response);
     } catch (error) {
-      console.error('Error creating prayer comment:', error);
       res.status(500).json({ message: "Failed to create prayer response" });
     }
   });
@@ -9120,7 +9056,6 @@ Return JSON with this exact structure:
       const responses = await storage.getPrayerSupportMessages(prayerId);
       res.json(responses);
     } catch (error) {
-      console.error('Error fetching prayer comments:', error);
       res.status(500).json({ message: "Failed to fetch prayer responses" });
     }
   });
@@ -9176,7 +9111,6 @@ Return JSON with this exact structure:
       const result = await storage.likePrayerResponse(responseId, userId);
       res.json(result);
     } catch (error) {
-      console.error('Error liking prayer response:', error);
       res.status(500).json({ message: "Failed to like prayer response" });
     }
   });
@@ -11162,7 +11096,6 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(transformedMembers);
     } catch (error) {
-      console.error('Error getting church members:', error);
       res.status(500).json({ message: "Failed to fetch members", error: (error as Error).message });
     }
   });

@@ -82,7 +82,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
         
         return await response.json();
       } catch (error) {
-        console.error('Error fetching comments:', error);
+        
         throw error;
       }
     },
@@ -128,7 +128,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
 
         return await response.json();
       } catch (error) {
-        console.error('Comment submission error:', error);
+        
         throw error;
       }
     },
@@ -145,7 +145,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
       });
     },
     onError: (error: any) => {
-      console.error('Failed to add comment:', error);
+      
       toast({
         title: "Unable to post comment",
         description: error.message || "Please try again in a moment",
@@ -216,7 +216,7 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
       });
     },
     onError: (error: any) => {
-      console.error('Like comment error:', error);
+      
       toast({
         title: "Error",
         description: "Failed to like comment",

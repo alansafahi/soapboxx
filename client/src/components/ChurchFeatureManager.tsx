@@ -304,8 +304,6 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
   // Update feature mutation
   const updateFeatureMutation = useMutation({
     mutationFn: async ({ featureId, isEnabled }: { featureId: number; isEnabled: boolean }) => {
-      console.log('Frontend: Updating feature:', { featureId, isEnabled });
-      
       const response = await fetch(`/api/churches/features/${featureId}`, {
         method: 'PUT',
         headers: {
@@ -315,20 +313,14 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
         body: JSON.stringify({ isEnabled }),
       });
       
-      console.log('Frontend: Response status:', response.status);
-      
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Frontend: Update failed:', errorText);
         throw new Error(`Failed to update feature: ${errorText}`);
       }
       
-      const result = await response.json();
-      console.log('Frontend: Update successful:', result);
-      return result;
+      return response.json();
     },
     onSuccess: () => {
-      console.log('Frontend: Invalidating cache and showing success');
       queryClient.invalidateQueries({ queryKey: ['church-features', churchId] });
       queryClient.invalidateQueries({ queryKey: ['user-churches'] });
       toast({
@@ -337,7 +329,6 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
       });
     },
     onError: (error: any) => {
-      console.error('Frontend: Mutation error:', error);
       toast({
         title: "Update Failed",
         description: error.message || "Failed to update church feature.",
@@ -347,13 +338,6 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
   });
 
   const handleFeatureToggle = (feature: ChurchFeature) => {
-    console.log('Frontend: Toggle clicked for feature:', { 
-      id: feature.id, 
-      name: feature.feature_name, 
-      currentState: feature.is_enabled,
-      newState: !feature.is_enabled 
-    });
-    
     updateFeatureMutation.mutate({
       featureId: feature.id,
       isEnabled: !feature.is_enabled
@@ -377,13 +361,7 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
     );
   }
 
-  console.log('ChurchFeatureManager render:', {
-    features: features?.length || 0,
-    featureNames: features?.map(f => f.feature_name) || [],
-    communityType,
-    hasAdminAccess: hasAdminAccess(),
-    featureDefinitions: Object.keys(getFeatureDefinitions(communityType))
-  });
+
 
   if (!hasAdminAccess()) {
     return (
@@ -407,7 +385,7 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
     return acc;
   }, {} as Record<string, ChurchFeature>) || {};
   
-  console.log('Feature lookup created:', featureLookup);
+
 
   return (
     <div className="space-y-6">
@@ -448,7 +426,7 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
                     <div 
                       key={featureKey}
                       className={`p-4 rounded-lg border ${featureDefinition.bgColor} ${
-                        feature?.isEnabled ? 'border-green-200 dark:border-green-800' : 'border-gray-200 dark:border-gray-700'
+                        feature?.is_enabled ? 'border-green-200 dark:border-green-800' : 'border-gray-200 dark:border-gray-700'
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -480,7 +458,6 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
                           <Switch
                             checked={feature?.is_enabled || false}
                             onCheckedChange={() => {
-                              console.log('Switch onCheckedChange triggered!', feature);
                               if (feature) {
                                 handleFeatureToggle(feature);
                               }

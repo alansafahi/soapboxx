@@ -302,7 +302,6 @@ export class BackgroundCheckService {
       }, 1000);
 
     } catch (error) {
-      console.error("Error in simulated API call:", error);
     }
   }
 
@@ -350,13 +349,11 @@ export class BackgroundCheckService {
     try {
       // In a real implementation, this would send email/SMS notifications
       // For now, we'll just log the notification
-      console.log(`Background check ${backgroundCheckId} status updated to: ${status}`);
       
       // This would integrate with the notification service
       // await notificationService.sendBackgroundCheckUpdate(backgroundCheckId, status);
 
     } catch (error) {
-      console.error("Error sending background check notification:", error);
     }
   }
 }

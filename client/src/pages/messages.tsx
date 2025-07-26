@@ -129,15 +129,15 @@ export default function MessagesPage() {
     
     // Only process if we have URL params
     if (contactId && contactName) {
-      console.log('Auto-selecting contact:', { contactId, contactName });
+      
       
       // First check in contacts list
       if (contacts && contacts.length > 0) {
-        console.log('Available contacts:', contacts.map(c => ({ id: c.id, name: `${c.firstName} ${c.lastName}` })));
+        
         const foundContact = contacts.find(c => c.id === contactId);
         
         if (foundContact) {
-          console.log('Found matching contact:', foundContact);
+          
           setSelectedContact(contactId);
           setSearchQuery(""); // Clear search to show all contacts
           setShowNewMessageDialog(true);
@@ -155,11 +155,11 @@ export default function MessagesPage() {
       
       // If not found in contacts, check in church members
       if (churchMembers && churchMembers.length > 0) {
-        console.log('Available church members:', churchMembers.map(m => ({ id: m.id, name: `${m.firstName} ${m.lastName}` })));
+        
         const foundMember = churchMembers.find(m => m.id.toString() === contactId);
         
         if (foundMember) {
-          console.log('Found matching church member:', foundMember);
+          
           // Create a pseudo-contact object for the member
           const pseudoContact = {
             id: foundMember.id.toString(),
@@ -186,7 +186,7 @@ export default function MessagesPage() {
       }
       
       // If not found anywhere, show error
-      console.log('Contact not found in either contacts or church members');
+      
       toast({
         title: "Contact Not Found",
         description: `Could not find ${decodeURIComponent(contactName)}`,

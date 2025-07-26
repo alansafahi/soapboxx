@@ -90,7 +90,7 @@ export function EnhancedSocialFeed({ limit = 20, showCreatePost = true }: Enhanc
         
         // Validate required fields
         if (!validateMappedData(mapped, ['id', 'content', 'author'])) {
-          console.warn('Invalid post data received:', post);
+          
           return null;
         }
         

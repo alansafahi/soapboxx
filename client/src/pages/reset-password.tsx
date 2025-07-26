@@ -22,31 +22,31 @@ export default function ResetPassword() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log("=== RESET PASSWORD PAGE LOADED ===");
-    console.log("Current URL:", window.location.href);
-    console.log("Current search params:", window.location.search);
-    console.log("Current pathname:", window.location.pathname);
+    
+    
+    
+    
     
     // Extract token from URL
     const urlParams = new URLSearchParams(window.location.search);
     const resetToken = urlParams.get('token');
     
-    console.log("Extracted token:", resetToken);
-    console.log("Token length:", resetToken ? resetToken.length : 0);
+    
+    
     
     if (!resetToken) {
-      console.log("NO TOKEN FOUND - This should show the forgot password form");
+      
       setError("No reset token provided");
       setIsValidToken(false);
       setIsLoading(false);
       return;
     }
     
-    console.log("TOKEN FOUND - Proceeding to validate with backend");
+    
     
     // Validate token with backend
     const validateToken = async () => {
-      console.log("Validating token with backend:", resetToken);
+      
       try {
         const response = await fetch('/api/auth/validate-reset-token', {
           method: 'POST',
@@ -57,19 +57,19 @@ export default function ResetPassword() {
         });
         
         const result = await response.json();
-        console.log("Token validation result:", result);
+        
         
         if (response.ok) {
           setToken(resetToken);
           setIsValidToken(true);
-          console.log("Token valid, showing reset form");
+          
         } else {
           setError("Invalid or expired reset token");
           setIsValidToken(false);
-          console.log("Token invalid");
+          
         }
       } catch (error) {
-        console.log("Token validation error:", error);
+        
         // If validation fails, still allow token but let backend handle final validation
         setToken(resetToken);
         setIsValidToken(true);
