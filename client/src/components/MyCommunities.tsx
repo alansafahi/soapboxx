@@ -880,7 +880,7 @@ export default function MyCommunities() {
                             {/* Event/Time Label */}
                             <div className="col-span-4">
                               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Event/Time Label {index + 1}
+                                Event/Time Label
                               </label>
                               <Input
                                 placeholder="e.g., Sunday Service, Youth Group"
@@ -892,7 +892,7 @@ export default function MyCommunities() {
                             {/* Time/Schedule */}
                             <div className="col-span-4">
                               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Time/Schedule {index + 1}
+                                Time/Schedule
                               </label>
                               <Input
                                 placeholder="e.g., Sunday 10:00 AM"
@@ -904,7 +904,7 @@ export default function MyCommunities() {
                             {/* Language */}
                             <div className="col-span-3">
                               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Language {index + 1}
+                                Language
                               </label>
                               <Select 
                                 value={row.language} 
