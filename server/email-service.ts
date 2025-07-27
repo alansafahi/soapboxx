@@ -35,11 +35,26 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
     };
 
     if (process.env.SENDGRID_API_KEY) {
+      console.log('🔧 Sending email via SendGrid with payload:', {
+        to: msg.to,
+        from: msg.from,
+        subject: msg.subject,
+        apiKeyPresent: !!process.env.SENDGRID_API_KEY
+      });
+      
       const response = await sgMail.send(msg);
       const messageId = response[0]?.headers?.['x-message-id'] || 'unknown';
+      
+      console.log('🔧 SendGrid response:', {
+        statusCode: response[0]?.statusCode,
+        messageId: messageId,
+        headers: response[0]?.headers
+      });
+      
       return { success: true, messageId };
     } else {
       // Development mode - simulate email sending
+      console.log('🔧 Development mode: simulating email send');
       return { success: true, messageId: 'dev-mode' };
     }
   } catch (error: any) {

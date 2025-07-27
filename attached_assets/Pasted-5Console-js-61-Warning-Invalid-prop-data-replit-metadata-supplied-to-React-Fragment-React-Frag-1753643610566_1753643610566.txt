@@ -1,0 +1,40 @@
+5Console.js:61 Warning: Invalid prop `data-replit-metadata` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.
+    at StaffManagement (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/components/StaffManagement.tsx:164:35)
+    at div
+    at StaffManagementPage (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/pages/staff-management.tsx:28:20)
+    at Route (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:206:16)
+    at ProtectedRoute (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?v=LBwTZ8J8Rx23pAP8gbmqI:178:40)
+    at Switch (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:262:17)
+    at Suspense
+    at div
+    at MotionComponent (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:945:40)
+    at PresenceChild (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:121:24)
+    at AnimatePresence (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:210:26)
+    at main
+    at div
+    at div
+    at AppRouter (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?v=LBwTZ8J8Rx23pAP8gbmqI:156:56)
+    at Router (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:161:17)
+    at Provider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=dbc732d9:38:15)
+    at TooltipProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=dbc732d9:65:5)
+    at ThemeProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/contexts/ThemeContext.tsx:21:33)
+    at QueryClientProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=dbc732d9:2934:3)
+    at App
+Mt.forEach.n.<computed> @ Console.js:61
+printWarning @ react_jsx-dev-runtime.js?v=dbc732d9:64
+error @ react_jsx-dev-runtime.js?v=dbc732d9:48
+validateFragmentProps @ react_jsx-dev-runtime.js?v=dbc732d9:796
+jsxWithValidation @ react_jsx-dev-runtime.js?v=dbc732d9:874
+(anonymous) @ StaffManagement.tsx:442
+StaffManagement @ StaffManagement.tsx:441
+renderWithHooks @ chunk-RPCDYKBN.js?v=dbc732d9:11548
+updateFunctionComponent @ chunk-RPCDYKBN.js?v=dbc732d9:14582
+beginWork @ chunk-RPCDYKBN.js?v=dbc732d9:15924
+beginWork$1 @ chunk-RPCDYKBN.js?v=dbc732d9:19753
+performUnitOfWork @ chunk-RPCDYKBN.js?v=dbc732d9:19198
+workLoopSync @ chunk-RPCDYKBN.js?v=dbc732d9:19137
+renderRootSync @ chunk-RPCDYKBN.js?v=dbc732d9:19116
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=dbc732d9:18678
+workLoop @ chunk-RPCDYKBN.js?v=dbc732d9:197
+flushWork @ chunk-RPCDYKBN.js?v=dbc732d9:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=dbc732d9:384Understand this error
