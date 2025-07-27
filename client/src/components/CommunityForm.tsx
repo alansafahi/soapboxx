@@ -312,6 +312,7 @@ export function CommunityForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('CommunityForm submitting with logoFile:', logoFile);
     onSubmit({
       ...formData,
       logoFile: logoFile || undefined

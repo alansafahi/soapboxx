@@ -120,7 +120,7 @@ export function CommunityAdminTab() {
           console.log('Logo uploaded successfully:', logoUrl);
         } else {
           const error = await uploadResponse.text();
-          console.error('Logo upload failed:', error);
+          console.error('Logo upload failed with status:', uploadResponse.status, 'Error:', error);
           // Don't fail the entire update if logo upload fails - just log the error
           console.warn("Logo upload failed, continuing with other updates");
         }
