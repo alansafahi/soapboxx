@@ -278,7 +278,7 @@ export default function MyCommunities() {
       wednesdayService: 'wednesday_service',
       officeHours: 'office_hours',
       worshipTimes: 'worship_times',
-      language: 'primary_language',
+      language: 'primaryLanguage',
       customTime1Label: 'custom_time_1_label',
       customTime1: 'custom_time_1',
       customTime2Label: 'custom_time_2_label',
@@ -326,8 +326,6 @@ export default function MyCommunities() {
   // Create community mutation
   const createCommunityMutation = useMutation({
     mutationFn: async (data: any) => {
-      console.log("Starting community creation with data:", data);
-      
       // Include time rows data as array for backend processing
       const filteredTimeRows = timeRows.filter(row => 
         row.eventLabel.trim() || row.timeSchedule.trim()
@@ -339,9 +337,7 @@ export default function MyCommunities() {
         timeRows: filteredTimeRows
       };
 
-      console.log("Submission data with timeRows:", submissionData);
       const normalizedData = transformToSnakeCase(submissionData);
-      console.log("Normalized data:", normalizedData);
       
       // Create FormData for multipart request (to handle logo upload)
       const formData = new FormData();
@@ -349,7 +345,6 @@ export default function MyCommunities() {
       // Add logo file if selected
       if (logoFile) {
         formData.append('logo', logoFile);
-        console.log("Added logo file to form data");
       }
       
       // Add all other fields
@@ -364,25 +359,18 @@ export default function MyCommunities() {
         }
       });
       
-      console.log("FormData prepared, sending request...");
-      
       const response = await fetch("/api/communities", {
         method: "POST",
         credentials: 'include',
         body: formData,
       });
       
-      console.log("Response status:", response.status);
-      
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error("Server error:", errorData);
         throw new Error(errorData.message || "Failed to create community");
       }
       
-      const result = await response.json();
-      console.log("Success result:", result);
-      return result;
+      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -494,8 +482,6 @@ export default function MyCommunities() {
               
               <Form {...createForm}>
                 <form onSubmit={createForm.handleSubmit((data) => {
-                  console.log("Form submission data:", data);
-                  
                   // Validate required fields
                   if (!data.denomination || data.denomination.trim() === '') {
                     toast({

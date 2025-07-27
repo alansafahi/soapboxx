@@ -1,0 +1,72 @@
+Starting community creation with data: {name: 'test church - no logo', address: '123 main', city: 'la', state: 'ca', zipCode: '90210', …}
+Console.js:61 Submission data with timeRows: {name: 'test church - no logo', address: '123 main', city: 'la', state: 'ca', zipCode: '90210', …}
+Console.js:61 Normalized data: {name: 'test church - no logo', address: '123 main', city: 'la', state: 'ca', type: 'church', …}
+Console.js:61 FormData prepared, sending request...
+MyCommunities.tsx:369  POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/communities 500 (Internal Server Error)
+window.fetch @ Network.js:219
+mutationFn @ MyCommunities.tsx:369
+fn @ @tanstack_react-query.js?v=dbc732d9:1236
+run @ @tanstack_react-query.js?v=dbc732d9:513
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:534
+Promise.catch
+run @ @tanstack_react-query.js?v=dbc732d9:517
+start @ @tanstack_react-query.js?v=dbc732d9:555
+execute @ @tanstack_react-query.js?v=dbc732d9:1272
+await in execute
+mutate @ @tanstack_react-query.js?v=dbc732d9:2692
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:3415
+(anonymous) @ MyCommunities.tsx:517
+(anonymous) @ chunk-W4HYFZIP.js?v=dbc732d9:1485
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=dbc732d9:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=dbc732d9:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=dbc732d9:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=dbc732d9:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=dbc732d9:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=dbc732d9:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=dbc732d9:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=dbc732d9:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=dbc732d9:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=dbc732d9:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=dbc732d9:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=dbc732d9:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=dbc732d9:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=dbc732d9:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=dbc732d9:5449Understand this error
+Console.js:61 Response status: 500
+Console.js:61 Server error: {error: 'Failed to create community', details: 'column "primary_language" of relation "communities" does not exist'}
+Mt.forEach.n.<computed> @ Console.js:61
+mutationFn @ MyCommunities.tsx:379
+await in mutationFn
+fn @ @tanstack_react-query.js?v=dbc732d9:1236
+run @ @tanstack_react-query.js?v=dbc732d9:513
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:534
+Promise.catch
+run @ @tanstack_react-query.js?v=dbc732d9:517
+start @ @tanstack_react-query.js?v=dbc732d9:555
+execute @ @tanstack_react-query.js?v=dbc732d9:1272
+await in execute
+mutate @ @tanstack_react-query.js?v=dbc732d9:2692
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:3415
+(anonymous) @ MyCommunities.tsx:517
+(anonymous) @ chunk-W4HYFZIP.js?v=dbc732d9:1485
+await in (anonymous)
+callCallback2 @ chunk-RPCDYKBN.js?v=dbc732d9:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=dbc732d9:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=dbc732d9:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=dbc732d9:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=dbc732d9:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=dbc732d9:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=dbc732d9:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=dbc732d9:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=dbc732d9:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=dbc732d9:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=dbc732d9:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=dbc732d9:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=dbc732d9:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=dbc732d9:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=dbc732d9:5449Understand this error
