@@ -4,7 +4,7 @@ import { createServer, type Server } from "http";
 // import { WebSocketServer } from "ws"; // Disabled for REST-only mode
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
-import { db } from "./db";
+import { db, pool } from "./db";
 import { 
   users, 
   communities,
