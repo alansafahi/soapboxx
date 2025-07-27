@@ -127,9 +127,14 @@ export default function SignupPage() {
       });
 
       if (signupResponse.success) {
-        // If this is a staff invite, automatically accept the position after registration
         if (isStaffInvite && communityId && role) {
-          await handleStaffInviteAcceptance();
+          toast({
+            title: "Registration Successful!",
+            description: "Your account has been created with a pending staff invitation. Please log in to activate your position.",
+            variant: "default",
+          });
+          // Redirect to login with staff invitation context
+          setLocation(`/login?staffInvite=true&communityId=${communityId}&role=${role}`);
         } else {
           toast({
             title: "Registration Successful",
