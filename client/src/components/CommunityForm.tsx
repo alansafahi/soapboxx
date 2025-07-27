@@ -135,37 +135,88 @@ export function CommunityForm({
   useEffect(() => {
     if (formData.denomination && mode === "create") {
       const denominationDefaults: { [key: string]: { officeHours: string; worshipTimes: string } } = {
+        // Catholic Churches
         "Catholic": {
-          officeHours: "Mon-Fri 9AM-4PM",
-          worshipTimes: "Saturday: 5PM\nSunday: 8AM, 10AM, 12PM"
+          officeHours: "Mon-Fri 9AM-5PM\nSat 9AM-12PM",
+          worshipTimes: "Saturday: 5:30PM (Vigil Mass)\nSunday: 7AM, 9AM, 11AM, 5PM\nDaily Mass: Mon-Fri 8AM, Sat 8AM"
         },
+        
+        // Baptist Churches
         "Baptist": {
-          officeHours: "Mon-Fri 9AM-5PM",
-          worshipTimes: "Sunday: 9AM & 11AM\nWednesday: 7PM"
-        },
-        "Methodist": {
           officeHours: "Mon-Fri 9AM-4PM",
-          worshipTimes: "Sunday: 8:30AM & 11AM"
+          worshipTimes: "Sunday: 9AM (Sunday School), 10:30AM (Morning Worship), 6PM (Evening Service)\nWednesday: 7PM (Prayer Meeting)"
         },
+        "Southern Baptist": {
+          officeHours: "Mon-Fri 8:30AM-4:30PM",
+          worshipTimes: "Sunday: 9:15AM (Sunday School), 10:30AM (Morning Worship), 6PM (Evening Worship)\nWednesday: 6:30PM (Prayer Service & Bible Study)"
+        },
+        
+        // Methodist Churches
+        "Methodist": {
+          officeHours: "Mon-Fri 9AM-3PM",
+          worshipTimes: "Sunday: 8:30AM (Traditional), 11AM (Contemporary)\nWednesday: 7PM (Bible Study)"
+        },
+        "United Methodist": {
+          officeHours: "Tue-Fri 9AM-4PM",
+          worshipTimes: "Sunday: 8:30AM (Traditional), 10:45AM (Contemporary)\nWednesday: 7PM (Bible Study & Prayer)"
+        },
+        
+        // Presbyterian Churches
         "Presbyterian": {
           officeHours: "Mon-Fri 9AM-4PM",
-          worshipTimes: "Sunday: 10AM"
+          worshipTimes: "Sunday: 9AM (Sunday School), 10:30AM (Worship Service)\nWednesday: 7PM (Prayer & Bible Study)"
         },
+        
+        // Lutheran Churches
         "Lutheran": {
-          officeHours: "Mon-Fri 9AM-4PM", 
-          worshipTimes: "Sunday: 8AM & 10:30AM"
+          officeHours: "Mon-Fri 9AM-4PM",
+          worshipTimes: "Sunday: 8AM (Traditional), 10:30AM (Contemporary)\nWednesday: 7PM (Bible Study)"
         },
+        
+        // Episcopal/Anglican Churches
         "Episcopal": {
           officeHours: "Mon-Fri 9AM-4PM",
-          worshipTimes: "Sunday: 8AM & 10AM"
+          worshipTimes: "Sunday: 8AM (Holy Eucharist), 10:30AM (Holy Eucharist with Music)\nWednesday: 12PM (Healing Service)"
         },
+        "Anglican": {
+          officeHours: "Mon-Fri 9AM-4PM",
+          worshipTimes: "Sunday: 8AM (Holy Communion), 10:30AM (Sung Eucharist)\nWednesday: 10AM (Said Eucharist)"
+        },
+        
+        // Pentecostal Churches
         "Pentecostal": {
-          officeHours: "Mon-Fri 10AM-6PM",
-          worshipTimes: "Sunday: 10AM & 6PM\nWednesday: 7PM"
-        },
-        "Non-denominational": {
           officeHours: "Mon-Fri 9AM-5PM",
-          worshipTimes: "Sunday: 9AM & 11AM"
+          worshipTimes: "Sunday: 10AM (Morning Worship), 6PM (Evening Service)\nWednesday: 7PM (Bible Study & Prayer)\nFriday: 7PM (Youth Service)"
+        },
+        "Assembly of God": {
+          officeHours: "Mon-Fri 9AM-5PM",
+          worshipTimes: "Sunday: 9AM (Sunday School), 10:30AM (Morning Worship), 6:30PM (Evening Service)\nWednesday: 7PM (Midweek Service)"
+        },
+        
+        // Orthodox Churches
+        "Orthodox": {
+          officeHours: "Mon-Fri 10AM-4PM",
+          worshipTimes: "Saturday: 6PM (Vespers)\nSunday: 9AM (Matins), 10:30AM (Divine Liturgy)\nDaily: Morning & Evening Prayers"
+        },
+        "Eastern Orthodox": {
+          officeHours: "Mon-Fri 10AM-4PM",
+          worshipTimes: "Saturday: 6PM (Great Vespers)\nSunday: 8:45AM (Matins), 10AM (Divine Liturgy)"
+        },
+        
+        // Non-denominational
+        "Non-denominational": {
+          officeHours: "Mon-Fri 9AM-4PM",
+          worshipTimes: "Sunday: 9AM & 11AM (Worship Services)\nWednesday: 7PM (Bible Study & Prayer)"
+        },
+        "Community Church": {
+          officeHours: "Mon-Fri 9AM-4PM",
+          worshipTimes: "Sunday: 9AM & 10:45AM (Worship Services)\nWednesday: 7PM (Community Groups)"
+        },
+        
+        // Seventh-day Adventist
+        "Seventh-day Adventist": {
+          officeHours: "Mon-Thu 9AM-4PM, Sun 9AM-4PM",
+          worshipTimes: "Friday: 7PM (Vespers)\nSaturday: 9:30AM (Sabbath School), 11AM (Divine Worship), 2PM (Afternoon Programs)"
         }
       };
 
