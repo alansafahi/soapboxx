@@ -272,10 +272,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize AI personalization service
   const aiPersonalizationService = new AIPersonalizationService();
 
+  // AUTHENTICATION SETUP FIRST - This must come before all other routes
+  setupAuth(app);
+
   // Serve static uploaded files
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-  // Upload routes
+  // Upload routes - now with proper session access
   app.use('/api/upload', uploadRoutes);
 
   // PUBLIC API EXEMPTION MIDDLEWARE - Allow specific endpoints to bypass authentication
@@ -438,8 +441,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Unified Authentication System - FIXES CRITICAL SECURITY VULNERABILITIES
-  setupAuth(app);
+  // Authentication already set up above - removed duplicate call
 
   // OVERRIDE: Re-register Bible API endpoints AFTER authentication to ensure public access
   // This ensures spiritual content remains accessible without authentication barriers

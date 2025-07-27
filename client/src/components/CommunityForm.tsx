@@ -581,7 +581,7 @@ export function CommunityForm({
                   accept="image/*"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
-                    console.log('File selected in CommunityForm:', file);
+                    console.log('File selected in CommunityForm:', file ? `${file.name} (${file.size} bytes)` : 'null');
                     if (file) {
                       setLogoFile(file);
                       const reader = new FileReader();
