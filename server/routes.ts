@@ -51,6 +51,7 @@ import { LearningIntegration } from "./learning-integration.js";
 import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";
 import enhancedRoutes from "./enhanced-routes";
 import MappingService from "./mapping-service";
+import { uploadRoutes } from "./routes/upload";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -270,6 +271,12 @@ async function checkForNewRoleAssignment(userId: string, currentRole: string): P
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize AI personalization service
   const aiPersonalizationService = new AIPersonalizationService();
+
+  // Serve static uploaded files
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+  // Upload routes
+  app.use('/api/upload', uploadRoutes);
 
   // PUBLIC API EXEMPTION MIDDLEWARE - Allow specific endpoints to bypass authentication
   const publicEndpoints = [

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Building, MapPin, Users, Calendar, Plus, Settings, Eye } from "lucide-react";
+import { Building, MapPin, Users, Calendar, Plus, Settings, Eye, Upload, X } from "lucide-react";
 import { CommunityViewDialog } from "./CommunityViewDialog";
 import { Link } from "wouter";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -80,6 +80,54 @@ const AFFILIATIONS = {
   ]
 };
 
+// Denomination-based defaults for operating hours
+const denominationDefaults = {
+  "Baptist": {
+    officeHours: "Mon-Thu 9AM-4PM, Fri 9AM-12PM",
+    worshipTimes: "Sunday: 9AM & 11AM\nWednesday: 6:30PM Bible Study"
+  },
+  "Methodist": {
+    officeHours: "Mon-Thu 9AM-4PM, Fri 9AM-12PM",
+    worshipTimes: "Sunday: 9AM Traditional, 11AM Contemporary\nWednesday: 6:30PM Study"
+  },
+  "Catholic": {
+    officeHours: "Mon-Fri 9AM-4PM",
+    worshipTimes: "Saturday: 5PM Vigil Mass\nSunday: 8AM, 10AM, 12PM Mass\nDaily Mass: Mon-Fri 8AM"
+  },
+  "Presbyterian": {
+    officeHours: "Mon-Thu 9AM-4PM, Fri 9AM-1PM",
+    worshipTimes: "Sunday: 9AM Sunday School, 10AM Worship\nWednesday: 7PM Prayer Meeting"
+  },
+  "Pentecostal": {
+    officeHours: "Mon-Thu 10AM-4PM, Fri 10AM-12PM",
+    worshipTimes: "Sunday: 10AM & 6PM\nWednesday: 7PM Bible Study\nFriday: 7PM Prayer Night"
+  },
+  "Lutheran": {
+    officeHours: "Mon-Thu 9AM-3PM, Fri 9AM-12PM",
+    worshipTimes: "Sunday: 8:30AM Traditional, 10:30AM Contemporary\nWednesday: 7PM Study"
+  },
+  "Episcopal": {
+    officeHours: "Mon-Thu 9AM-4PM",
+    worshipTimes: "Sunday: 8AM Holy Eucharist, 10AM Family Service\nWednesday: 12PM Holy Eucharist"
+  },
+  "Non-denominational": {
+    officeHours: "Mon-Fri 9AM-4PM",
+    worshipTimes: "Sunday: 9AM & 11AM Services\nWednesday: 7PM Bible Study"
+  }
+};
+
+// Weekly attendance categories
+const WEEKLY_ATTENDANCE_OPTIONS = [
+  { value: "under-50", label: "Micro (Under 50)" },
+  { value: "50-99", label: "Small (50-99)" },
+  { value: "100-199", label: "Medium (100-199)" },
+  { value: "200-349", label: "Large (200-349)" },
+  { value: "350-499", label: "Very Large (350-499)" },
+  { value: "500-999", label: "Mega (500-999)" },
+  { value: "1000-4999", label: "Super Mega (1,000-4,999)" },
+  { value: "5000+", label: "Meta Church (5,000+)" }
+];
+
 export default function MyCommunities() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -88,6 +136,8 @@ export default function MyCommunities() {
   const [showCustomDenomination, setShowCustomDenomination] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string>("");
   
   const { data: userCommunities = [], isLoading, error } = useQuery<Community[]>({
     queryKey: ["/api/users/communities"],
@@ -116,12 +166,56 @@ export default function MyCommunities() {
       facebookUrl: "",
       instagramUrl: "",
       sundayService: "",
-      wednesdayService: ""
+      wednesdayService: "",
+      officeHours: "",
+      worshipTimes: ""
     }
   });
 
   // Watch the type field to update affiliation options
   const selectedType = createForm.watch("type") as keyof typeof AFFILIATIONS;
+  const selectedDenomination = createForm.watch("denomination");
+
+  // Auto-fill office hours and worship times based on denomination selection
+  useEffect(() => {
+    if (selectedDenomination && denominationDefaults[selectedDenomination as keyof typeof denominationDefaults]) {
+      const defaults = denominationDefaults[selectedDenomination as keyof typeof denominationDefaults];
+      createForm.setValue('officeHours', defaults.officeHours);
+      createForm.setValue('worshipTimes', defaults.worshipTimes);
+    }
+  }, [selectedDenomination, createForm]);
+
+  // Handle logo upload
+  const handleLogoUpload = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('logo', file);
+    
+    const response = await fetch('/api/upload/community-logo', {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to upload logo');
+    }
+    
+    const result = await response.json();
+    return result.logoUrl;
+  };
+
+  // Handle logo file selection
+  const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Helper function to normalize website URL
   const normalizeWebsiteUrl = (url: string) => {
@@ -136,9 +230,17 @@ export default function MyCommunities() {
   // Create community mutation
   const createCommunityMutation = useMutation({
     mutationFn: async (data: any) => {
+      let logoUrl = "";
+      
+      // Upload logo if selected
+      if (logoFile) {
+        logoUrl = await handleLogoUpload(logoFile);
+      }
+      
       const normalizedData = {
         ...data,
-        website: normalizeWebsiteUrl(data.website)
+        website: normalizeWebsiteUrl(data.website),
+        logoUrl: logoUrl
       };
       
       const response = await fetch("/api/communities", {
@@ -163,6 +265,8 @@ export default function MyCommunities() {
       setCreateCommunityOpen(false);
       createForm.reset();
       setShowCustomDenomination(false);
+      setLogoFile(null);
+      setLogoPreview("");
     },
     onError: (error: any) => {
       toast({
@@ -481,19 +585,49 @@ export default function MyCommunities() {
                       )}
                     />
 
-                    <FormField
-                      control={createForm.control}
-                      name="logoUrl"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Community Logo URL</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://example.com/logo.png" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {/* Logo Upload Section */}
+                    <div className="col-span-2">
+                      <FormLabel>📸 Community Logo</FormLabel>
+                      <div className="mt-2 space-y-3">
+                        {logoPreview ? (
+                          <div className="relative w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden">
+                            <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setLogoFile(null);
+                                setLogoPreview("");
+                              }}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
+                            <div className="text-center">
+                              <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                              <div className="mt-4">
+                                <label htmlFor="logo-upload" className="cursor-pointer">
+                                  <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-white">
+                                    Upload a logo
+                                  </span>
+                                  <span className="text-sm text-gray-500">PNG, JPG up to 5MB</span>
+                                </label>
+                                <input
+                                  id="logo-upload"
+                                  name="logo-upload"
+                                  type="file"
+                                  className="sr-only"
+                                  accept="image/*"
+                                  onChange={handleLogoChange}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
                     <FormField
                       control={createForm.control}
@@ -514,10 +648,21 @@ export default function MyCommunities() {
                       name="weeklyAttendance"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Weekly Attendance</FormLabel>
-                          <FormControl>
-                            <Input type="number" placeholder="150" {...field} />
-                          </FormControl>
+                          <FormLabel>👥 Weekly Attendance</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select attendance size" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {WEEKLY_ATTENDANCE_OPTIONS.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -610,6 +755,42 @@ export default function MyCommunities() {
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={createForm.control}
+                      name="officeHours"
+                      render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>🕒 Office Hours (Auto-filled by denomination)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Mon-Fri 9AM-4PM"
+                              rows={2}
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="worshipTimes"
+                      render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>⛪ Worship Times (Auto-filled by denomination)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Sunday: 9AM & 11AM"
+                              rows={3}
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   <div className="flex justify-end gap-3 pt-4">
@@ -620,6 +801,8 @@ export default function MyCommunities() {
                         setCreateCommunityOpen(false);
                         createForm.reset();
                         setShowCustomDenomination(false);
+                        setLogoFile(null);
+                        setLogoPreview("");
                       }}
                     >
                       Cancel
