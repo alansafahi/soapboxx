@@ -156,7 +156,11 @@ export function ChurchManagementHub() {
       adminPhone: "",
       website: "",
       description: "",
-      logoUrl: ""
+      logoUrl: "",
+      weeklyAttendance: "",
+      establishedYear: "",
+      parentChurchName: "",
+      missionStatement: ""
     }
   });
 
@@ -611,6 +615,65 @@ export function ChurchManagementHub() {
                           />
                         </div>
 
+                        {/* Additional Community Information */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <FormField
+                            control={createForm.control}
+                            name="weeklyAttendance"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Weekly Attendance</FormLabel>
+                                <Select onValueChange={field.onChange} value={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Select weekly attendance" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="1-50">1-50 (Micro - House church)</SelectItem>
+                                    <SelectItem value="51-100">51-100 (Small - Close-knit)</SelectItem>
+                                    <SelectItem value="101-250">101-250 (Medium - Community)</SelectItem>
+                                    <SelectItem value="251-500">251-500 (Large - Multi-ministry)</SelectItem>
+                                    <SelectItem value="501-1000">501-1000 (Very Large - Multi-staff)</SelectItem>
+                                    <SelectItem value="1001-2000">1001-2000 (Mega - Extensive programming)</SelectItem>
+                                    <SelectItem value="2001-10000">2001-10000 (Giga - High tech)</SelectItem>
+                                    <SelectItem value="10000+">10000+ (Meta - National reach)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={createForm.control}
+                            name="establishedYear"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Established Year</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="2020" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={createForm.control}
+                            name="parentChurchName"
+                            render={({ field }) => (
+                              <FormItem className="col-span-2">
+                                <FormLabel>Parent Church (if applicable)</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Main Campus Church Name" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
                         {/* Logo Upload Section */}
                         <div className="space-y-4">
                           <div>
@@ -673,6 +736,24 @@ export function ChurchManagementHub() {
                               )}
                             </div>
                           </div>
+
+                          <FormField
+                            control={createForm.control}
+                            name="missionStatement"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Mission Statement</FormLabel>
+                                <FormControl>
+                                  <Textarea 
+                                    placeholder="Our mission is to..."
+                                    rows={3}
+                                    {...field} 
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
                           <FormField
                             control={createForm.control}
