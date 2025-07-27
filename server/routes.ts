@@ -1343,13 +1343,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For regular users, check church relationships
       const userChurch = await storage.getUserChurch(userId);
       
-      if (!userRole) {
+      if (!userChurch) {
         return res.json({ role: 'new_member', churchId: null });
       }
       
       res.json({ 
-        role: userRole.role || 'member',
-        churchId: userRole.churchId 
+        role: userChurch.role || 'member',
+        churchId: userChurch.churchId 
       });
     } catch (error) {
       res.json({ role: 'member', churchId: null });
@@ -2290,8 +2290,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session.userId || req.user?.claims?.sub || req.user?.id;
       if (!userId) return res.status(401).json({ message: "User not authenticated" });
       const userChurch = await storage.getUserChurch(userId);
-      if (!userRole) return res.json({ role: 'new_member', churchId: null });
-      res.json({ role: userRole.role || 'member', churchId: userRole.churchId });
+      if (!userChurch) return res.json({ role: 'new_member', churchId: null });
+      res.json({ role: userChurch.role || 'member', churchId: userChurch.churchId });
     } catch (error) {
       res.json({ role: 'member', churchId: null });
     }
@@ -5274,7 +5274,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       }
 
       const userRole = await storage.getUserRole(userId);
-      if (!userRole || !['admin', 'pastor', 'super_admin'].includes(userRole.role)) {
+      if (!userRole || !['admin', 'pastor', 'super_admin'].includes(userRole)) {
         return res.status(403).json({ message: "Access denied. Admin privileges required." });
       }
 
@@ -5301,7 +5301,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       }
 
       const userRole = await storage.getUserRole(userId);
-      if (!userRole || !['admin', 'pastor', 'super_admin'].includes(userRole.role)) {
+      if (!userRole || !['admin', 'pastor', 'super_admin'].includes(userRole)) {
         return res.status(403).json({ message: "Access denied. Admin privileges required." });
       }
 
@@ -7702,7 +7702,7 @@ Return JSON with this exact structure:
       
       const user = await storage.getUser(userId);
       
-      if (!userRole || (!adminRoles.includes(userRole.role) && user?.role !== 'soapbox_owner')) {
+      if (!userRole || (!adminRoles.includes(userRole) && user?.role !== 'soapbox_owner')) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
@@ -7884,7 +7884,7 @@ Return JSON with this exact structure:
       
       const user = await storage.getUser(userId);
       
-      if (!userRole || (!adminRoles.includes(userRole.role) && user?.role !== 'soapbox_owner')) {
+      if (!userRole || (!adminRoles.includes(userRole) && user?.role !== 'soapbox_owner')) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
@@ -7914,7 +7914,7 @@ Return JSON with this exact structure:
       // First try to get user's role in this church
       const userChurch = await storage.getUserCommunityRole(userId, churchId);
       if (userChurch) {
-        return res.json({ role: userRole.role });
+        return res.json({ role: userRole });
       }
 
       // If not found, check if this user is a global admin or created this church
@@ -7992,7 +7992,7 @@ Return JSON with this exact structure:
       
       const user = await storage.getUser(userId);
       
-      if (!userRole || (!adminRoles.includes(userRole.role) && user?.role !== 'soapbox_owner')) {
+      if (!userRole || (!adminRoles.includes(userRole) && user?.role !== 'soapbox_owner')) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
@@ -8072,7 +8072,7 @@ Return JSON with this exact structure:
       
       if (user?.role === 'soapbox_owner' || user?.role === 'system_admin') {
         hasAccess = true;
-      } else if (userChurch && adminRoles.includes(userRole.role)) {
+      } else if (userChurch && adminRoles.includes(userRole)) {
         hasAccess = true;
       } else {
         // Check if user created this church by looking for admin churches
@@ -11043,7 +11043,7 @@ Please provide suggestions for the missing or incomplete sections.`
       } else {
         // Check church-specific permissions for other users
         const userChurch = await storage.getUserChurch(userId);
-        if (!userRole || !['church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
+        if (!userRole || !['church_admin', 'lead_pastor', 'pastor'].includes(userRole)) {
           return res.status(403).json({ message: "Leadership access required for your church" });
         }
       }
@@ -11084,7 +11084,7 @@ Please provide suggestions for the missing or incomplete sections.`
       } else {
         // Check church-specific permissions for other users
         const userChurch = await storage.getUserChurch(userId);
-        if (!userRole || !['church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
+        if (!userRole || !['church_admin', 'lead_pastor', 'pastor'].includes(userRole)) {
           return res.status(403).json({ message: "Leadership access required for your church" });
         }
       }
@@ -11242,9 +11242,9 @@ Please provide suggestions for the missing or incomplete sections.`
       const user = await storage.getUser(userId);
       const userChurch = await storage.getUserChurch(userId);
       
-      // Check both user.role (main table) and userRole.role for permissions
+      // Check both user.role (main table) and userRole for permissions
       const isAuthorized = user?.role === 'soapbox_owner' || 
-                          (userChurch && ['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'soapbox_owner'].includes(userRole.role));
+                          (userChurch && ['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'soapbox_owner'].includes(userRole));
       
       if (!isAuthorized) {
         return res.status(403).json({ message: "Senior leadership access required for emergency broadcasts" });
@@ -11529,7 +11529,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Check if user has admin permissions
       const adminRoles = ['admin', 'church_admin', 'system_admin', 'super_admin', 'pastor', 'lead_pastor', 'soapbox_owner', 'soapbox_support', 'platform_admin', 'regional_admin'];
-      if (!adminRoles.includes(userRole.role)) {
+      if (!adminRoles.includes(userRole)) {
         return res.status(403).json({ message: "Admin access required" });
       }
       
@@ -11662,7 +11662,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Get user's church to verify permissions
       const userChurch = await storage.getUserChurch(userId);
-      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
+      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole)) {
         return res.status(403).json({ message: "Permission Required" });
       }
 
@@ -11715,7 +11715,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Verify user has admin access
       const userChurch = await storage.getUserChurch(userId);
-      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
+      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole)) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -11737,7 +11737,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Verify user has admin access
       const userChurch = await storage.getUserChurch(userId);
-      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
+      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole)) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -11763,7 +11763,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Verify user has admin access
       const userChurch = await storage.getUserChurch(userId);
-      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
+      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole)) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -11788,7 +11788,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Verify user has admin access
       const userChurch = await storage.getUserChurch(userId);
-      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
+      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole)) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -12928,7 +12928,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Check if user has admin access to this church
       const userChurch = await storage.getUserChurch(userId, parseInt(churchId));
-      if (!userRole || !['church_admin', 'owner', 'soapbox_owner'].includes(userRole.role)) {
+      if (!userRole || !['church_admin', 'owner', 'soapbox_owner'].includes(userRole)) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
@@ -12975,7 +12975,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Check if user has admin access to this church
       const userChurch = await storage.getUserChurch(userId, parseInt(churchId));
-      if (!userRole || !['church_admin', 'owner', 'soapbox_owner'].includes(userRole.role)) {
+      if (!userRole || !['church_admin', 'owner', 'soapbox_owner'].includes(userRole)) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
@@ -13000,7 +13000,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const userRole = await storage.getUserCommunityRole(userId, communityId);
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'ministry_leader'];
       
-      if (!userRole || !adminRoles.includes(userRole.role)) {
+      if (!userRole || !adminRoles.includes(userRole)) {
         return res.status(403).json({ error: 'Insufficient permissions to access settings' });
       }
 
@@ -13025,7 +13025,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const userRole = await storage.getUserCommunityRole(userId, communityId);
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'ministry_leader'];
       
-      if (!userRole || !adminRoles.includes(userRole.role)) {
+      if (!userRole || !adminRoles.includes(userRole)) {
         return res.status(403).json({ error: 'Insufficient permissions to modify settings' });
       }
 
