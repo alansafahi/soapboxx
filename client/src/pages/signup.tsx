@@ -139,7 +139,18 @@ export default function SignupPage() {
           setLocation('/login');
         }
       }
-    } catch (error) {
+    } catch (error: any) {
+      // Handle case where user already exists with staff invitation
+      if (error.message && error.message.includes('already exists') && isStaffInvite) {
+        toast({
+          title: "Account Already Exists",
+          description: "You already have an account. Please log in to accept your staff position.",
+          variant: "default",
+        });
+        setLocation('/login');
+        return;
+      }
+      
       toast({
         title: "Registration Failed",
         description: formatErrorForToast(error),

@@ -12,6 +12,7 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { storage } from "./storage";
 import { sendVerificationEmail } from "./email-service";
+import { pool } from "./db";
 
 // Session configuration
 export function getSession() {
@@ -215,9 +216,46 @@ export function setupAuth(app: Express): void {
       // Check if user already exists
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
+        // If this is a staff invitation and user exists, create the staff invitation for existing user
+        if (staffInvite && staffInvite.communityId && staffInvite.role) {
+          try {
+            console.log('Creating staff invitation for existing user:', { email, userId: existingUser.id, staffInvite });
+            
+            // Check if user already has a role in this community
+            const existingRole = await pool.query(
+              'SELECT * FROM user_churches WHERE user_id = $1 AND church_id = $2',
+              [existingUser.id, staffInvite.communityId]
+            );
+            
+            if (existingRole.rows.length === 0) {
+              // Create new staff invitation for existing user
+              await pool.query(
+                'INSERT INTO user_churches (user_id, church_id, role, is_active, assigned_by, assigned_at, title) VALUES ($1, $2, $3, false, $4, NOW(), $5)',
+                [existingUser.id, staffInvite.communityId, staffInvite.role, existingUser.id, staffInvite.role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())]
+              );
+              
+              return res.status(200).json({
+                success: true,
+                message: 'Staff invitation created! Please log in to accept your position.',
+                existingUser: true,
+                staffInvitation: { communityId: staffInvite.communityId, role: staffInvite.role }
+              });
+            } else {
+              return res.status(200).json({
+                success: true,
+                message: 'You already have a role in this community. Please log in to manage your position.',
+                existingUser: true,
+                existingRole: existingRole.rows[0].role
+              });
+            }
+          } catch (staffError) {
+            console.error('Failed to create staff invitation for existing user:', staffError);
+          }
+        }
+        
         return res.status(409).json({ 
           success: false,
-          message: 'Account already exists with this email address' 
+          message: 'Account already exists with this email address. Please log in instead.' 
         });
       }
 
@@ -286,12 +324,10 @@ export function setupAuth(app: Express): void {
         try {
           console.log('Processing staff invitation during registration:', staffInvite);
           
-          // Create pending staff invitation in user_churches table
-          await storage.inviteStaffMember(
-            staffInvite.communityId, 
-            email, 
-            staffInvite.role, 
-            newUser.id // Use the newly created user's ID as the inviter
+          // Create pending staff invitation directly in user_churches table
+          await pool.query(
+            'INSERT INTO user_churches (user_id, church_id, role, is_active, assigned_by, assigned_at, title) VALUES ($1, $2, $3, false, $4, NOW(), $5)',
+            [newUser.id, staffInvite.communityId, staffInvite.role, newUser.id, staffInvite.role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())]
           );
           
           console.log('Staff invitation created for new user:', { 
