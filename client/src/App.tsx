@@ -28,6 +28,7 @@ const ContactUsPage = lazy(() => import("./pages/contact-us"));
 const SupportPage = lazy(() => import("./pages/support"));
 const HelpDocsPage = lazy(() => import("./pages/help-docs"));
 const LoginPage = lazy(() => import("./pages/login"));
+const SignupPage = lazy(() => import("./pages/signup"));
 const ResetPasswordPage = lazy(() => import("./pages/reset-password"));
 const Home = lazy(() => import("./pages/home"));
 const BiblePage = lazy(() => import("./pages/bible"));
@@ -138,6 +139,7 @@ function AppRouter() {
                             <Suspense fallback={<div>Loading...</div>}>
                                 <Switch>
                                     <Route path="/login" component={LoginPage} />
+                                    <Route path="/signup" component={SignupPage} />
                                     <Route path="/auto-login" component={lazy(() => import('./pages/auto-login'))} />
                                     <Route path="/reset-password">
                                         <ResetPasswordPage />

@@ -3076,6 +3076,52 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
   // Staff Management API Endpoints
   // Get staff members for a community
+  // Staff invitation acceptance endpoint
+  app.post('/api/communities/:id/staff/accept', isAuthenticated, async (req: any, res) => {
+    try {
+      const communityId = parseInt(req.params.id);
+      const { role } = req.body;
+      const userId = req.session.userId;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      if (!communityId || !role) {
+        return res.status(400).json({ message: 'Community ID and role are required' });
+      }
+
+      // Check if user has a pending staff invitation for this community and role
+      const [pendingInvitation] = await db.query(`
+        SELECT uc.*, c.name as community_name
+        FROM user_churches uc
+        JOIN churches c ON uc.church_id = c.id
+        WHERE uc.user_id = $1 AND uc.church_id = $2 AND uc.role = $3 AND uc.is_active = false
+      `, [userId, communityId, role]);
+
+      if (!pendingInvitation) {
+        return res.status(404).json({ message: 'No pending invitation found for this position' });
+      }
+
+      // Activate the staff position
+      await db.query(`
+        UPDATE user_churches 
+        SET is_active = true, assigned_at = NOW()
+        WHERE user_id = $1 AND church_id = $2 AND role = $3
+      `, [userId, communityId, role]);
+
+      res.json({
+        success: true,
+        message: 'Staff position accepted successfully',
+        title: pendingInvitation.title || role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+        community: pendingInvitation.community_name
+      });
+    } catch (error) {
+      console.error('Error accepting staff invitation:', error);
+      res.status(500).json({ message: 'Failed to accept staff invitation' });
+    }
+  });
+
   app.get('/api/communities/:id/staff', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
