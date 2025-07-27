@@ -81,7 +81,7 @@ export function CommunityAdminTab() {
     queryKey: ['community-details', selectedCommunityId],
     queryFn: async () => {
       if (!selectedCommunityId) return null;
-      const response = await fetch(`/api/churches/${selectedCommunityId}`, { credentials: 'include' });
+      const response = await fetch(`/api/communities/${selectedCommunityId}`, { credentials: 'include' });
       if (!response.ok) {
         throw new Error('Failed to fetch community details');
       }
@@ -117,7 +117,8 @@ export function CommunityAdminTab() {
           const uploadResult = await uploadResponse.json();
           logoUrl = uploadResult.logoUrl;
         } else {
-          throw new Error("Logo upload failed");
+          // Don't fail the entire update if logo upload fails - just log the error
+          console.warn("Logo upload failed, continuing with other updates");
         }
       }
       
