@@ -5601,31 +5601,18 @@ export class DatabaseStorage implements IStorage {
       const existingUser = await this.getUserByEmail(data.email);
       
       if (existingUser) {
-        // Add existing user to community with role
-        const [userCommunity] = await db
-          .insert(userChurches)
-          .values({
-            userId: existingUser.id,
-            churchId: data.communityId,
-            role: data.role,
-            title: data.title,
-            department: data.department,
-            assignedBy: data.invitedBy,
-            assignedAt: new Date(),
-            joinedAt: new Date(),
-            isActive: true
-          })
-          .onConflictDoUpdate({
-            target: [userChurches.userId, userChurches.churchId],
-            set: {
-              role: data.role,
-              title: data.title,
-              department: data.department,
-              assignedBy: data.invitedBy,
-              assignedAt: new Date()
-            }
-          })
-          .returning();
+        // Add existing user to community with role using consistent naming
+        await pool.query(`
+          INSERT INTO user_communities (user_id, community_id, role, title, department, assigned_by, assigned_at, joined_at, is_active)
+          VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW(), true)
+          ON CONFLICT (user_id, community_id) 
+          DO UPDATE SET 
+            role = EXCLUDED.role,
+            title = EXCLUDED.title,
+            department = EXCLUDED.department,
+            assigned_by = EXCLUDED.assigned_by,
+            assigned_at = EXCLUDED.assigned_at
+        `, [existingUser.id, data.communityId, data.role, data.title, data.department, data.invitedBy]);
 
         return {
           id: existingUser.id,
@@ -5638,27 +5625,17 @@ export class DatabaseStorage implements IStorage {
           status: 'active'
         };
       } else {
-        // Create invitation record for new user
-        const [invitation] = await db
-          .insert(invitations)
-          .values({
-            email: data.email,
-            invitedBy: data.invitedBy,
-            role: 'member',
-            communityId: data.communityId,
-            status: 'pending',
-            createdAt: new Date()
-          })
-          .returning();
-
-        // Create pending user community record
+        // For new users, create pending invitation record
         await pool.query(`
           INSERT INTO user_communities (user_id, community_id, role, title, department, assigned_by, assigned_at, is_active)
           VALUES (NULL, $1, $2, $3, $4, $5, NOW(), false)
         `, [data.communityId, data.role, data.title, data.department, data.invitedBy]);
 
+        // Create a unique ID for pending invitation
+        const pendingId = `pending_${data.email.replace('@', '_at_').replace('.', '_dot_')}_${Date.now()}`;
+
         return {
-          id: `pending_${invitation.id}`,
+          id: pendingId,
           email: data.email,
           firstName: '',
           lastName: '',
@@ -5675,16 +5652,11 @@ export class DatabaseStorage implements IStorage {
 
   async updateStaffRole(communityId: number, staffId: string, role: string): Promise<void> {
     try {
-      await db
-        .update(userChurches)
-        .set({ 
-          role: role,
-          updatedAt: new Date()
-        })
-        .where(and(
-          eq(userChurches.userId, staffId),
-          eq(userChurches.churchId, communityId)
-        ));
+      await pool.query(`
+        UPDATE user_communities 
+        SET role = $1, assigned_at = NOW()
+        WHERE user_id = $2 AND community_id = $3
+      `, [role, staffId, communityId]);
     } catch (error) {
       throw new Error(`Failed to update staff role: ${error}`);
     }
@@ -5692,16 +5664,11 @@ export class DatabaseStorage implements IStorage {
 
   async removeStaffMember(communityId: number, staffId: string): Promise<void> {
     try {
-      await db
-        .update(userChurches)
-        .set({ 
-          isActive: false,
-          updatedAt: new Date()
-        })
-        .where(and(
-          eq(userChurches.userId, staffId),
-          eq(userChurches.churchId, communityId)
-        ));
+      await pool.query(`
+        UPDATE user_communities 
+        SET is_active = false, assigned_at = NOW()
+        WHERE user_id = $1 AND community_id = $2
+      `, [staffId, communityId]);
     } catch (error) {
       throw new Error(`Failed to remove staff member: ${error}`);
     }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -439,8 +439,8 @@ export function StaffManagement({ communityId }: { communityId: number }) {
                 </thead>
                 <tbody>
                   {Object.entries(PERMISSION_CATEGORIES).map(([category, permissions]) => (
-                    <>
-                      <tr key={category} className="bg-gray-100">
+                    <React.Fragment key={category}>
+                      <tr className="bg-gray-100">
                         <td colSpan={AVAILABLE_ROLES.length + 1} className="p-2 font-medium text-sm">
                           {category}
                         </td>
@@ -466,7 +466,7 @@ export function StaffManagement({ communityId }: { communityId: number }) {
                           ))}
                         </tr>
                       ))}
-                    </>
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>
