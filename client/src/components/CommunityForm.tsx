@@ -129,7 +129,7 @@ export function CommunityForm({
   });
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string>("");
+  const [logoPreview, setLogoPreview] = useState<string>(initialData?.logoUrl || "");
 
   // Auto-fill office hours and worship times based on denomination
   useEffect(() => {
