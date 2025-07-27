@@ -397,9 +397,10 @@ export function setupAuth(app: Express): void {
       if (!user.emailVerified) {
         return res.status(403).json({ 
           success: false,
-          message: 'Please verify your email before logging in. Check your inbox for verification link.',
+          message: 'Email verification required. Please check your email and click the verification link before logging in.',
           requiresVerification: true,
-          email: user.email
+          email: user.email,
+          userFriendlyMessage: 'Please check your email (including spam folder) and click the verification link to activate your account before logging in.'
         });
       }
 

@@ -86,16 +86,26 @@ export default function LoginPage() {
           return;
         } else {
           let errorMessage = 'Login failed';
+          let toastVariant = "destructive";
+          let toastTitle = "Login Failed";
+          
           try {
             const errorData = await loginResponse.json();
             errorMessage = errorData.message || errorData.error || errorMessage;
+            
+            // Handle email verification required with friendly message
+            if (loginResponse.status === 403 && errorData.requiresVerification) {
+              toastTitle = "📧 Email Verification Required";
+              errorMessage = errorData.userFriendlyMessage || "Please check your email and click the verification link before logging in. Don't forget to check your spam folder!";
+              toastVariant = "default";
+            }
           } catch (parseError) {
           }
           
           toast({
-            title: "Login Failed",
+            title: toastTitle,
             description: errorMessage,
-            variant: "destructive"
+            variant: toastVariant
           });
         }
       } else {
