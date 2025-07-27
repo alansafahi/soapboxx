@@ -319,19 +319,19 @@ export function CommunityViewDialog({
                 </h3>
               </CardHeader>
               <CardContent>
-                {community.bio && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mission Statement</h4>
-                    <p className="text-gray-900 dark:text-gray-100 leading-relaxed">
-                      {community.bio}
-                    </p>
-                  </div>
-                )}
                 {community.description && community.description !== '' && (
-                  <div>
+                  <div className="mb-4">
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</h4>
                     <p className="text-gray-900 dark:text-gray-100 leading-relaxed">
                       {community.description}
+                    </p>
+                  </div>
+                )}
+                {community.bio && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Mission Statement</h4>
+                    <p className="text-gray-900 dark:text-gray-100 leading-relaxed">
+                      {community.bio}
                     </p>
                   </div>
                 )}
@@ -339,42 +339,7 @@ export function CommunityViewDialog({
             </Card>
           )}
 
-          {/* Service Times & Hours */}
-          {(community.worshipTimes || community.officeHours || community.hoursOfOperation) && (
-            <Card>
-              <CardHeader>
-                <h3 className="text-lg font-semibold flex items-center">
-                  <Clock className="h-5 w-5 mr-2 text-blue-500" />
-                  Service Times & Hours
-                </h3>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {community.worshipTimes && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Worship Times</h4>
-                    <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
-                      <pre className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap font-medium">
-                        {community.worshipTimes}
-                      </pre>
-                    </div>
-                  </div>
-                )}
-                
-                {(community.officeHours || community.hoursOfOperation) && (
-                  <div>
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Office Hours</h4>
-                    <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                      <p className="text-sm text-gray-900 dark:text-gray-100">
-                        {community.officeHours || (typeof community.hoursOfOperation === 'object' 
-                          ? JSON.stringify(community.hoursOfOperation) 
-                          : community.hoursOfOperation)}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )}
+
 
           {/* Multi-Campus Locations */}
           {campuses && campuses.length > 0 && (
@@ -501,6 +466,43 @@ export function CommunityViewDialog({
               </CardContent>
             </Card>
           </div>
+
+          {/* Service Times & Hours */}
+          {(community.worshipTimes || community.officeHours || community.hoursOfOperation) && (
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold flex items-center">
+                  <Clock className="h-5 w-5 mr-2 text-blue-500" />
+                  Service Times & Hours
+                </h3>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {community.worshipTimes && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Worship Times</h4>
+                    <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
+                      <pre className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap font-medium">
+                        {community.worshipTimes}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+                
+                {(community.officeHours || community.hoursOfOperation) && (
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Office Hours</h4>
+                    <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                      <p className="text-sm text-gray-900 dark:text-gray-100">
+                        {community.officeHours || (typeof community.hoursOfOperation === 'object' 
+                          ? JSON.stringify(community.hoursOfOperation) 
+                          : community.hoursOfOperation)}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Social Media Links */}
           {getSocialMediaLinks().length > 0 && (
