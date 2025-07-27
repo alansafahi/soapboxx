@@ -134,17 +134,29 @@ export function CommunityAdminTab() {
         console.log('No logo file to upload');
       }
       
+      console.log('Updating community with logoUrl:', logoUrl);
+      const updateData = {
+        ...profileData,
+        logoUrl,
+      };
+      console.log('Update payload:', updateData);
+      
       const response = await fetch(`/api/communities/${selectedCommunityId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({
-          ...profileData,
-          logoUrl,
-        }),
+        body: JSON.stringify(updateData),
       });
-      if (!response.ok) throw new Error('Failed to save community profile');
-      return response.json();
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Community update failed:', response.status, errorText);
+        throw new Error(`Failed to save community profile: ${errorText}`);
+      }
+      
+      const result = await response.json();
+      console.log('Community update result:', result);
+      return result;
     },
     onSuccess: () => {
       toast({ title: "Community profile updated successfully!" });
