@@ -7479,7 +7479,7 @@ Return JSON with this exact structure:
         instagram_url,
         twitter_url,
         tiktok_url,
-        primaryLanguage, // Add missing primaryLanguage field
+        // primaryLanguage field removed - not in database schema
         timeRows, // New dynamic time row data
         // Legacy fields for backward compatibility
         sunday_service,
@@ -7603,24 +7603,16 @@ Return JSON with this exact structure:
         adminEmail: adminEmail?.trim(),
         createdBy: userId,
         size: size?.trim() || 'small',
-        primaryLanguage: primaryLanguage?.trim() || 'English', // Add primaryLanguage field
+        // primaryLanguage field removed - not in database schema
         isActive: true,
-        verificationStatus: 'pending',
+        verificationStatus: 'verified',
         isDemo: false,
         isClaimed: true,
-        // Enhanced fields
-        establishedYear: establishedYear ? parseInt(establishedYear) : null,
-        weeklyAttendance: weeklyAttendance ? parseInt(weeklyAttendance) : null,
-        parentChurchId: parentChurchName ? null : null, // Would need to lookup actual parent church ID
-        missionStatement: missionStatement?.trim(),
+        // Enhanced fields - removed non-existent database fields
         socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : null,
         hoursOfOperation: Object.keys(hoursOfOperation).length > 0 ? hoursOfOperation : null,
         worshipTimes: worshipTimesArray.length > 0 ? worshipTimesArray.join('; ') : null,
-        // Custom time fields from dynamic rows
-        ...customTimeFields,
-        // Legacy fields for backward compatibility
-        sundayService: hoursOfOperation.sunday || null,
-        wednesdayService: hoursOfOperation.wednesday || null,
+        // Custom time fields removed - not in database schema
         createdAt: new Date(),
         updatedAt: new Date()
       };

@@ -196,25 +196,7 @@ export const communities = pgTable("communities", {
   officeHours: text("office_hours"), // Office hours text format
   worshipTimes: text("worship_times"), // Worship service times text format
   socialLinks: jsonb("social_links"), // Facebook, Instagram, Twitter, YouTube, etc.
-  primaryLanguage: varchar("primary_language", { length: 50 }), // Primary language for services
-  sundayService: text("sunday_service"), // Sunday service time
-  wednesdayService: text("wednesday_service"), // Wednesday service time
-  customTime1Label: varchar("custom_time_1_label", { length: 255 }), // Custom event/time label 1
-  customTime1: text("custom_time_1"), // Custom event/time schedule 1
-  customTime2Label: varchar("custom_time_2_label", { length: 255 }), // Custom event/time label 2
-  customTime2: text("custom_time_2"), // Custom event/time schedule 2
-  customTime3Label: varchar("custom_time_3_label", { length: 255 }), // Custom event/time label 3
-  customTime3: text("custom_time_3"), // Custom event/time schedule 3
-  customTime4Label: varchar("custom_time_4_label", { length: 255 }), // Custom event/time label 4
-  customTime4: text("custom_time_4"), // Custom event/time schedule 4
-  // parentChurchId: integer("parent_church_id").references((): any => communities.id), // For satellite campuses/ministries - Column doesn't exist in database
-  // parentChurchName: varchar("parent_church_name", { length: 255 }), // Display name of parent church - Column doesn't exist in database
-  // establishedYear: integer("established_year"), // Year the community was established - Column doesn't exist in database
-  // communityLanguages: text("community_languages").array(), // Languages spoken/services offered in - Column doesn't exist in database
-  // specialPrograms: text("special_programs").array(), // Special programs offered - Column doesn't exist in database
-  // facilities: text("facilities").array(), // Available facilities (gym, nursery, etc.) - Column doesn't exist in database
-  // missionStatement: text("mission_statement"), // Community mission statement - Column doesn't exist in database
-  // coreValues: text("core_values").array(), // Core values of the community - Column doesn't exist in database
+  // Fields below don't exist in actual database - removing to match schema
   communityTags: text("community_tags").array(), // Custom tags for community categorization
   latitude: real("latitude"),
   longitude: real("longitude"),

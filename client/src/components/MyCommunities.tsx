@@ -278,7 +278,7 @@ export default function MyCommunities() {
       wednesdayService: 'wednesday_service',
       officeHours: 'office_hours',
       worshipTimes: 'worship_times',
-      language: 'primaryLanguage',
+      // language field removed - not in database schema
       customTime1Label: 'custom_time_1_label',
       customTime1: 'custom_time_1',
       customTime2Label: 'custom_time_2_label',
