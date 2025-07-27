@@ -138,14 +138,10 @@ export function getUserFriendlyError(error: any, context: 'login' | 'registratio
   };
 }
 
-export function formatErrorForToast(error: any, context: 'login' | 'registration' | 'general' = 'general') {
+export function formatErrorForToast(error: any, context: 'login' | 'registration' | 'general' = 'general'): string {
   const friendlyError = getUserFriendlyError(error, context);
   
-  return {
-    title: friendlyError.title,
-    description: friendlyError.actionable ? 
-      `${friendlyError.description} ${friendlyError.actionable}` : 
-      friendlyError.description,
-    variant: "destructive" as const
-  };
+  return friendlyError.actionable ? 
+    `${friendlyError.description} ${friendlyError.actionable}` : 
+    friendlyError.description;
 }
