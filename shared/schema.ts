@@ -192,6 +192,8 @@ export const communities = pgTable("communities", {
   website: varchar("website", { length: 255 }),
   logoUrl: varchar("logo_url"), // Community logo/image
   size: varchar("size", { length: 50 }), // Weekly attendance category
+  establishedYear: integer("established_year"), // Year the community was established
+  parentChurchName: varchar("parent_church_name", { length: 255 }), // Parent organization name
   hoursOfOperation: jsonb("hours_of_operation"), // Operating hours for each day of the week
   officeHours: text("office_hours"), // Office hours text format
   worshipTimes: text("worship_times"), // Worship service times text format

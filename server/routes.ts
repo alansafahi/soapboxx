@@ -7824,9 +7824,9 @@ Return JSON with this exact structure:
         officeHours: officeHours?.trim(),
         worshipTimes: processedWorshipTimes?.trim(),
         hoursOfOperation: processedHoursOfOperation,
+        establishedYear: establishedYear ? parseInt(establishedYear) : undefined,
+        parentChurchName: parentChurchName?.trim(),
         updatedAt: new Date()
-        // Note: establishedYear and parentChurchName fields don't exist in database schema
-        // These would need schema migration to be added
       };
 
       // Remove undefined/null values to avoid overwriting existing data
