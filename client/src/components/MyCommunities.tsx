@@ -481,7 +481,26 @@ export default function MyCommunities() {
               </DialogHeader>
               
               <Form {...createForm}>
-                <form onSubmit={createForm.handleSubmit((data) => createCommunityMutation.mutate(data))} className="space-y-4">
+                <form onSubmit={createForm.handleSubmit((data) => {
+                  // Validate required fields
+                  if (!data.denomination || data.denomination.trim() === '') {
+                    toast({
+                      title: "Validation Error",
+                      description: "Please select a denomination or affiliation.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  if (!data.weeklyAttendance || data.weeklyAttendance.trim() === '') {
+                    toast({
+                      title: "Validation Error",
+                      description: "Please select weekly attendance.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  createCommunityMutation.mutate(data);
+                })} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={createForm.control}
@@ -533,7 +552,7 @@ export default function MyCommunities() {
                         return (
                           <FormItem>
                             <FormLabel>
-                              {selectedType === 'church' ? 'Denomination' : 'Affiliation'}
+                              {selectedType === 'church' ? 'Denomination *' : 'Affiliation *'}
                             </FormLabel>
                             <Select onValueChange={(value) => {
                               if (value === "other") {
@@ -684,24 +703,6 @@ export default function MyCommunities() {
                       )}
                     />
 
-                    <FormField
-                      control={createForm.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Description</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Tell us about your community..."
-                              rows={3}
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
                     {/* Logo Upload Section */}
                     <div className="col-span-2">
                       <FormLabel>📸 Community Logo</FormLabel>
@@ -748,6 +749,24 @@ export default function MyCommunities() {
 
                     <FormField
                       control={createForm.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Tell us about your community..."
+                              rows={3}
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
                       name="establishedYear"
                       render={({ field }) => (
                         <FormItem>
@@ -765,7 +784,7 @@ export default function MyCommunities() {
                       name="weeklyAttendance"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>👥 Weekly Attendance</FormLabel>
+                          <FormLabel>👥 Weekly Attendance *</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
@@ -929,7 +948,7 @@ export default function MyCommunities() {
                     {/* Dynamic Service Times Section */}
                     <div className="col-span-2">
                       <div className="flex items-center gap-4 mb-4">
-                        <h3 className="text-lg font-semibold">⏰ Additional Times & Events</h3>
+                        <h3 className="text-lg font-semibold">Additional Times</h3>
                       </div>
                       
                       <div className="space-y-4">
