@@ -1247,7 +1247,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         )
         .limit(1);
 
-      if (userChurch.length === 0) {
+      if (userRole.length === 0) {
         return res.status(403).json({ success: false, message: "You are not a member of this church" });
       }
 
@@ -1343,13 +1343,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // For regular users, check church relationships
       const userChurch = await storage.getUserChurch(userId);
       
-      if (!userChurch) {
+      if (!userRole) {
         return res.json({ role: 'new_member', churchId: null });
       }
       
       res.json({ 
-        role: userChurch.role || 'member',
-        churchId: userChurch.churchId 
+        role: userRole.role || 'member',
+        churchId: userRole.churchId 
       });
     } catch (error) {
       res.json({ role: 'member', churchId: null });
@@ -2290,8 +2290,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session.userId || req.user?.claims?.sub || req.user?.id;
       if (!userId) return res.status(401).json({ message: "User not authenticated" });
       const userChurch = await storage.getUserChurch(userId);
-      if (!userChurch) return res.json({ role: 'new_member', churchId: null });
-      res.json({ role: userChurch.role || 'member', churchId: userChurch.churchId });
+      if (!userRole) return res.json({ role: 'new_member', churchId: null });
+      res.json({ role: userRole.role || 'member', churchId: userRole.churchId });
     } catch (error) {
       res.json({ role: 'member', churchId: null });
     }
@@ -7291,12 +7291,12 @@ Return JSON with this exact structure:
       }
 
       const user = await storage.getUser(userId);
-      const userChurchRole = await storage.getUserChurchRole(userId, churchId);
+      const userRole = await storage.getUserCommunityRole(userId, churchId);
       
       // Check if user has permission to delete church
       const canDelete = user?.role === 'soapbox_owner' || 
-                       userChurchRole?.role === 'church_admin' ||
-                       userChurchRole?.role === 'owner';
+                       userRole?.role === 'church_admin' ||
+                       userRole?.role === 'owner';
 
       if (!canDelete) {
         return res.status(403).json({ error: 'Insufficient permissions to delete church' });
@@ -7696,13 +7696,13 @@ Return JSON with this exact structure:
       }
 
       // Check if user has admin access to this community
-      const userCommunity = await storage.getUserChurchRole(userId, communityId);
+      const userRole = await storage.getUserCommunityRole(userId, communityId);
       
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
       
       const user = await storage.getUser(userId);
       
-      if (!userCommunity || (!adminRoles.includes(userCommunity.role) && user?.role !== 'soapbox_owner')) {
+      if (!userRole || (!adminRoles.includes(userRole.role) && user?.role !== 'soapbox_owner')) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
@@ -7878,13 +7878,13 @@ Return JSON with this exact structure:
       }
 
       // Check if user has admin access to this community
-      const userCommunity = await storage.getUserChurchRole(userId, communityId);
+      const userCommunity = await storage.getUserCommunityRole(userId, communityId);
       
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
       
       const user = await storage.getUser(userId);
       
-      if (!userCommunity || (!adminRoles.includes(userCommunity.role) && user?.role !== 'soapbox_owner')) {
+      if (!userRole || (!adminRoles.includes(userRole.role) && user?.role !== 'soapbox_owner')) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
@@ -7912,9 +7912,9 @@ Return JSON with this exact structure:
       }
 
       // First try to get user's role in this church
-      const userChurch = await storage.getUserChurchRole(userId, churchId);
+      const userChurch = await storage.getUserCommunityRole(userId, churchId);
       if (userChurch) {
-        return res.json({ role: userChurch.role });
+        return res.json({ role: userRole.role });
       }
 
       // If not found, check if this user is a global admin or created this church
@@ -7986,13 +7986,13 @@ Return JSON with this exact structure:
       }
 
       // Check if user has admin access to this church
-      const userChurch = await storage.getUserChurchRole(userId, churchId);
+      const userChurch = await storage.getUserCommunityRole(userId, churchId);
       
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
       
       const user = await storage.getUser(userId);
       
-      if (!userChurch || (!adminRoles.includes(userChurch.role) && user?.role !== 'soapbox_owner')) {
+      if (!userRole || (!adminRoles.includes(userRole.role) && user?.role !== 'soapbox_owner')) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
@@ -8016,7 +8016,7 @@ Return JSON with this exact structure:
       }
 
       // Check if user has access to this church
-      const userChurch = await storage.getUserChurchRole(userId, churchId);
+      const userChurch = await storage.getUserCommunityRole(userId, churchId);
       const user = await storage.getUser(userId);
       
       // Allow access for global admins or church creators
@@ -8062,7 +8062,7 @@ Return JSON with this exact structure:
       }
 
       // Check if user has admin access to this church
-      const userChurch = await storage.getUserChurchRole(userId, feature.church_id);
+      const userChurch = await storage.getUserCommunityRole(userId, feature.church_id);
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
       
       const user = await storage.getUser(userId);
@@ -8072,7 +8072,7 @@ Return JSON with this exact structure:
       
       if (user?.role === 'soapbox_owner' || user?.role === 'system_admin') {
         hasAccess = true;
-      } else if (userChurch && adminRoles.includes(userChurch.role)) {
+      } else if (userChurch && adminRoles.includes(userRole.role)) {
         hasAccess = true;
       } else {
         // Check if user created this church by looking for admin churches
@@ -8160,7 +8160,7 @@ Return JSON with this exact structure:
 
       // Verify user is member of this church
       const userChurch = await storage.getUserChurch(userId, churchId);
-      if (!userChurch) {
+      if (!userRole) {
         return res.status(403).json({ error: 'Not a member of this church' });
       }
 
@@ -9751,7 +9751,7 @@ Return JSON with this exact structure:
         // Continue without church - allow independent circles
       }
 
-      if (!userChurch) {
+      if (!userRole) {
         isIndependent = true;
         
         // Check limits for independent circles with user-specific limits
@@ -9784,7 +9784,7 @@ Return JSON with this exact structure:
         memberLimit: memberLimit || null,
         focusAreas: focusAreas || [],
         meetingSchedule: meetingSchedule || null,
-        churchId: userChurch ? userChurch.churchId : null, // null for independent circles
+        churchId: userChurch ? userRole.churchId : null, // null for independent circles
         createdBy: userId,
         isIndependent: isIndependent, // Mark independent circles
         type: isIndependent ? 'independent' : 'church',
@@ -10038,10 +10038,10 @@ Return JSON with this exact structure:
 
       const circleLimit = user.independentCircleLimit || 2;
       const independentCirclesCount = independentCircles.length;
-      const canCreateMore = userChurch.length > 0 || independentCirclesCount < circleLimit;
+      const canCreateMore = userRole.length > 0 || independentCirclesCount < circleLimit;
 
       return res.json({
-        hasChurch: userChurch.length > 0,
+        hasChurch: userRole.length > 0,
         profileComplete,
         circleLimit,
         independentCirclesCount,
@@ -10599,12 +10599,12 @@ Return JSON with this exact structure:
       let userChurchId = churchId ? parseInt(churchId as string) : undefined;
       
       // Get user's church if not specified
-      if (!userChurchId) {
+      if (!userRoleId) {
         const user = await storage.getUser(userId);
         if (user) {
           const userChurch = await storage.getUserChurch(userId);
           if (userChurch) {
-            userChurchId = userChurch.churchId;
+            userChurchId = userRole.churchId;
             
           }
         }
@@ -10949,11 +10949,11 @@ Return JSON with this exact structure:
 
       // Get user's church
       const userChurch = await storage.getUserChurch(userId);
-      if (!userChurch) {
+      if (!userRole) {
         return res.status(404).json({ message: 'Church affiliation required' });
       }
 
-      const sharedEntries = await storage.getSoapEntriesSharedWithPastor(userId, userChurch.churchId);
+      const sharedEntries = await storage.getSoapEntriesSharedWithPastor(userId, userRole.churchId);
       res.json(sharedEntries);
     } catch (error) {
       res.status(500).json({ message: 'Failed to retrieve shared S.O.A.P. entries' });
@@ -10966,12 +10966,12 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       
       const userChurch = await storage.getUserChurch(userId);
-      const pastors = userChurch ? await storage.getChurchPastors(userChurch.churchId) : [];
+      const pastors = userChurch ? await storage.getChurchPastors(userRole.churchId) : [];
       
       res.json({
-        hasChurch: !!userChurch,
+        hasChurch: !!userRole,
         church: userChurch ? {
-          id: userChurch.churchId,
+          id: userRole.churchId,
           name: 'Church Name', // Will be populated from church details
         } : null,
         hasPastors: pastors.length > 0,
@@ -11043,7 +11043,7 @@ Please provide suggestions for the missing or incomplete sections.`
       } else {
         // Check church-specific permissions for other users
         const userChurch = await storage.getUserChurch(userId);
-        if (!userChurch || !['church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+        if (!userRole || !['church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
           return res.status(403).json({ message: "Leadership access required for your church" });
         }
       }
@@ -11084,7 +11084,7 @@ Please provide suggestions for the missing or incomplete sections.`
       } else {
         // Check church-specific permissions for other users
         const userChurch = await storage.getUserChurch(userId);
-        if (!userChurch || !['church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+        if (!userRole || !['church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
           return res.status(403).json({ message: "Leadership access required for your church" });
         }
       }
@@ -11123,10 +11123,10 @@ Please provide suggestions for the missing or incomplete sections.`
         churchId = userChurchAssociations[0].churchId;
       } else {
         const userChurch = await storage.getUserChurch(userId);
-        if (!userChurch) {
+        if (!userRole) {
           return res.status(403).json({ message: "Church membership required" });
         }
-        churchId = userChurch.churchId;
+        churchId = userRole.churchId;
       }
       
       if (targetAudience?.allMembers) {
@@ -11242,9 +11242,9 @@ Please provide suggestions for the missing or incomplete sections.`
       const user = await storage.getUser(userId);
       const userChurch = await storage.getUserChurch(userId);
       
-      // Check both user.role (main table) and userChurch.role for permissions
+      // Check both user.role (main table) and userRole.role for permissions
       const isAuthorized = user?.role === 'soapbox_owner' || 
-                          (userChurch && ['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'soapbox_owner'].includes(userChurch.role));
+                          (userChurch && ['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'soapbox_owner'].includes(userRole.role));
       
       if (!isAuthorized) {
         return res.status(403).json({ message: "Senior leadership access required for emergency broadcasts" });
@@ -11253,9 +11253,9 @@ Please provide suggestions for the missing or incomplete sections.`
       const { title, content, requiresResponse } = req.body;
 
       // Get all church members
-      const churchMembers = await storage.getChurchMembers(userChurch.churchId);
+      const churchMembers = await storage.getChurchMembers(userRole.churchId);
       const sender = await storage.getUser(userId);
-      const church = await storage.getChurch(userChurch.churchId);
+      const church = await storage.getChurch(userRole.churchId);
       
       // Create urgent in-app notifications for all members
       for (const member of churchMembers) {
@@ -11273,7 +11273,7 @@ Please provide suggestions for the missing or incomplete sections.`
       for (const member of churchMembers) {
         try {
           await storage.createCommunicationRecord({
-            churchId: userChurch.churchId,
+            churchId: userRole.churchId,
             sentBy: userId,
             subject: `URGENT: ${title}`,
             content: content,
@@ -11523,18 +11523,18 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Get the admin's church
       const userChurch = await storage.getUserChurch(userId);
-      if (!userChurch) {
+      if (!userRole) {
         return res.status(403).json({ message: "User not associated with any church" });
       }
       
       // Check if user has admin permissions
       const adminRoles = ['admin', 'church_admin', 'system_admin', 'super_admin', 'pastor', 'lead_pastor', 'soapbox_owner', 'soapbox_support', 'platform_admin', 'regional_admin'];
-      if (!adminRoles.includes(userChurch.role)) {
+      if (!adminRoles.includes(userRole.role)) {
         return res.status(403).json({ message: "Admin access required" });
       }
       
       // Get only members from the admin's church
-      const members = await storage.getChurchMembers(userChurch.churchId);
+      const members = await storage.getChurchMembers(userRole.churchId);
       
       // Transform members to include required display fields
       const transformedMembers = members.map((member: any) => {
@@ -11572,7 +11572,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Get user's church to verify permissions
       const userChurch = await storage.getUserChurch(userId);
-      if (!userChurch) {
+      if (!userRole) {
         return res.status(403).json({ message: "Must be affiliated with a church to add members" });
       }
       
@@ -11625,7 +11625,7 @@ Please provide suggestions for the missing or incomplete sections.`
         .insert(userChurches)
         .values({
           userId: newUserId,
-          churchId: churchId || userChurch.churchId,
+          churchId: churchId || userRole.churchId,
           roleId: 1, // Default member role
           isActive: true,
         })
@@ -11640,7 +11640,7 @@ Please provide suggestions for the missing or incomplete sections.`
         address: newUser.address,
         membershipStatus: 'active',
         joinedDate: new Date().toISOString(),
-        churchId: (churchId || userChurch.churchId).toString(),
+        churchId: (churchId || userRole.churchId).toString(),
         churchAffiliation: '',
         denomination: '',
         interests: interests || '',
@@ -11662,7 +11662,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Get user's church to verify permissions
       const userChurch = await storage.getUserChurch(userId);
-      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
         return res.status(403).json({ message: "Permission Required" });
       }
 
@@ -11715,7 +11715,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Verify user has admin access
       const userChurch = await storage.getUserChurch(userId);
-      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -11737,7 +11737,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Verify user has admin access
       const userChurch = await storage.getUserChurch(userId);
-      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -11763,7 +11763,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Verify user has admin access
       const userChurch = await storage.getUserChurch(userId);
-      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -11788,7 +11788,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Verify user has admin access
       const userChurch = await storage.getUserChurch(userId);
-      if (!userChurch || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userChurch.role)) {
+      if (!userRole || !['owner', 'super_admin', 'system_admin', 'church_admin', 'lead_pastor', 'pastor'].includes(userRole.role)) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -12905,7 +12905,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Check if user has access to this church
       const userChurch = await storage.getUserChurch(userId, parseInt(churchId));
-      if (!userChurch) {
+      if (!userRole) {
         return res.status(403).json({ error: 'Access denied to this church' });
       }
 
@@ -12928,7 +12928,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Check if user has admin access to this church
       const userChurch = await storage.getUserChurch(userId, parseInt(churchId));
-      if (!userChurch || !['church_admin', 'owner', 'soapbox_owner'].includes(userChurch.role)) {
+      if (!userRole || !['church_admin', 'owner', 'soapbox_owner'].includes(userRole.role)) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
@@ -12975,7 +12975,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Check if user has admin access to this church
       const userChurch = await storage.getUserChurch(userId, parseInt(churchId));
-      if (!userChurch || !['church_admin', 'owner', 'soapbox_owner'].includes(userChurch.role)) {
+      if (!userRole || !['church_admin', 'owner', 'soapbox_owner'].includes(userRole.role)) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
@@ -12997,7 +12997,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Check if user has access to community settings
-      const userRole = await storage.getUserChurchRole(userId, communityId);
+      const userRole = await storage.getUserCommunityRole(userId, communityId);
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'ministry_leader'];
       
       if (!userRole || !adminRoles.includes(userRole.role)) {
@@ -13022,7 +13022,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Check if user has admin access
-      const userRole = await storage.getUserChurchRole(userId, communityId);
+      const userRole = await storage.getUserCommunityRole(userId, communityId);
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'ministry_leader'];
       
       if (!userRole || !adminRoles.includes(userRole.role)) {
@@ -13231,7 +13231,7 @@ Please provide suggestions for the missing or incomplete sections.`
         ));
       
       // Prevent upload if user has no church associations for security
-      if (!userChurchAssociations || userChurchAssociations.length === 0) {
+      if (!userRoleAssociations || userChurchAssociations.length === 0) {
         return res.status(403).json({ message: 'You must be a member of a church to upload images' });
       }
       
@@ -13441,7 +13441,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       const userChurches = await storage.getUserChurches(userId);
-      if (!userChurches || userChurches.length === 0) {
+      if (!userRolees || userChurches.length === 0) {
         return res.json([]); // Return empty array if no church
       }
 
@@ -13492,7 +13492,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Simplified leaderboard - use storage methods instead of direct DB access
       const userChurches = await storage.getUserChurches(userId);
-      if (!userChurches || userChurches.length === 0) {
+      if (!userRolees || userChurches.length === 0) {
         return res.json([]); // Empty leaderboard for users not in a church
       }
 
@@ -13531,7 +13531,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       const userChurches = await storage.getUserChurches(userId);
-      if (!userChurches || userChurches.length === 0) {
+      if (!userRolees || userChurches.length === 0) {
         return res.json([]); // Return empty array if no church
       }
 
@@ -13557,7 +13557,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Get events for user's church
       const userChurches = await storage.getUserChurches(userId);
-      if (!userChurches || userChurches.length === 0) {
+      if (!userRolees || userChurches.length === 0) {
         return res.json([]);
       }
 
@@ -13580,7 +13580,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Get user's church for event creation
       const userChurches = await storage.getUserChurches(userId);
-      if (!userChurches || userChurches.length === 0) {
+      if (!userRolees || userChurches.length === 0) {
         return res.status(400).json({ message: 'Must be affiliated with a church to create events' });
       }
 

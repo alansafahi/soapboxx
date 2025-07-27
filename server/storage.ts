@@ -1816,7 +1816,7 @@ export class DatabaseStorage implements IStorage {
           c.created_at as "createdAt", c.updated_at as "updatedAt", c.admin_email as "adminEmail",
           c.type, c.size, c.member_count as "memberCount", c.created_by as "createdBy"
         FROM communities c
-        INNER JOIN user_churches uc ON c.id = uc.church_id
+        INNER JOIN user_communities uc ON c.id = uc.community_id
         WHERE uc.user_id = ${userId}
           AND uc.role IN ('church_admin', 'admin', 'pastor', 'lead-pastor')
           AND c.is_active = true
@@ -1891,23 +1891,27 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getUserChurchRole(userId: string, churchId: number): Promise<{ role: string } | undefined> {
+  async getUserCommunityRole(userId: string, communityId: number): Promise<string | undefined> {
     try {
       const result = await pool.query(
-        'SELECT role FROM user_churches WHERE user_id = $1 AND church_id = $2 AND is_active = true LIMIT 1',
-        [userId, churchId]
+        'SELECT role FROM user_communities WHERE user_id = $1 AND community_id = $2 AND is_active = true LIMIT 1',
+        [userId, communityId]
       );
 
       if (result.rows.length === 0) {
         return undefined;
       }
 
-      return {
-        role: result.rows[0].role || 'member'
-      };
+      return result.rows[0].role || 'member';
     } catch (error) {
       return undefined;
     }
+  }
+
+  // Legacy method alias for backward compatibility
+  async getUserChurchRole(userId: string, churchId: number): Promise<{ role: string } | undefined> {
+    const role = await this.getUserCommunityRole(userId, churchId);
+    return role ? { role } : undefined;
   }
 
   async getChurchFeature(featureId: number): Promise<any> {
@@ -2742,7 +2746,7 @@ export class DatabaseStorage implements IStorage {
       
       // Check for church-specific admin roles using raw SQL to handle column mapping
       const churchRoles = await db.execute(sql`
-        SELECT role FROM user_churches 
+        SELECT role FROM user_communities 
         WHERE user_id = ${userId} AND role IS NOT NULL
       `);
       
@@ -2772,8 +2776,8 @@ export class DatabaseStorage implements IStorage {
           uc.joined_at,
           uc.last_accessed_at,
           uc.is_active as user_is_active
-        FROM user_churches uc
-        LEFT JOIN communities c ON uc.church_id = c.id
+        FROM user_communities uc
+        LEFT JOIN communities c ON uc.community_id = c.id
         WHERE uc.user_id = ${userId} AND uc.is_active = true
         ORDER BY uc.last_accessed_at DESC
       `);
@@ -2813,8 +2817,8 @@ export class DatabaseStorage implements IStorage {
         FROM communities c
         WHERE c.is_active = true 
           AND c.id NOT IN (
-            SELECT uc.church_id 
-            FROM user_churches uc 
+            SELECT uc.community_id 
+            FROM user_communities uc 
             WHERE uc.user_id = ${userId} AND uc.is_active = true
           )
         ORDER BY c.member_count DESC, c.name ASC
@@ -2848,21 +2852,21 @@ export class DatabaseStorage implements IStorage {
     try {
       // Check if user is already a member
       const existingMembership = await db.execute(sql`
-        SELECT id FROM user_churches 
-        WHERE user_id = ${userId} AND church_id = ${communityId}
+        SELECT id FROM user_communities 
+        WHERE user_id = ${userId} AND community_id = ${communityId}
       `);
 
       if (existingMembership.rows.length > 0) {
         // Reactivate if membership exists but is inactive
         await db.execute(sql`
-          UPDATE user_churches 
+          UPDATE user_communities 
           SET is_active = true, last_accessed_at = NOW()
-          WHERE user_id = ${userId} AND church_id = ${communityId}
+          WHERE user_id = ${userId} AND community_id = ${communityId}
         `);
       } else {
         // Create new membership with admin role for community creator
         await db.execute(sql`
-          INSERT INTO user_churches (user_id, church_id, role, joined_at, last_accessed_at, is_active)
+          INSERT INTO user_communities (user_id, community_id, role, joined_at, last_accessed_at, is_active)
           VALUES (${userId}, ${communityId}, 'church_admin', NOW(), NOW(), true)
         `);
       }
@@ -2871,8 +2875,8 @@ export class DatabaseStorage implements IStorage {
       await db.execute(sql`
         UPDATE communities 
         SET member_count = (
-          SELECT COUNT(*) FROM user_churches 
-          WHERE church_id = ${communityId} AND is_active = true
+          SELECT COUNT(*) FROM user_communities 
+          WHERE community_id = ${communityId} AND is_active = true
         )
         WHERE id = ${communityId}
       `);
@@ -2973,7 +2977,7 @@ export class DatabaseStorage implements IStorage {
           moodTag: prayer.moodTag || null,
           prayerCount: prayer.prayer_count || 0,
           authorId: prayer.author_id,
-          churchId: prayer.church_id,
+          churchId: prayer.community_id,
           isPublic: prayer.is_public,
           isAnonymous: prayer.is_anonymous,
           isAnswered: prayer.is_answered,
@@ -3384,12 +3388,12 @@ export class DatabaseStorage implements IStorage {
           u.role,
           uc.is_active as "isActive",
           u.created_at as "createdAt",
-          uc.church_id as "churchId",
+          uc.community_id as "churchId",
           c.name as "churchName"
         FROM users u
         LEFT JOIN user_churches uc ON u.id = uc.user_id
-        LEFT JOIN communities c ON uc.church_id = c.id
-        WHERE uc.church_id IS NOT NULL
+        LEFT JOIN communities c ON uc.community_id = c.id
+        WHERE uc.community_id IS NOT NULL
         ORDER BY u.created_at DESC
       `);
       return result.rows;
@@ -3413,12 +3417,12 @@ export class DatabaseStorage implements IStorage {
           u.role,
           uc.is_active as "isActive",
           u.created_at as "createdAt",
-          uc.church_id as "churchId",
+          uc.community_id as "churchId",
           c.name as "churchName"
         FROM users u
         LEFT JOIN user_churches uc ON u.id = uc.user_id
-        LEFT JOIN communities c ON uc.church_id = c.id
-        WHERE uc.church_id = $1
+        LEFT JOIN communities c ON uc.community_id = c.id
+        WHERE uc.community_id = $1
         ORDER BY u.created_at DESC
       `, [churchId]);
       return result.rows;
@@ -3431,7 +3435,7 @@ export class DatabaseStorage implements IStorage {
     try {
       // Direct database query to avoid compilation issues
       const result = await pool.query(
-        'SELECT * FROM church_feature_settings WHERE church_id = $1 ORDER BY feature_category, feature_name',
+        'SELECT * FROM church_feature_settings WHERE community_id = $1 ORDER BY feature_category, feature_name',
         [churchId]
       );
       return result.rows;
@@ -3451,7 +3455,7 @@ export class DatabaseStorage implements IStorage {
       const result = await pool.query(`
         UPDATE church_feature_settings 
         SET is_enabled = $1, enabled_by = $2, last_modified = NOW()
-        WHERE church_id = $3 AND feature_category = $4 AND feature_name = $5
+        WHERE community_id = $3 AND feature_category = $4 AND feature_name = $5
         RETURNING *
       `, [data.isEnabled, data.enabledBy, data.churchId, data.featureCategory, data.featureName]);
       
@@ -4168,9 +4172,9 @@ export class DatabaseStorage implements IStorage {
         try {
           await pool.query(`
             INSERT INTO church_feature_settings (
-              church_id, feature_category, feature_name, is_enabled, enabled_by, enabled_at, last_modified
+              community_id, feature_category, feature_name, is_enabled, enabled_by, enabled_at, last_modified
             ) VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-            ON CONFLICT (church_id, feature_category, feature_name) 
+            ON CONFLICT (community_id, feature_category, feature_name) 
             DO UPDATE SET 
               is_enabled = EXCLUDED.is_enabled,
               enabled_by = EXCLUDED.enabled_by,
