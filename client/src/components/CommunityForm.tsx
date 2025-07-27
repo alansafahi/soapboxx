@@ -387,16 +387,6 @@ export function CommunityForm({
               )}
             </div>
             <div>
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                rows={3}
-                value={formData.description || ''}
-                onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Tell people about your community..."
-              />
-            </div>
-            <div>
               <Label htmlFor="establishedYear">Established Year</Label>
               <Input
                 id="establishedYear"
@@ -431,6 +421,16 @@ export function CommunityForm({
                 value={formData.parentChurchName || ''}
                 onChange={(e) => handleInputChange('parentChurchName', e.target.value)}
                 placeholder="Main Campus Church Name"
+              />
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                rows={3}
+                value={formData.description || ''}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                placeholder="Tell people about your community..."
               />
             </div>
             <div>
@@ -671,12 +671,12 @@ export function CommunityForm({
           </CardContent>
         </Card>
 
-        {/* Service Times */}
+        {/* Service Times & Hours */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
-              Service Times
+              Service Times & Hours
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
