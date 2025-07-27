@@ -830,6 +830,44 @@ export default function MyCommunities() {
                       )}
                     />
 
+
+
+                    <FormField
+                      control={createForm.control}
+                      name="officeHours"
+                      render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>🕒 Office Hours (Auto-filled by denomination)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Mon-Fri 9AM-4PM"
+                              rows={2}
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
+                      name="worshipTimes"
+                      render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>⛪ Worship Times (Auto-filled by denomination)</FormLabel>
+                          <FormControl>
+                            <Textarea 
+                              placeholder="Sunday: 9AM & 11AM"
+                              rows={3}
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     {/* Dynamic Service Times Section */}
                     <div className="col-span-2">
                       <div className="flex items-center gap-4 mb-4">
@@ -916,43 +954,6 @@ export default function MyCommunities() {
                         )}
                       </div>
                     </div>
-
-                    <FormField
-                      control={createForm.control}
-                      name="officeHours"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>🕒 Office Hours (Auto-filled by denomination)</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Mon-Fri 9AM-4PM"
-                              rows={2}
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createForm.control}
-                      name="worshipTimes"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>⛪ Worship Times (Auto-filled by denomination)</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Sunday: 9AM & 11AM"
-                              rows={3}
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
 
                   </div>
 
