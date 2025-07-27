@@ -9,7 +9,7 @@ import { Textarea } from "./ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useToast } from "../hooks/use-toast";
-import { Building2, Settings, Users, Eye, Save, MapPin, Phone, Mail, Globe, Calendar, Church, Clock, Share2, Image, Trophy } from "lucide-react";
+import { Building2, Settings, Users, Eye, Save, MapPin, Phone, Mail, Globe, Calendar, Church, Clock, Share2, Image, Trophy, Plus } from "lucide-react";
 import { CommunitySettings } from "./CommunitySettings";
 import { ChurchFeatureManager } from "./ChurchFeatureManager";
 import { EventManagement } from "./EventManagement";
@@ -261,26 +261,36 @@ export function CommunityAdminTab() {
           </p>
         </div>
         
-        {allAdminCommunities.length > 1 && (
-          <Select value={selectedCommunityId || ""} onValueChange={setSelectedCommunityId}>
-            <SelectTrigger className="w-64">
-              <SelectValue placeholder="Select a community" />
-            </SelectTrigger>
-            <SelectContent>
-              {allAdminCommunities.map((community: any) => (
-                <SelectItem key={community.id} value={community.id.toString()}>
-                  <div className="flex items-center space-x-2">
-                    <Building2 className="h-4 w-4" />
-                    <span>{community.name}</span>
-                    <span className="text-xs text-gray-500">
-                      ({community.role === 'creator' ? 'Creator' : community.role})
-                    </span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => window.location.href = '/community-management'}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Create A Community
+          </Button>
+          
+          {allAdminCommunities.length > 1 && (
+            <Select value={selectedCommunityId || ""} onValueChange={setSelectedCommunityId}>
+              <SelectTrigger className="w-64">
+                <SelectValue placeholder="Select a community" />
+              </SelectTrigger>
+              <SelectContent>
+                {allAdminCommunities.map((community: any) => (
+                  <SelectItem key={community.id} value={community.id.toString()}>
+                    <div className="flex items-center space-x-2">
+                      <Building2 className="h-4 w-4" />
+                      <span>{community.name}</span>
+                      <span className="text-xs text-gray-500">
+                        ({community.role === 'creator' ? 'Creator' : community.role})
+                      </span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        </div>
       </div>
 
       {selectedCommunity && (
