@@ -53,19 +53,8 @@ const createCommunitySchema = z.object({
   missionStatement: z.string().optional(),
   facebookUrl: z.string().optional(),
   instagramUrl: z.string().optional(),
-  sundayService: z.string().optional(),
-  wednesdayService: z.string().optional(),
   officeHours: z.string().optional(),
-  worshipTimes: z.string().optional(),
-  language: z.string().optional(),
-  customTime1: z.string().optional(),
-  customTime1Label: z.string().optional(),
-  customTime2: z.string().optional(),
-  customTime2Label: z.string().optional(),
-  customTime3: z.string().optional(),
-  customTime3Label: z.string().optional(),
-  customTime4: z.string().optional(),
-  customTime4Label: z.string().optional()
+  worshipTimes: z.string().optional()
 });
 
 // Organization-specific affiliation lists
@@ -166,6 +155,9 @@ export default function MyCommunities() {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>("");
+  const [timeRows, setTimeRows] = useState([
+    { id: 1, eventLabel: '', timeSchedule: '', language: 'english' }
+  ]);
   
   const { data: userCommunities = [], isLoading, error } = useQuery<Community[]>({
     queryKey: ["/api/users/communities"],
@@ -295,13 +287,34 @@ export default function MyCommunities() {
     
     // Transform field names
     Object.keys(fieldMapping).forEach(camelKey => {
+      const snakeKey = fieldMapping[camelKey as keyof typeof fieldMapping];
       if (transformed[camelKey] !== undefined) {
-        transformed[fieldMapping[camelKey]] = transformed[camelKey];
+        transformed[snakeKey] = transformed[camelKey];
         delete transformed[camelKey];
       }
     });
 
     return transformed;
+  };
+
+  // Helper functions for managing time rows
+  const addTimeRow = () => {
+    if (timeRows.length < 6) {
+      const newId = Math.max(...timeRows.map(row => row.id)) + 1;
+      setTimeRows([...timeRows, { id: newId, eventLabel: '', timeSchedule: '', language: 'english' }]);
+    }
+  };
+
+  const removeTimeRow = (id: number) => {
+    if (timeRows.length > 1) {
+      setTimeRows(timeRows.filter(row => row.id !== id));
+    }
+  };
+
+  const updateTimeRow = (id: number, field: string, value: string) => {
+    setTimeRows(timeRows.map(row => 
+      row.id === id ? { ...row, [field]: value } : row
+    ));
   };
 
   // Create community mutation
@@ -314,8 +327,19 @@ export default function MyCommunities() {
         logoUrl = await handleLogoUpload(logoFile);
       }
       
+      // Include time rows data in submission
+      const timeRowsData: Record<string, string> = {};
+      timeRows.forEach((row, index) => {
+        if (row.eventLabel || row.timeSchedule) {
+          timeRowsData[`timeRow${index + 1}Label`] = row.eventLabel;
+          timeRowsData[`timeRow${index + 1}Schedule`] = row.timeSchedule;
+          timeRowsData[`timeRow${index + 1}Language`] = row.language;
+        }
+      });
+
       const normalizedData = transformToSnakeCase({
         ...data,
+        ...timeRowsData,
         website: normalizeWebsiteUrl(data.website),
         logoUrl: logoUrl
       });
@@ -344,6 +368,7 @@ export default function MyCommunities() {
       setShowCustomDenomination(false);
       setLogoFile(null);
       setLogoPreview("");
+      setTimeRows([{ id: 1, eventLabel: '', timeSchedule: '', language: 'english' }]);
     },
     onError: (error: any) => {
       toast({
@@ -805,22 +830,51 @@ export default function MyCommunities() {
                       )}
                     />
 
-                    {/* Service Times Section with Language Selector */}
+                    {/* Dynamic Service Times Section */}
                     <div className="col-span-2">
                       <div className="flex items-center gap-4 mb-4">
-                        <h3 className="text-lg font-semibold">⏰ Service Times</h3>
-                        <FormField
-                          control={createForm.control}
-                          name="language"
-                          render={({ field }) => (
-                            <FormItem className="flex-1 max-w-xs">
-                              <FormLabel className="text-sm">Primary Language</FormLabel>
-                              <Select onValueChange={field.onChange} value={field.value}>
-                                <FormControl>
-                                  <SelectTrigger className="h-9">
-                                    <SelectValue placeholder="Select language" />
-                                  </SelectTrigger>
-                                </FormControl>
+                        <h3 className="text-lg font-semibold">⏰ Additional Times & Events</h3>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        {timeRows.map((row, index) => (
+                          <div key={row.id} className="grid grid-cols-12 gap-3 items-end">
+                            {/* Event/Time Label */}
+                            <div className="col-span-4">
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Event/Time Label {index + 1}
+                              </label>
+                              <Input
+                                placeholder="e.g., Sunday Service, Youth Group"
+                                value={row.eventLabel}
+                                onChange={(e) => updateTimeRow(row.id, 'eventLabel', e.target.value)}
+                              />
+                            </div>
+                            
+                            {/* Time/Schedule */}
+                            <div className="col-span-4">
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Time/Schedule {index + 1}
+                              </label>
+                              <Input
+                                placeholder="e.g., Sunday 10:00 AM"
+                                value={row.timeSchedule}
+                                onChange={(e) => updateTimeRow(row.id, 'timeSchedule', e.target.value)}
+                              />
+                            </div>
+                            
+                            {/* Language */}
+                            <div className="col-span-3">
+                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Language {index + 1}
+                              </label>
+                              <Select 
+                                value={row.language} 
+                                onValueChange={(value) => updateTimeRow(row.id, 'language', value)}
+                              >
+                                <SelectTrigger>
+                                  <SelectValue />
+                                </SelectTrigger>
                                 <SelectContent>
                                   {LANGUAGE_OPTIONS.map((option) => (
                                     <SelectItem key={option.value} value={option.value}>
@@ -829,40 +883,37 @@ export default function MyCommunities() {
                                   ))}
                                 </SelectContent>
                               </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={createForm.control}
-                          name="sundayService"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Sunday Service Time</FormLabel>
-                              <FormControl>
-                                <Input placeholder="10:00 AM" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={createForm.control}
-                          name="wednesdayService"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Wednesday Service Time</FormLabel>
-                              <FormControl>
-                                <Input placeholder="7:00 PM" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+                            </div>
+                            
+                            {/* Remove Button */}
+                            <div className="col-span-1">
+                              {timeRows.length > 1 && (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => removeTimeRow(row.id)}
+                                  className="h-9 w-9 p-0"
+                                >
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                        
+                        {/* Add Another Row Button */}
+                        {timeRows.length < 6 && (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={addTimeRow}
+                            className="w-full mt-3"
+                          >
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Another Date/Time
+                          </Button>
+                        )}
                       </div>
                     </div>
 
@@ -902,123 +953,7 @@ export default function MyCommunities() {
                       )}
                     />
 
-                    {/* Custom Time Elements Section */}
-                    <div className="col-span-2">
-                      <h3 className="text-lg font-semibold mb-4">📅 Additional Times & Events</h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        {/* Custom Time 1 */}
-                        <FormField
-                          control={createForm.control}
-                          name="customTime1Label"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Event/Time Label 1</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g., Youth Group, Prayer Meeting" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createForm.control}
-                          name="customTime1"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Time/Schedule 1</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g., Friday 7:00 PM" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
 
-                        {/* Custom Time 2 */}
-                        <FormField
-                          control={createForm.control}
-                          name="customTime2Label"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Event/Time Label 2</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g., Bible Study, Choir Practice" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createForm.control}
-                          name="customTime2"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Time/Schedule 2</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g., Tuesday 6:30 PM" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        {/* Custom Time 3 */}
-                        <FormField
-                          control={createForm.control}
-                          name="customTime3Label"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Event/Time Label 3</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g., Sunday School, Small Groups" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createForm.control}
-                          name="customTime3"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Time/Schedule 3</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g., Sunday 9:00 AM" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        {/* Custom Time 4 */}
-                        <FormField
-                          control={createForm.control}
-                          name="customTime4Label"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Event/Time Label 4</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g., Men's Breakfast, Women's Fellowship" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={createForm.control}
-                          name="customTime4"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Time/Schedule 4</FormLabel>
-                              <FormControl>
-                                <Input placeholder="e.g., Saturday 8:00 AM" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
                   </div>
 
                   <div className="flex justify-end gap-3 pt-4">
@@ -1031,6 +966,7 @@ export default function MyCommunities() {
                         setShowCustomDenomination(false);
                         setLogoFile(null);
                         setLogoPreview("");
+                        setTimeRows([{ id: 1, eventLabel: '', timeSchedule: '', language: 'english' }]);
                       }}
                     >
                       Cancel
