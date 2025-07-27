@@ -3091,30 +3091,24 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
         return res.status(400).json({ message: 'Community ID and role are required' });
       }
 
-      // Check if user has a pending staff invitation for this community and role
-      const [pendingInvitation] = await db.query(`
-        SELECT uc.*, c.name as community_name
-        FROM user_churches uc
-        JOIN churches c ON uc.church_id = c.id
-        WHERE uc.user_id = $1 AND uc.church_id = $2 AND uc.role = $3 AND uc.is_active = false
-      `, [userId, communityId, role]);
-
-      if (!pendingInvitation) {
+      // Check if user has a pending staff invitation for this community and role using storage
+      const userCommunityRole = await storage.getUserCommunityRole(userId, communityId);
+      
+      if (!userCommunityRole || userCommunityRole.role !== role || userCommunityRole.isActive) {
         return res.status(404).json({ message: 'No pending invitation found for this position' });
       }
 
-      // Activate the staff position
-      await db.query(`
-        UPDATE user_churches 
-        SET is_active = true, assigned_at = NOW()
-        WHERE user_id = $1 AND church_id = $2 AND role = $3
-      `, [userId, communityId, role]);
+      // Activate the staff position using storage
+      await storage.activateStaffPosition(userId, communityId, role);
+
+      // Get community name for response
+      const community = await storage.getCommunity(communityId);
 
       res.json({
         success: true,
         message: 'Staff position accepted successfully',
-        title: pendingInvitation.title || role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-        community: pendingInvitation.community_name
+        title: role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+        community: community?.name || 'Community'
       });
     } catch (error) {
       console.error('Error accepting staff invitation:', error);

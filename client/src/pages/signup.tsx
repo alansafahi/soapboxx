@@ -53,10 +53,10 @@ export default function SignupPage() {
   const handleStaffInviteAcceptance = async () => {
     if (!communityId || !role) {
       toast({
-        title: "Invalid Invitation",
+        title: "Invalid Invitation", 
         description: "This invitation link appears to be invalid or expired.",
         variant: "destructive",
-      } as any);
+      });
       return;
     }
 
@@ -80,8 +80,8 @@ export default function SignupPage() {
       toast({
         title: "Error",
         description: formatErrorForToast(error),
-        variant: "destructive",
-      } as any);
+        variant: "destructive", 
+      });
     } finally {
       setIsLoading(false);
     }
@@ -107,7 +107,7 @@ export default function SignupPage() {
         title: "Password Too Short",
         description: "Password must be at least 8 characters long.",
         variant: "destructive",
-      } as any);
+      });
       setIsLoading(false);
       return;
     }
@@ -140,7 +140,7 @@ export default function SignupPage() {
         title: "Registration Failed",
         description: formatErrorForToast(error),
         variant: "destructive",
-      } as any);
+      });
     } finally {
       setIsLoading(false);
     }

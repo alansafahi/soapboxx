@@ -1891,10 +1891,10 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  async getUserCommunityRole(userId: string, communityId: number): Promise<string | undefined> {
+  async getUserCommunityRole(userId: string, communityId: number): Promise<{ role: string; isActive: boolean } | undefined> {
     try {
       const result = await pool.query(
-        'SELECT role FROM user_churches WHERE user_id = $1 AND church_id = $2 AND is_active = true LIMIT 1',
+        'SELECT role, is_active FROM user_churches WHERE user_id = $1 AND church_id = $2 LIMIT 1',
         [userId, communityId]
       );
 
@@ -1902,9 +1902,23 @@ export class DatabaseStorage implements IStorage {
         return undefined;
       }
 
-      return result.rows[0].role || 'member';
+      return {
+        role: result.rows[0].role || 'member',
+        isActive: result.rows[0].is_active || false
+      };
     } catch (error) {
       return undefined;
+    }
+  }
+
+  async activateStaffPosition(userId: string, communityId: number, role: string): Promise<void> {
+    try {
+      await pool.query(
+        'UPDATE user_churches SET is_active = true, joined_at = NOW() WHERE user_id = $1 AND church_id = $2 AND role = $3',
+        [userId, communityId, role]
+      );
+    } catch (error) {
+      throw new Error(`Failed to activate staff position: ${error}`);
     }
   }
 
