@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardHeader } from "./ui/card";
@@ -98,16 +98,22 @@ export function CommunityViewDialog({
   userRole 
 }: CommunityViewDialogProps) {
   // Get community details
-  const { data: community, isLoading } = useQuery({
+  const { data: community, isLoading, error } = useQuery({
     queryKey: ['community-details', communityId],
     queryFn: async () => {
+      console.log('Fetching community details for ID:', communityId);
       const response = await fetch(`/api/communities/${communityId}`, { credentials: 'include' });
       if (!response.ok) {
-        throw new Error('Failed to fetch community details');
+        const errorText = await response.text();
+        console.error('Community fetch error:', response.status, errorText);
+        throw new Error(`Failed to fetch community details: ${response.status} ${errorText}`);
       }
-      return response.json();
+      const data = await response.json();
+      console.log('Community data received:', data);
+      return data;
     },
     enabled: isOpen && !!communityId,
+    retry: 1,
   });
 
   // Check if user has admin access
@@ -176,6 +182,10 @@ export function CommunityViewDialog({
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Loading Community</DialogTitle>
+            <DialogDescription>Fetching community details...</DialogDescription>
+          </DialogHeader>
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
             <p className="text-gray-600">Loading community details...</p>
@@ -185,14 +195,20 @@ export function CommunityViewDialog({
     );
   }
 
-  if (!community) {
+  if (error || (!community && !isLoading)) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Community Not Found</DialogTitle>
+            <DialogDescription>Unable to load community information.</DialogDescription>
+          </DialogHeader>
           <div className="text-center py-8">
             <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Community Not Found</h3>
-            <p className="text-gray-600">Unable to load community information.</p>
+            <p className="text-gray-600">
+              {error?.message || "Unable to load community information."}
+            </p>
           </div>
         </DialogContent>
       </Dialog>
@@ -204,57 +220,65 @@ export function CommunityViewDialog({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              {/* Logo Display */}
-              {(community.logoUrl || community.logo_url) ? (
-                <div className="relative">
-                  <img 
-                    src={community.logoUrl || community.logo_url} 
-                    alt={`${community.name} logo`}
-                    className="w-16 h-16 rounded-xl object-cover border-2 border-gray-200 shadow-sm"
-                  />
-                </div>
-              ) : (
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                  <Building2 className="h-8 w-8 text-white" />
-                </div>
-              )}
-              
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{community.name}</h2>
-                <div className="flex items-center space-x-2 mt-1">
-                  <Badge variant={community.type === 'church' ? 'default' : community.type === 'group' ? 'secondary' : 'outline'}>
-                    {community.type.charAt(0).toUpperCase() + community.type.slice(1)}
+            Community Profile
+          </DialogTitle>
+          <DialogDescription>
+            View comprehensive community information including contact details, service times, and more.
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Community Header */}
+        <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-4 mb-6">
+          <div className="flex items-center space-x-4">
+            {/* Logo Display */}
+            {(community.logoUrl || community.logo_url) ? (
+              <div className="relative">
+                <img 
+                  src={community.logoUrl || community.logo_url} 
+                  alt={`${community.name} logo`}
+                  className="w-16 h-16 rounded-xl object-cover border-2 border-gray-200 shadow-sm"
+                />
+              </div>
+            ) : (
+              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <Building2 className="h-8 w-8 text-white" />
+              </div>
+            )}
+            
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{community.name}</h2>
+              <div className="flex items-center space-x-2 mt-1">
+                <Badge variant={community.type === 'church' ? 'default' : community.type === 'group' ? 'secondary' : 'outline'}>
+                  {community.type.charAt(0).toUpperCase() + community.type.slice(1)}
+                </Badge>
+                {community.denomination && (
+                  <Badge variant="outline" className="text-xs">
+                    {community.denomination}
                   </Badge>
-                  {community.denomination && (
-                    <Badge variant="outline" className="text-xs">
-                      {community.denomination}
-                    </Badge>
-                  )}
-                  {getFieldValue(community.establishedYear, community.established_year) && (
-                    <Badge variant="outline" className="text-xs">
-                      Est. {getFieldValue(community.establishedYear, community.established_year)}
-                    </Badge>
-                  )}
-                </div>
+                )}
+                {getFieldValue(community.establishedYear, community.established_year) && (
+                  <Badge variant="outline" className="text-xs">
+                    Est. {getFieldValue(community.establishedYear, community.established_year)}
+                  </Badge>
+                )}
               </div>
             </div>
-            
-            {/* Action Buttons */}
-            <div className="flex items-center space-x-2">
-              {hasAdminAccess() && (
-                <Button
-                  onClick={handleAdminAccess}
-                  size="sm"
-                  className="bg-purple-600 hover:bg-purple-700"
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Manage
-                </Button>
-              )}
-            </div>
-          </DialogTitle>
-        </DialogHeader>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-2">
+            {hasAdminAccess() && (
+              <Button
+                onClick={handleAdminAccess}
+                size="sm"
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Manage
+              </Button>
+            )}
+          </div>
+        </div>
 
         {/* Main Content */}
         <div className="space-y-6 p-1">
