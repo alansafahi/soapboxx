@@ -109,6 +109,7 @@ export function CommunityAdminTab() {
         
         const uploadResponse = await fetch('/api/upload/community-logo', {
           method: 'POST',
+          credentials: 'include',
           body: formData,
         });
         
