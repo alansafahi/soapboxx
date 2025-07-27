@@ -38,9 +38,19 @@ interface CommunityProfile {
   email?: string;
   website?: string;
   logoUrl?: string;
+  logo_url?: string; // Database field mapping
   bio?: string;
   memberCount: number;
+  member_count?: number; // Database field mapping
   role?: string;
+  establishedYear?: string;
+  established_year?: string; // Database field mapping
+  weeklyAttendance?: string;
+  weekly_attendance?: string; // Database field mapping
+  adminEmail?: string;
+  admin_email?: string; // Database field mapping
+  adminPhone?: string;
+  admin_phone?: string; // Database field mapping
 }
 
 export function CommunityViewDialog({ 
@@ -53,7 +63,7 @@ export function CommunityViewDialog({
   const { data: community, isLoading } = useQuery({
     queryKey: ['community-details', communityId],
     queryFn: async () => {
-      const response = await fetch(`/api/churches/${communityId}`, { credentials: 'include' });
+      const response = await fetch(`/api/communities/${communityId}`, { credentials: 'include' });
       if (!response.ok) {
         throw new Error('Failed to fetch community details');
       }
@@ -106,9 +116,9 @@ export function CommunityViewDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              {community.logoUrl ? (
+              {(community.logoUrl || community.logo_url) ? (
                 <img 
-                  src={community.logoUrl} 
+                  src={community.logoUrl || community.logo_url} 
                   alt={`${community.name} logo`}
                   className="w-10 h-10 rounded-lg object-cover"
                 />
@@ -147,6 +157,47 @@ export function CommunityViewDialog({
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Basic Information */}
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-semibold mb-3">Basic Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {(community.establishedYear || community.established_year) && (
+                  <div>
+                    <p className="font-medium text-sm text-gray-500">Established</p>
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {community.establishedYear || community.established_year}
+                    </p>
+                  </div>
+                )}
+                {(community.weeklyAttendance || community.weekly_attendance) && (
+                  <div>
+                    <p className="font-medium text-sm text-gray-500">Weekly Attendance</p>
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {community.weeklyAttendance || community.weekly_attendance}
+                    </p>
+                  </div>
+                )}
+                {(community.adminEmail || community.admin_email) && (
+                  <div>
+                    <p className="font-medium text-sm text-gray-500">Administrator Email</p>
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {community.adminEmail || community.admin_email}
+                    </p>
+                  </div>
+                )}
+                {(community.adminPhone || community.admin_phone) && (
+                  <div>
+                    <p className="font-medium text-sm text-gray-500">Administrator Phone</p>
+                    <p className="text-gray-900 dark:text-gray-100">
+                      {community.adminPhone || community.admin_phone}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Community Description */}
           {(community.description || community.bio) && (
             <Card>
@@ -246,15 +297,17 @@ export function CommunityViewDialog({
                   <Users className="h-5 w-5 text-gray-500" />
                   <div>
                     <p className="font-medium">Members</p>
-                    <p className="text-gray-600 dark:text-gray-300">{community.memberCount || 0}</p>
+                    <p className="text-gray-600 dark:text-gray-300">
+                      {community.memberCount || community.member_count || 'Not specified'}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Building2 className="h-5 w-5 text-gray-500" />
                   <div>
                     <p className="font-medium">Type</p>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      {community.type.charAt(0).toUpperCase() + community.type.slice(1)}
+                    <p className="text-gray-600 dark:text-gray-300 capitalize">
+                      {community.type}
                     </p>
                   </div>
                 </div>
