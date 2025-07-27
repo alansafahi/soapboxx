@@ -41,9 +41,6 @@ const upload = multer({
 // Community logo upload endpoint
 router.post('/community-logo', isAuthenticated, upload.single('logo'), (req: any, res) => {
   try {
-    const userId = req.session?.userId || req.user?.id;
-    console.log('Logo upload attempt by user:', userId);
-    
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
@@ -51,7 +48,6 @@ router.post('/community-logo', isAuthenticated, upload.single('logo'), (req: any
     // Generate the URL for the uploaded file
     const logoUrl = `/uploads/community-logos/${req.file.filename}`;
     
-    console.log('Logo upload successful:', logoUrl);
     res.json({ 
       logoUrl,
       message: 'Logo uploaded successfully' 

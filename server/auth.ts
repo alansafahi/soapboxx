@@ -151,9 +151,6 @@ function configurePassport() {
 // Unified authentication middleware
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   try {
-    console.log('Auth check - Session exists:', !!req.session);
-    console.log('Auth check - User ID:', req.session?.userId);
-    
     // Check for session-based authentication
     if (req.session && req.session.userId) {
       // Load user data into req.user for consistency
@@ -161,22 +158,19 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         const user = await storage.getUser(req.session.userId);
         if (user) {
           (req as any).user = user;
-          console.log('Auth check - User authenticated:', user.username);
           return next();
         }
       } catch (error) {
-        console.log('Auth check - User lookup failed:', error);
+        // User lookup failed
       }
     }
     
-    console.log('Auth check - No valid session');
     // If no session, return unauthorized
     return res.status(401).json({ 
       success: false, 
       message: "Authentication required"
     });
   } catch (error) {
-    console.log('Auth check - Error:', error);
     return res.status(500).json({ success: false, message: "Authentication error" });
   }
 };
