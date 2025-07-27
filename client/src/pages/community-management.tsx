@@ -278,46 +278,6 @@ export default function CommunityManagement() {
                 </CardContent>
               </Card>
 
-              {/* Contact Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Phone className="h-5 w-5" />
-                    Contact Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      value={editedProfile.phone || ''}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      placeholder="(555) 123-4567"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={editedProfile.email || ''}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      placeholder="contact@community.org"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="website">Website</Label>
-                    <Input
-                      id="website"
-                      value={editedProfile.website || ''}
-                      onChange={(e) => handleInputChange('website', e.target.value)}
-                      placeholder="https://community.org"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
               {/* Location Information */}
               <Card className="lg:col-span-2">
                 <CardHeader>
@@ -364,6 +324,46 @@ export default function CommunityManagement() {
                         placeholder="90210"
                       />
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Contact Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Phone className="h-5 w-5" />
+                    Contact Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      value={editedProfile.phone || ''}
+                      onChange={(e) => handleInputChange('phone', e.target.value)}
+                      placeholder="(555) 123-4567"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={editedProfile.email || ''}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      placeholder="contact@community.org"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="website">Website</Label>
+                    <Input
+                      id="website"
+                      value={editedProfile.website || ''}
+                      onChange={(e) => handleInputChange('website', e.target.value)}
+                      placeholder="https://community.org"
+                    />
                   </div>
                 </CardContent>
               </Card>
