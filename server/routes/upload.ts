@@ -38,10 +38,19 @@ const upload = multer({
   }
 });
 
-// Community logo upload endpoint
-router.post('/community-logo', isAuthenticated, upload.single('logo'), (req: any, res) => {
+// Community logo upload endpoint - with enhanced session handling
+router.post('/community-logo', upload.single('logo'), (req: any, res) => {
   try {
-    console.log('Logo upload attempt - User:', req.session?.userId, 'File:', req.file);
+    console.log('Logo upload attempt - Session:', req.session?.userId, 'File:', req.file ? req.file.filename : 'None');
+    
+    // Check authentication after multer processes the file
+    if (!req.session || !req.session.userId) {
+      console.log('Authentication failed during logo upload');
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Authentication required' 
+      });
+    }
     
     if (!req.file) {
       return res.status(400).json({ 
@@ -53,7 +62,7 @@ router.post('/community-logo', isAuthenticated, upload.single('logo'), (req: any
     // Generate the URL for the uploaded file
     const logoUrl = `/uploads/community-logos/${req.file.filename}`;
     
-    console.log('Logo uploaded successfully:', logoUrl);
+    console.log('Logo uploaded successfully for user', req.session.userId, ':', logoUrl);
     
     res.json({ 
       success: true,
