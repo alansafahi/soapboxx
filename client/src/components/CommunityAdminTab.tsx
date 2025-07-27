@@ -1,27 +1,21 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useToast } from "../hooks/use-toast";
-import { Building2, Settings, Users, Eye, Save, MapPin, Phone, Mail, Globe, Calendar, Church, Clock, Share2, Image, Trophy, Plus } from "lucide-react";
+import { Building2, Settings, Users, Calendar } from "lucide-react";
 import { CommunitySettings } from "./CommunitySettings";
 import { ChurchFeatureManager } from "./ChurchFeatureManager";
 import { EventManagement } from "./EventManagement";
 import CampusManagement from "./CampusManagement";
+import { CommunityForm } from "./CommunityForm";
 
 interface CommunityProfile {
   id: number;
   name: string;
   type: string;
   denomination: string;
-  customDenomination?: string;
-  description?: string;
   address: string;
   city: string;
   state: string;
@@ -29,19 +23,22 @@ interface CommunityProfile {
   phone?: string;
   email?: string;
   website?: string;
+  description?: string;
   logoUrl?: string;
-  bio?: string;
-  memberCount: number;
-  hoursOfOperation?: any;
-  socialLinks?: any;
-  parentChurchId?: number;
-  parentChurchName?: string;
   establishedYear?: number;
-  missionStatement?: string;
   weeklyAttendance?: string;
+  parentChurchName?: string;
+  missionStatement?: string;
+  socialLinks?: {
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+    tiktok?: string;
+    youtube?: string;
+  };
   officeHours?: string;
   worshipTimes?: string;
-  role?: string;
+  customDenomination?: string;
 }
 
 export function CommunityAdminTab() {
@@ -50,9 +47,6 @@ export function CommunityAdminTab() {
   const queryClient = useQueryClient();
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("profile");
-  const [editedProfile, setEditedProfile] = useState<Partial<CommunityProfile>>({});
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string>("");
 
   // Get communities where user has admin role - always call hooks in same order
   const { data: adminCommunities = [], isLoading: communitiesLoading, error: communitiesError } = useQuery({
@@ -103,22 +97,15 @@ export function CommunityAdminTab() {
     }
   }, [allAdminCommunities, selectedCommunityId]);
 
-  // Initialize edited profile when community data loads
-  useEffect(() => {
-    if (selectedCommunity && Object.keys(editedProfile).length === 0) {
-      setEditedProfile(selectedCommunity);
-    }
-  }, [selectedCommunity, editedProfile]);
-
   // Save profile mutation
   const saveProfileMutation = useMutation({
-    mutationFn: async (profileData: Partial<CommunityProfile>) => {
+    mutationFn: async (profileData: any) => {
       let logoUrl = profileData.logoUrl;
       
       // Upload logo if a file is selected
-      if (logoFile) {
+      if (profileData.logoFile) {
         const formData = new FormData();
-        formData.append('logo', logoFile);
+        formData.append('logo', profileData.logoFile);
         
         const uploadResponse = await fetch('/api/upload/community-logo', {
           method: 'POST',
@@ -145,9 +132,6 @@ export function CommunityAdminTab() {
     },
     onSuccess: () => {
       toast({ title: "Community profile updated successfully!" });
-      // Reset logo upload state
-      setLogoFile(null);
-      setLogoPreview("");
       queryClient.invalidateQueries({ queryKey: ['community-details', selectedCommunityId] });
     },
     onError: (error: any) => {
@@ -159,12 +143,8 @@ export function CommunityAdminTab() {
     },
   });
 
-  const handleSave = () => {
-    saveProfileMutation.mutate(editedProfile);
-  };
-
-  const handleInputChange = (field: keyof CommunityProfile, value: string) => {
-    setEditedProfile(prev => ({ ...prev, [field]: value }));
+  const handleCommunitySubmit = (formData: any) => {
+    saveProfileMutation.mutate(formData);
   };
 
   // Show authentication prompt if user is not logged in
@@ -190,37 +170,6 @@ export function CommunityAdminTab() {
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             You need to be logged in to access Community Administration.
           </p>
-          <Button onClick={() => window.location.href = '/api/login'} className="bg-blue-600 hover:bg-blue-700 text-white">
-            Sign In
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error states for debugging
-  if (communitiesError || createdError) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="text-center max-w-md mx-auto">
-          <Building2 className="h-16 w-16 text-red-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            Connection Error
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Unable to load community data. Please check your authentication and try again.
-          </p>
-          <div className="text-sm text-red-600 dark:text-red-400 mb-6 p-3 bg-red-50 dark:bg-red-900/20 rounded">
-            {communitiesError?.message || createdError?.message || 'Unknown error occurred'}
-          </div>
-          <div className="space-x-2">
-            <Button onClick={() => window.location.reload()} variant="outline">
-              Retry
-            </Button>
-            <Button onClick={() => window.location.href = '/api/login'} className="bg-blue-600 hover:bg-blue-700 text-white">
-              Re-authenticate
-            </Button>
-          </div>
         </div>
       </div>
     );
@@ -228,50 +177,57 @@ export function CommunityAdminTab() {
 
   if (communitiesLoading || createdLoading) {
     return (
-      <Card>
-        <CardContent className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading communities...</p>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading your communities...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (communitiesError || createdError) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center max-w-md mx-auto">
+          <Building2 className="h-16 w-16 text-red-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            Error Loading Communities
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            There was an error loading your communities. Please try refreshing the page.
+          </p>
+        </div>
+      </div>
     );
   }
 
   if (allAdminCommunities.length === 0) {
     return (
-      <Card>
-        <CardContent className="text-center py-8">
-          <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No Admin Access</h3>
-          <p className="text-gray-600">You don't have administrative access to any communities yet.</p>
-          <p className="text-sm text-gray-500 mt-2">
-            Contact your community leaders to request admin permissions.
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center max-w-md mx-auto">
+          <Building2 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            No Communities Found
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            You don't have administrative access to any communities yet. Create or join a community to get started.
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header with Community Selection */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Community Administration</h2>
           <p className="text-gray-600 dark:text-gray-400">
-            Manage your community profile, settings, and features
+            Manage your community settings, events, and features
           </p>
         </div>
-        
-        <div className="flex items-center gap-3">
-          <Button 
-            onClick={() => window.location.href = '/community-management'}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Create A Community
-          </Button>
-          
+        <div className="flex items-center space-x-4">
           {allAdminCommunities.length > 1 && (
             <Select value={selectedCommunityId || ""} onValueChange={setSelectedCommunityId}>
               <SelectTrigger className="w-64">
@@ -321,429 +277,21 @@ export function CommunityAdminTab() {
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6">
-            {/* Header with Save Button */}
-            <div className="flex items-center justify-between">
+            <div className="space-y-6">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Community Profile</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   Manage your community's basic information and contact details
                 </p>
               </div>
-              <Button onClick={handleSave} disabled={saveProfileMutation.isPending}>
-                <Save className="h-4 w-4 mr-2" />
-                {saveProfileMutation.isPending ? "Saving..." : "Save Changes"}
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Basic Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building2 className="h-5 w-5" />
-                    Basic Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">Community Name</Label>
-                    <Input
-                      id="name"
-                      value={editedProfile.name || ''}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="type">Type</Label>
-                    <Select
-                      value={editedProfile.type || ''}
-                      onValueChange={(value) => handleInputChange('type', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select community type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Church">Church</SelectItem>
-                        <SelectItem value="Ministry">Ministry</SelectItem>
-                        <SelectItem value="Group">Group</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="denomination">Denomination</Label>
-                    <Select
-                      value={editedProfile.denomination || ''}
-                      onValueChange={(value) => handleInputChange('denomination', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select denomination" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Baptist">Baptist</SelectItem>
-                        <SelectItem value="Methodist">Methodist</SelectItem>
-                        <SelectItem value="Presbyterian">Presbyterian</SelectItem>
-                        <SelectItem value="Lutheran">Lutheran</SelectItem>
-                        <SelectItem value="Episcopal">Episcopal</SelectItem>
-                        <SelectItem value="Catholic">Catholic</SelectItem>
-                        <SelectItem value="Orthodox">Orthodox</SelectItem>
-                        <SelectItem value="Pentecostal">Pentecostal</SelectItem>
-                        <SelectItem value="Evangelical">Evangelical</SelectItem>
-                        <SelectItem value="Non-denominational">Non-denominational</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {editedProfile.denomination === 'Other' && (
-                      <div className="mt-2">
-                        <Input
-                          placeholder="Please specify denomination"
-                          value={editedProfile.customDenomination || ''}
-                          onChange={(e) => handleInputChange('customDenomination', e.target.value)}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Location Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5" />
-                    Location Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="address">Street Address</Label>
-                    <Input
-                      id="address"
-                      value={editedProfile.address || ''}
-                      onChange={(e) => handleInputChange('address', e.target.value)}
-                      placeholder="123 Main Street"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="city">City</Label>
-                      <Input
-                        id="city"
-                        value={editedProfile.city || ''}
-                        onChange={(e) => handleInputChange('city', e.target.value)}
-                        placeholder="City"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="state">State</Label>
-                      <Input
-                        id="state"
-                        value={editedProfile.state || ''}
-                        onChange={(e) => handleInputChange('state', e.target.value)}
-                        placeholder="CA"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label htmlFor="zipCode">Zip Code</Label>
-                    <Input
-                      id="zipCode"
-                      value={editedProfile.zipCode || ''}
-                      onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                      placeholder="90210"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Basic Information (continued) */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building2 className="h-5 w-5" />
-                    Community Details
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      rows={3}
-                      value={editedProfile.description || ''}
-                      onChange={(e) => handleInputChange('description', e.target.value)}
-                      placeholder="Tell people about your community..."
-                    />
-                  </div>
-
-                  {/* Logo Upload Section */}
-                  <div className="space-y-4">
-                    <Label>Community Logo</Label>
-                    <div className="mt-2 space-y-4">
-                      {logoPreview ? (
-                        <div className="flex items-center space-x-4">
-                          <img 
-                            src={logoPreview} 
-                            alt="Logo preview" 
-                            className="w-20 h-20 object-cover rounded-lg border"
-                          />
-                          <div className="flex-1">
-                            <p className="text-sm text-gray-600">Logo selected: {logoFile?.name}</p>
-                            <Button 
-                              type="button" 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => {
-                                setLogoFile(null);
-                                setLogoPreview("");
-                              }}
-                              className="mt-2"
-                            >
-                              Remove
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
-                          <input
-                            type="file"
-                            id="logo-upload"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                setLogoFile(file);
-                                const reader = new FileReader();
-                                reader.onload = (e) => setLogoPreview(e.target?.result as string);
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                            className="hidden"
-                          />
-                          <label htmlFor="logo-upload" className="cursor-pointer">
-                            <div className="space-y-2">
-                              <div className="text-gray-400">
-                                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                                </svg>
-                              </div>
-                              <div className="text-sm text-gray-600">
-                                <span className="font-medium text-blue-600 hover:text-blue-500">
-                                  Click to upload
-                                </span>
-                                {" "}or drag and drop
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                PNG, JPG, GIF up to 5MB
-                              </div>
-                            </div>
-                          </label>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Contact Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Phone className="h-5 w-5" />
-                    Contact Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      value={editedProfile.phone || ''}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      placeholder="(555) 123-4567"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={editedProfile.email || ''}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      placeholder="contact@community.org"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="website">Website</Label>
-                    <Input
-                      id="website"
-                      value={editedProfile.website || ''}
-                      onChange={(e) => handleInputChange('website', e.target.value)}
-                      placeholder="https://community.org"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Additional Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Church className="h-5 w-5" />
-                    Additional Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="establishedYear">Established Year</Label>
-                    <Input
-                      id="establishedYear"
-                      type="number"
-                      value={editedProfile.establishedYear || ''}
-                      onChange={(e) => handleInputChange('establishedYear', e.target.value)}
-                      placeholder="2020"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="weeklyAttendance">Weekly Attendance</Label>
-                    <Select
-                      value={editedProfile.weeklyAttendance?.toString() || ''}
-                      onValueChange={(value) => handleInputChange('weeklyAttendance', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select weekly attendance range" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1-50">1-50 (Micro - House church)</SelectItem>
-                        <SelectItem value="51-100">51-100 (Small - Close-knit)</SelectItem>
-                        <SelectItem value="101-250">101-250 (Medium - Community)</SelectItem>
-                        <SelectItem value="251-500">251-500 (Large - Multi-ministry)</SelectItem>
-                        <SelectItem value="501-1000">501-1000 (Very Large - Multi-staff)</SelectItem>
-                        <SelectItem value="1001-2000">1001-2000 (Mega - Extensive programming)</SelectItem>
-                        <SelectItem value="2001-10000">2001-10000 (Giga - High tech)</SelectItem>
-                        <SelectItem value="10000+">10000+ (Meta - National reach)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="parentChurchName">Parent Church (if applicable)</Label>
-                    <Input
-                      id="parentChurchName"
-                      value={editedProfile.parentChurchName || ''}
-                      onChange={(e) => handleInputChange('parentChurchName', e.target.value)}
-                      placeholder="Main Campus Church Name"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="missionStatement">Mission Statement</Label>
-                    <Textarea
-                      id="missionStatement"
-                      rows={3}
-                      value={editedProfile.missionStatement || ''}
-                      onChange={(e) => handleInputChange('missionStatement', e.target.value)}
-                      placeholder="Our mission is to..."
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Social Media */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Share2 className="h-5 w-5" />
-                    Social Media
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="facebookUrl">Facebook URL</Label>
-                      <Input
-                        id="facebookUrl"
-                        placeholder="https://facebook.com/community"
-                        value={editedProfile.socialLinks?.facebook || ''}
-                        onChange={(e) => handleInputChange('socialLinks', {...(editedProfile.socialLinks || {}), facebook: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="instagramUrl">Instagram URL</Label>
-                      <Input
-                        id="instagramUrl"
-                        placeholder="https://instagram.com/community"
-                        value={editedProfile.socialLinks?.instagram || ''}
-                        onChange={(e) => handleInputChange('socialLinks', {...(editedProfile.socialLinks || {}), instagram: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="twitterUrl">Twitter (X) URL</Label>
-                      <Input
-                        id="twitterUrl"
-                        placeholder="https://x.com/community"
-                        value={editedProfile.socialLinks?.twitter || ''}
-                        onChange={(e) => handleInputChange('socialLinks', {...(editedProfile.socialLinks || {}), twitter: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="tiktokUrl">TikTok URL</Label>
-                      <Input
-                        id="tiktokUrl"
-                        placeholder="https://tiktok.com/@community"
-                        value={editedProfile.socialLinks?.tiktok || ''}
-                        onChange={(e) => handleInputChange('socialLinks', {...(editedProfile.socialLinks || {}), tiktok: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="youtubeUrl">YouTube URL</Label>
-                      <Input
-                        id="youtubeUrl"
-                        placeholder="https://youtube.com/community"
-                        value={editedProfile.socialLinks?.youtube || ''}
-                        onChange={(e) => handleInputChange('socialLinks', {...(editedProfile.socialLinks || {}), youtube: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Service Times */}
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
-                    Service Times
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="officeHours">🕒 Office Hours (Auto-filled by denomination)</Label>
-                    <Textarea
-                      id="officeHours"
-                      rows={2}
-                      value={editedProfile.officeHours || ''}
-                      onChange={(e) => handleInputChange('officeHours', e.target.value)}
-                      placeholder="Mon-Fri 9AM-4PM"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="worshipTimes">⛪ Worship Times (Auto-filled by denomination)</Label>
-                    <Textarea
-                      id="worshipTimes"
-                      rows={3}
-                      value={editedProfile.worshipTimes || ''}
-                      onChange={(e) => handleInputChange('worshipTimes', e.target.value)}
-                      placeholder="Sunday: 9AM & 11AM"
-                    />
-                  </div>
-                  <div>
-                    <Label>Additional Times</Label>
-                    <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                      Use the Community Creation form to add dynamic additional service times with event labels, schedules, and language options.
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-
+              
+              <CommunityForm
+                mode="edit"
+                initialData={selectedCommunity}
+                onSubmit={handleCommunitySubmit}
+                isLoading={saveProfileMutation.isPending}
+                submitButtonText="Save Changes"
+              />
             </div>
           </TabsContent>
 
@@ -782,9 +330,9 @@ export function CommunityAdminTab() {
           <TabsContent value="settings" className="space-y-6">
             {selectedCommunityId && selectedCommunity && (
               <CommunitySettings 
-                communityId={parseInt(selectedCommunityId)}
-                communityType={selectedCommunity.type as "church" | "group" | "ministry"}
+                churchId={parseInt(selectedCommunityId)}
                 userRole="church_admin"
+                communityType={selectedCommunity.type}
               />
             )}
           </TabsContent>
