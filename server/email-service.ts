@@ -100,3 +100,78 @@ export async function sendVerificationEmail(options: VerificationEmailOptions): 
     html: verificationTemplate
   });
 }
+
+export interface StaffInvitationOptions {
+  role: string;
+  title: string;
+  department: string;
+  communityId: number;
+}
+
+export async function sendStaffInvitationEmail(email: string, options: StaffInvitationOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  const inviteLink = `${process.env.FRONTEND_URL || 'https://soapboxsuperapp.com'}/signup?invite=staff&community=${options.communityId}&role=${options.role}`;
+  
+  const staffInvitationHtml = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #6366f1; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: white; padding: 30px; border: 1px solid #e5e7eb; }
+        .button { display: inline-block; background: #6366f1; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+        .footer { background: #f9fafb; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; color: #6b7280; font-size: 14px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>🙏 You've Been Invited to Join Our Ministry Team</h1>
+        </div>
+        <div class="content">
+          <p>Hello!</p>
+          <p>You've been invited to join our community ministry team in an important leadership role.</p>
+          
+          <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin: 0 0 10px 0; color: #1e40af;">Your Invitation Details:</h3>
+            <p style="margin: 5px 0;"><strong>Position:</strong> ${options.title}</p>
+            <p style="margin: 5px 0;"><strong>Role:</strong> ${options.role}</p>
+            <p style="margin: 5px 0;"><strong>Department:</strong> ${options.department}</p>
+          </div>
+
+          <p>As a valued member of our team, you'll have access to:</p>
+          <ul>
+            <li>📊 Administrative dashboard and community management tools</li>
+            <li>👥 Member directory and communication features</li>
+            <li>📅 Event planning and volunteer coordination</li>
+            <li>💬 Prayer support and pastoral care resources</li>
+            <li>🔐 Role-based permissions for your ministry area</li>
+          </ul>
+
+          <p>Click the button below to accept your invitation and set up your account:</p>
+          
+          <div style="text-align: center;">
+            <a href="${inviteLink}" class="button">Accept Invitation & Join Team</a>
+          </div>
+
+          <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
+            If the button doesn't work, copy and paste this link into your browser:<br>
+            <a href="${inviteLink}">${inviteLink}</a>
+          </p>
+        </div>
+        <div class="footer">
+          <p>This invitation was sent through SoapBox Community Management Platform</p>
+          <p>If you have any questions, please contact your community administrator.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail({
+    to: email,
+    subject: `Ministry Team Invitation - ${options.title} Position`,
+    html: staffInvitationHtml
+  });
+}

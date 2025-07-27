@@ -5635,6 +5635,20 @@ export class DatabaseStorage implements IStorage {
           VALUES (NULL, $1, $2, $3, $4, $5, NOW(), false)
         `, [data.communityId, data.role, data.title, data.department, data.invitedBy]);
 
+        // Send invitation email
+        try {
+          const emailService = await import('./email-service');
+          await emailService.sendStaffInvitationEmail(data.email, {
+            role: data.role,
+            title: data.title,
+            department: data.department,
+            communityId: data.communityId
+          });
+        } catch (emailError) {
+          console.log(`Failed to send invitation email to ${data.email}:`, emailError);
+          // Continue without failing the invitation process
+        }
+
         // Create a unique ID for pending invitation
         const pendingId = `pending_${data.email.replace('@', '_at_').replace('.', '_dot_')}_${Date.now()}`;
 
