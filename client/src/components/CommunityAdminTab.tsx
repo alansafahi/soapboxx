@@ -38,7 +38,9 @@ interface CommunityProfile {
   parentChurchName?: string;
   establishedYear?: number;
   missionStatement?: string;
-  weeklyAttendance?: number;
+  weeklyAttendance?: string;
+  officeHours?: string;
+  worshipTimes?: string;
   role?: string;
 }
 
@@ -394,6 +396,7 @@ export function CommunityAdminTab() {
                       placeholder="Tell people about your community..."
                     />
                   </div>
+
                   {/* Logo Upload Section */}
                   <div className="space-y-4">
                     <Label>Community Logo</Label>
@@ -565,50 +568,98 @@ export function CommunityAdminTab() {
                 </CardContent>
               </Card>
 
-              {/* Social Media & Hours */}
+              {/* Social Media */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Share2 className="h-5 w-5" />
-                    Social & Hours
+                    Social Media
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label>Social Media Links</Label>
-                    <div className="space-y-2 mt-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="facebookUrl">Facebook URL</Label>
                       <Input
-                        placeholder="Facebook URL"
+                        id="facebookUrl"
+                        placeholder="https://facebook.com/community"
                         value={editedProfile.socialLinks?.facebook || ''}
                         onChange={(e) => handleInputChange('socialLinks', {...(editedProfile.socialLinks || {}), facebook: e.target.value})}
                       />
+                    </div>
+                    <div>
+                      <Label htmlFor="instagramUrl">Instagram URL</Label>
                       <Input
-                        placeholder="Instagram URL"
+                        id="instagramUrl"
+                        placeholder="https://instagram.com/community"
                         value={editedProfile.socialLinks?.instagram || ''}
                         onChange={(e) => handleInputChange('socialLinks', {...(editedProfile.socialLinks || {}), instagram: e.target.value})}
                       />
+                    </div>
+                    <div>
+                      <Label htmlFor="twitterUrl">Twitter (X) URL</Label>
                       <Input
-                        placeholder="YouTube URL"
+                        id="twitterUrl"
+                        placeholder="https://x.com/community"
+                        value={editedProfile.socialLinks?.twitter || ''}
+                        onChange={(e) => handleInputChange('socialLinks', {...(editedProfile.socialLinks || {}), twitter: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="tiktokUrl">TikTok URL</Label>
+                      <Input
+                        id="tiktokUrl"
+                        placeholder="https://tiktok.com/@community"
+                        value={editedProfile.socialLinks?.tiktok || ''}
+                        onChange={(e) => handleInputChange('socialLinks', {...(editedProfile.socialLinks || {}), tiktok: e.target.value})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="youtubeUrl">YouTube URL</Label>
+                      <Input
+                        id="youtubeUrl"
+                        placeholder="https://youtube.com/community"
                         value={editedProfile.socialLinks?.youtube || ''}
                         onChange={(e) => handleInputChange('socialLinks', {...(editedProfile.socialLinks || {}), youtube: e.target.value})}
                       />
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Service Times */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    Service Times
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div>
-                    <Label>Operating Hours</Label>
-                    <div className="space-y-2 mt-2">
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input
-                          placeholder="Sunday Service Time"
-                          value={editedProfile.hoursOfOperation?.sunday || ''}
-                          onChange={(e) => handleInputChange('hoursOfOperation', {...(editedProfile.hoursOfOperation || {}), sunday: e.target.value})}
-                        />
-                        <Input
-                          placeholder="Wednesday Service Time"
-                          value={editedProfile.hoursOfOperation?.wednesday || ''}
-                          onChange={(e) => handleInputChange('hoursOfOperation', {...(editedProfile.hoursOfOperation || {}), wednesday: e.target.value})}
-                        />
-                      </div>
+                    <Label htmlFor="officeHours">🕒 Office Hours (Auto-filled by denomination)</Label>
+                    <Textarea
+                      id="officeHours"
+                      rows={2}
+                      value={editedProfile.officeHours || ''}
+                      onChange={(e) => handleInputChange('officeHours', e.target.value)}
+                      placeholder="Mon-Fri 9AM-4PM"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="worshipTimes">⛪ Worship Times (Auto-filled by denomination)</Label>
+                    <Textarea
+                      id="worshipTimes"
+                      rows={3}
+                      value={editedProfile.worshipTimes || ''}
+                      onChange={(e) => handleInputChange('worshipTimes', e.target.value)}
+                      placeholder="Sunday: 9AM & 11AM"
+                    />
+                  </div>
+                  <div>
+                    <Label>Additional Times</Label>
+                    <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                      Use the Community Creation form to add dynamic additional service times with event labels, schedules, and language options.
                     </div>
                   </div>
                 </CardContent>
