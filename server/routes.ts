@@ -3119,6 +3119,8 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
         return res.status(400).json({ message: 'Email and role are required' });
       }
 
+      console.log(`🔧 Starting staff invitation for ${email} in community ${communityId}`);
+      
       const staffMember = await storage.inviteStaffMember({
         communityId,
         email,
@@ -3128,6 +3130,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
         invitedBy: userId
       });
 
+      console.log(`🔧 Staff invitation completed for ${email}:`, staffMember);
       res.json(staffMember);
     } catch (error) {
       res.status(500).json({ message: 'Failed to invite staff member', error: (error as Error).message });
