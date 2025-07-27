@@ -1770,9 +1770,11 @@ export class DatabaseStorage implements IStorage {
     const allowedFields = [
       'name', 'type', 'denomination', 'description', 'bio', 'address', 'city', 
       'state', 'zipCode', 'phone', 'email', 'website', 'logoUrl', 'size', 
-      'hoursOfOperation', 'socialLinks', 'communityTags', 'latitude', 'longitude', 
+      'hoursOfOperation', 'officeHours', 'worshipTimes', 'socialLinks', 'communityTags', 'latitude', 'longitude', 
       'rating', 'memberCount', 'isActive', 'isClaimed', 'adminEmail', 'adminPhone', 
-      'verificationStatus', 'rejectionReason'
+      'verificationStatus', 'rejectionReason', 'primaryLanguage', 'sundayService', 'wednesdayService',
+      'customTime1Label', 'customTime1', 'customTime2Label', 'customTime2', 
+      'customTime3Label', 'customTime3', 'customTime4Label', 'customTime4'
     ];
     
     const filteredUpdates = Object.keys(updates)
