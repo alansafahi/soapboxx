@@ -7479,6 +7479,7 @@ Return JSON with this exact structure:
         instagram_url,
         twitter_url,
         tiktok_url,
+        primaryLanguage, // Add missing primaryLanguage field
         timeRows, // New dynamic time row data
         // Legacy fields for backward compatibility
         sunday_service,
@@ -7602,6 +7603,7 @@ Return JSON with this exact structure:
         adminEmail: adminEmail?.trim(),
         createdBy: userId,
         size: size?.trim() || 'small',
+        primaryLanguage: primaryLanguage?.trim() || 'English', // Add primaryLanguage field
         isActive: true,
         verificationStatus: 'pending',
         isDemo: false,
@@ -7634,7 +7636,12 @@ Return JSON with this exact structure:
         community: newCommunity
       });
     } catch (error) {
-      res.status(500).json({ error: 'Failed to create community', details: error.message });
+      console.error('Community creation error:', error);
+      res.status(500).json({ 
+        error: 'Failed to create community', 
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
     }
   });
 
