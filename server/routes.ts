@@ -7587,6 +7587,7 @@ Return JSON with this exact structure:
         worshipTimesArray.push(`Wednesday Service: ${wednesdayService}`);
       }
 
+      // SoapBox Development Standards v1.0: snake_case for database fields
       const communityData = {
         name: name?.trim(),
         type: type?.trim() || 'church',
@@ -7594,27 +7595,24 @@ Return JSON with this exact structure:
         address: address?.trim(),
         city: city?.trim(),
         state: state?.trim(),
-        zipCode: zipCode?.trim(),
+        zip_code: zipCode?.trim(), // snake_case for database
         phone: adminPhone?.trim(),
         email: adminEmail?.trim(),
         website: website?.trim(),
         description: description?.trim(),
-        logoUrl: finalLogoUrl,
-        adminEmail: adminEmail?.trim(),
-        createdBy: userId,
+        logo_url: finalLogoUrl, // snake_case for database
+        admin_email: adminEmail?.trim(), // snake_case for database
+        created_by: userId, // snake_case for database
         size: size?.trim() || 'small',
-        // primaryLanguage field removed - not in database schema
-        isActive: true,
-        verificationStatus: 'verified',
-        isDemo: false,
-        isClaimed: true,
-        // Enhanced fields - removed non-existent database fields
-        socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : null,
-        hoursOfOperation: Object.keys(hoursOfOperation).length > 0 ? hoursOfOperation : null,
-        worshipTimes: worshipTimesArray.length > 0 ? worshipTimesArray.join('; ') : null,
-        // Custom time fields removed - not in database schema
-        createdAt: new Date(),
-        updatedAt: new Date()
+        is_active: true, // snake_case for database
+        verification_status: 'verified', // snake_case for database
+        is_demo: false, // snake_case for database
+        is_claimed: true, // snake_case for database
+        social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null, // snake_case for database
+        hours_of_operation: Object.keys(hoursOfOperation).length > 0 ? hoursOfOperation : null, // snake_case for database
+        worship_times: worshipTimesArray.length > 0 ? worshipTimesArray.join('; ') : null, // snake_case for database
+        created_at: new Date(), // snake_case for database
+        updated_at: new Date() // snake_case for database
       };
 
       const newCommunity = await storage.createChurch(communityData);

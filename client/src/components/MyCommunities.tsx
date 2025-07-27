@@ -260,38 +260,19 @@ export default function MyCommunities() {
     return `https://${trimmedUrl}`;
   };
 
-  // Helper function to transform field names from camelCase to snake_case
+  // SoapBox Development Standards v1.0 Field Mapping: camelCase -> snake_case
   const transformToSnakeCase = (data: any) => {
     const fieldMapping = {
       adminEmail: 'admin_email',
       adminPhone: 'admin_phone',
       zipCode: 'zip_code',
-      logoUrl: 'logo_url',
-      weeklyAttendance: 'weekly_attendance',
-      parentChurchName: 'parent_church_name',
-      missionStatement: 'mission_statement',
-      facebookUrl: 'facebook_url',
-      instagramUrl: 'instagram_url',
-      twitterUrl: 'twitter_url',
-      tiktokUrl: 'tiktok_url',
-      sundayService: 'sunday_service',
-      wednesdayService: 'wednesday_service',
-      officeHours: 'office_hours',
-      worshipTimes: 'worship_times',
-      // language field removed - not in database schema
-      customTime1Label: 'custom_time_1_label',
-      customTime1: 'custom_time_1',
-      customTime2Label: 'custom_time_2_label',
-      customTime2: 'custom_time_2',
-      customTime3Label: 'custom_time_3_label',
-      customTime3: 'custom_time_3',
-      customTime4Label: 'custom_time_4_label',
-      customTime4: 'custom_time_4'
+      logoUrl: 'logo_url'
+      // Only mapping fields that exist in actual database schema
     };
 
     const transformed = { ...data };
     
-    // Transform field names
+    // Transform field names according to standards
     Object.keys(fieldMapping).forEach(camelKey => {
       const snakeKey = fieldMapping[camelKey as keyof typeof fieldMapping];
       if (transformed[camelKey] !== undefined) {
