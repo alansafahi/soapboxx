@@ -68,10 +68,21 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
+// Create community logos directory
+const communityLogosDir = path.join(uploadsDir, 'community-logos');
+if (!fs.existsSync(communityLogosDir)) {
+  fs.mkdirSync(communityLogosDir, { recursive: true });
+}
+
 // Configure multer for file uploads
 const storage_multer = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadsDir);
+    // Route to appropriate directory based on fieldname
+    if (file.fieldname === 'logo') {
+      cb(null, communityLogosDir);
+    } else {
+      cb(null, uploadsDir);
+    }
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -12265,6 +12276,40 @@ Please provide suggestions for the missing or incomplete sections.`
       res.json(uploadedFile);
     } catch (error) {
       res.status(500).json({ message: 'Image upload failed', error: error.message });
+    }
+  });
+
+  // Community logo upload endpoint
+  app.post('/api/upload/community-logo', isAuthenticated, upload.single('logo'), async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub || req.user?.id;
+      
+      if (!req.file) {
+        return res.status(400).json({ message: 'No logo file uploaded' });
+      }
+
+      // Validate it's an image
+      if (!req.file.mimetype.startsWith('image/')) {
+        return res.status(400).json({ message: 'Only image files are allowed for logos' });
+      }
+
+      // Check file size (limit to 5MB for logos)
+      if (req.file.size > 5 * 1024 * 1024) {
+        return res.status(400).json({ message: 'Logo file size must be less than 5MB' });
+      }
+
+      const logoUrl = `/uploads/community-logos/${req.file.filename}`;
+      
+      res.json({ 
+        logoUrl,
+        filename: req.file.filename,
+        originalName: req.file.originalname,
+        size: req.file.size,
+        type: req.file.mimetype
+      });
+    } catch (error) {
+      console.error('Logo upload error:', error);
+      res.status(500).json({ message: 'Failed to upload logo' });
     }
   });
 

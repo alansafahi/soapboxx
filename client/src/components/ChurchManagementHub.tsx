@@ -26,10 +26,55 @@ import { CrossCampusMemberManagement } from "./CrossCampusMemberManagement";
 // Organization-specific affiliation lists
 const AFFILIATIONS = {
   church: [
-    "Baptist", "Methodist", "Presbyterian", "Lutheran", "Episcopal", "Catholic", "Orthodox",
-    "Pentecostal", "Assembly of God", "Church of Christ", "Disciples of Christ", "Adventist",
-    "Mennonite", "Quaker", "Congregational", "Reformed", "Evangelical", "Non-denominational",
-    "Interdenominational", "Unity", "Unitarian Universalist"
+    // Major Protestant Denominations
+    "Baptist", "Southern Baptist", "Independent Baptist", "American Baptist", "Free Will Baptist",
+    "Methodist", "United Methodist", "African Methodist Episcopal", "Free Methodist", "Wesleyan",
+    "Presbyterian", "Presbyterian Church (USA)", "Presbyterian Church in America", "Orthodox Presbyterian",
+    "Lutheran", "Evangelical Lutheran Church", "Lutheran Church Missouri Synod", "Wisconsin Evangelical Lutheran",
+    "Episcopal", "Anglican", "Reformed Episcopal",
+    
+    // Pentecostal and Charismatic
+    "Pentecostal", "Assembly of God", "Church of God", "Church of God in Christ", "International Church of the Foursquare Gospel",
+    "United Pentecostal Church", "Apostolic", "Full Gospel", "Charismatic", "Vineyard", "Calvary Chapel",
+    
+    // Reformed and Calvinist
+    "Reformed", "Christian Reformed", "Presbyterian Reformed", "Reformed Church in America", "Protestant Reformed",
+    "Calvinist", "Reformed Baptist", "Presbyterian Church of America",
+    
+    // Restorationist Movement
+    "Church of Christ", "Disciples of Christ", "Christian Church", "Churches of Christ", "Independent Christian Church",
+    
+    // Adventist and Sabbatarian
+    "Seventh-day Adventist", "Adventist Christian", "Church of God (Seventh Day)",
+    
+    // Anabaptist and Peace Churches
+    "Mennonite", "Amish", "Brethren", "Church of the Brethren", "Mennonite Brethren", "Hutterite",
+    "Quaker", "Friends", "Religious Society of Friends",
+    
+    // Congregational and Independent
+    "Congregational", "United Church of Christ", "Congregational Christian", "Conservative Congregational Christian",
+    "Independent", "Non-denominational", "Interdenominational", "Community Church", "Bible Church",
+    
+    // Holiness Movement
+    "Nazarene", "Church of the Nazarene", "Salvation Army", "Christian and Missionary Alliance",
+    "Church of God (Anderson)", "Pilgrim Holiness", "Free Methodist",
+    
+    // Evangelical and Fundamentalist
+    "Evangelical", "Evangelical Free", "Fundamentalist", "Bible Baptist", "Independent Fundamental Baptist",
+    
+    // Catholic and Orthodox
+    "Roman Catholic", "Catholic", "Eastern Orthodox", "Greek Orthodox", "Russian Orthodox",
+    "Orthodox Church in America", "Antiochian Orthodox", "Serbian Orthodox", "Bulgarian Orthodox",
+    "Romanian Orthodox", "Ukrainian Orthodox", "Coptic Orthodox", "Ethiopian Orthodox",
+    "Armenian Apostolic", "Assyrian Church of the East", "Chaldean Catholic", "Maronite",
+    
+    // African American Denominations
+    "African Methodist Episcopal", "African Methodist Episcopal Zion", "Christian Methodist Episcopal",
+    "National Baptist Convention", "Progressive National Baptist Convention", "Full Gospel Baptist",
+    
+    // Other Christian Traditions
+    "Unity", "Unitarian Universalist", "Christian Science", "Latter-day Saints", "Jehovah's Witnesses",
+    "Moravian", "Waldensian", "Plymouth Brethren", "Christadelphian"
   ],
   group: [
     "Community Organization", "Non-Profit", "Educational", "Support Group", "Recovery Group",
@@ -58,7 +103,8 @@ const createChurchSchema = z.object({
   adminEmail: z.string().email("Valid email required"),
   adminPhone: z.string().optional(),
   website: z.string().optional(),
-  description: z.string().optional()
+  description: z.string().optional(),
+  logoUrl: z.string().optional()
 });
 
 // Church claim schema
@@ -73,6 +119,8 @@ export function ChurchManagementHub() {
   const [claimDialog, setClaimDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showCustomDenomination, setShowCustomDenomination] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string>("");
   const { toast } = useToast();
 
   // Get user's admin churches
@@ -107,7 +155,8 @@ export function ChurchManagementHub() {
       adminEmail: "",
       adminPhone: "",
       website: "",
-      description: ""
+      description: "",
+      logoUrl: ""
     }
   });
 
@@ -132,13 +181,53 @@ export function ChurchManagementHub() {
     return `https://${trimmedUrl}`;
   };
 
+  // Handle logo upload
+  const handleLogoUpload = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('logo', file);
+    
+    const response = await fetch('/api/upload/community-logo', {
+      method: 'POST',
+      credentials: 'include',
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to upload logo');
+    }
+    
+    const result = await response.json();
+    return result.logoUrl;
+  };
+
+  // Handle logo file selection
+  const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Create church mutation
   const createChurchMutation = useMutation({
     mutationFn: async (data: any) => {
+      let logoUrl = "";
+      
+      // Upload logo if selected
+      if (logoFile) {
+        logoUrl = await handleLogoUpload(logoFile);
+      }
+      
       // Normalize website URL before sending
       const processedData = {
         ...data,
-        website: data.website ? normalizeWebsiteUrl(data.website) : ""
+        website: data.website ? normalizeWebsiteUrl(data.website) : "",
+        logoUrl: logoUrl
       };
       return await apiRequest("/api/churches", "POST", processedData);
     },
@@ -146,6 +235,8 @@ export function ChurchManagementHub() {
       toast({ title: "Community created successfully!" });
       setCreateDialog(false);
       setShowCustomDenomination(false);
+      setLogoFile(null);
+      setLogoPreview("");
       createForm.reset();
       queryClient.invalidateQueries({ queryKey: ["/api/user/churches"] });
     },
@@ -295,6 +386,8 @@ export function ChurchManagementHub() {
                   setCreateDialog(open);
                   if (!open) {
                     setShowCustomDenomination(false);
+                    setLogoFile(null);
+                    setLogoPreview("");
                     createForm.reset();
                   }
                 }}>
@@ -511,6 +604,88 @@ export function ChurchManagementHub() {
                                 <FormLabel>Website</FormLabel>
                                 <FormControl>
                                   <Input placeholder="https://www.church.org" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        {/* Logo Upload Section */}
+                        <div className="space-y-4">
+                          <div>
+                            <Label>Community Logo</Label>
+                            <div className="mt-2 space-y-4">
+                              {logoPreview ? (
+                                <div className="flex items-center space-x-4">
+                                  <img 
+                                    src={logoPreview} 
+                                    alt="Logo preview" 
+                                    className="w-20 h-20 object-cover rounded-lg border"
+                                  />
+                                  <div className="flex-1">
+                                    <p className="text-sm text-gray-600">Logo selected: {logoFile?.name}</p>
+                                    <Button 
+                                      type="button" 
+                                      variant="outline" 
+                                      size="sm" 
+                                      onClick={() => {
+                                        setLogoFile(null);
+                                        setLogoPreview("");
+                                      }}
+                                      className="mt-2"
+                                    >
+                                      Remove
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleLogoChange}
+                                    className="hidden"
+                                    id="logo-upload"
+                                  />
+                                  <label 
+                                    htmlFor="logo-upload" 
+                                    className="cursor-pointer"
+                                  >
+                                    <div className="space-y-2">
+                                      <div className="text-gray-400">
+                                        <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                        </svg>
+                                      </div>
+                                      <div className="text-sm text-gray-600">
+                                        <span className="font-medium text-blue-600 hover:text-blue-500">
+                                          Click to upload
+                                        </span>
+                                        {" "}or drag and drop
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        PNG, JPG, GIF up to 5MB
+                                      </div>
+                                    </div>
+                                  </label>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <FormField
+                            control={createForm.control}
+                            name="description"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Description</FormLabel>
+                                <FormControl>
+                                  <Textarea 
+                                    placeholder="Brief description of your community..."
+                                    rows={3}
+                                    {...field} 
+                                  />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
