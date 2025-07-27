@@ -1783,6 +1783,7 @@ export class DatabaseStorage implements IStorage {
         return obj;
       }, {} as any);
     
+    console.log('Filtered updates for storage:', filteredUpdates);
     
     const [updatedChurch] = await db
       .update(communities)

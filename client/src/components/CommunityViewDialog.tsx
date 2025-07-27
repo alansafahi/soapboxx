@@ -365,7 +365,9 @@ export function CommunityViewDialog({
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Office Hours</h4>
                     <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                       <p className="text-sm text-gray-900 dark:text-gray-100">
-                        {community.officeHours || community.hoursOfOperation}
+                        {community.officeHours || (typeof community.hoursOfOperation === 'object' 
+                          ? JSON.stringify(community.hoursOfOperation) 
+                          : community.hoursOfOperation)}
                       </p>
                     </div>
                   </div>

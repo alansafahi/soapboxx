@@ -7739,7 +7739,13 @@ Return JSON with this exact structure:
       console.log('Received update data:', req.body);
 
       // Handle logo upload
-      const uploadedLogoUrl = req.file ? `/uploads/${req.file.filename}` : null;
+      let uploadedLogoUrl = null;
+      if (req.file) {
+        uploadedLogoUrl = `/uploads/community-logos/${req.file.filename}`;
+        console.log('Logo uploaded successfully:', uploadedLogoUrl);
+      } else {
+        console.warn('Logo upload failed, continuing with other updates');
+      }
       const finalLogoUrl = uploadedLogoUrl || logoUrl || null;
 
       // Prepare social links object

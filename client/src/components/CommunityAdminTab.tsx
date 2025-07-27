@@ -104,6 +104,7 @@ export function CommunityAdminTab() {
       
       // Upload logo if a file is selected
       if (profileData.logoFile) {
+        console.log('Uploading logo file:', profileData.logoFile);
         const formData = new FormData();
         formData.append('logo', profileData.logoFile);
         
@@ -116,10 +117,15 @@ export function CommunityAdminTab() {
         if (uploadResponse.ok) {
           const uploadResult = await uploadResponse.json();
           logoUrl = uploadResult.logoUrl;
+          console.log('Logo uploaded successfully:', logoUrl);
         } else {
+          const error = await uploadResponse.text();
+          console.error('Logo upload failed:', error);
           // Don't fail the entire update if logo upload fails - just log the error
           console.warn("Logo upload failed, continuing with other updates");
         }
+      } else {
+        console.log('No logo file to upload');
       }
       
       const response = await fetch(`/api/communities/${selectedCommunityId}`, {
