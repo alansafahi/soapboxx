@@ -34,6 +34,7 @@ interface CommunityProfile {
   city: string;
   state: string;
   zipCode: string;
+  zip_code?: string; // Database field mapping
   phone?: string;
   email?: string;
   website?: string;
@@ -51,6 +52,20 @@ interface CommunityProfile {
   admin_email?: string; // Database field mapping
   adminPhone?: string;
   admin_phone?: string; // Database field mapping
+  parentChurch?: string;
+  parent_church?: string; // Database field mapping
+  facebookUrl?: string;
+  facebook_url?: string; // Database field mapping
+  instagramUrl?: string;
+  instagram_url?: string; // Database field mapping
+  youtubeUrl?: string;
+  youtube_url?: string; // Database field mapping
+  sundayServiceTime?: string;
+  sunday_service_time?: string; // Database field mapping
+  wednesdayServiceTime?: string;
+  wednesday_service_time?: string; // Database field mapping
+  streetAddress?: string;
+  street_address?: string; // Database field mapping
 }
 
 export function CommunityViewDialog({ 
@@ -157,14 +172,28 @@ export function CommunityViewDialog({
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Basic Information */}
+          {/* Community Logo Section */}
+          {(community.logoUrl || community.logo_url) && (
+            <Card>
+              <CardContent className="p-4 text-center">
+                <h3 className="font-semibold mb-3">Community Logo</h3>
+                <img 
+                  src={community.logoUrl || community.logo_url} 
+                  alt={`${community.name} logo`}
+                  className="w-32 h-32 mx-auto rounded-lg object-cover border"
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Additional Information */}
           <Card>
             <CardContent className="p-4">
-              <h3 className="font-semibold mb-3">Basic Information</h3>
+              <h3 className="font-semibold mb-3">Additional Information</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {(community.establishedYear || community.established_year) && (
                   <div>
-                    <p className="font-medium text-sm text-gray-500">Established</p>
+                    <p className="font-medium text-sm text-gray-500">Established Year</p>
                     <p className="text-gray-900 dark:text-gray-100">
                       {community.establishedYear || community.established_year}
                     </p>
@@ -178,19 +207,11 @@ export function CommunityViewDialog({
                     </p>
                   </div>
                 )}
-                {(community.adminEmail || community.admin_email) && (
-                  <div>
-                    <p className="font-medium text-sm text-gray-500">Administrator Email</p>
+                {(community.parentChurch || community.parent_church) && (
+                  <div className="md:col-span-2">
+                    <p className="font-medium text-sm text-gray-500">Parent Church (if applicable)</p>
                     <p className="text-gray-900 dark:text-gray-100">
-                      {community.adminEmail || community.admin_email}
-                    </p>
-                  </div>
-                )}
-                {(community.adminPhone || community.admin_phone) && (
-                  <div>
-                    <p className="font-medium text-sm text-gray-500">Administrator Phone</p>
-                    <p className="text-gray-900 dark:text-gray-100">
-                      {community.adminPhone || community.admin_phone}
+                      {community.parentChurch || community.parent_church}
                     </p>
                   </div>
                 )}
@@ -215,25 +236,12 @@ export function CommunityViewDialog({
             <CardContent className="p-4">
               <h3 className="font-semibold mb-3">Contact Information</h3>
               <div className="space-y-3">
-                {/* Address */}
-                <div className="flex items-start space-x-3">
-                  <MapPin className="h-5 w-5 text-gray-500 mt-0.5" />
-                  <div>
-                    <p className="font-medium">Address</p>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      {community.address}
-                      <br />
-                      {community.city}, {community.state} {community.zipCode}
-                    </p>
-                  </div>
-                </div>
-
                 {/* Phone */}
                 {community.phone && (
                   <div className="flex items-center space-x-3">
                     <Phone className="h-5 w-5 text-gray-500" />
                     <div>
-                      <p className="font-medium">Phone</p>
+                      <p className="font-medium">Phone Number</p>
                       <p className="text-gray-600 dark:text-gray-300">
                         <a 
                           href={`tel:${community.phone}`} 
@@ -251,7 +259,7 @@ export function CommunityViewDialog({
                   <div className="flex items-center space-x-3">
                     <Mail className="h-5 w-5 text-gray-500" />
                     <div>
-                      <p className="font-medium">Email</p>
+                      <p className="font-medium">Email Address</p>
                       <p className="text-gray-600 dark:text-gray-300">
                         <a 
                           href={`mailto:${community.email}`} 
@@ -284,6 +292,140 @@ export function CommunityViewDialog({
                     </div>
                   </div>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Social Media & Hours */}
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-semibold mb-3">Social & Hours</h3>
+              
+              {/* Social Media Links */}
+              {((community.facebookUrl || community.facebook_url) || 
+                (community.instagramUrl || community.instagram_url) || 
+                (community.youtubeUrl || community.youtube_url)) && (
+                <div className="mb-4">
+                  <h4 className="font-medium mb-2">Social Media Links</h4>
+                  <div className="space-y-2">
+                    {(community.facebookUrl || community.facebook_url) && (
+                      <div>
+                        <p className="text-sm text-gray-500">Facebook URL</p>
+                        <a 
+                          href={community.facebookUrl || community.facebook_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 transition-colors flex items-center space-x-1"
+                        >
+                          <span>{community.facebookUrl || community.facebook_url}</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                    )}
+                    {(community.instagramUrl || community.instagram_url) && (
+                      <div>
+                        <p className="text-sm text-gray-500">Instagram URL</p>
+                        <a 
+                          href={community.instagramUrl || community.instagram_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 transition-colors flex items-center space-x-1"
+                        >
+                          <span>{community.instagramUrl || community.instagram_url}</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                    )}
+                    {(community.youtubeUrl || community.youtube_url) && (
+                      <div>
+                        <p className="text-sm text-gray-500">YouTube URL</p>
+                        <a 
+                          href={community.youtubeUrl || community.youtube_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 transition-colors flex items-center space-x-1"
+                        >
+                          <span>{community.youtubeUrl || community.youtube_url}</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Operating Hours */}
+              {((community.sundayServiceTime || community.sunday_service_time) || 
+                (community.wednesdayServiceTime || community.wednesday_service_time)) && (
+                <div>
+                  <h4 className="font-medium mb-2">Operating Hours</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {(community.sundayServiceTime || community.sunday_service_time) && (
+                      <div>
+                        <p className="text-sm text-gray-500">Sunday Service Time</p>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {community.sundayServiceTime || community.sunday_service_time}
+                        </p>
+                      </div>
+                    )}
+                    {(community.wednesdayServiceTime || community.wednesday_service_time) && (
+                      <div>
+                        <p className="text-sm text-gray-500">Wednesday Service Time</p>
+                        <p className="text-gray-900 dark:text-gray-100">
+                          {community.wednesdayServiceTime || community.wednesday_service_time}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Location Information */}
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-semibold mb-3">Location Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="font-medium text-sm text-gray-500">Street Address</p>
+                  <p className="text-gray-900 dark:text-gray-100">
+                    {community.streetAddress || community.street_address || community.address}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-sm text-gray-500">City</p>
+                  <p className="text-gray-900 dark:text-gray-100">
+                    {community.city}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-sm text-gray-500">State</p>
+                  <p className="text-gray-900 dark:text-gray-100">
+                    {community.state}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-sm text-gray-500">Zip Code</p>
+                  <p className="text-gray-900 dark:text-gray-100">
+                    {community.zipCode || community.zip_code}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Full Address Display */}
+              <div className="mt-4 pt-3 border-t">
+                <div className="flex items-start space-x-3">
+                  <MapPin className="h-5 w-5 text-gray-500 mt-0.5" />
+                  <div>
+                    <p className="font-medium">Complete Address</p>
+                    <p className="text-gray-600 dark:text-gray-300">
+                      {community.streetAddress || community.street_address || community.address}
+                      <br />
+                      {community.city}, {community.state} {community.zipCode || community.zip_code}
+                    </p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
