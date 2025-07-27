@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
+import { useLocation, useSearch } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useToast } from "../hooks/use-toast";
@@ -45,8 +46,20 @@ export function CommunityAdminTab() {
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
+  const [location, setLocation] = useLocation();
+  const searchParams = new URLSearchParams(useSearch());
+  
+  // Get communityId from URL params
+  const urlCommunityId = searchParams.get('communityId');
+  const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(urlCommunityId);
   const [activeTab, setActiveTab] = useState("profile");
+
+  // Sync selectedCommunityId with URL
+  useEffect(() => {
+    if (urlCommunityId && urlCommunityId !== selectedCommunityId) {
+      setSelectedCommunityId(urlCommunityId);
+    }
+  }, [urlCommunityId, selectedCommunityId]);
 
   // Get communities where user has admin role - always call hooks in same order
   const { data: adminCommunities = [], isLoading: communitiesLoading, error: communitiesError } = useQuery({
@@ -90,12 +103,14 @@ export function CommunityAdminTab() {
     enabled: !!selectedCommunityId && isAuthenticated,
   }) as { data: CommunityProfile | null, isLoading: boolean };
 
-  // Auto-select first community if none selected
+  // Auto-select first community if none selected and no URL param
   useEffect(() => {
-    if (!selectedCommunityId && allAdminCommunities.length > 0) {
-      setSelectedCommunityId(allAdminCommunities[0].id.toString());
+    if (!urlCommunityId && !selectedCommunityId && allAdminCommunities.length > 0) {
+      const firstCommunityId = allAdminCommunities[0].id.toString();
+      setSelectedCommunityId(firstCommunityId);
+      setLocation(`/community-administration?communityId=${firstCommunityId}`);
     }
-  }, [allAdminCommunities, selectedCommunityId]);
+  }, [allAdminCommunities, selectedCommunityId, urlCommunityId, setLocation]);
 
   // Save profile mutation
   const saveProfileMutation = useMutation({
@@ -257,7 +272,11 @@ export function CommunityAdminTab() {
         </div>
         <div className="flex items-center space-x-4">
           {allAdminCommunities.length > 1 && (
-            <Select value={selectedCommunityId || ""} onValueChange={setSelectedCommunityId}>
+            <Select value={selectedCommunityId || ""} onValueChange={(value) => {
+              setSelectedCommunityId(value);
+              // Update URL to reflect community selection
+              setLocation(`/community-administration?communityId=${value}`);
+            }}>
               <SelectTrigger className="w-64">
                 <SelectValue placeholder="Select a community" />
               </SelectTrigger>
