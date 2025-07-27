@@ -121,7 +121,7 @@ export function CommunityAdminTab() {
         }
       }
       
-      const response = await fetch(`/api/churches/${selectedCommunityId}`, {
+      const response = await fetch(`/api/communities/${selectedCommunityId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

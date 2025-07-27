@@ -7684,11 +7684,10 @@ Return JSON with this exact structure:
   });
 
   // Update community profile (new terminology)
-  app.put('/api/communities/:communityId', isAuthenticated, async (req: any, res) => {
+  app.put('/api/communities/:communityId', isAuthenticated, upload.single('logo'), async (req: any, res) => {
     try {
       const userId = req.session.userId;
       const communityId = parseInt(req.params.communityId);
-      
       
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
@@ -7705,12 +7704,150 @@ Return JSON with this exact structure:
         return res.status(403).json({ error: 'Admin access required' });
       }
 
-      const updates = req.body;
+      // Extract and map fields properly for database storage
+      const {
+        name,
+        type,
+        denomination,
+        description,
+        bio,
+        address,
+        city,
+        state,
+        zipCode,
+        phone,
+        email,
+        website,
+        logoUrl,
+        size,
+        establishedYear,
+        weeklyAttendance,
+        parentChurchName,
+        missionStatement,
+        facebookUrl,
+        instagramUrl,
+        twitterUrl,
+        tiktokUrl,
+        youtubeUrl,
+        officeHours,
+        worshipTimes,
+        hoursOfOperation,
+        timeRows,
+        socialLinks
+      } = req.body;
+
+      console.log('Received update data:', req.body);
+
+      // Handle logo upload
+      const uploadedLogoUrl = req.file ? `/uploads/${req.file.filename}` : null;
+      const finalLogoUrl = uploadedLogoUrl || logoUrl || null;
+
+      // Prepare social links object
+      let socialLinksData: any = {};
+      if (socialLinks) {
+        try {
+          socialLinksData = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
+        } catch (e) {
+          console.log('Error parsing socialLinks:', e);
+        }
+      }
+      
+      // Add individual social media URLs to socialLinks
+      if (facebookUrl) socialLinksData.facebook = facebookUrl;
+      if (instagramUrl) socialLinksData.instagram = instagramUrl;
+      if (twitterUrl) socialLinksData.twitter = twitterUrl;
+      if (tiktokUrl) socialLinksData.tiktok = tiktokUrl;
+      if (youtubeUrl) socialLinksData.youtube = youtubeUrl;
+
+      // Process time rows if provided
+      let processedWorshipTimes = worshipTimes;
+      let processedHoursOfOperation = hoursOfOperation;
+      
+      if (timeRows && Array.isArray(timeRows)) {
+        const worshipTimesArray: string[] = [];
+        const hoursOfOperationObj: any = {};
+        
+        timeRows.forEach((row: any) => {
+          if (row.eventLabel && row.timeSchedule) {
+            let timeEntry = `${row.eventLabel}: ${row.timeSchedule}`;
+            if (row.language && row.language !== 'English') {
+              timeEntry += ` (${row.language})`;
+            }
+            worshipTimesArray.push(timeEntry);
+            
+            // Extract day-based entries for hoursOfOperation
+            const timeSchedule = row.timeSchedule.toLowerCase();
+            if (timeSchedule.includes('sunday')) {
+              hoursOfOperationObj.sunday = row.timeSchedule;
+            } else if (timeSchedule.includes('monday')) {
+              hoursOfOperationObj.monday = row.timeSchedule;
+            } else if (timeSchedule.includes('tuesday')) {
+              hoursOfOperationObj.tuesday = row.timeSchedule;
+            } else if (timeSchedule.includes('wednesday')) {
+              hoursOfOperationObj.wednesday = row.timeSchedule;
+            } else if (timeSchedule.includes('thursday')) {
+              hoursOfOperationObj.thursday = row.timeSchedule;
+            } else if (timeSchedule.includes('friday')) {
+              hoursOfOperationObj.friday = row.timeSchedule;
+            } else if (timeSchedule.includes('saturday')) {
+              hoursOfOperationObj.saturday = row.timeSchedule;
+            }
+          }
+        });
+        
+        if (worshipTimesArray.length > 0) {
+          processedWorshipTimes = worshipTimesArray.join('; ');
+        }
+        
+        if (Object.keys(hoursOfOperationObj).length > 0) {
+          processedHoursOfOperation = hoursOfOperationObj;
+        }
+      }
+
+      // Map to database field names - use actual schema fields
+      const updates = {
+        name: name?.trim(),
+        type: type?.trim(),
+        denomination: denomination?.trim(),
+        description: description?.trim(),
+        bio: bio?.trim() || missionStatement?.trim(), // Map mission statement to bio field
+        address: address?.trim(),
+        city: city?.trim(),
+        state: state?.trim(),
+        zipCode: zipCode?.trim(),
+        phone: phone?.trim(),
+        email: email?.trim(),
+        website: website?.trim(),
+        logoUrl: finalLogoUrl,
+        size: weeklyAttendance?.trim() || size?.trim(), // Map weekly attendance to size field
+        socialLinks: Object.keys(socialLinksData).length > 0 ? socialLinksData : null,
+        officeHours: officeHours?.trim(),
+        worshipTimes: processedWorshipTimes?.trim(),
+        hoursOfOperation: processedHoursOfOperation,
+        updatedAt: new Date()
+        // Note: establishedYear and parentChurchName fields don't exist in database schema
+        // These would need schema migration to be added
+      };
+
+      // Remove undefined/null values to avoid overwriting existing data
+      Object.keys(updates).forEach(key => {
+        if (updates[key] === undefined || updates[key] === '') {
+          delete updates[key];
+        }
+      });
+
+      console.log('Mapped updates for database:', updates);
+
       const updatedCommunity = await storage.updateChurch(communityId, updates);
       
       res.json(updatedCommunity);
     } catch (error) {
-      res.status(500).json({ error: 'Failed to update community' });
+      console.error('Community update error:', error);
+      res.status(500).json({ 
+        error: 'Failed to update community', 
+        details: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
     }
   });
 

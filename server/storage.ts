@@ -1773,6 +1773,8 @@ export class DatabaseStorage implements IStorage {
       'hoursOfOperation', 'officeHours', 'worshipTimes', 'socialLinks', 'communityTags', 'latitude', 'longitude', 
       'rating', 'memberCount', 'isActive', 'isClaimed', 'adminEmail', 'adminPhone', 
       'verificationStatus', 'rejectionReason', 'createdBy', 'isDemo'
+      // Note: establishedYear, weeklyAttendance, parentChurchName don't exist in database schema
+      // weeklyAttendance is mapped to 'size' field, missionStatement to 'bio' field
     ];
     
     const filteredUpdates = Object.keys(updates)
