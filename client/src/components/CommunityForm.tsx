@@ -98,38 +98,77 @@ export function CommunityForm({
   isLoading = false,
   submitButtonText = mode === "create" ? "Create Community" : "Save Changes"
 }: CommunityFormProps) {
-  const [formData, setFormData] = useState<CommunityFormData>({
-    name: "",
-    type: "",
-    denomination: "",
-    description: "",
-    address: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    phone: "",
-    email: "",
-    website: "",
-    logoUrl: "",
-    establishedYear: undefined,
-    weeklyAttendance: "",
-    parentChurchName: "",
-    missionStatement: "",
-    socialLinks: {
-      facebook: "",
-      instagram: "",
-      twitter: "",
-      tiktok: "",
-      youtube: ""
-    },
-    officeHours: "",
-    worshipTimes: "",
-    additionalTimes: [],
-    ...initialData
+  const [formData, setFormData] = useState<CommunityFormData>(() => {
+    // Map database fields to form fields
+    const mappedData = {
+      name: initialData?.name || "",
+      type: initialData?.type || "",
+      denomination: initialData?.denomination || "",
+      description: initialData?.description || "",
+      address: initialData?.address || "",
+      city: initialData?.city || "",
+      state: initialData?.state || "",
+      zipCode: initialData?.zipCode || "",
+      phone: initialData?.phone || "",
+      email: initialData?.email || "",
+      website: initialData?.website || "",
+      logoUrl: initialData?.logoUrl || "",
+      establishedYear: initialData?.establishedYear || undefined,
+      weeklyAttendance: initialData?.size || initialData?.weeklyAttendance || "", // Map size to weeklyAttendance
+      parentChurchName: initialData?.parentChurchName || "",
+      missionStatement: initialData?.bio || initialData?.missionStatement || "", // Map bio to missionStatement
+      socialLinks: {
+        facebook: initialData?.socialLinks?.facebook || "",
+        instagram: initialData?.socialLinks?.instagram || "",
+        twitter: initialData?.socialLinks?.twitter || "",
+        tiktok: initialData?.socialLinks?.tiktok || "",
+        youtube: initialData?.socialLinks?.youtube || ""
+      },
+      officeHours: initialData?.officeHours || "",
+      worshipTimes: initialData?.worshipTimes || "",
+      additionalTimes: initialData?.additionalTimes || [],
+    };
+    return mappedData;
   });
 
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>(initialData?.logoUrl || "");
+
+  // Update form data when initialData changes (e.g., community selection changes)
+  useEffect(() => {
+    if (initialData) {
+      const mappedData = {
+        name: initialData?.name || "",
+        type: initialData?.type || "",
+        denomination: initialData?.denomination || "",
+        description: initialData?.description || "",
+        address: initialData?.address || "",
+        city: initialData?.city || "",
+        state: initialData?.state || "",
+        zipCode: initialData?.zipCode || "",
+        phone: initialData?.phone || "",
+        email: initialData?.email || "",
+        website: initialData?.website || "",
+        logoUrl: initialData?.logoUrl || "",
+        establishedYear: initialData?.establishedYear || undefined,
+        weeklyAttendance: initialData?.size || initialData?.weeklyAttendance || "", // Map size to weeklyAttendance
+        parentChurchName: initialData?.parentChurchName || "",
+        missionStatement: initialData?.bio || initialData?.missionStatement || "", // Map bio to missionStatement
+        socialLinks: {
+          facebook: initialData?.socialLinks?.facebook || "",
+          instagram: initialData?.socialLinks?.instagram || "",
+          twitter: initialData?.socialLinks?.twitter || "",
+          tiktok: initialData?.socialLinks?.tiktok || "",
+          youtube: initialData?.socialLinks?.youtube || ""
+        },
+        officeHours: initialData?.officeHours || "",
+        worshipTimes: initialData?.worshipTimes || "",
+        additionalTimes: initialData?.additionalTimes || [],
+      };
+      setFormData(mappedData);
+      setLogoPreview(initialData?.logoUrl || "");
+    }
+  }, [initialData]);
 
   // Auto-fill office hours and worship times based on denomination
   useEffect(() => {
