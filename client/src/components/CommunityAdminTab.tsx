@@ -116,6 +116,8 @@ export function CommunityAdminTab() {
         if (uploadResponse.ok) {
           const uploadResult = await uploadResponse.json();
           logoUrl = uploadResult.logoUrl;
+        } else {
+          throw new Error("Logo upload failed");
         }
       }
       

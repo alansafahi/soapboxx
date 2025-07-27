@@ -133,7 +133,7 @@ export function CommunityForm({
 
   // Auto-fill office hours and worship times based on denomination
   useEffect(() => {
-    if (formData.denomination && mode === "create") {
+    if (formData.denomination) {
       const denominationDefaults: { [key: string]: { officeHours: string; worshipTimes: string } } = {
         // Catholic Churches
         "Catholic": {
