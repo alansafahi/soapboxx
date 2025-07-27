@@ -41,7 +41,6 @@ const upload = multer({
 router.post('/community-logo', (req: any, res, next) => {
   // Check authentication before processing file
   if (!req.session || !req.session.userId) {
-    console.log('Authentication failed during logo upload - Session:', req.session?.userId);
     return res.status(401).json({ 
       success: false, 
       message: 'Authentication required' 
@@ -50,8 +49,6 @@ router.post('/community-logo', (req: any, res, next) => {
   next();
 }, upload.single('logo'), (req: any, res) => {
   try {
-    console.log('Logo upload attempt - Session:', req.session?.userId, 'File:', req.file ? req.file.filename : 'None');
-    
     if (!req.file) {
       return res.status(400).json({ 
         success: false, 
@@ -62,15 +59,12 @@ router.post('/community-logo', (req: any, res, next) => {
     // Generate the URL for the uploaded file
     const logoUrl = `/uploads/community-logos/${req.file.filename}`;
     
-    console.log('Logo uploaded successfully for user', req.session.userId, ':', logoUrl);
-    
     res.json({ 
       success: true,
       logoUrl,
       message: 'Logo uploaded successfully' 
     });
   } catch (error) {
-    console.error('Logo upload error:', error);
     res.status(500).json({ 
       success: false, 
       message: 'Failed to upload logo' 

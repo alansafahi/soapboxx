@@ -119,7 +119,7 @@ export function CommunityAdminTab() {
       
       // Upload logo if a file is selected
       if (profileData.logoFile && profileData.logoFile instanceof File) {
-        console.log('Uploading logo file:', profileData.logoFile.name, 'Size:', profileData.logoFile.size);
+
         const formData = new FormData();
         formData.append('logo', profileData.logoFile);
         
@@ -133,28 +133,28 @@ export function CommunityAdminTab() {
           if (uploadResponse.ok) {
             const uploadResult = await uploadResponse.json();
             logoUrl = uploadResult.logoUrl;
-            console.log('Logo uploaded successfully:', logoUrl);
+
           } else {
             const error = await uploadResponse.text();
-            console.error('Logo upload failed with status:', uploadResponse.status, 'Error:', error);
+
             throw new Error(`Logo upload failed: ${error}`);
           }
         } catch (uploadError) {
-          console.error('Logo upload error:', uploadError);
+
           throw new Error(`Failed to upload logo: ${uploadError.message}`);
         }
       } else if (profileData.logoFile) {
-        console.warn('logoFile is not a valid File object:', typeof profileData.logoFile, profileData.logoFile);
+
       } else {
-        console.log('No logo file to upload');
+
       }
       
-      console.log('Updating community with logoUrl:', logoUrl);
+
       const updateData = {
         ...profileData,
         logoUrl,
       };
-      console.log('Update payload:', updateData);
+
       
       const response = await fetch(`/api/communities/${selectedCommunityId}`, {
         method: 'PUT',
@@ -165,12 +165,12 @@ export function CommunityAdminTab() {
       
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Community update failed:', response.status, errorText);
+
         throw new Error(`Failed to save community profile: ${errorText}`);
       }
       
       const result = await response.json();
-      console.log('Community update result:', result);
+
       return result;
     },
     onSuccess: () => {

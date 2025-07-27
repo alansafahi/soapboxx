@@ -1734,7 +1734,7 @@ export class DatabaseStorage implements IStorage {
       const [church] = await db.select().from(communities).where(eq(communities.id, id));
       return church;
     } catch (error) {
-      console.error('Error in getChurch:', error);
+
       throw error;
     }
   }
@@ -1746,7 +1746,7 @@ export class DatabaseStorage implements IStorage {
       // TODO: Implement proper leaderboard logic
       return [];
     } catch (error) {
-      console.error('Error in getChurchLeaderboard:', error);
+
       return [];
     }
   }
@@ -1783,7 +1783,7 @@ export class DatabaseStorage implements IStorage {
         return obj;
       }, {} as any);
     
-    console.log('Filtered updates for storage:', filteredUpdates);
+
     
     const [updatedChurch] = await db
       .update(communities)
@@ -1824,10 +1824,10 @@ export class DatabaseStorage implements IStorage {
         ORDER BY c.created_at DESC
       `);
 
-      console.log(`getUserCreatedChurches: Found ${result.rows.length} communities for user ${userId}`);
+
       return result.rows as Church[];
     } catch (error) {
-      console.error('getUserCreatedChurches error:', error);
+
       
       // Try alternative query using direct createdBy field
       try {
@@ -1838,10 +1838,10 @@ export class DatabaseStorage implements IStorage {
           ORDER BY created_at DESC
         `);
         
-        console.log(`getUserCreatedChurches fallback: Found ${fallbackResult.rows.length} communities created by user ${userId}`);
+
         return fallbackResult.rows as Church[];
       } catch (fallbackError) {
-        console.error('getUserCreatedChurches fallback error:', fallbackError);
+
         return [];
       }
     }

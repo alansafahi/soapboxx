@@ -7426,7 +7426,7 @@ Return JSON with this exact structure:
 
       res.json(church);
     } catch (error) {
-      console.error('Error in /api/churches/:churchId:', error);
+
       res.status(500).json({ error: 'Failed to get church details', details: error.message });
     }
   });
@@ -7509,7 +7509,7 @@ Return JSON with this exact structure:
         try {
           timeRows = JSON.parse(timeRows);
         } catch (e) {
-          console.log('Failed to parse timeRows JSON:', e);
+
           timeRows = [];
         }
       }
@@ -7628,7 +7628,7 @@ Return JSON with this exact structure:
         community: newCommunity
       });
     } catch (error) {
-      console.error('Community creation error:', error);
+
       res.status(500).json({ 
         error: 'Failed to create community', 
         details: error.message,
@@ -7738,15 +7738,15 @@ Return JSON with this exact structure:
         socialLinks
       } = req.body;
 
-      console.log('Received update data:', req.body);
+
 
       // Handle logo upload
       let uploadedLogoUrl = null;
       if (req.file) {
         uploadedLogoUrl = `/uploads/community-logos/${req.file.filename}`;
-        console.log('Logo uploaded successfully:', uploadedLogoUrl);
+
       } else {
-        console.warn('Logo upload failed, continuing with other updates');
+
       }
       const finalLogoUrl = uploadedLogoUrl || logoUrl || null;
 
@@ -7756,7 +7756,7 @@ Return JSON with this exact structure:
         try {
           socialLinksData = typeof socialLinks === 'string' ? JSON.parse(socialLinks) : socialLinks;
         } catch (e) {
-          console.log('Error parsing socialLinks:', e);
+
         }
       }
       
@@ -7848,13 +7848,13 @@ Return JSON with this exact structure:
         }
       });
 
-      console.log('Mapped updates for database:', updates);
+
 
       const updatedCommunity = await storage.updateChurch(communityId, updates);
       
       res.json(updatedCommunity);
     } catch (error) {
-      console.error('Community update error:', error);
+
       res.status(500).json({ 
         error: 'Failed to update community', 
         details: error.message,
@@ -7949,7 +7949,7 @@ Return JSON with this exact structure:
         count: churches.length 
       });
     } catch (error) {
-      console.error('Test endpoint error:', error);
+
       res.status(500).json({ 
         status: 'error', 
         error: error.message,

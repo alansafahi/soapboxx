@@ -101,16 +101,12 @@ export function CommunityViewDialog({
   const { data: community, isLoading, error } = useQuery({
     queryKey: ['community-details', communityId],
     queryFn: async () => {
-      console.log('Fetching community details for ID:', communityId);
       const response = await fetch(`/api/communities/${communityId}`, { credentials: 'include' });
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Community fetch error:', response.status, errorText);
         throw new Error(`Failed to fetch community details: ${response.status} ${errorText}`);
       }
-      const data = await response.json();
-      console.log('Community data received:', data);
-      return data;
+      return response.json();
     },
     enabled: isOpen && !!communityId,
     retry: 1,
@@ -157,7 +153,7 @@ export function CommunityViewDialog({
           ? JSON.parse(community.socialLinks) 
           : community.socialLinks;
       } catch (e) {
-        console.log('Error parsing socialLinks:', e);
+
       }
     }
     
