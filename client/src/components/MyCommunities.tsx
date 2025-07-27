@@ -320,13 +320,6 @@ export default function MyCommunities() {
   // Create community mutation
   const createCommunityMutation = useMutation({
     mutationFn: async (data: any) => {
-      let logoUrl = "";
-      
-      // Upload logo if selected
-      if (logoFile) {
-        logoUrl = await handleLogoUpload(logoFile);
-      }
-      
       // Include time rows data as array for backend processing
       const filteredTimeRows = timeRows.filter(row => 
         row.eventLabel.trim() || row.timeSchedule.trim()
@@ -335,16 +328,35 @@ export default function MyCommunities() {
       const submissionData = {
         ...data,
         website: normalizeWebsiteUrl(data.website),
-        logoUrl: logoUrl,
         timeRows: filteredTimeRows
       };
 
       const normalizedData = transformToSnakeCase(submissionData);
       
+      // Create FormData for multipart request (to handle logo upload)
+      const formData = new FormData();
+      
+      // Add logo file if selected
+      if (logoFile) {
+        formData.append('logo', logoFile);
+      }
+      
+      // Add all other fields
+      Object.keys(normalizedData).forEach(key => {
+        const value = normalizedData[key];
+        if (value !== null && value !== undefined) {
+          if (typeof value === 'object') {
+            formData.append(key, JSON.stringify(value));
+          } else {
+            formData.append(key, String(value));
+          }
+        }
+      });
+      
       const response = await fetch("/api/communities", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(normalizedData),
+        credentials: 'include',
+        body: formData,
       });
       
       if (!response.ok) {

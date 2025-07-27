@@ -7457,31 +7457,55 @@ Return JSON with this exact structure:
   // Create new community (new terminology)
   app.post('/api/communities', isAuthenticated, upload.single('logo'), async (req: any, res) => {
     try {
-      const { 
+      let { 
         name, 
         type, 
         denomination, 
         address, 
         city, 
         state, 
-        zipCode, 
-        adminPhone, 
-        adminEmail, 
+        zip_code, 
+        admin_phone, 
+        admin_email, 
         website, 
         description, 
         size,
-        logoUrl,
-        establishedYear,
-        weeklyAttendance,
-        parentChurchName,
-        missionStatement,
-        facebookUrl,
-        instagramUrl,
+        logo_url,
+        established_year,
+        weekly_attendance,
+        parent_church_name,
+        mission_statement,
+        facebook_url,
+        instagram_url,
         timeRows, // New dynamic time row data
         // Legacy fields for backward compatibility
-        sundayService,
-        wednesdayService
+        sunday_service,
+        wednesday_service
       } = req.body;
+      
+      // Map snake_case to camelCase for processing
+      const zipCode = zip_code;
+      const adminPhone = admin_phone;
+      const adminEmail = admin_email;
+      const logoUrl = logo_url;
+      const establishedYear = established_year;
+      const weeklyAttendance = weekly_attendance;
+      const parentChurchName = parent_church_name;
+      const missionStatement = mission_statement;
+      const facebookUrl = facebook_url;
+      const instagramUrl = instagram_url;
+      const sundayService = sunday_service;
+      const wednesdayService = wednesday_service;
+      
+      // Parse timeRows if it's a JSON string (from FormData)
+      if (typeof timeRows === 'string') {
+        try {
+          timeRows = JSON.parse(timeRows);
+        } catch (e) {
+          console.log('Failed to parse timeRows JSON:', e);
+          timeRows = [];
+        }
+      }
       const userId = req.session.userId;
 
       if (!userId) {
