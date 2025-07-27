@@ -883,6 +883,13 @@ export default function MyCommunities() {
 
 
 
+                    {/* Service Times Section */}
+                    <div className="col-span-2">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+                        Service Times
+                      </h3>
+                    </div>
+
                     <FormField
                       control={createForm.control}
                       name="officeHours"
