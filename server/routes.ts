@@ -7714,6 +7714,39 @@ Return JSON with this exact structure:
     }
   });
 
+  // Delete community endpoint
+  app.delete('/api/communities/:communityId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const communityId = parseInt(req.params.communityId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      if (isNaN(communityId)) {
+        return res.status(400).json({ error: 'Invalid community ID' });
+      }
+
+      // Check if user has admin access to this community
+      const userCommunity = await storage.getUserChurchRole(userId, communityId);
+      
+      const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
+      
+      const user = await storage.getUser(userId);
+      
+      if (!userCommunity || (!adminRoles.includes(userCommunity.role) && user?.role !== 'soapbox_owner')) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      await storage.deleteChurch(communityId);
+      
+      res.json({ message: 'Community deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete community' });
+    }
+  });
+
   // Get user's role in a specific church
   app.get('/api/users/churches/:churchId/role', isAuthenticated, async (req: any, res) => {
     try {

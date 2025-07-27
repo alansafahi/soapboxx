@@ -4,7 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Building, MapPin, Users, Calendar, Plus, Settings, Eye, Upload, X } from "lucide-react";
+import { Building, MapPin, Users, Calendar, Plus, Settings, Eye, Upload, X, Trash2 } from "lucide-react";
 import { CommunityViewDialog } from "./CommunityViewDialog";
 import { Link } from "wouter";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
@@ -151,6 +151,39 @@ export default function MyCommunities() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Handle community deletion
+  const deleteCommunityMutation = useMutation({
+    mutationFn: async (communityId: number) => {
+      const response = await fetch(`/api/communities/${communityId}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete community');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Community Deleted",
+        description: "The community has been successfully deleted.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/communities/user'] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete community",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteCommunity = (communityId: number) => {
+    if (window.confirm('Are you sure you want to delete this community? This action cannot be undone.')) {
+      deleteCommunityMutation.mutate(communityId);
+    }
+  };
   const [createCommunityOpen, setCreateCommunityOpen] = useState(false);
   const [showCustomDenomination, setShowCustomDenomination] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -1149,15 +1182,25 @@ export default function MyCommunities() {
                           View Details
                         </Button>
                         {(community.role === 'church_admin' || community.role === 'admin' || community.role === 'pastor' || community.role === 'lead-pastor' || community.role === 'elder') && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => {
-                              window.location.href = `/admin?tab=community-admin&communityId=${community.id}`;
-                            }}
-                          >
-                            <Settings className="h-4 w-4" />
-                          </Button>
+                          <>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                window.location.href = `/community-administration?communityId=${community.id}`;
+                              }}
+                            >
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleDeleteCommunity(community.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
                       </div>
                     </CardContent>
@@ -1329,15 +1372,25 @@ export default function MyCommunities() {
                           View Details
                         </Button>
                         {(community.role === 'church_admin' || community.role === 'admin' || community.role === 'pastor' || community.role === 'lead-pastor' || community.role === 'elder') && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => {
-                              window.location.href = `/admin?tab=community-admin&communityId=${community.id}`;
-                            }}
-                          >
-                            <Settings className="h-4 w-4" />
-                          </Button>
+                          <>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                window.location.href = `/community-administration?communityId=${community.id}`;
+                              }}
+                            >
+                              <Settings className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleDeleteCommunity(community.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
                       </div>
                     </CardContent>
