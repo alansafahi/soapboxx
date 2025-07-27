@@ -354,7 +354,23 @@ export function CommunityAdminTab() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="denomination">Type/Denomination</Label>
+                    <Label htmlFor="type">Type</Label>
+                    <Select
+                      value={editedProfile.type || ''}
+                      onValueChange={(value) => handleInputChange('type', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select community type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Church">Church</SelectItem>
+                        <SelectItem value="Ministry">Ministry</SelectItem>
+                        <SelectItem value="Group">Group</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="denomination">Denomination</Label>
                     <Select
                       value={editedProfile.denomination || ''}
                       onValueChange={(value) => handleInputChange('denomination', value)}
@@ -386,6 +402,68 @@ export function CommunityAdminTab() {
                       </div>
                     )}
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Location Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Location Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="address">Street Address</Label>
+                    <Input
+                      id="address"
+                      value={editedProfile.address || ''}
+                      onChange={(e) => handleInputChange('address', e.target.value)}
+                      placeholder="123 Main Street"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="city">City</Label>
+                      <Input
+                        id="city"
+                        value={editedProfile.city || ''}
+                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        placeholder="City"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="state">State</Label>
+                      <Input
+                        id="state"
+                        value={editedProfile.state || ''}
+                        onChange={(e) => handleInputChange('state', e.target.value)}
+                        placeholder="CA"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="zipCode">Zip Code</Label>
+                    <Input
+                      id="zipCode"
+                      value={editedProfile.zipCode || ''}
+                      onChange={(e) => handleInputChange('zipCode', e.target.value)}
+                      placeholder="90210"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Basic Information (continued) */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Community Details
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor="description">Description</Label>
                     <Textarea
@@ -665,55 +743,7 @@ export function CommunityAdminTab() {
                 </CardContent>
               </Card>
 
-              {/* Location Information */}
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5" />
-                    Location Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="md:col-span-2">
-                      <Label htmlFor="address">Street Address</Label>
-                      <Input
-                        id="address"
-                        value={editedProfile.address || ''}
-                        onChange={(e) => handleInputChange('address', e.target.value)}
-                        placeholder="123 Main Street"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="city">City</Label>
-                      <Input
-                        id="city"
-                        value={editedProfile.city || ''}
-                        onChange={(e) => handleInputChange('city', e.target.value)}
-                        placeholder="City"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="state">State</Label>
-                      <Input
-                        id="state"
-                        value={editedProfile.state || ''}
-                        onChange={(e) => handleInputChange('state', e.target.value)}
-                        placeholder="CA"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="zipCode">Zip Code</Label>
-                      <Input
-                        id="zipCode"
-                        value={editedProfile.zipCode || ''}
-                        onChange={(e) => handleInputChange('zipCode', e.target.value)}
-                        placeholder="90210"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+
             </div>
           </TabsContent>
 
