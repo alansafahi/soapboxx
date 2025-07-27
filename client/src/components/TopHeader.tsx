@@ -66,10 +66,16 @@ export default function TopHeader() {
   // Local state for immediate UI feedback with notifications
   const [localNotifications, setLocalNotifications] = useState<Notification[]>([]);
 
-  // Fetch notifications from server - temporarily disabled to fix 500 errors
+  // Fetch notifications from server and staff invitations
   const { data: serverNotifications = [] } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
-    enabled: false, // Disabled to prevent 500 errors
+    enabled: !!user,
+  });
+
+  // Fetch pending staff invitations for current user
+  const { data: staffInvitations = [] } = useQuery({
+    queryKey: ["/api/auth/pending-staff-invitations"],
+    enabled: !!user,
   });
 
   // Update local state when server data changes
@@ -79,10 +85,27 @@ export default function TopHeader() {
     }
   }, [serverNotifications]);
 
-  // Use local notifications for display, fallback to server data with null safety
-  const notifications = Array.isArray(localNotifications) && localNotifications.length > 0 
-    ? localNotifications 
-    : Array.isArray(serverNotifications) ? serverNotifications : [];
+  // Convert staff invitations to notifications format
+  const staffNotifications = (staffInvitations || []).map((invitation: any) => ({
+    id: `staff-${invitation.communityId}-${invitation.role}`,
+    type: 'staff_invitation',
+    title: `Staff Invitation: ${invitation.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}`,
+    message: `You've been invited to join ${invitation.communityName} as a ${invitation.role.replace('_', ' ')}. Click to accept your position.`,
+    isRead: false,
+    createdAt: new Date().toISOString(),
+    actionUrl: `/signup?invite=staff&community=${invitation.communityId}&role=${invitation.role}`
+  }));
+
+  // Combine regular notifications with staff invitations
+  const allNotifications = [
+    ...staffNotifications,
+    ...(Array.isArray(localNotifications) && localNotifications.length > 0 
+      ? localNotifications 
+      : Array.isArray(serverNotifications) ? serverNotifications : [])
+  ];
+
+  // Use combined notifications for display
+  const notifications = allNotifications;
 
   // Mark notification as read mutation
   const markAsReadMutation = useMutation({
@@ -147,6 +170,8 @@ export default function TopHeader() {
         return <Calendar className="h-4 w-4 text-blue-500" />;
       case 'message':
         return <MessageSquare className="h-4 w-4 text-green-500" />;
+      case 'staff_invitation':
+        return <UserPlus className="h-4 w-4 text-purple-500" />;
       default:
         return <Bell className="h-4 w-4 text-gray-500" />;
     }

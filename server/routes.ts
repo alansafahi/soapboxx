@@ -1356,6 +1356,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get pending staff invitations for current user
+  app.get('/api/auth/pending-staff-invitations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Get all inactive staff positions for this user
+      const result = await pool.query(`
+        SELECT 
+          uc.church_id as "communityId",
+          uc.role,
+          uc.title,
+          c.name as "communityName"
+        FROM user_churches uc
+        JOIN communities c ON uc.church_id = c.id
+        WHERE uc.user_id = $1 AND uc.is_active = false
+      `, [userId]);
+
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Error fetching pending staff invitations:', error);
+      res.status(500).json({ message: 'Failed to fetch pending staff invitations' });
+    }
+  });
+
   // Tour completion routes (STANDARDIZED)
   app.get('/api/user-tours/:userId/completion/:tourType', async (req, res) => {
     try {
