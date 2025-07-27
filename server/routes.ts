@@ -7477,6 +7477,8 @@ Return JSON with this exact structure:
         mission_statement,
         facebook_url,
         instagram_url,
+        twitter_url,
+        tiktok_url,
         timeRows, // New dynamic time row data
         // Legacy fields for backward compatibility
         sunday_service,
@@ -7494,6 +7496,8 @@ Return JSON with this exact structure:
       const missionStatement = mission_statement;
       const facebookUrl = facebook_url;
       const instagramUrl = instagram_url;
+      const twitterUrl = twitter_url;
+      const tiktokUrl = tiktok_url;
       const sundayService = sunday_service;
       const wednesdayService = wednesday_service;
       
@@ -7527,6 +7531,8 @@ Return JSON with this exact structure:
       const socialLinks: any = {};
       if (facebookUrl) socialLinks.facebook = facebookUrl;
       if (instagramUrl) socialLinks.instagram = instagramUrl;
+      if (twitterUrl) socialLinks.twitter = twitterUrl;
+      if (tiktokUrl) socialLinks.tiktok = tiktokUrl;
 
       // Process dynamic time rows into hours of operation and worship times
       const hoursOfOperation: any = {};

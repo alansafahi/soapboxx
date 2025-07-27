@@ -53,6 +53,8 @@ const createCommunitySchema = z.object({
   missionStatement: z.string().optional(),
   facebookUrl: z.string().optional(),
   instagramUrl: z.string().optional(),
+  twitterUrl: z.string().optional(),
+  tiktokUrl: z.string().optional(),
   officeHours: z.string().optional(),
   worshipTimes: z.string().optional()
 });
@@ -185,6 +187,8 @@ export default function MyCommunities() {
       missionStatement: "",
       facebookUrl: "",
       instagramUrl: "",
+      twitterUrl: "",
+      tiktokUrl: "",
       sundayService: "",
       wednesdayService: "",
       officeHours: "",
@@ -268,6 +272,8 @@ export default function MyCommunities() {
       missionStatement: 'mission_statement',
       facebookUrl: 'facebook_url',
       instagramUrl: 'instagram_url',
+      twitterUrl: 'twitter_url',
+      tiktokUrl: 'tiktok_url',
       sundayService: 'sunday_service',
       wednesdayService: 'wednesday_service',
       officeHours: 'office_hours',
@@ -811,33 +817,69 @@ export default function MyCommunities() {
                       )}
                     />
 
-                    <FormField
-                      control={createForm.control}
-                      name="facebookUrl"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Facebook URL</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://facebook.com/community" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {/* Social Media Section */}
+                    <div className="col-span-2">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+                        Social Media
+                      </h3>
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={createForm.control}
+                          name="facebookUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Facebook URL</FormLabel>
+                              <FormControl>
+                                <Input placeholder="https://facebook.com/community" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                    <FormField
-                      control={createForm.control}
-                      name="instagramUrl"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Instagram URL</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://instagram.com/community" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        <FormField
+                          control={createForm.control}
+                          name="instagramUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Instagram URL</FormLabel>
+                              <FormControl>
+                                <Input placeholder="https://instagram.com/community" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createForm.control}
+                          name="twitterUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Twitter (X) URL</FormLabel>
+                              <FormControl>
+                                <Input placeholder="https://x.com/community" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createForm.control}
+                          name="tiktokUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>TikTok URL</FormLabel>
+                              <FormControl>
+                                <Input placeholder="https://tiktok.com/@community" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
 
 
 
