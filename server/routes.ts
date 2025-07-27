@@ -3083,26 +3083,38 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       const { role } = req.body;
       const userId = req.session.userId;
 
+      console.log('Staff acceptance attempt:', { communityId, role, userId, hasSession: !!req.session });
+
       if (!userId) {
+        console.log('No user ID in session');
         return res.status(401).json({ message: 'User authentication required' });
       }
 
       if (!communityId || !role) {
+        console.log('Missing communityId or role:', { communityId, role });
         return res.status(400).json({ message: 'Community ID and role are required' });
       }
 
       // Check if user has a pending staff invitation for this community and role using storage
       const userCommunityRole = await storage.getUserCommunityRole(userId, communityId);
+      console.log('User community role check:', { userCommunityRole, expectedRole: role });
       
       if (!userCommunityRole || userCommunityRole.role !== role || userCommunityRole.isActive) {
+        console.log('No pending invitation found:', { 
+          hasRole: !!userCommunityRole, 
+          roleMatch: userCommunityRole?.role === role,
+          isAlreadyActive: userCommunityRole?.isActive 
+        });
         return res.status(404).json({ message: 'No pending invitation found for this position' });
       }
 
       // Activate the staff position using storage
+      console.log('Activating staff position...');
       await storage.activateStaffPosition(userId, communityId, role);
 
       // Get community name for response
       const community = await storage.getCommunity(communityId);
+      console.log('Staff position accepted successfully:', { userId, communityId, role, communityName: community?.name });
 
       res.json({
         success: true,
