@@ -49,6 +49,8 @@ export function CommunityAdminTab() {
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("profile");
   const [editedProfile, setEditedProfile] = useState<Partial<CommunityProfile>>({});
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string>("");
 
   // Get communities where user has admin role - always call hooks in same order
   const { data: adminCommunities = [], isLoading: communitiesLoading, error: communitiesError } = useQuery({
@@ -109,17 +111,41 @@ export function CommunityAdminTab() {
   // Save profile mutation
   const saveProfileMutation = useMutation({
     mutationFn: async (profileData: Partial<CommunityProfile>) => {
+      let logoUrl = profileData.logoUrl;
+      
+      // Upload logo if a file is selected
+      if (logoFile) {
+        const formData = new FormData();
+        formData.append('logo', logoFile);
+        
+        const uploadResponse = await fetch('/api/upload/community-logo', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json();
+          logoUrl = uploadResult.logoUrl;
+        }
+      }
+      
       const response = await fetch(`/api/churches/${selectedCommunityId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(profileData),
+        body: JSON.stringify({
+          ...profileData,
+          logoUrl,
+        }),
       });
       if (!response.ok) throw new Error('Failed to save community profile');
       return response.json();
     },
     onSuccess: () => {
       toast({ title: "Community profile updated successfully!" });
+      // Reset logo upload state
+      setLogoFile(null);
+      setLogoPreview("");
       queryClient.invalidateQueries({ queryKey: ['community-details', selectedCommunityId] });
     },
     onError: (error: any) => {
@@ -358,14 +384,71 @@ export function CommunityAdminTab() {
                       placeholder="Tell people about your community..."
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="logoUrl">Community Logo URL</Label>
-                    <Input
-                      id="logoUrl"
-                      value={editedProfile.logoUrl || ''}
-                      onChange={(e) => handleInputChange('logoUrl', e.target.value)}
-                      placeholder="https://example.com/logo.png"
-                    />
+                  {/* Logo Upload Section */}
+                  <div className="space-y-4">
+                    <Label>Community Logo</Label>
+                    <div className="mt-2 space-y-4">
+                      {logoPreview ? (
+                        <div className="flex items-center space-x-4">
+                          <img 
+                            src={logoPreview} 
+                            alt="Logo preview" 
+                            className="w-20 h-20 object-cover rounded-lg border"
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-600">Logo selected: {logoFile?.name}</p>
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => {
+                                setLogoFile(null);
+                                setLogoPreview("");
+                              }}
+                              className="mt-2"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+                          <input
+                            type="file"
+                            id="logo-upload"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setLogoFile(file);
+                                const reader = new FileReader();
+                                reader.onload = (e) => setLogoPreview(e.target?.result as string);
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                            className="hidden"
+                          />
+                          <label htmlFor="logo-upload" className="cursor-pointer">
+                            <div className="space-y-2">
+                              <div className="text-gray-400">
+                                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                <span className="font-medium text-blue-600 hover:text-blue-500">
+                                  Click to upload
+                                </span>
+                                {" "}or drag and drop
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                PNG, JPG, GIF up to 5MB
+                              </div>
+                            </div>
+                          </label>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -431,13 +514,24 @@ export function CommunityAdminTab() {
                   </div>
                   <div>
                     <Label htmlFor="weeklyAttendance">Weekly Attendance</Label>
-                    <Input
-                      id="weeklyAttendance"
-                      type="number"
-                      value={editedProfile.weeklyAttendance || ''}
-                      onChange={(e) => handleInputChange('weeklyAttendance', e.target.value)}
-                      placeholder="150"
-                    />
+                    <Select
+                      value={editedProfile.weeklyAttendance?.toString() || ''}
+                      onValueChange={(value) => handleInputChange('weeklyAttendance', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select weekly attendance range" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1-50">1-50 (Micro - House church)</SelectItem>
+                        <SelectItem value="51-100">51-100 (Small - Close-knit)</SelectItem>
+                        <SelectItem value="101-250">101-250 (Medium - Community)</SelectItem>
+                        <SelectItem value="251-500">251-500 (Large - Multi-ministry)</SelectItem>
+                        <SelectItem value="501-1000">501-1000 (Very Large - Multi-staff)</SelectItem>
+                        <SelectItem value="1001-2000">1001-2000 (Mega - Extensive programming)</SelectItem>
+                        <SelectItem value="2001-10000">2001-10000 (Giga - High tech)</SelectItem>
+                        <SelectItem value="10000+">10000+ (Meta - National reach)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="parentChurchName">Parent Church (if applicable)</Label>
