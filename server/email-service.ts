@@ -35,26 +35,11 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
     };
 
     if (process.env.SENDGRID_API_KEY) {
-      console.log('🔧 Sending email via SendGrid with payload:', {
-        to: msg.to,
-        from: msg.from,
-        subject: msg.subject,
-        apiKeyPresent: !!process.env.SENDGRID_API_KEY
-      });
-      
       const response = await sgMail.send(msg);
       const messageId = response[0]?.headers?.['x-message-id'] || 'unknown';
-      
-      console.log('🔧 SendGrid response:', {
-        statusCode: response[0]?.statusCode,
-        messageId: messageId,
-        headers: response[0]?.headers
-      });
-      
       return { success: true, messageId };
     } else {
       // Development mode - simulate email sending
-      console.log('🔧 Development mode: simulating email send');
       return { success: true, messageId: 'dev-mode' };
     }
   } catch (error: any) {
@@ -133,15 +118,7 @@ export interface StaffInvitationOptions {
 }
 
 export async function sendStaffInvitationEmail(email: string, options: StaffInvitationOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
-  console.log('🔧 sendStaffInvitationEmail called with:', { email, options });
-  console.log('🔧 Environment check:', {
-    hasApiKey: !!process.env.SENDGRID_API_KEY,
-    verifiedSender: process.env.SENDGRID_VERIFIED_SENDER,
-    fromEmail: process.env.FROM_EMAIL
-  });
-  
   const inviteLink = `${process.env.FRONTEND_URL || 'https://soapboxsuperapp.com'}/signup?invite=staff&community=${options.communityId}&role=${options.role}`;
-  console.log('🔧 Generated invite link:', inviteLink);
   
   const staffInvitationHtml = `
     <!DOCTYPE html>
