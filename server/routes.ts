@@ -7829,9 +7829,13 @@ Return JSON with this exact structure:
         updatedAt: new Date()
       };
 
-      // Remove undefined/null values to avoid overwriting existing data
+      // Remove undefined/null values to avoid overwriting existing data (but keep empty strings for some fields)
       Object.keys(updates).forEach(key => {
-        if (updates[key] === undefined || updates[key] === '') {
+        if (updates[key] === undefined) {
+          delete updates[key];
+        }
+        // Don't delete empty strings for these specific fields that users might want to clear
+        if (updates[key] === '' && !['parentChurchName', 'description', 'bio'].includes(key)) {
           delete updates[key];
         }
       });

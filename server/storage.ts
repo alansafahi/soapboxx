@@ -1772,15 +1772,14 @@ export class DatabaseStorage implements IStorage {
       'state', 'zipCode', 'phone', 'email', 'website', 'logoUrl', 'size', 
       'hoursOfOperation', 'officeHours', 'worshipTimes', 'socialLinks', 'communityTags', 'latitude', 'longitude', 
       'rating', 'memberCount', 'isActive', 'isClaimed', 'adminEmail', 'adminPhone', 
-      'verificationStatus', 'rejectionReason', 'createdBy', 'isDemo'
-      // Note: establishedYear, weeklyAttendance, parentChurchName don't exist in database schema
-      // weeklyAttendance is mapped to 'size' field, missionStatement to 'bio' field
+      'verificationStatus', 'rejectionReason', 'createdBy', 'isDemo', 'updatedAt',
+      'establishedYear', 'parentChurchName' // Added missing database fields that exist in schema
     ];
     
     const filteredUpdates = Object.keys(updates)
       .filter(key => allowedFields.includes(key))
-      .reduce((obj, key) => {
-        obj[key] = updates[key];
+      .reduce((obj: any, key) => {
+        obj[key] = (updates as any)[key];
         return obj;
       }, {} as any);
     
