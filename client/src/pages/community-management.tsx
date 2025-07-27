@@ -6,6 +6,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useToast } from "../hooks/use-toast";
 import { ChurchFeatureManager } from "../components/ChurchFeatureManager";
@@ -21,7 +22,9 @@ import {
   MapPin,
   Phone,
   Mail,
-  Globe
+  Globe,
+  Image,
+  Church
 } from "lucide-react";
 
 interface CommunityProfile {
@@ -40,6 +43,10 @@ interface CommunityProfile {
   logoUrl?: string;
   bio?: string;
   memberCount: number;
+  establishedYear?: number;
+  weeklyAttendance?: string;
+  parentChurchName?: string;
+  missionStatement?: string;
   role?: string;
 }
 
@@ -50,6 +57,8 @@ export default function CommunityManagement() {
   const [, setLocation] = useLocation();
   const { communityId } = useParams<{ communityId: string }>();
   const [editedProfile, setEditedProfile] = useState<Partial<CommunityProfile>>({});
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string>("");
   const [activeTab, setActiveTab] = useState("profile");
 
   // If no communityId is provided, show the ChurchManagementHub for community creation
@@ -106,17 +115,41 @@ export default function CommunityManagement() {
   // Save profile mutation
   const saveProfileMutation = useMutation({
     mutationFn: async (profileData: Partial<CommunityProfile>) => {
+      let logoUrl = profileData.logoUrl;
+      
+      // Upload logo if a file is selected
+      if (logoFile) {
+        const formData = new FormData();
+        formData.append('logo', logoFile);
+        
+        const uploadResponse = await fetch('/api/upload/community-logo', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json();
+          logoUrl = uploadResult.logoUrl;
+        }
+      }
+      
       const response = await fetch(`/api/churches/${communityId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(profileData),
+        body: JSON.stringify({
+          ...profileData,
+          logoUrl,
+        }),
       });
       if (!response.ok) throw new Error('Failed to save community profile');
       return response.json();
     },
     onSuccess: () => {
       toast({ title: "Community profile updated successfully!" });
+      // Reset logo upload state
+      setLogoFile(null);
+      setLogoPreview("");
       queryClient.invalidateQueries({ queryKey: ['community-details', communityId] });
     },
     onError: (error: any) => {
@@ -275,6 +308,73 @@ export default function CommunityManagement() {
                       placeholder="Tell people about your community..."
                     />
                   </div>
+                  
+                  {/* Logo Upload Section */}
+                  <div className="space-y-4">
+                    <Label>Community Logo</Label>
+                    <div className="mt-2 space-y-4">
+                      {logoPreview ? (
+                        <div className="flex items-center space-x-4">
+                          <img 
+                            src={logoPreview} 
+                            alt="Logo preview" 
+                            className="w-20 h-20 object-cover rounded-lg border"
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-600">Logo selected: {logoFile?.name}</p>
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => {
+                                setLogoFile(null);
+                                setLogoPreview("");
+                              }}
+                              className="mt-2"
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors">
+                          <input
+                            type="file"
+                            id="logo-upload"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setLogoFile(file);
+                                const reader = new FileReader();
+                                reader.onload = (e) => setLogoPreview(e.target?.result as string);
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                            className="hidden"
+                          />
+                          <label htmlFor="logo-upload" className="cursor-pointer">
+                            <div className="space-y-2">
+                              <div className="text-gray-400">
+                                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                <span className="font-medium text-blue-600 hover:text-blue-500">
+                                  Click to upload
+                                </span>
+                                {" "}or drag and drop
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                PNG, JPG, GIF up to 5MB
+                              </div>
+                            </div>
+                          </label>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -363,6 +463,68 @@ export default function CommunityManagement() {
                       value={editedProfile.website || ''}
                       onChange={(e) => handleInputChange('website', e.target.value)}
                       placeholder="https://community.org"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Additional Information */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Church className="h-5 w-5" />
+                    Additional Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label htmlFor="establishedYear">Established Year</Label>
+                    <Input
+                      id="establishedYear"
+                      type="number"
+                      value={editedProfile.establishedYear || ''}
+                      onChange={(e) => handleInputChange('establishedYear', e.target.value)}
+                      placeholder="2020"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="weeklyAttendance">Weekly Attendance</Label>
+                    <Select
+                      value={editedProfile.weeklyAttendance || ''}
+                      onValueChange={(value) => handleInputChange('weeklyAttendance', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select weekly attendance range" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1-50">1-50 (Micro - House church)</SelectItem>
+                        <SelectItem value="51-100">51-100 (Small - Close-knit)</SelectItem>
+                        <SelectItem value="101-250">101-250 (Medium - Community)</SelectItem>
+                        <SelectItem value="251-500">251-500 (Large - Multi-ministry)</SelectItem>
+                        <SelectItem value="501-1000">501-1000 (Very Large - Multi-staff)</SelectItem>
+                        <SelectItem value="1001-2000">1001-2000 (Mega - Extensive programming)</SelectItem>
+                        <SelectItem value="2001-10000">2001-10000 (Giga - High tech)</SelectItem>
+                        <SelectItem value="10000+">10000+ (Meta - National reach)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="parentChurchName">Parent Church (if applicable)</Label>
+                    <Input
+                      id="parentChurchName"
+                      value={editedProfile.parentChurchName || ''}
+                      onChange={(e) => handleInputChange('parentChurchName', e.target.value)}
+                      placeholder="Main Campus Church Name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="missionStatement">Mission Statement</Label>
+                    <Textarea
+                      id="missionStatement"
+                      rows={3}
+                      value={editedProfile.missionStatement || ''}
+                      onChange={(e) => handleInputChange('missionStatement', e.target.value)}
+                      placeholder="Our mission is to..."
                     />
                   </div>
                 </CardContent>
