@@ -439,7 +439,7 @@ export function StaffManagement({ communityId }: { communityId: number }) {
                 </thead>
                 <tbody>
                   {Object.entries(PERMISSION_CATEGORIES).map(([category, permissions]) => (
-                    <React.Fragment key={category}>
+                    <tbody key={category}>
                       <tr className="bg-gray-100">
                         <td colSpan={AVAILABLE_ROLES.length + 1} className="p-2 font-medium text-sm">
                           {category}
@@ -466,7 +466,7 @@ export function StaffManagement({ communityId }: { communityId: number }) {
                           ))}
                         </tr>
                       ))}
-                    </React.Fragment>
+                    </tbody>
                   ))}
                 </tbody>
               </table>
