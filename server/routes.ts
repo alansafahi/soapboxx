@@ -3124,7 +3124,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       });
     } catch (error) {
       console.error('Error accepting staff invitation:', error);
-      res.status(500).json({ message: 'Failed to accept staff invitation' });
+      res.status(500).json({ message: 'Failed to accept staff invitation', error: (error as Error).message });
     }
   });
 

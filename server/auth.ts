@@ -192,7 +192,9 @@ export function setupAuth(app: Express): void {
   // User registration endpoint
   app.post('/api/auth/register', async (req, res) => {
     try {
-      const { email, password, username, firstName, lastName } = req.body;
+      const { email, password, username, firstName, lastName, staffInvite } = req.body;
+      
+      console.log('Registration attempt:', { email, username, firstName, lastName, hasStaffInvite: !!staffInvite });
 
       if (!email || !password || !username || !firstName || !lastName) {
         return res.status(400).json({ 
@@ -276,21 +278,51 @@ export function setupAuth(app: Express): void {
 
       } catch (emailError) {
         // Continue with registration even if email fails
+        console.log('Email verification sending failed:', emailError);
+      }
+
+      // Handle staff invitation if present
+      if (staffInvite && staffInvite.communityId && staffInvite.role) {
+        try {
+          console.log('Processing staff invitation during registration:', staffInvite);
+          
+          // Create pending staff invitation in user_churches table
+          await storage.inviteStaffMember(
+            staffInvite.communityId, 
+            email, 
+            staffInvite.role, 
+            newUser.id // Use the newly created user's ID as the inviter
+          );
+          
+          console.log('Staff invitation created for new user:', { 
+            userId: newUser.id, 
+            communityId: staffInvite.communityId, 
+            role: staffInvite.role 
+          });
+        } catch (staffError) {
+          console.error('Failed to create staff invitation during registration:', staffError);
+          // Continue with registration even if staff invitation fails
+        }
       }
 
       const response = {
         success: true,
-        message: 'Registration successful! Please check your email to verify your account before logging in.',
+        message: staffInvite 
+          ? 'Registration successful! You\'ve been added as a staff member. Please check your email to verify your account.'
+          : 'Registration successful! Please check your email to verify your account before logging in.',
         email: newUser.email,
         requiresVerification: true,
-        ...(claimableChurch && { claimableChurch })
+        ...(claimableChurch && { claimableChurch }),
+        ...(staffInvite && { staffInvitation: { communityId: staffInvite.communityId, role: staffInvite.role } })
       };
 
       res.status(201).json(response);
     } catch (error) {
+      console.error('Registration error:', error);
       res.status(500).json({ 
         success: false,
-        message: 'Registration failed. Please try again.' 
+        message: 'Registration failed. Please try again.',
+        error: (error as Error).message
       });
     }
   });

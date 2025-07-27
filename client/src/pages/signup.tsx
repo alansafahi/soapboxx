@@ -120,6 +120,10 @@ export default function SignupPage() {
         username: formData.username,
         firstName: formData.firstName,
         lastName: formData.lastName,
+        // Include staff invitation context if present
+        ...(isStaffInvite && { 
+          staffInvite: { communityId, role } 
+        })
       });
 
       if (signupResponse.success) {
