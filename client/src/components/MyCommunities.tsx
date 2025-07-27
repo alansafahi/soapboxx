@@ -326,6 +326,8 @@ export default function MyCommunities() {
   // Create community mutation
   const createCommunityMutation = useMutation({
     mutationFn: async (data: any) => {
+      console.log("Starting community creation with data:", data);
+      
       // Include time rows data as array for backend processing
       const filteredTimeRows = timeRows.filter(row => 
         row.eventLabel.trim() || row.timeSchedule.trim()
@@ -337,7 +339,9 @@ export default function MyCommunities() {
         timeRows: filteredTimeRows
       };
 
+      console.log("Submission data with timeRows:", submissionData);
       const normalizedData = transformToSnakeCase(submissionData);
+      console.log("Normalized data:", normalizedData);
       
       // Create FormData for multipart request (to handle logo upload)
       const formData = new FormData();
@@ -345,6 +349,7 @@ export default function MyCommunities() {
       // Add logo file if selected
       if (logoFile) {
         formData.append('logo', logoFile);
+        console.log("Added logo file to form data");
       }
       
       // Add all other fields
@@ -359,18 +364,25 @@ export default function MyCommunities() {
         }
       });
       
+      console.log("FormData prepared, sending request...");
+      
       const response = await fetch("/api/communities", {
         method: "POST",
         credentials: 'include',
         body: formData,
       });
       
+      console.log("Response status:", response.status);
+      
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Server error:", errorData);
         throw new Error(errorData.message || "Failed to create community");
       }
       
-      return response.json();
+      const result = await response.json();
+      console.log("Success result:", result);
+      return result;
     },
     onSuccess: () => {
       toast({
@@ -482,6 +494,8 @@ export default function MyCommunities() {
               
               <Form {...createForm}>
                 <form onSubmit={createForm.handleSubmit((data) => {
+                  console.log("Form submission data:", data);
+                  
                   // Validate required fields
                   if (!data.denomination || data.denomination.trim() === '') {
                     toast({
@@ -493,12 +507,13 @@ export default function MyCommunities() {
                   }
                   if (!data.weeklyAttendance || data.weeklyAttendance.trim() === '') {
                     toast({
-                      title: "Validation Error",
+                      title: "Validation Error", 
                       description: "Please select weekly attendance.",
                       variant: "destructive",
                     });
                     return;
                   }
+                  
                   createCommunityMutation.mutate(data);
                 })} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
