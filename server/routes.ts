@@ -3095,22 +3095,52 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
         return res.status(400).json({ message: 'Community ID and role are required' });
       }
 
-      // Check if user has a pending staff invitation for this community and role using storage
-      const userCommunityRole = await storage.getUserCommunityRole(userId, communityId);
-      console.log('User community role check:', { userCommunityRole, expectedRole: role });
+      // Check if user already has ANY role in this community (active or inactive)
+      const existingRole = await pool.query(
+        'SELECT * FROM user_churches WHERE user_id = $1 AND church_id = $2 LIMIT 1',
+        [userId, communityId]
+      );
       
-      if (!userCommunityRole || userCommunityRole.role !== role || userCommunityRole.isActive) {
-        console.log('No pending invitation found:', { 
-          hasRole: !!userCommunityRole, 
-          roleMatch: userCommunityRole?.role === role,
-          isAlreadyActive: userCommunityRole?.isActive 
-        });
-        return res.status(404).json({ message: 'No pending invitation found for this position' });
+      console.log('Existing role check:', { 
+        userId, 
+        communityId, 
+        requestedRole: role,
+        existingRole: existingRole.rows[0] 
+      });
+      
+      if (existingRole.rows.length === 0) {
+        console.log('No existing role found for user in community');
+        return res.status(404).json({ message: 'No staff invitation found for this community' });
       }
-
-      // Activate the staff position using storage
-      console.log('Activating staff position...');
-      await storage.activateStaffPosition(userId, communityId, role);
+      
+      const currentRole = existingRole.rows[0];
+      
+      // If user already has an active role and it's different from requested role,
+      // update their role to the new one
+      if (currentRole.is_active && currentRole.role !== role) {
+        console.log('Updating existing active role:', { from: currentRole.role, to: role });
+        await pool.query(
+          'UPDATE user_churches SET role = $1, title = $2, assigned_at = NOW() WHERE user_id = $3 AND church_id = $4',
+          [role, role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()), userId, communityId]
+        );
+      } else if (!currentRole.is_active && currentRole.role === role) {
+        // This is a pending invitation for the exact role - activate it
+        console.log('Activating pending invitation for exact role');
+        await pool.query(
+          'UPDATE user_churches SET is_active = true, joined_at = NOW() WHERE user_id = $1 AND church_id = $2',
+          [userId, communityId]
+        );
+      } else if (!currentRole.is_active && currentRole.role !== role) {
+        // Update pending invitation to new role and activate
+        console.log('Updating pending invitation role and activating:', { from: currentRole.role, to: role });
+        await pool.query(
+          'UPDATE user_churches SET role = $1, title = $2, is_active = true, joined_at = NOW() WHERE user_id = $3 AND church_id = $4',
+          [role, role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()), userId, communityId]
+        );
+      } else {
+        console.log('User already has active role:', currentRole.role);
+        return res.status(400).json({ message: 'You already have an active role in this community' });
+      }
 
       // Get community name for response
       const community = await storage.getCommunity(communityId);
