@@ -5618,6 +5618,27 @@ export class DatabaseStorage implements IStorage {
             assigned_at = EXCLUDED.assigned_at
         `, [existingUser.id, data.communityId, data.role, data.title, data.department, data.invitedBy]);
 
+        // Send notification email to existing user about their new role
+        try {
+          const emailService = await import('./email-service');
+          console.log(`🔧 Sending staff notification email to existing user ${data.email}...`);
+          const emailResult = await emailService.sendStaffInvitationEmail(data.email, {
+            role: data.role,
+            title: data.title,
+            department: data.department,
+            communityId: data.communityId
+          });
+          console.log(`🔧 Email result for existing user ${data.email}:`, emailResult);
+          if (emailResult.success) {
+            console.log(`✅ Successfully sent notification email to existing user ${data.email}`);
+          } else {
+            console.log(`❌ Failed to send notification email to existing user ${data.email}:`, emailResult.error);
+          }
+        } catch (emailError) {
+          console.log(`❌ Exception sending notification email to existing user ${data.email}:`, emailError);
+          // Continue without failing the invitation process
+        }
+
         return {
           id: existingUser.id,
           email: data.email,
@@ -5635,24 +5656,24 @@ export class DatabaseStorage implements IStorage {
           VALUES (NULL, $1, $2, $3, $4, $5, NOW(), false)
         `, [data.communityId, data.role, data.title, data.department, data.invitedBy]);
 
-        // Send invitation email
+        // Send invitation email to new user
         try {
           const emailService = await import('./email-service');
-          console.log(`Attempting to send invitation email to ${data.email}...`);
+          console.log(`🔧 Sending invitation email to new user ${data.email}...`);
           const emailResult = await emailService.sendStaffInvitationEmail(data.email, {
             role: data.role,
             title: data.title,
             department: data.department,
             communityId: data.communityId
           });
-          console.log(`Email result for ${data.email}:`, emailResult);
+          console.log(`🔧 Email result for new user ${data.email}:`, emailResult);
           if (emailResult.success) {
-            console.log(`✅ Successfully sent invitation email to ${data.email}`);
+            console.log(`✅ Successfully sent invitation email to new user ${data.email}`);
           } else {
-            console.log(`❌ Failed to send invitation email to ${data.email}:`, emailResult.error);
+            console.log(`❌ Failed to send invitation email to new user ${data.email}:`, emailResult.error);
           }
         } catch (emailError) {
-          console.log(`❌ Exception sending invitation email to ${data.email}:`, emailError);
+          console.log(`❌ Exception sending invitation email to new user ${data.email}:`, emailError);
           // Continue without failing the invitation process
         }
 
