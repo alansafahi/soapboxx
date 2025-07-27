@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { useToast } from "../hooks/use-toast";
 import { ChurchFeatureManager } from "../components/ChurchFeatureManager";
-import { ChurchManagementHub } from "../components/ChurchManagementHub";
+
 import { CommunitySettings } from "../components/CommunitySettings";
 import { useParams, useLocation } from "wouter";
 import {
@@ -54,16 +54,17 @@ export default function CommunityManagement() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { communityId } = useParams<{ communityId: string }>();
   const [editedProfile, setEditedProfile] = useState<Partial<CommunityProfile>>({});
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>("");
   const [activeTab, setActiveTab] = useState("profile");
 
-  // If no communityId is provided, show the ChurchManagementHub for community creation
+  // If no communityId is provided, redirect to communities page
   if (!communityId) {
-    return <ChurchManagementHub />;
+    setLocation('/communities');
+    return null;
   }
 
   // Get community details

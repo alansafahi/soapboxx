@@ -62,7 +62,7 @@ const CommunicationPage = lazy(() => import("./pages/BulkCommunication"));
 const SermonStudioPage = lazy(() => import("./pages/SermonStudioPage"));
 const ContentDistributionPage = lazy(() => import("./pages/ContentDistributionPage"));
 const EngagementAnalyticsPage = lazy(() => import("./pages/EngagementAnalyticsPage"));
-const ChurchManagementPage = lazy(() => import("./pages/church-management"));
+
 const CommunityManagementPage = lazy(() => import("./pages/community-management"));
 
 const PersonalizedGuidancePage = lazy(() => import("./pages/PersonalizedGuidance"));
@@ -138,7 +138,7 @@ function AppRouter() {
                             <Suspense fallback={<div>Loading...</div>}>
                                 <Switch>
                                     <Route path="/login" component={LoginPage} />
-                                    <Route path="/auto-login" component={() => import('./pages/auto-login')} />
+                                    <Route path="/auto-login" component={lazy(() => import('./pages/auto-login'))} />
                                     <Route path="/reset-password">
                                         <ResetPasswordPage />
                                     </Route>
@@ -166,8 +166,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/churches" component={Churches} />
                                     <ProtectedRoute path="/communities" component={Communities} />
                                     <ProtectedRoute path="/church-claiming" component={ChurchClaiming} />
-                                    <ProtectedRoute path="/church-management" component={ChurchManagementPage} />
-                                    <ProtectedRoute path="/church-management/:churchId" component={ChurchManagementPage} />
+
                                     <ProtectedRoute path="/community-management" component={CommunityManagementPage} />
                                     <ProtectedRoute path="/community-management/:communityId" component={CommunityManagementPage} />
                                     <ProtectedRoute path="/events" component={Events} />

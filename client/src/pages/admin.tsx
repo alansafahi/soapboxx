@@ -33,7 +33,7 @@ import ChurchFeatureManager from "../components/ChurchFeatureManager";
 import { ChurchAdminManagement } from "../components/church-admin-management";
 import CampusManagement from "../components/CampusManagement";
 import { CrossCampusMemberManagement } from "../components/CrossCampusMemberManagement";
-import { ChurchManagementHub } from "../components/ChurchManagementHub";
+
 import { CommunityAdminTab } from "../components/CommunityAdminTab";
 
 function MembersPage() {
@@ -102,7 +102,7 @@ function MembersPage() {
     );
   }
 
-  // Note: Removed redirect to ChurchManagementHub to allow church admins access to Admin Portal Community Admin tab
+  // Note: Church admins now have access to Admin Portal Community Admin tab
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
