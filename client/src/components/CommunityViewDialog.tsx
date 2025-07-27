@@ -54,16 +54,30 @@ interface CommunityProfile {
   admin_phone?: string; // Database field mapping
   parentChurch?: string;
   parent_church?: string; // Database field mapping
+  missionStatement?: string;
+  mission_statement?: string; // Database field mapping
   facebookUrl?: string;
   facebook_url?: string; // Database field mapping
   instagramUrl?: string;
   instagram_url?: string; // Database field mapping
+  twitterUrl?: string;
+  twitter_url?: string; // Database field mapping
+  tiktokUrl?: string;
+  tiktok_url?: string; // Database field mapping
   youtubeUrl?: string;
   youtube_url?: string; // Database field mapping
+  officeHours?: string;
+  office_hours?: string; // Database field mapping
+  worshipTimes?: string;
+  worship_times?: string; // Database field mapping
   sundayServiceTime?: string;
   sunday_service_time?: string; // Database field mapping
   wednesdayServiceTime?: string;
   wednesday_service_time?: string; // Database field mapping
+  additionalTimes?: string;
+  additional_times?: string; // Database field mapping
+  serviceLanguage?: string;
+  service_language?: string; // Database field mapping
   streetAddress?: string;
   street_address?: string; // Database field mapping
 }
@@ -223,9 +237,21 @@ export function CommunityViewDialog({
           {(community.description || community.bio) && (
             <Card>
               <CardContent className="p-4">
-                <h3 className="font-semibold mb-2">About</h3>
+                <h3 className="font-semibold mb-2">Description</h3>
                 <p className="text-gray-600 dark:text-gray-300">
                   {community.description || community.bio}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Mission Statement */}
+          {(community.missionStatement || community.mission_statement) && (
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="font-semibold mb-2">Mission Statement</h3>
+                <p className="text-gray-600 dark:text-gray-300">
+                  {community.missionStatement || community.mission_statement}
                 </p>
               </CardContent>
             </Card>
@@ -304,6 +330,8 @@ export function CommunityViewDialog({
               {/* Social Media Links */}
               {((community.facebookUrl || community.facebook_url) || 
                 (community.instagramUrl || community.instagram_url) || 
+                (community.twitterUrl || community.twitter_url) ||
+                (community.tiktokUrl || community.tiktok_url) ||
                 (community.youtubeUrl || community.youtube_url)) && (
                 <div className="mb-4">
                   <h4 className="font-medium mb-2">Social Media Links</h4>
@@ -336,6 +364,34 @@ export function CommunityViewDialog({
                         </a>
                       </div>
                     )}
+                    {(community.twitterUrl || community.twitter_url) && (
+                      <div>
+                        <p className="text-sm text-gray-500">Twitter (X) URL</p>
+                        <a 
+                          href={community.twitterUrl || community.twitter_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 transition-colors flex items-center space-x-1"
+                        >
+                          <span>{community.twitterUrl || community.twitter_url}</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                    )}
+                    {(community.tiktokUrl || community.tiktok_url) && (
+                      <div>
+                        <p className="text-sm text-gray-500">TikTok URL</p>
+                        <a 
+                          href={community.tiktokUrl || community.tiktok_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 transition-colors flex items-center space-x-1"
+                        >
+                          <span>{community.tiktokUrl || community.tiktok_url}</span>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      </div>
+                    )}
                     {(community.youtubeUrl || community.youtube_url) && (
                       <div>
                         <p className="text-sm text-gray-500">YouTube URL</p>
@@ -354,12 +410,37 @@ export function CommunityViewDialog({
                 </div>
               )}
 
-              {/* Operating Hours */}
-              {((community.sundayServiceTime || community.sunday_service_time) || 
-                (community.wednesdayServiceTime || community.wednesday_service_time)) && (
+              {/* Service Times */}
+              {((community.officeHours || community.office_hours) ||
+                (community.worshipTimes || community.worship_times) ||
+                (community.sundayServiceTime || community.sunday_service_time) || 
+                (community.wednesdayServiceTime || community.wednesday_service_time) ||
+                (community.additionalTimes || community.additional_times)) && (
                 <div>
-                  <h4 className="font-medium mb-2">Operating Hours</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <h4 className="font-medium mb-2">Service Times</h4>
+                  
+                  {/* Office Hours */}
+                  {(community.officeHours || community.office_hours) && (
+                    <div className="mb-3">
+                      <p className="text-sm text-gray-500">Office Hours (Auto-filled by denomination)</p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {community.officeHours || community.office_hours}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Worship Times */}
+                  {(community.worshipTimes || community.worship_times) && (
+                    <div className="mb-3">
+                      <p className="text-sm text-gray-500">Worship Times (Auto-filled by denomination)</p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {community.worshipTimes || community.worship_times}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Traditional Service Times */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                     {(community.sundayServiceTime || community.sunday_service_time) && (
                       <div>
                         <p className="text-sm text-gray-500">Sunday Service Time</p>
@@ -377,6 +458,26 @@ export function CommunityViewDialog({
                       </div>
                     )}
                   </div>
+                  
+                  {/* Additional Times */}
+                  {(community.additionalTimes || community.additional_times) && (
+                    <div className="mb-3">
+                      <p className="text-sm text-gray-500">Additional Times</p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {community.additionalTimes || community.additional_times}
+                      </p>
+                    </div>
+                  )}
+                  
+                  {/* Service Language */}
+                  {(community.serviceLanguage || community.service_language) && (
+                    <div>
+                      <p className="text-sm text-gray-500">Service Language</p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {community.serviceLanguage || community.service_language}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
