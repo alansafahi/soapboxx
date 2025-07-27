@@ -43,18 +43,27 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
       return { success: true, messageId: 'dev-mode' };
     }
   } catch (error: any) {
-    // Log error for debugging (production: use proper logging service)
+    // Log detailed error for debugging
+    console.log('SendGrid Email Error Details:', {
+      code: error.code,
+      message: error.message,
+      response: error.response?.body,
+      apiKey: process.env.SENDGRID_API_KEY ? 'Present' : 'Missing',
+      fromEmail: process.env.SENDGRID_VERIFIED_SENDER || process.env.FROM_EMAIL || 'support@soapboxsuperapp.com'
+    });
     
     // Provide specific error messages for common issues
     let errorMessage = 'Failed to send email';
     if (error.code === 403) {
-      errorMessage = 'Email service authentication failed';
+      errorMessage = 'Email service authentication failed - check SendGrid API key';
     } else if (error.code === 429) {
       errorMessage = 'Email rate limit exceeded, please try again later';
     } else if (error.message?.includes('quota')) {
       errorMessage = 'Email quota exceeded';
     } else if (error.message?.includes('Invalid email')) {
       errorMessage = 'Invalid email address';
+    } else if (error.message?.includes('not verified')) {
+      errorMessage = 'Sender email not verified in SendGrid';
     }
     
     return { success: false, error: errorMessage };
@@ -109,7 +118,15 @@ export interface StaffInvitationOptions {
 }
 
 export async function sendStaffInvitationEmail(email: string, options: StaffInvitationOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  console.log('🔧 sendStaffInvitationEmail called with:', { email, options });
+  console.log('🔧 Environment check:', {
+    hasApiKey: !!process.env.SENDGRID_API_KEY,
+    verifiedSender: process.env.SENDGRID_VERIFIED_SENDER,
+    fromEmail: process.env.FROM_EMAIL
+  });
+  
   const inviteLink = `${process.env.FRONTEND_URL || 'https://soapboxsuperapp.com'}/signup?invite=staff&community=${options.communityId}&role=${options.role}`;
+  console.log('🔧 Generated invite link:', inviteLink);
   
   const staffInvitationHtml = `
     <!DOCTYPE html>

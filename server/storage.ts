@@ -5638,14 +5638,21 @@ export class DatabaseStorage implements IStorage {
         // Send invitation email
         try {
           const emailService = await import('./email-service');
-          await emailService.sendStaffInvitationEmail(data.email, {
+          console.log(`Attempting to send invitation email to ${data.email}...`);
+          const emailResult = await emailService.sendStaffInvitationEmail(data.email, {
             role: data.role,
             title: data.title,
             department: data.department,
             communityId: data.communityId
           });
+          console.log(`Email result for ${data.email}:`, emailResult);
+          if (emailResult.success) {
+            console.log(`✅ Successfully sent invitation email to ${data.email}`);
+          } else {
+            console.log(`❌ Failed to send invitation email to ${data.email}:`, emailResult.error);
+          }
         } catch (emailError) {
-          console.log(`Failed to send invitation email to ${data.email}:`, emailError);
+          console.log(`❌ Exception sending invitation email to ${data.email}:`, emailError);
           // Continue without failing the invitation process
         }
 
