@@ -7050,7 +7050,9 @@ Return JSON with this exact structure:
         website,
         size,
         hoursOfOperation,
-        socialMedia
+        socialMedia,
+        officeHours,
+        worshipTimes
       } = req.body;
 
       // Map frontend field names to backend field names
@@ -7149,6 +7151,8 @@ Return JSON with this exact structure:
         logoUrl: logoUrl || null,
         size: size?.trim() || null,
         hoursOfOperation: hoursOfOperation || null,
+        officeHours: officeHours?.trim() || null,
+        worshipTimes: worshipTimes?.trim() || null,
         socialLinks: socialMedia || null,
         isActive: true,
         isClaimed: true, // Immediately claimed by creator

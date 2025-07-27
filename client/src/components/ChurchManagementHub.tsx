@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
@@ -160,12 +160,68 @@ export function ChurchManagementHub() {
       weeklyAttendance: "",
       establishedYear: "",
       parentChurchName: "",
-      missionStatement: ""
+      missionStatement: "",
+      officeHours: "",
+      worshipTimes: ""
     }
   });
 
   // Watch the type field to update affiliation options
   const selectedType = createForm.watch("type") as keyof typeof AFFILIATIONS;
+  const selectedDenomination = createForm.watch("denomination");
+
+  // Denomination-based defaults for operating hours
+  const denominationDefaults = {
+    "Catholic": {
+      officeHours: "Mon–Fri 9AM–4PM",
+      worshipTimes: "Sunday: 8AM, 10AM, 12PM\nWeekday Mass: 7AM"
+    },
+    "Evangelical / Non-Denominational": {
+      officeHours: "Tue–Fri 10AM–5PM", 
+      worshipTimes: "Sunday: 9AM & 11AM\nWednesday: 7PM"
+    },
+    "Southern Baptist": {
+      officeHours: "Mon–Fri 9AM–5PM",
+      worshipTimes: "Sunday: 8AM & 11AM\nWednesday: 6:30PM"
+    },
+    "Pentecostal / Charismatic": {
+      officeHours: "Tue–Fri 10AM–6PM",
+      worshipTimes: "Sunday: 10AM & 6PM\nWednesday: 7PM\nFriday: 7PM"
+    },
+    "Mainline Protestant": {
+      officeHours: "Mon–Fri 9AM–4PM",
+      worshipTimes: "Sunday: 8AM & 10:30AM"
+    },
+    "Seventh-Day Adventist": {
+      officeHours: "Sun–Thu 9AM–5PM",
+      worshipTimes: "Friday: 7PM\nSaturday: 9:30AM & 11AM"
+    },
+    "Orthodox": {
+      officeHours: "Mon–Fri 10AM–4PM",
+      worshipTimes: "Saturday: 6PM\nSunday: 8AM & 10AM"
+    },
+    "African-American Church": {
+      officeHours: "Mon–Fri 9AM–5PM",
+      worshipTimes: "Sunday: 8AM & 11AM\nWednesday: 7PM"
+    },
+    "LDS (Mormon)": {
+      officeHours: "Mon–Fri 9AM–4PM",
+      worshipTimes: "Sunday: 9AM–12PM (3-hour block)"
+    },
+    "Jehovah's Witnesses": {
+      officeHours: "Tue–Fri 10AM–6PM",
+      worshipTimes: "Sunday: 10AM\nMidweek: 7PM"
+    }
+  };
+
+  // Auto-fill office hours and worship times based on denomination selection
+  useEffect(() => {
+    if (selectedDenomination && denominationDefaults[selectedDenomination as keyof typeof denominationDefaults]) {
+      const defaults = denominationDefaults[selectedDenomination as keyof typeof denominationDefaults];
+      createForm.setValue('officeHours', defaults.officeHours);
+      createForm.setValue('worshipTimes', defaults.worshipTimes);
+    }
+  }, [selectedDenomination, createForm]);
 
   // Claim church form
   const claimForm = useForm({
@@ -754,6 +810,45 @@ export function ChurchManagementHub() {
                               </FormItem>
                             )}
                           />
+
+                          {/* Operating Hours Section */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                              control={createForm.control}
+                              name="officeHours"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>🕒 Office Hours</FormLabel>
+                                  <FormControl>
+                                    <Textarea 
+                                      placeholder="Mon–Fri 9AM–4PM"
+                                      rows={2}
+                                      {...field} 
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={createForm.control}
+                              name="worshipTimes"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>🙏 Worship & Gathering Times</FormLabel>
+                                  <FormControl>
+                                    <Textarea 
+                                      placeholder="Sunday: 9AM & 11AM"
+                                      rows={2}
+                                      {...field} 
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </div>
 
                           <FormField
                             control={createForm.control}

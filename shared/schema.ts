@@ -193,6 +193,8 @@ export const communities = pgTable("communities", {
   logoUrl: varchar("logo_url"), // Community logo/image
   size: varchar("size", { length: 50 }), // Weekly attendance category
   hoursOfOperation: jsonb("hours_of_operation"), // Operating hours for each day of the week
+  officeHours: text("office_hours"), // Office hours text format
+  worshipTimes: text("worship_times"), // Worship service times text format
   socialLinks: jsonb("social_links"), // Facebook, Instagram, Twitter, YouTube, etc.
   // parentChurchId: integer("parent_church_id").references((): any => communities.id), // For satellite campuses/ministries - Column doesn't exist in database
   // parentChurchName: varchar("parent_church_name", { length: 255 }), // Display name of parent church - Column doesn't exist in database
