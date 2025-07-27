@@ -7477,6 +7477,8 @@ Return JSON with this exact structure:
         missionStatement,
         facebookUrl,
         instagramUrl,
+        timeRows, // New dynamic time row data
+        // Legacy fields for backward compatibility
         sundayService,
         wednesdayService
       } = req.body;
@@ -7502,10 +7504,57 @@ Return JSON with this exact structure:
       if (facebookUrl) socialLinks.facebook = facebookUrl;
       if (instagramUrl) socialLinks.instagram = instagramUrl;
 
-      // Prepare hours of operation object
+      // Process dynamic time rows into hours of operation and worship times
       const hoursOfOperation: any = {};
-      if (sundayService) hoursOfOperation.sunday = sundayService;
-      if (wednesdayService) hoursOfOperation.wednesday = wednesdayService;
+      let worshipTimesArray: string[] = [];
+      const customTimeFields: any = {};
+      
+      if (timeRows && Array.isArray(timeRows)) {
+        // Process dynamic time rows
+        timeRows.forEach((row: any, index: number) => {
+          if (row.eventLabel && row.timeSchedule) {
+            let timeEntry = `${row.eventLabel}: ${row.timeSchedule}`;
+            if (row.language && row.language !== 'English') {
+              timeEntry += ` (${row.language})`;
+            }
+            worshipTimesArray.push(timeEntry);
+            
+            // Store in custom time fields (up to 4 supported by schema)
+            if (index < 4) {
+              customTimeFields[`customTime${index + 1}Label`] = row.eventLabel;
+              customTimeFields[`customTime${index + 1}`] = row.timeSchedule;
+            }
+            
+            // Extract day-based entries for hoursOfOperation
+            const timeSchedule = row.timeSchedule.toLowerCase();
+            if (timeSchedule.includes('sunday')) {
+              hoursOfOperation.sunday = row.timeSchedule;
+            } else if (timeSchedule.includes('wednesday')) {
+              hoursOfOperation.wednesday = row.timeSchedule;
+            } else if (timeSchedule.includes('monday')) {
+              hoursOfOperation.monday = row.timeSchedule;
+            } else if (timeSchedule.includes('tuesday')) {
+              hoursOfOperation.tuesday = row.timeSchedule;
+            } else if (timeSchedule.includes('thursday')) {
+              hoursOfOperation.thursday = row.timeSchedule;
+            } else if (timeSchedule.includes('friday')) {
+              hoursOfOperation.friday = row.timeSchedule;
+            } else if (timeSchedule.includes('saturday')) {
+              hoursOfOperation.saturday = row.timeSchedule;
+            }
+          }
+        });
+      }
+      
+      // Fall back to legacy fields if no time rows provided
+      if (sundayService && worshipTimesArray.length === 0) {
+        hoursOfOperation.sunday = sundayService;
+        worshipTimesArray.push(`Sunday Service: ${sundayService}`);
+      }
+      if (wednesdayService && !hoursOfOperation.wednesday) {
+        hoursOfOperation.wednesday = wednesdayService;
+        worshipTimesArray.push(`Wednesday Service: ${wednesdayService}`);
+      }
 
       const communityData = {
         name: name?.trim(),
@@ -7534,6 +7583,12 @@ Return JSON with this exact structure:
         missionStatement: missionStatement?.trim(),
         socialLinks: Object.keys(socialLinks).length > 0 ? socialLinks : null,
         hoursOfOperation: Object.keys(hoursOfOperation).length > 0 ? hoursOfOperation : null,
+        worshipTimes: worshipTimesArray.length > 0 ? worshipTimesArray.join('; ') : null,
+        // Custom time fields from dynamic rows
+        ...customTimeFields,
+        // Legacy fields for backward compatibility
+        sundayService: hoursOfOperation.sunday || null,
+        wednesdayService: hoursOfOperation.wednesday || null,
         createdAt: new Date(),
         updatedAt: new Date()
       };

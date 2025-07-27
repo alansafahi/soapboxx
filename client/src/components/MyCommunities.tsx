@@ -327,22 +327,19 @@ export default function MyCommunities() {
         logoUrl = await handleLogoUpload(logoFile);
       }
       
-      // Include time rows data in submission
-      const timeRowsData: Record<string, string> = {};
-      timeRows.forEach((row, index) => {
-        if (row.eventLabel || row.timeSchedule) {
-          timeRowsData[`timeRow${index + 1}Label`] = row.eventLabel;
-          timeRowsData[`timeRow${index + 1}Schedule`] = row.timeSchedule;
-          timeRowsData[`timeRow${index + 1}Language`] = row.language;
-        }
-      });
+      // Include time rows data as array for backend processing
+      const filteredTimeRows = timeRows.filter(row => 
+        row.eventLabel.trim() || row.timeSchedule.trim()
+      );
 
-      const normalizedData = transformToSnakeCase({
+      const submissionData = {
         ...data,
-        ...timeRowsData,
         website: normalizeWebsiteUrl(data.website),
-        logoUrl: logoUrl
-      });
+        logoUrl: logoUrl,
+        timeRows: filteredTimeRows
+      };
+
+      const normalizedData = transformToSnakeCase(submissionData);
       
       const response = await fetch("/api/communities", {
         method: "POST",
