@@ -79,8 +79,8 @@ export function CommunityViewDialog({
   };
 
   const handleAdminAccess = () => {
-    // Redirect to Admin Portal Community Admin tab
-    window.location.href = `/admin?tab=community-admin&communityId=${communityId}`;
+    // Redirect to Community Administration page
+    window.location.href = `/community-administration?communityId=${communityId}`;
   };
 
   if (isLoading) {
