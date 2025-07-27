@@ -118,7 +118,14 @@ export interface StaffInvitationOptions {
 }
 
 export async function sendStaffInvitationEmail(email: string, options: StaffInvitationOptions): Promise<{ success: boolean; messageId?: string; error?: string }> {
-  const inviteLink = `${process.env.FRONTEND_URL || 'https://soapboxsuperapp.com'}/signup?invite=staff&community=${options.communityId}&role=${options.role}`;
+  // Use Replit domain for development - always prefer development domain when available
+  const baseUrl = process.env.REPLIT_DEV_DOMAIN 
+    ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+    : (process.env.FRONTEND_URL || 'https://soapboxsuperapp.com');
+  
+  console.log(`📧 Creating staff invitation link with base URL: ${baseUrl}`);
+  const inviteLink = `${baseUrl}/signup?invite=staff&community=${options.communityId}&role=${options.role}`;
+  console.log(`📧 Final invitation link: ${inviteLink}`);
   
   const staffInvitationHtml = `
     <!DOCTYPE html>
