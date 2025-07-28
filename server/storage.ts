@@ -5594,7 +5594,7 @@ export class DatabaseStorage implements IStorage {
         SELECT 
           pr.id,
           pr.author_id,
-          pr.community_id,
+          pr.church_id,
           pr.title,
           pr.content,
           pr.is_anonymous,
@@ -5630,7 +5630,7 @@ export class DatabaseStorage implements IStorage {
       const params: any[] = [];
       
       if (churchId) {
-        query += ' AND pr.community_id = $1';
+        query += ' AND pr.church_id = $1';
         params.push(churchId);
       }
 
@@ -5641,7 +5641,7 @@ export class DatabaseStorage implements IStorage {
       return result.rows.map(row => ({
         id: row.id,
         authorId: row.author_id,
-        communityId: row.community_id,
+        communityId: row.church_id,
         title: row.title,
         content: row.content,
         isAnonymous: row.is_anonymous,
