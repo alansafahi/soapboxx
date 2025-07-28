@@ -599,34 +599,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
               </Select>
             </div>
 
-            {/* Role Header Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-              {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role) => {
-                const Icon = role.icon;
-                const isSelected = selectedMatrixRole === role.name;
-                const isFiltered = roleFilter && roleFilter !== role.name;
-                
-                return (
-                  <button
-                    key={role.name}
-                    onClick={() => setSelectedMatrixRole(isSelected ? null : role.name)}
-                    className={`p-3 rounded-lg border-2 transition-all text-center ${
-                      isSelected 
-                        ? `${role.color} border-purple-500 shadow-lg scale-105` 
-                        : isFiltered
-                        ? 'opacity-50 bg-gray-50 border-gray-200'
-                        : `hover:${role.color} border-gray-200 hover:shadow-md`
-                    }`}
-                  >
-                    <div className="flex flex-col items-center gap-1">
-                      <Icon className="h-5 w-5" />
-                      <div className="text-xs font-medium">{role.displayName}</div>
-                      <div className="text-xs opacity-75">L{role.level}</div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+
 
             {/* Collapsible Permission Categories */}
             <TooltipProvider>
@@ -681,23 +654,35 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                                 <thead>
                                   <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                                     <th className="text-left p-3 font-medium text-gray-900 dark:text-gray-100">Permission</th>
-                                    {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role) => {
+                                    {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role, roleIndex) => {
                                       const Icon = role.icon;
                                       const isHighlighted = selectedMatrixRole === role.name;
+                                      
+                                      // Define distinct colors for each role
+                                      const roleColors = [
+                                        { header: 'bg-blue-500', cell: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-white', hover: 'hover:bg-blue-600' },
+                                        { header: 'bg-green-500', cell: 'bg-green-50 dark:bg-green-900/20', text: 'text-white', hover: 'hover:bg-green-600' },
+                                        { header: 'bg-purple-500', cell: 'bg-purple-50 dark:bg-purple-900/20', text: 'text-white', hover: 'hover:bg-purple-600' },
+                                        { header: 'bg-orange-500', cell: 'bg-orange-50 dark:bg-orange-900/20', text: 'text-white', hover: 'hover:bg-orange-600' },
+                                        { header: 'bg-red-500', cell: 'bg-red-50 dark:bg-red-900/20', text: 'text-white', hover: 'hover:bg-red-600' },
+                                        { header: 'bg-indigo-500', cell: 'bg-indigo-50 dark:bg-indigo-900/20', text: 'text-white', hover: 'hover:bg-indigo-600' },
+                                        { header: 'bg-pink-500', cell: 'bg-pink-50 dark:bg-pink-900/20', text: 'text-white', hover: 'hover:bg-pink-600' },
+                                        { header: 'bg-teal-500', cell: 'bg-teal-50 dark:bg-teal-900/20', text: 'text-white', hover: 'hover:bg-teal-600' },
+                                      ];
+                                      
+                                      const colorScheme = roleColors[roleIndex % roleColors.length];
+                                      
                                       return (
                                         <th
                                           key={role.name}
-                                          className={`text-center p-2 cursor-pointer transition-all min-w-[80px] ${
-                                            isHighlighted 
-                                              ? 'bg-blue-100 dark:bg-blue-900' 
-                                              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                                          className={`text-center p-2 cursor-pointer transition-all min-w-[80px] ${colorScheme.header} ${colorScheme.text} ${colorScheme.hover} ${
+                                            isHighlighted ? 'ring-2 ring-white ring-opacity-50 shadow-lg' : ''
                                           }`}
                                           onClick={() => setSelectedMatrixRole(selectedMatrixRole === role.name ? null : role.name)}
                                         >
                                           <div className="flex flex-col items-center gap-1">
                                             <Icon className="h-4 w-4" />
                                             <span className="text-xs font-medium leading-tight">{role.displayName}</span>
-                                            <span className="text-xs text-gray-500">L{role.level}</span>
                                           </div>
                                         </th>
                                       );
@@ -723,17 +708,32 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                                           )}
                                         </div>
                                       </td>
-                                      {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role) => {
+                                      {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role, roleIndex) => {
                                         const hasPermission = role.permissions.includes(permission.key);
                                         const isHighlighted = selectedMatrixRole === role.name;
+                                        
+                                        // Use same color scheme as headers
+                                        const roleColors = [
+                                          { header: 'bg-blue-500', cell: 'bg-blue-50 dark:bg-blue-900/20', text: 'text-white', hover: 'hover:bg-blue-600' },
+                                          { header: 'bg-green-500', cell: 'bg-green-50 dark:bg-green-900/20', text: 'text-white', hover: 'hover:bg-green-600' },
+                                          { header: 'bg-purple-500', cell: 'bg-purple-50 dark:bg-purple-900/20', text: 'text-white', hover: 'hover:bg-purple-600' },
+                                          { header: 'bg-orange-500', cell: 'bg-orange-50 dark:bg-orange-900/20', text: 'text-white', hover: 'hover:bg-orange-600' },
+                                          { header: 'bg-red-500', cell: 'bg-red-50 dark:bg-red-900/20', text: 'text-white', hover: 'hover:bg-red-600' },
+                                          { header: 'bg-indigo-500', cell: 'bg-indigo-50 dark:bg-indigo-900/20', text: 'text-white', hover: 'hover:bg-indigo-600' },
+                                          { header: 'bg-pink-500', cell: 'bg-pink-50 dark:bg-pink-900/20', text: 'text-white', hover: 'hover:bg-pink-600' },
+                                          { header: 'bg-teal-500', cell: 'bg-teal-50 dark:bg-teal-900/20', text: 'text-white', hover: 'hover:bg-teal-600' },
+                                        ];
+                                        
+                                        const colorScheme = roleColors[roleIndex % roleColors.length];
+                                        
                                         return (
                                           <td
                                             key={role.name}
-                                            className={`text-center p-3 ${
+                                            className={`text-center p-3 ${colorScheme.cell} ${
                                               isHighlighted 
                                                 ? hasPermission 
-                                                  ? 'bg-green-100 dark:bg-green-900' 
-                                                  : 'bg-red-100 dark:bg-red-900'
+                                                  ? 'ring-2 ring-green-500 ring-opacity-50' 
+                                                  : 'ring-2 ring-red-500 ring-opacity-50'
                                                 : ''
                                             }`}
                                           >
