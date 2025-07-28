@@ -738,7 +738,11 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                                             }`}
                                           >
                                             {hasPermission ? (
-                                              <Check className="h-5 w-5 text-green-600 mx-auto" />
+                                              <div className="relative">
+                                                <div className="w-6 h-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto border border-green-300 dark:border-green-700">
+                                                  <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                                </div>
+                                              </div>
                                             ) : (
                                               <X className="h-5 w-5 text-gray-400 mx-auto" />
                                             )}
