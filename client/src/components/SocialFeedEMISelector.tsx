@@ -22,12 +22,21 @@ export default function SocialFeedEMISelector({
 }: SocialFeedEMISelectorProps) {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
-  // Fetch mood indicators by category
-  const { data: moodsByCategory = {}, isLoading } = useQuery({
-    queryKey: ["/api/enhanced-mood-indicators/by-category"],
-    staleTime: 0, // Force fresh data
-    cacheTime: 0, // Don't cache
+  // Fetch mood indicators by category - use same endpoint as CheckInSystem
+  const { data: allMoods = [], isLoading } = useQuery({
+    queryKey: ["/api/enhanced-mood-indicators"],
+    staleTime: 0,
+    cacheTime: 0,
   });
+
+  // Group moods by category manually like CheckInSystem does
+  const moodsByCategory = allMoods.reduce((acc: Record<string, EnhancedMoodIndicator[]>, mood: EnhancedMoodIndicator) => {
+    if (!acc[mood.category]) {
+      acc[mood.category] = [];
+    }
+    acc[mood.category].push(mood);
+    return acc;
+  }, {});
 
   const getSelectedMoodsData = (): EnhancedMoodIndicator[] => {
     const allMoods: EnhancedMoodIndicator[] = [];
