@@ -35,6 +35,11 @@ export default function SocialFeedEMISelector({
     refetchOnWindowFocus: true,
   });
 
+  // FORCE CONSOLE LOGGING ALWAYS
+  console.error("🚨 SOCIAL FEED EMI - FORCED DEBUG:");
+  console.error("Raw moods fetched:", allMoods?.length || 0);
+  console.error("First 3 moods:", allMoods?.slice(0, 3));
+
   // Group moods by category manually like CheckInSystem does
   const moodsByCategory = allMoods.reduce((acc: Record<string, EnhancedMoodIndicator[]>, mood: EnhancedMoodIndicator) => {
     if (!acc[mood.category]) {
@@ -76,17 +81,26 @@ export default function SocialFeedEMISelector({
 
   let categories = Object.keys(moodsByCategory);
   
+  // ENHANCED DEBUG WITH ALERT
+  console.error("🚨 BEFORE FILTER - All categories:", categories);
+  alert("DEBUG: Categories before filter: " + categories.join(", "));
+  
   // TEMPORARY TEST: Remove "Spiritual States" to see if another category appears
+  const originalLength = categories.length;
   categories = categories.filter(cat => cat !== "Spiritual States");
+  
+  console.error("🚨 AFTER FILTER - Remaining categories:", categories);
+  alert("DEBUG: Categories after removing Spiritual States: " + categories.join(", "));
   
   const selectedMoodsData = getSelectedMoodsData();
 
   // Enhanced debugging
-  console.error("🔍 EMI DEBUG:");
+  console.error("🔍 EMI DEBUG COMPLETE:");
   console.error("📊 Raw mood count:", allMoods.length);
   console.error("📁 Total categories found:", Object.keys(moodsByCategory).length);
-  console.error("📋 All categories:", Object.keys(moodsByCategory));
+  console.error("📋 All categories ORIGINAL:", Object.keys(moodsByCategory));
   console.error("✂️ After filtering out Spiritual States:", categories);
+  console.error("🔄 Filter worked?", originalLength > categories.length);
   console.error("📈 Category counts:", Object.fromEntries(
     Object.entries(moodsByCategory).map(([cat, moods]) => [cat, moods.length])
   ));
