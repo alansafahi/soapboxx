@@ -1413,8 +1413,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'No pending staff invitation found for this role' });
       }
 
-      // Activate the staff position
-      await storage.activateStaffPosition(userId, communityId, role);
+      // Activate the staff position and get notification data
+      const { newStaffMember, communityAdmins } = await storage.activateStaffPosition(userId, communityId, role);
+
+      // Send notification emails to community admins about new staff member
+      if (newStaffMember && communityAdmins.length > 0) {
+        const staffTitle = role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
+        const staffName = `${newStaffMember.first_name} ${newStaffMember.last_name}`;
+        
+        for (const admin of communityAdmins) {
+          try {
+            const emailContent = `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #3B82F6;">New Staff Member Joined Your Team!</h2>
+                <p>Hi ${admin.first_name},</p>
+                <p>Great news! A new staff member has accepted their position and joined your community team.</p>
+                
+                <div style="background: #F0F9FF; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #3B82F6;">
+                  <h3 style="margin: 0 0 15px 0; color: #1E40AF;">New Staff Member Details</h3>
+                  <p><strong>Name:</strong> ${staffName}</p>
+                  <p><strong>Email:</strong> ${newStaffMember.email}</p>
+                  <p><strong>Position:</strong> ${staffTitle}</p>
+                  <p><strong>Community:</strong> ${newStaffMember.community_name}</p>
+                  <p><strong>Joined:</strong> ${new Date().toLocaleDateString()}</p>
+                </div>
+
+                <div style="background: #DBEAFE; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                  <p style="margin: 0; font-size: 14px; color: #1E40AF;">
+                    <strong>Next Steps:</strong> You can now see ${staffName} in your Staff Management section. 
+                    Consider reaching out to welcome them and provide any necessary training materials.
+                  </p>
+                </div>
+
+                <p>You can manage your staff team and view all members in the Staff Management section of your Admin Portal.</p>
+                
+                <p>Blessings,<br/>The SoapBox Super App Team</p>
+                <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 30px 0;">
+                <p style="font-size: 12px; color: #6B7280;">
+                  SoapBox Super App - Unite Your Faith Community<br/>
+                  This is an automated notification about staff activity in your community.
+                </p>
+              </div>
+            `;
+
+            await sendEmail({
+              to: admin.email,
+              subject: `New Staff Member: ${staffName} joined as ${staffTitle}`,
+              html: emailContent
+            });
+          } catch (emailError) {
+            console.error('Failed to send admin notification email:', emailError);
+          }
+        }
+      }
 
       // Get community name for response
       const community = await storage.getCommunity(communityId);
@@ -1429,6 +1480,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error accepting staff invitation:', error);
       res.status(500).json({ message: 'Failed to accept staff invitation', error: (error as Error).message });
+    }
+  });
+
+  // Get admin notifications for new staff members
+  app.get('/api/auth/admin-notifications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Get communities where user is an admin
+      const adminCommunitiesResult = await pool.query(`
+        SELECT DISTINCT uc.church_id
+        FROM user_churches uc
+        WHERE uc.user_id = $1 
+        AND uc.is_active = true
+        AND uc.role IN ('lead_pastor', 'associate_pastor', 'administrator', 'church_admin', 'pastor')
+      `, [userId]);
+
+      if (adminCommunitiesResult.rows.length === 0) {
+        return res.json([]);
+      }
+
+      const communityIds = adminCommunitiesResult.rows.map(row => row.church_id);
+
+      // Get recently activated staff members in these communities (last 7 days)
+      const recentStaffResult = await pool.query(`
+        SELECT 
+          u.id,
+          u.first_name,
+          u.last_name,
+          u.email,
+          u.profile_image_url,
+          uc.role,
+          uc.title,
+          uc.joined_at,
+          c.name as community_name,
+          c.id as community_id
+        FROM users u
+        JOIN user_churches uc ON u.id = uc.user_id
+        JOIN communities c ON uc.church_id = c.id
+        WHERE uc.church_id = ANY($1)
+        AND uc.is_active = true
+        AND uc.joined_at >= NOW() - INTERVAL '7 days'
+        AND u.id != $2
+        ORDER BY uc.joined_at DESC
+      `, [communityIds, userId]);
+
+      const notifications = recentStaffResult.rows.map(staff => ({
+        id: `staff-${staff.id}-${staff.community_id}`,
+        type: 'new_staff_member',
+        title: 'New Staff Member Joined',
+        message: `${staff.first_name} ${staff.last_name} accepted the ${staff.title || staff.role.replace('_', ' ')} position`,
+        communityName: staff.community_name,
+        communityId: staff.community_id,
+        staffMember: {
+          id: staff.id,
+          name: `${staff.first_name} ${staff.last_name}`,
+          email: staff.email,
+          role: staff.role,
+          title: staff.title,
+          profileImageUrl: staff.profile_image_url
+        },
+        createdAt: staff.joined_at
+      }));
+
+      res.json(notifications);
+    } catch (error) {
+      console.error('Error fetching admin notifications:', error);
+      res.status(500).json({ message: 'Failed to fetch admin notifications' });
     }
   });
 

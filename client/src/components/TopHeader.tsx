@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles, Building2 } from "lucide-react";
+import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles, Building2, CheckCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useTheme } from "../hooks/useTheme";
@@ -78,6 +78,12 @@ export default function TopHeader() {
     enabled: !!user,
   });
 
+  // Fetch admin notifications for new staff members
+  const { data: adminNotifications = [] } = useQuery({
+    queryKey: ["/api/auth/admin-notifications"],
+    enabled: !!user,
+  });
+
   // Update local state when server data changes
   useEffect(() => {
     if (Array.isArray(serverNotifications) && serverNotifications.length > 0) {
@@ -96,9 +102,21 @@ export default function TopHeader() {
     actionUrl: `/signup?invite=staff&community=${invitation.communityId}&role=${invitation.role}`
   }));
 
-  // Combine regular notifications with staff invitations
+  // Convert admin notifications to notifications format
+  const adminStaffNotifications = (adminNotifications || []).map((notification: any) => ({
+    id: notification.id,
+    type: notification.type,
+    title: notification.title,
+    message: notification.message,
+    isRead: false,
+    createdAt: notification.createdAt,
+    actionUrl: `/staff-management?communityId=${notification.communityId}`
+  }));
+
+  // Combine regular notifications, staff invitations, and admin notifications
   const allNotifications = [
     ...staffNotifications,
+    ...adminStaffNotifications,
     ...(Array.isArray(localNotifications) && localNotifications.length > 0 
       ? localNotifications 
       : Array.isArray(serverNotifications) ? serverNotifications : [])
@@ -172,6 +190,8 @@ export default function TopHeader() {
         return <MessageSquare className="h-4 w-4 text-green-500" />;
       case 'staff_invitation':
         return <UserPlus className="h-4 w-4 text-purple-500" />;
+      case 'new_staff_member':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
       default:
         return <Bell className="h-4 w-4 text-gray-500" />;
     }

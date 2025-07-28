@@ -1911,12 +1911,49 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async activateStaffPosition(userId: string, communityId: number, role: string): Promise<void> {
+  async activateStaffPosition(userId: string, communityId: number, role: string): Promise<{ newStaffMember: any, communityAdmins: any[] }> {
     try {
+      // Activate the staff position
       await pool.query(
         'UPDATE user_churches SET is_active = true, joined_at = NOW() WHERE user_id = $1 AND church_id = $2 AND role = $3',
         [userId, communityId, role]
       );
+
+      // Get the new staff member details
+      const newStaffResult = await pool.query(`
+        SELECT 
+          u.id,
+          u.email,
+          u.first_name,
+          u.last_name,
+          u.profile_image_url,
+          uc.role,
+          uc.title,
+          c.name as community_name
+        FROM users u
+        JOIN user_churches uc ON u.id = uc.user_id
+        JOIN communities c ON uc.church_id = c.id
+        WHERE u.id = $1 AND uc.church_id = $2 AND uc.role = $3
+      `, [userId, communityId, role]);
+
+      // Get community admins who should be notified
+      const adminResult = await pool.query(`
+        SELECT DISTINCT
+          u.id,
+          u.email,
+          u.first_name,
+          u.last_name
+        FROM users u
+        JOIN user_churches uc ON u.id = uc.user_id
+        WHERE uc.church_id = $1 
+        AND uc.is_active = true
+        AND uc.role IN ('lead_pastor', 'associate_pastor', 'administrator', 'church_admin', 'pastor')
+      `, [communityId]);
+
+      return {
+        newStaffMember: newStaffResult.rows[0] || null,
+        communityAdmins: adminResult.rows || []
+      };
     } catch (error) {
       throw new Error(`Failed to activate staff position: ${error}`);
     }
