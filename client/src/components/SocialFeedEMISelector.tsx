@@ -64,7 +64,13 @@ export default function SocialFeedEMISelector({
   const categories = Object.keys(moodsByCategory);
   const selectedMoodsData = getSelectedMoodsData();
 
-
+  // Temporary debugging - will remove after confirming fix
+  if (categories.length !== 6) {
+    console.error("EMI Categories Issue - Expected 6, got:", categories.length);
+    console.error("Categories received:", categories);
+    console.error("Raw mood data length:", allMoods.length);
+    console.error("First few moods:", allMoods.slice(0, 5));
+  }
 
   return (
     <div className="space-y-4">
