@@ -78,6 +78,7 @@ const DivinePhase2Dashboard = lazy(() => import("./pages/DivinePhase2Dashboard")
 const VolunteerManagementPage = lazy(() => import("./pages/volunteer-management"));
 const StaffManagementPage = lazy(() => import("./pages/staff-management"));
 const MemberManagementPage = lazy(() => import("./pages/member-management"));
+const BackgroundCheckManagementPage = lazy(() => import("./pages/background-check-management"));
 const CommunityAdministrationPage = lazy(() => import("./pages/community-administration"));
 const AnalyticsDashboardPage = lazy(() => import("./pages/analytics-dashboard"));
 
@@ -194,6 +195,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/staff-management" component={StaffManagementPage} />
                                     <ProtectedRoute path="/member-management" component={MemberManagementPage} />
                                     <ProtectedRoute path="/volunteer-management" component={VolunteerManagementPage} />
+                                    <ProtectedRoute path="/background-check-management" component={BackgroundCheckManagementPage} />
                                     <ProtectedRoute path="/members" component={MembersPage} />
                                     <ProtectedRoute path="/qr-management" component={QrManagementPage} />
                                     <ProtectedRoute path="/donation" component={DonationPage} />

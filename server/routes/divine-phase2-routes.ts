@@ -20,6 +20,35 @@ const router = Router();
 
 // ===== BACKGROUND CHECK MANAGEMENT =====
 
+// Initialize background check providers
+router.post('/background-checks/initialize', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const user = req.user as any;
+    const hasPermission = ['soapbox_owner', 'church_admin', 'admin'].includes(user.role);
+    
+    if (!hasPermission) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    await backgroundCheckService.initializeProviders();
+
+    res.json({
+      success: true,
+      message: 'Background check providers initialized successfully'
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to initialize providers',
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
+});
+
 // Request background check for volunteer
 router.post('/background-checks/request', async (req, res) => {
   try {
@@ -151,6 +180,36 @@ router.get('/background-checks/expiring', async (req, res) => {
   } catch (error) {
     res.status(500).json({ 
       error: 'Failed to get expiring background checks',
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
+});
+
+// Process renewal reminders (automated task)
+router.post('/background-checks/process-renewals', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
+    const user = req.user as any;
+    const hasPermission = ['soapbox_owner', 'church_admin', 'admin'].includes(user.role);
+    
+    if (!hasPermission) {
+      return res.status(403).json({ error: 'Insufficient permissions' });
+    }
+
+    const results = await backgroundCheckService.processRenewalReminders();
+
+    res.json({
+      success: true,
+      results,
+      message: `Processed ${results.processed} background checks, sent ${results.notifications} notifications, expired ${results.expired} checks`
+    });
+
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to process renewal reminders',
       details: error instanceof Error ? error.message : 'Unknown error' 
     });
   }
