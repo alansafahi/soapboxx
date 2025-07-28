@@ -235,8 +235,12 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Get roles for this community type
+  // Get roles for this community type  
   const COMMUNITY_ROLES = getCommunityRoles(communityType);
+  
+  // Debug: Check if roles are properly loaded
+  console.log('Community Type:', communityType);
+  console.log('Community Roles:', COMMUNITY_ROLES);
 
   // Fetch current staff members
   const { data: staffMembers = [], isLoading } = useQuery({
