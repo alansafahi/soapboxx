@@ -238,9 +238,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
   // Get roles for this community type  
   const COMMUNITY_ROLES = getCommunityRoles(communityType);
   
-  // Debug: Check if roles are properly loaded
-  console.log('Community Type:', communityType);
-  console.log('Community Roles:', COMMUNITY_ROLES);
+
 
   // Fetch current staff members
   const { data: staffMembers = [], isLoading } = useQuery({
@@ -525,67 +523,65 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(PERMISSION_CATEGORIES).map(([category, permissions]) => (
-                      <React.Fragment key={category}>
-                        <tr className="bg-gray-100 dark:bg-gray-800">
-                          <td colSpan={COMMUNITY_ROLES.length + 1} className="p-3 font-semibold text-sm border-t-2 sticky left-0 bg-gray-100 dark:bg-gray-800 z-10">
-                            📋 {category}
-                          </td>
-                        </tr>
-                        {permissions.map((permission) => (
-                          <tr 
-                            key={permission.key} 
-                            className="border-t hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                          >
-                            <td className="p-4 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r">
-                              <div className="flex items-center gap-3">
-                                <div>
-                                  <div className="font-medium text-sm">{permission.label}</div>
-                                  {permission.critical && (
-                                    <div className="flex items-center gap-1 mt-1">
-                                      <AlertTriangle className="h-3 w-3 text-red-500" />
-                                      <span className="text-xs text-red-600 font-medium">Critical Permission</span>
-                                    </div>
-                                  )}
-                                </div>
+                    {Object.entries(PERMISSION_CATEGORIES).map(([category, permissions]) => [
+                      <tr key={`${category}-header`} className="bg-gray-100 dark:bg-gray-800">
+                        <td colSpan={COMMUNITY_ROLES.length + 1} className="p-3 font-semibold text-sm border-t-2 sticky left-0 bg-gray-100 dark:bg-gray-800 z-10">
+                          📋 {category}
+                        </td>
+                      </tr>,
+                      ...permissions.map((permission) => (
+                        <tr 
+                          key={permission.key} 
+                          className="border-t hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                        >
+                          <td className="p-4 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r">
+                            <div className="flex items-center gap-3">
+                              <div>
+                                <div className="font-medium text-sm">{permission.label}</div>
+                                {permission.critical && (
+                                  <div className="flex items-center gap-1 mt-1">
+                                    <AlertTriangle className="h-3 w-3 text-red-500" />
+                                    <span className="text-xs text-red-600 font-medium">Critical Permission</span>
+                                  </div>
+                                )}
                               </div>
-                            </td>
-                            {COMMUNITY_ROLES.map((role) => {
-                              const hasPermission = role.permissions.includes(permission.key);
-                              const isHighlighted = selectedMatrixRole === role.name;
-                              return (
-                                <td 
-                                  key={role.name} 
-                                  className={`text-center p-3 transition-all duration-200 border-l-2 ${
+                            </div>
+                          </td>
+                          {COMMUNITY_ROLES.map((role) => {
+                            const hasPermission = role.permissions.includes(permission.key);
+                            const isHighlighted = selectedMatrixRole === role.name;
+                            return (
+                              <td 
+                                key={role.name} 
+                                className={`text-center p-3 transition-all duration-200 border-l-2 ${
+                                  isHighlighted 
+                                    ? 'bg-purple-50 dark:bg-purple-900/20 border-l-purple-500 shadow-inner' 
+                                    : 'border-gray-200 hover:bg-gray-50'
+                                }`}
+                              >
+                                {hasPermission ? (
+                                  <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full transition-all ${
                                     isHighlighted 
-                                      ? 'bg-purple-50 dark:bg-purple-900/20 border-l-purple-500 shadow-inner' 
-                                      : 'border-gray-200 hover:bg-gray-50'
-                                  }`}
-                                >
-                                  {hasPermission ? (
-                                    <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full transition-all ${
-                                      isHighlighted 
-                                        ? 'bg-green-200 text-green-800 border-2 border-green-400 shadow-lg' 
-                                        : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                    }`}>
-                                      <Check className="h-5 w-5 font-bold" />
-                                    </div>
-                                  ) : (
-                                    <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full transition-all ${
-                                      isHighlighted 
-                                        ? 'bg-red-200 text-red-800 border-2 border-red-400 shadow-lg' 
-                                        : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                    }`}>
-                                      <X className="h-5 w-5" />
-                                    </div>
-                                  )}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        ))}
-                      </React.Fragment>
-                    ))}
+                                      ? 'bg-green-200 text-green-800 border-2 border-green-400 shadow-lg' 
+                                      : 'bg-green-100 text-green-700 hover:bg-green-200'
+                                  }`}>
+                                    <Check className="h-5 w-5 font-bold" />
+                                  </div>
+                                ) : (
+                                  <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+                                    isHighlighted 
+                                      ? 'bg-red-200 text-red-800 border-2 border-red-400 shadow-lg' 
+                                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                  }`}>
+                                    <X className="h-5 w-5" />
+                                  </div>
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ))
+                    ]).flat()}
                   </tbody>
                 </table>
               </div>
