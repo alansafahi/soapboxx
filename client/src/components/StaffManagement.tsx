@@ -232,19 +232,23 @@ const getCommunityRoles = (communityType: string = "church") => {
 const AVAILABLE_ROLES = getCommunityRoles();
 
 const PERMISSION_CATEGORIES = {
-  "Staff Management": [
+  "📋 Admin & Management": [
     { key: "manage_staff", label: "Invite & manage staff members", critical: true },
     { key: "assign_roles", label: "Assign roles to members", critical: true },
-    { key: "assign_campus_affiliation", label: "Assign campus affiliation", critical: true }
+    { key: "assign_campus_affiliation", label: "Assign campus affiliation", critical: true },
+    { key: "manage_child_communities", label: "Manage child campus communities", critical: true },
+    { key: "manage_members", label: "Add/remove members", critical: false },
+    { key: "church_directory_updates", label: "Update church directory info", critical: false },
+    { key: "manage_settings", label: "Modify church settings", critical: true }
   ],
-  "Content & Communication": [
+  "📣 Content & Communications": [
     { key: "approve_content", label: "Approve user-generated content", critical: false },
     { key: "create_content", label: "Create announcements & posts", critical: false },
     { key: "send_communications", label: "Send emails & notifications", critical: false },
     { key: "moderate_prayers", label: "Moderate prayer requests", critical: false },
     { key: "pre_approval_posts", label: "Pre-approval of scheduled posts", critical: false }
   ],
-  "Events & Ministry": [
+  "🎉 Events & Volunteers": [
     { key: "manage_events", label: "Create & manage events", critical: false },
     { key: "manage_volunteers", label: "Coordinate volunteers", critical: false },
     { key: "upload_music", label: "Upload worship music", critical: false },
@@ -252,7 +256,7 @@ const PERMISSION_CATEGORIES = {
     { key: "event_budget_submission", label: "Submit event budget requests", critical: false },
     { key: "manage_local_events", label: "Manage local campus events", critical: false }
   ],
-  "Analytics & Reports": [
+  "📊 Reports & Finance": [
     { key: "access_analytics", label: "View engagement analytics", critical: false },
     { key: "access_finances", label: "View financial reports", critical: true },
     { key: "manage_finances", label: "Manage donations & finances", critical: true },
@@ -262,12 +266,8 @@ const PERMISSION_CATEGORIES = {
     { key: "submit_campus_reports", label: "Submit campus reports", critical: false },
     { key: "view_local_donations", label: "View local campus donations", critical: false }
   ],
-  "Settings & Security": [
-    { key: "manage_settings", label: "Modify church settings", critical: true },
-    { key: "manage_members", label: "Add/remove members", critical: false },
+  "🔒 Settings & Security": [
     { key: "manage_facilities", label: "Manage facilities & resources", critical: false },
-    { key: "church_directory_updates", label: "Update church directory info", critical: false },
-    { key: "manage_child_communities", label: "Manage child campus communities", critical: true },
     { key: "approve_child_campus_requests", label: "Approve or reject child campus requests", critical: true },
     { key: "control_campus_feature_toggles", label: "Control campus-specific feature toggles", critical: true },
     { key: "audit_trail_access", label: "Audit trail / action history", critical: true },
