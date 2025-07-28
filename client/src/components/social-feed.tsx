@@ -62,6 +62,7 @@ import { FlagContentDialog } from './content-moderation/FlagContentDialog';
 import { ContentModerationStatus, HiddenContentPlaceholder } from './content-moderation/ContentModerationStatus';
 import { CommentConfirmationDialog } from './CommentConfirmationDialog';
 import { CommentDialog } from './CommentDialog';
+import SocialFeedEMISelector from './SocialFeedEMISelector';
 
 interface FeedPost {
   id: number;
@@ -117,8 +118,8 @@ export default function SocialFeed() {
   const queryClient = useQueryClient();
   
   const [newPost, setNewPost] = useState("");
-  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
-  const [recentMoods, setRecentMoods] = useState<any[]>([]);
+  const [selectedMoods, setSelectedMoods] = useState<number[]>([]);
+  // Legacy recentMoods removed - using EMI system
   const [showComposer, setShowComposer] = useState(true);
   const [showMoodDropdown, setShowMoodDropdown] = useState(false);
   const [showVerseSearch, setShowVerseSearch] = useState(false);
@@ -629,104 +630,25 @@ export default function SocialFeed() {
     }
   ];
 
-  // SoapBox Super App Feelings Selector - 4 Pillars System
-const moodCategories = [
-  {
-    title: "🧠 Emotional & Spiritual Support",
-    description: "Express your struggles and need for comfort",
-    moods: [
-      { id: 'lonely', label: 'Feeling Lonely', subtitle: "God's presence and companionship", icon: '🙁', color: 'bg-blue-100 text-blue-800' },
-      { id: 'overwhelmed', label: 'Overwhelmed', subtitle: 'Anxiety and fatigue relief', icon: '😰', color: 'bg-orange-100 text-orange-800' },
-      { id: 'shame', label: 'Shame or Guilt', subtitle: 'Forgiveness, grace, redemption', icon: '💔', color: 'bg-red-100 text-red-800' },
-      { id: 'doubting', label: 'Doubting Faith', subtitle: 'Wrestling with God, questions', icon: '😕', color: 'bg-gray-100 text-gray-800' },
-      { id: 'needing-forgiveness', label: 'Needing Forgiveness', subtitle: 'Grace and mercy', icon: '🙏', color: 'bg-purple-100 text-purple-800' },
-      { id: 'struggling-sin', label: 'Struggling with Sin', subtitle: 'Temptation, accountability, renewal', icon: '😖', color: 'bg-red-100 text-red-800' },
-      { id: 'discouraged', label: 'Discouraged', subtitle: 'Hopelessness, low self-worth', icon: '😔', color: 'bg-gray-100 text-gray-800' },
-      { id: 'brokenhearted', label: 'Brokenhearted', subtitle: 'Grief, loss, mourning', icon: '🥹', color: 'bg-blue-100 text-blue-800' }
-    ]
-  },
-  {
-    title: "🌱 Growth & Transformation",
-    description: "Mark your spiritual formation journey",
-    moods: [
-      { id: 'seeking-purpose', label: 'Seeking Purpose', subtitle: 'Identity, calling, direction', icon: '❓', color: 'bg-purple-100 text-purple-800' },
-      { id: 'starting-over', label: 'Starting Over', subtitle: 'New beginnings, transformation', icon: '🆕', color: 'bg-green-100 text-green-800' },
-      { id: 'wanting-growth', label: 'Wanting to Grow', subtitle: 'Wisdom, discipline, sanctification', icon: '📈', color: 'bg-blue-100 text-blue-800' },
-      { id: 'building-confidence', label: 'Building Confidence', subtitle: 'Strength, courage, fearlessness', icon: '💪', color: 'bg-orange-100 text-orange-800' },
-      { id: 'desiring-wisdom', label: 'Desiring Wisdom', subtitle: 'Proverbs, guidance, discernment', icon: '🤔', color: 'bg-indigo-100 text-indigo-800' },
-      { id: 'serving-others', label: 'Serving Others', subtitle: 'Compassion, generosity, humility', icon: '🤝', color: 'bg-green-100 text-green-800' },
-      { id: 'spiritually-dry', label: 'Spiritually Dry', subtitle: 'Feeling distant, thirsting for renewal', icon: '🌿', color: 'bg-yellow-100 text-yellow-800' }
-    ]
-  },
-  {
-    title: "🌍 Life Situations", 
-    description: "Navigate life's challenges with faith",
-    moods: [
-      { id: 'big-decision', label: 'Before a Big Decision', subtitle: 'Discernment scriptures', icon: '🔍', color: 'bg-purple-100 text-purple-800' },
-      { id: 'waiting-god', label: 'Waiting on God', subtitle: 'Patience, faith in timing', icon: '⏳', color: 'bg-yellow-100 text-yellow-800' },
-      { id: 'relationship-struggles', label: 'Struggling in Relationships', subtitle: 'Marriage, family, forgiveness', icon: '💔', color: 'bg-red-100 text-red-800' },
-      { id: 'navigating-change', label: 'Navigating Change', subtitle: 'Transitions, new seasons', icon: '🔄', color: 'bg-blue-100 text-blue-800' },
-      { id: 'dealing-injustice', label: 'Dealing with Injustice', subtitle: 'Encouragement in trials', icon: '⚖️', color: 'bg-orange-100 text-orange-800' },
-      { id: 'facing-illness', label: 'Facing Illness', subtitle: 'Healing, peace in hardship', icon: '🏥', color: 'bg-red-100 text-red-800' },
-      { id: 'financial-worries', label: 'Financial Worries', subtitle: 'Stewardship, provision, hope', icon: '💸', color: 'bg-green-100 text-green-800' },
-      { id: 'burned-out', label: 'Burned Out', subtitle: 'Rest, boundary-setting, balance', icon: '😵‍💫', color: 'bg-gray-100 text-gray-800' }
-    ]
-  },
-  {
-    title: "✝️ Faith & Worship",
-    description: "Express your heart of worship and devotion",
-    moods: [
-      { id: 'hungry-for-god', label: 'Hungry for God', subtitle: 'Revival, intimacy with Christ', icon: '🔥', color: 'bg-red-100 text-red-800' },
-      { id: 'worshipful-heart', label: 'Worshipful Heart', subtitle: 'Psalms, adoration, joy', icon: '🎵', color: 'bg-purple-100 text-purple-800' },
-      { id: 'fasting-prayer', label: 'Fasting/Prayer Mode', subtitle: 'Intensified seeking', icon: '🙇', color: 'bg-blue-100 text-blue-800' },
-      { id: 'grateful-heart', label: 'Grateful Heart', subtitle: 'Thanksgiving and praise', icon: '💚', color: 'bg-green-100 text-green-800' },
-      { id: 'inspired', label: 'Inspired', subtitle: 'Joy, hope, and spiritual creativity', icon: '😇', color: 'bg-yellow-100 text-yellow-800' },
-      { id: 'tired-faithful', label: 'Tired but Faithful', subtitle: 'Endurance, trust in rest', icon: '😴', color: 'bg-gray-100 text-gray-800' },
-      { id: 'contemplative', label: 'Contemplative', subtitle: 'Stillness, reflection, meditation', icon: '🛐', color: 'bg-indigo-100 text-indigo-800' }
-    ]
-  }
-];
+  // Legacy mood system removed - now using Enhanced Mood Indicators (EMI)
 
-// Flatten all moods for backward compatibility
-const moodOptions = moodCategories.flatMap(category => category.moods);
-
-  const toggleMoodSelection = (moodId: string) => {
+  const toggleMoodSelection = (moodId: number) => {
     setSelectedMoods(prev => {
       if (prev.includes(moodId)) {
         return prev.filter(id => id !== moodId);
       } else {
-        // Check if adding this mood would exceed the character limit
-        const newMoods = [...prev, moodId];
-        const moodString = newMoods.join(',');
-        
-        if (moodString.length > 255) {
-          // Show error message using toast
-          import('../hooks/use-toast').then(({ toast }) => {
-            toast({
-              title: "Too many moods selected",
-              description: `You can select up to ${255 - prev.join(',').length} more characters worth of moods. Current selection: ${moodString.length}/255 characters.`,
-              variant: "destructive",
-            });
+        // Limit to 3 moods maximum for social posts
+        if (prev.length >= 3) {
+          toast({
+            title: "Maximum moods reached",
+            description: "You can select up to 3 moods per post.",
+            variant: "destructive",
           });
-          return prev; // Don't add the mood
+          return prev;
         }
-        
-        return newMoods;
+        return [...prev, moodId];
       }
     });
-    
-    // Update recent moods
-    const mood = moodOptions.find(m => m.id === moodId);
-    if (mood) {
-      setRecentMoods(prev => {
-        const filtered = prev.filter(m => m.id !== moodId);
-        return [mood, ...filtered].slice(0, 5); // Keep only 5 recent
-      });
-    }
-  };
-
-  const getSelectedMoodsData = () => {
-    return selectedMoods.map(id => moodOptions.find(mood => mood.id === id)).filter((mood): mood is NonNullable<typeof mood> => Boolean(mood));
   };
 
   const clearMoods = () => {
@@ -771,49 +693,15 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            {/* Selected Moods Display */}
-            {selectedMoods.length > 0 && (
-              <div className="mb-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-medium text-gray-600 dark:text-gray-400">Current feelings:</div>
-                  <div className={`text-xs px-2 py-1 rounded-full ${
-                    selectedMoods.join(',').length > 200 
-                      ? 'bg-red-100 text-red-700 border border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800' 
-                      : selectedMoods.join(',').length > 150
-                      ? 'bg-yellow-100 text-yellow-700 border border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-300 dark:border-yellow-800'
-                      : 'bg-gray-100 text-gray-600 border border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600'
-                  }`}>
-                    {selectedMoods.join(',').length}/255 chars
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {getSelectedMoodsData().map((mood, index) => (
-                    <div key={mood.id} className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/20 rounded-full border border-purple-200 dark:border-purple-700">
-                      <span className="text-sm">{mood.icon}</span>
-                      <span className="text-xs font-medium text-purple-800 dark:text-purple-200">{mood.label}</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleMoodSelection(mood.id)}
-                        className="h-4 w-4 p-0 text-purple-400 hover:text-purple-600 ml-1"
-                      >
-                        <X className="h-2 w-2" />
-                      </Button>
-                    </div>
-                  ))}
-                  {selectedMoods.length > 1 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={clearMoods}
-                      className="h-6 px-2 text-xs text-gray-500 hover:text-gray-700"
-                    >
-                      Clear all
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
+            {/* Enhanced Mood Indicators (EMI) Selector */}
+            <div className="mb-4">
+              <SocialFeedEMISelector
+                selectedMoods={selectedMoods}
+                onMoodToggle={toggleMoodSelection}
+                maxMoods={3}
+                compact={true}
+              />
+            </div>
 
             {/* Linked Verse Display */}
             {linkedVerse && (
@@ -920,125 +808,17 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
                   )}
                 </div>
 
-                {/* Mood Selector */}
-                <div className="relative" ref={moodDropdownRef}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowMoodDropdown(!showMoodDropdown)}
-                    className="text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 p-1.5 h-8 w-8"
-                    title="Add feeling"
-                  >
-                    <Smile className="w-4 h-4" />
-                  </Button>
-
-                  {/* Enhanced Mood Dropdown - Mobile Responsive */}
-                  {showMoodDropdown && (
-                    <div className="absolute top-full left-0 mt-1 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-[480px] max-w-[95vw] max-h-[70vh] overflow-y-auto">
-                      <div className="p-3 sm:p-4">
-                        <div className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">How are you feeling?</div>
-                        
-                        {/* Recently Used Section */}
-                        {recentMoods.length > 0 && (
-                          <div className="mb-4">
-                            <div className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Recently Used</div>
-                            <div className="flex flex-wrap gap-1">
-                              {recentMoods.map((mood) => {
-                                const isSelected = selectedMoods.includes(mood.id);
-                                const currentString = selectedMoods.join(',');
-                                const wouldExceedLimit = !isSelected && (currentString + (currentString ? ',' : '') + mood.id).length > 255;
-                                
-                                return (
-                                  <Button
-                                    key={`recent-${mood.id}`}
-                                    variant={isSelected ? "default" : "outline"}
-                                    size="sm"
-                                    onClick={() => toggleMoodSelection(mood.id)}
-                                    disabled={wouldExceedLimit}
-                                    className={`h-7 px-2 text-xs ${
-                                      isSelected 
-                                        ? 'bg-purple-600 hover:bg-purple-700' 
-                                        : wouldExceedLimit 
-                                        ? 'opacity-50 cursor-not-allowed' 
-                                        : ''
-                                    }`}
-                                    title={wouldExceedLimit ? `Adding this mood would exceed the 255 character limit (current: ${currentString.length}/255)` : undefined}
-                                  >
-                                    <span className="mr-1">{mood.icon}</span>
-                                    <span className="hidden sm:inline">{mood.label}</span>
-                                    <span className="sm:hidden">{mood.label.length > 8 ? mood.label.substring(0, 8) + '...' : mood.label}</span>
-                                  </Button>
-                                );
-                              })}
-                            </div>
-                            <hr className="my-3 border-gray-200 dark:border-gray-600" />
-                          </div>
-                        )}
-
-                        {/* Categorized Moods */}
-                        <div className="space-y-4">
-                          {moodCategories.map((category) => (
-                            <div key={category.title}>
-                              <div className="mb-2">
-                                <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200">{category.title}</h3>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 italic hidden sm:block">{category.description}</p>
-                              </div>
-                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                {category.moods.map((mood) => {
-                                  const isSelected = selectedMoods.includes(mood.id);
-                                  const currentString = selectedMoods.join(',');
-                                  const wouldExceedLimit = !isSelected && (currentString + (currentString ? ',' : '') + mood.id).length > 255;
-                                  
-                                  return (
-                                    <Button
-                                      key={mood.id}
-                                      variant={isSelected ? "default" : "ghost"}
-                                      size="sm"
-                                      onClick={() => toggleMoodSelection(mood.id)}
-                                      disabled={wouldExceedLimit}
-                                      className={`h-auto min-h-[3rem] p-2 justify-start text-left ${
-                                        isSelected 
-                                          ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-                                          : wouldExceedLimit 
-                                          ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400'
-                                          : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                                      }`}
-                                      title={wouldExceedLimit ? `Adding this mood would exceed the 255 character limit (current: ${currentString.length}/255)` : mood.subtitle}
-                                    >
-                                      <div className="flex items-center w-full">
-                                        <span className="mr-2 text-base flex-shrink-0">{mood.icon}</span>
-                                        <span className="text-xs font-medium leading-tight break-words hyphens-auto">{mood.label}</span>
-                                      </div>
-                                    </Button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Action Buttons */}
-                        <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-600 flex justify-between">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setSelectedMoods([])}
-                            className="text-gray-500 hover:text-gray-700 text-xs sm:text-sm"
-                          >
-                            Clear All
-                          </Button>
-                          <Button
-                            size="sm"
-                            onClick={() => setShowMoodDropdown(false)}
-                            className="bg-purple-600 hover:bg-purple-700 text-xs sm:text-sm"
-                          >
-                            Done ({selectedMoods.length})
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                {/* EMI Modal Trigger */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowMoodDropdown(!showMoodDropdown)}
+                  className="text-gray-600 hover:text-purple-600 hover:bg-purple-50 p-1.5 h-8 w-8"
+                  type="button"
+                  title="Expand mood selection"
+                >
+                  <Smile className="w-4 h-4" />
+                </Button>
 
                 {/* Bible Verse Link */}
                 <div className="relative" ref={verseDropdownRef}>
@@ -1212,6 +992,43 @@ const moodOptions = moodCategories.flatMap(category => category.moods);
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* EMI Modal for expanded selection */}
+      {showMoodDropdown && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-2xl max-h-[80vh] overflow-hidden">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Select Your Feelings</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowMoodDropdown(false)}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="p-4">
+              <SocialFeedEMISelector
+                selectedMoods={selectedMoods}
+                onMoodToggle={toggleMoodSelection}
+                maxMoods={3}
+                compact={false}
+              />
+            </div>
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <Button
+                onClick={() => setShowMoodDropdown(false)}
+                className="bg-purple-600 hover:bg-purple-700"
+              >
+                Done ({selectedMoods.length}/3)
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Feed Posts */}
