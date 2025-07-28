@@ -24,8 +24,10 @@ import {
   Settings,
   Send,
   Eye,
-  AlertCircle
+  AlertCircle,
+  ExternalLink
 } from "lucide-react";
+import { Link } from "wouter";
 
 interface BackgroundCheck {
   id: number;
@@ -276,7 +278,22 @@ export default function BackgroundCheckManager() {
 
                       return (
                         <TableRow key={volunteer.id}>
-                          <TableCell className="font-medium">{volunteer.name}</TableCell>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              {volunteer.name}
+                              {/* Smart Cross-Link to Volunteer Management */}
+                              <Link href="/volunteer-management">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  className="h-6 px-2 text-xs hover:bg-blue-50"
+                                  title="View Volunteer Profile"
+                                >
+                                  <ExternalLink className="h-3 w-3" />
+                                </Button>
+                              </Link>
+                            </div>
+                          </TableCell>
                           <TableCell>{volunteer.email}</TableCell>
                           <TableCell>
                             {latestCheck ? (

@@ -43,7 +43,10 @@ import {
   Heart,
   Gift,
   Target,
-  BarChart3
+  BarChart3,
+  Shield,
+  ExternalLink,
+  AlertTriangle
 } from "lucide-react";
 import { format, isValid, parseISO } from "date-fns";
 import { motion } from "framer-motion";
@@ -61,6 +64,77 @@ const formatSafeDate = (dateString: string | null | undefined, formatStr: string
   }
 };
 import { useToast } from "../hooks/use-toast";
+import { Link } from "wouter";
+
+// Background Check Status Badge Component with Smart Cross-Linking
+const BackgroundCheckStatusBadge = ({ volunteer }: { volunteer: Volunteer }) => {
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case 'approved': return 'bg-green-100 text-green-800 border-green-200';
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'expired': return 'bg-red-100 text-red-800 border-red-200';
+      case 'rejected': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusIcon = (status?: string) => {
+    switch (status) {
+      case 'approved': return <CheckCircle className="h-3 w-3" />;
+      case 'pending': return <Clock className="h-3 w-3" />;
+      case 'expired': return <AlertTriangle className="h-3 w-3" />;
+      case 'rejected': return <XCircle className="h-3 w-3" />;
+      default: return <Shield className="h-3 w-3" />;
+    }
+  };
+
+  const getStatusText = (status?: string) => {
+    switch (status) {
+      case 'approved': return 'Approved';
+      case 'pending': return 'Pending';
+      case 'expired': return 'Expired';
+      case 'rejected': return 'Rejected';
+      default: return 'Not Started';
+    }
+  };
+
+  const isExpiringSoon = volunteer.backgroundCheckExpiry ? 
+    new Date(volunteer.backgroundCheckExpiry) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : false;
+
+  return (
+    <div className="flex items-center gap-2">
+      <Badge 
+        variant="outline" 
+        className={`${getStatusColor(volunteer.backgroundCheckStatus)} border text-xs`}
+      >
+        <span className="flex items-center gap-1">
+          {getStatusIcon(volunteer.backgroundCheckStatus)}
+          {getStatusText(volunteer.backgroundCheckStatus)}
+        </span>
+      </Badge>
+      
+      {/* Smart Cross-Link to Background Check Management */}
+      <Link href="/background-check-management">
+        <Button 
+          variant="ghost" 
+          size="sm"
+          className="h-6 px-2 text-xs hover:bg-blue-50"
+          title="Manage Background Check"
+        >
+          <ExternalLink className="h-3 w-3" />
+        </Button>
+      </Link>
+      
+      {/* Expiry Warning */}
+      {isExpiringSoon && volunteer.backgroundCheckStatus === 'approved' && (
+        <Badge variant="outline" className="bg-orange-100 text-orange-800 border-orange-200 text-xs">
+          <AlertTriangle className="h-3 w-3 mr-1" />
+          Expires Soon
+        </Badge>
+      )}
+    </div>
+  );
+};
 
 interface Volunteer {
   id: number;
@@ -77,6 +151,8 @@ interface Volunteer {
   totalHours: number;
   backgroundCheck: boolean;
   orientation: boolean;
+  backgroundCheckStatus?: 'pending' | 'approved' | 'rejected' | 'expired' | 'none';
+  backgroundCheckExpiry?: string;
 }
 
 interface VolunteerRole {
@@ -124,7 +200,7 @@ export default function VolunteerManagementSystem() {
   const queryClient = useQueryClient();
 
   // Fetch volunteers
-  const { data: volunteers = [], isLoading: loadingVolunteers } = useQuery({
+  const { data: volunteers = [], isLoading: loadingVolunteers } = useQuery<Volunteer[]>({
     queryKey: ["/api/volunteers"],
     enabled: true,
   });
@@ -136,7 +212,7 @@ export default function VolunteerManagementSystem() {
   });
 
   // Fetch volunteer opportunities
-  const { data: opportunities = [], isLoading: loadingOpportunities } = useQuery({
+  const { data: opportunities = [], isLoading: loadingOpportunities } = useQuery<VolunteerOpportunity[]>({
     queryKey: ["/api/volunteer-opportunities"],
     enabled: true,
   });
@@ -148,7 +224,7 @@ export default function VolunteerManagementSystem() {
   });
 
   // Fetch volunteer stats
-  const { data: stats = {} } = useQuery({
+  const { data: stats = {} } = useQuery<any>({
     queryKey: ["/api/volunteer-stats"],
     enabled: true,
   });
@@ -433,6 +509,7 @@ export default function VolunteerManagementSystem() {
                 <TableHead>Skills</TableHead>
                 <TableHead>Hours</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Background Check</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -475,6 +552,9 @@ export default function VolunteerManagementSystem() {
                     }>
                       {volunteer.status}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <BackgroundCheckStatusBadge volunteer={volunteer} />
                   </TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
