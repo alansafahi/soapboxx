@@ -21,6 +21,9 @@ export default function SocialFeedEMISelector({
   compact = false
 }: SocialFeedEMISelectorProps) {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  
+  // Debug: Component mount
+  console.log("SocialFeedEMISelector mounted, compact:", compact);
 
   // Fetch mood indicators by category - use same endpoint as CheckInSystem
   const { data: allMoods = [], isLoading } = useQuery<EnhancedMoodIndicator[]>({
