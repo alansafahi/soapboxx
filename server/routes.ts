@@ -1555,6 +1555,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's admin communities for ADMIN PORTAL visibility
+  app.get('/api/auth/admin-communities', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // Get communities where user has admin roles
+      const adminCommunitiesResult = await pool.query(`
+        SELECT DISTINCT 
+          uc.church_id,
+          uc.role,
+          c.name as community_name
+        FROM user_churches uc
+        JOIN communities c ON uc.church_id = c.id
+        WHERE uc.user_id = $1 
+        AND uc.is_active = true
+        AND uc.role IN ('lead_pastor', 'associate_pastor', 'administrator', 'church_admin', 'pastor', 'admin')
+        ORDER BY c.name
+      `, [userId]);
+
+      const adminCommunities = adminCommunitiesResult.rows.map(row => ({
+        communityId: row.church_id,
+        role: row.role,
+        communityName: row.community_name
+      }));
+
+      // Also check if user has global admin roles (soapbox_owner, etc.)
+      const globalAdminRoles = ['soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin', 'system-admin', 'super-admin'];
+      const user = await storage.getUser(userId);
+      const hasGlobalAdminRole = user && globalAdminRoles.includes(user.role || '');
+
+      res.json({
+        hasAdminAccess: adminCommunities.length > 0 || hasGlobalAdminRole,
+        adminCommunities,
+        globalAdminRole: hasGlobalAdminRole ? user?.role : null
+      });
+    } catch (error) {
+      console.error('Error fetching admin communities:', error);
+      res.status(500).json({ message: 'Failed to fetch admin communities' });
+    }
+  });
+
   // Tour completion routes (STANDARDIZED)
   app.get('/api/user-tours/:userId/completion/:tourType', async (req, res) => {
     try {

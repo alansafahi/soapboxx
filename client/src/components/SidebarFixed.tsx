@@ -74,6 +74,20 @@ export default function SidebarFixed() {
   const { user } = useAuth();
   const [location] = useLocation();
 
+  // Get user's community admin roles for ADMIN PORTAL visibility
+  const { data: userAdminCommunities } = useQuery<{
+    hasAdminAccess: boolean;
+    adminCommunities: Array<{
+      communityId: number;
+      role: string;
+      communityName: string;
+    }>;
+    globalAdminRole: string | null;
+  }>({
+    queryKey: ["/api/auth/admin-communities"],
+    enabled: !!user,
+  });
+
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL', 'SOAPBOX PORTAL', 'ACCOUNT']));
   const [forceUpdate, setForceUpdate] = useState(0);
 
@@ -206,8 +220,19 @@ export default function SidebarFixed() {
     }
   ];
 
-  // Use navigation groups directly - filtering happens at render time
-  const visibleGroups = navigationGroups;
+  // Filter groups based on user permissions and admin access
+  const visibleGroups = navigationGroups.filter(group => {
+    if (group.label === 'ADMIN PORTAL') {
+      // Show admin portal only for users with actual admin access to communities
+      return user && userAdminCommunities?.hasAdminAccess;
+    }
+    
+    if (group.label === 'SOAPBOX PORTAL') {
+      return user?.role === 'soapbox_owner';
+    }
+    
+    return true;
+  });
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {
@@ -291,12 +316,12 @@ export default function SidebarFixed() {
           // Expanded Navigation - Filtered Groups  
           visibleGroups.map((group, idx) => {
 
-            // Ensure admin groups are always expanded for soapbox_owner users OR users with church admin roles
+            // Ensure admin groups are always expanded for users with admin access
             // FORCE SPIRITUAL TOOLS TO BE EXPANDED TO SHOW D.I.V.I.N.E.
             const isExpanded = expandedGroups.has(group.label) || 
               group.label === 'SPIRITUAL TOOLS' ||
               (user?.role === 'soapbox_owner' && (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL')) ||
-              (hasCommunityAdminRole && group.label === 'ADMIN PORTAL');
+              (userAdminCommunities?.hasAdminAccess && group.label === 'ADMIN PORTAL');
             
             return (
               <div key={`${group.label}-${group.items.length}-${idx}`}>
@@ -386,9 +411,8 @@ export default function SidebarFixed() {
                 // Apply same filtering logic as expanded view
                 if (item.roles) {
                   if (!user) return null;
-                  const hasGlobalRole = item.roles.includes(user.role || '');
-                  const hasCommunityRole = hasCommunityAdminRole && (item.roles.includes('church-admin') || item.roles.includes('church_admin'));
-                  if (!hasGlobalRole && !hasCommunityRole) return null;
+                  // Check if user has actual admin access to communities
+                  if (!userAdminCommunities?.hasAdminAccess) return null;
                 }
               }
               

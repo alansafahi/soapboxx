@@ -63,6 +63,20 @@ export default function TopHeader() {
     enabled: !!user,
   });
 
+  // Get user's community admin roles for ADMIN PORTAL visibility
+  const { data: userAdminCommunities } = useQuery<{
+    hasAdminAccess: boolean;
+    adminCommunities: Array<{
+      communityId: number;
+      role: string;
+      communityName: string;
+    }>;
+    globalAdminRole: string | null;
+  }>({
+    queryKey: ["/api/auth/admin-communities"],
+    enabled: !!user,
+  });
+
   // Local state for immediate UI feedback with notifications
   const [localNotifications, setLocalNotifications] = useState<Notification[]>([]);
 
@@ -319,8 +333,8 @@ export default function TopHeader() {
               </DropdownMenuItem>
             </Link>
             
-            {/* Admin Portal Section - Only show for admin users */}
-            {user && ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'].includes((user as any)?.role) && (
+            {/* Admin Portal Section - Only show for users with admin access to communities */}
+            {user && userAdminCommunities?.hasAdminAccess && (
               <>
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
