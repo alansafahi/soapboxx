@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
   Users, 
   UserPlus, 
@@ -30,7 +32,13 @@ import {
   X,
   AlertTriangle,
   DollarSign,
-  MapPin
+  MapPin,
+  ChevronDown,
+  ChevronRight,
+  Info,
+  Star,
+  Filter,
+  Search
 } from "lucide-react";
 
 interface StaffMember {
@@ -232,48 +240,68 @@ const getCommunityRoles = (communityType: string = "church") => {
 const AVAILABLE_ROLES = getCommunityRoles();
 
 const PERMISSION_CATEGORIES = {
-  "📋 Admin & Management": [
-    { key: "manage_staff", label: "Invite & manage staff members", critical: true },
-    { key: "assign_roles", label: "Assign roles to members", critical: true },
-    { key: "assign_campus_affiliation", label: "Assign campus affiliation", critical: true },
-    { key: "manage_child_communities", label: "Manage child campus communities", critical: true },
-    { key: "manage_members", label: "Add/remove members", critical: false },
-    { key: "church_directory_updates", label: "Update church directory info", critical: false },
-    { key: "manage_settings", label: "Modify church settings", critical: true }
-  ],
-  "📣 Content & Communications": [
-    { key: "approve_content", label: "Approve user-generated content", critical: false },
-    { key: "create_content", label: "Create announcements & posts", critical: false },
-    { key: "send_communications", label: "Send emails & notifications", critical: false },
-    { key: "moderate_prayers", label: "Moderate prayer requests", critical: false },
-    { key: "pre_approval_posts", label: "Pre-approval of scheduled posts", critical: false }
-  ],
-  "🎉 Events & Volunteers": [
-    { key: "manage_events", label: "Create & manage events", critical: false },
-    { key: "manage_volunteers", label: "Coordinate volunteers", critical: false },
-    { key: "upload_music", label: "Upload worship music", critical: false },
-    { key: "volunteer_hours_tracking", label: "Track volunteer hours & export", critical: false },
-    { key: "event_budget_submission", label: "Submit event budget requests", critical: false },
-    { key: "manage_local_events", label: "Manage local campus events", critical: false }
-  ],
-  "📊 Reports & Finance": [
-    { key: "access_analytics", label: "View engagement analytics", critical: false },
-    { key: "access_finances", label: "View financial reports", critical: true },
-    { key: "manage_finances", label: "Manage donations & finances", critical: true },
-    { key: "cross_campus_reporting", label: "Cross-campus reporting access", critical: true },
-    { key: "cross_campus_analytics", label: "Cross-campus analytics dashboard", critical: true },
-    { key: "view_user_engagement_by_campus", label: "View user engagement by campus", critical: false },
-    { key: "submit_campus_reports", label: "Submit campus reports", critical: false },
-    { key: "view_local_donations", label: "View local campus donations", critical: false }
-  ],
-  "🔒 Settings & Security": [
-    { key: "manage_facilities", label: "Manage facilities & resources", critical: false },
-    { key: "approve_child_campus_requests", label: "Approve or reject child campus requests", critical: true },
-    { key: "control_campus_feature_toggles", label: "Control campus-specific feature toggles", critical: true },
-    { key: "audit_trail_access", label: "Audit trail / action history", critical: true },
-    { key: "approve_sub_campus_leaders", label: "Approve sub-campus leaders", critical: true },
-    { key: "override_local_settings", label: "Override local campus settings", critical: true }
-  ]
+  "📋 Admin & Management": {
+    color: "bg-blue-50 border-blue-200 text-blue-900",
+    headerColor: "bg-blue-100 text-blue-800",
+    permissions: [
+      { key: "manage_staff", label: "Invite & manage staff members", critical: true, tooltip: "Send invitations and manage staff member accounts and access" },
+      { key: "assign_roles", label: "Assign roles to members", critical: true, tooltip: "Assign and modify user roles and permission levels" },
+      { key: "assign_campus_affiliation", label: "Assign campus affiliation", critical: true, tooltip: "Associate staff members with specific campus locations" },
+      { key: "manage_child_communities", label: "Manage child campus communities", critical: true, tooltip: "Oversee and manage subsidiary campus communities" },
+      { key: "manage_members", label: "Add/remove members", critical: false, tooltip: "Add new members and remove existing members from the community" },
+      { key: "church_directory_updates", label: "Update church directory info", critical: false, tooltip: "Modify community contact information and directory details" },
+      { key: "manage_settings", label: "Modify church settings", critical: true, tooltip: "Access and modify core community configuration settings" }
+    ]
+  },
+  "📣 Content & Communications": {
+    color: "bg-green-50 border-green-200 text-green-900", 
+    headerColor: "bg-green-100 text-green-800",
+    permissions: [
+      { key: "approve_content", label: "Approve user-generated content", critical: false, tooltip: "Review and approve posts, comments, and user-submitted content" },
+      { key: "create_content", label: "Create announcements & posts", critical: false, tooltip: "Create and publish community announcements and social posts" },
+      { key: "send_communications", label: "Send emails & notifications", critical: false, tooltip: "Send email newsletters and push notifications to members" },
+      { key: "moderate_prayers", label: "Moderate prayer requests", critical: false, tooltip: "Review, approve, and manage prayer wall submissions" },
+      { key: "pre_approval_posts", label: "Pre-approval of scheduled posts", critical: false, tooltip: "Review and approve content before scheduled publication" }
+    ]
+  },
+  "🎉 Events & Volunteers": {
+    color: "bg-orange-50 border-orange-200 text-orange-900",
+    headerColor: "bg-orange-100 text-orange-800", 
+    permissions: [
+      { key: "manage_events", label: "Create & manage events", critical: false, tooltip: "Create, edit, and coordinate community events and activities" },
+      { key: "manage_volunteers", label: "Coordinate volunteers", critical: false, tooltip: "Recruit, assign, and manage volunteer schedules and positions" },
+      { key: "upload_music", label: "Upload worship music", critical: false, tooltip: "Upload and manage worship songs and audio content" },
+      { key: "volunteer_hours_tracking", label: "Track volunteer hours & export", critical: false, tooltip: "Monitor volunteer participation and generate service hour reports" },
+      { key: "event_budget_submission", label: "Submit event budget requests", critical: false, tooltip: "Submit budget proposals for events and ministry activities" },
+      { key: "manage_local_events", label: "Manage local campus events", critical: false, tooltip: "Coordinate events specific to individual campus locations" }
+    ]
+  },
+  "📊 Reports & Finance": {
+    color: "bg-purple-50 border-purple-200 text-purple-900",
+    headerColor: "bg-purple-100 text-purple-800",
+    permissions: [
+      { key: "access_analytics", label: "View engagement analytics", critical: false, tooltip: "Access member engagement metrics and community analytics" },
+      { key: "access_finances", label: "View financial reports", critical: true, tooltip: "View donation summaries and financial dashboard data" },
+      { key: "manage_finances", label: "Manage donations & finances", critical: true, tooltip: "Process donations, manage funds, and handle financial operations" },
+      { key: "cross_campus_reporting", label: "Cross-campus reporting access", critical: true, tooltip: "Generate reports across multiple campus locations" },
+      { key: "cross_campus_analytics", label: "Cross-campus analytics dashboard", critical: true, tooltip: "Access unified analytics across all campus communities" },
+      { key: "view_user_engagement_by_campus", label: "View user engagement by campus", critical: false, tooltip: "Monitor member activity and engagement per campus location" },
+      { key: "submit_campus_reports", label: "Submit campus reports", critical: false, tooltip: "Generate and submit periodic campus performance reports" },
+      { key: "view_local_donations", label: "View local campus donations", critical: false, tooltip: "Access donation data specific to individual campus locations" }
+    ]
+  },
+  "🔒 Settings & Security": {
+    color: "bg-red-50 border-red-200 text-red-900",
+    headerColor: "bg-red-100 text-red-800",
+    permissions: [
+      { key: "manage_facilities", label: "Manage facilities & resources", critical: false, tooltip: "Coordinate facility bookings and resource allocation" },
+      { key: "approve_child_campus_requests", label: "Approve or reject child campus requests", critical: true, tooltip: "Review and approve requests for new subsidiary campus locations" },
+      { key: "control_campus_feature_toggles", label: "Control campus-specific feature toggles", critical: true, tooltip: "Enable or disable features for individual campus locations" },
+      { key: "audit_trail_access", label: "Audit trail / action history", critical: true, tooltip: "View complete log of administrative actions and system changes" },
+      { key: "approve_sub_campus_leaders", label: "Approve sub-campus leaders", critical: true, tooltip: "Review and approve leadership appointments for subsidiary campuses" },
+      { key: "override_local_settings", label: "Override local campus settings", critical: true, tooltip: "Modify or override configuration settings for individual campuses" }
+    ]
+  }
 };
 
 export function StaffManagement({ communityId, communityType = "church" }: { communityId: number; communityType?: string }) {
@@ -284,6 +312,9 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showPermissionsMatrix, setShowPermissionsMatrix] = useState(false);
   const [selectedMatrixRole, setSelectedMatrixRole] = useState<string | null>(null);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['📋 Admin & Management']));
+  const [searchFilter, setSearchFilter] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -531,200 +562,185 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
               {communityType.charAt(0).toUpperCase() + communityType.slice(1)} Role Permissions Matrix
             </DialogTitle>
             <DialogDescription className="text-sm">
-              Click on any column header to highlight that role's permissions. Roles ordered from Level 1 (lowest) to Level 6 (highest).
+              Collapsible permission categories with filtering and tooltip guidance. Click role headers to highlight permissions.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="flex-1 overflow-hidden">
-            {/* Enhanced Permissions Table */}
-            <div className="h-full border rounded-lg overflow-hidden bg-white dark:bg-gray-900">
-              <div className="h-full overflow-auto">
-                <table className="w-full text-xs sm:text-sm">
-                  <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0 z-20">
-                    <tr>
-                      <th className="text-left p-2 sm:p-3 font-semibold w-32 sm:w-48 sticky left-0 bg-gray-50 dark:bg-gray-800 z-30 border-r">
-                        <div className="truncate">Permission</div>
-                      </th>
-                      {COMMUNITY_ROLES.sort((a, b) => a.level - b.level).map((role) => {
-                        const Icon = role.icon;
-                        const isHighlighted = selectedMatrixRole === role.name;
-                        return (
-                          <th 
-                            key={role.name}
-                            onClick={() => setSelectedMatrixRole(isHighlighted ? null : role.name)}
-                            className={`text-center p-1 sm:p-2 font-medium w-16 sm:w-20 cursor-pointer transition-all duration-200 border-l-2 ${
-                              isHighlighted 
-                                ? `${role.color} border-l-4 border-purple-500 shadow-lg scale-105` 
-                                : `hover:${role.color} hover:shadow-md border-gray-200`
-                            }`}
-                          >
-                            <div className="flex flex-col items-center gap-1">
-                              <div className={`p-1 rounded-full ${isHighlighted ? 'bg-white shadow-md' : 'bg-white/50'}`}>
-                                <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
-                              </div>
-                              <div className="text-[10px] sm:text-xs font-semibold leading-tight text-center">
-                                <div className="hidden sm:block">{role.displayName}</div>
-                                <div className="sm:hidden">{role.displayName.split(' ')[0]}</div>
-                              </div>
-                              <div className="text-[8px] sm:text-xs opacity-75 bg-white/80 px-1 py-0.5 rounded-full">
-                                L{role.level}
-                              </div>
-                            </div>
-                          </th>
-                        );
-                      })}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(PERMISSION_CATEGORIES).map(([category, permissions]) => [
-                      <tr key={`${category}-header`} className="bg-gray-100 dark:bg-gray-800">
-                        <td colSpan={COMMUNITY_ROLES.length + 1} className="p-2 sm:p-3 font-semibold text-xs sm:text-sm border-t-2 sticky left-0 bg-gray-100 dark:bg-gray-800 z-20">
-                          <div className="truncate">📋 {category}</div>
-                        </td>
-                      </tr>,
-                      ...permissions.map((permission) => (
-                        <tr 
-                          key={permission.key} 
-                          className="border-t hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                        >
-                          <td className="p-2 sm:p-3 sticky left-0 bg-white dark:bg-gray-900 z-20 border-r">
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 min-w-0">
-                                <div className="font-medium text-xs sm:text-sm truncate">{permission.label}</div>
-                                {permission.critical && (
-                                  <div className="flex items-center gap-1 mt-1">
-                                    <AlertTriangle className="h-2 w-2 sm:h-3 sm:w-3 text-red-500 flex-shrink-0" />
-                                    <span className="text-[10px] sm:text-xs text-red-600 font-medium truncate">Critical</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </td>
-                          {COMMUNITY_ROLES.sort((a, b) => a.level - b.level).map((role) => {
-                            const hasPermission = role.permissions.includes(permission.key);
-                            const isHighlighted = selectedMatrixRole === role.name;
-                            return (
-                              <td 
-                                key={role.name} 
-                                className={`text-center p-1 sm:p-2 transition-all duration-200 border-l-2 ${
-                                  isHighlighted 
-                                    ? 'bg-purple-50 dark:bg-purple-900/20 border-l-purple-500 shadow-inner' 
-                                    : 'border-gray-200 hover:bg-gray-50'
-                                }`}
-                              >
-                                {hasPermission ? (
-                                  <div className={`inline-flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full transition-all ${
-                                    isHighlighted 
-                                      ? 'bg-green-200 text-green-800 border-2 border-green-400 shadow-lg' 
-                                      : 'bg-green-100 text-green-700 hover:bg-green-200'
-                                  }`}>
-                                    <Check className="h-3 w-3 sm:h-4 sm:w-4 font-bold" />
-                                  </div>
-                                ) : (
-                                  <div className={`inline-flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full transition-all ${
-                                    isHighlighted 
-                                      ? 'bg-red-200 text-red-800 border-2 border-red-400 shadow-lg' 
-                                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                                  }`}>
-                                    <X className="h-3 w-3 sm:h-4 sm:w-4" />
-                                  </div>
-                                )}
-                              </td>
-                            );
-                          })}
-                        </tr>
-                      ))
-                    ]).flat()}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Community Type Info */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-              <div className="flex items-start gap-3">
-                <div className="bg-blue-100 p-2 rounded-full">
-                  <Settings className="h-5 w-5 text-blue-600" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-blue-900 dark:text-blue-100">
-                    {communityType.charAt(0).toUpperCase() + communityType.slice(1)} Community Matrix
-                  </h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-200 mt-1">
-                    This matrix shows {COMMUNITY_ROLES.length} roles specifically designed for {communityType} communities. 
-                    Different community types (Churches, Groups, Ministries) have different role structures and permissions.
-                  </p>
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {COMMUNITY_ROLES.map((role) => (
-                      <div key={role.name} className={`px-3 py-1 rounded-full text-xs font-medium ${role.color}`}>
-                        Level {role.level}: {role.displayName}
-                      </div>
-                    ))}
-                  </div>
+          <div className="flex-1 overflow-hidden space-y-4">
+            {/* Search and Filter Controls */}
+            <div className="flex gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search permissions..."
+                    value={searchFilter}
+                    onChange={(e) => setSearchFilter(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
               </div>
+              <Select value={roleFilter} onValueChange={setRoleFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filter by role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Roles</SelectItem>
+                  {COMMUNITY_ROLES.map((role) => (
+                    <SelectItem key={role.name} value={role.name}>
+                      {role.displayName} (L{role.level})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Selected Role Summary */}
-            {selectedMatrixRole && (
-              <div className="border rounded-lg p-6 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
-                {(() => {
-                  const role = COMMUNITY_ROLES.find(r => r.name === selectedMatrixRole);
-                  if (!role) return null;
-                  const Icon = role.icon;
-                  const rolePermissions = Object.entries(PERMISSION_CATEGORIES)
-                    .flatMap(([category, permissions]) => 
-                      permissions.filter(p => role.permissions.includes(p.key))
-                        .map(p => ({ ...p, category }))
-                    );
-                  
+            {/* Role Header Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+              {COMMUNITY_ROLES.sort((a, b) => a.level - b.level).map((role) => {
+                const Icon = role.icon;
+                const isSelected = selectedMatrixRole === role.name;
+                const isFiltered = roleFilter && roleFilter !== role.name;
+                
+                return (
+                  <button
+                    key={role.name}
+                    onClick={() => setSelectedMatrixRole(isSelected ? null : role.name)}
+                    className={`p-3 rounded-lg border-2 transition-all text-center ${
+                      isSelected 
+                        ? `${role.color} border-purple-500 shadow-lg scale-105` 
+                        : isFiltered
+                        ? 'opacity-50 bg-gray-50 border-gray-200'
+                        : `hover:${role.color} border-gray-200 hover:shadow-md`
+                    }`}
+                  >
+                    <div className="flex flex-col items-center gap-1">
+                      <Icon className="h-5 w-5" />
+                      <div className="text-xs font-medium">{role.displayName}</div>
+                      <div className="text-xs opacity-75">L{role.level}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Collapsible Permission Categories */}
+            <TooltipProvider>
+              <div className="space-y-3 max-h-[50vh] overflow-auto">
+                {Object.entries(PERMISSION_CATEGORIES).map(([categoryName, categoryData]) => {
+                  const isExpanded = expandedCategories.has(categoryName);
+                  const filteredPermissions = categoryData.permissions.filter(permission => {
+                    const matchesSearch = !searchFilter || 
+                      permission.label.toLowerCase().includes(searchFilter.toLowerCase()) ||
+                      permission.tooltip.toLowerCase().includes(searchFilter.toLowerCase());
+                    const matchesRole = !roleFilter || 
+                      COMMUNITY_ROLES.find(r => r.name === roleFilter)?.permissions.includes(permission.key);
+                    return matchesSearch && matchesRole;
+                  });
+
+                  if (filteredPermissions.length === 0 && (searchFilter || roleFilter)) return null;
+
                   return (
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <div className={`p-3 rounded-full shadow-lg ${role.color}`}>
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-xl">{role.displayName}</h4>
-                          <p className="text-gray-600 dark:text-gray-300">{role.description}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-sm font-medium">Authority Level: {role.level}</span>
-                            <span className="text-sm text-gray-500">•</span>
-                            <span className="text-sm text-gray-500">{rolePermissions.length} permissions</span>
+                    <Collapsible
+                      key={categoryName}
+                      open={isExpanded}
+                      onOpenChange={(open) => {
+                        const newExpanded = new Set(expandedCategories);
+                        if (open) {
+                          newExpanded.add(categoryName);
+                        } else {
+                          newExpanded.delete(categoryName);
+                        }
+                        setExpandedCategories(newExpanded);
+                      }}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <button className={`w-full p-4 rounded-lg border-2 transition-all ${categoryData.headerColor} ${categoryData.color} hover:shadow-md`}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <h3 className="font-semibold text-lg">{categoryName}</h3>
+                              <Badge variant="outline" className="bg-white/50">
+                                {filteredPermissions.length} permission{filteredPermissions.length !== 1 ? 's' : ''}
+                              </Badge>
+                            </div>
+                            {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
                           </div>
-                        </div>
-                      </div>
-                      <div>
-                        <h5 className="font-semibold mb-3 text-lg">Role Permissions:</h5>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {rolePermissions.map((permission) => (
-                            <div key={permission.key} className="flex items-start gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg border">
-                              <Check className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
-                              <div>
-                                <span className="font-medium">{permission.label}</span>
-                                {permission.critical && (
-                                  <div className="flex items-center gap-1 mt-1">
-                                    <AlertTriangle className="h-3 w-3 text-red-500" />
-                                    <span className="text-xs text-red-600 font-medium">Critical</span>
+                        </button>
+                      </CollapsibleTrigger>
+                      
+                      <CollapsibleContent className="mt-2">
+                        <div className={`border-2 border-t-0 rounded-b-lg ${categoryData.color} p-4 space-y-3`}>
+                          {filteredPermissions.map((permission) => (
+                            <div key={permission.key} className="bg-white/80 dark:bg-gray-800/80 rounded-lg p-3 border">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <span className="font-medium">{permission.label}</span>
+                                    <Tooltip>
+                                      <TooltipTrigger>
+                                        <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                                      </TooltipTrigger>
+                                      <TooltipContent className="max-w-xs">
+                                        <p>{permission.tooltip}</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                    {permission.critical && (
+                                      <Badge variant="destructive" className="text-xs">Critical</Badge>
+                                    )}
                                   </div>
-                                )}
+                                  
+                                  {/* Role Permission Grid */}
+                                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                    {COMMUNITY_ROLES.sort((a, b) => a.level - b.level).map((role) => {
+                                      const hasPermission = role.permissions.includes(permission.key);
+                                      const isHighlighted = selectedMatrixRole === role.name;
+                                      const Icon = role.icon;
+                                      
+                                      return (
+                                        <div
+                                          key={role.name}
+                                          className={`flex flex-col items-center p-2 rounded-lg border transition-all ${
+                                            isHighlighted
+                                              ? hasPermission
+                                                ? 'bg-green-100 border-green-300 shadow-lg'
+                                                : 'bg-red-100 border-red-300 shadow-lg'
+                                              : hasPermission
+                                              ? 'bg-green-50 border-green-200'
+                                              : 'bg-gray-50 border-gray-200'
+                                          }`}
+                                        >
+                                          <Icon className="h-3 w-3 mb-1" />
+                                          <div className="text-xs text-center font-medium">L{role.level}</div>
+                                          {hasPermission ? (
+                                            <Check className="h-3 w-3 text-green-600" />
+                                          ) : (
+                                            <X className="h-3 w-3 text-gray-400" />
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           ))}
                         </div>
-                      </div>
-                    </div>
+                      </CollapsibleContent>
+                    </Collapsible>
                   );
-                })()}
+                })}
               </div>
-            )}
+            </TooltipProvider>
 
-            <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2 bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <span>
-                <strong>Usage:</strong> Click column headers to highlight roles. Critical permissions marked with ⚠️ require careful consideration.
-                Church Administrator (Level 1) has the highest authority with full access to all features.
-              </span>
+            {/* Usage Instructions */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+              <div className="flex items-start gap-3">
+                <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-blue-800 dark:text-blue-200">
+                  <strong>How to use:</strong> Expand categories to view permissions. Hover over ⓘ icons for detailed descriptions. 
+                  Click role cards above to highlight their permissions. Use search and role filters to focus on specific areas.
+                </div>
+              </div>
             </div>
           </div>
         </DialogContent>
