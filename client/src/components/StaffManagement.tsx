@@ -542,7 +542,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {COMMUNITY_ROLES.map((role) => (
+                          {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).map((role) => (
                             <SelectItem key={role.name} value={role.name}>
                               {role.displayName}
                             </SelectItem>
@@ -590,7 +590,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
-                  {COMMUNITY_ROLES.map((role) => (
+                  {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).map((role) => (
                     <SelectItem key={role.name} value={role.name}>
                       {role.displayName} (L{role.level})
                     </SelectItem>
@@ -601,7 +601,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
 
             {/* Role Header Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-              {COMMUNITY_ROLES.sort((a, b) => a.level - b.level).map((role) => {
+              {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role) => {
                 const Icon = role.icon;
                 const isSelected = selectedMatrixRole === role.name;
                 const isFiltered = roleFilter && roleFilter !== role.name;
@@ -638,7 +638,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                       permission.label.toLowerCase().includes(searchFilter.toLowerCase()) ||
                       permission.tooltip.toLowerCase().includes(searchFilter.toLowerCase());
                     const matchesRole = !roleFilter || roleFilter === "all" || 
-                      COMMUNITY_ROLES.find(r => r.name === roleFilter)?.permissions.includes(permission.key);
+                      COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).find(r => r.name === roleFilter)?.permissions.includes(permission.key);
                     return matchesSearch && matchesRole;
                   });
 
@@ -695,7 +695,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                                   
                                   {/* Role Permission Grid */}
                                   <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                                    {COMMUNITY_ROLES.sort((a, b) => a.level - b.level).map((role) => {
+                                    {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role) => {
                                       const hasPermission = role.permissions.includes(permission.key);
                                       const isHighlighted = selectedMatrixRole === role.name;
                                       const Icon = role.icon;
