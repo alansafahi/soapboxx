@@ -589,7 +589,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                   <SelectValue placeholder="Filter by role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Roles</SelectItem>
+                  <SelectItem value="all">All Roles</SelectItem>
                   {COMMUNITY_ROLES.map((role) => (
                     <SelectItem key={role.name} value={role.name}>
                       {role.displayName} (L{role.level})
@@ -637,7 +637,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                     const matchesSearch = !searchFilter || 
                       permission.label.toLowerCase().includes(searchFilter.toLowerCase()) ||
                       permission.tooltip.toLowerCase().includes(searchFilter.toLowerCase());
-                    const matchesRole = !roleFilter || 
+                    const matchesRole = !roleFilter || roleFilter === "all" || 
                       COMMUNITY_ROLES.find(r => r.name === roleFilter)?.permissions.includes(permission.key);
                     return matchesSearch && matchesRole;
                   });
