@@ -31,10 +31,6 @@ export default function SocialFeedEMISelector({
     refetchOnWindowFocus: true,
   });
 
-  // Debug logging
-  console.log("SocialFeedEMISelector - All moods:", allMoods);
-  console.log("SocialFeedEMISelector - Categories found:", [...new Set(allMoods.map((m: any) => m.category))]);
-
   // Group moods by category manually like CheckInSystem does
   const moodsByCategory = allMoods.reduce((acc: Record<string, EnhancedMoodIndicator[]>, mood: EnhancedMoodIndicator) => {
     if (!acc[mood.category]) {
@@ -43,8 +39,6 @@ export default function SocialFeedEMISelector({
     acc[mood.category].push(mood);
     return acc;
   }, {});
-
-  console.log("SocialFeedEMISelector - Grouped categories:", Object.keys(moodsByCategory));
 
   const getSelectedMoodsData = (): EnhancedMoodIndicator[] => {
     const allMoods: EnhancedMoodIndicator[] = [];
@@ -112,7 +106,7 @@ export default function SocialFeedEMISelector({
         {compact ? (
           // Compact view for smaller spaces
           <div className="grid grid-cols-2 gap-2">
-            {categories.slice(0, 4).map((categoryName) => {
+            {categories.map((categoryName) => {
               const categoryMoods = moodsByCategory[categoryName];
               const hasSelected = categoryMoods.some((mood: EnhancedMoodIndicator) => isMoodSelected(mood.id));
               

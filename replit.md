@@ -157,6 +157,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - MOOD SELECTION FIXED: Updated Virtual Check-In to use EMI IDs instead of string values with proper 5-mood selection limit and validation
   - CATEGORY CONSISTENCY: EMI system now has 6 proper mood/feeling categories (Emotional Well-being: 13, Faith & Worship: 5, Growth & Transformation: 4, Life Circumstances: 11, Seeking Support: 6, Spiritual States: 7)
   - CACHE REFRESH IMPLEMENTED: Updated SocialFeedEMISelector to force fresh data retrieval eliminating stale cache showing old "Daily Checkin" category
+  - COMPACT VIEW LIMIT REMOVED: Fixed SocialFeedEMISelector limiting display to only 4 categories by removing categories.slice(0, 4) restriction in compact mode
 - July 28, 2025: ENHANCED MOOD INDICATORS (EMI) SYSTEM FULLY OPERATIONAL - Successfully implemented comprehensive centralized mood tracking system for Reading Plans, Social Feed, and Daily Checkins
   - EMI SCHEMA INTEGRATION: Updated shared/schema.ts with comprehensive enhancedMoodIndicators table definitions, types, and Zod validation schemas
   - EMI STORAGE LAYER: Added complete CRUD operations (getEnhancedMoodIndicators, getEnhancedMoodIndicatorsByCategory, createEnhancedMoodIndicator, updateEnhancedMoodIndicator, deleteEnhancedMoodIndicator) in server/storage.ts
