@@ -63,6 +63,7 @@ import { ContentModerationStatus, HiddenContentPlaceholder } from './content-mod
 import { CommentConfirmationDialog } from './CommentConfirmationDialog';
 import { CommentDialog } from './CommentDialog';
 import SocialFeedEMISelector from './SocialFeedEMISelector';
+import EMIAwareRecommendations from './EMIAwareRecommendations';
 
 interface FeedPost {
   id: number;
@@ -702,6 +703,16 @@ export default function SocialFeed() {
                 compact={true}
               />
             </div>
+
+            {/* EMI-Aware AI Recommendations */}
+            {selectedMoods.length > 0 && (
+              <EMIAwareRecommendations
+                selectedMoodIds={selectedMoods}
+                emiCategories={['Emotional Well-being', 'Spiritual States', 'Faith & Worship', 'Growth & Transformation']}
+                isVisible={true}
+                compact={true}
+              />
+            )}
 
             {/* Linked Verse Display */}
             {linkedVerse && (

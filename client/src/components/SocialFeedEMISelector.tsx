@@ -24,6 +24,7 @@ export default function SocialFeedEMISelector({
   
   // Debug: Component mount
   console.log("SocialFeedEMISelector mounted, compact:", compact);
+  console.log("SocialFeedEMISelector selectedMoods:", selectedMoods);
 
   // Fetch mood indicators by category - use same endpoint as CheckInSystem
   const { data: allMoods = [], isLoading } = useQuery<EnhancedMoodIndicator[]>({

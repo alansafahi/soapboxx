@@ -2778,6 +2778,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // EMI-aware AI recommendations endpoint
+  app.post('/api/ai/emi-recommendations', isAuthenticated, async (req: any, res) => {
+    try {
+      const { selectedMoodIds, emiCategories } = req.body;
+      const userId = req.session.userId;
+
+      if (!selectedMoodIds || !Array.isArray(selectedMoodIds) || selectedMoodIds.length === 0) {
+        return res.status(400).json({ message: 'Selected mood IDs are required' });
+      }
+
+      if (!emiCategories || !Array.isArray(emiCategories) || emiCategories.length === 0) {
+        return res.status(400).json({ message: 'EMI categories are required' });
+      }
+
+      // Import AI personalization service
+      const { AIPersonalizationService } = await import('./ai-personalization');
+      const aiService = new AIPersonalizationService();
+
+      // Generate EMI-based recommendations
+      const recommendations = await aiService.generateEMIBasedRecommendations(
+        userId,
+        selectedMoodIds,
+        emiCategories
+      );
+
+      res.json(recommendations);
+    } catch (error) {
+      console.error('EMI recommendations error:', error);
+      res.status(500).json({ 
+        message: 'Failed to generate EMI-based recommendations',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // REST-only messaging - no WebSocket dependencies

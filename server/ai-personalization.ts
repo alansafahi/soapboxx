@@ -36,11 +36,12 @@ export interface MoodBasedContent {
 
 export class AIPersonalizationService {
   
-  private buildMoodBasedPrompt(mood: string, moodScore: number, notes?: string, userId?: string): string {
+  private buildMoodBasedPrompt(mood: string, moodScore: number, notes?: string, userId?: string, emiCategories?: string[]): string {
     return `
 User's current emotional state:
-- Mood: ${mood}
+- Primary Mood: ${mood}
 - Mood intensity (1-5): ${moodScore}
+- EMI Categories: ${emiCategories ? emiCategories.join(', ') : 'Not specified'}
 - Additional notes: ${notes || 'None provided'}
 
 Please provide personalized spiritual content recommendations in JSON format:
@@ -119,6 +120,110 @@ Provide 3-5 recommendations that offer comfort, encouragement, and biblical wisd
       moodScore,
       recommendations: fallbackContent
     };
+  }
+
+  async generateEMIBasedRecommendations(userId: string, selectedMoodIds: number[], emiCategories: string[]): Promise<ContentRecommendation[]> {
+    try {
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      
+      const prompt = `
+Based on the user's Enhanced Mood Indicators (EMI) selection, provide personalized spiritual content recommendations:
+
+User's Current EMI State:
+- Selected Mood IDs: ${selectedMoodIds.join(', ')}
+- Active EMI Categories: ${emiCategories.join(', ')}
+- Emotional Context: User has selected multiple moods across different spiritual and emotional categories
+
+Generate 4-6 contextual recommendations that address their current emotional and spiritual state:
+
+1. **Bible Reading**: Select relevant scripture passages that speak to their current feelings
+2. **Prayer Scripts**: Provide personalized prayer templates addressing their emotional needs
+3. **Devotional Content**: Suggest reflective content matching their spiritual state
+4. **Practical Applications**: Actionable steps they can take based on their current mood
+
+Respond in JSON format:
+{
+  "recommendations": [
+    {
+      "type": "verse|prayer|devotional|meditation|application",
+      "title": "Clear, encouraging title",
+      "content": "Full content or scripture text",
+      "reason": "Why this addresses their EMI selection",
+      "confidence": 0.0-1.0,
+      "priority": 1-5,
+      "estimatedReadTime": minutes,
+      "difficulty": "beginner|intermediate|advanced",
+      "topics": ["relevant", "topics"],
+      "scriptureReferences": ["if applicable"],
+      "actionable": true/false,
+      "emiAlignment": ["matching", "categories"]
+    }
+  ]
+}
+
+Focus on providing hope, comfort, guidance, and spiritual growth opportunities that directly respond to their emotional indicators.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a compassionate spiritual AI that provides personalized biblical guidance based on Enhanced Mood Indicators. Always provide relevant, biblically sound, and emotionally supportive recommendations."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 1500
+      });
+
+      const aiResponse = JSON.parse(response.choices[0].message.content || '{}');
+      return aiResponse.recommendations || [];
+      
+    } catch (error) {
+      // Fallback to default recommendations
+      return this.generateDefaultEMIRecommendations(emiCategories);
+    }
+  }
+
+  private generateDefaultEMIRecommendations(emiCategories: string[]): ContentRecommendation[] {
+    const defaultRecs: ContentRecommendation[] = [];
+    
+    if (emiCategories.includes('Spiritual States')) {
+      defaultRecs.push({
+        type: 'verse',
+        title: 'Growing in Faith',
+        content: '"Trust in the Lord with all your heart and lean not on your own understanding." - Proverbs 3:5',
+        reason: 'Encouragement for your spiritual journey',
+        confidence: 0.8,
+        priority: 1,
+        estimatedReadTime: 2,
+        difficulty: 'beginner',
+        topics: ['faith', 'trust', 'guidance'],
+        scriptureReferences: ['Proverbs 3:5'],
+        actionable: true
+      });
+    }
+    
+    if (emiCategories.includes('Emotional Well-being')) {
+      defaultRecs.push({
+        type: 'prayer',
+        title: 'Prayer for Emotional Peace',
+        content: 'Lord, help me find peace in Your presence. Calm my emotions and guide my heart toward Your love.',
+        reason: 'Support for emotional balance',
+        confidence: 0.8,
+        priority: 2,
+        estimatedReadTime: 1,
+        difficulty: 'beginner',
+        topics: ['peace', 'emotions', 'comfort'],
+        actionable: true
+      });
+    }
+    
+    return defaultRecs;
   }
 
   async generateMoodBasedContent(userId: string, mood: string, moodScore: number, notes?: string): Promise<MoodBasedContent> {
