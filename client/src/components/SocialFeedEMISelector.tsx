@@ -74,16 +74,22 @@ export default function SocialFeedEMISelector({
     );
   }
 
-  const categories = Object.keys(moodsByCategory);
+  let categories = Object.keys(moodsByCategory);
+  
+  // TEMPORARY TEST: Remove "Spiritual States" to see if another category appears
+  categories = categories.filter(cat => cat !== "Spiritual States");
+  
   const selectedMoodsData = getSelectedMoodsData();
 
-  // Temporary debugging - will remove after confirming fix
-  if (categories.length !== 6) {
-    console.error("EMI Categories Issue - Expected 6, got:", categories.length);
-    console.error("Categories received:", categories);
-    console.error("Raw mood data length:", allMoods.length);
-    console.error("First few moods:", allMoods.slice(0, 5));
-  }
+  // Enhanced debugging
+  console.error("🔍 EMI DEBUG:");
+  console.error("📊 Raw mood count:", allMoods.length);
+  console.error("📁 Total categories found:", Object.keys(moodsByCategory).length);
+  console.error("📋 All categories:", Object.keys(moodsByCategory));
+  console.error("✂️ After filtering out Spiritual States:", categories);
+  console.error("📈 Category counts:", Object.fromEntries(
+    Object.entries(moodsByCategory).map(([cat, moods]) => [cat, moods.length])
+  ));
 
   return (
     <div className="space-y-4">
@@ -127,8 +133,8 @@ export default function SocialFeedEMISelector({
         </div>
 
         {compact ? (
-          // Compact view for smaller spaces - show ALL 6 categories in 2x3 grid
-          <div className="grid grid-cols-2 gap-2">
+          // Compact view for smaller spaces - test with 2x3 grid (should show 6 but was showing 4)
+          <div className="grid grid-cols-2 gap-2 max-h-none overflow-visible">
             {categories.sort().map((categoryName) => {
               const categoryMoods = moodsByCategory[categoryName];
               const hasSelected = categoryMoods.some((mood: EnhancedMoodIndicator) => isMoodSelected(mood.id));
