@@ -1384,6 +1384,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Accept staff invitation
+  app.post('/api/auth/accept-staff-invitation', isAuthenticated, async (req: any, res) => {
+    try {
+      const { communityId, role } = req.body;
+      const userId = req.session.userId;
+      
+      console.log('Staff acceptance attempt:', { communityId, role, userId, hasSession: !!req.session.userId });
+
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      if (!communityId || !role) {
+        return res.status(400).json({ message: 'Community ID and role are required' });
+      }
+
+      // Check if user has a pending staff invitation (inactive role)
+      const result = await pool.query(
+        'SELECT * FROM user_churches WHERE user_id = $1 AND church_id = $2 AND role = $3 AND is_active = false',
+        [userId, communityId, role]
+      );
+
+      console.log('Existing role check:', { userId, communityId, requestedRole: role, found: result.rows.length > 0 });
+
+      if (result.rows.length === 0) {
+        console.log('No pending staff invitation found for user in community');
+        return res.status(404).json({ message: 'No pending staff invitation found for this role' });
+      }
+
+      // Activate the staff position
+      await storage.activateStaffPosition(userId, communityId, role);
+
+      // Get community name for response
+      const community = await storage.getCommunity(communityId);
+      console.log('Staff position accepted successfully:', { userId, communityId, role, communityName: community?.name });
+
+      res.json({
+        success: true,
+        message: 'Staff position accepted successfully',
+        title: role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
+        community: community?.name || 'Community'
+      });
+    } catch (error) {
+      console.error('Error accepting staff invitation:', error);
+      res.status(500).json({ message: 'Failed to accept staff invitation', error: (error as Error).message });
+    }
+  });
+
   // Tour completion routes (STANDARDIZED)
   app.get('/api/user-tours/:userId/completion/:tourType', async (req, res) => {
     try {
