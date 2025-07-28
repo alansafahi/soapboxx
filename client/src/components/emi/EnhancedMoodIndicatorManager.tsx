@@ -277,7 +277,8 @@ export default function EnhancedMoodIndicatorManager({
                               <SelectItem value="Life Circumstances">Life Circumstances</SelectItem>
                               <SelectItem value="Faith & Worship">Faith & Worship</SelectItem>
                               <SelectItem value="Growth & Transformation">Growth & Transformation</SelectItem>
-                              <SelectItem value="Emotional & Spiritual Support">Emotional & Spiritual Support</SelectItem>
+                              <SelectItem value="Seeking Support">Seeking Support</SelectItem>
+                              <SelectItem value="Daily Checkin">Daily Checkin</SelectItem>
                             </SelectContent>
                           </Select>
                         </FormControl>
