@@ -636,7 +636,9 @@ export default function SocialFeed() {
   const toggleMoodSelection = (moodId: number) => {
     setSelectedMoods(prev => {
       if (prev.includes(moodId)) {
-        return prev.filter(id => id !== moodId);
+        const newMoods = prev.filter(id => id !== moodId);
+        console.log('Social Feed: Removed mood', moodId, 'new moods:', newMoods);
+        return newMoods;
       } else {
         // Limit to 3 moods maximum for social posts
         if (prev.length >= 3) {
@@ -647,7 +649,9 @@ export default function SocialFeed() {
           });
           return prev;
         }
-        return [...prev, moodId];
+        const newMoods = [...prev, moodId];
+        console.log('Social Feed: Added mood', moodId, 'new moods:', newMoods);
+        return newMoods;
       }
     });
   };
@@ -715,11 +719,9 @@ export default function SocialFeed() {
             )}
             
             {/* Debug: Show selected moods count */}
-            {selectedMoods.length > 0 && (
-              <div className="text-xs text-gray-500 mb-2">
-                DEBUG: {selectedMoods.length} moods selected: {selectedMoods.join(', ')}
-              </div>
-            )}
+            <div className="text-xs text-gray-500 mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
+              DEBUG: Selected moods count: {selectedMoods.length} | Moods: [{selectedMoods.join(', ')}] | Component should show: {selectedMoods.length > 0 ? 'YES' : 'NO'}
+            </div>
 
             {/* Linked Verse Display */}
             {linkedVerse && (
