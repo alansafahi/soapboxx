@@ -628,134 +628,94 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
               })}
             </div>
 
-            {/* Collapsible Permission Categories */}
+            {/* Original Single Table Design */}
             <TooltipProvider>
-              <div className="space-y-3 max-h-[50vh] overflow-auto">
-                {Object.entries(PERMISSION_CATEGORIES).map(([categoryName, categoryData]) => {
-                  const isExpanded = expandedCategories.has(categoryName);
-                  const filteredPermissions = categoryData.permissions.filter(permission => {
-                    const matchesSearch = !searchFilter || 
-                      permission.label.toLowerCase().includes(searchFilter.toLowerCase()) ||
-                      permission.tooltip.toLowerCase().includes(searchFilter.toLowerCase());
-                    const matchesRole = !roleFilter || roleFilter === "all" || 
-                      COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).find(r => r.name === roleFilter)?.permissions.includes(permission.key);
-                    return matchesSearch && matchesRole;
-                  });
-
-                  if (filteredPermissions.length === 0 && (searchFilter || roleFilter)) return null;
-
-                  return (
-                    <Collapsible
-                      key={categoryName}
-                      open={isExpanded}
-                      onOpenChange={(open) => {
-                        const newExpanded = new Set(expandedCategories);
-                        if (open) {
-                          newExpanded.add(categoryName);
-                        } else {
-                          newExpanded.delete(categoryName);
-                        }
-                        setExpandedCategories(newExpanded);
-                      }}
-                    >
-                      <CollapsibleTrigger asChild>
-                        <button className={`w-full p-4 rounded-lg border-2 transition-all ${categoryData.headerColor} ${categoryData.color} hover:shadow-md`}>
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <h3 className="font-semibold text-lg">{categoryName}</h3>
-                              <Badge variant="outline" className="bg-white/50">
-                                {filteredPermissions.length} permission{filteredPermissions.length !== 1 ? 's' : ''}
-                              </Badge>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow max-h-[60vh] overflow-auto">
+                <table className="w-full">
+                  <thead className="sticky top-0 bg-white dark:bg-gray-800">
+                    <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <th className="text-left p-3 font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-800">Permission</th>
+                      {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role) => {
+                        const Icon = role.icon;
+                        const isHighlighted = selectedMatrixRole === role.name;
+                        return (
+                          <th
+                            key={role.name}
+                            className={`text-center p-2 cursor-pointer transition-all min-w-[80px] bg-white dark:bg-gray-800 ${
+                              isHighlighted 
+                                ? 'bg-blue-100 dark:bg-blue-900' 
+                                : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
+                            onClick={() => setSelectedMatrixRole(selectedMatrixRole === role.name ? null : role.name)}
+                          >
+                            <div className="flex flex-col items-center gap-1">
+                              <Icon className="h-4 w-4" />
+                              <span className="text-xs font-medium leading-tight">{role.displayName}</span>
+                              <span className="text-xs text-gray-500">L{role.level}</span>
                             </div>
-                            {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-                          </div>
-                        </button>
-                      </CollapsibleTrigger>
-                      
-                      <CollapsibleContent className="mt-2">
-                        <div className={`border-2 border-t-0 rounded-b-lg ${categoryData.color} p-4`}>
-                          {/* Table with Original Clean Style */}
-                          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-                            <div className="overflow-x-auto">
-                              <table className="w-full">
-                                <thead>
-                                  <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                                    <th className="text-left p-3 font-medium text-gray-900 dark:text-gray-100">Permission</th>
-                                    {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role) => {
-                                      const Icon = role.icon;
-                                      const isHighlighted = selectedMatrixRole === role.name;
-                                      return (
-                                        <th
-                                          key={role.name}
-                                          className={`text-center p-2 cursor-pointer transition-all min-w-[80px] ${
-                                            isHighlighted 
-                                              ? 'bg-blue-100 dark:bg-blue-900' 
-                                              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                                          }`}
-                                          onClick={() => setSelectedMatrixRole(selectedMatrixRole === role.name ? null : role.name)}
-                                        >
-                                          <div className="flex flex-col items-center gap-1">
-                                            <Icon className="h-4 w-4" />
-                                            <span className="text-xs font-medium leading-tight">{role.displayName}</span>
-                                            <span className="text-xs text-gray-500">L{role.level}</span>
-                                          </div>
-                                        </th>
-                                      );
-                                    })}
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {filteredPermissions.map((permission, index) => (
-                                    <tr key={permission.key} className={`border-b border-gray-100 dark:border-gray-700 ${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'}`}>
-                                      <td className="p-3">
-                                        <div className="flex items-center gap-2">
-                                          <span className="font-medium text-gray-900 dark:text-gray-100">{permission.label}</span>
-                                          <Tooltip>
-                                            <TooltipTrigger>
-                                              <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help" />
-                                            </TooltipTrigger>
-                                            <TooltipContent className="max-w-xs">
-                                              <p>{permission.tooltip}</p>
-                                            </TooltipContent>
-                                          </Tooltip>
-                                          {permission.critical && (
-                                            <Badge variant="destructive" className="text-xs">Critical</Badge>
-                                          )}
-                                        </div>
-                                      </td>
-                                      {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role) => {
-                                        const hasPermission = role.permissions.includes(permission.key);
-                                        const isHighlighted = selectedMatrixRole === role.name;
-                                        return (
-                                          <td
-                                            key={role.name}
-                                            className={`text-center p-3 ${
-                                              isHighlighted 
-                                                ? hasPermission 
-                                                  ? 'bg-green-100 dark:bg-green-900' 
-                                                  : 'bg-red-100 dark:bg-red-900'
-                                                : ''
-                                            }`}
-                                          >
-                                            {hasPermission ? (
-                                              <Check className="h-5 w-5 text-green-600 mx-auto" />
-                                            ) : (
-                                              <X className="h-5 w-5 text-gray-400 mx-auto" />
-                                            )}
-                                          </td>
-                                        );
-                                      })}
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
+                          </th>
+                        );
+                      })}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(PERMISSION_CATEGORIES).map(([categoryName, categoryData]) => {
+                      const filteredPermissions = categoryData.permissions.filter(permission => {
+                        const matchesSearch = !searchFilter || 
+                          permission.label.toLowerCase().includes(searchFilter.toLowerCase()) ||
+                          permission.tooltip.toLowerCase().includes(searchFilter.toLowerCase());
+                        const matchesRole = !roleFilter || roleFilter === "all" || 
+                          COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).find(r => r.name === roleFilter)?.permissions.includes(permission.key);
+                        return matchesSearch && matchesRole;
+                      });
+
+                      if (filteredPermissions.length === 0 && (searchFilter || roleFilter)) return null;
+
+                      return filteredPermissions.map((permission, index) => (
+                        <tr key={permission.key} className={`border-b border-gray-100 dark:border-gray-700 ${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'}`}>
+                          <td className="p-3">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-gray-900 dark:text-gray-100">{permission.label}</span>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                                </TooltipTrigger>
+                                <TooltipContent className="max-w-xs">
+                                  <p>{permission.tooltip}</p>
+                                </TooltipContent>
+                              </Tooltip>
+                              {permission.critical && (
+                                <Badge variant="destructive" className="text-xs">Critical</Badge>
+                              )}
                             </div>
-                          </div>
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  );
-                })}
+                          </td>
+                          {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role) => {
+                            const hasPermission = role.permissions.includes(permission.key);
+                            const isHighlighted = selectedMatrixRole === role.name;
+                            return (
+                              <td
+                                key={role.name}
+                                className={`text-center p-3 ${
+                                  isHighlighted 
+                                    ? hasPermission 
+                                      ? 'bg-green-100 dark:bg-green-900' 
+                                      : 'bg-red-100 dark:bg-red-900'
+                                    : ''
+                                }`}
+                              >
+                                {hasPermission ? (
+                                  <Check className="h-5 w-5 text-green-600 mx-auto" />
+                                ) : (
+                                  <X className="h-5 w-5 text-gray-400 mx-auto" />
+                                )}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      ));
+                    }).flat()}
+                  </tbody>
+                </table>
               </div>
             </TooltipProvider>
 
@@ -764,8 +724,8 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
               <div className="flex items-start gap-3">
                 <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div className="text-sm text-blue-800 dark:text-blue-200">
-                  <strong>How to use:</strong> Expand categories to view permissions. Hover over ⓘ icons for detailed descriptions. 
-                  Click role cards above to highlight their permissions. Use search and role filters to focus on specific areas.
+                  <strong>How to use:</strong> View all permissions in the single table. Hover over ⓘ icons for detailed descriptions. 
+                  Click role headers to highlight their permissions. Use search and role filters to focus on specific areas.
                 </div>
               </div>
             </div>
