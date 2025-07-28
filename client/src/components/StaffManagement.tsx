@@ -38,7 +38,11 @@ import {
   Info,
   Star,
   Filter,
-  Search
+  Search,
+  Wrench,
+  Calculator,
+  Church,
+  Building2
 } from "lucide-react";
 
 interface StaffMember {
@@ -157,7 +161,7 @@ const getCommunityRoles = (communityType: string = "church") => {
       description: "Handles technical and administrative support tasks",
       level: 2,
       color: "bg-gray-100 text-gray-800",
-      icon: Settings,
+      icon: Wrench,
       communityTypes: ["church"],
       permissions: [
         "manage_settings", "access_analytics", "manage_facilities", "church_directory_updates"
@@ -181,7 +185,7 @@ const getCommunityRoles = (communityType: string = "church") => {
       description: "Specialized role for donations and financial reporting",
       level: 3.5,
       color: "bg-emerald-100 text-emerald-800",
-      icon: DollarSign,
+      icon: Calculator,
       communityTypes: ["church"],
       permissions: [
         "access_finances", "manage_finances"
@@ -193,7 +197,7 @@ const getCommunityRoles = (communityType: string = "church") => {
       description: "Oversees one campus in a multi-campus church",
       level: 4.5,
       color: "bg-teal-100 text-teal-800",
-      icon: MapPin,
+      icon: Church,
       communityTypes: ["church"],
       permissions: [
         "manage_staff", "approve_content", "moderate_prayers", "manage_events", 
@@ -207,7 +211,7 @@ const getCommunityRoles = (communityType: string = "church") => {
       description: "Mega-church administrator overseeing multiple campuses",
       level: 6.5,
       color: "bg-violet-100 text-violet-800",
-      icon: Crown,
+      icon: Building2,
       communityTypes: ["church"],
       permissions: [
         "manage_staff", "assign_roles", "approve_content", "moderate_prayers", 
