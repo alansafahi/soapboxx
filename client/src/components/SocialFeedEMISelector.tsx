@@ -40,6 +40,15 @@ export default function SocialFeedEMISelector({
     return acc;
   }, {});
 
+  // Debug logging
+  if (allMoods.length > 0) {
+    console.log("SocialFeedEMI Debug - Raw moods count:", allMoods.length);
+    console.log("SocialFeedEMI Debug - Categories:", Object.keys(moodsByCategory));
+    console.log("SocialFeedEMI Debug - Category counts:", Object.fromEntries(
+      Object.entries(moodsByCategory).map(([cat, moods]) => [cat, moods.length])
+    ));
+  }
+
 
 
   const getSelectedMoodsData = (): EnhancedMoodIndicator[] => {
