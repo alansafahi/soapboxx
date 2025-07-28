@@ -14686,9 +14686,30 @@ Please provide suggestions for the missing or incomplete sections.`
   // Get volunteer opportunities
   app.get('/api/volunteer-opportunities', async (req: any, res) => {
     try {
-      const opportunities = await db.select().from(schema.volunteerOpportunities);
-      res.json(opportunities);
+      const opportunities = await db.execute(sql`
+        SELECT 
+          id,
+          title,
+          description,
+          ministry,
+          category,
+          location,
+          start_date as startDate,
+          end_date as endDate,
+          time_commitment as timeCommitment,
+          status,
+          volunteers_needed as volunteersNeeded,
+          volunteers_registered as volunteersRegistered,
+          background_check_required as backgroundCheckRequired,
+          spiritual_gifts as spiritualGifts,
+          required_skills as requiredSkills,
+          created_at as createdAt
+        FROM volunteer_opportunities 
+        ORDER BY created_at DESC
+      `);
+      res.json(opportunities.rows);
     } catch (error) {
+      console.error('Opportunities fetch error:', error);
       res.status(500).json({ error: 'Failed to fetch opportunities' });
     }
   });
