@@ -58,10 +58,14 @@ export default function EMIAwareRecommendations({
 }: EMIAwareRecommendationsProps) {
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
 
+  // Debug logging
+  console.log('EMIAwareRecommendations props:', { selectedMoodIds, emiCategories, isVisible, compact });
+
   // Only fetch recommendations when EMI moods are selected
   const { data: recommendations = [], isLoading, error } = useQuery<ContentRecommendation[]>({
     queryKey: ['/api/ai/emi-recommendations', selectedMoodIds.join(','), emiCategories.join(',')],
     queryFn: async () => {
+      console.log('EMI Recommendations API call with:', { selectedMoodIds, emiCategories });
       if (selectedMoodIds.length === 0) return [];
       
       return apiRequest('POST', '/api/ai/emi-recommendations', {
@@ -73,7 +77,15 @@ export default function EMIAwareRecommendations({
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  console.log('EMI Recommendations state:', { 
+    selectedMoodCount: selectedMoodIds.length, 
+    isLoading, 
+    error: error?.message, 
+    recommendationsCount: recommendations.length 
+  });
+
   if (!isVisible || selectedMoodIds.length === 0) {
+    console.log('EMI Recommendations not visible:', { isVisible, selectedMoodCount: selectedMoodIds.length });
     return null;
   }
 

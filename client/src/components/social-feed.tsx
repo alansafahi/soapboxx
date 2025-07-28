@@ -713,6 +713,13 @@ export default function SocialFeed() {
                 compact={true}
               />
             )}
+            
+            {/* Debug: Show selected moods count */}
+            {selectedMoods.length > 0 && (
+              <div className="text-xs text-gray-500 mb-2">
+                DEBUG: {selectedMoods.length} moods selected: {selectedMoods.join(', ')}
+              </div>
+            )}
 
             {/* Linked Verse Display */}
             {linkedVerse && (
