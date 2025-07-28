@@ -40,6 +40,11 @@ export default function SocialFeedEMISelector({
     return acc;
   }, {});
 
+  // Debug: Check what categories we actually have
+  console.log("SocialFeedEMISelector - All categories from data:", Object.keys(moodsByCategory));
+  console.log("SocialFeedEMISelector - Expected categories: Growth & Transformation, Faith & Worship");
+  console.log("SocialFeedEMISelector - Raw mood data sample:", allMoods.slice(0, 5));
+
   const getSelectedMoodsData = (): EnhancedMoodIndicator[] => {
     const allMoods: EnhancedMoodIndicator[] = [];
     Object.values(moodsByCategory).forEach((categoryMoods: any) => {
