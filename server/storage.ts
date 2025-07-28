@@ -5587,6 +5587,93 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Prayer request operations
+  async getPrayerRequests(churchId?: number): Promise<PrayerRequest[]> {
+    try {
+      let query = `
+        SELECT 
+          pr.id,
+          pr.author_id,
+          pr.community_id,
+          pr.title,
+          pr.content,
+          pr.is_anonymous,
+          pr.is_answered,
+          pr.answered_at,
+          pr.prayer_count,
+          pr.is_public,
+          pr.category,
+          pr.status,
+          pr.moderation_notes,
+          pr.assigned_to,
+          pr.priority,
+          pr.follow_up_date,
+          pr.last_follow_up_at,
+          pr.is_urgent,
+          pr.tags,
+          pr.attachment_url,
+          pr.expires_at,
+          pr.expired_at,
+          pr.created_at,
+          pr.updated_at,
+          u.email as author_email,
+          u.first_name as author_first_name,
+          u.last_name as author_last_name,
+          u.profile_image_url as author_profile_image_url
+        FROM prayer_requests pr
+        LEFT JOIN users u ON pr.author_id = u.id
+        WHERE pr.is_public = true
+        AND (pr.expires_at IS NULL OR pr.expires_at > NOW())
+        AND (pr.expired_at IS NULL)
+      `;
+
+      const params: any[] = [];
+      
+      if (churchId) {
+        query += ' AND pr.community_id = $1';
+        params.push(churchId);
+      }
+
+      query += ' ORDER BY pr.created_at DESC';
+
+      const result = await pool.query(query, params);
+
+      return result.rows.map(row => ({
+        id: row.id,
+        authorId: row.author_id,
+        communityId: row.community_id,
+        title: row.title,
+        content: row.content,
+        isAnonymous: row.is_anonymous,
+        isAnswered: row.is_answered,
+        answeredAt: row.answered_at,
+        prayerCount: row.prayer_count || 0,
+        isPublic: row.is_public,
+        category: row.category,
+        status: row.status,
+        moderationNotes: row.moderation_notes,
+        assignedTo: row.assigned_to,
+        priority: row.priority,
+        followUpDate: row.follow_up_date,
+        lastFollowUpAt: row.last_follow_up_at,
+        isUrgent: row.is_urgent,
+        tags: row.tags,
+        attachmentUrl: row.attachment_url,
+        expiresAt: row.expires_at,
+        expiredAt: row.expired_at,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        authorEmail: row.author_email,
+        authorFirstName: row.author_first_name,
+        authorLastName: row.author_last_name,
+        authorProfileImageUrl: row.author_profile_image_url
+      }));
+    } catch (error) {
+      console.error('Error fetching prayer requests:', error);
+      return [];
+    }
+  }
+
   // Staff Management Operations
   async getStaffMembers(communityId: number): Promise<any[]> {
     try {
