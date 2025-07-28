@@ -60,10 +60,75 @@ interface Role {
 const getCommunityRoles = (communityType: string = "church") => {
   const baseRoles = [
     {
+      name: "ministry_leader",
+      displayName: "Ministry Leader",
+      description: "Leader of specific ministry departments",
+      level: 1,
+      color: "bg-indigo-100 text-indigo-800",
+      icon: Heart,
+      communityTypes: ["church", "ministry"],
+      permissions: [
+        "manage_events", "create_content", "moderate_prayers",
+        "send_communications", "manage_volunteers"
+      ]
+    },
+    {
+      name: "worship_leader",
+      displayName: "Worship Leader",
+      description: "Oversees music ministry and worship services",
+      level: 2,
+      color: "bg-orange-100 text-orange-800",
+      icon: Music,
+      communityTypes: ["church"],
+      permissions: [
+        "manage_events", "upload_music", "create_content",
+        "manage_volunteers", "access_analytics"
+      ]
+    },
+    {
+      name: "youth_pastor",
+      displayName: "Youth Pastor",
+      description: "Leader of youth ministry programs and activities",
+      level: 3,
+      color: "bg-green-100 text-green-800",
+      icon: Users,
+      communityTypes: ["church"],
+      permissions: [
+        "manage_events", "moderate_prayers", "create_content", 
+        "send_communications", "access_analytics", "manage_volunteers"
+      ]
+    },
+    {
+      name: "associate_pastor",
+      displayName: "Associate Pastor",
+      description: "Assistant pastoral role with ministry leadership responsibilities",
+      level: 4,
+      color: "bg-blue-100 text-blue-800",
+      icon: Shield,
+      communityTypes: ["church"],
+      permissions: [
+        "approve_content", "moderate_prayers", "manage_events", 
+        "access_analytics", "send_communications", "manage_members"
+      ]
+    },
+    {
+      name: "lead_pastor",
+      displayName: "Lead Pastor",
+      description: "Primary spiritual leader with full ministry access",
+      level: 5,
+      color: "bg-purple-100 text-purple-800",
+      icon: Crown,
+      communityTypes: ["church"],
+      permissions: [
+        "manage_staff", "approve_content", "moderate_prayers", "manage_events", 
+        "access_analytics", "send_communications", "manage_settings", "manage_members"
+      ]
+    },
+    {
       name: "church_admin",
       displayName: "Church Administrator", 
       description: "Highest administrative authority with full access",
-      level: 1,
+      level: 6,
       color: "bg-red-100 text-red-800",
       icon: Crown,
       communityTypes: ["church"],
@@ -74,75 +139,10 @@ const getCommunityRoles = (communityType: string = "church") => {
       ]
     },
     {
-      name: "lead_pastor",
-      displayName: "Lead Pastor",
-      description: "Primary spiritual leader with full ministry access",
-      level: 2,
-      color: "bg-purple-100 text-purple-800",
-      icon: Crown,
-      communityTypes: ["church"],
-      permissions: [
-        "manage_staff", "approve_content", "moderate_prayers", "manage_events", 
-        "access_analytics", "send_communications", "manage_settings", "manage_members"
-      ]
-    },
-    {
-      name: "associate_pastor",
-      displayName: "Associate Pastor",
-      description: "Assistant pastoral role with ministry leadership responsibilities",
-      level: 3,
-      color: "bg-blue-100 text-blue-800",
-      icon: Shield,
-      communityTypes: ["church"],
-      permissions: [
-        "approve_content", "moderate_prayers", "manage_events", 
-        "access_analytics", "send_communications", "manage_members"
-      ]
-    },
-    {
-      name: "youth_pastor",
-      displayName: "Youth Pastor",
-      description: "Leader of youth ministry programs and activities",
-      level: 4,
-      color: "bg-green-100 text-green-800",
-      icon: Users,
-      communityTypes: ["church"],
-      permissions: [
-        "manage_events", "moderate_prayers", "create_content", 
-        "send_communications", "access_analytics", "manage_volunteers"
-      ]
-    },
-    {
-      name: "worship_leader",
-      displayName: "Worship Leader",
-      description: "Oversees music ministry and worship services",
-      level: 4,
-      color: "bg-orange-100 text-orange-800",
-      icon: Music,
-      communityTypes: ["church"],
-      permissions: [
-        "manage_events", "upload_music", "create_content",
-        "manage_volunteers", "access_analytics"
-      ]
-    },
-    {
-      name: "ministry_leader",
-      displayName: "Ministry Leader",
-      description: "Leader of specific ministry departments",
-      level: 5,
-      color: "bg-indigo-100 text-indigo-800",
-      icon: Heart,
-      communityTypes: ["church", "ministry"],
-      permissions: [
-        "manage_events", "create_content", "moderate_prayers",
-        "send_communications", "manage_volunteers"
-      ]
-    },
-    {
       name: "administrator",
       displayName: "Administrator",
       description: "Handles administrative tasks and operations",
-      level: 6,
+      level: 2,
       color: "bg-gray-100 text-gray-800",
       icon: Settings,
       communityTypes: ["church", "ministry", "group"],
@@ -473,48 +473,49 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
 
       {/* Redesigned Permissions Matrix Dialog */}
       <Dialog open={showPermissionsMatrix} onOpenChange={setShowPermissionsMatrix}>
-        <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="w-[95vw] max-w-[95vw] h-[90vh] max-h-[90vh] p-2 sm:p-4">
+          <DialogHeader className="pb-2">
+            <DialogTitle className="text-lg sm:text-xl">
               {communityType.charAt(0).toUpperCase() + communityType.slice(1)} Role Permissions Matrix
             </DialogTitle>
-            <DialogDescription>
-              Click on any column header to highlight that role's permissions. This matrix shows roles available for {communityType} communities.
+            <DialogDescription className="text-sm">
+              Click on any column header to highlight that role's permissions. Roles ordered from Level 1 (lowest) to Level 6 (highest).
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4">
+          <div className="flex-1 overflow-hidden">
             {/* Enhanced Permissions Table */}
-            <div className="border rounded-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px]">
-                  <thead className="bg-gray-50 dark:bg-gray-800">
+            <div className="h-full border rounded-lg overflow-hidden bg-white dark:bg-gray-900">
+              <div className="h-full overflow-auto">
+                <table className="w-full text-xs sm:text-sm">
+                  <thead className="bg-gray-50 dark:bg-gray-800 sticky top-0 z-20">
                     <tr>
-                      <th className="text-left p-4 font-semibold min-w-[300px] sticky left-0 bg-gray-50 dark:bg-gray-800 z-10">
-                        Permission
+                      <th className="text-left p-2 sm:p-3 font-semibold w-32 sm:w-48 sticky left-0 bg-gray-50 dark:bg-gray-800 z-30 border-r">
+                        <div className="truncate">Permission</div>
                       </th>
-                      {COMMUNITY_ROLES.map((role) => {
+                      {COMMUNITY_ROLES.sort((a, b) => a.level - b.level).map((role) => {
                         const Icon = role.icon;
                         const isHighlighted = selectedMatrixRole === role.name;
                         return (
                           <th 
                             key={role.name}
                             onClick={() => setSelectedMatrixRole(isHighlighted ? null : role.name)}
-                            className={`text-center p-3 font-medium min-w-[120px] cursor-pointer transition-all duration-200 border-l-2 ${
+                            className={`text-center p-1 sm:p-2 font-medium w-16 sm:w-20 cursor-pointer transition-all duration-200 border-l-2 ${
                               isHighlighted 
-                                ? `${role.color} border-l-4 border-purple-500 shadow-lg transform scale-105` 
+                                ? `${role.color} border-l-4 border-purple-500 shadow-lg scale-105` 
                                 : `hover:${role.color} hover:shadow-md border-gray-200`
                             }`}
                           >
-                            <div className="flex flex-col items-center gap-2">
-                              <div className={`p-2 rounded-full ${isHighlighted ? 'bg-white shadow-md' : 'bg-white/50'}`}>
-                                <Icon className="h-5 w-5" />
+                            <div className="flex flex-col items-center gap-1">
+                              <div className={`p-1 rounded-full ${isHighlighted ? 'bg-white shadow-md' : 'bg-white/50'}`}>
+                                <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
                               </div>
-                              <div className="text-sm font-semibold leading-tight">
-                                {role.displayName}
+                              <div className="text-[10px] sm:text-xs font-semibold leading-tight text-center">
+                                <div className="hidden sm:block">{role.displayName}</div>
+                                <div className="sm:hidden">{role.displayName.split(' ')[0]}</div>
                               </div>
-                              <div className="text-xs opacity-75 bg-white/80 px-2 py-1 rounded-full">
-                                Level {role.level}
+                              <div className="text-[8px] sm:text-xs opacity-75 bg-white/80 px-1 py-0.5 rounded-full">
+                                L{role.level}
                               </div>
                             </div>
                           </th>
@@ -525,8 +526,8 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                   <tbody>
                     {Object.entries(PERMISSION_CATEGORIES).map(([category, permissions]) => [
                       <tr key={`${category}-header`} className="bg-gray-100 dark:bg-gray-800">
-                        <td colSpan={COMMUNITY_ROLES.length + 1} className="p-3 font-semibold text-sm border-t-2 sticky left-0 bg-gray-100 dark:bg-gray-800 z-10">
-                          📋 {category}
+                        <td colSpan={COMMUNITY_ROLES.length + 1} className="p-2 sm:p-3 font-semibold text-xs sm:text-sm border-t-2 sticky left-0 bg-gray-100 dark:bg-gray-800 z-20">
+                          <div className="truncate">📋 {category}</div>
                         </td>
                       </tr>,
                       ...permissions.map((permission) => (
@@ -534,46 +535,46 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                           key={permission.key} 
                           className="border-t hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                         >
-                          <td className="p-4 sticky left-0 bg-white dark:bg-gray-900 z-10 border-r">
-                            <div className="flex items-center gap-3">
-                              <div>
-                                <div className="font-medium text-sm">{permission.label}</div>
+                          <td className="p-2 sm:p-3 sticky left-0 bg-white dark:bg-gray-900 z-20 border-r">
+                            <div className="flex items-center gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium text-xs sm:text-sm truncate">{permission.label}</div>
                                 {permission.critical && (
                                   <div className="flex items-center gap-1 mt-1">
-                                    <AlertTriangle className="h-3 w-3 text-red-500" />
-                                    <span className="text-xs text-red-600 font-medium">Critical Permission</span>
+                                    <AlertTriangle className="h-2 w-2 sm:h-3 sm:w-3 text-red-500 flex-shrink-0" />
+                                    <span className="text-[10px] sm:text-xs text-red-600 font-medium truncate">Critical</span>
                                   </div>
                                 )}
                               </div>
                             </div>
                           </td>
-                          {COMMUNITY_ROLES.map((role) => {
+                          {COMMUNITY_ROLES.sort((a, b) => a.level - b.level).map((role) => {
                             const hasPermission = role.permissions.includes(permission.key);
                             const isHighlighted = selectedMatrixRole === role.name;
                             return (
                               <td 
                                 key={role.name} 
-                                className={`text-center p-3 transition-all duration-200 border-l-2 ${
+                                className={`text-center p-1 sm:p-2 transition-all duration-200 border-l-2 ${
                                   isHighlighted 
                                     ? 'bg-purple-50 dark:bg-purple-900/20 border-l-purple-500 shadow-inner' 
                                     : 'border-gray-200 hover:bg-gray-50'
                                 }`}
                               >
                                 {hasPermission ? (
-                                  <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+                                  <div className={`inline-flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full transition-all ${
                                     isHighlighted 
                                       ? 'bg-green-200 text-green-800 border-2 border-green-400 shadow-lg' 
                                       : 'bg-green-100 text-green-700 hover:bg-green-200'
                                   }`}>
-                                    <Check className="h-5 w-5 font-bold" />
+                                    <Check className="h-3 w-3 sm:h-4 sm:w-4 font-bold" />
                                   </div>
                                 ) : (
-                                  <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full transition-all ${
+                                  <div className={`inline-flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full transition-all ${
                                     isHighlighted 
                                       ? 'bg-red-200 text-red-800 border-2 border-red-400 shadow-lg' 
                                       : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
                                   }`}>
-                                    <X className="h-5 w-5" />
+                                    <X className="h-3 w-3 sm:h-4 sm:w-4" />
                                   </div>
                                 )}
                               </td>
