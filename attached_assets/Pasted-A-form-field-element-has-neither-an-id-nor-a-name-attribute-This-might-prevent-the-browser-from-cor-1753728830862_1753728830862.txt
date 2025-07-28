@@ -1,0 +1,29 @@
+A form field element has neither an id nor a name attribute. This might prevent the browser from correctly autofilling the form.
+
+To fix this issue, add a unique id or name attribute to a form field. This is not strictly needed, but still recommended even if you have an autocomplete attribute on the same element.
+
+105 resources
+Learn more: The form input element
+No label associated with a form field
+A <label> isn't associated with a form field.
+
+To fix this issue, nest the <input> in the <label> or provide a for attribute on the <label> that matches a form field id.
+
+11 resources
+Learn more: The label elements
+Page layout may be unexpected due to Quirks Mode
+One or more documents in this page is in Quirks Mode, which will render the affected document(s) with quirks incompatible with the current HTML and CSS specifications.
+
+Quirks Mode exists mostly due to historical reasons. If this is not intentional, you can add or modify the DOCTYPE to be `<!DOCTYPE html>` to render the page in No Quirks Mode.
+
+1 element
+Document in the DOM tree	Mode	URL
+document	Quirks Mode	https://td.doubleclick.net/td/rul/11411994397?random=1753660726346&cv=11&fst=1753660726346&fmt=3&bg=ffffff&guid=ON&async=1&en=gtag.config&gtm=45be57n0v9171242957za200zd9171242957&gcd=13l3l3l3l1l1&dma=0&tag_exp=101509157~103116026~103200004~103233427~104573694~104684208~104684211~104948813&u_w=1470&u_h=956&url=https%3A%2F%2Freplit.com%2F%40AlanMSafahi%2FSoapBox-Super-App&hn=www.googleadservices.com&frm=0&tiba=SoapBox%20Super%20App%20-%20Replit&npa=0&pscdl=noapi&auid=843763861.1753066528&fledge=1&data=event%3Dgtag.config
+Learn more: Document compatibility mode
+Response was blocked by CORB (Cross-Origin Read Blocking)
+Cross-Origin Read Blocking (CORB) blocked a cross-origin response.
+
+1 request
+
+logs?ddsource=browser&ddtags=sdk_version%3A4.46.0%2Capi%3Abeacon%2Cenv%3Aproduction%2Cservice%3Awebsite%2Cversion%3Ae94b8644&dd-api-key=pub31a5047a3a4692afb84a423db984dc57&dd-evp-origin-version=4.46.0&dd-evp-origin=browser&dd-request-id=957641d7-0d77-439e-bfa9-02aae869c059
+Learn more: CORB explainer
