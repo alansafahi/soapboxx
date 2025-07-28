@@ -178,6 +178,7 @@ export default function SidebarFixed() {
       label: "SPIRITUAL TOOLS",  
       items: [
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
+        { label: "Reading Plans", href: "/reading-plans", icon: Calendar },
         { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
         { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles }, // Divine Volunteer System - RESTORED

@@ -13147,6 +13147,131 @@ Please provide suggestions for the missing or incomplete sections.`
   });
 
   // Get import status for all versions
+  // Reading Plans API Routes
+  app.get("/api/reading-plans", async (req, res) => {
+    try {
+      const plans = await storage.getReadingPlans();
+      res.json(plans);
+    } catch (error) {
+      console.error("Error fetching reading plans:", error);
+      res.status(500).json({ message: "Failed to fetch reading plans" });
+    }
+  });
+
+  app.get("/api/reading-plans/:id", async (req, res) => {
+    try {
+      const planId = parseInt(req.params.id);
+      if (isNaN(planId)) {
+        return res.status(400).json({ message: "Invalid plan ID" });
+      }
+
+      const plan = await storage.getReadingPlan(planId);
+      if (!plan) {
+        return res.status(404).json({ message: "Reading plan not found" });
+      }
+
+      res.json(plan);
+    } catch (error) {
+      console.error("Error fetching reading plan:", error);
+      res.status(500).json({ message: "Failed to fetch reading plan" });
+    }
+  });
+
+  app.get("/api/reading-plans/:id/days", async (req, res) => {
+    try {
+      const planId = parseInt(req.params.id);
+      if (isNaN(planId)) {
+        return res.status(400).json({ message: "Invalid plan ID" });
+      }
+
+      const days = await storage.getReadingPlanDays(planId);
+      res.json(days);
+    } catch (error) {
+      console.error("Error fetching reading plan days:", error);
+      res.status(500).json({ message: "Failed to fetch reading plan days" });
+    }
+  });
+
+  app.get("/api/reading-plans/user/subscriptions", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const subscriptions = await storage.getUserReadingPlanSubscriptions(userId);
+      res.json(subscriptions);
+    } catch (error) {
+      console.error("Error fetching user reading plan subscriptions:", error);
+      res.status(500).json({ message: "Failed to fetch user reading plan subscriptions" });
+    }
+  });
+
+  app.post("/api/reading-plans/:id/subscribe", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const planId = parseInt(req.params.id);
+      
+      if (isNaN(planId)) {
+        return res.status(400).json({ message: "Invalid plan ID" });
+      }
+
+      const subscription = await storage.subscribeToReadingPlan(userId, planId);
+      res.json(subscription);
+    } catch (error) {
+      console.error("Error subscribing to reading plan:", error);
+      res.status(500).json({ message: "Failed to subscribe to reading plan" });
+    }
+  });
+
+  app.post("/api/reading-plans/:id/progress/:day", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const planId = parseInt(req.params.id);
+      const dayNumber = parseInt(req.params.day);
+      
+      if (isNaN(planId) || isNaN(dayNumber)) {
+        return res.status(400).json({ message: "Invalid plan ID or day number" });
+      }
+
+      const progressData = req.body;
+      const progress = await storage.recordReadingProgress(userId, planId, dayNumber, progressData);
+      
+      // Award SoapBox Points for completing reading
+      await storage.trackUserActivity(userId, 'reading_plan_progress', planId, 10);
+      
+      res.json(progress);
+    } catch (error) {
+      console.error("Error recording reading progress:", error);
+      res.status(500).json({ message: "Failed to record reading progress" });
+    }
+  });
+
+  app.get("/api/reading-plans/:id/progress", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const planId = parseInt(req.params.id);
+      
+      if (isNaN(planId)) {
+        return res.status(400).json({ message: "Invalid plan ID" });
+      }
+
+      const progress = await storage.getUserReadingProgress(userId, planId);
+      res.json(progress);
+    } catch (error) {
+      console.error("Error fetching reading progress:", error);
+      res.status(500).json({ message: "Failed to fetch reading progress" });
+    }
+  });
+
   // Bible import endpoints disabled for production
 
   // Source Attribution page data - Limited to 6 public domain/freely available versions

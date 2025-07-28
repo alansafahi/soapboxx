@@ -5674,6 +5674,328 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Reading Plans operations
+  async getReadingPlans(): Promise<ReadingPlan[]> {
+    try {
+      const result = await pool.query(`
+        SELECT 
+          id,
+          name,
+          description,
+          type,
+          duration,
+          difficulty,
+          category,
+          image_url,
+          is_public,
+          is_active,
+          author_id,
+          created_at,
+          updated_at
+        FROM reading_plans
+        WHERE is_active = true AND is_public = true
+        ORDER BY name ASC
+      `);
+
+      return result.rows.map(row => ({
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        type: row.type,
+        duration: row.duration,
+        difficulty: row.difficulty,
+        category: row.category,
+        imageUrl: row.image_url,
+        isPublic: row.is_public,
+        isActive: row.is_active,
+        authorId: row.author_id,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      }));
+    } catch (error) {
+      console.error('Error fetching reading plans:', error);
+      throw new Error('Failed to fetch reading plans');
+    }
+  }
+
+  async getReadingPlan(planId: number): Promise<ReadingPlan | undefined> {
+    try {
+      const result = await pool.query(`
+        SELECT 
+          id,
+          name,
+          description,
+          type,
+          duration,
+          difficulty,
+          category,
+          image_url,
+          is_public,
+          is_active,
+          author_id,
+          created_at,
+          updated_at
+        FROM reading_plans
+        WHERE id = $1 AND is_active = true
+      `, [planId]);
+
+      if (result.rows.length === 0) return undefined;
+
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        name: row.name,
+        description: row.description,
+        type: row.type,
+        duration: row.duration,
+        difficulty: row.difficulty,
+        category: row.category,
+        imageUrl: row.image_url,
+        isPublic: row.is_public,
+        isActive: row.is_active,
+        authorId: row.author_id,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      };
+    } catch (error) {
+      console.error('Error fetching reading plan:', error);
+      throw new Error('Failed to fetch reading plan');
+    }
+  }
+
+  async getReadingPlanDays(planId: number): Promise<ReadingPlanDay[]> {
+    try {
+      const result = await pool.query(`
+        SELECT 
+          id,
+          plan_id,
+          day_number,
+          title,
+          scripture_reference,
+          scripture_text,
+          devotional_content,
+          reflection_question,
+          prayer_prompt,
+          additional_verses,
+          tags,
+          is_optional,
+          created_at
+        FROM reading_plan_days
+        WHERE plan_id = $1
+        ORDER BY day_number ASC
+      `, [planId]);
+
+      return result.rows.map(row => ({
+        id: row.id,
+        planId: row.plan_id,
+        dayNumber: row.day_number,
+        title: row.title,
+        scriptureReference: row.scripture_reference,
+        scriptureText: row.scripture_text,
+        devotionalContent: row.devotional_content,
+        reflectionQuestion: row.reflection_question,
+        prayerPrompt: row.prayer_prompt,
+        additionalVerses: row.additional_verses || [],
+        tags: row.tags || [],
+        isOptional: row.is_optional,
+        createdAt: row.created_at,
+      }));
+    } catch (error) {
+      console.error('Error fetching reading plan days:', error);
+      throw new Error('Failed to fetch reading plan days');
+    }
+  }
+
+  async getUserReadingPlanSubscriptions(userId: string): Promise<UserReadingPlanSubscription[]> {
+    try {
+      const result = await pool.query(`
+        SELECT 
+          urps.id,
+          urps.user_id,
+          urps.plan_id,
+          urps.started_at,
+          urps.completed_at,
+          urps.current_day,
+          urps.is_active,
+          urps.reminder_frequency,
+          urps.preferred_reading_time,
+          urps.consecutive_days,
+          urps.total_days_completed,
+          urps.last_read_at,
+          urps.created_at,
+          urps.updated_at,
+          rp.name as plan_name,
+          rp.duration as plan_duration,
+          rp.type as plan_type,
+          rp.category as plan_category
+        FROM user_reading_plan_subscriptions urps
+        LEFT JOIN reading_plans rp ON urps.plan_id = rp.id
+        WHERE urps.user_id = $1 AND urps.is_active = true
+        ORDER BY urps.started_at DESC
+      `, [userId]);
+
+      return result.rows.map(row => ({
+        id: row.id,
+        userId: row.user_id,
+        planId: row.plan_id,
+        startedAt: row.started_at,
+        completedAt: row.completed_at,
+        currentDay: row.current_day,
+        isActive: row.is_active,
+        reminderFrequency: row.reminder_frequency,
+        preferredReadingTime: row.preferred_reading_time,
+        consecutiveDays: row.consecutive_days,
+        totalDaysCompleted: row.total_days_completed,
+        lastReadAt: row.last_read_at,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      }));
+    } catch (error) {
+      console.error('Error fetching user reading plan subscriptions:', error);
+      throw new Error('Failed to fetch user reading plan subscriptions');
+    }
+  }
+
+  async subscribeToReadingPlan(userId: string, planId: number): Promise<UserReadingPlanSubscription> {
+    try {
+      const result = await pool.query(`
+        INSERT INTO user_reading_plan_subscriptions (user_id, plan_id, current_day, is_active)
+        VALUES ($1, $2, 1, true)
+        ON CONFLICT (user_id, plan_id) 
+        DO UPDATE SET 
+          is_active = true,
+          current_day = CASE WHEN user_reading_plan_subscriptions.completed_at IS NULL THEN user_reading_plan_subscriptions.current_day ELSE 1 END,
+          updated_at = NOW()
+        RETURNING 
+          id, user_id, plan_id, started_at, completed_at, current_day, 
+          is_active, reminder_frequency, preferred_reading_time, 
+          consecutive_days, total_days_completed, last_read_at, 
+          created_at, updated_at
+      `, [userId, planId]);
+
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        userId: row.user_id,
+        planId: row.plan_id,
+        startedAt: row.started_at,
+        completedAt: row.completed_at,
+        currentDay: row.current_day,
+        isActive: row.is_active,
+        reminderFrequency: row.reminder_frequency,
+        preferredReadingTime: row.preferred_reading_time,
+        consecutiveDays: row.consecutive_days,
+        totalDaysCompleted: row.total_days_completed,
+        lastReadAt: row.last_read_at,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      };
+    } catch (error) {
+      console.error('Error subscribing to reading plan:', error);
+      throw new Error('Failed to subscribe to reading plan');
+    }
+  }
+
+  async recordReadingProgress(userId: string, planId: number, dayNumber: number, progressData: Partial<InsertUserReadingProgress>): Promise<UserReadingProgress> {
+    try {
+      const result = await pool.query(`
+        INSERT INTO user_reading_progress (
+          user_id, plan_id, day_number, reflection_text, prayer_text, 
+          emotional_reaction, personal_insights, soap_entry_id, reading_time_minutes
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        ON CONFLICT (user_id, plan_id, day_number)
+        DO UPDATE SET
+          reflection_text = EXCLUDED.reflection_text,
+          prayer_text = EXCLUDED.prayer_text,
+          emotional_reaction = EXCLUDED.emotional_reaction,
+          personal_insights = EXCLUDED.personal_insights,
+          soap_entry_id = EXCLUDED.soap_entry_id,
+          reading_time_minutes = EXCLUDED.reading_time_minutes,
+          completed_at = NOW()
+        RETURNING 
+          id, user_id, plan_id, day_number, completed_at, reflection_text, 
+          prayer_text, emotional_reaction, personal_insights, soap_entry_id, 
+          reading_time_minutes, created_at
+      `, [
+        userId, 
+        planId, 
+        dayNumber, 
+        progressData.reflectionText || null,
+        progressData.prayerText || null,
+        progressData.emotionalReaction || null,
+        progressData.personalInsights || null,
+        progressData.soapEntryId || null,
+        progressData.readingTimeMinutes || null
+      ]);
+
+      // Update subscription progress
+      await pool.query(`
+        UPDATE user_reading_plan_subscriptions 
+        SET 
+          current_day = CASE WHEN $3 >= current_day THEN $3 + 1 ELSE current_day END,
+          total_days_completed = (
+            SELECT COUNT(*) FROM user_reading_progress 
+            WHERE user_id = $1 AND plan_id = $2
+          ),
+          last_read_at = NOW(),
+          updated_at = NOW()
+        WHERE user_id = $1 AND plan_id = $2
+      `, [userId, planId, dayNumber]);
+
+      const row = result.rows[0];
+      return {
+        id: row.id,
+        userId: row.user_id,
+        planId: row.plan_id,
+        dayNumber: row.day_number,
+        completedAt: row.completed_at,
+        reflectionText: row.reflection_text,
+        prayerText: row.prayer_text,
+        emotionalReaction: row.emotional_reaction,
+        personalInsights: row.personal_insights,
+        soapEntryId: row.soap_entry_id,
+        readingTimeMinutes: row.reading_time_minutes,
+        createdAt: row.created_at,
+      };
+    } catch (error) {
+      console.error('Error recording reading progress:', error);
+      throw new Error('Failed to record reading progress');
+    }
+  }
+
+  async getUserReadingProgress(userId: string, planId: number): Promise<UserReadingProgress[]> {
+    try {
+      const result = await pool.query(`
+        SELECT 
+          id, user_id, plan_id, day_number, completed_at, reflection_text, 
+          prayer_text, emotional_reaction, personal_insights, soap_entry_id, 
+          reading_time_minutes, created_at
+        FROM user_reading_progress
+        WHERE user_id = $1 AND plan_id = $2
+        ORDER BY day_number ASC
+      `, [userId, planId]);
+
+      return result.rows.map(row => ({
+        id: row.id,
+        userId: row.user_id,
+        planId: row.plan_id,
+        dayNumber: row.day_number,
+        completedAt: row.completed_at,
+        reflectionText: row.reflection_text,
+        prayerText: row.prayer_text,
+        emotionalReaction: row.emotional_reaction,
+        personalInsights: row.personal_insights,
+        soapEntryId: row.soap_entry_id,
+        readingTimeMinutes: row.reading_time_minutes,
+        createdAt: row.created_at,
+      }));
+    } catch (error) {
+      console.error('Error fetching user reading progress:', error);
+      throw new Error('Failed to fetch user reading progress');
+    }
+  }
+
   // Staff Management Operations
   async getStaffMembers(communityId: number): Promise<any[]> {
     try {

@@ -81,6 +81,7 @@ const MemberManagementPage = lazy(() => import("./pages/member-management"));
 const BackgroundCheckManagementPage = lazy(() => import("./pages/background-check-management"));
 const CommunityAdministrationPage = lazy(() => import("./pages/community-administration"));
 const AnalyticsDashboardPage = lazy(() => import("./pages/analytics-dashboard"));
+const ReadingPlansPage = lazy(() => import("./pages/reading-plans"));
 
 function AppRouter() {
     const { user, isAuthenticated, isLoading, logout } = useImmediateAuth();
@@ -158,6 +159,7 @@ function AppRouter() {
                                     </Route>
 
                                     <ProtectedRoute path="/bible" component={BiblePage} />
+                                    <ProtectedRoute path="/reading-plans" component={ReadingPlansPage} />
                                     <ProtectedRoute path="/audio-bible" component={FreshAudioBible} />
                                     <ProtectedRoute path="/fresh-audio-bible" component={FreshAudioBible} />
                                     <ProtectedRoute path="/audio-routines" component={AudioRoutines} />

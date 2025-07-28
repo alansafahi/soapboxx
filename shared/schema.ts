@@ -995,6 +995,77 @@ export const sermonMedia = pgTable("sermon_media", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Bible Reading Plans
+export const readingPlans = pgTable("reading_plans", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 200 }).notNull(),
+  description: text("description"),
+  type: varchar("type", { length: 50 }).notNull(), // topical, chronological, book_study, devotional
+  duration: integer("duration").notNull(), // days
+  difficulty: varchar("difficulty", { length: 20 }).default("beginner"), // beginner, intermediate, advanced
+  category: varchar("category", { length: 50 }).notNull(), // peace, anxiety, purpose, new_testament, etc.
+  imageUrl: varchar("image_url"),
+  isPublic: boolean("is_public").default(true),
+  isActive: boolean("is_active").default(true),
+  authorId: varchar("author_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const readingPlanDays = pgTable("reading_plan_days", {
+  id: serial("id").primaryKey(),
+  planId: integer("plan_id").notNull().references(() => readingPlans.id, { onDelete: "cascade" }),
+  dayNumber: integer("day_number").notNull(),
+  title: varchar("title", { length: 300 }).notNull(),
+  scriptureReference: varchar("scripture_reference", { length: 200 }).notNull(),
+  scriptureText: text("scripture_text"),
+  devotionalContent: text("devotional_content"),
+  reflectionQuestion: text("reflection_question"),
+  prayerPrompt: text("prayer_prompt"),
+  additionalVerses: text("additional_verses").array(), // Array of additional verse references
+  tags: text("tags").array(),
+  isOptional: boolean("is_optional").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  planDayUnique: unique().on(table.planId, table.dayNumber),
+}));
+
+export const userReadingProgress = pgTable("user_reading_progress", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  planId: integer("plan_id").notNull().references(() => readingPlans.id, { onDelete: "cascade" }),
+  dayNumber: integer("day_number").notNull(),
+  completedAt: timestamp("completed_at").defaultNow(),
+  reflectionText: text("reflection_text"),
+  prayerText: text("prayer_text"),
+  emotionalReaction: varchar("emotional_reaction", { length: 50 }), // peaceful, encouraged, challenged, etc.
+  personalInsights: text("personal_insights"),
+  soapEntryId: integer("soap_entry_id").references(() => soapEntries.id), // Link to SOAP journal entry
+  readingTimeMinutes: integer("reading_time_minutes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userPlanDayUnique: unique().on(table.userId, table.planId, table.dayNumber),
+}));
+
+export const userReadingPlanSubscriptions = pgTable("user_reading_plan_subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  planId: integer("plan_id").notNull().references(() => readingPlans.id, { onDelete: "cascade" }),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  currentDay: integer("current_day").default(1),
+  isActive: boolean("is_active").default(true),
+  reminderFrequency: varchar("reminder_frequency", { length: 20 }).default("daily"), // daily, weekly, none
+  preferredReadingTime: varchar("preferred_reading_time", { length: 20 }), // morning, afternoon, evening
+  consecutiveDays: integer("consecutive_days").default(0),
+  totalDaysCompleted: integer("total_days_completed").default(0),
+  lastReadAt: timestamp("last_read_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userPlanUnique: unique().on(table.userId, table.planId),
+}));
+
 // User inspiration preferences
 export const userInspirationPreferences = pgTable("user_inspiration_preferences", {
   id: serial("id").primaryKey(),
@@ -4385,3 +4456,37 @@ export type InsertDefaultFeatureSetting = z.infer<typeof insertDefaultFeatureSet
 // Prayer response likes type definitions
 export type PrayerResponseLike = typeof prayerResponseLikes.$inferSelect;
 export type InsertPrayerResponseLike = typeof prayerResponseLikes.$inferInsert;
+
+// Reading Plans type definitions
+export const insertReadingPlanSchema = createInsertSchema(readingPlans).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertReadingPlanDaySchema = createInsertSchema(readingPlanDays).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserReadingProgressSchema = createInsertSchema(userReadingProgress).omit({
+  id: true,
+  completedAt: true,
+  createdAt: true,
+});
+
+export const insertUserReadingPlanSubscriptionSchema = createInsertSchema(userReadingPlanSubscriptions).omit({
+  id: true,
+  startedAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type ReadingPlan = typeof readingPlans.$inferSelect;
+export type InsertReadingPlan = z.infer<typeof insertReadingPlanSchema>;
+export type ReadingPlanDay = typeof readingPlanDays.$inferSelect;
+export type InsertReadingPlanDay = z.infer<typeof insertReadingPlanDaySchema>;
+export type UserReadingProgress = typeof userReadingProgress.$inferSelect;
+export type InsertUserReadingProgress = z.infer<typeof insertUserReadingProgressSchema>;
+export type UserReadingPlanSubscription = typeof userReadingPlanSubscriptions.$inferSelect;
+export type InsertUserReadingPlanSubscription = z.infer<typeof insertUserReadingPlanSubscriptionSchema>;
