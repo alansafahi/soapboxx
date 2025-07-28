@@ -579,6 +579,119 @@ export default function VolunteerManagementSystem() {
     </div>
   );
 
+  const OpportunitiesTab = () => (
+    <div className="space-y-6">
+      {/* Header with actions */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold">Volunteer Opportunities</h2>
+          <p className="text-gray-600">Manage volunteer opportunities and scheduling</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Export
+          </Button>
+          <Button>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Create Opportunity
+          </Button>
+        </div>
+      </div>
+
+      {/* Opportunities Grid */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {opportunities.map((opportunity: VolunteerOpportunity) => (
+          <Card key={opportunity.id} className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-lg">{opportunity.title}</CardTitle>
+                  <CardDescription className="flex items-center mt-1">
+                    <MapPin className="w-4 h-4 mr-1" />
+                    {opportunity.location || 'Location TBD'}
+                  </CardDescription>
+                </div>
+                <Badge
+                  variant={opportunity.status === 'active' ? 'default' : 'secondary'}
+                >
+                  {opportunity.status}
+                </Badge>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="space-y-4">
+              <p className="text-sm text-gray-600 line-clamp-3">{opportunity.description}</p>
+              
+              <div className="flex items-center justify-between text-sm">
+                <span className="flex items-center">
+                  <Users className="w-4 h-4 mr-1" />
+                  {opportunity.volunteersRegistered || 0}/{opportunity.volunteersNeeded || 1}
+                </span>
+                <span className="flex items-center">
+                  <CalendarIcon className="w-4 h-4 mr-1" />
+                  {formatSafeDate(opportunity.startDate)}
+                </span>
+              </div>
+
+              {/* Cross-linking to volunteer management */}
+              <div className="flex justify-between items-center pt-2 border-t">
+                <div className="flex gap-1">
+                  <Button variant="outline" size="sm">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Users className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Link href="/volunteer-management">
+                  <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-800">
+                    <ExternalLink className="h-4 w-4 mr-1" />
+                    View Volunteers
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Empty State */}
+      {opportunities.length === 0 && !loadingOpportunities && (
+        <div className="text-center py-12">
+          <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Opportunities Yet</h3>
+          <p className="text-gray-500 mb-4">Create your first volunteer opportunity to get started</p>
+          <Button>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Create Opportunity
+          </Button>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {loadingOpportunities && (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-200 rounded"></div>
+                  <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+                  <div className="h-3 bg-gray-200 rounded w-4/5"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   const AddVolunteerForm = () => {
     const [formData, setFormData] = useState({
       firstName: "",
@@ -688,11 +801,7 @@ export default function VolunteerManagementSystem() {
         </TabsContent>
 
         <TabsContent value="opportunities">
-          <div className="text-center py-12">
-            <CalendarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Volunteer Opportunities</h3>
-            <p className="text-gray-500">Manage volunteer opportunities and scheduling</p>
-          </div>
+          <OpportunitiesTab />
         </TabsContent>
 
         <TabsContent value="hours">
