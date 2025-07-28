@@ -1,0 +1,62 @@
+2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/components/LimitedSocialFeed.tsx:33  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/components/content-moderation/FlagContentDialog.tsx net::ERR_ABORTED 502 (Bad Gateway)Understand this error
+LeaderboardPreview.tsx:24  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/leaderboard 500 (Internal Server Error)
+window.fetch @ Network.js:219
+fetchTopUsers @ LeaderboardPreview.tsx:24
+(anonymous) @ LeaderboardPreview.tsx:38
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=dbc732d9:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=dbc732d9:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=dbc732d9:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=dbc732d9:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=dbc732d9:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=dbc732d9:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=dbc732d9:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=dbc732d9:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=dbc732d9:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=dbc732d9:19432
+commitRoot @ chunk-RPCDYKBN.js?v=dbc732d9:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=dbc732d9:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=dbc732d9:18718
+workLoop @ chunk-RPCDYKBN.js?v=dbc732d9:197
+flushWork @ chunk-RPCDYKBN.js?v=dbc732d9:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=dbc732d9:384Understand this error
+UpcomingEventsPreview.tsx:25  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/events/upcoming?limit=3 500 (Internal Server Error)
+window.fetch @ Network.js:219
+fetchUpcomingEvents @ UpcomingEventsPreview.tsx:25
+(anonymous) @ UpcomingEventsPreview.tsx:39
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=dbc732d9:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=dbc732d9:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=dbc732d9:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=dbc732d9:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=dbc732d9:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=dbc732d9:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=dbc732d9:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=dbc732d9:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=dbc732d9:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=dbc732d9:19432
+commitRoot @ chunk-RPCDYKBN.js?v=dbc732d9:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=dbc732d9:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=dbc732d9:18718
+workLoop @ chunk-RPCDYKBN.js?v=dbc732d9:197
+flushWork @ chunk-RPCDYKBN.js?v=dbc732d9:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=dbc732d9:384Understand this error
+LeaderboardPreview.tsx:24  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/leaderboard 500 (Internal Server Error)
+window.fetch @ Network.js:219
+fetchTopUsers @ LeaderboardPreview.tsx:24
+(anonymous) @ LeaderboardPreview.tsx:38
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=dbc732d9:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=dbc732d9:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=dbc732d9:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=dbc732d9:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=dbc732d9:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=dbc732d9:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=dbc732d9:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=dbc732d9:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=dbc732d9:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=dbc732d9:19432
+commitRoot @ chunk-RPCDYKBN.js?v=dbc732d9:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=dbc732d9:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=dbc732d9:18718
+workLoop @ chunk-RPCDYKBN.js?v=dbc732d9:197
+flushWork @ chunk-RPCDYKBN.js?v=dbc732d9:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=dbc732d9:384Understand this error
+UpcomingEventsPreview.tsx:25  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/events/upcoming?limit=3 500 (Internal Server Error)

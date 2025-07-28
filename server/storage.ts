@@ -3274,18 +3274,24 @@ export class DatabaseStorage implements IStorage {
 
   async getEnhancedMoodIndicators(category?: string): Promise<EnhancedMoodIndicator[]> {
     try {
+      let whereConditions = eq(enhancedMoodIndicators.isActive, true);
+      
+      if (category) {
+        whereConditions = and(
+          eq(enhancedMoodIndicators.isActive, true),
+          eq(enhancedMoodIndicators.category, category)
+        );
+      }
+
       const query = db
         .select()
         .from(enhancedMoodIndicators)
-        .where(eq(enhancedMoodIndicators.isActive, true))
+        .where(whereConditions)
         .orderBy(enhancedMoodIndicators.sortOrder, enhancedMoodIndicators.name);
-
-      if (category) {
-        query.where(eq(enhancedMoodIndicators.category, category));
-      }
 
       return await query;
     } catch (error) {
+      console.error("Error fetching enhanced mood indicators:", error);
       return [];
     }
   }

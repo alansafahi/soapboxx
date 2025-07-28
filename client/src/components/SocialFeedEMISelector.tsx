@@ -24,7 +24,7 @@ export default function SocialFeedEMISelector({
 
   // Fetch mood indicators by category - use same endpoint as CheckInSystem
   const { data: allMoods = [], isLoading } = useQuery<EnhancedMoodIndicator[]>({
-    queryKey: ["/api/enhanced-mood-indicators", "force-refresh", Date.now()],
+    queryKey: ["/api/enhanced-mood-indicators"],
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: true,
@@ -64,10 +64,7 @@ export default function SocialFeedEMISelector({
   const categories = Object.keys(moodsByCategory);
   const selectedMoodsData = getSelectedMoodsData();
 
-  // Debug: Log categories to console
-  console.log("SocialFeedEMISelector - Categories found:", categories);
-  console.log("SocialFeedEMISelector - Categories count:", categories.length);
-  console.log("SocialFeedEMISelector - Full moodsByCategory:", moodsByCategory);
+
 
   return (
     <div className="space-y-4">
