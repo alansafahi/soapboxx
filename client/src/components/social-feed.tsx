@@ -1032,13 +1032,13 @@ export default function SocialFeed() {
         </Card>
       )}
 
-      {/* EMI Modal for expanded selection */}
+      {/* EMI Modal for expanded selection - THIS IS THE MODAL YOU SEE */}
       {showMoodDropdown && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-2xl max-h-[80vh] overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Select Your Feelings</h3>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">🔥 TESTING: EMI Modal (Should remove Spiritual States)</h3>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -1049,7 +1049,11 @@ export default function SocialFeed() {
                 </Button>
               </div>
             </div>
-            <div className="p-4">
+            <div className="p-6 overflow-y-auto">
+              <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                <h4 className="font-medium text-blue-800">🔍 DEBUG: This is the modal you're seeing</h4>
+                <p className="text-sm text-blue-600">Selected moods: {selectedMoods.length} | IDs: [{selectedMoods.join(', ')}]</p>
+              </div>
               <SocialFeedEMISelector
                 selectedMoods={selectedMoods}
                 onMoodToggle={toggleMoodSelection}
@@ -1062,7 +1066,7 @@ export default function SocialFeed() {
                 onClick={() => setShowMoodDropdown(false)}
                 className="bg-purple-600 hover:bg-purple-700"
               >
-                Done ({selectedMoods.length}/3)
+                Done ({selectedMoods.length}/3) - Check Console for Debug
               </Button>
             </div>
           </div>
