@@ -159,12 +159,12 @@ const getCommunityRoles = (communityType: string = "church") => {
       name: "super_volunteer",
       displayName: "Super Volunteer",
       description: "Coordinates volunteers and events without financial access",
-      level: 2,
+      level: 1.5,
       color: "bg-cyan-100 text-cyan-800",
       icon: Users,
       communityTypes: ["church"],
       permissions: [
-        "manage_volunteers", "manage_events", "create_content"
+        "manage_volunteers", "manage_events"
       ]
     },
     {
@@ -176,7 +176,7 @@ const getCommunityRoles = (communityType: string = "church") => {
       icon: DollarSign,
       communityTypes: ["church"],
       permissions: [
-        "access_finances", "manage_finances", "access_analytics"
+        "access_finances", "manage_finances"
       ]
     },
     {
@@ -189,7 +189,8 @@ const getCommunityRoles = (communityType: string = "church") => {
       communityTypes: ["church"],
       permissions: [
         "manage_staff", "approve_content", "moderate_prayers", "manage_events", 
-        "access_analytics", "send_communications", "manage_settings", "manage_members", "manage_volunteers"
+        "access_analytics", "send_communications", "manage_settings", "manage_members", "manage_volunteers",
+        "submit_campus_reports", "manage_local_events", "view_local_donations"
       ]
     },
     {
@@ -204,7 +205,8 @@ const getCommunityRoles = (communityType: string = "church") => {
         "manage_staff", "assign_roles", "approve_content", "moderate_prayers", 
         "manage_events", "access_analytics", "manage_finances", "send_communications", 
         "manage_settings", "manage_members", "manage_facilities", "access_finances",
-        "cross_campus_reporting", "assign_campus_affiliation", "manage_child_communities"
+        "cross_campus_reporting", "assign_campus_affiliation", "manage_child_communities",
+        "cross_campus_analytics", "approve_sub_campus_leaders", "override_local_settings"
       ]
     },
     {
@@ -247,20 +249,30 @@ const PERMISSION_CATEGORIES = {
     { key: "manage_volunteers", label: "Coordinate volunteers", critical: false },
     { key: "upload_music", label: "Upload worship music", critical: false },
     { key: "volunteer_hours_tracking", label: "Track volunteer hours & export", critical: false },
-    { key: "event_budget_submission", label: "Submit event budget requests", critical: false }
+    { key: "event_budget_submission", label: "Submit event budget requests", critical: false },
+    { key: "manage_local_events", label: "Manage local campus events", critical: false }
   ],
   "Analytics & Reports": [
     { key: "access_analytics", label: "View engagement analytics", critical: false },
     { key: "access_finances", label: "View financial reports", critical: true },
     { key: "manage_finances", label: "Manage donations & finances", critical: true },
-    { key: "cross_campus_reporting", label: "Cross-campus reporting access", critical: true }
+    { key: "cross_campus_reporting", label: "Cross-campus reporting access", critical: true },
+    { key: "cross_campus_analytics", label: "Cross-campus analytics dashboard", critical: true },
+    { key: "view_user_engagement_by_campus", label: "View user engagement by campus", critical: false },
+    { key: "submit_campus_reports", label: "Submit campus reports", critical: false },
+    { key: "view_local_donations", label: "View local campus donations", critical: false }
   ],
   "Settings & Security": [
     { key: "manage_settings", label: "Modify church settings", critical: true },
     { key: "manage_members", label: "Add/remove members", critical: false },
     { key: "manage_facilities", label: "Manage facilities & resources", critical: false },
     { key: "church_directory_updates", label: "Update church directory info", critical: false },
-    { key: "manage_child_communities", label: "Manage child campus communities", critical: true }
+    { key: "manage_child_communities", label: "Manage child campus communities", critical: true },
+    { key: "approve_child_campus_requests", label: "Approve or reject child campus requests", critical: true },
+    { key: "control_campus_feature_toggles", label: "Control campus-specific feature toggles", critical: true },
+    { key: "audit_trail_access", label: "Audit trail / action history", critical: true },
+    { key: "approve_sub_campus_leaders", label: "Approve sub-campus leaders", critical: true },
+    { key: "override_local_settings", label: "Override local campus settings", critical: true }
   ]
 };
 
