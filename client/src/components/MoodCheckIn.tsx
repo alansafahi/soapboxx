@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Textarea } from "./ui/textarea";
 import { Checkbox } from "./ui/checkbox";
 import { Badge } from "./ui/badge";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
 import { useToast } from "../hooks/use-toast";
 import { Heart, BookOpen, Brain, X } from "lucide-react";
@@ -13,10 +13,16 @@ interface MoodCheckInProps {
   onComplete?: () => void;
 }
 
-import { moodCategories, allMoods } from "../lib/moodCategories";
+interface EnhancedMoodIndicator {
+  id: number;
+  name: string;
+  emoji: string;
+  category: string;
+  description: string;
+}
 
 export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
-  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
+  const [selectedMoods, setSelectedMoods] = useState<number[]>([]);
   const [notes, setNotes] = useState("");
   const [shareWithStaff, setShareWithStaff] = useState(false);
   const [personalizedContent, setPersonalizedContent] = useState<any>(null);
@@ -24,7 +30,14 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const toggleMoodSelection = (moodId: string) => {
+  // Fetch EMI data from centralized system
+  const { data: emiData, isLoading: emiLoading } = useQuery({
+    queryKey: ["/api/enhanced-mood-indicators"],
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const toggleMoodSelection = (moodId: number) => {
     setSelectedMoods(prev => 
       prev.includes(moodId) 
         ? prev.filter(id => id !== moodId)
@@ -37,7 +50,26 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
   };
 
   const getSelectedMoodsData = () => {
-    return allMoods.filter(mood => selectedMoods.includes(mood.id));
+    if (!emiData || !Array.isArray(emiData)) return [];
+    return emiData.filter((mood: EnhancedMoodIndicator) => selectedMoods.includes(mood.id));
+  };
+
+  // Group EMI data by category
+  const getGroupedMoods = () => {
+    if (!emiData || !Array.isArray(emiData)) return [];
+    
+    const grouped = emiData.reduce((acc: any, mood: EnhancedMoodIndicator) => {
+      if (!acc[mood.category]) {
+        acc[mood.category] = [];
+      }
+      acc[mood.category].push(mood);
+      return acc;
+    }, {});
+
+    return Object.entries(grouped).map(([category, moods]) => ({
+      title: category,
+      moods: moods
+    }));
   };
 
   const submitMoodMutation = useMutation({
@@ -52,8 +84,11 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
           let score = 3; // neutral default
           if (mood.category === "Faith & Worship") score = 4;
           if (mood.category === "Growth & Transformation") score = 3;
-          if (mood.category === "Life Situations") score = 3;
-          if (mood.category === "Emotional & Spiritual Support") score = 2;
+          if (mood.category === "Life Circumstances") score = 3;
+          if (mood.category === "Spiritual States") score = 4;
+          if (mood.category === "Emotional Well-being") score = 2;
+          if (mood.category === "Seeking Support") score = 2;
+          if (mood.category === "Daily Checkin") score = 3;
           return sum + score;
         }, 0) / selectedMoodsData.length) : 3;
       
@@ -66,17 +101,19 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
             "Referer": window.location.href,
           },
           body: JSON.stringify({
-            mood: selectedMoods.join(", "),
+            mood: selectedMoodsData.map(m => m.name).join(", "),
             moodScore: averageScore,
-            moodEmoji: primaryMood?.icon || "😊",
+            moodEmoji: primaryMood?.emoji || "😊",
             notes: notes.trim() || null,
             shareWithStaff,
             generatePersonalizedContent: true,
+            moodIds: selectedMoods, // EMI IDs
             selectedMoods: selectedMoodsData.map(mood => ({
               id: mood.id,
-              label: mood.label,
+              name: mood.name,
               category: mood.category,
-              subtitle: mood.subtitle
+              description: mood.description,
+              emoji: mood.emoji
             }))
           }),
           credentials: "include",
@@ -218,8 +255,8 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
             <div className="flex flex-wrap gap-2">
               {getSelectedMoodsData().map((mood) => (
                 <div key={mood.id} className="flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-900/20 rounded-full border border-purple-200 dark:border-purple-700">
-                  <span className="text-sm">{mood.icon}</span>
-                  <span className="text-xs font-medium text-purple-800 dark:text-purple-200">{mood.label}</span>
+                  <span className="text-sm">{mood.emoji}</span>
+                  <span className="text-xs font-medium text-purple-800 dark:text-purple-200">{mood.name}</span>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -244,51 +281,56 @@ export default function MoodCheckIn({ onComplete }: MoodCheckInProps) {
           </div>
         )}
 
-        {/* 4-Pillar Feelings Selector */}
-        <div className="space-y-4 max-h-48 overflow-y-auto">
-          {moodCategories.map((category) => {
-            const hasSelectedMood = category.moods.some(mood => selectedMoods.includes(mood.id));
-            return (
-              <div key={category.title} className="space-y-2">
-                <div className={`flex items-center gap-2 pb-2 border-b ${hasSelectedMood ? 'border-purple-300 dark:border-purple-600' : 'border-gray-200 dark:border-gray-600'}`}>
-                  <span className="text-lg">{category.icon}</span>
-                  <h3 className={`font-semibold text-sm ${hasSelectedMood ? 'text-purple-700 dark:text-purple-300' : 'text-gray-800 dark:text-white'}`}>
-                    {category.title}
-                    {hasSelectedMood && (
-                      <span className="ml-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded-full">
-                        Selected
-                      </span>
-                    )}
-                  </h3>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {category.moods.map((mood) => {
-                    const isSelected = selectedMoods.includes(mood.id);
-                    return (
-                      <Button
-                        key={mood.id}
-                        variant={isSelected ? "default" : "outline"}
-                        size="sm"
-                        className={`h-auto p-2 flex flex-col items-center gap-1 text-xs ${
-                          isSelected 
-                            ? "bg-purple-600 hover:bg-purple-700 text-white border-purple-600" 
-                            : "hover:bg-purple-50 dark:hover:bg-purple-900/20 border-gray-200 dark:border-gray-600"
-                        }`}
-                        onClick={() => toggleMoodSelection(mood.id)}
-                        title={mood.subtitle}
-                      >
-                        <span className="text-lg">{mood.icon}</span>
-                        <span className="text-xs font-medium leading-tight text-center">
-                          {mood.label}
+        {/* Enhanced Mood Indicators (EMI) Selector */}
+        {emiLoading ? (
+          <div className="text-center py-4">
+            <div className="text-sm text-muted-foreground">Loading mood indicators...</div>
+          </div>
+        ) : (
+          <div className="space-y-4 max-h-48 overflow-y-auto">
+            {getGroupedMoods().map((category) => {
+              const hasSelectedMood = category.moods.some((mood: EnhancedMoodIndicator) => selectedMoods.includes(mood.id));
+              return (
+                <div key={category.title} className="space-y-2">
+                  <div className={`flex items-center gap-2 pb-2 border-b ${hasSelectedMood ? 'border-purple-300 dark:border-purple-600' : 'border-gray-200 dark:border-gray-600'}`}>
+                    <h3 className={`font-semibold text-sm ${hasSelectedMood ? 'text-purple-700 dark:text-purple-300' : 'text-gray-800 dark:text-white'}`}>
+                      {category.title}
+                      {hasSelectedMood && (
+                        <span className="ml-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded-full">
+                          Selected
                         </span>
-                      </Button>
-                    );
-                  })}
+                      )}
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {category.moods.map((mood: EnhancedMoodIndicator) => {
+                      const isSelected = selectedMoods.includes(mood.id);
+                      return (
+                        <Button
+                          key={mood.id}
+                          variant={isSelected ? "default" : "outline"}
+                          size="sm"
+                          className={`h-auto p-2 flex flex-col items-center gap-1 text-xs ${
+                            isSelected 
+                              ? "bg-purple-600 hover:bg-purple-700 text-white border-purple-600" 
+                              : "hover:bg-purple-50 dark:hover:bg-purple-900/20 border-gray-200 dark:border-gray-600"
+                          }`}
+                          onClick={() => toggleMoodSelection(mood.id)}
+                          title={mood.description}
+                        >
+                          <span className="text-lg">{mood.emoji}</span>
+                          <span className="text-xs font-medium leading-tight text-center">
+                            {mood.name}
+                          </span>
+                        </Button>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         <div className="space-y-2">
           <label className="text-sm font-medium">

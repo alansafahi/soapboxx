@@ -76,73 +76,14 @@ interface Event {
   isOnline?: boolean;
 }
 
-// 4-Pillar Comprehensive Mood System matching AI Check-In
-const moodCategories = [
-  {
-    title: "💙 Emotional & Spiritual Support",
-    description: "Express your struggles and need for comfort",
-    moods: [
-      { value: "anxious", emoji: "😰", label: "Anxious" },
-      { value: "depressed", emoji: "😞", label: "Depressed" },
-      { value: "lonely", emoji: "😔", label: "Lonely" },
-      { value: "grieving", emoji: "💔", label: "Grieving" },
-      { value: "fearful", emoji: "😨", label: "Fearful" },
-      { value: "overwhelmed", emoji: "😵", label: "Overwhelmed" },
-      { value: "doubtful", emoji: "🤔", label: "Doubtful" },
-      { value: "angry", emoji: "😠", label: "Angry" },
-    ]
-  },
-  {
-    title: "🌱 Growth & Transformation",
-    description: "Mark your spiritual formation journey",
-    moods: [
-      { value: "seeking-direction", emoji: "🧭", label: "Seeking Direction" },
-      { value: "repentant", emoji: "🙏", label: "Repentant" },
-      { value: "motivated", emoji: "🔥", label: "Motivated" },
-      { value: "curious", emoji: "🤓", label: "Curious" },
-      { value: "determined", emoji: "💪", label: "Determined" },
-      { value: "reflective", emoji: "🤲", label: "Reflective" },
-      { value: "inspired", emoji: "✨", label: "Inspired" },
-      { value: "focused", emoji: "🎯", label: "Focused" },
-    ]
-  },
-  {
-    title: "🏠 Life Situations",
-    description: "Navigate life's challenges with faith",
-    moods: [
-      { value: "celebrating", emoji: "🎉", label: "Celebrating" },
-      { value: "in-transition", emoji: "🚪", label: "In Transition" },
-      { value: "healing", emoji: "🩹", label: "Healing" },
-      { value: "parenting-challenges", emoji: "👨‍👩‍👧‍👦", label: "Parenting Challenges" },
-      { value: "work-stress", emoji: "💼", label: "Work Stress" },
-      { value: "relationship-issues", emoji: "💕", label: "Relationship Issues" },
-      { value: "financial-concerns", emoji: "💰", label: "Financial Concerns" },
-      { value: "health-concerns", emoji: "🏥", label: "Health Concerns" },
-    ]
-  },
-  {
-    title: "⛪ Faith & Worship",
-    description: "Express your spiritual state and connection",
-    moods: [
-      { value: "grateful", emoji: "🙌", label: "Grateful" },
-      { value: "peaceful", emoji: "🕊️", label: "Peaceful" },
-      { value: "joyful", emoji: "😊", label: "Joyful" },
-      { value: "blessed", emoji: "😇", label: "Blessed" },
-      { value: "prayerful", emoji: "🙏", label: "Prayerful" },
-      { value: "worshipful", emoji: "🎵", label: "Worshipful" },
-      { value: "hopeful", emoji: "🌅", label: "Hopeful" },
-      { value: "content", emoji: "😌", label: "Content" },
-    ]
-  }
-];
-
-// Flattened mood options for easier access
-const moodOptions = moodCategories.flatMap(category => 
-  category.moods.map(mood => ({
-    ...mood,
-    category: category.title
-  }))
-);
+// EMI system integration interface
+interface EnhancedMoodIndicator {
+  id: number;
+  name: string;
+  emoji: string;
+  category: string;
+  description: string;
+}
 
 const checkInTypes = [
   { value: "Sunday Service", icon: Users, description: "Attending Sunday Service" },
@@ -161,7 +102,7 @@ export default function CheckInSystem() {
   const [showQrScanner, setShowQrScanner] = useState(false);
   const [showMoodCheckIn, setShowMoodCheckIn] = useState(false);
   const [selectedType, setSelectedType] = useState("Spiritual Check-In");
-  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
+  const [selectedMoods, setSelectedMoods] = useState<number[]>([]);
   const [notes, setNotes] = useState("");
   const [prayerIntent, setPrayerIntent] = useState("");
   const [customType, setCustomType] = useState("");
@@ -172,6 +113,36 @@ export default function CheckInSystem() {
   const [qrValidationResult, setQrValidationResult] = useState<any>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const qrScannerRef = useRef<QrScanner | null>(null);
+
+  // Fetch EMI data from centralized system
+  const { data: emiData, isLoading: emiLoading } = useQuery({
+    queryKey: ["/api/enhanced-mood-indicators"],
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Group EMI data by category
+  const getGroupedMoods = () => {
+    if (!emiData || !Array.isArray(emiData)) return [];
+    
+    const grouped = emiData.reduce((acc: any, mood: EnhancedMoodIndicator) => {
+      if (!acc[mood.category]) {
+        acc[mood.category] = [];
+      }
+      acc[mood.category].push(mood);
+      return acc;
+    }, {});
+
+    return Object.entries(grouped).map(([category, moods]) => ({
+      title: category,
+      moods: moods
+    }));
+  };
+
+  const getSelectedMoodsData = () => {
+    if (!emiData || !Array.isArray(emiData)) return [];
+    return emiData.filter((mood: EnhancedMoodIndicator) => selectedMoods.includes(mood.id));
+  };
 
   // Get today's check-in status
   const { data: todayCheckIn } = useQuery({
@@ -244,13 +215,15 @@ export default function CheckInSystem() {
   });
 
   const handleCheckIn = () => {
-    const moodString = selectedMoods.join(', ');
-    const moodEmojis = selectedMoods.map(mood => moodOptions.find(m => m.value === mood)?.emoji).filter(Boolean).join('');
+    const selectedMoodsData = getSelectedMoodsData();
+    const moodString = selectedMoodsData.map(m => m.name).join(', ');
+    const moodEmojis = selectedMoodsData.map(m => m.emoji).join('');
     
     const checkInData = {
       checkInType: selectedType === "Custom" ? customType : selectedType,
-      mood: moodString,
-      moodEmoji: moodEmojis,
+      mood: moodString || undefined,
+      moodEmoji: moodEmojis || undefined,
+      moodIds: selectedMoods.length > 0 ? selectedMoods : undefined,
       notes: notes.trim() || undefined,
       prayerIntent: prayerIntent.trim() || undefined,
       isPhysicalAttendance: false,
@@ -260,15 +233,17 @@ export default function CheckInSystem() {
   };
 
   const handleQrCheckIn = (qrCodeId: string) => {
-    const moodString = selectedMoods.join(', ');
-    const moodEmojis = selectedMoods.map(mood => moodOptions.find(m => m.value === mood)?.emoji).filter(Boolean).join('');
+    const selectedMoodsData = getSelectedMoodsData();
+    const moodString = selectedMoodsData.map(m => m.name).join(', ');
+    const moodEmojis = selectedMoodsData.map(m => m.emoji).join('');
     
     const checkInData = {
       checkInType: "Physical Attendance",
       isPhysicalAttendance: true,
       qrCodeId,
-      mood: moodString,
-      moodEmoji: moodEmojis,
+      mood: moodString || undefined,
+      moodEmoji: moodEmojis || undefined,
+      moodIds: selectedMoods.length > 0 ? selectedMoods : undefined,
       notes: notes.trim() || undefined,
     };
 
@@ -535,23 +510,20 @@ export default function CheckInSystem() {
                         {selectedMoods.length > 0 && (
                           <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
                             <div className="text-sm text-blue-700 dark:text-blue-300 mb-2">
-                              Selected feelings ({selectedMoods.join(', ').length}/150 characters):
+                              Selected feelings ({selectedMoods.length}/5 maximum):
                             </div>
                             <div className="flex flex-wrap gap-1">
-                              {selectedMoods.map((moodValue) => {
-                                const mood = moodOptions.find(m => m.value === moodValue);
-                                return mood ? (
-                                  <span key={moodValue} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-800 rounded text-xs">
-                                    {mood.emoji} {mood.label}
-                                    <button
-                                      onClick={() => setSelectedMoods(prev => prev.filter(m => m !== moodValue))}
-                                      className="ml-1 text-blue-600 hover:text-blue-800"
-                                    >
-                                      ×
-                                    </button>
-                                  </span>
-                                ) : null;
-                              })}
+                              {getSelectedMoodsData().map((mood) => (
+                                <span key={mood.id} className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-800 rounded text-xs">
+                                  {mood.emoji} {mood.name}
+                                  <button
+                                    onClick={() => setSelectedMoods(prev => prev.filter(m => m !== mood.id))}
+                                    className="ml-1 text-blue-600 hover:text-blue-800"
+                                  >
+                                    ×
+                                  </button>
+                                </span>
+                              ))}
                             </div>
                             {selectedMoods.length > 0 && (
                               <button
@@ -564,45 +536,53 @@ export default function CheckInSystem() {
                           </div>
                         )}
                         
-                        <div className="space-y-4 max-h-60 overflow-y-auto">
-                          {moodCategories.map((category) => (
-                            <div key={category.title} className="space-y-2">
-                              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                {category.title}
-                              </div>
-                              <div className="grid grid-cols-4 gap-2">
-                                {category.moods.map((mood) => {
-                                  const isSelected = selectedMoods.includes(mood.value);
-                                  const wouldExceedLimit = !isSelected && (selectedMoods.join(', ') + ', ' + mood.label).length > 150;
-                                  
-                                  return (
-                                    <button
-                                      key={mood.value}
-                                      onClick={() => {
-                                        if (isSelected) {
-                                          setSelectedMoods(prev => prev.filter(m => m !== mood.value));
-                                        } else if (!wouldExceedLimit) {
-                                          setSelectedMoods(prev => [...prev, mood.value]);
-                                        }
-                                      }}
-                                      disabled={wouldExceedLimit}
-                                      className={`p-2 rounded-lg border text-center transition-colors ${
-                                        isSelected
-                                          ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
-                                          : wouldExceedLimit
-                                          ? "border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed"
-                                          : "border-gray-200 hover:border-gray-300"
-                                      }`}
+                        {/* Enhanced Mood Indicators (EMI) Selector */}
+                        {emiLoading ? (
+                          <div className="text-center py-4">
+                            <div className="text-sm text-muted-foreground">Loading mood indicators...</div>
+                          </div>
+                        ) : (
+                          <div className="space-y-4 max-h-60 overflow-y-auto">
+                            {getGroupedMoods().map((category) => (
+                              <div key={category.title} className="space-y-2">
+                                <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                  {category.title}
+                                </div>
+                                <div className="grid grid-cols-4 gap-2">
+                                  {category.moods.map((mood: EnhancedMoodIndicator) => {
+                                    const isSelected = selectedMoods.includes(mood.id);
+                                    const wouldExceedLimit = !isSelected && selectedMoods.length >= 5;
+                                    
+                                    return (
+                                      <button
+                                        key={mood.id}
+                                        onClick={() => {
+                                          if (isSelected) {
+                                            setSelectedMoods(prev => prev.filter(m => m !== mood.id));
+                                          } else if (!wouldExceedLimit) {
+                                            setSelectedMoods(prev => [...prev, mood.id]);
+                                          }
+                                        }}
+                                        disabled={wouldExceedLimit}
+                                        className={`p-2 rounded-lg border text-center transition-colors ${
+                                          isSelected
+                                            ? "border-blue-500 bg-blue-50 dark:bg-blue-950"
+                                            : wouldExceedLimit
+                                            ? "border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed"
+                                            : "border-gray-200 hover:border-gray-300"
+                                        }`}
+                                        title={mood.description}
                                     >
                                       <div className="text-lg mb-1">{mood.emoji}</div>
-                                      <div className="text-xs leading-tight">{mood.label}</div>
+                                      <div className="text-xs leading-tight">{mood.name}</div>
                                     </button>
                                   );
-                                })}
+                                  })}
+                                </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
                       {/* Notes */}
