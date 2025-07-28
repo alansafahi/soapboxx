@@ -704,7 +704,7 @@ export default function SocialFeed() {
                 selectedMoods={selectedMoods}
                 onMoodToggle={toggleMoodSelection}
                 maxMoods={3}
-                compact={true}
+                compact={false}
               />
             </div>
 

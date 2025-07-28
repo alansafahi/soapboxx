@@ -127,8 +127,8 @@ export default function SocialFeedEMISelector({
         </div>
 
         {compact ? (
-          // Compact view for smaller spaces - show all 6 categories in 3x2 grid
-          <div className="grid grid-cols-3 gap-2">
+          // Compact view for smaller spaces - show ALL 6 categories in 2x3 grid
+          <div className="grid grid-cols-2 gap-2">
             {categories.sort().map((categoryName) => {
               const categoryMoods = moodsByCategory[categoryName];
               const hasSelected = categoryMoods.some((mood: EnhancedMoodIndicator) => isMoodSelected(mood.id));
