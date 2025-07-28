@@ -110,7 +110,10 @@ export default function StaffManagementPage() {
 
       {/* Staff Management Component */}
       {selectedCommunityId && (
-        <StaffManagement communityId={selectedCommunityId} />
+        <StaffManagement 
+          communityId={selectedCommunityId} 
+          communityType={adminCommunities.find((c: any) => c.id === selectedCommunityId)?.type || "church"}
+        />
       )}
 
       {/* Placeholder for community selection */}
