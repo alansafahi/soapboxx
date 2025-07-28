@@ -151,6 +151,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes
+- July 28, 2025: VIRTUAL CHECK-IN EMI INTEGRATION COMPLETED - Successfully updated Virtual Check-In dialog to use centralized Enhanced Mood Indicators (EMI) system with proper 6-category organization
+  - DAILY CHECKIN CATEGORY REMOVED: Eliminated problematic "Daily Checkin" category that incorrectly appeared as mood option containing non-feeling items like "Morning", "Evening", "Routine"
+  - EMI SYSTEM STANDARDIZED: Virtual Check-In now uses same EMI data source as AI Mood Check-In and Social Feed for consistent mood tracking across platform
+  - MOOD SELECTION FIXED: Updated Virtual Check-In to use EMI IDs instead of string values with proper 5-mood selection limit and validation
+  - CATEGORY CONSISTENCY: EMI system now has 6 proper mood/feeling categories (Emotional Well-being: 13, Faith & Worship: 5, Growth & Transformation: 4, Life Circumstances: 11, Seeking Support: 6, Spiritual States: 7)
+  - CACHE REFRESH IMPLEMENTED: Updated SocialFeedEMISelector to force fresh data retrieval eliminating stale cache showing old "Daily Checkin" category
 - July 28, 2025: ENHANCED MOOD INDICATORS (EMI) SYSTEM FULLY OPERATIONAL - Successfully implemented comprehensive centralized mood tracking system for Reading Plans, Social Feed, and Daily Checkins
   - EMI SCHEMA INTEGRATION: Updated shared/schema.ts with comprehensive enhancedMoodIndicators table definitions, types, and Zod validation schemas
   - EMI STORAGE LAYER: Added complete CRUD operations (getEnhancedMoodIndicators, getEnhancedMoodIndicatorsByCategory, createEnhancedMoodIndicator, updateEnhancedMoodIndicator, deleteEnhancedMoodIndicator) in server/storage.ts

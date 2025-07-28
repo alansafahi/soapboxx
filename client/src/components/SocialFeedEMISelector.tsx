@@ -25,6 +25,8 @@ export default function SocialFeedEMISelector({
   // Fetch mood indicators by category
   const { data: moodsByCategory = {}, isLoading } = useQuery({
     queryKey: ["/api/enhanced-mood-indicators/by-category"],
+    staleTime: 0, // Force fresh data
+    cacheTime: 0, // Don't cache
   });
 
   const getSelectedMoodsData = (): EnhancedMoodIndicator[] => {
