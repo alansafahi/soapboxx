@@ -1,0 +1,37 @@
+🔍 Evaluation of Current Roles (L1–L6)
+Role	Description	Feedback / Notes
+Ministry Leader (L1)	Entry-level leader for small groups or ministries	✅ Appropriate permissions
+Worship Leader (L2)	Oversees worship/music	✅ Correctly scoped
+Administrator (L2)	Technical/admin support—not pastoral	✅ OK but should be renamed “Technical Admin” to avoid confusion with L6
+Youth Pastor (L3)	Manages youth ministries	✅ Good, but may need access to Volunteer and Event features
+Associate Pastor (L4)	Reports to Lead Pastor, oversees larger sections	✅ Good permission set
+Lead Pastor (L5)	Executive leader of a single campus	✅ Good access set
+Church Administrator (L6)	Full administrative authority, often executive pastor or founder	✅ Good full access
+
+🧩 Missing or Recommended Roles
+Role Name	Description
+Campus Pastor (L4.5)	Oversees one of many campuses in a multi-campus church. Needs similar permissions to Lead Pastor, but limited to their assigned community only.
+Parent Church Admin (L6.5)	For mega-churches overseeing 2+ satellite campuses; must be able to manage child communities, assign admins, view analytics across them.
+Finance Admin (L3.5)	Only has permissions for donations, reporting, and analytics. For churches with split roles between operations and finances.
+Super Volunteer (L2)	Can coordinate volunteers, approve requests, and schedule—but not post announcements or manage donations. Useful for event-heavy ministries.
+
+⚙️ Suggested Missing Permissions
+Responsibility	Needed For	Who Should Get It
+Cross-campus reporting	Parent/mega churches	Parent Church Admin
+Assign campus affiliation	Multi-campus churches	Church Admin, Parent Admin
+Volunteer hours tracking/export	Ministries with liability/compliance	Youth Pastor, Admin
+Pre-approval of scheduled posts	Large churches with moderation policies	Admin, Lead Pastor
+Event budget submission	Ministry departments	Ministry Leader, Youth Pastor
+Church directory updates	Address, hours, contact info	Admin, Church Admin
+
+🛠️ Recommendations for Role Adjustments
+Rename L2 “Administrator” to “Technical Admin” to avoid confusion with L6 “Church Administrator.”
+
+Add a Campus Selection Dropdown for roles L4 and above if multi-campus mode is detected.
+
+Create a role-inheritance structure for mega churches:
+
+Parent Admin can see/manage all child campuses
+
+Campus Pastor can only manage their own campus
+

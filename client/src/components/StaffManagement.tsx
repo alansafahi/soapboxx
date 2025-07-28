@@ -28,7 +28,9 @@ import {
   Eye,
   Check,
   X,
-  AlertTriangle
+  AlertTriangle,
+  DollarSign,
+  MapPin
 } from "lucide-react";
 
 interface StaffMember {
@@ -69,7 +71,7 @@ const getCommunityRoles = (communityType: string = "church") => {
       communityTypes: ["church", "ministry"],
       permissions: [
         "manage_events", "create_content", "moderate_prayers",
-        "send_communications", "manage_volunteers"
+        "send_communications", "manage_volunteers", "event_budget_submission"
       ]
     },
     {
@@ -95,7 +97,8 @@ const getCommunityRoles = (communityType: string = "church") => {
       communityTypes: ["church"],
       permissions: [
         "manage_events", "moderate_prayers", "create_content", 
-        "send_communications", "access_analytics", "manage_volunteers"
+        "send_communications", "access_analytics", "manage_volunteers",
+        "volunteer_hours_tracking", "event_budget_submission"
       ]
     },
     {
@@ -121,7 +124,8 @@ const getCommunityRoles = (communityType: string = "church") => {
       communityTypes: ["church"],
       permissions: [
         "manage_staff", "approve_content", "moderate_prayers", "manage_events", 
-        "access_analytics", "send_communications", "manage_settings", "manage_members"
+        "access_analytics", "send_communications", "manage_settings", "manage_members",
+        "pre_approval_posts", "church_directory_updates"
       ]
     },
     {
@@ -135,45 +139,72 @@ const getCommunityRoles = (communityType: string = "church") => {
       permissions: [
         "manage_staff", "assign_roles", "approve_content", "moderate_prayers", 
         "manage_events", "access_analytics", "manage_finances", "send_communications", 
-        "manage_settings", "manage_members", "manage_facilities", "access_finances"
+        "manage_settings", "manage_members", "manage_facilities", "access_finances",
+        "pre_approval_posts", "church_directory_updates", "assign_campus_affiliation"
       ]
     },
     {
-      name: "administrator",
-      displayName: "Administrator",
-      description: "Handles administrative tasks and operations",
+      name: "technical_admin",
+      displayName: "Technical Admin",
+      description: "Handles technical and administrative support tasks",
       level: 2,
       color: "bg-gray-100 text-gray-800",
       icon: Settings,
-      communityTypes: ["church", "ministry", "group"],
+      communityTypes: ["church"],
       permissions: [
-        "manage_members", "manage_events", "access_analytics",
-        "send_communications", "manage_facilities"
+        "manage_settings", "access_analytics", "manage_facilities", "church_directory_updates"
       ]
     },
     {
-      name: "group_leader",
-      displayName: "Group Leader",
-      description: "Leader of small groups and community circles",
-      level: 3,
-      color: "bg-teal-100 text-teal-800",
-      icon: Users,
-      communityTypes: ["group"],
-      permissions: [
-        "manage_events", "create_content", "moderate_prayers",
-        "send_communications", "manage_volunteers"
-      ]
-    },
-    {
-      name: "coordinator",
-      displayName: "Coordinator",
-      description: "Coordinates activities and member engagement",
-      level: 4,
+      name: "super_volunteer",
+      displayName: "Super Volunteer",
+      description: "Coordinates volunteers and events without financial access",
+      level: 2,
       color: "bg-cyan-100 text-cyan-800",
-      icon: Calendar,
-      communityTypes: ["group", "ministry"],
+      icon: Users,
+      communityTypes: ["church"],
       permissions: [
-        "manage_events", "create_content", "manage_volunteers"
+        "manage_volunteers", "manage_events", "create_content"
+      ]
+    },
+    {
+      name: "finance_admin",
+      displayName: "Finance Admin",
+      description: "Specialized role for donations and financial reporting",
+      level: 3.5,
+      color: "bg-emerald-100 text-emerald-800",
+      icon: DollarSign,
+      communityTypes: ["church"],
+      permissions: [
+        "access_finances", "manage_finances", "access_analytics"
+      ]
+    },
+    {
+      name: "campus_pastor",
+      displayName: "Campus Pastor",
+      description: "Oversees one campus in a multi-campus church",
+      level: 4.5,
+      color: "bg-teal-100 text-teal-800",
+      icon: MapPin,
+      communityTypes: ["church"],
+      permissions: [
+        "manage_staff", "approve_content", "moderate_prayers", "manage_events", 
+        "access_analytics", "send_communications", "manage_settings", "manage_members", "manage_volunteers"
+      ]
+    },
+    {
+      name: "parent_church_admin",
+      displayName: "Parent Church Admin",
+      description: "Mega-church administrator overseeing multiple campuses",
+      level: 6.5,
+      color: "bg-violet-100 text-violet-800",
+      icon: Crown,
+      communityTypes: ["church"],
+      permissions: [
+        "manage_staff", "assign_roles", "approve_content", "moderate_prayers", 
+        "manage_events", "access_analytics", "manage_finances", "send_communications", 
+        "manage_settings", "manage_members", "manage_facilities", "access_finances",
+        "cross_campus_reporting", "assign_campus_affiliation", "manage_child_communities"
       ]
     },
     {
@@ -190,8 +221,10 @@ const getCommunityRoles = (communityType: string = "church") => {
     }
   ];
 
-  // Filter roles based on community type
-  return baseRoles.filter(role => role.communityTypes.includes(communityType));
+  // Filter roles based on community type and sort by level
+  return baseRoles
+    .filter(role => role.communityTypes.includes(communityType))
+    .sort((a, b) => a.level - b.level);
 };
 
 const AVAILABLE_ROLES = getCommunityRoles();
@@ -199,28 +232,35 @@ const AVAILABLE_ROLES = getCommunityRoles();
 const PERMISSION_CATEGORIES = {
   "Staff Management": [
     { key: "manage_staff", label: "Invite & manage staff members", critical: true },
-    { key: "assign_roles", label: "Assign roles to members", critical: true }
+    { key: "assign_roles", label: "Assign roles to members", critical: true },
+    { key: "assign_campus_affiliation", label: "Assign campus affiliation", critical: true }
   ],
   "Content & Communication": [
     { key: "approve_content", label: "Approve user-generated content", critical: false },
     { key: "create_content", label: "Create announcements & posts", critical: false },
     { key: "send_communications", label: "Send emails & notifications", critical: false },
-    { key: "moderate_prayers", label: "Moderate prayer requests", critical: false }
+    { key: "moderate_prayers", label: "Moderate prayer requests", critical: false },
+    { key: "pre_approval_posts", label: "Pre-approval of scheduled posts", critical: false }
   ],
   "Events & Ministry": [
     { key: "manage_events", label: "Create & manage events", critical: false },
     { key: "manage_volunteers", label: "Coordinate volunteers", critical: false },
-    { key: "upload_music", label: "Upload worship music", critical: false }
+    { key: "upload_music", label: "Upload worship music", critical: false },
+    { key: "volunteer_hours_tracking", label: "Track volunteer hours & export", critical: false },
+    { key: "event_budget_submission", label: "Submit event budget requests", critical: false }
   ],
   "Analytics & Reports": [
     { key: "access_analytics", label: "View engagement analytics", critical: false },
     { key: "access_finances", label: "View financial reports", critical: true },
-    { key: "manage_finances", label: "Manage donations & finances", critical: true }
+    { key: "manage_finances", label: "Manage donations & finances", critical: true },
+    { key: "cross_campus_reporting", label: "Cross-campus reporting access", critical: true }
   ],
   "Settings & Security": [
     { key: "manage_settings", label: "Modify church settings", critical: true },
     { key: "manage_members", label: "Add/remove members", critical: false },
-    { key: "manage_facilities", label: "Manage facilities & resources", critical: false }
+    { key: "manage_facilities", label: "Manage facilities & resources", critical: false },
+    { key: "church_directory_updates", label: "Update church directory info", critical: false },
+    { key: "manage_child_communities", label: "Manage child campus communities", critical: true }
   ]
 };
 
