@@ -81,16 +81,15 @@ export default function SocialFeedEMISelector({
 
   let categories = Object.keys(moodsByCategory);
   
-  // ENHANCED DEBUG WITH ALERT
-  console.error("🚨 BEFORE FILTER - All categories:", categories);
-  alert("DEBUG: Categories before filter: " + categories.join(", "));
+  // REMOVE ALERT SPAM - CONSOLE ONLY FOR NOW
+  console.error("🚨 SOCIAL FEED EMI - All categories found:", categories);
   
   // TEMPORARY TEST: Remove "Spiritual States" to see if another category appears
   const originalLength = categories.length;
   categories = categories.filter(cat => cat !== "Spiritual States");
   
-  console.error("🚨 AFTER FILTER - Remaining categories:", categories);
-  alert("DEBUG: Categories after removing Spiritual States: " + categories.join(", "));
+  console.error("🚨 SOCIAL FEED EMI - After removing Spiritual States:", categories);
+  console.error("🚨 SOCIAL FEED EMI - Filter worked?", originalLength > categories.length);
   
   const selectedMoodsData = getSelectedMoodsData();
 
