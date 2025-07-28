@@ -30,6 +30,22 @@ export const sessions = pgTable(
 // Note: Bible verse caching removed - using API.Bible direct lookup with ChatGPT fallback
 
 // Prayer analytics and badges schema
+// Enhanced Mood Indicators (EMI) - Centralized mood system
+export const enhancedMoodIndicators = pgTable("enhanced_mood_indicators", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
+  emoji: varchar("emoji", { length: 10 }).notNull(),
+  category: varchar("category", { length: 100 }).notNull(), // Spiritual States, Emotional Well-being, Life Circumstances, etc.
+  subcategory: varchar("subcategory", { length: 100 }), // Faith & Worship, Growth & Transformation, etc.
+  description: text("description"),
+  colorHex: varchar("color_hex", { length: 7 }), // #FFFFFF format
+  moodScore: integer("mood_score").notNull(), // 1-5 scale for mood intensity
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const answeredPrayerTestimonies = pgTable("answered_prayer_testimonies", {
   id: serial("id").primaryKey(),
   prayerId: integer("prayer_id").notNull().references(() => prayerRequests.id),
@@ -1038,7 +1054,8 @@ export const userReadingProgress = pgTable("user_reading_progress", {
   completedAt: timestamp("completed_at").defaultNow(),
   reflectionText: text("reflection_text"),
   prayerText: text("prayer_text"),
-  emotionalReaction: varchar("emotional_reaction", { length: 50 }), // peaceful, encouraged, challenged, etc.
+  emotionalReactionId: integer("emotional_reaction_id").references(() => enhancedMoodIndicators.id), // EMI reference
+  emotionalReaction: varchar("emotional_reaction", { length: 50 }), // Legacy field for backward compatibility
   personalInsights: text("personal_insights"),
   soapEntryId: integer("soap_entry_id").references(() => soapEntries.id), // Link to SOAP journal entry
   readingTimeMinutes: integer("reading_time_minutes"),
@@ -1183,7 +1200,8 @@ export const moodCheckins = pgTable("mood_checkins", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   checkInId: integer("check_in_id").references(() => checkIns.id), // Link to daily check-in
-  mood: varchar("mood", { length: 200 }).notNull(), // Multiple mood selections: joyful, peaceful, anxious, lonely, determined, etc.
+  moodIds: integer("mood_ids").array(), // EMI reference IDs
+  mood: varchar("mood", { length: 200 }).notNull(), // Legacy field: Multiple mood selections: joyful, peaceful, anxious, lonely, determined, etc.
   moodEmoji: varchar("mood_emoji", { length: 10 }).notNull(), // 😇 😊 😐 😔 😭
   moodScore: integer("mood_score").notNull(), // 1-5 scale
   notes: text("notes"), // User reflection on mood
@@ -2660,12 +2678,23 @@ export type User = typeof users.$inferSelect;
 export type MoodCheckin = typeof moodCheckins.$inferSelect;
 export type InsertMoodCheckin = typeof moodCheckins.$inferInsert;
 
+// Enhanced Mood Indicators (EMI) types
+export type EnhancedMoodIndicator = typeof enhancedMoodIndicators.$inferSelect;
+export type InsertEnhancedMoodIndicator = typeof enhancedMoodIndicators.$inferInsert;
+
 // Personalized content types
 export type PersonalizedContent = typeof personalizedContent.$inferSelect;
 export type InsertPersonalizedContent = typeof personalizedContent.$inferInsert;
 
 // Insert schemas for mood features
 export const insertMoodCheckinSchema = createInsertSchema(moodCheckins).omit({ id: true, createdAt: true });
+
+// Enhanced Mood Indicators (EMI) Zod Schema
+export const insertEnhancedMoodIndicatorSchema = createInsertSchema(enhancedMoodIndicators).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true 
+});
 export const insertPersonalizedContentSchema = createInsertSchema(personalizedContent).omit({ id: true, createdAt: true });
 
 // Bible in a Day sessions

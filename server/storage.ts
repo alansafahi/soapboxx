@@ -1,6 +1,7 @@
 import MappingService from "./mapping-service";
 import {
   users,
+  enhancedMoodIndicators,
   notifications,
   communities,
   churches, // Legacy alias for backward compatibility
@@ -199,6 +200,8 @@ import {
   type InsertEventMetric,
   type MoodCheckin,
   type InsertMoodCheckin,
+  type EnhancedMoodIndicator,
+  type InsertEnhancedMoodIndicator,
   type PersonalizedContent,
   type InsertPersonalizedContent,
   type CheckIn,
@@ -3256,6 +3259,83 @@ export class DatabaseStorage implements IStorage {
     }
   }
   
+  // Enhanced Mood Indicators (EMI) operations
+  async createEnhancedMoodIndicator(emiData: InsertEnhancedMoodIndicator): Promise<EnhancedMoodIndicator> {
+    try {
+      const [emi] = await db
+        .insert(enhancedMoodIndicators)
+        .values(emiData)
+        .returning();
+      return emi;
+    } catch (error) {
+      throw new Error(`Failed to create mood indicator: ${(error as Error).message}`);
+    }
+  }
+
+  async getEnhancedMoodIndicators(category?: string): Promise<EnhancedMoodIndicator[]> {
+    try {
+      const query = db
+        .select()
+        .from(enhancedMoodIndicators)
+        .where(eq(enhancedMoodIndicators.isActive, true))
+        .orderBy(enhancedMoodIndicators.sortOrder, enhancedMoodIndicators.name);
+
+      if (category) {
+        query.where(eq(enhancedMoodIndicators.category, category));
+      }
+
+      return await query;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async getEnhancedMoodIndicatorsByCategory(): Promise<Record<string, EnhancedMoodIndicator[]>> {
+    try {
+      const moods = await db
+        .select()
+        .from(enhancedMoodIndicators)
+        .where(eq(enhancedMoodIndicators.isActive, true))
+        .orderBy(enhancedMoodIndicators.category, enhancedMoodIndicators.sortOrder, enhancedMoodIndicators.name);
+
+      const grouped: Record<string, EnhancedMoodIndicator[]> = {};
+      moods.forEach(mood => {
+        if (!grouped[mood.category]) {
+          grouped[mood.category] = [];
+        }
+        grouped[mood.category].push(mood);
+      });
+
+      return grouped;
+    } catch (error) {
+      return {};
+    }
+  }
+
+  async updateEnhancedMoodIndicator(id: number, updates: Partial<InsertEnhancedMoodIndicator>): Promise<EnhancedMoodIndicator | null> {
+    try {
+      const [emi] = await db
+        .update(enhancedMoodIndicators)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(enhancedMoodIndicators.id, id))
+        .returning();
+      return emi || null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async deleteEnhancedMoodIndicator(id: number): Promise<boolean> {
+    try {
+      const result = await db
+        .delete(enhancedMoodIndicators)
+        .where(eq(enhancedMoodIndicators.id, id));
+      return result.rowCount > 0;
+    } catch (error) {
+      return false;
+    }
+  }
+
   // Mood check-in operations
   async createMoodCheckin(moodCheckinData: InsertMoodCheckin): Promise<MoodCheckin> {
     try {

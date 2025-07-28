@@ -695,6 +695,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Enhanced Mood Indicators (EMI) API endpoints - Centralized system for Reading Plans, Social Feed, Daily Checkins
+  app.get("/api/enhanced-mood-indicators", async (req, res) => {
+    try {
+      const { category } = req.query;
+      const moods = await storage.getEnhancedMoodIndicators(category as string);
+      res.json(moods);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch mood indicators" });
+    }
+  });
+
+  app.get("/api/enhanced-mood-indicators/by-category", async (req, res) => {
+    try {
+      const moodsByCategory = await storage.getEnhancedMoodIndicatorsByCategory();
+      res.json(moodsByCategory);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch mood indicators by category" });
+    }
+  });
+
+  app.post("/api/enhanced-mood-indicators", isAuthenticated, async (req, res) => {
+    try {
+      const emiData = req.body;
+      const mood = await storage.createEnhancedMoodIndicator(emiData);
+      res.json(mood);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to create mood indicator" });
+    }
+  });
+
+  app.put("/api/enhanced-mood-indicators/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const mood = await storage.updateEnhancedMoodIndicator(id, updates);
+      if (!mood) {
+        return res.status(404).json({ message: "Mood indicator not found" });
+      }
+      res.json(mood);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update mood indicator" });
+    }
+  });
+
+  app.delete("/api/enhanced-mood-indicators/:id", isAuthenticated, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteEnhancedMoodIndicator(id);
+      if (!success) {
+        return res.status(404).json({ message: "Mood indicator not found" });
+      }
+      res.json({ message: "Mood indicator deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete mood indicator" });
+    }
+  });
+
   // LEGACY COMPATIBILITY: Deprecated endpoints (WILL BE REMOVED September 30, 2025)
   app.post("/api/soap/save", isAuthenticated, async (req, res) => {
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/soap-entries/save');

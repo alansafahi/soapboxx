@@ -82,6 +82,7 @@ const BackgroundCheckManagementPage = lazy(() => import("./pages/background-chec
 const CommunityAdministrationPage = lazy(() => import("./pages/community-administration"));
 const AnalyticsDashboardPage = lazy(() => import("./pages/analytics-dashboard"));
 const ReadingPlansPage = lazy(() => import("./pages/reading-plans"));
+const EMIAdminPage = lazy(() => import("./pages/emi-admin"));
 
 function AppRouter() {
     const { user, isAuthenticated, isLoading, logout } = useImmediateAuth();
@@ -209,6 +210,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/engagement-analytics" component={EngagementAnalyticsPage} />
                                     <ProtectedRoute path="/moderation-dashboard" component={ModerationDashboardPage} />
                                     <ProtectedRoute path="/divine-phase2" component={DivinePhase2Dashboard} />
+                                    <ProtectedRoute path="/emi-admin" component={EMIAdminPage} />
 
 
                                     <ProtectedRoute path="/ai-guidance" component={PersonalizedGuidancePage} />
