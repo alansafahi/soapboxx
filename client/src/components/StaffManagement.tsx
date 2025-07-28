@@ -166,6 +166,7 @@ export function StaffManagement({ communityId }: { communityId: number }) {
   const [inviteDepartment, setInviteDepartment] = useState("");
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showPermissionsMatrix, setShowPermissionsMatrix] = useState(false);
+  const [selectedMatrixRole, setSelectedMatrixRole] = useState<string | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -400,77 +401,199 @@ export function StaffManagement({ communityId }: { communityId: number }) {
         </CardContent>
       </Card>
 
-      {/* Permissions Matrix Dialog */}
+      {/* Enhanced Permissions Matrix Dialog */}
       <Dialog open={showPermissionsMatrix} onOpenChange={setShowPermissionsMatrix}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Role Permissions Matrix</DialogTitle>
+            <DialogTitle>Staff Role Permissions Matrix</DialogTitle>
             <DialogDescription>
-              See what features and capabilities each role has access to in your community.
+              Click on any role below to highlight their specific permissions, or view all roles at once.
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-6">
-            {/* Role Legend */}
-            <div className="flex flex-wrap gap-2">
-              {AVAILABLE_ROLES.map((role) => {
-                const Icon = role.icon;
-                return (
-                  <Badge key={role.name} variant="outline" className={role.color}>
-                    <Icon className="h-3 w-3 mr-1" />
-                    {role.displayName}
-                  </Badge>
-                );
-              })}
+            {/* Interactive Role Selector */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">Select Role to Highlight:</h3>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setSelectedMatrixRole(null)}
+                  className={selectedMatrixRole === null ? "bg-purple-100 text-purple-800" : ""}
+                >
+                  View All Roles
+                </Button>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {AVAILABLE_ROLES.map((role) => {
+                  const Icon = role.icon;
+                  const isSelected = selectedMatrixRole === role.name;
+                  return (
+                    <Button
+                      key={role.name}
+                      variant={isSelected ? "default" : "outline"}
+                      className={`justify-start p-3 h-auto ${isSelected ? role.color : 'hover:' + role.color}`}
+                      onClick={() => setSelectedMatrixRole(isSelected ? null : role.name)}
+                    >
+                      <Icon className="h-4 w-4 mr-2" />
+                      <div className="text-left">
+                        <div className="font-medium">{role.displayName}</div>
+                        <div className="text-xs opacity-75">Level {role.level}</div>
+                      </div>
+                    </Button>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Permissions Table */}
+            {/* Enhanced Permissions Table */}
             <div className="border rounded-lg overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="text-left p-3 font-medium">Permission</th>
-                    {AVAILABLE_ROLES.map((role) => (
-                      <th key={role.name} className="text-center p-2 font-medium text-xs">
-                        {role.displayName.split(' ')[0]}
-                      </th>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[800px]">
+                  <thead className="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <th className="text-left p-4 font-semibold min-w-[300px]">Permission</th>
+                      {AVAILABLE_ROLES.map((role) => {
+                        const Icon = role.icon;
+                        const isHighlighted = selectedMatrixRole === role.name || selectedMatrixRole === null;
+                        return (
+                          <th 
+                            key={role.name} 
+                            className={`text-center p-3 font-medium min-w-[100px] transition-all duration-200 ${
+                              selectedMatrixRole === role.name 
+                                ? 'bg-purple-100 dark:bg-purple-900/30 ' + role.color 
+                                : isHighlighted 
+                                  ? 'hover:bg-gray-100 dark:hover:bg-gray-700' 
+                                  : 'opacity-30'
+                            }`}
+                          >
+                            <div className="flex flex-col items-center gap-1">
+                              <Icon className="h-4 w-4" />
+                              <div className="text-xs font-medium leading-tight">
+                                {role.displayName}
+                              </div>
+                              <div className="text-xs opacity-75">
+                                Lvl {role.level}
+                              </div>
+                            </div>
+                          </th>
+                        );
+                      })}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(PERMISSION_CATEGORIES).map(([category, permissions]) => (
+                      <React.Fragment key={category}>
+                        <tr className="bg-gray-100 dark:bg-gray-800">
+                          <td colSpan={AVAILABLE_ROLES.length + 1} className="p-3 font-semibold text-sm border-t-2">
+                            📋 {category}
+                          </td>
+                        </tr>
+                        {permissions.map((permission) => (
+                          <tr 
+                            key={permission.key} 
+                            className="border-t hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                          >
+                            <td className="p-4">
+                              <div className="flex items-center gap-3">
+                                <div>
+                                  <div className="font-medium text-sm">{permission.label}</div>
+                                  {permission.critical && (
+                                    <div className="flex items-center gap-1 mt-1">
+                                      <AlertTriangle className="h-3 w-3 text-red-500" />
+                                      <span className="text-xs text-red-600">Critical Permission</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            {AVAILABLE_ROLES.map((role) => {
+                              const hasPermission = role.permissions.includes(permission.key);
+                              const isHighlighted = selectedMatrixRole === role.name || selectedMatrixRole === null;
+                              return (
+                                <td 
+                                  key={role.name} 
+                                  className={`text-center p-3 transition-all duration-200 ${
+                                    selectedMatrixRole === role.name 
+                                      ? 'bg-purple-50 dark:bg-purple-900/20 border-x-2 border-purple-200 dark:border-purple-700' 
+                                      : isHighlighted 
+                                        ? '' 
+                                        : 'opacity-30'
+                                  }`}
+                                >
+                                  {hasPermission ? (
+                                    <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${
+                                      selectedMatrixRole === role.name 
+                                        ? 'bg-green-100 text-green-700 border-2 border-green-300' 
+                                        : 'bg-green-100 text-green-600'
+                                    }`}>
+                                      <Check className="h-4 w-4" />
+                                    </div>
+                                  ) : (
+                                    <div className={`inline-flex items-center justify-center w-8 h-8 rounded-full ${
+                                      selectedMatrixRole === role.name 
+                                        ? 'bg-red-100 text-red-700 border-2 border-red-300' 
+                                        : 'bg-gray-100 text-gray-400'
+                                    }`}>
+                                      <X className="h-4 w-4" />
+                                    </div>
+                                  )}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </React.Fragment>
                     ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(PERMISSION_CATEGORIES).map(([category, permissions]) => (
-                    <tbody key={category}>
-                      <tr className="bg-gray-100">
-                        <td colSpan={AVAILABLE_ROLES.length + 1} className="p-2 font-medium text-sm">
-                          {category}
-                        </td>
-                      </tr>
-                      {permissions.map((permission) => (
-                        <tr key={permission.key} className="border-t">
-                          <td className="p-3">
-                            <div className="flex items-center gap-2">
-                              {permission.label}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Selected Role Summary */}
+            {selectedMatrixRole && (
+              <div className="border rounded-lg p-4 bg-purple-50 dark:bg-purple-900/20">
+                {(() => {
+                  const role = AVAILABLE_ROLES.find(r => r.name === selectedMatrixRole);
+                  if (!role) return null;
+                  const Icon = role.icon;
+                  const rolePermissions = Object.entries(PERMISSION_CATEGORIES)
+                    .flatMap(([category, permissions]) => 
+                      permissions.filter(p => role.permissions.includes(p.key))
+                        .map(p => ({ ...p, category }))
+                    );
+                  
+                  return (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-full ${role.color}`}>
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-lg">{role.displayName}</h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-300">{role.description}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="font-medium mb-2">This role has {rolePermissions.length} permissions:</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {rolePermissions.map((permission) => (
+                            <div key={permission.key} className="flex items-center gap-2 text-sm">
+                              <Check className="h-3 w-3 text-green-600" />
+                              <span>{permission.label}</span>
                               {permission.critical && (
                                 <AlertTriangle className="h-3 w-3 text-red-500" />
                               )}
                             </div>
-                          </td>
-                          {AVAILABLE_ROLES.map((role) => (
-                            <td key={role.name} className="text-center p-2">
-                              {role.permissions.includes(permission.key) ? (
-                                <Check className="h-4 w-4 text-green-600 mx-auto" />
-                              ) : (
-                                <X className="h-4 w-4 text-gray-300 mx-auto" />
-                              )}
-                            </td>
                           ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
 
             <div className="text-xs text-gray-500 flex items-center gap-2">
               <AlertTriangle className="h-3 w-3 text-red-500" />
