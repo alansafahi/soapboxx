@@ -673,61 +673,84 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                       </CollapsibleTrigger>
                       
                       <CollapsibleContent className="mt-2">
-                        <div className={`border-2 border-t-0 rounded-b-lg ${categoryData.color} p-4 space-y-3`}>
-                          {filteredPermissions.map((permission) => (
-                            <div key={permission.key} className="bg-white/80 dark:bg-gray-800/80 rounded-lg p-3 border">
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-2">
-                                    <span className="font-medium">{permission.label}</span>
-                                    <Tooltip>
-                                      <TooltipTrigger>
-                                        <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help" />
-                                      </TooltipTrigger>
-                                      <TooltipContent className="max-w-xs">
-                                        <p>{permission.tooltip}</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                    {permission.critical && (
-                                      <Badge variant="destructive" className="text-xs">Critical</Badge>
-                                    )}
-                                  </div>
-                                  
-                                  {/* Role Permission Grid */}
-                                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                        <div className={`border-2 border-t-0 rounded-b-lg ${categoryData.color} p-4`}>
+                          {/* Table with Original Clean Style */}
+                          <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+                            <div className="overflow-x-auto">
+                              <table className="w-full">
+                                <thead>
+                                  <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                                    <th className="text-left p-3 font-medium text-gray-900 dark:text-gray-100">Permission</th>
                                     {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role) => {
-                                      const hasPermission = role.permissions.includes(permission.key);
-                                      const isHighlighted = selectedMatrixRole === role.name;
                                       const Icon = role.icon;
-                                      
+                                      const isHighlighted = selectedMatrixRole === role.name;
                                       return (
-                                        <div
+                                        <th
                                           key={role.name}
-                                          className={`flex flex-col items-center p-2 rounded-lg border transition-all ${
-                                            isHighlighted
-                                              ? hasPermission
-                                                ? 'bg-green-100 border-green-300 shadow-lg'
-                                                : 'bg-red-100 border-red-300 shadow-lg'
-                                              : hasPermission
-                                              ? 'bg-green-50 border-green-200'
-                                              : 'bg-gray-50 border-gray-200'
+                                          className={`text-center p-2 cursor-pointer transition-all min-w-[80px] ${
+                                            isHighlighted 
+                                              ? 'bg-blue-100 dark:bg-blue-900' 
+                                              : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                                           }`}
+                                          onClick={() => setSelectedMatrixRole(selectedMatrixRole === role.name ? null : role.name)}
                                         >
-                                          <Icon className="h-3 w-3 mb-1" />
-                                          <div className="text-xs text-center font-medium">L{role.level}</div>
-                                          {hasPermission ? (
-                                            <Check className="h-3 w-3 text-green-600" />
-                                          ) : (
-                                            <X className="h-3 w-3 text-gray-400" />
-                                          )}
-                                        </div>
+                                          <div className="flex flex-col items-center gap-1">
+                                            <Icon className="h-4 w-4" />
+                                            <span className="text-xs font-medium leading-tight">{role.displayName}</span>
+                                            <span className="text-xs text-gray-500">L{role.level}</span>
+                                          </div>
+                                        </th>
                                       );
                                     })}
-                                  </div>
-                                </div>
-                              </div>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {filteredPermissions.map((permission, index) => (
+                                    <tr key={permission.key} className={`border-b border-gray-100 dark:border-gray-700 ${index % 2 === 0 ? 'bg-gray-50 dark:bg-gray-800' : 'bg-white dark:bg-gray-900'}`}>
+                                      <td className="p-3">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-medium text-gray-900 dark:text-gray-100">{permission.label}</span>
+                                          <Tooltip>
+                                            <TooltipTrigger>
+                                              <Info className="h-4 w-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                                            </TooltipTrigger>
+                                            <TooltipContent className="max-w-xs">
+                                              <p>{permission.tooltip}</p>
+                                            </TooltipContent>
+                                          </Tooltip>
+                                          {permission.critical && (
+                                            <Badge variant="destructive" className="text-xs">Critical</Badge>
+                                          )}
+                                        </div>
+                                      </td>
+                                      {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role) => {
+                                        const hasPermission = role.permissions.includes(permission.key);
+                                        const isHighlighted = selectedMatrixRole === role.name;
+                                        return (
+                                          <td
+                                            key={role.name}
+                                            className={`text-center p-3 ${
+                                              isHighlighted 
+                                                ? hasPermission 
+                                                  ? 'bg-green-100 dark:bg-green-900' 
+                                                  : 'bg-red-100 dark:bg-red-900'
+                                                : ''
+                                            }`}
+                                          >
+                                            {hasPermission ? (
+                                              <Check className="h-5 w-5 text-green-600 mx-auto" />
+                                            ) : (
+                                              <X className="h-5 w-5 text-gray-400 mx-auto" />
+                                            )}
+                                          </td>
+                                        );
+                                      })}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
                             </div>
-                          ))}
+                          </div>
                         </div>
                       </CollapsibleContent>
                     </Collapsible>
