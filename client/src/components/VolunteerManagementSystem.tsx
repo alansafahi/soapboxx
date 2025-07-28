@@ -520,7 +520,7 @@ export default function VolunteerManagementSystem() {
                     <div>
                       <p className="font-medium">{volunteer.firstName} {volunteer.lastName}</p>
                       <p className="text-sm text-gray-500">
-                        Joined {format(new Date(volunteer.joinedAt), "MMM yyyy")}
+                        Joined {formatSafeDate(volunteer.joinedAt, "MMM yyyy")}
                       </p>
                     </div>
                   </TableCell>
