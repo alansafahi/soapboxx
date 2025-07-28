@@ -235,9 +235,9 @@ const getCommunityRoles = (communityType: string = "church") => {
     }
   ];
 
-  // Filter roles based on community type and sort by level
+  // Filter roles based on community type and sort by level (case-insensitive)
   return baseRoles
-    .filter(role => role.communityTypes.includes(communityType))
+    .filter(role => role.communityTypes.includes(communityType.toLowerCase()))
     .sort((a, b) => a.level - b.level);
 };
 
@@ -590,7 +590,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Roles</SelectItem>
-                  {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).map((role) => (
+                  {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType.toLowerCase())).map((role) => (
                     <SelectItem key={role.name} value={role.name}>
                       {role.displayName} (L{role.level})
                     </SelectItem>
@@ -611,7 +611,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                       permission.label.toLowerCase().includes(searchFilter.toLowerCase()) ||
                       permission.tooltip.toLowerCase().includes(searchFilter.toLowerCase());
                     const matchesRole = !roleFilter || roleFilter === "all" || 
-                      COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).find(r => r.name === roleFilter)?.permissions.includes(permission.key);
+                      COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType.toLowerCase())).find(r => r.name === roleFilter)?.permissions.includes(permission.key);
                     return matchesSearch && matchesRole;
                   });
 
@@ -654,7 +654,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                                 <thead>
                                   <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                                     <th className="text-left p-3 font-medium text-gray-900 dark:text-gray-100">Permission</th>
-                                    {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role, roleIndex) => {
+                                    {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType.toLowerCase())).sort((a, b) => a.level - b.level).map((role, roleIndex) => {
                                       const Icon = role.icon;
                                       const isHighlighted = selectedMatrixRole === role.name;
                                       
@@ -708,7 +708,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                                           )}
                                         </div>
                                       </td>
-                                      {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType)).sort((a, b) => a.level - b.level).map((role, roleIndex) => {
+                                      {COMMUNITY_ROLES.filter(role => role.communityTypes.includes(communityType.toLowerCase())).sort((a, b) => a.level - b.level).map((role, roleIndex) => {
                                         const hasPermission = role.permissions.includes(permission.key);
                                         const isHighlighted = selectedMatrixRole === role.name;
                                         
