@@ -314,7 +314,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
   const [selectedMatrixRole, setSelectedMatrixRole] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['📋 Admin & Management']));
   const [searchFilter, setSearchFilter] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
+  const [roleFilter, setRoleFilter] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -585,7 +585,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                   <SelectValue placeholder="Filter by role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="">All Roles</SelectItem>
                   {COMMUNITY_ROLES.map((role) => (
                     <SelectItem key={role.name} value={role.name}>
                       {role.displayName} (L{role.level})
@@ -600,7 +600,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
               {COMMUNITY_ROLES.sort((a, b) => a.level - b.level).map((role) => {
                 const Icon = role.icon;
                 const isSelected = selectedMatrixRole === role.name;
-                const isFiltered = roleFilter !== "all" && roleFilter !== role.name;
+                const isFiltered = roleFilter && roleFilter !== role.name;
                 
                 return (
                   <button
@@ -633,7 +633,7 @@ export function StaffManagement({ communityId, communityType = "church" }: { com
                     const matchesSearch = !searchFilter || 
                       permission.label.toLowerCase().includes(searchFilter.toLowerCase()) ||
                       permission.tooltip.toLowerCase().includes(searchFilter.toLowerCase());
-                    const matchesRole = roleFilter === "all" || 
+                    const matchesRole = !roleFilter || 
                       COMMUNITY_ROLES.find(r => r.name === roleFilter)?.permissions.includes(permission.key);
                     return matchesSearch && matchesRole;
                   });
