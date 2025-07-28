@@ -23,10 +23,10 @@ export default function SocialFeedEMISelector({
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
   // Fetch mood indicators by category - use same endpoint as CheckInSystem
-  const { data: allMoods = [], isLoading } = useQuery({
+  const { data: allMoods = [], isLoading } = useQuery<EnhancedMoodIndicator[]>({
     queryKey: ["/api/enhanced-mood-indicators", "force-refresh", Date.now()],
     staleTime: 0,
-    cacheTime: 0,
+    gcTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
@@ -63,6 +63,11 @@ export default function SocialFeedEMISelector({
 
   const categories = Object.keys(moodsByCategory);
   const selectedMoodsData = getSelectedMoodsData();
+
+  // Debug: Log categories to console
+  console.log("SocialFeedEMISelector - Categories found:", categories);
+  console.log("SocialFeedEMISelector - Categories count:", categories.length);
+  console.log("SocialFeedEMISelector - Full moodsByCategory:", moodsByCategory);
 
   return (
     <div className="space-y-4">
@@ -108,7 +113,7 @@ export default function SocialFeedEMISelector({
         {compact ? (
           // Compact view for smaller spaces - show all 6 categories in 3x2 grid
           <div className="grid grid-cols-3 gap-2">
-            {categories.map((categoryName) => {
+            {categories.sort().map((categoryName) => {
               const categoryMoods = moodsByCategory[categoryName];
               const hasSelected = categoryMoods.some((mood: EnhancedMoodIndicator) => isMoodSelected(mood.id));
               
@@ -136,7 +141,7 @@ export default function SocialFeedEMISelector({
           // Full view
           <ScrollArea className="h-64">
             <div className="space-y-3">
-              {categories.map((categoryName) => {
+              {categories.sort().map((categoryName) => {
                 const categoryMoods = moodsByCategory[categoryName];
                 const isExpanded = expandedCategory === categoryName;
                 const hasSelected = categoryMoods.some((mood: EnhancedMoodIndicator) => isMoodSelected(mood.id));
