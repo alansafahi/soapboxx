@@ -312,7 +312,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
         generateComplete: !currentData.scripture || !currentData.scriptureReference // Generate complete S.O.A.P. if no scripture provided
       };
 
-      const suggestions = await apiRequest('POST', '/api/soap-entries/ai/suggestions', requestBody);
+      const suggestions = await apiRequest('POST', '/api/soap/ai/suggestions', requestBody);
       
       setAiSuggestions(suggestions);
       
