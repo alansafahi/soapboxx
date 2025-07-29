@@ -178,7 +178,29 @@ export default function EnhancedCommunityDiscovery() {
       });
     }
 
-    return filtered;
+    // Sort by type first (Churches, Ministries, Groups), then alphabetically by name
+    return filtered.sort((a, b) => {
+      // Define type priority: church = 1, ministry = 2, group = 3
+      const getTypePriority = (type: string) => {
+        switch (type) {
+          case 'church': return 1;
+          case 'ministry': return 2;
+          case 'group': return 3;
+          default: return 4;
+        }
+      };
+      
+      const typePriorityA = getTypePriority(a.type);
+      const typePriorityB = getTypePriority(b.type);
+      
+      // First sort by type priority
+      if (typePriorityA !== typePriorityB) {
+        return typePriorityA - typePriorityB;
+      }
+      
+      // Then sort alphabetically by name within the same type
+      return a.name.localeCompare(b.name);
+    });
   }, [communities, searchQuery, locationFilter, zipCodeFilter, proximityFilter, communityTypeFilter, denominationFilter, sizeFilter, userCommunities]);
 
   // Adaptive secondary filter options based on primary selection
