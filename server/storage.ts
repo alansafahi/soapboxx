@@ -2460,19 +2460,32 @@ export class DatabaseStorage implements IStorage {
   // Discussion operations
   async getDiscussions(limit?: number, offset?: number, churchId?: number, currentUserId?: string, includeFlagged?: boolean): Promise<any[]> {
     try {
-      // Simple query to get discussions without complex joins for now
-      const discussionsResult = await db.execute(sql`
-        SELECT 
-          d.id, d.title, d.content, d.category, d.is_public, d.created_at, d.author_id,
-          u.id as user_id, u.email, u.first_name, u.last_name, u.profile_image_url
-        FROM discussions d
-        LEFT JOIN users u ON d.author_id = u.id
-        WHERE d.is_public = true AND (d.expires_at IS NULL OR d.expires_at > NOW())
-        ORDER BY d.created_at DESC
+      // Combined query to get both discussions and SOAP entries using UNION
+      const combinedResult = await db.execute(sql`
+        (
+          SELECT 
+            d.id, 'discussion' as type, d.title, d.content, d.category, d.is_public, d.created_at, d.author_id,
+            u.id as user_id, u.email, u.first_name, u.last_name, u.profile_image_url,
+            NULL as scripture, NULL as scripture_reference, NULL as observation, NULL as application, NULL as prayer, NULL as mood_tag
+          FROM discussions d
+          LEFT JOIN users u ON d.author_id = u.id
+          WHERE d.is_public = true AND (d.expires_at IS NULL OR d.expires_at > NOW())
+        )
+        UNION ALL
+        (
+          SELECT 
+            s.id, 'soap_reflection' as type, s.scripture_reference as title, s.scripture as content, 'reflection' as category, s.is_public, s.created_at, s.user_id as author_id,
+            u.id as user_id, u.email, u.first_name, u.last_name, u.profile_image_url,
+            s.scripture, s.scripture_reference, s.observation, s.application, s.prayer, s.mood_tag
+          FROM soap_entries s
+          LEFT JOIN users u ON s.user_id = u.id
+          WHERE s.is_public = true
+        )
+        ORDER BY created_at DESC
         LIMIT ${limit || 50} OFFSET ${offset || 0}
       `);
 
-      const discussions = discussionsResult.rows.map((row: any) => ({
+      const discussions = combinedResult.rows.map((row: any) => ({
         id: row.id,
         title: row.title,
         content: row.content,
@@ -2487,16 +2500,26 @@ export class DatabaseStorage implements IStorage {
           lastName: row.last_name,
           profileImageUrl: row.profile_image_url,
         },
-        type: 'general',
-        soapData: null,
+        type: row.type,
+        mood: row.mood_tag,
+        soapData: row.type === 'soap_reflection' ? {
+          scripture: row.scripture,
+          scriptureReference: row.scripture_reference,
+          observation: row.observation,
+          application: row.application,
+          prayer: row.prayer
+        } : null,
         isLiked: false
       }));
 
-      // Get comment counts for discussions
-      const discussionIds = discussions.map(d => d.id).filter(Boolean);
-      let discussionCommentCounts: Record<number, number> = {};
+      // Separate discussions and SOAP entries
+      const discussionPosts = discussions.filter(d => d.type === 'discussion');
+      const soapPosts = discussions.filter(d => d.type === 'soap_reflection');
       
-      if (discussionIds.length > 0) {
+      // Get comment counts for discussions
+      let discussionCommentCounts: Record<number, number> = {};
+      if (discussionPosts.length > 0) {
+        const discussionIds = discussionPosts.map(d => d.id);
         const commentCountResult = await db.execute(sql`
           SELECT discussion_id, COUNT(*) as comment_count 
           FROM discussion_comments 
@@ -2510,12 +2533,29 @@ export class DatabaseStorage implements IStorage {
         }, {});
       }
 
-      // Get like counts and user like status for discussions
+      // Get comment counts for SOAP entries
+      let soapCommentCounts: Record<number, number> = {};
+      if (soapPosts.length > 0) {
+        const soapIds = soapPosts.map(d => d.id);
+        const soapCommentCountResult = await db.execute(sql`
+          SELECT soap_entry_id, COUNT(*) as comment_count 
+          FROM soap_comments 
+          WHERE soap_entry_id IN (${sql.join(soapIds, sql`, `)})
+          GROUP BY soap_entry_id
+        `);
+        
+        soapCommentCounts = soapCommentCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
+          acc[row.soap_entry_id] = Number(row.comment_count);
+          return acc;
+        }, {});
+      }
+
+      // Get like counts for discussions
       let discussionLikeCounts: Record<number, number> = {};
       let userLikedDiscussions: Set<number> = new Set();
       
-      if (discussionIds.length > 0) {
-        // Get like counts
+      if (discussionPosts.length > 0) {
+        const discussionIds = discussionPosts.map(d => d.id);
         const likeCountResult = await db.execute(sql`
           SELECT discussion_id, COUNT(*) as like_count 
           FROM discussion_likes 
@@ -2528,7 +2568,6 @@ export class DatabaseStorage implements IStorage {
           return acc;
         }, {});
         
-        // Get user's liked posts
         if (currentUserId) {
           const userLikesResult = await db.execute(sql`
             SELECT discussion_id 
@@ -2540,12 +2579,47 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      // Add comment counts, like counts, and like status to discussions
+      // Get like counts for SOAP entries
+      let soapLikeCounts: Record<number, number> = {};
+      let userLikedSoap: Set<number> = new Set();
+      
+      if (soapPosts.length > 0) {
+        const soapIds = soapPosts.map(d => d.id);
+        const soapLikeCountResult = await db.execute(sql`
+          SELECT soap_entry_id, COUNT(*) as like_count 
+          FROM soap_entry_likes 
+          WHERE soap_entry_id IN (${sql.join(soapIds, sql`, `)})
+          GROUP BY soap_entry_id
+        `);
+        
+        soapLikeCounts = soapLikeCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
+          acc[row.soap_entry_id] = Number(row.like_count);
+          return acc;
+        }, {});
+        
+        if (currentUserId) {
+          const userSoapLikesResult = await db.execute(sql`
+            SELECT soap_entry_id 
+            FROM soap_entry_likes 
+            WHERE user_id = ${currentUserId} AND soap_entry_id IN (${sql.join(soapIds, sql`, `)})
+          `);
+          
+          userLikedSoap = new Set(userSoapLikesResult.rows.map((row: any) => row.soap_entry_id));
+        }
+      }
+
+      // Add comment counts, like counts, and like status to all posts
       const discussionsWithCounts = discussions.map(discussion => ({
         ...discussion,
-        commentCount: discussionCommentCounts[discussion.id] || 0,
-        likeCount: discussionLikeCounts[discussion.id] || 0,
-        isLiked: userLikedDiscussions.has(discussion.id)
+        commentCount: discussion.type === 'discussion' 
+          ? (discussionCommentCounts[discussion.id] || 0)
+          : (soapCommentCounts[discussion.id] || 0),
+        likeCount: discussion.type === 'discussion'
+          ? (discussionLikeCounts[discussion.id] || 0)
+          : (soapLikeCounts[discussion.id] || 0),
+        isLiked: discussion.type === 'discussion'
+          ? userLikedDiscussions.has(discussion.id)
+          : userLikedSoap.has(discussion.id)
       }));
 
       return discussionsWithCounts;
