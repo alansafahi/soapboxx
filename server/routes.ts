@@ -7886,6 +7886,17 @@ Return JSON with this exact structure:
   // Create new community (new terminology)
   app.post('/api/communities', isAuthenticated, upload.single('logo'), async (req: any, res) => {
     try {
+      // Debug: Log all received data
+      console.log('Community creation - All req.body fields:', Object.keys(req.body));
+      console.log('Community creation - Social media fields:', {
+        facebook_url: req.body.facebook_url,
+        instagram_url: req.body.instagram_url,
+        twitter_url: req.body.twitter_url,
+        tiktok_url: req.body.tiktok_url,
+        youtube_url: req.body.youtube_url,
+        linkedin_url: req.body.linkedin_url
+      });
+
       let { 
         name, 
         type, 

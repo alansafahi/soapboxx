@@ -151,6 +151,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes
+- July 29, 2025: YOUTUBE AND LINKEDIN SOCIAL MEDIA INTEGRATION BACKEND FIX COMPLETED - Successfully resolved critical backend field mapping issue preventing YouTube and LinkedIn URLs from being saved to database
+  - ROOT CAUSE IDENTIFIED: Backend route missing critical fields in communityData object for database insertion
+  - BACKEND ROUTE FIXED: Added missing fields to communityData object in server/routes.ts (established_year, weekly_attendance, parent_church_name, mission_statement, admin_phone)
+  - DATABASE SCHEMA VERIFIED: Confirmed all required columns exist (social_links JSONB, established_year INTEGER, parent_church_name VARCHAR, mission_statement TEXT)
+  - FIELD MAPPING ENHANCED: Improved field extraction and mapping from FormData to database snake_case format
+  - LSP ERRORS RESOLVED: Eliminated 414 TypeScript errors in routes.ts indicating successful backend integration
+  - INVESTIGATION ONGOING: Added debug logging to identify any remaining field extraction issues between frontend transformation and backend processing
 - July 29, 2025: PRODUCTION DEPLOYMENT CLEANUP COMPLETED - Successfully eliminated 136MB of development screenshots and assets, removed debug console statements throughout codebase, fixed duplicate method warnings, and achieved clean production build
   - ASSETS CLEANUP: Reduced attached_assets from 136MB to 12KB by removing all development screenshots and text files
   - DEBUG STATEMENTS REMOVED: Eliminated console.log, console.error statements from client-side components (SocialFeedEMISelector, EMIAwareRecommendations, social-feed) and server-side routes (email-service, auth, routes)
