@@ -112,6 +112,7 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
       attachedMedia?: Array<{name: string; type: string; size: number; url: string}>;
       linkedVerse?: {reference: string; text: string};
       audience?: string;
+      expiresAt?: Date | null;
     }) => {
       return apiRequest("POST", "/api/discussions", data);
     },

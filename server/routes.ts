@@ -9186,7 +9186,7 @@ Return JSON with this exact structure:
   app.post("/api/discussions", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
-      const { type, content, mood, audience, linkedVerse, attachedMedia, title, category, isPublic, tags } = req.body;
+      const { type, content, mood, audience, linkedVerse, attachedMedia, title, category, isPublic, tags, expiresAt } = req.body;
       
 
 
@@ -9224,7 +9224,8 @@ Return JSON with this exact structure:
         isPublic: isPublic !== undefined ? isPublic : true,
         moodTag: mood || null,
         attachedMedia: attachedMedia || null,
-        linkedVerse: linkedVerse || null
+        linkedVerse: linkedVerse || null,
+        expiresAt: expiresAt || null
       };
       
 
