@@ -3835,6 +3835,8 @@ export class DatabaseStorage implements IStorage {
 
   async getPublicSoapEntries(churchId?: number, limit = 20, offset = 0, excludeUserId?: string): Promise<any[]> {
     try {
+      console.log(`[DEBUG] getPublicSoapEntries called with churchId=${churchId}, excludeUserId=${excludeUserId}, limit=${limit}`);
+      
       let conditions = [eq(soapEntries.isPublic, true)];
 
       // Only filter by church if churchId is provided AND we want church-specific results
@@ -3842,12 +3844,17 @@ export class DatabaseStorage implements IStorage {
         // For church-specific feed with user exclusion, get entries from same church excluding user
         conditions.push(eq(soapEntries.communityId, churchId));
         conditions.push(ne(soapEntries.userId, excludeUserId));
+        console.log(`[DEBUG] Applied church-specific filter with user exclusion: churchId=${churchId}, excludeUserId=${excludeUserId}`);
       } else if (churchId) {
         // For church-specific feed without exclusion
         conditions.push(eq(soapEntries.communityId, churchId));
+        console.log(`[DEBUG] Applied church-specific filter: churchId=${churchId}`);
       } else if (excludeUserId) {
         // For global feed excluding specific user
         conditions.push(ne(soapEntries.userId, excludeUserId));
+        console.log(`[DEBUG] Applied global filter excluding user: excludeUserId=${excludeUserId}`);
+      } else {
+        console.log(`[DEBUG] No additional filters applied - returning all public entries`);
       }
       // else: no filters, get all public entries
 
@@ -3915,7 +3922,7 @@ export class DatabaseStorage implements IStorage {
       //   });
       // }
 
-      return entries.map(entry => ({
+      const finalEntries = entries.map(entry => ({
         ...entry,
         author: {
           firstName: entry.firstName,
@@ -3924,8 +3931,11 @@ export class DatabaseStorage implements IStorage {
           profileImageUrl: entry.profileImageUrl
         }
       }));
+      
+      console.log(`[DEBUG] getPublicSoapEntries returning ${finalEntries.length} entries`);
+      return finalEntries;
     } catch (error) {
-      // Error logged for internal tracking
+      console.error(`[ERROR] getPublicSoapEntries failed:`, error);
       return [];
     }
   }
