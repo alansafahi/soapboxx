@@ -396,7 +396,6 @@ export interface IStorage {
   updateChurch(id: number, updates: Partial<Church>): Promise<Church>;
   deleteChurch(id: number): Promise<void>;
   getUserCreatedChurches(userId: string): Promise<Church[]>;
-  getCommunitiesCreatedByUser(userId: string): Promise<Church[]>;
   searchChurches(params: { denomination?: string; location?: string; size?: string; proximity?: number; limit?: number }): Promise<any[]>;
   getChurchDenominations(): Promise<string[]>;
   
@@ -1811,45 +1810,6 @@ export class DatabaseStorage implements IStorage {
       .where(eq(communities.id, id));
   }
 
-  // Standardized method for getting communities created by user
-  async getCommunitiesCreatedByUser(userId: string): Promise<Church[]> {
-    try {
-      // Use raw SQL to avoid Drizzle ORM table reference issues
-      const result = await db.execute(sql`
-        SELECT 
-          c.id, c.name, c.denomination, c.address, c.city, c.state, c.zip_code as "zipCode",
-          c.phone, c.email, c.website, c.description, c.logo_url as "logoUrl",
-          c.verification_status as "verificationStatus", c.is_active as "isActive",
-          c.created_at as "createdAt", c.updated_at as "updatedAt", c.admin_email as "adminEmail",
-          c.type, c.size, c.member_count as "memberCount", c.created_by as "createdBy"
-        FROM communities c
-        INNER JOIN user_churches uc ON c.id = uc.church_id
-        WHERE uc.user_id = ${userId}
-          AND uc.role IN ('church_admin', 'admin', 'pastor', 'lead-pastor')
-          AND c.is_active = true
-          AND uc.is_active = true
-        ORDER BY c.created_at DESC
-      `);
-
-      return result.rows as Church[];
-    } catch (error) {
-      // Try alternative query using direct createdBy field
-      try {
-        const fallbackResult = await db.execute(sql`
-          SELECT * FROM communities 
-          WHERE created_by = ${userId} 
-            AND is_active = true 
-          ORDER BY created_at DESC
-        `);
-        
-        return fallbackResult.rows as Church[];
-      } catch (fallbackError) {
-        return [];
-      }
-    }
-  }
-
-  // Legacy method for backward compatibility
   async getUserCreatedChurches(userId: string): Promise<Church[]> {
     try {
       // Use raw SQL to avoid Drizzle ORM table reference issues

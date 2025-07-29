@@ -76,14 +76,14 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
 
   // Fetch church details to identify main church
   const { data: churchDetails } = useQuery({
-    queryKey: ['/api/communities', churchId],
-    queryFn: () => apiRequest(`/api/communities/${churchId}`, 'GET')
+    queryKey: ['/api/churches', churchId],
+    queryFn: () => apiRequest(`/api/churches/${churchId}`, 'GET')
   });
 
   // Fetch campuses for the church
   const { data: campuses, isLoading: campusesLoading } = useQuery<Campus[]>({
-    queryKey: ['/api/communities/campuses', churchId],
-    queryFn: () => apiRequest(`/api/communities/${churchId}/campuses`, 'GET').then(res => res.campuses)
+    queryKey: ['/api/churches/campuses', churchId],
+    queryFn: () => apiRequest(`/api/churches/${churchId}/campuses`, 'GET').then(res => res.campuses)
   });
 
   // Sort campuses with main church first, then satellite campuses
@@ -105,13 +105,13 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
 
   // Create campus mutation
   const createCampusMutation = useMutation({
-    mutationFn: (campusData: any) => apiRequest(`/api/communities/${churchId}/campuses`, 'POST', campusData),
+    mutationFn: (campusData: any) => apiRequest(`/api/churches/${churchId}/campuses`, 'POST', campusData),
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Campus created successfully!"
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/communities/campuses', churchId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/churches/campuses', churchId] });
       setNewCampusData({ 
         name: '', 
         address: '', 
@@ -139,13 +139,13 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
   // Update campus mutation
   const updateCampusMutation = useMutation({
     mutationFn: ({ id, ...data }: { id: number } & any) => 
-      apiRequest(`/api/communities/campuses/${id}`, 'PUT', data),
+      apiRequest(`/api/churches/campuses/${id}`, 'PUT', data),
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Campus updated successfully!"
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/communities/campuses', churchId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/churches/campuses', churchId] });
       setManageCampusDialog(false);
       setEditingCampus(null);
     },
@@ -160,13 +160,13 @@ export default function CampusManagement({ churchId }: CampusManagementProps) {
 
   // Delete campus mutation
   const deleteCampusMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/communities/campuses/${id}`, 'DELETE'),
+    mutationFn: (id: number) => apiRequest(`/api/churches/campuses/${id}`, 'DELETE'),
     onSuccess: () => {
       toast({
         title: "Success",
         description: "Campus deleted successfully!"
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/communities/campuses', churchId] });
+      queryClient.invalidateQueries({ queryKey: ['/api/churches/campuses', churchId] });
       setManageCampusDialog(false);
       setEditingCampus(null);
     },

@@ -1,18 +1,16 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
-import { useLocation, useSearch, Link } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Button } from "./ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { useToast } from "../hooks/use-toast";
-import { Building2, Settings, Users, Calendar, Plus } from "lucide-react";
+import { Building2, Settings, Users, Calendar } from "lucide-react";
 import { CommunitySettings } from "./CommunitySettings";
 import { ChurchFeatureManager } from "./ChurchFeatureManager";
 import { EventManagement } from "./EventManagement";
 import CampusManagement from "./CampusManagement";
-import { CommunityCreationForm, type CommunityFormData } from "./CommunityCreationForm";
+import { CommunityForm } from "./CommunityForm";
 
 interface CommunityProfile {
   id: number;
@@ -55,48 +53,6 @@ export function CommunityAdminTab() {
   const urlCommunityId = searchParams.get('communityId');
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(urlCommunityId);
   const [activeTab, setActiveTab] = useState("profile");
-  const [createCommunityOpen, setCreateCommunityOpen] = useState(false);
-  
-  // Create community mutation
-  const createCommunityMutation = useMutation({
-    mutationFn: async (data: CommunityFormData) => {
-      const normalizedData = {
-        ...data,
-        website: data.website?.trim() ? 
-          (data.website.startsWith("http://") || data.website.startsWith("https://") ? 
-            data.website : `https://${data.website}`) : "",
-      };
-      
-      const response = await fetch('/api/communities', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(normalizedData),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to create community');
-      }
-      
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Community created successfully!",
-        description: "Your new community has been created and you are now the administrator.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["/api/users/admin-communities"] });
-      setCreateCommunityOpen(false);
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Failed to create community",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
-      });
-  });
 
   // Sync selectedCommunityId with URL
   useEffect(() => {
@@ -114,7 +70,7 @@ export function CommunityAdminTab() {
 
   // Get communities created by user - always call hooks in same order
   const { data: createdCommunities = [], isLoading: createdLoading, error: createdError } = useQuery({
-    queryKey: ["/api/users/created-communities"],
+    queryKey: ["/api/users/created-churches"],
     enabled: !!user && isAuthenticated,
     retry: 2,
   }) as { data: any[], isLoading: boolean, error: any };
@@ -185,7 +141,7 @@ export function CommunityAdminTab() {
           }
         } catch (uploadError) {
 
-          throw new Error(`Failed to upload logo: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`);
+          throw new Error(`Failed to upload logo: ${uploadError.message}`);
         }
       } else if (profileData.logoFile) {
 
@@ -315,28 +271,6 @@ export function CommunityAdminTab() {
           </p>
         </div>
         <div className="flex items-center space-x-4">
-          <Dialog open={createCommunityOpen} onOpenChange={setCreateCommunityOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Community
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Create A New Community</DialogTitle>
-                <DialogDescription>
-                  Set up a new community and become its administrator
-                </DialogDescription>
-              </DialogHeader>
-              
-              <CommunityCreationForm
-                onSubmit={(data) => createCommunityMutation.mutate(data)}
-                isLoading={createCommunityMutation.isPending}
-                submitButtonText="Create Community"
-              />
-            </DialogContent>
-          </Dialog>
           {allAdminCommunities.length > 1 && (
             <Select value={selectedCommunityId || ""} onValueChange={(value) => {
               setSelectedCommunityId(value);
@@ -398,32 +332,13 @@ export function CommunityAdminTab() {
                 </p>
               </div>
               
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Community profile editing form will be implemented here with React Hook Form
-                </p>
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  <div>
-                    <Label>Community Name</Label>
-                    <Input value={selectedCommunity?.name || ""} disabled />
-                  </div>
-                  <div>
-                    <Label>Type</Label>
-                    <Input value={selectedCommunity?.type || ""} disabled />
-                  </div>
-                  <div>
-                    <Label>Address</Label>
-                    <Input value={selectedCommunity?.address || ""} disabled />
-                  </div>
-                  <div>
-                    <Label>City</Label>
-                    <Input value={selectedCommunity?.city || ""} disabled />
-                  </div>
-                </div>
-                <Button className="mt-4" disabled>
-                  Profile editing will be available soon
-                </Button>
-              </div>
+              <CommunityForm
+                mode="edit"
+                initialData={selectedCommunity}
+                onSubmit={handleCommunitySubmit}
+                isLoading={saveProfileMutation.isPending}
+                submitButtonText="Save Changes"
+              />
             </div>
           </TabsContent>
 
@@ -464,7 +379,7 @@ export function CommunityAdminTab() {
               <CommunitySettings 
                 churchId={parseInt(selectedCommunityId)}
                 userRole="church_admin"
-                communityType={selectedCommunity.type as "church" | "group" | "ministry"}
+                communityType={selectedCommunity.type}
               />
             )}
           </TabsContent>

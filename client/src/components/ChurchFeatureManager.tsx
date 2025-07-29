@@ -260,7 +260,7 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
   const { data: features, isLoading, refetch } = useQuery<ChurchFeature[]>({
     queryKey: ['church-features', churchId],
     queryFn: async () => {
-      const response = await fetch(`/api/communities/${churchId}/features`, { credentials: 'include' });
+      const response = await fetch(`/api/churches/${churchId}/features`, { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch church features');
       return response.json();
     },
