@@ -6367,6 +6367,42 @@ export class DatabaseStorage implements IStorage {
 
     return rolePermissions[role] || ["basic_access"];
   }
+
+  // Scripture tracking methods for AI generation
+  async getRecentUserScriptures(userId: string, days: number = 30): Promise<string[]> {
+    try {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - days);
+      
+      const recentEntries = await db
+        .select({ scriptureReference: soapEntries.scriptureReference })
+        .from(soapEntries)
+        .where(and(
+          eq(soapEntries.userId, userId),
+          gte(soapEntries.createdAt, cutoffDate),
+          isNotNull(soapEntries.scriptureReference)
+        ))
+        .orderBy(desc(soapEntries.createdAt));
+      
+      return recentEntries
+        .map(entry => entry.scriptureReference)
+        .filter(ref => ref && ref.trim() !== '');
+    } catch (error) {
+      console.error('Error getting recent user scriptures:', error);
+      return [];
+    }
+  }
+
+  async recordUserScripture(userId: string, scriptureReference: string): Promise<void> {
+    try {
+      // This method could track scripture usage for future AI recommendations
+      // For now, we don't need to store additional records since SOAP entries
+      // already contain the scripture references
+      console.log(`[DEBUG] Recording scripture ${scriptureReference} for user ${userId}`);
+    } catch (error) {
+      console.error('Error recording user scripture:', error);
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
