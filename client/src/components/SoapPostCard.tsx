@@ -336,7 +336,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
         <div className="bg-white/80 dark:bg-gray-800/50 rounded-lg p-4 border border-purple-100 dark:border-purple-800">
           <div className="flex items-start space-x-3">
             <div className="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-              <span className="text-sm">📖</span>
+              <span className="text-sm" style={{fontFamily: 'Apple Color Emoji, Segoe UI Emoji, NotoColorEmoji, Segoe UI Symbol, Android Emoji, EmojiSymbols'}}>📖</span>
             </div>
             <div className="flex-1">
               <h3 className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-2">
@@ -357,7 +357,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
               <div className="p-3">
                 <div className="flex items-center space-x-3 mb-2">
                   <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                    <span className="text-xs">🔍</span>
+                    <span className="text-xs" style={{fontFamily: 'Apple Color Emoji, Segoe UI Emoji, NotoColorEmoji, Segoe UI Symbol, Android Emoji, EmojiSymbols'}}>🔍</span>
                   </div>
                   <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
                     Observation
@@ -393,7 +393,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
               <div className="p-3">
                 <div className="flex items-center space-x-3 mb-2">
                   <div className="w-6 h-6 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                    <span className="text-xs">💡</span>
+                    <span className="text-xs" style={{fontFamily: 'Apple Color Emoji, Segoe UI Emoji, NotoColorEmoji, Segoe UI Symbol, Android Emoji, EmojiSymbols'}}>💡</span>
                   </div>
                   <span className="text-sm font-medium text-green-700 dark:text-green-300">
                     Application
@@ -429,7 +429,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
               <div className="p-3">
                 <div className="flex items-center space-x-3 mb-2">
                   <div className="w-6 h-6 bg-amber-100 dark:bg-amber-900 rounded-full flex items-center justify-center">
-                    <span className="text-xs">🙏</span>
+                    <span className="text-xs" style={{fontFamily: 'Apple Color Emoji, Segoe UI Emoji, NotoColorEmoji, Segoe UI Symbol, Android Emoji, EmojiSymbols'}}>🙏</span>
                   </div>
                   <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
                     Prayer

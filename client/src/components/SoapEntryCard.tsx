@@ -376,9 +376,11 @@ export function SoapEntryCard({
               Observation
             </div>
             <p className="text-sm text-muted-foreground">
-              <FormattedText content={isExpanded || entry.observation.length <= 150 
-                ? entry.observation 
-                : truncateText(entry.observation)
+              <FormattedText content={entry.observation && entry.observation.trim() 
+                ? (isExpanded || entry.observation.length <= 150 
+                    ? entry.observation 
+                    : truncateText(entry.observation))
+                : "Add your observations about this scripture..."
               } />
             </p>
           </div>
@@ -390,9 +392,11 @@ export function SoapEntryCard({
               Application
             </div>
             <p className="text-sm text-muted-foreground">
-              <FormattedText content={isExpanded || entry.application.length <= 150 
-                ? entry.application 
-                : truncateText(entry.application)
+              <FormattedText content={entry.application && entry.application.trim() 
+                ? (isExpanded || entry.application.length <= 150 
+                    ? entry.application 
+                    : truncateText(entry.application))
+                : "How does this apply to your life?..."
               } />
             </p>
           </div>
@@ -404,9 +408,11 @@ export function SoapEntryCard({
               Prayer
             </div>
             <p className="text-sm text-muted-foreground italic">
-              <FormattedText content={isExpanded || entry.prayer.length <= 150 
-                ? entry.prayer 
-                : truncateText(entry.prayer)
+              <FormattedText content={entry.prayer && entry.prayer.trim() 
+                ? (isExpanded || entry.prayer.length <= 150 
+                    ? entry.prayer 
+                    : truncateText(entry.prayer))
+                : "Write your prayer based on this scripture..."
               } />
             </p>
           </div>
