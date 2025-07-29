@@ -632,7 +632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/soap-entries/reactions", isAuthenticated, async (req: any, res) => {
     try {
       const { soapId, reactionType, emoji } = req.body;
-      const userId = req.user.id;
+      const userId = req.user.claims.sub;
 
       // Toggle reaction to SOAP entry
       const result = await storage.addSoapReaction(soapId, userId, reactionType, emoji);
@@ -642,33 +642,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get SOAP reaction counts for a specific entry
-  app.get("/api/soap-entries/:id/reactions", async (req, res) => {
-    try {
-      const soapId = parseInt(req.params.id);
-      const counts = await storage.getSoapReactionCounts(soapId);
-      res.json(counts);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  // Get user's reaction for a specific SOAP entry
-  app.get("/api/soap-entries/:id/user-reaction", isAuthenticated, async (req: any, res) => {
-    try {
-      const soapId = parseInt(req.params.id);
-      const userId = req.user.id;
-      const reaction = await storage.getUserSoapReaction(soapId, userId);
-      res.json(reaction);
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
   app.post("/api/soap-entries/reflect", isAuthenticated, async (req: any, res) => {
     try {
       const { originalSoapId, scripture, scriptureReference } = req.body;
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
 
       // Create a personal reflection template with only scripture and reference
       // Use placeholder text to satisfy schema requirements while encouraging personal reflection
@@ -696,7 +673,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/soap-entries/save", isAuthenticated, async (req: any, res) => {
     try {
       const { soapId } = req.body;
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
 
       // Save SOAP entry to user's collection
       await storage.saveSoapEntry(soapId, userId);
@@ -1119,7 +1096,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       // Use session data for user retrieval
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       
       if (!userId) {
         return res.status(401).json({ message: "Unauthorized" });
@@ -1348,7 +1325,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Role Management Routes
   app.get('/api/auth/available-roles', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const availableRoles = await storage.getAvailableRoles(userId);
       const currentRole = await storage.getUserRole(userId);
       
@@ -1364,7 +1341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/auth/switch-role', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const { newRole } = req.body;
 
       if (!newRole) {
@@ -1718,7 +1695,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Tour status endpoint (STANDARDIZED)
   app.get('/api/user-tours/status', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -1789,7 +1766,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Complete tour endpoint
   app.post('/api/user-tours/complete', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const { role } = req.body;
       
       if (!role) {
@@ -1849,7 +1826,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/tour/status', isAuthenticated, async (req: any, res) => {
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-tours/status');
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       if (!user) return res.status(404).json({ message: "User not found" });
       const platformRoles = ['soapbox_owner', 'system_admin', 'support_agent'];
@@ -1870,7 +1847,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/tour/complete', isAuthenticated, async (req: any, res) => {
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/user-tours/complete');
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const { role } = req.body;
       if (!role) return res.status(400).json({ message: "Role is required" });
       await storage.saveTourCompletion({ userId, tourType: role, stepIndex: -1, completed: true, completedAt: new Date() });
@@ -1885,7 +1862,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const { category, expiresAt } = req.body;
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       
       // Check if user has pastor/admin permissions
       const userRole = await storage.getUserRole(userId);
@@ -1920,7 +1897,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/discussions/:id/pin', isAuthenticated, async (req: any, res) => {
     try {
       const { id } = req.params;
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       
       // Check if user has pastor/admin permissions
       const userRole = await storage.getUserRole(userId);
@@ -1967,7 +1944,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get pinned posts for church
   app.get('/api/discussions/pinned', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -2023,7 +2000,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/sermon-studio/research', isAuthenticated, async (req: any, res) => {
     try {
       const { scripture, topic } = req.body;
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       
       // Check if user has pastor permissions
       const userRole = await storage.getUserRole(userId);
@@ -2494,7 +2471,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get specific sermon draft
   app.get('/api/sermon-studio/drafts/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const draftId = parseInt(req.params.id);
       
       const draft = await storage.getSermonDraft(draftId, userId);
@@ -2512,7 +2489,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update sermon draft
   app.put('/api/sermon-studio/drafts/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const draftId = parseInt(req.params.id);
       const { title, outline, research, illustrations, enhancement } = req.body;
       
@@ -2545,7 +2522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Delete sermon draft
   app.delete('/api/sermon-studio/drafts/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const draftId = parseInt(req.params.id);
       
       await storage.deleteSermonDraft(draftId, userId);
@@ -2570,7 +2547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.setHeader('X-API-Deprecation-Warning', 'This endpoint will be removed September 30, 2025. Use /api/sermon-studio/research');
     try {
       const { scripture, topic } = req.body;
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       if (!userId) return res.status(401).json({ message: "User not authenticated" });
       const userRole = await storage.getUserRole(userId);
       if (!['pastor', 'lead_pastor', 'church_admin', 'admin', 'system_admin', 'soapbox_owner'].includes(userRole)) {
@@ -3627,7 +3604,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
   app.get('/api/personalized-content/:contentId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const { contentId } = req.params;
       
       const content = await storage.getPersonalizedContent(contentId);
@@ -4742,7 +4719,7 @@ Context: ${context || 'General support chat'}`;
   app.post('/api/bible/ai-reflection', isAuthenticated, async (req: any, res) => {
     try {
       const { verseText, verseReference, userContext, emotionalState } = req.body;
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
 
       if (!process.env.OPENAI_API_KEY) {
         return res.status(500).json({ message: "AI service not configured" });
@@ -4873,7 +4850,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     try {
       const { packId } = req.params;
       const { day } = req.query;
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       
       // Sample content for demonstration
       const packContent = {
@@ -4937,7 +4914,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
   app.get('/api/bible/streak', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       
       const streak = {
         id: 1,
@@ -4960,7 +4937,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   app.post('/api/bible/ai-reflection', isAuthenticated, async (req: any, res) => {
     try {
       const { verseText, verseReference, userContext, emotionalState } = req.body;
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
 
       if (!verseText || !verseReference) {
         return res.status(400).json({ message: "Verse text and reference are required" });
@@ -5062,7 +5039,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   app.post('/api/bible/search-by-topic', isAuthenticated, async (req: any, res) => {
     try {
       const { topics } = req.body;
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
 
       if (!topics || !Array.isArray(topics) || topics.length === 0) {
         return res.status(400).json({ message: "Topics array is required" });
@@ -5270,7 +5247,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   // Mark conversation as read
   app.post('/api/messages/conversations/:conversationId/read', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const { conversationId } = req.params;
       
       await storage.markConversationAsRead(conversationId, userId);
@@ -5283,7 +5260,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   // Get contacts for new message
   app.get('/api/contacts', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const contacts = await storage.getUserContacts(userId);
       res.json(contacts);
     } catch (error) {
@@ -5295,7 +5272,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   app.get('/api/bible/random-verse', isAuthenticated, async (req: any, res) => {
     try {
       const { category } = req.query;
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
 
       const verse = await storage.getRandomVerseByCategory(category as string);
       
@@ -5315,7 +5292,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   app.post('/api/bible/generate-verse-art', isAuthenticated, async (req: any, res) => {
     try {
       const { verseText, verseReference, backgroundTheme, fontStyle, colorScheme } = req.body;
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
 
       if (!verseText || !verseReference || !backgroundTheme) {
         return res.status(400).json({ message: "Verse text, reference, and background theme are required" });
@@ -5417,7 +5394,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
   app.get('/api/bible/badges', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       
       const badges = [
         {
@@ -5457,7 +5434,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
   app.post('/api/bible/reading', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const { dailyVerseId, reflectionText, emotionalReaction, audioListened } = req.body;
       
       // Record the reading (simplified for now)
@@ -5480,7 +5457,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   // Admin/Pastor Analytics Endpoints
   app.get('/api/admin/member-checkins', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const { period = '30', churchId } = req.query;
       
       // Check if user has admin/pastor permissions
@@ -5509,7 +5486,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
   app.get('/api/admin/devotion-analytics', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const { period = '30', churchId } = req.query;
       
       // Check if user has admin/pastor permissions
@@ -5539,7 +5516,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
   app.get('/api/admin/at-risk-members', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const { churchId, threshold = '14' } = req.query;
       
       // Check if user has admin/pastor permissions
@@ -5575,7 +5552,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
   app.get('/api/admin/engagement-overview', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const { churchId } = req.query;
       
       // Check if user has admin/pastor permissions
@@ -6358,7 +6335,7 @@ ${availableVerses.slice(0, 50).map((v: any) => `${v.id}: ${v.reference} - ${v.te
   // Enhanced audio routine with Bible integration
   app.post('/api/audio/routines/bible-integrated', isAuthenticated, async (req, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = (req as any).user.claims.sub;
       const { verseIds, routineType = 'custom', voice = 'warm-female', musicBed = 'gentle-piano' } = req.body;
       
       if (!verseIds || !Array.isArray(verseIds) || verseIds.length === 0) {
@@ -7421,7 +7398,7 @@ Return JSON with this exact structure:
   // AI Video Generation Routes - Phase 2
   app.post('/api/videos/ai-generate', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const { aiVideoGenerator } = await import('./ai-video-generator');
       
       const request = {
@@ -7756,7 +7733,7 @@ Return JSON with this exact structure:
   // Bulk church import (admin only)
   app.post('/api/churches/bulk-import', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
       // Check admin permissions
@@ -9057,7 +9034,7 @@ Return JSON with this exact structure:
   // Get churches created by the current user (for admin portal)
   app.get('/api/churches/created', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const churches = await storage.getUserCreatedChurches(userId);
       res.json(churches);
     } catch (error) {
@@ -9287,7 +9264,7 @@ Return JSON with this exact structure:
   // Get discussions endpoint
   app.get("/api/discussions", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       console.log(`[DEBUG] /api/discussions called by user ${userId}`);
       
       if (!userId) {
@@ -9361,7 +9338,7 @@ Return JSON with this exact structure:
   // Create discussion endpoint
   app.post("/api/discussions", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       const { type, content, mood, audience, linkedVerse, attachedMedia, title, category, isPublic, tags, expiresAt } = req.body;
       
       console.log('POST /api/discussions - Debug:', {
@@ -9706,7 +9683,7 @@ Return JSON with this exact structure:
 
   app.post("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       const discussionId = parseInt(req.params.id);
       const { content, parentId } = req.body;
       
@@ -9751,7 +9728,7 @@ Return JSON with this exact structure:
   app.get("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
     const discussionId = parseInt(req.params.id);
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       console.log(`[DEBUG] Fetching comments for discussion ${discussionId}, user ${userId}`);
       const comments = await storage.getDiscussionComments(discussionId, userId);
       console.log(`[DEBUG] Found ${comments.length} comments for discussion ${discussionId}`);
@@ -9765,7 +9742,7 @@ Return JSON with this exact structure:
   // SOAP Entry Comments - Add missing endpoints
   app.post("/api/soap/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       const soapId = parseInt(req.params.id);
       const { content } = req.body;
       
@@ -9802,7 +9779,7 @@ Return JSON with this exact structure:
   app.post('/api/soap/comments/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const commentId = parseInt(req.params.id);
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       
       // Award points for liking a SOAP comment
       await storage.trackUserActivity({
@@ -9823,7 +9800,7 @@ Return JSON with this exact structure:
   app.post('/api/comments/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const commentId = parseInt(req.params.id);
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       
       const result = await storage.toggleDiscussionCommentLike(commentId, userId);
       res.json(result);
@@ -11381,7 +11358,7 @@ Return JSON with this exact structure:
   app.post('/api/soap/:id/feature', isAuthenticated, async (req: any, res) => {
     try {
       const entryId = parseInt(req.params.id);
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
 
       // Check if user has admin permissions
       const userRole = await storage.getUserRole(userId);
@@ -11575,7 +11552,7 @@ Return JSON with this exact structure:
   app.delete('/api/soap/:id/feature', isAuthenticated, async (req: any, res) => {
     try {
       const entryId = parseInt(req.params.id);
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
 
       // Check if user has admin permissions
       const userRole = await storage.getUserRole(userId);
@@ -13590,7 +13567,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
   app.get("/api/reading-plans/:id/progress", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.id || req.session?.userId;
+      const userId = req.user.claims.sub;
       const planId = parseInt(req.params.id);
       
       if (isNaN(planId)) {
