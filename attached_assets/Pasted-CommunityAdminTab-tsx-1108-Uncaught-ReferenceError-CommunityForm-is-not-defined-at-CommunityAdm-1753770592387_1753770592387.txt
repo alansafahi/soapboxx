@@ -1,0 +1,391 @@
+CommunityAdminTab.tsx:1108 Uncaught ReferenceError: CommunityForm is not defined
+    at CommunityAdminTab (CommunityAdminTab.tsx:1108:11)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at updateFunctionComponent (chunk-RPCDYKBN.js:14582:28)
+    at beginWork (chunk-RPCDYKBN.js:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+eruda.js:2 The above error occurred in the <CommunityAdminTab> component:
+
+    at CommunityAdminTab (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/components/CommunityAdminTab.tsx?t=1753769059189:38:61)
+    at div
+    at div
+    at CommunityAdministration
+    at Route (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:206:16)
+    at ProtectedRoute (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?v=ZeeiDjYckgCuBMxXtAl4Z:186:40)
+    at Switch (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:262:17)
+    at Suspense
+    at div
+    at MotionComponent (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:945:40)
+    at PresenceChild (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:121:24)
+    at AnimatePresence (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:210:26)
+    at main
+    at div
+    at div
+    at AppRouter (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?v=ZeeiDjYckgCuBMxXtAl4Z:164:56)
+    at Router (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:161:17)
+    at Provider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=dbc732d9:38:15)
+    at TooltipProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=dbc732d9:65:5)
+    at ThemeProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/contexts/ThemeContext.tsx:21:33)
+    at QueryClientProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=dbc732d9:2934:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+chunk-RPCDYKBN.js:19413 Uncaught ReferenceError: CommunityForm is not defined
+    at CommunityAdminTab (CommunityAdminTab.tsx:1108:11)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at updateFunctionComponent (chunk-RPCDYKBN.js:14582:28)
+    at beginWork (chunk-RPCDYKBN.js:15924:22)
+    at beginWork$1 (chunk-RPCDYKBN.js:19753:22)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+    at renderRootSync (chunk-RPCDYKBN.js:19116:15)
+    at recoverFromConcurrentError (chunk-RPCDYKBN.js:18736:28)
+    at performConcurrentWorkOnRoot (chunk-RPCDYKBN.js:18684:30)
+CommunityAdminTab.tsx:1115 Uncaught ReferenceError: Label is not defined
+    at CommunityAdminTab (CommunityAdminTab.tsx:1115:38)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at updateFunctionComponent (chunk-RPCDYKBN.js:14582:28)
+    at beginWork (chunk-RPCDYKBN.js:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+CommunityAdminTab.tsx:1115 Uncaught ReferenceError: Label is not defined
+    at CommunityAdminTab (CommunityAdminTab.tsx:1115:38)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at updateFunctionComponent (chunk-RPCDYKBN.js:14582:28)
+    at beginWork (chunk-RPCDYKBN.js:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+eruda.js:2 The above error occurred in the <CommunityAdminTab> component:
+
+    at CommunityAdminTab (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/components/CommunityAdminTab.tsx?t=1753769106706:38:61)
+    at div
+    at div
+    at CommunityAdministration
+    at Route (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:206:16)
+    at ProtectedRoute (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?v=ZeeiDjYckgCuBMxXtAl4Z:186:40)
+    at Switch (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:262:17)
+    at Suspense
+    at div
+    at MotionComponent (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:945:40)
+    at PresenceChild (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:121:24)
+    at AnimatePresence (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:210:26)
+    at main
+    at div
+    at div
+    at AppRouter (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?v=ZeeiDjYckgCuBMxXtAl4Z:164:56)
+    at Router (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:161:17)
+    at Provider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=dbc732d9:38:15)
+    at TooltipProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=dbc732d9:65:5)
+    at ThemeProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/contexts/ThemeContext.tsx:21:33)
+    at QueryClientProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=dbc732d9:2934:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+chunk-RPCDYKBN.js:19413 Uncaught ReferenceError: Label is not defined
+    at CommunityAdminTab (CommunityAdminTab.tsx:1115:38)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at updateFunctionComponent (chunk-RPCDYKBN.js:14582:28)
+    at beginWork (chunk-RPCDYKBN.js:15924:22)
+    at beginWork$1 (chunk-RPCDYKBN.js:19753:22)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+    at renderRootSync (chunk-RPCDYKBN.js:19116:15)
+    at recoverFromConcurrentError (chunk-RPCDYKBN.js:18736:28)
+    at performConcurrentWorkOnRoot (chunk-RPCDYKBN.js:18684:30)
+eruda.js:2 [vite] server connection lost. Polling for restart...
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/leaderboard 500 (Internal Server Error)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/events/upcoming?limit=3 500 (Internal Server Error)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/leaderboard 500 (Internal Server Error)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/events/upcoming?limit=3 500 (Internal Server Error)
+CommunityAdminTab.tsx:1115 Uncaught ReferenceError: Label is not defined
+    at CommunityAdminTab (CommunityAdminTab.tsx:1115:38)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at updateFunctionComponent (chunk-RPCDYKBN.js:14582:28)
+    at beginWork (chunk-RPCDYKBN.js:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+CommunityAdminTab.tsx:1115 Uncaught ReferenceError: Label is not defined
+    at CommunityAdminTab (CommunityAdminTab.tsx:1115:38)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at updateFunctionComponent (chunk-RPCDYKBN.js:14582:28)
+    at beginWork (chunk-RPCDYKBN.js:15924:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+eruda.js:2 The above error occurred in the <CommunityAdminTab> component:
+
+    at CommunityAdminTab (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/components/CommunityAdminTab.tsx:38:61)
+    at div
+    at div
+    at CommunityAdministration
+    at Route (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:206:16)
+    at ProtectedRoute (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?v=A9NbILKCR_XdwRwovHfB8:186:40)
+    at Switch (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:262:17)
+    at Suspense
+    at div
+    at MotionComponent (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:945:40)
+    at PresenceChild (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:121:24)
+    at AnimatePresence (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:210:26)
+    at main
+    at div
+    at div
+    at AppRouter (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?v=A9NbILKCR_XdwRwovHfB8:164:56)
+    at Router (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:161:17)
+    at Provider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=dbc732d9:38:15)
+    at TooltipProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=dbc732d9:65:5)
+    at ThemeProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/contexts/ThemeContext.tsx:21:33)
+    at QueryClientProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=dbc732d9:2934:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+chunk-RPCDYKBN.js:9129 Uncaught ReferenceError: Label is not defined
+    at CommunityAdminTab (CommunityAdminTab.tsx:1115:38)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at updateFunctionComponent (chunk-RPCDYKBN.js:14582:28)
+    at beginWork (chunk-RPCDYKBN.js:15924:22)
+    at beginWork$1 (chunk-RPCDYKBN.js:19753:22)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+    at renderRootSync (chunk-RPCDYKBN.js:19116:15)
+    at recoverFromConcurrentError (chunk-RPCDYKBN.js:18736:28)
+    at performSyncWorkOnRoot (chunk-RPCDYKBN.js:18879:28)
+eruda.js:2 [vite] server connection lost. Polling for restart...
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/leaderboard 500 (Internal Server Error)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/events/upcoming?limit=3 500 (Internal Server Error)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/leaderboard 500 (Internal Server Error)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/events/upcoming?limit=3 500 (Internal Server Error)
+eruda.js:2 
+ POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/communities 400 (Bad Request)
+eruda.js:2 
+ POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/communities 400 (Bad Request)
+eruda.js:2 
+ POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/communities 400 (Bad Request)
+eruda.js:2 
+ POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/communities 400 (Bad Request)
+MyCommunities.tsx:233 Uncaught ReferenceError: useForm is not defined
+    at MyCommunities (MyCommunities.tsx:233:22)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at mountIndeterminateComponent (chunk-RPCDYKBN.js:14926:21)
+    at beginWork (chunk-RPCDYKBN.js:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+MyCommunities.tsx:233 Uncaught ReferenceError: useForm is not defined
+    at MyCommunities (MyCommunities.tsx:233:22)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at mountIndeterminateComponent (chunk-RPCDYKBN.js:14926:21)
+    at beginWork (chunk-RPCDYKBN.js:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+eruda.js:2 The above error occurred in the <MyCommunities> component:
+
+    at MyCommunities (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/components/MyCommunities.tsx?t=1753769920795:185:20)
+    at div
+    at main
+    at div
+    at Communities (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/pages/communities.tsx?t=1753769546564:23:20)
+    at Route (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:206:16)
+    at ProtectedRoute (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?t=1753769546564&v=fXJjpvoB4qd51VaFzjF4F:186:40)
+    at Switch (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:262:17)
+    at Suspense
+    at div
+    at MotionComponent (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:945:40)
+    at PresenceChild (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:121:24)
+    at AnimatePresence (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:210:26)
+    at main
+    at div
+    at div
+    at AppRouter (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?t=1753769546564&v=fXJjpvoB4qd51VaFzjF4F:164:56)
+    at Router (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:161:17)
+    at Provider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=dbc732d9:38:15)
+    at TooltipProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=dbc732d9:65:5)
+    at ThemeProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/contexts/ThemeContext.tsx:21:33)
+    at QueryClientProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=dbc732d9:2934:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+MyCommunities.tsx:233 Uncaught (in promise) ReferenceError: useForm is not defined
+    at MyCommunities (MyCommunities.tsx:233:22)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at mountIndeterminateComponent (chunk-RPCDYKBN.js:14926:21)
+    at beginWork (chunk-RPCDYKBN.js:15914:22)
+    at beginWork$1 (chunk-RPCDYKBN.js:19753:22)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+    at renderRootSync (chunk-RPCDYKBN.js:19116:15)
+    at recoverFromConcurrentError (chunk-RPCDYKBN.js:18736:28)
+    at performSyncWorkOnRoot (chunk-RPCDYKBN.js:18879:28)
+MyCommunities.tsx:80 Uncaught ReferenceError: useForm is not defined
+    at MyCommunities (MyCommunities.tsx:80:22)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at mountIndeterminateComponent (chunk-RPCDYKBN.js:14926:21)
+    at beginWork (chunk-RPCDYKBN.js:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+MyCommunities.tsx:80 Uncaught ReferenceError: useForm is not defined
+    at MyCommunities (MyCommunities.tsx:80:22)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at mountIndeterminateComponent (chunk-RPCDYKBN.js:14926:21)
+    at beginWork (chunk-RPCDYKBN.js:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-RPCDYKBN.js:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-RPCDYKBN.js:3699:24)
+    at invokeGuardedCallback (chunk-RPCDYKBN.js:3733:39)
+    at beginWork$1 (chunk-RPCDYKBN.js:19765:15)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+eruda.js:2 The above error occurred in the <MyCommunities> component:
+
+    at MyCommunities (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/components/MyCommunities.tsx?t=1753769942553:32:20)
+    at div
+    at main
+    at div
+    at Communities (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/pages/communities.tsx?t=1753769546564:23:20)
+    at Route (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:206:16)
+    at ProtectedRoute (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?t=1753769546564&v=fXJjpvoB4qd51VaFzjF4F:186:40)
+    at Switch (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:262:17)
+    at Suspense
+    at div
+    at MotionComponent (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:945:40)
+    at PresenceChild (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:121:24)
+    at AnimatePresence (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:210:26)
+    at main
+    at div
+    at div
+    at AppRouter (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?t=1753769546564&v=fXJjpvoB4qd51VaFzjF4F:164:56)
+    at Router (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:161:17)
+    at Provider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=dbc732d9:38:15)
+    at TooltipProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=dbc732d9:65:5)
+    at ThemeProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/contexts/ThemeContext.tsx:21:33)
+    at QueryClientProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=dbc732d9:2934:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+MyCommunities.tsx:80 Uncaught (in promise) ReferenceError: useForm is not defined
+    at MyCommunities (MyCommunities.tsx:80:22)
+    at renderWithHooks (chunk-RPCDYKBN.js:11548:26)
+    at mountIndeterminateComponent (chunk-RPCDYKBN.js:14926:21)
+    at beginWork (chunk-RPCDYKBN.js:15914:22)
+    at beginWork$1 (chunk-RPCDYKBN.js:19753:22)
+    at performUnitOfWork (chunk-RPCDYKBN.js:19198:20)
+    at workLoopSync (chunk-RPCDYKBN.js:19137:13)
+    at renderRootSync (chunk-RPCDYKBN.js:19116:15)
+    at recoverFromConcurrentError (chunk-RPCDYKBN.js:18736:28)
+    at performSyncWorkOnRoot (chunk-RPCDYKBN.js:18879:28)
+eruda.js:2 [vite] server connection lost. Polling for restart...
+client:602 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/index.css?t=1753769992186&v=7h82sDvJ8IsK8bOFG5Pil net::ERR_ABORTED 502 (Bad Gateway)
+eruda.js:2 [hmr] Failed to reload /src/index.css?v=7h82sDvJ8IsK8bOFG5Pil. This could be due to syntax errors or importing non-existent modules. (see errors above)
+client:602 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/components/MyCommunities.tsx?t=1753769992186 net::ERR_ABORTED 502 (Bad Gateway)
+eruda.js:2 [hmr] Failed to reload /src/components/MyCommunities.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/ 502 (Bad Gateway)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/leaderboard 500 (Internal Server Error)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/events/upcoming?limit=3 500 (Internal Server Error)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/leaderboard 500 (Internal Server Error)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/events/upcoming?limit=3 500 (Internal Server Error)
+eruda.js:2 [vite] server connection lost. Polling for restart...
+2c924485-4bb4-4841-9…IktOx5otJ5fmuQPt:72 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/pages/communities.tsx net::ERR_ABORTED 502 (Bad Gateway)
+2
+2c924485-4bb4-4841-9…K.js?v=dbc732d9:903 Uncaught TypeError: Failed to fetch dynamically imported module: https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/pages/communities.tsx
+2c924485-4bb4-4841-9…da/3.2.3/eruda.js:2 The above error occurred in one of your React components:
+
+    at Lazy
+    at Route (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:206:16)
+    at ProtectedRoute (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?v=UcWN3IktOx5otJ5fmuQPt:186:40)
+    at Switch (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:262:17)
+    at Suspense
+    at div
+    at MotionComponent (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:945:40)
+    at PresenceChild (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:121:24)
+    at AnimatePresence (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/framer-motion.js?v=dbc732d9:210:26)
+    at main
+    at div
+    at div
+    at AppRouter (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/App.tsx?v=UcWN3IktOx5otJ5fmuQPt:164:56)
+    at Router (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=dbc732d9:161:17)
+    at Provider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…unner/workspace/node_modules/.vite/deps/chunk-OXZDJRWN.js?v=dbc732d9:38:15)
+    at TooltipProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=dbc732d9:65:5)
+    at ThemeProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/contexts/ThemeContext.tsx:21:33)
+    at QueryClientProvider (https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.d…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=dbc732d9:2934:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+2c924485-4bb4-4841-9…js?v=dbc732d9:19413 Uncaught TypeError: Failed to fetch dynamically imported module: https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/src/pages/communities.tsx
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/leaderboard 500 (Internal Server Error)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/events/upcoming?limit=3 500 (Internal Server Error)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/leaderboard 500 (Internal Server Error)
+eruda.js:2 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/events/upcoming?limit=3 500 (Internal Server Error)
+eruda.js:2 [vite] server connection lost. Polling for restart...
+LeaderboardPreview.tsx:24 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/leaderboard 500 (Internal Server Error)
+UpcomingEventsPreview.tsx:25 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/events/upcoming?limit=3 500 (Internal Server Error)
+LeaderboardPreview.tsx:24 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/leaderboard 500 (Internal Server Error)
+UpcomingEventsPreview.tsx:25 
+ GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/events/upcoming?limit=3 500 (Internal Server Error)
+MyCommunities.tsx:90 
+ POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/communities 400 (Bad Request)
+MyCommunities.tsx:90 
+ POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/communities 400 (Bad Request)
+MyCommunities.tsx:90 
+ POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/communities 400 (Bad Request)
+MyCommunities.tsx:90 
+ POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/communities 400 (Bad Request)
+
+﻿
