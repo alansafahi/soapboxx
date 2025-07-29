@@ -92,9 +92,7 @@ export default function SocialFeedEMISelector({
   console.error("🔍 EMI DEBUG COMPLETE:");
   console.error("📊 Raw mood count:", allMoods.length);
   console.error("📁 Total categories found:", Object.keys(moodsByCategory).length);
-  console.error("📋 All categories ORIGINAL:", Object.keys(moodsByCategory));
-  console.error("✂️ After filtering out Spiritual States:", categories);
-  console.error("🔄 Filter worked?", originalLength > categories.length);
+  console.error("📋 All categories:", categories);
   console.error("📈 Category counts:", Object.fromEntries(
     Object.entries(moodsByCategory).map(([cat, moods]) => [cat, moods.length])
   ));
