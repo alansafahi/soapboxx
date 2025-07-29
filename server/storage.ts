@@ -2835,8 +2835,10 @@ export class DatabaseStorage implements IStorage {
         FROM user_churches uc
         LEFT JOIN communities c ON uc.church_id = c.id
         WHERE uc.user_id = ${userId} AND uc.is_active = true
-        ORDER BY uc.last_accessed_at DESC
+        ORDER BY uc.joined_at DESC
       `);
+      
+      console.log(`getUserChurches for user ${userId}: Found ${result.rows.length} communities`);
       
       return result.rows.map((row: any) => ({
         id: row.id,
@@ -2860,6 +2862,7 @@ export class DatabaseStorage implements IStorage {
         joinedAt: row.joined_at,
       }));
     } catch (error) {
+      console.error('getUserChurches error:', error);
       return [];
     }
   }
@@ -2906,6 +2909,8 @@ export class DatabaseStorage implements IStorage {
 
   async joinCommunity(userId: string, communityId: number): Promise<any> {
     try {
+      console.log(`joinCommunity: Creating admin relationship for user ${userId} and community ${communityId}`);
+      
       // Check if user is already a member
       const existingMembership = await db.execute(sql`
         SELECT id FROM user_churches 
@@ -2913,6 +2918,7 @@ export class DatabaseStorage implements IStorage {
       `);
 
       if (existingMembership.rows.length > 0) {
+        console.log(`joinCommunity: Reactivating existing membership for user ${userId}`);
         // Reactivate if membership exists but is inactive
         await db.execute(sql`
           UPDATE user_churches 
@@ -2920,6 +2926,7 @@ export class DatabaseStorage implements IStorage {
           WHERE user_id = ${userId} AND church_id = ${communityId}
         `);
       } else {
+        console.log(`joinCommunity: Creating new admin membership for user ${userId}`);
         // Create new membership with admin role for community creator
         await db.execute(sql`
           INSERT INTO user_churches (user_id, church_id, role, joined_at, last_accessed_at, is_active)
@@ -2937,8 +2944,10 @@ export class DatabaseStorage implements IStorage {
         WHERE id = ${communityId}
       `);
 
+      console.log(`joinCommunity: Successfully created admin relationship for user ${userId}`);
       return { success: true, message: 'Successfully joined community' };
     } catch (error) {
+      console.error('joinCommunity error:', error);
       throw error;
     }
   }

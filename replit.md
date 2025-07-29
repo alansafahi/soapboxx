@@ -157,10 +157,11 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - DUPLICATE CODE FIXED: Removed duplicate getChurchMembers method in storage.ts and getCampusById method in multi-campus-service.ts
   - CLEAN BUILD ACHIEVED: Final production bundle 1.2MB with no compilation warnings or errors
   - TECHNICAL DEBT CLEARED: Removed empty debug comment blocks and development artifacts preparing codebase for deployment
-- July 29, 2025: SOCIAL MEDIA INTEGRATION ENHANCED - Successfully added LinkedIn support to community creation and administration forms
-  - LINKEDIN FIELD ADDED: Community creation form now includes LinkedIn URL field alongside Facebook, Instagram, Twitter, TikTok, and YouTube
-  - BACKEND SUPPORT: Updated both community creation routes (POST /api/communities and PUT /api/communities/:id) to handle linkedin_url field
-  - CONSISTENT INTEGRATION: LinkedIn support added to both frontend form interface and backend data processing for complete social media coverage
+- July 29, 2025: YOUTUBE AND LINKEDIN SOCIAL MEDIA INTEGRATION COMPLETED - Successfully added comprehensive social media support to community creation and administration forms
+  - COMPLETE SOCIAL MEDIA COVERAGE: Community creation form now includes YouTube and LinkedIn URL fields alongside Facebook, Instagram, Twitter/X, and TikTok for comprehensive social media integration
+  - BACKEND API SUPPORT: Updated both community creation routes (POST /api/communities and PUT /api/communities/:id) to handle youtube_url and linkedin_url fields with proper data processing
+  - DEBUG LOGGING ADDED: Enhanced joinCommunity and getUserChurches methods with comprehensive logging to investigate community visibility issues
+  - INVESTIGATION IN PROGRESS: Addressing user report that newly created communities are not appearing on "My Communities" page despite successful creation
 - July 29, 2025: COMPLETE EMI INTEGRATION AND POST SYSTEM RESTORATION COMPLETED - Successfully implemented EMI system across all components and resolved critical post creation/display issues
   - COMPLETE EMI REPLACEMENT: All components (Social Feed, AI Check-In, Virtual Check-In, CompactPostComposer, Reading Plans) now use unified EMI system with 60+ mood indicators across 6 categories
   - DATABASE SCHEMA FIXED: Corrected community_id to church_id mapping in discussions table schema resolving "column does not exist" errors
