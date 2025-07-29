@@ -308,24 +308,36 @@ export default function MyPostsFeed() {
               <CardContent className="pt-0">
                 <div className="mb-4">
                   {post.type === 'soap_reflection' && post.soapData ? (
-                    <SoapPostCard 
-                      post={{
-                        id: post.id,
+                    <>
+                      {/* Debug log for Genesis 1:5 post */}
+                      {post.content.includes('Genesis 1:5') && console.log('[DEBUG MyPostsFeed] Genesis 1:5 SOAP Data:', {
+                        postId: post.id,
+                        title: post.title,
                         content: post.content,
-                        authorId: user?.id || 'unknown',
-                        author: {
-                          id: user?.id || 'unknown',
-                          firstName: user?.firstName || 'Your',
-                          lastName: user?.lastName || 'Reflection',
-                          profileImageUrl: user?.profileImageUrl
-                        },
-                        createdAt: post.createdAt,
-                        type: 'soap_reflection',
                         soapData: post.soapData,
-                        likeCount: post.likeCount,
-                        commentCount: post.commentCount
-                      }}
-                    />
+                        hasObservation: !!post.soapData.observation,
+                        hasApplication: !!post.soapData.application,
+                        hasPrayer: !!post.soapData.prayer
+                      })}
+                      <SoapPostCard 
+                        post={{
+                          id: post.id,
+                          content: post.content,
+                          authorId: user?.id || 'unknown',
+                          author: {
+                            id: user?.id || 'unknown',
+                            firstName: user?.firstName || 'Your',
+                            lastName: user?.lastName || 'Reflection',
+                            profileImageUrl: user?.profileImageUrl
+                          },
+                          createdAt: post.createdAt,
+                          type: 'soap_reflection',
+                          soapData: post.soapData,
+                          likeCount: post.likeCount,
+                          commentCount: post.commentCount
+                        }}
+                      />
+                    </>
                   ) : (
                     <FormattedContent 
                       content={post.content} 
