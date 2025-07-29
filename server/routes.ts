@@ -7924,7 +7924,7 @@ Return JSON with this exact structure:
       const tiktokUrl = req.body.tiktokUrl; // CAMELCASE
       const youtubeUrl = req.body.youtubeUrl; // CAMELCASE
       const linkedinUrl = req.body.linkedinUrl; // CAMELCASE
-      const timeRows = req.body.timeRows;
+      let timeRows = req.body.timeRows;
       const sundayService = req.body.sundayService; // CAMELCASE
       const wednesdayService = req.body.wednesdayService; // CAMELCASE
       
@@ -7933,7 +7933,6 @@ Return JSON with this exact structure:
         try {
           timeRows = JSON.parse(timeRows);
         } catch (e) {
-
           timeRows = [];
         }
       }
