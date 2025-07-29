@@ -348,107 +348,113 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
 
         {/* Collapsible SOAP Sections */}
         <div className="space-y-2">
-          {/* Observation */}
-          <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg border border-blue-100 dark:border-blue-800">
-            <div className="p-3">
-              <div className="flex items-center space-x-3 mb-2">
-                <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                  <span className="text-xs">🔍</span>
+          {/* Observation - Only show if content exists */}
+          {soapData.observation && soapData.observation.trim() && (
+            <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg border border-blue-100 dark:border-blue-800">
+              <div className="p-3">
+                <div className="flex items-center space-x-3 mb-2">
+                  <div className="w-6 h-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <span className="text-xs">🔍</span>
+                  </div>
+                  <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                    Observation
+                  </span>
                 </div>
-                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                  Observation
-                </span>
-              </div>
-              
-              <div className="ml-9">
-                <p className="text-sm text-gray-700 dark:text-gray-200">
-                  {expandedSections.observation ? soapData.observation : truncateText(soapData.observation)}
-                </p>
                 
-                {soapData.observation.length > 120 && (
-                  <button
-                    onClick={() => toggleSection('observation')}
-                    className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 mt-1 flex items-center space-x-1"
-                  >
-                    <span>{expandedSections.observation ? 'Show less' : 'Show more'}</span>
-                    {expandedSections.observation ? (
-                      <ChevronUp className="w-3 h-3" />
-                    ) : (
-                      <ChevronDown className="w-3 h-3" />
-                    )}
-                  </button>
-                )}
+                <div className="ml-9">
+                  <p className="text-sm text-gray-700 dark:text-gray-200">
+                    {expandedSections.observation ? soapData.observation : truncateText(soapData.observation)}
+                  </p>
+                  
+                  {soapData.observation.length > 120 && (
+                    <button
+                      onClick={() => toggleSection('observation')}
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 mt-1 flex items-center space-x-1"
+                    >
+                      <span>{expandedSections.observation ? 'Show less' : 'Show more'}</span>
+                      {expandedSections.observation ? (
+                        <ChevronUp className="w-3 h-3" />
+                      ) : (
+                        <ChevronDown className="w-3 h-3" />
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Application */}
-          <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg border border-green-100 dark:border-green-800">
-            <div className="p-3">
-              <div className="flex items-center space-x-3 mb-2">
-                <div className="w-6 h-6 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                  <span className="text-xs">💡</span>
+          {/* Application - Only show if content exists */}
+          {soapData.application && soapData.application.trim() && (
+            <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg border border-green-100 dark:border-green-800">
+              <div className="p-3">
+                <div className="flex items-center space-x-3 mb-2">
+                  <div className="w-6 h-6 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                    <span className="text-xs">💡</span>
+                  </div>
+                  <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                    Application
+                  </span>
                 </div>
-                <span className="text-sm font-medium text-green-700 dark:text-green-300">
-                  Application
-                </span>
-              </div>
-              
-              <div className="ml-9">
-                <p className="text-sm text-gray-700 dark:text-gray-200">
-                  {expandedSections.application ? soapData.application : truncateText(soapData.application)}
-                </p>
                 
-                {soapData.application.length > 120 && (
-                  <button
-                    onClick={() => toggleSection('application')}
-                    className="text-xs text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 mt-1 flex items-center space-x-1"
-                  >
-                    <span>{expandedSections.application ? 'Show less' : 'Show more'}</span>
-                    {expandedSections.application ? (
-                      <ChevronUp className="w-3 h-3" />
-                    ) : (
-                      <ChevronDown className="w-3 h-3" />
-                    )}
-                  </button>
-                )}
+                <div className="ml-9">
+                  <p className="text-sm text-gray-700 dark:text-gray-200">
+                    {expandedSections.application ? soapData.application : truncateText(soapData.application)}
+                  </p>
+                  
+                  {soapData.application.length > 120 && (
+                    <button
+                      onClick={() => toggleSection('application')}
+                      className="text-xs text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 mt-1 flex items-center space-x-1"
+                    >
+                      <span>{expandedSections.application ? 'Show less' : 'Show more'}</span>
+                      {expandedSections.application ? (
+                        <ChevronUp className="w-3 h-3" />
+                      ) : (
+                        <ChevronDown className="w-3 h-3" />
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
-          {/* Prayer */}
-          <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg border border-amber-100 dark:border-amber-800">
-            <div className="p-3">
-              <div className="flex items-center space-x-3 mb-2">
-                <div className="w-6 h-6 bg-amber-100 dark:bg-amber-900 rounded-full flex items-center justify-center">
-                  <span className="text-xs">🙏</span>
+          {/* Prayer - Only show if content exists */}
+          {soapData.prayer && soapData.prayer.trim() && (
+            <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg border border-amber-100 dark:border-amber-800">
+              <div className="p-3">
+                <div className="flex items-center space-x-3 mb-2">
+                  <div className="w-6 h-6 bg-amber-100 dark:bg-amber-900 rounded-full flex items-center justify-center">
+                    <span className="text-xs">🙏</span>
+                  </div>
+                  <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+                    Prayer
+                  </span>
                 </div>
-                <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
-                  Prayer
-                </span>
-              </div>
-              
-              <div className="ml-9">
-                <p className="text-sm text-gray-700 dark:text-gray-200">
-                  {expandedSections.prayer ? soapData.prayer : truncateText(soapData.prayer)}
-                </p>
                 
-                {soapData.prayer.length > 120 && (
-                  <button
-                    onClick={() => toggleSection('prayer')}
-                    className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 mt-1 flex items-center space-x-1"
-                  >
-                    <span>{expandedSections.prayer ? 'Show less' : 'Show more'}</span>
-                    {expandedSections.prayer ? (
-                      <ChevronUp className="w-3 h-3" />
-                    ) : (
-                      <ChevronDown className="w-3 h-3" />
-                    )}
-                  </button>
-                )}
+                <div className="ml-9">
+                  <p className="text-sm text-gray-700 dark:text-gray-200">
+                    {expandedSections.prayer ? soapData.prayer : truncateText(soapData.prayer)}
+                  </p>
+                  
+                  {soapData.prayer.length > 120 && (
+                    <button
+                      onClick={() => toggleSection('prayer')}
+                      className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 mt-1 flex items-center space-x-1"
+                    >
+                      <span>{expandedSections.prayer ? 'Show less' : 'Show more'}</span>
+                      {expandedSections.prayer ? (
+                        <ChevronUp className="w-3 h-3" />
+                      ) : (
+                        <ChevronDown className="w-3 h-3" />
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Spiritual Reaction Bar */}
