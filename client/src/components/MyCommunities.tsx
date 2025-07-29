@@ -1206,7 +1206,7 @@ export default function MyCommunities() {
                 </Badge>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {userCommunities.filter(c => c.type === 'church').map((community) => (
+                {userCommunities.filter(c => c.type === 'church').sort((a, b) => a.name.localeCompare(b.name)).map((community) => (
                   <Card key={community.id} className="hover:shadow-lg transition-shadow border-2 border-blue-200 dark:border-blue-800">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
@@ -1311,7 +1311,7 @@ export default function MyCommunities() {
                 </Badge>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {userCommunities.filter(c => c.type === 'group').map((community) => (
+                {userCommunities.filter(c => c.type === 'group').sort((a, b) => a.name.localeCompare(b.name)).map((community) => (
                   <Card key={community.id} className="hover:shadow-lg transition-shadow border-2 border-green-200 dark:border-green-800">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
@@ -1396,7 +1396,7 @@ export default function MyCommunities() {
                 </Badge>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {userCommunities.filter(c => c.type === 'ministry').map((community) => (
+                {userCommunities.filter(c => c.type === 'ministry').sort((a, b) => a.name.localeCompare(b.name)).map((community) => (
                   <Card key={community.id} className="hover:shadow-lg transition-shadow border-2 border-purple-200 dark:border-purple-800">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
