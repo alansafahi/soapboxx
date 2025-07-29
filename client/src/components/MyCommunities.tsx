@@ -42,6 +42,7 @@ const createCommunitySchema = z.object({
   zipCode: z.string().min(1, "Zip code is required"),
   type: z.string().default("church"),
   denomination: z.string().optional(),
+  privacySetting: z.enum(["public", "private", "church_members_only"]).default("public"),
   adminEmail: z.string().email("Valid email required"),
   adminPhone: z.string().optional(),
   website: z.string().optional(),
@@ -211,6 +212,7 @@ export default function MyCommunities() {
       zipCode: "",
       type: "church",
       denomination: "",
+      privacySetting: "public",
       adminEmail: "",
       adminPhone: "",
       website: "",
@@ -303,7 +305,8 @@ export default function MyCommunities() {
       adminEmail: 'admin_email',
       adminPhone: 'admin_phone',
       zipCode: 'zip_code',
-      logoUrl: 'logo_url'
+      logoUrl: 'logo_url',
+      privacySetting: 'privacy_setting'
       // Only mapping fields that exist in actual database schema
     };
 
@@ -650,6 +653,29 @@ export default function MyCommunities() {
 
                     <FormField
                       control={createForm.control}
+                      name="privacySetting"
+                      render={({ field }) => (
+                        <FormItem className="col-span-2">
+                          <FormLabel>🔒 Privacy Setting *</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select privacy level" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="public">🌍 Public - Anyone can find and view this community</SelectItem>
+                              <SelectItem value="private">🔒 Private - Invite only, hidden from search results</SelectItem>
+                              <SelectItem value="church_members_only">⛪ Church Members Only - Only verified church members can join</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={createForm.control}
                       name="address"
                       render={({ field }) => (
                         <FormItem className="col-span-2">
@@ -822,30 +848,33 @@ export default function MyCommunities() {
                       )}
                     />
 
-                    <FormField
-                      control={createForm.control}
-                      name="weeklyAttendance"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>👥 Weekly Attendance *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select attendance size" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {WEEKLY_ATTENDANCE_OPTIONS.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {/* Weekly Attendance - Only for Churches */}
+                    {selectedType === 'church' && (
+                      <FormField
+                        control={createForm.control}
+                        name="weeklyAttendance"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>👥 Weekly Attendance *</FormLabel>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select attendance size" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {WEEKLY_ATTENDANCE_OPTIONS.map((option) => (
+                                  <SelectItem key={option.value} value={option.value}>
+                                    {option.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
 
                     <FormField
                       control={createForm.control}
@@ -973,48 +1002,52 @@ export default function MyCommunities() {
 
 
 
-                    {/* Service Times Section */}
-                    <div className="col-span-2">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
-                        Service Times
-                      </h3>
-                    </div>
+                    {/* Service Times Section - Only for Churches */}
+                    {selectedType === 'church' && (
+                      <>
+                        <div className="col-span-2">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+                            Service Times
+                          </h3>
+                        </div>
 
-                    <FormField
-                      control={createForm.control}
-                      name="officeHours"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>🕒 Office Hours (Auto-filled by denomination)</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Mon-Fri 9AM-4PM"
-                              rows={2}
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        <FormField
+                          control={createForm.control}
+                          name="officeHours"
+                          render={({ field }) => (
+                            <FormItem className="col-span-2">
+                              <FormLabel>🕒 Office Hours (Auto-filled by denomination)</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Mon-Fri 9AM-4PM"
+                                  rows={2}
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
 
-                    <FormField
-                      control={createForm.control}
-                      name="worshipTimes"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>⛪ Worship Times (Auto-filled by denomination)</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Sunday: 9AM & 11AM"
-                              rows={3}
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                        <FormField
+                          control={createForm.control}
+                          name="worshipTimes"
+                          render={({ field }) => (
+                            <FormItem className="col-span-2">
+                              <FormLabel>⛪ Worship Times (Auto-filled by denomination)</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Sunday: 9AM & 11AM"
+                                  rows={3}
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    )}
 
                     {/* Dynamic Service Times Section */}
                     <div className="col-span-2">
