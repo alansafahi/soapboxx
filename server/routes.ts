@@ -11155,7 +11155,48 @@ Return JSON with this exact structure:
     try {
       const { limit = 20, offset = 0 } = req.query;
 
+      const entries = await storage.getPublicSoapEntries(
+        undefined, // No church filter - platform-wide
+        parseInt(limit as string),
+        parseInt(offset as string),
+        undefined // Include ALL users including current user
+      );
+
+      res.json(entries);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch all S.O.A.P. entries', error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
+  // Standardized endpoints (Phase 3 migration)
+  app.get('/api/soap-entries', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
       
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      const { churchId, isPublic, limit = 20, offset = 0 } = req.query;
+
+      const options = {
+        churchId: churchId ? parseInt(churchId) : undefined,
+        isPublic: isPublic !== undefined ? isPublic === 'true' : undefined,
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+      };
+
+      const entries = await storage.getSoapEntries(userId, options);
+
+      res.json(entries);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch S.O.A.P. entries', error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
+  app.get('/api/soap-entries/all', isAuthenticated, async (req: any, res) => {
+    try {
+      const { limit = 20, offset = 0 } = req.query;
 
       const entries = await storage.getPublicSoapEntries(
         undefined, // No church filter - platform-wide
@@ -11164,11 +11205,8 @@ Return JSON with this exact structure:
         undefined // Include ALL users including current user
       );
 
-      
-
       res.json(entries);
     } catch (error) {
-      
       res.status(500).json({ message: 'Failed to fetch all S.O.A.P. entries', error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -11178,7 +11216,44 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       const { churchId, limit = 20, offset = 0, includeOwnEntries = 'false' } = req.query;
 
-      // Debug info removed for production
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      // For Community tab, we want to show entries from other users in the SAME CHURCH
+      let userChurchId = churchId ? parseInt(churchId as string) : undefined;
+      
+      // Get user's church if not specified
+      if (!userChurchId) {
+        const user = await storage.getUser(userId);
+        if (user) {
+          const userChurches = await storage.getUserChurches(userId);
+          if (userChurches && userChurches.length > 0) {
+            userChurchId = userChurches[0].id;
+          }
+        }
+      }
+      
+      const excludeUserId = includeOwnEntries === 'true' ? undefined : userId;
+
+      const entries = await storage.getPublicSoapEntries(
+        userChurchId, // undefined = platform-wide, number = church-specific
+        parseInt(limit as string),
+        parseInt(offset as string),
+        excludeUserId // Exclude current user's entries by default
+      );
+
+      res.json(entries);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch public S.O.A.P. entries', error: error instanceof Error ? error.message : 'Unknown error' });
+    }
+  });
+
+  // Standardized public SOAP entries endpoint
+  app.get('/api/soap-entries/public', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const { churchId, limit = 20, offset = 0, includeOwnEntries = 'false' } = req.query;
 
       if (!userId) {
         return res.status(401).json({ message: 'User authentication required' });
@@ -11188,20 +11263,17 @@ Return JSON with this exact structure:
       let userChurchId = churchId ? parseInt(churchId as string) : undefined;
       
       // Get user's church if not specified
-      if (!userRoleId) {
+      if (!userChurchId) {
         const user = await storage.getUser(userId);
         if (user) {
-          const userChurch = await storage.getUserChurch(userId);
-          if (userChurch) {
-            userChurchId = userRole.churchId;
-            
+          const userChurches = await storage.getUserChurches(userId);
+          if (userChurches && userChurches.length > 0) {
+            userChurchId = userChurches[0].id;
           }
         }
       }
       
       const excludeUserId = includeOwnEntries === 'true' ? undefined : userId;
-
-      // Debug info removed for production
 
       const entries = await storage.getPublicSoapEntries(
         userChurchId, // undefined = platform-wide, number = church-specific
@@ -11210,11 +11282,8 @@ Return JSON with this exact structure:
         excludeUserId // Exclude current user's entries by default
       );
 
-      // Debug logging removed for production
-
       res.json(entries);
     } catch (error) {
-      
       res.status(500).json({ message: 'Failed to fetch public S.O.A.P. entries', error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -11303,6 +11372,17 @@ Return JSON with this exact structure:
   });
 
   app.get('/api/soap/streak/:userId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.params.userId;
+      const streak = await storage.getUserSoapStreak(userId);
+      res.json({ streak });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch S.O.A.P. streak' });
+    }
+  });
+
+  // Standardized streak endpoint
+  app.get('/api/soap-entries/streak/:userId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.params.userId;
       const streak = await storage.getUserSoapStreak(userId);
