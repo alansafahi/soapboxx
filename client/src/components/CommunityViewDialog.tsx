@@ -560,12 +560,12 @@ export function CommunityViewDialog({
                   </div>
                 )}
                 
-                {community.createdAt && (
+                {(community.establishedYear || community.established_year || community.createdAt) && (
                   <div className="text-center p-3 bg-purple-50 dark:bg-purple-950 rounded-lg">
                     <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
-                      {new Date(community.createdAt).getFullYear()}
+                      {community.establishedYear || community.established_year || new Date(community.createdAt).getFullYear()}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Joined</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Established Year</p>
                   </div>
                 )}
                 
