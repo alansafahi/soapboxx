@@ -7961,6 +7961,23 @@ Return JSON with this exact structure:
         }
       }
 
+      // Required address fields
+      if (!address?.trim()) {
+        validationErrors.push('Address is required');
+      }
+
+      if (!city?.trim()) {
+        validationErrors.push('City is required');
+      }
+
+      if (!state?.trim()) {
+        validationErrors.push('State is required');
+      }
+
+      if (!zipCode?.trim()) {
+        validationErrors.push('ZIP code is required');
+      }
+
       // Phone validation
       if (adminPhone?.trim()) {
         const phoneResult = phoneValidation.safeParse(adminPhone);
