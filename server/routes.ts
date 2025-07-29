@@ -7981,7 +7981,7 @@ Return JSON with this exact structure:
       }
 
       // Privacy setting validation
-      const privacySetting = formData.get('privacySetting') as string;
+      const privacySetting = req.body.privacy_setting; // snake_case from frontend transformation
       if (!privacySetting?.trim()) {
         validationErrors.push('Privacy setting is required');
       } else if (!['public', 'private', 'church_members_only'].includes(privacySetting)) {
