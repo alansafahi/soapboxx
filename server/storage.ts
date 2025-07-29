@@ -3842,12 +3842,12 @@ export class DatabaseStorage implements IStorage {
       // Only filter by church if churchId is provided AND we want church-specific results
       if (churchId && excludeUserId) {
         // For church-specific feed with user exclusion, get entries from same church excluding user
-        conditions.push(eq(soapEntries.communityId, churchId));
+        conditions.push(eq(soapEntries.churchId, churchId));
         conditions.push(ne(soapEntries.userId, excludeUserId));
         console.log(`[DEBUG] Applied church-specific filter with user exclusion: churchId=${churchId}, excludeUserId=${excludeUserId}`);
       } else if (churchId) {
         // For church-specific feed without exclusion
-        conditions.push(eq(soapEntries.communityId, churchId));
+        conditions.push(eq(soapEntries.churchId, churchId));
         console.log(`[DEBUG] Applied church-specific filter: churchId=${churchId}`);
       } else if (excludeUserId) {
         // For global feed excluding specific user
@@ -3902,7 +3902,7 @@ export class DatabaseStorage implements IStorage {
         moodTag: row.soap_entries.moodTag,
         tags: row.soap_entries.tags,
         isPublic: row.soap_entries.isPublic,
-        churchId: row.soap_entries.communityId,
+        churchId: row.soap_entries.churchId,
         createdAt: row.soap_entries.createdAt,
         updatedAt: row.soap_entries.updatedAt,
         firstName: row.users?.firstName,
