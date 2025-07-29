@@ -9286,7 +9286,8 @@ Return JSON with this exact structure:
 
       res.json(discussions);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch discussions" });
+      console.error('Error in /api/discussions:', error);
+      res.status(500).json({ message: "Failed to fetch discussions", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
 

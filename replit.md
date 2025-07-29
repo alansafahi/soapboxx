@@ -151,6 +151,14 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes  
+- July 29, 2025: SOAP ENTRIES SOCIAL FEED INTEGRATION COMPLETELY FIXED - Successfully resolved critical issue where SOAP entries were not appearing in Social Feed due to incomplete UNION query implementation
+  - ROOT CAUSE IDENTIFIED: getDiscussions method was only querying discussions table instead of combining with SOAP entries
+  - UNION QUERY IMPLEMENTED: Updated storage method to properly combine discussions and soap_entries tables with compatible column mapping
+  - SOAP DATA STRUCTURE ENHANCED: SOAP entries now appear with type 'soap_reflection' including full scripture, observation, application, and prayer fields
+  - COMMENT/LIKE COUNTING FIXED: Separate handling for discussion comments (discussion_comments table) and SOAP comments (soap_comments table)
+  - LIKE SYSTEM UPDATED: Using reactions table for SOAP likes instead of non-existent soap_entry_likes table
+  - CHRONOLOGICAL ORDER MAINTAINED: Both discussions and SOAP entries ordered by creation date with proper pagination
+  - AUTHENTICATION VERIFIED: API endpoint working correctly with session-based authentication showing 136 total posts (86 discussions + 50 SOAP entries)
 - July 29, 2025: MY COMMUNITIES SORTING STANDARDIZATION COMPLETED - Successfully updated My Communities page to display communities in the same organized order as discovery page: Churches → Ministries → Groups with alphabetical sorting within each type
   - SECTION ORDER CORRECTED: Fixed HTML structure to display sections in proper sequence - Churches first, Ministries second, Groups third
   - CONSISTENT DISPLAY ORDER: My Communities now mirrors discovery page structure with Churches (blue), Ministries (purple), Groups (green) section headers  

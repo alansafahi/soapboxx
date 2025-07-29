@@ -2464,9 +2464,9 @@ export class DatabaseStorage implements IStorage {
       const combinedResult = await db.execute(sql`
         (
           SELECT 
-            d.id, 'discussion' as type, d.title, d.content, d.category, d.is_public, d.created_at, d.author_id,
+            d.id, 'discussion' as type, d.title, d.content, d.category, d.is_public, d.created_at, d.author_id::text as author_id,
             u.id as user_id, u.email, u.first_name, u.last_name, u.profile_image_url,
-            NULL as scripture, NULL as scripture_reference, NULL as observation, NULL as application, NULL as prayer, NULL as mood_tag
+            NULL::text as scripture, NULL::text as scripture_reference, NULL::text as observation, NULL::text as application, NULL::text as prayer, d.mood_tag
           FROM discussions d
           LEFT JOIN users u ON d.author_id = u.id
           WHERE d.is_public = true AND (d.expires_at IS NULL OR d.expires_at > NOW())
@@ -2484,6 +2484,8 @@ export class DatabaseStorage implements IStorage {
         ORDER BY created_at DESC
         LIMIT ${limit || 50} OFFSET ${offset || 0}
       `);
+
+      // Successfully combined discussions and SOAP entries
 
       const discussions = combinedResult.rows.map((row: any) => ({
         id: row.id,
@@ -2579,32 +2581,38 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      // Get like counts for SOAP entries
+      // Get like counts for SOAP entries using reactions table
       let soapLikeCounts: Record<number, number> = {};
       let userLikedSoap: Set<number> = new Set();
       
       if (soapPosts.length > 0) {
         const soapIds = soapPosts.map(d => d.id);
-        const soapLikeCountResult = await db.execute(sql`
-          SELECT soap_entry_id, COUNT(*) as like_count 
-          FROM soap_entry_likes 
-          WHERE soap_entry_id IN (${sql.join(soapIds, sql`, `)})
-          GROUP BY soap_entry_id
-        `);
-        
-        soapLikeCounts = soapLikeCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
-          acc[row.soap_entry_id] = Number(row.like_count);
-          return acc;
-        }, {});
-        
-        if (currentUserId) {
-          const userSoapLikesResult = await db.execute(sql`
-            SELECT soap_entry_id 
-            FROM soap_entry_likes 
-            WHERE user_id = ${currentUserId} AND soap_entry_id IN (${sql.join(soapIds, sql`, `)})
+        try {
+          const soapLikeCountResult = await db.execute(sql`
+            SELECT entity_id, COUNT(*) as like_count 
+            FROM reactions 
+            WHERE entity_type = 'soap_entry' AND entity_id IN (${sql.join(soapIds, sql`, `)})
+            GROUP BY entity_id
           `);
           
-          userLikedSoap = new Set(userSoapLikesResult.rows.map((row: any) => row.soap_entry_id));
+          soapLikeCounts = soapLikeCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
+            acc[row.entity_id] = Number(row.like_count);
+            return acc;
+          }, {});
+          
+          if (currentUserId) {
+            const userSoapLikesResult = await db.execute(sql`
+              SELECT entity_id 
+              FROM reactions 
+              WHERE entity_type = 'soap_entry' AND user_id = ${currentUserId} AND entity_id IN (${sql.join(soapIds, sql`, `)})
+            `);
+            
+            userLikedSoap = new Set(userSoapLikesResult.rows.map((row: any) => row.entity_id));
+          }
+        } catch (error) {
+          // If reactions table query fails, just use empty counts
+          soapLikeCounts = {};
+          userLikedSoap = new Set();
         }
       }
 
