@@ -9683,7 +9683,7 @@ Return JSON with this exact structure:
 
   app.post("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session?.userId;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       const discussionId = parseInt(req.params.id);
       const { content, parentId } = req.body;
       
@@ -9726,20 +9726,23 @@ Return JSON with this exact structure:
   });
 
   app.get("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
+    const discussionId = parseInt(req.params.id);
     try {
-      const discussionId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      console.log(`[DEBUG] Fetching comments for discussion ${discussionId}, user ${userId}`);
       const comments = await storage.getDiscussionComments(discussionId, userId);
+      console.log(`[DEBUG] Found ${comments.length} comments for discussion ${discussionId}`);
       res.json(comments);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch comments" });
+      console.error(`[ERROR] Failed to fetch comments for discussion ${discussionId}:`, error);
+      res.status(500).json({ message: "Failed to fetch comments", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
   // SOAP Entry Comments - Add missing endpoints
   app.post("/api/soap/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       const soapId = parseInt(req.params.id);
       const { content } = req.body;
       
@@ -9760,12 +9763,15 @@ Return JSON with this exact structure:
   });
 
   app.get("/api/soap/:id/comments", isAuthenticated, async (req: any, res) => {
+    const soapId = parseInt(req.params.id);
     try {
-      const soapId = parseInt(req.params.id);
+      console.log(`[DEBUG] Fetching comments for SOAP entry ${soapId}`);
       const comments = await storage.getSoapComments(soapId);
+      console.log(`[DEBUG] Found ${comments.length} comments for SOAP entry ${soapId}`);
       res.json(comments);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch comments" });
+      console.error(`[ERROR] Failed to fetch SOAP comments for entry ${soapId}:`, error);
+      res.status(500).json({ message: "Failed to fetch comments", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
@@ -9773,7 +9779,7 @@ Return JSON with this exact structure:
   app.post('/api/soap/comments/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const commentId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       
       // Award points for liking a SOAP comment
       await storage.trackUserActivity({
@@ -9794,7 +9800,7 @@ Return JSON with this exact structure:
   app.post('/api/comments/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const commentId = parseInt(req.params.id);
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       
       const result = await storage.toggleDiscussionCommentLike(commentId, userId);
       res.json(result);
