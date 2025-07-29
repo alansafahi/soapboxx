@@ -629,14 +629,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // SOAP reaction endpoints
-  app.post("/api/soap-entries/reactions", isAuthenticated, async (req, res) => {
+  app.post("/api/soap-entries/reactions", isAuthenticated, async (req: any, res) => {
     try {
       const { soapId, reactionType, emoji } = req.body;
-      const userId = req.session.userId;
-
-      if (!userId) {
-        return res.status(401).json({ error: "User not authenticated" });
-      }
+      const userId = req.user.claims.sub;
 
       // Toggle reaction to SOAP entry
       const result = await storage.addSoapReaction(soapId, userId, reactionType, emoji);
@@ -646,14 +642,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/soap-entries/reflect", isAuthenticated, async (req, res) => {
+  app.post("/api/soap-entries/reflect", isAuthenticated, async (req: any, res) => {
     try {
       const { originalSoapId, scripture, scriptureReference } = req.body;
-      const userId = req.session.userId;
-
-      if (!userId) {
-        return res.status(401).json({ error: "User not authenticated" });
-      }
+      const userId = req.user.claims.sub;
 
       // Create a personal reflection template with only scripture and reference
       // Use placeholder text to satisfy schema requirements while encouraging personal reflection
@@ -678,14 +670,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/soap-entries/save", isAuthenticated, async (req, res) => {
+  app.post("/api/soap-entries/save", isAuthenticated, async (req: any, res) => {
     try {
       const { soapId } = req.body;
-      const userId = req.session.userId;
-
-      if (!userId) {
-        return res.status(401).json({ error: "User not authenticated" });
-      }
+      const userId = req.user.claims.sub;
 
       // Save SOAP entry to user's collection
       await storage.saveSoapEntry(soapId, userId);
@@ -9740,7 +9728,7 @@ Return JSON with this exact structure:
   app.get("/api/discussions/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
       const discussionId = parseInt(req.params.id);
-      const userId = req.session?.userId;
+      const userId = req.user.claims.sub;
       const comments = await storage.getDiscussionComments(discussionId, userId);
       res.json(comments);
     } catch (error) {
@@ -9751,13 +9739,9 @@ Return JSON with this exact structure:
   // SOAP Entry Comments - Add missing endpoints
   app.post("/api/soap/:id/comments", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session?.userId;
+      const userId = req.user.claims.sub;
       const soapId = parseInt(req.params.id);
       const { content } = req.body;
-      
-      if (!userId) {
-        return res.status(401).json({ success: false, message: 'Unauthorized' });
-      }
       
       if (!content || !content.trim()) {
         return res.status(400).json({ success: false, message: "Comment content is required" });
@@ -9789,11 +9773,7 @@ Return JSON with this exact structure:
   app.post('/api/soap/comments/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const commentId = parseInt(req.params.id);
-      const userId = req.session.userId;
-      
-      if (!userId) {
-        return res.status(401).json({ message: 'User authentication required' });
-      }
+      const userId = req.user.claims.sub;
       
       // Award points for liking a SOAP comment
       await storage.trackUserActivity({
@@ -9814,11 +9794,7 @@ Return JSON with this exact structure:
   app.post('/api/comments/:id/like', isAuthenticated, async (req: any, res) => {
     try {
       const commentId = parseInt(req.params.id);
-      const userId = req.session.userId;
-      
-      if (!userId) {
-        return res.status(401).json({ message: 'User authentication required' });
-      }
+      const userId = req.user.claims.sub;
       
       const result = await storage.toggleDiscussionCommentLike(commentId, userId);
       res.json(result);

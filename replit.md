@@ -151,6 +151,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes  
+- July 29, 2025: ENGAGEMENT FEATURES AUTHENTICATION REGRESSION FIXED - Successfully resolved critical authentication mismatch causing Amen reactions, comment counters, and reply threading to fail on SOAP posts
+  - ROOT CAUSE IDENTIFIED: SOAP and comment endpoints using deprecated req.session.userId instead of current req.user.claims.sub authentication pattern
+  - AUTHENTICATION STANDARDIZED: Updated /api/soap-entries/reactions, /api/soap-entries/reflect, /api/soap-entries/save, /api/soap/:id/comments, /api/soap/comments/:id/like, /api/comments/:id/like, and /api/discussions/:id/comments endpoints
+  - AMEN REACTIONS RESTORED: SOAP post Amen button now properly toggles reactions with correct authentication and toast notifications
+  - COMMENT SYSTEM FIXED: Comment posting, reply threading, and like functionality operational across all post types
+  - AUTHENTICATION PATTERN UNIFIED: All endpoints now consistently use req.user.claims.sub for user identification eliminating session mismatch issues
+  - RECURRING REGRESSION RESOLVED: Fixed underlying authentication inconsistency that was causing repeated failures of engagement features
 - July 29, 2025: SOAP ENTRIES SOCIAL FEED INTEGRATION COMPLETELY FIXED - Successfully resolved critical issue where SOAP entries were not appearing in Social Feed due to incomplete UNION query implementation
   - ROOT CAUSE IDENTIFIED: getDiscussions method was only querying discussions table instead of combining with SOAP entries
   - UNION QUERY IMPLEMENTED: Updated storage method to properly combine discussions and soap_entries tables with compatible column mapping

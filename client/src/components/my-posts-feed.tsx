@@ -308,17 +308,6 @@ export default function MyPostsFeed() {
               <CardContent className="pt-0">
                 <div className="mb-4">
                   {post.type === 'soap_reflection' && post.soapData ? (
-                    <>
-                      {/* Debug log for Genesis 1:5 post */}
-                      {post.content.includes('Genesis 1:5') && console.log('[DEBUG MyPostsFeed] Genesis 1:5 SOAP Data:', {
-                        postId: post.id,
-                        title: post.title,
-                        content: post.content,
-                        soapData: post.soapData,
-                        hasObservation: !!post.soapData.observation,
-                        hasApplication: !!post.soapData.application,
-                        hasPrayer: !!post.soapData.prayer
-                      })}
                       <SoapPostCard 
                         post={{
                           id: post.id,
@@ -337,7 +326,6 @@ export default function MyPostsFeed() {
                           commentCount: post.commentCount
                         }}
                       />
-                    </>
                   ) : (
                     <FormattedContent 
                       content={post.content} 

@@ -300,19 +300,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
 
   const soapData = post.soapData;
   
-  // Debug: Log the actual SOAP data structure
-  console.log('[DEBUG SoapPostCard] SOAP Data Structure:', {
-    postId: post.id,
-    hasObservation: !!(soapData?.observation),
-    observationLength: soapData?.observation?.length || 0,
-    observationContent: soapData?.observation?.substring(0, 50) + '...',
-    hasApplication: !!(soapData?.application),
-    applicationLength: soapData?.application?.length || 0,
-    applicationContent: soapData?.application?.substring(0, 50) + '...',
-    hasPrayer: !!(soapData?.prayer),
-    prayerLength: soapData?.prayer?.length || 0,
-    prayerContent: soapData?.prayer?.substring(0, 50) + '...'
-  });
+
   
   if (!soapData) return null;
 
