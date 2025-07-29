@@ -7886,6 +7886,9 @@ Return JSON with this exact structure:
   // Create new community (new terminology)
   app.post('/api/communities', isAuthenticated, upload.single('logo'), async (req: any, res) => {
     try {
+      // Import validation utilities
+      const { communityValidationSchema, phoneValidation, urlValidation, emailValidation, yearValidation, zipCodeValidation, socialMediaValidation } = await import('../shared/validation');
+      
       // Debug: Log all received data
       console.log('Community creation - All req.body fields:', Object.keys(req.body));
       console.log('Community creation - Social media fields (camelCase):', {
@@ -7940,12 +7943,107 @@ Return JSON with this exact structure:
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      if (!name) {
-        return res.status(400).json({ error: 'Community name is required' });
+      // Comprehensive field validation with user-friendly error messages
+      const validationErrors = [];
+
+      // Required fields
+      if (!name?.trim()) {
+        validationErrors.push('Community name is required');
+      } else if (name.trim().length < 2) {
+        validationErrors.push('Community name must be at least 2 characters');
       }
 
-      if (!adminEmail) {
-        return res.status(400).json({ error: 'Admin email is required' });
+      if (!adminEmail?.trim()) {
+        validationErrors.push('Admin email is required');
+      } else {
+        const emailResult = emailValidation.safeParse(adminEmail);
+        if (!emailResult.success) {
+          validationErrors.push(emailResult.error.errors[0]?.message || 'Invalid email format');
+        }
+      }
+
+      // Phone validation
+      if (adminPhone?.trim()) {
+        const phoneResult = phoneValidation.safeParse(adminPhone);
+        if (!phoneResult.success) {
+          validationErrors.push(phoneResult.error.errors[0]?.message || 'Invalid phone number format');
+        }
+      }
+
+      // Website URL validation
+      if (website?.trim()) {
+        const urlResult = urlValidation.safeParse(website);
+        if (!urlResult.success) {
+          validationErrors.push('Website: ' + (urlResult.error.errors[0]?.message || 'Invalid URL format'));
+        }
+      }
+
+      // ZIP code validation
+      if (zipCode?.trim()) {
+        const zipResult = zipCodeValidation.safeParse(zipCode);
+        if (!zipResult.success) {
+          validationErrors.push(zipResult.error.errors[0]?.message || 'Invalid ZIP code format');
+        }
+      }
+
+      // Established year validation
+      if (establishedYear?.trim()) {
+        const yearResult = yearValidation.safeParse(establishedYear);
+        if (!yearResult.success) {
+          validationErrors.push(yearResult.error.errors[0]?.message || 'Invalid established year');
+        }
+      }
+
+      // Social media URL validation
+      if (facebookUrl?.trim()) {
+        const fbResult = socialMediaValidation.facebook.safeParse(facebookUrl);
+        if (!fbResult.success) {
+          validationErrors.push('Facebook: ' + fbResult.error.errors[0]?.message);
+        }
+      }
+
+      if (instagramUrl?.trim()) {
+        const igResult = socialMediaValidation.instagram.safeParse(instagramUrl);
+        if (!igResult.success) {
+          validationErrors.push('Instagram: ' + igResult.error.errors[0]?.message);
+        }
+      }
+
+      if (twitterUrl?.trim()) {
+        const twitterResult = socialMediaValidation.twitter.safeParse(twitterUrl);
+        if (!twitterResult.success) {
+          validationErrors.push('Twitter/X: ' + twitterResult.error.errors[0]?.message);
+        }
+      }
+
+      if (tiktokUrl?.trim()) {
+        const tiktokResult = socialMediaValidation.tiktok.safeParse(tiktokUrl);
+        if (!tiktokResult.success) {
+          validationErrors.push('TikTok: ' + tiktokResult.error.errors[0]?.message);
+        }
+      }
+
+      if (youtubeUrl?.trim()) {
+        const youtubeResult = socialMediaValidation.youtube.safeParse(youtubeUrl);
+        if (!youtubeResult.success) {
+          validationErrors.push('YouTube: ' + youtubeResult.error.errors[0]?.message);
+        }
+      }
+
+      if (linkedinUrl?.trim()) {
+        const linkedinResult = socialMediaValidation.linkedin.safeParse(linkedinUrl);
+        if (!linkedinResult.success) {
+          validationErrors.push('LinkedIn: ' + linkedinResult.error.errors[0]?.message);
+        }
+      }
+
+      // Return validation errors if any
+      if (validationErrors.length > 0) {
+        return res.status(400).json({ 
+          error: 'Validation failed', 
+          details: validationErrors,
+          message: 'Please fix the following issues:\n• ' + validationErrors.join('\n• ')
+        });
       }
 
       const uploadedLogoUrl = req.file ? `/uploads/${req.file.filename}` : null;

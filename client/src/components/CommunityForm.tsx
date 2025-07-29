@@ -5,7 +5,15 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Building2, MapPin, Phone, Mail, Globe, Clock, Share2, Image, Upload } from "lucide-react";
+import { Building2, MapPin, Phone, Mail, Globe, Clock, Share2, Image, Upload, AlertCircle } from "lucide-react";
+import { 
+  phoneValidation, 
+  urlValidation, 
+  emailValidation, 
+  yearValidation, 
+  zipCodeValidation, 
+  socialMediaValidation 
+} from "../../shared/validation";
 
 interface CommunityFormData {
   id?: number;
@@ -99,6 +107,7 @@ export function CommunityForm({
   isLoading = false,
   submitButtonText = mode === "create" ? "Create Community" : "Save Changes"
 }: CommunityFormProps) {
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState<CommunityFormData>(() => {
     // Map database fields to form fields
     const mappedData = {
@@ -273,8 +282,91 @@ export function CommunityForm({
     }
   }, [formData.denomination, mode]);
 
+  const validateField = (field: string, value: string) => {
+    let error = '';
+    
+    switch (field) {
+      case 'phone':
+        if (value.trim()) {
+          const result = phoneValidation.safeParse(value);
+          if (!result.success) error = result.error.errors[0]?.message || 'Invalid phone number';
+        }
+        break;
+      case 'email':
+        if (value.trim()) {
+          const result = emailValidation.safeParse(value);
+          if (!result.success) error = result.error.errors[0]?.message || 'Invalid email';
+        }
+        break;
+      case 'website':
+        if (value.trim()) {
+          const result = urlValidation.safeParse(value);
+          if (!result.success) error = result.error.errors[0]?.message || 'Invalid URL';
+        }
+        break;
+      case 'zipCode':
+        if (value.trim()) {
+          const result = zipCodeValidation.safeParse(value);
+          if (!result.success) error = result.error.errors[0]?.message || 'Invalid ZIP code';
+        }
+        break;
+      case 'establishedYear':
+        if (value.trim()) {
+          const result = yearValidation.safeParse(value);
+          if (!result.success) error = result.error.errors[0]?.message || 'Invalid year';
+        }
+        break;
+      case 'facebookUrl':
+        if (value.trim()) {
+          const result = socialMediaValidation.facebook.safeParse(value);
+          if (!result.success) error = result.error.errors[0]?.message || 'Invalid Facebook URL';
+        }
+        break;
+      case 'instagramUrl':
+        if (value.trim()) {
+          const result = socialMediaValidation.instagram.safeParse(value);
+          if (!result.success) error = result.error.errors[0]?.message || 'Invalid Instagram URL';
+        }
+        break;
+      case 'twitterUrl':
+        if (value.trim()) {
+          const result = socialMediaValidation.twitter.safeParse(value);
+          if (!result.success) error = result.error.errors[0]?.message || 'Invalid Twitter/X URL';
+        }
+        break;
+      case 'tiktokUrl':
+        if (value.trim()) {
+          const result = socialMediaValidation.tiktok.safeParse(value);
+          if (!result.success) error = result.error.errors[0]?.message || 'Invalid TikTok URL';
+        }
+        break;
+      case 'youtubeUrl':
+        if (value.trim()) {
+          const result = socialMediaValidation.youtube.safeParse(value);
+          if (!result.success) error = result.error.errors[0]?.message || 'Invalid YouTube URL';
+        }
+        break;
+      case 'linkedinUrl':
+        if (value.trim()) {
+          const result = socialMediaValidation.linkedin.safeParse(value);
+          if (!result.success) error = result.error.errors[0]?.message || 'Invalid LinkedIn URL';
+        }
+        break;
+    }
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      [field]: error
+    }));
+  };
+
   const handleInputChange = (field: keyof CommunityFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Real-time validation for specific fields
+    if (typeof value === 'string') {
+      validateField(field as string, value);
+    }
   };
 
   const handleSocialLinkChange = (platform: string, value: string) => {
@@ -497,14 +589,21 @@ export function CommunityForm({
               </div>
             </div>
             <div>
-              <Label htmlFor="zipCode">Zip Code *</Label>
+              <Label htmlFor="zipCode" className="flex items-center gap-2">
+                Zip Code *
+                {validationErrors.zipCode && <AlertCircle className="h-4 w-4 text-red-500" />}
+              </Label>
               <Input
                 id="zipCode"
                 required
                 value={formData.zipCode}
                 onChange={(e) => handleInputChange('zipCode', e.target.value)}
                 placeholder="90210"
+                className={validationErrors.zipCode ? 'border-red-500 focus:border-red-500' : ''}
               />
+              {validationErrors.zipCode && (
+                <p className="text-sm text-red-500 mt-1">{validationErrors.zipCode}</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -519,16 +618,26 @@ export function CommunityForm({
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone" className="flex items-center gap-2">
+                Phone Number
+                {validationErrors.phone && <AlertCircle className="h-4 w-4 text-red-500" />}
+              </Label>
               <Input
                 id="phone"
                 value={formData.phone || ''}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
                 placeholder="(555) 123-4567"
+                className={validationErrors.phone ? 'border-red-500 focus:border-red-500' : ''}
               />
+              {validationErrors.phone && (
+                <p className="text-sm text-red-500 mt-1">{validationErrors.phone}</p>
+              )}
             </div>
             <div>
-              <Label htmlFor="email">Email Address *</Label>
+              <Label htmlFor="email" className="flex items-center gap-2">
+                Email Address *
+                {validationErrors.email && <AlertCircle className="h-4 w-4 text-red-500" />}
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -536,16 +645,27 @@ export function CommunityForm({
                 value={formData.email || ''}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 placeholder="pastor@church.org"
+                className={validationErrors.email ? 'border-red-500 focus:border-red-500' : ''}
               />
+              {validationErrors.email && (
+                <p className="text-sm text-red-500 mt-1">{validationErrors.email}</p>
+              )}
             </div>
             <div>
-              <Label htmlFor="website">Website</Label>
+              <Label htmlFor="website" className="flex items-center gap-2">
+                Website
+                {validationErrors.website && <AlertCircle className="h-4 w-4 text-red-500" />}
+              </Label>
               <Input
                 id="website"
                 value={formData.website || ''}
                 onChange={(e) => handleInputChange('website', e.target.value)}
                 placeholder="https://www.church.org"
+                className={validationErrors.website ? 'border-red-500 focus:border-red-500' : ''}
               />
+              {validationErrors.website && (
+                <p className="text-sm text-red-500 mt-1">{validationErrors.website}</p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -668,22 +788,42 @@ export function CommunityForm({
                 />
               </div>
               <div>
-                <Label htmlFor="youtubeUrl">YouTube URL</Label>
+                <Label htmlFor="youtubeUrl" className="flex items-center gap-2">
+                  YouTube URL
+                  {validationErrors.youtubeUrl && <AlertCircle className="h-4 w-4 text-red-500" />}
+                </Label>
                 <Input
                   id="youtubeUrl"
                   placeholder="https://youtube.com/community"
                   value={formData.socialLinks?.youtube || ''}
-                  onChange={(e) => handleSocialLinkChange('youtube', e.target.value)}
+                  onChange={(e) => {
+                    handleSocialLinkChange('youtube', e.target.value);
+                    validateField('youtubeUrl', e.target.value);
+                  }}
+                  className={validationErrors.youtubeUrl ? 'border-red-500 focus:border-red-500' : ''}
                 />
+                {validationErrors.youtubeUrl && (
+                  <p className="text-sm text-red-500 mt-1">{validationErrors.youtubeUrl}</p>
+                )}
               </div>
               <div>
-                <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
+                <Label htmlFor="linkedinUrl" className="flex items-center gap-2">
+                  LinkedIn URL
+                  {validationErrors.linkedinUrl && <AlertCircle className="h-4 w-4 text-red-500" />}
+                </Label>
                 <Input
                   id="linkedinUrl"
                   placeholder="https://linkedin.com/company/community"
                   value={formData.socialLinks?.linkedin || ''}
-                  onChange={(e) => handleSocialLinkChange('linkedin', e.target.value)}
+                  onChange={(e) => {
+                    handleSocialLinkChange('linkedin', e.target.value);
+                    validateField('linkedinUrl', e.target.value);
+                  }}
+                  className={validationErrors.linkedinUrl ? 'border-red-500 focus:border-red-500' : ''}
                 />
+                {validationErrors.linkedinUrl && (
+                  <p className="text-sm text-red-500 mt-1">{validationErrors.linkedinUrl}</p>
+                )}
               </div>
             </div>
           </CardContent>
