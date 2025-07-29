@@ -536,10 +536,11 @@ export default function MyCommunities() {
                     });
                     return;
                   }
-                  if (!data.weeklyAttendance || data.weeklyAttendance.trim() === '') {
+                  // Weekly attendance only required for churches
+                  if (data.type === 'church' && (!data.weeklyAttendance || data.weeklyAttendance.trim() === '')) {
                     toast({
                       title: "Validation Error", 
-                      description: "Please select weekly attendance.",
+                      description: "Please select weekly attendance for churches.",
                       variant: "destructive",
                     });
                     return;

@@ -7891,12 +7891,7 @@ Return JSON with this exact structure:
       
       // Debug: Log all received data
       console.log('Community creation - All req.body fields:', Object.keys(req.body));
-      console.log('Community creation - Type and Weekly Attendance check:', {
-        type: req.body.type,
-        weeklyAttendance: req.body.weeklyAttendance,
-        typeCheck: req.body.type === 'church',
-        weeklyAttendanceProvided: !!req.body.weeklyAttendance?.trim()
-      });
+
 
       // MIXED FIELD EXTRACTION: Frontend sends mix of camelCase and snake_case
       const name = req.body.name;
@@ -7994,13 +7989,6 @@ Return JSON with this exact structure:
       }
 
       // Weekly attendance only required for churches
-      console.log('Weekly attendance validation check:', {
-        type: type,
-        weeklyAttendance: weeklyAttendance,
-        isChurch: type === 'church',
-        hasWeeklyAttendance: !!weeklyAttendance?.trim()
-      });
-      
       if (type === 'church' && !weeklyAttendance?.trim()) {
         validationErrors.push('Weekly attendance is required for churches');
       }
