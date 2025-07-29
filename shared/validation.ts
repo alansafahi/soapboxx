@@ -1,12 +1,13 @@
 import { z } from "zod";
 
-// Phone number validation - supports various formats
-const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+// Phone number validation - supports various formats but requires proper length
+const phoneRegex = /^[\+]?[1-9][\d]{9,14}$/; // At least 10 digits for US format
 export const phoneValidation = z.string()
   .refine((phone) => {
     if (!phone) return true; // Optional field
     const cleaned = phone.replace(/[\s\-\(\)\.]/g, ''); // Remove formatting
-    return phoneRegex.test(cleaned);
+    // Must be at least 10 digits for a valid phone number
+    return phoneRegex.test(cleaned) && cleaned.length >= 10;
   }, {
     message: "Please enter a valid phone number (e.g., (555) 123-4567 or +1-555-123-4567)"
   });

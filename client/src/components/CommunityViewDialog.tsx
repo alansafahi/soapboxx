@@ -414,7 +414,7 @@ export function CommunityViewDialog({
                     {community.address}
                   </p>
                   <p className="text-gray-900 dark:text-gray-100">
-                    {community.city}, {community.state} {community.zipCode || ''}
+                    {community.city}, {community.state} {community.zipCode || community.zip_code || ''}
                   </p>
                 </div>
               </CardContent>
