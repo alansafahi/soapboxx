@@ -5,6 +5,7 @@ import { useLocation, useSearch, Link } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { useToast } from "../hooks/use-toast";
 import { Building2, Settings, Users, Calendar, Plus } from "lucide-react";
 import { CommunitySettings } from "./CommunitySettings";
@@ -54,6 +55,7 @@ export function CommunityAdminTab() {
   const urlCommunityId = searchParams.get('communityId');
   const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(urlCommunityId);
   const [activeTab, setActiveTab] = useState("profile");
+  const [createCommunityOpen, setCreateCommunityOpen] = useState(false);
 
   // Sync selectedCommunityId with URL
   useEffect(() => {
@@ -142,7 +144,7 @@ export function CommunityAdminTab() {
           }
         } catch (uploadError) {
 
-          throw new Error(`Failed to upload logo: ${uploadError.message}`);
+          throw new Error(`Failed to upload logo: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`);
         }
       } else if (profileData.logoFile) {
 
@@ -272,12 +274,55 @@ export function CommunityAdminTab() {
           </p>
         </div>
         <div className="flex items-center space-x-4">
-          <Link href="/communities" className="flex items-center">
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Community
-            </Button>
-          </Link>
+          <Dialog open={createCommunityOpen} onOpenChange={setCreateCommunityOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Community
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Create A New Community</DialogTitle>
+                <DialogDescription>
+                  Set up a new community and become its administrator
+                </DialogDescription>
+              </DialogHeader>
+              
+              <CommunityForm 
+                mode="create"
+                onSubmit={async (data) => {
+                  try {
+                    const response = await fetch('/api/communities', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      credentials: 'include',
+                      body: JSON.stringify(data),
+                    });
+
+                    if (!response.ok) {
+                      throw new Error('Failed to create community');
+                    }
+
+                    setCreateCommunityOpen(false);
+                    queryClient.invalidateQueries({ queryKey: ["/api/users/communities"] });
+                    queryClient.invalidateQueries({ queryKey: ["/api/users/created-communities"] });
+                    toast({
+                      title: "Community Created",
+                      description: "Your community has been created successfully!",
+                    });
+                  } catch (error) {
+                    toast({
+                      title: "Error",
+                      description: "Failed to create community. Please try again.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                onCancel={() => setCreateCommunityOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
           {allAdminCommunities.length > 1 && (
             <Select value={selectedCommunityId || ""} onValueChange={(value) => {
               setSelectedCommunityId(value);
@@ -386,7 +431,7 @@ export function CommunityAdminTab() {
               <CommunitySettings 
                 churchId={parseInt(selectedCommunityId)}
                 userRole="church_admin"
-                communityType={selectedCommunity.type}
+                communityType={selectedCommunity.type as "church" | "group" | "ministry"}
               />
             )}
           </TabsContent>
