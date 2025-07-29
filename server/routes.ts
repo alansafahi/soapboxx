@@ -7908,6 +7908,7 @@ Return JSON with this exact structure:
         instagram_url,
         twitter_url,
         tiktok_url,
+        linkedin_url,
         // primaryLanguage field removed - not in database schema
         timeRows, // New dynamic time row data
         // Legacy fields for backward compatibility
@@ -7928,6 +7929,7 @@ Return JSON with this exact structure:
       const instagramUrl = instagram_url;
       const twitterUrl = twitter_url;
       const tiktokUrl = tiktok_url;
+      const linkedinUrl = linkedin_url;
       const sundayService = sunday_service;
       const wednesdayService = wednesday_service;
       
@@ -7963,6 +7965,7 @@ Return JSON with this exact structure:
       if (instagramUrl) socialLinks.instagram = instagramUrl;
       if (twitterUrl) socialLinks.twitter = twitterUrl;
       if (tiktokUrl) socialLinks.tiktok = tiktokUrl;
+      if (linkedinUrl) socialLinks.linkedin = linkedinUrl;
 
       // Process dynamic time rows into hours of operation and worship times
       const hoursOfOperation: any = {};
@@ -8160,6 +8163,7 @@ Return JSON with this exact structure:
         twitterUrl,
         tiktokUrl,
         youtubeUrl,
+        linkedinUrl,
         officeHours,
         worshipTimes,
         hoursOfOperation,
@@ -8196,6 +8200,7 @@ Return JSON with this exact structure:
       if (twitterUrl) socialLinksData.twitter = twitterUrl;
       if (tiktokUrl) socialLinksData.tiktok = tiktokUrl;
       if (youtubeUrl) socialLinksData.youtube = youtubeUrl;
+      if (linkedinUrl) socialLinksData.linkedin = linkedinUrl;
 
       // Process time rows if provided
       let processedWorshipTimes = worshipTimes;

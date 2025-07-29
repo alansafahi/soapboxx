@@ -32,6 +32,7 @@ interface CommunityFormData {
     twitter?: string;
     tiktok?: string;
     youtube?: string;
+    linkedin?: string;
   };
   officeHours?: string;
   worshipTimes?: string;
@@ -122,7 +123,8 @@ export function CommunityForm({
         instagram: initialData?.socialLinks?.instagram || "",
         twitter: initialData?.socialLinks?.twitter || "",
         tiktok: initialData?.socialLinks?.tiktok || "",
-        youtube: initialData?.socialLinks?.youtube || ""
+        youtube: initialData?.socialLinks?.youtube || "",
+        linkedin: initialData?.socialLinks?.linkedin || ""
       },
       officeHours: initialData?.officeHours || "",
       worshipTimes: initialData?.worshipTimes || "",
@@ -159,7 +161,8 @@ export function CommunityForm({
           instagram: initialData?.socialLinks?.instagram || "",
           twitter: initialData?.socialLinks?.twitter || "",
           tiktok: initialData?.socialLinks?.tiktok || "",
-          youtube: initialData?.socialLinks?.youtube || ""
+          youtube: initialData?.socialLinks?.youtube || "",
+          linkedin: initialData?.socialLinks?.linkedin || ""
         },
         officeHours: initialData?.officeHours || "",
         worshipTimes: initialData?.worshipTimes || "",
@@ -671,6 +674,15 @@ export function CommunityForm({
                   placeholder="https://youtube.com/community"
                   value={formData.socialLinks?.youtube || ''}
                   onChange={(e) => handleSocialLinkChange('youtube', e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="linkedinUrl">LinkedIn URL</Label>
+                <Input
+                  id="linkedinUrl"
+                  placeholder="https://linkedin.com/company/community"
+                  value={formData.socialLinks?.linkedin || ''}
+                  onChange={(e) => handleSocialLinkChange('linkedin', e.target.value)}
                 />
               </div>
             </div>
