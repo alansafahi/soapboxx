@@ -2532,21 +2532,30 @@ export class DatabaseStorage implements IStorage {
       const discussionPosts = discussions.filter(d => d.type === 'discussion');
       const soapPosts = discussions.filter(d => d.type === 'soap_reflection');
       
+      console.log(`[DEBUG] Split posts: ${discussionPosts.length} discussions, ${soapPosts.length} SOAP entries`);
+      
       // Get comment counts for discussions
       let discussionCommentCounts: Record<number, number> = {};
       if (discussionPosts.length > 0) {
-        const discussionIds = discussionPosts.map(d => d.id);
-        const commentCountResult = await db.execute(sql`
-          SELECT discussion_id, COUNT(*) as comment_count 
-          FROM discussion_comments 
-          WHERE discussion_id IN (${sql.join(discussionIds, sql`, `)})
-          GROUP BY discussion_id
-        `);
-        
-        discussionCommentCounts = commentCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
-          acc[row.discussion_id] = Number(row.comment_count);
-          return acc;
-        }, {});
+        console.log(`[DEBUG] Fetching comment counts for discussions...`);
+        try {
+          const discussionIds = discussionPosts.map(d => d.id);
+          const commentCountResult = await db.execute(sql`
+            SELECT discussion_id, COUNT(*) as comment_count 
+            FROM discussion_comments 
+            WHERE discussion_id IN (${sql.join(discussionIds, sql`, `)})
+            GROUP BY discussion_id
+          `);
+          
+          discussionCommentCounts = commentCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
+            acc[row.discussion_id] = Number(row.comment_count);
+            return acc;
+          }, {});
+          console.log(`[DEBUG] Discussion comment counts successful`);
+        } catch (error) {
+          console.log(`[DEBUG] Discussion comment counts failed:`, error);
+          discussionCommentCounts = {};
+        }
       }
 
       // Get comment counts for SOAP entries
@@ -2651,6 +2660,7 @@ export class DatabaseStorage implements IStorage {
 
       return discussionsWithCounts;
     } catch (error) {
+      console.log(`[ERROR] getDiscussions failed:`, error);
       return [];
     }
   }
