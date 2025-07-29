@@ -55,6 +55,7 @@ const createCommunitySchema = z.object({
   instagramUrl: z.string().optional(),
   twitterUrl: z.string().optional(),
   tiktokUrl: z.string().optional(),
+
   officeHours: z.string().optional(),
   worshipTimes: z.string().optional()
 });
@@ -222,6 +223,7 @@ export default function MyCommunities() {
       instagramUrl: "",
       twitterUrl: "",
       tiktokUrl: "",
+
       sundayService: "",
       wednesdayService: "",
       officeHours: "",
@@ -907,6 +909,34 @@ export default function MyCommunities() {
                               <FormLabel>TikTok URL</FormLabel>
                               <FormControl>
                                 <Input placeholder="https://tiktok.com/@community" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createForm.control}
+                          name="youtubeUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>YouTube URL</FormLabel>
+                              <FormControl>
+                                <Input placeholder="https://youtube.com/@community" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={createForm.control}
+                          name="linkedinUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>LinkedIn URL</FormLabel>
+                              <FormControl>
+                                <Input placeholder="https://linkedin.com/company/community" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
