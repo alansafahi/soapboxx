@@ -8023,6 +8023,20 @@ Return JSON with this exact structure:
         worshipTimesArray.push(`Wednesday Service: ${wednesdayService}`);
       }
 
+      // Debug: Log all extracted field values before database insertion
+      console.log('Community creation - Extracted field values:', {
+        name: name?.trim(),
+        description: description?.trim(),
+        zipCode: zipCode?.trim(),
+        establishedYear: establishedYear?.trim(),
+        parentChurchName: parentChurchName?.trim(),
+        missionStatement: missionStatement?.trim(),
+        adminEmail: adminEmail?.trim(),
+        adminPhone: adminPhone?.trim(),
+        finalLogoUrl,
+        socialLinks
+      });
+
       // SoapBox Development Standards v1.0: snake_case for database fields
       const communityData = {
         name: name?.trim(),
@@ -8035,26 +8049,28 @@ Return JSON with this exact structure:
         phone: adminPhone?.trim(),
         email: adminEmail?.trim(),
         website: website?.trim(),
-        description: description?.trim(),
+        description: description?.trim(), // FIXED: Must be included
         logo_url: finalLogoUrl, // snake_case for database
         admin_email: adminEmail?.trim(), // snake_case for database
         admin_phone: adminPhone?.trim(), // snake_case for database
         created_by: userId, // snake_case for database
         size: size?.trim() || 'small',
-        established_year: establishedYear?.trim(), // snake_case for database
-        weekly_attendance: weeklyAttendance?.trim(), // snake_case for database
-        parent_church_name: parentChurchName?.trim(), // snake_case for database
-        mission_statement: missionStatement?.trim(), // snake_case for database
+        established_year: establishedYear ? parseInt(establishedYear) : null, // FIXED: Convert to integer
+        parent_church_name: parentChurchName?.trim(), // FIXED: Must be included
+        mission_statement: missionStatement?.trim(), // FIXED: Must be included
         is_active: true, // snake_case for database
         verification_status: 'verified', // snake_case for database
         is_demo: false, // snake_case for database
         is_claimed: true, // snake_case for database
-        social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null, // snake_case for database
+        social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null, // FIXED: Must be included
         hours_of_operation: Object.keys(hoursOfOperation).length > 0 ? hoursOfOperation : null, // snake_case for database
         worship_times: worshipTimesArray.length > 0 ? worshipTimesArray.join('; ') : null, // snake_case for database
         created_at: new Date(), // snake_case for database
         updated_at: new Date() // snake_case for database
       };
+
+      // Debug: Log final communityData object
+      console.log('Community creation - Final database object:', communityData);
 
       const newCommunity = await storage.createChurch(communityData);
 
