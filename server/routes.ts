@@ -7978,6 +7978,19 @@ Return JSON with this exact structure:
         validationErrors.push('ZIP code is required');
       }
 
+      // Additional required fields for complete community profile
+      if (!type?.trim()) {
+        validationErrors.push('Community type is required');
+      }
+
+      if (!denomination?.trim()) {
+        validationErrors.push('Denomination is required');
+      }
+
+      if (!weeklyAttendance?.trim()) {
+        validationErrors.push('Weekly attendance is required');
+      }
+
       // Phone validation
       if (adminPhone?.trim()) {
         const phoneResult = phoneValidation.safeParse(adminPhone);
