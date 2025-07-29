@@ -39,9 +39,6 @@ interface CommunityFormData {
     eventLabel: string;
     timeSchedule: string;
     language: string;
-    field1?: string;
-    field2?: string;
-    field3?: string;
   }>;
 }
 
@@ -288,13 +285,19 @@ export function CommunityForm({
   };
 
   const addAdditionalTime = () => {
-    setFormData(prev => ({
-      ...prev,
-      additionalTimes: [
-        ...(prev.additionalTimes || []),
-        { eventLabel: "", timeSchedule: "", language: "English" }
-      ]
-    }));
+    setFormData(prev => {
+      const currentTimes = prev.additionalTimes || [];
+      if (currentTimes.length >= 6) {
+        return prev; // Don't add if already at limit
+      }
+      return {
+        ...prev,
+        additionalTimes: [
+          ...currentTimes,
+          { eventLabel: "", timeSchedule: "", language: "English" }
+        ]
+      };
+    });
   };
 
   const updateAdditionalTime = (index: number, field: string, value: string) => {
@@ -705,14 +708,15 @@ export function CommunityForm({
             </div>
             <div>
               <div className="flex items-center justify-between">
-                <Label>Additional Times</Label>
+                <Label>Additional Times (up to 6)</Label>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
                   onClick={addAdditionalTime}
+                  disabled={(formData.additionalTimes?.length || 0) >= 6}
                 >
-                  Add Time
+                  {(formData.additionalTimes?.length || 0) >= 6 ? 'Limit Reached (6/6)' : `Add Time (${(formData.additionalTimes?.length || 0)}/6)`}
                 </Button>
               </div>
               {formData.additionalTimes?.map((time, index) => (
