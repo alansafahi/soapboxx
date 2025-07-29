@@ -210,9 +210,11 @@ export const communities = pgTable("communities", {
   size: varchar("size", { length: 50 }), // Weekly attendance category
   establishedYear: integer("established_year"), // Year the community was established
   parentChurchName: varchar("parent_church_name", { length: 255 }), // Parent organization name
+  missionStatement: text("mission_statement"), // Community mission statement
   hoursOfOperation: jsonb("hours_of_operation"), // Operating hours for each day of the week
   officeHours: text("office_hours"), // Office hours text format
   worshipTimes: text("worship_times"), // Worship service times text format
+  additionalTimes: jsonb("additional_times"), // Additional service times (array of objects)
   socialLinks: jsonb("social_links"), // Facebook, Instagram, Twitter, YouTube, etc.
   // Fields below don't exist in actual database - removing to match schema
   communityTags: text("community_tags").array(), // Custom tags for community categorization

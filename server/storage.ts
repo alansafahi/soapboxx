@@ -1776,7 +1776,7 @@ export class DatabaseStorage implements IStorage {
       'hoursOfOperation', 'officeHours', 'worshipTimes', 'socialLinks', 'communityTags', 'latitude', 'longitude', 
       'rating', 'memberCount', 'isActive', 'isClaimed', 'adminEmail', 'adminPhone', 
       'verificationStatus', 'rejectionReason', 'createdBy', 'isDemo', 'updatedAt',
-      'establishedYear', 'parentChurchName' // Added missing database fields that exist in schema
+      'establishedYear', 'parentChurchName', 'missionStatement', 'additionalTimes' // Added all missing fields
     ];
     
     const filteredUpdates = Object.keys(updates)
