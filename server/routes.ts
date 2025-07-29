@@ -8037,8 +8037,13 @@ Return JSON with this exact structure:
         description: description?.trim(),
         logo_url: finalLogoUrl, // snake_case for database
         admin_email: adminEmail?.trim(), // snake_case for database
+        admin_phone: adminPhone?.trim(), // snake_case for database
         created_by: userId, // snake_case for database
         size: size?.trim() || 'small',
+        established_year: establishedYear?.trim(), // snake_case for database
+        weekly_attendance: weeklyAttendance?.trim(), // snake_case for database
+        parent_church_name: parentChurchName?.trim(), // snake_case for database
+        mission_statement: missionStatement?.trim(), // snake_case for database
         is_active: true, // snake_case for database
         verification_status: 'verified', // snake_case for database
         is_demo: false, // snake_case for database
