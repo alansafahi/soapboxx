@@ -384,14 +384,30 @@ export default function MyCommunities() {
       });
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        let errorData;
+        const contentType = response.headers.get('content-type');
+        
+        try {
+          if (contentType && contentType.includes('application/json')) {
+            errorData = await response.json();
+          } else {
+            const errorText = await response.text();
+            errorData = { message: errorText };
+          }
+        } catch (parseError) {
+          console.error('Error parsing response:', parseError);
+          errorData = { message: `Server error (${response.status})` };
+        }
+        
+        console.log('Full error data:', errorData);
+        
         // Handle validation errors with detailed messages
         if (errorData.details && Array.isArray(errorData.details)) {
-          throw new Error(errorData.message || errorData.details.join('\n'));
+          throw new Error(errorData.message || errorData.details.join('\n• '));
         } else if (errorData.message) {
           throw new Error(errorData.message);
         } else {
-          throw new Error("Failed to create community");
+          throw new Error(`Failed to create community (${response.status})`);
         }
       }
       
