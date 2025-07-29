@@ -1786,6 +1786,10 @@ export class DatabaseStorage implements IStorage {
         return obj;
       }, {} as any);
     
+    console.log(`[STORAGE] updateChurch - Allowed fields:`, allowedFields);
+    console.log(`[STORAGE] updateChurch - Original updates:`, Object.keys(updates));
+    console.log(`[STORAGE] updateChurch - Filtered updates:`, filteredUpdates);
+    
 
     
     const [updatedChurch] = await db
