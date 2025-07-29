@@ -8,6 +8,7 @@ import { Badge } from "./ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import FormattedContent from "../utils/FormattedContent";
+import SoapPostCard from "./SoapPostCard";
 import { 
   MessageSquare, 
   Heart, 
@@ -36,6 +37,14 @@ interface UserPost {
   prayerCount?: number;
   isPublic: boolean;
   mood?: string;
+  soapData?: {
+    scripture: string;
+    scriptureReference: string;
+    observation: string;
+    application: string;
+    prayer: string;
+  };
+  attachedMedia?: string;
 }
 
 interface PostStats {
@@ -298,11 +307,45 @@ export default function MyPostsFeed() {
               
               <CardContent className="pt-0">
                 <div className="mb-4">
-                  <FormattedContent 
-                    content={post.content} 
-                    attachedMedia={post.attachedMedia} 
-                    className="text-gray-700 dark:text-gray-300 line-clamp-2"
-                  />
+                  {post.type === 'soap_reflection' && post.soapData ? (
+                    <div className="soap-sections-preview">
+                      <div className="space-y-3">
+                        {post.soapData.scripture && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-purple-600 dark:text-purple-400 mb-1">📖 Scripture</h4>
+                            {post.soapData.scriptureReference && (
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{post.soapData.scriptureReference}</p>
+                            )}
+                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{post.soapData.scripture}</p>
+                          </div>
+                        )}
+                        {post.soapData.observation && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-1">👁️ Observation</h4>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{post.soapData.observation}</p>
+                          </div>
+                        )}
+                        {post.soapData.application && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-green-600 dark:text-green-400 mb-1">🔧 Application</h4>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{post.soapData.application}</p>
+                          </div>
+                        )}
+                        {post.soapData.prayer && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-red-600 dark:text-red-400 mb-1">🙏 Prayer</h4>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{post.soapData.prayer}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <FormattedContent 
+                      content={post.content} 
+                      attachedMedia={post.attachedMedia} 
+                      className="text-gray-700 dark:text-gray-300 line-clamp-2"
+                    />
+                  )}
                 </div>
                 
                 {/* Engagement Stats */}

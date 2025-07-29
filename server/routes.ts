@@ -8994,7 +8994,15 @@ Return JSON with this exact structure:
       }
 
       const { sort = 'recent', type = 'all' } = req.query;
+      console.log(`[DEBUG] getUserPosts called for user ${userId}, type=${type}`);
       const posts = await storage.getUserPosts(userId, sort as string, type as string);
+      console.log(`[DEBUG] getUserPosts returned ${posts.length} posts`);
+      if (posts.length > 0) {
+        const soapPosts = posts.filter(p => p.type === 'soap_reflection');
+        if (soapPosts.length > 0) {
+          console.log(`[DEBUG] Sample SOAP post from getUserPosts:`, JSON.stringify(soapPosts[0], null, 2));
+        }
+      }
       res.json(posts);
     } catch (error) {
       // // 

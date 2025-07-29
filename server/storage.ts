@@ -2492,6 +2492,12 @@ export class DatabaseStorage implements IStorage {
       // Debug: Log first few raw rows to see what we're getting
       if (combinedResult.rows.length > 0) {
         console.log(`[DEBUG] Sample raw row:`, JSON.stringify(combinedResult.rows[0], null, 2));
+        
+        // Check for SOAP entries specifically
+        const soapRows = combinedResult.rows.filter(row => row.type === 'soap_reflection');
+        if (soapRows.length > 0) {
+          console.log(`[DEBUG] Sample SOAP row:`, JSON.stringify(soapRows[0], null, 2));
+        }
       }
 
       // Successfully combined discussions and SOAP entries
@@ -3118,12 +3124,19 @@ export class DatabaseStorage implements IStorage {
         const soapWithType = soapResult.rows.map(s => ({
           ...s,
           type: 'soap_reflection',
-          title: 'S.O.A.P. Reflection',
+          title: s.scripture_reference || 'S.O.A.P. Reflection',
           category: 'soap_reflection',
           likeCount: 0,
           commentCount: Number(s.comment_count) || 0,
           mood: s.mood || null,
-          content: s.scripture || s.observation || s.application || s.prayer || 'S.O.A.P. Entry',
+          content: s.scripture || 'S.O.A.P. Entry', // Keep scripture as content for display
+          soapData: {
+            scripture: s.scripture,
+            scriptureReference: s.scripture_reference,
+            observation: s.observation,
+            application: s.application,
+            prayer: s.prayer
+          },
           userId: s.user_id,
           communityId: s.church_id,
           isPublic: s.is_public,
