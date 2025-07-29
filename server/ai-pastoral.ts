@@ -26,6 +26,7 @@ export async function generateSoapSuggestions(
   contextualInfo?: ContextualInfo
 ): Promise<SoapSuggestion> {
   try {
+    console.log(`[DEBUG] generateSoapSuggestions called with:`, { scripture, scriptureReference, contextualInfo });
     // Build contextual awareness
     const currentDate = new Date();
     const liturgicalContext = getLiturgicalContext(currentDate);
@@ -93,12 +94,14 @@ Respond with JSON in this format:
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
     
+    console.log(`[DEBUG] OpenAI response:`, result);
     return {
       observation: result.observation || '',
       application: result.application || '',
       prayer: result.prayer || ''
     };
   } catch (error) {
+    console.error(`[ERROR] generateSoapSuggestions failed:`, error);
     throw new Error('Failed to generate AI suggestions. Please try again.');
   }
 }

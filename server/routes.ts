@@ -11383,6 +11383,7 @@ Return JSON with this exact structure:
   // AI-powered S.O.A.P. assistance endpoints
   app.post('/api/soap/ai/suggestions', isAuthenticated, async (req: any, res) => {
     try {
+      console.log(`[DEBUG] AI suggestions request from user ${req.session.userId}:`, req.body);
       const { scripture, scriptureReference, userMood, currentEvents, personalContext, generateComplete } = req.body;
       const userId = req.session.userId;
 
@@ -11408,8 +11409,10 @@ Return JSON with this exact structure:
         suggestions = await generateSoapSuggestions(scripture, scriptureReference, contextualInfo);
       }
 
+      console.log(`[DEBUG] AI suggestions response:`, suggestions);
       res.json(suggestions);
     } catch (error) {
+      console.error(`[ERROR] AI suggestions failed:`, error);
       res.status(500).json({ message: (error as Error).message || 'Failed to generate AI suggestions' });
     }
   });
