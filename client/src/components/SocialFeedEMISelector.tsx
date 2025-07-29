@@ -26,28 +26,26 @@ export default function SocialFeedEMISelector({
   console.log("SocialFeedEMISelector mounted, compact:", compact);
   console.log("SocialFeedEMISelector selectedMoods:", selectedMoods);
 
-  // Fetch mood indicators by category - use same endpoint as CheckInSystem
-  const { data: allMoods = [], isLoading } = useQuery<EnhancedMoodIndicator[]>({
-    queryKey: ["/api/enhanced-mood-indicators"],
+  // Fetch mood indicators by category - use the correct endpoint that groups by category
+  const { data: moodsByCategory = {}, isLoading } = useQuery<Record<string, EnhancedMoodIndicator[]>>({
+    queryKey: ["/api/enhanced-mood-indicators/by-category"],
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
 
-  // FORCE CONSOLE LOGGING ALWAYS
-  console.error("🚨 SOCIAL FEED EMI - FORCED DEBUG:");
-  console.error("Raw moods fetched:", allMoods?.length || 0);
-  console.error("First 3 moods:", allMoods?.slice(0, 3));
+  // Get all moods as flat array for compatibility
+  const allMoods = Object.values(moodsByCategory).flat();
 
-  // Group moods by category manually like CheckInSystem does
-  const moodsByCategory = allMoods.reduce((acc: Record<string, EnhancedMoodIndicator[]>, mood: EnhancedMoodIndicator) => {
-    if (!acc[mood.category]) {
-      acc[mood.category] = [];
-    }
-    acc[mood.category].push(mood);
-    return acc;
-  }, {});
+  // FORCE CONSOLE LOGGING ALWAYS
+  console.error("🚨 SOCIAL FEED EMI - USING CORRECT BY-CATEGORY ENDPOINT:");
+  console.error("Total categories fetched:", Object.keys(moodsByCategory).length);
+  console.error("All categories:", Object.keys(moodsByCategory));
+  console.error("Total moods across all categories:", allMoods.length);
+  console.error("Category breakdown:", Object.fromEntries(
+    Object.entries(moodsByCategory).map(([cat, moods]) => [cat, moods.length])
+  ));
 
   // Debug logging
   if (allMoods.length > 0) {
@@ -87,15 +85,6 @@ export default function SocialFeedEMISelector({
   console.error("🎯 EMI SYSTEM - Total moods available:", allMoods.length);
   
   const selectedMoodsData = getSelectedMoodsData();
-
-  // Enhanced debugging
-  console.error("🔍 EMI DEBUG COMPLETE:");
-  console.error("📊 Raw mood count:", allMoods.length);
-  console.error("📁 Total categories found:", Object.keys(moodsByCategory).length);
-  console.error("📋 All categories:", categories);
-  console.error("📈 Category counts:", Object.fromEntries(
-    Object.entries(moodsByCategory).map(([cat, moods]) => [cat, moods.length])
-  ));
 
   return (
     <div className="space-y-4">
