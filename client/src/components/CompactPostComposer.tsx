@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
+import type { EnhancedMoodIndicator } from "@shared/schema";
 import { useToast } from "../hooks/use-toast";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -65,7 +66,7 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
   const queryClient = useQueryClient();
   const [content, setContent] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
-  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
+  const [selectedMoods, setSelectedMoods] = useState<number[]>([]);
   const [attachedMedia, setAttachedMedia] = useState<Array<{name: string; type: string; size: number; url: string}>>([]);
   const [linkedVerse, setLinkedVerse] = useState<{reference: string; text: string} | null>(null);
   const [audience, setAudience] = useState<'public' | 'church' | 'private'>('public');
@@ -77,7 +78,7 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  const [recentMoods, setRecentMoods] = useState<Array<{id: string; icon: string; label: string}>>([]);
+  const [recentMoods, setRecentMoods] = useState<EnhancedMoodIndicator[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
   const [expirationSettings, setExpirationSettings] = useState<{
@@ -93,62 +94,20 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
   const verseDropdownRef = useRef<HTMLDivElement>(null);
   const audienceDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Comprehensive mood categories from social-feed.tsx
-  const moodCategories = [
-    {
-      title: "Spiritual States",
-      description: "Your relationship with God and faith journey",
-      moods: [
-        { id: "grateful", icon: "🙏", label: "Grateful", subtitle: "Thankful for God's blessings" },
-        { id: "blessed", icon: "✝️", label: "Blessed", subtitle: "Experiencing God's favor" },
-        { id: "peaceful", icon: "🕊️", label: "Peaceful", subtitle: "Feeling God's peace" },
-        { id: "loved", icon: "❤️", label: "Loved", subtitle: "Embraced by God's love" },
-        { id: "inspired", icon: "🔥", label: "Inspired", subtitle: "Moved by the Spirit" },
-        { id: "hopeful", icon: "🌟", label: "Hopeful", subtitle: "Trusting in God's plan" },
-        { id: "faithful", icon: "🛡️", label: "Faithful", subtitle: "Standing firm in belief" },
-        { id: "worshipful", icon: "🎵", label: "Worshipful", subtitle: "In praise and adoration" }
-      ]
-    },
-    {
-      title: "Emotional Well-being",
-      description: "How you're feeling emotionally today",
-      moods: [
-        { id: "joyful", icon: "😊", label: "Joyful", subtitle: "Filled with happiness" },
-        { id: "content", icon: "😌", label: "Content", subtitle: "At peace with life" },
-        { id: "excited", icon: "🤗", label: "Excited", subtitle: "Looking forward" },
-        { id: "calm", icon: "😇", label: "Calm", subtitle: "Tranquil and serene" },
-        { id: "reflective", icon: "🤔", label: "Reflective", subtitle: "Thoughtful and pondering" },
-        { id: "energetic", icon: "⚡", label: "Energetic", subtitle: "Full of vitality" }
-      ]
-    },
-    {
-      title: "Seeking Support",
-      description: "When you need encouragement or prayer",
-      moods: [
-        { id: "struggling", icon: "😔", label: "Struggling", subtitle: "Going through difficulties" },
-        { id: "anxious", icon: "😰", label: "Anxious", subtitle: "Feeling worried or nervous" },
-        { id: "confused", icon: "😕", label: "Confused", subtitle: "Seeking clarity" },
-        { id: "lonely", icon: "😢", label: "Lonely", subtitle: "Needing connection" },
-        { id: "overwhelmed", icon: "😵", label: "Overwhelmed", subtitle: "Feeling burdened" },
-        { id: "seeking", icon: "🔍", label: "Seeking", subtitle: "Looking for answers" }
-      ]
-    },
-    {
-      title: "Life Circumstances",
-      description: "What's happening in your life right now",
-      moods: [
-        { id: "celebrating", icon: "🎉", label: "Celebrating", subtitle: "Marking a special moment" },
-        { id: "recovering", icon: "🩹", label: "Recovering", subtitle: "Healing and getting better" },
-        { id: "learning", icon: "📚", label: "Learning", subtitle: "Growing in knowledge" },
-        { id: "serving", icon: "🤝", label: "Serving", subtitle: "Helping others" },
-        { id: "traveling", icon: "✈️", label: "Traveling", subtitle: "On a journey" },
-        { id: "working", icon: "💼", label: "Working", subtitle: "Focused on tasks" }
-      ]
-    }
-  ];
+  // Fetch Enhanced Mood Indicators (EMI) from centralized system
+  const { data: moodsByCategory = {}, isLoading: loadingMoods } = useQuery<Record<string, EnhancedMoodIndicator[]>>({
+    queryKey: ["/api/enhanced-mood-indicators/by-category"],
+    staleTime: 5 * 60 * 1000, // 5 minute cache
+  });
 
-  // Flatten all moods for backward compatibility
-  const moodOptions = moodCategories.flatMap(category => category.moods);
+  // Get all moods as flat array for mood operations
+  const allMoods = Object.values(moodsByCategory).flat();
+
+  console.log("CompactPostComposer EMI Debug:", {
+    categoriesCount: Object.keys(moodsByCategory).length,
+    totalMoods: allMoods.length,
+    selectedMoodsCount: selectedMoods.length
+  });
 
   const createPostMutation = useMutation({
     mutationFn: async (data: { 
@@ -236,7 +195,7 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
     
     createPostMutation.mutate({
       content: content.trim(),
-      mood: selectedMoods.join(","),
+      mood: selectedMoods.map(id => id.toString()).join(","),
       attachedMedia: attachedMedia.length > 0 ? attachedMedia : undefined,
       linkedVerse: linkedVerse || undefined,
       audience,
@@ -248,16 +207,16 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
     setIsExpanded(true);
   };
 
-  const toggleMoodSelection = (moodId: string) => {
+  const toggleMoodSelection = (moodId: number) => {
     setSelectedMoods(prev => {
       const isSelected = prev.includes(moodId);
       const newSelection = isSelected 
         ? prev.filter(id => id !== moodId)
         : [...prev, moodId];
       
-      // Update recent moods
+      // Update recent moods with EMI data
       if (!isSelected) {
-        const mood = moodOptions.find(m => m.id === moodId);
+        const mood = allMoods.find(m => m.id === moodId);
         if (mood) {
           setRecentMoods(prevRecent => {
             const filtered = prevRecent.filter(m => m.id !== moodId);
@@ -623,8 +582,8 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
                               <div className="flex flex-wrap gap-1">
                                 {recentMoods.map((mood) => {
                                   const isSelected = selectedMoods.includes(mood.id);
-                                  const currentString = selectedMoods.join(',');
-                                  const wouldExceedLimit = !isSelected && (currentString + (currentString ? ',' : '') + mood.id).length > 255;
+                                  const currentString = selectedMoods.map(id => id.toString()).join(',');
+                                  const wouldExceedLimit = !isSelected && (currentString + (currentString ? ',' : '') + mood.id.toString()).length > 255;
                                   
                                   return (
                                     <Button
@@ -642,9 +601,9 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
                                       }`}
                                       title={wouldExceedLimit ? `Adding this mood would exceed the 255 character limit (current: ${currentString.length}/255)` : undefined}
                                     >
-                                      <span className="mr-1">{mood.icon}</span>
-                                      <span className="hidden sm:inline">{mood.label}</span>
-                                      <span className="sm:hidden">{mood.label.length > 8 ? mood.label.substring(0, 8) + '...' : mood.label}</span>
+                                      <span className="mr-1">{mood.emoji}</span>
+                                      <span className="hidden sm:inline">{mood.name}</span>
+                                      <span className="sm:hidden">{mood.name.length > 8 ? mood.name.substring(0, 8) + '...' : mood.name}</span>
                                     </Button>
                                   );
                                 })}
@@ -653,47 +612,61 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
                             </div>
                           )}
 
-                          {/* Categorized Moods */}
-                          <div className="space-y-4">
-                            {moodCategories.map((category) => (
-                              <div key={category.title}>
-                                <div className="mb-2">
-                                  <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200">{category.title}</h3>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400 italic hidden sm:block">{category.description}</p>
+                          {/* Enhanced Mood Indicators (EMI) by Category */}
+                          {loadingMoods ? (
+                            <div className="flex items-center justify-center p-4">
+                              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+                              <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">Loading moods...</span>
+                            </div>
+                          ) : (
+                            <div className="space-y-4">
+                              {Object.keys(moodsByCategory).sort().map((categoryName) => (
+                                <div key={categoryName}>
+                                  <div className="mb-2">
+                                    <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-200">{categoryName}</h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 italic hidden sm:block">
+                                      {categoryName === "Spiritual States" && "Your relationship with God and faith journey"}
+                                      {categoryName === "Emotional Well-being" && "How you're feeling emotionally today"}
+                                      {categoryName === "Life Circumstances" && "Current situations you're navigating"}
+                                      {categoryName === "Faith & Worship" && "Your spiritual practices and worship"}
+                                      {categoryName === "Growth & Transformation" && "Your journey of spiritual development"}
+                                      {categoryName === "Seeking Support" && "When you need prayer, encouragement, or help"}
+                                    </p>
+                                  </div>
+                                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                    {moodsByCategory[categoryName].map((mood) => {
+                                      const isSelected = selectedMoods.includes(mood.id);
+                                      const currentString = selectedMoods.map(id => id.toString()).join(',');
+                                      const wouldExceedLimit = !isSelected && (currentString + (currentString ? ',' : '') + mood.id.toString()).length > 255;
+                                      
+                                      return (
+                                        <Button
+                                          key={mood.id}
+                                          variant={isSelected ? "default" : "ghost"}
+                                          size="sm"
+                                          onClick={() => toggleMoodSelection(mood.id)}
+                                          disabled={wouldExceedLimit}
+                                          className={`h-auto min-h-[3rem] p-2 justify-start text-left ${
+                                            isSelected 
+                                              ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                                              : wouldExceedLimit 
+                                              ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400'
+                                              : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                                          }`}
+                                          title={wouldExceedLimit ? `Adding this mood would exceed the 255 character limit (current: ${currentString.length}/255)` : mood.description || `Feeling ${mood.name.toLowerCase()}`}
+                                        >
+                                          <div className="flex items-center w-full">
+                                            <span className="mr-2 text-base flex-shrink-0">{mood.emoji}</span>
+                                            <span className="text-xs font-medium leading-tight break-words hyphens-auto">{mood.name}</span>
+                                          </div>
+                                        </Button>
+                                      );
+                                    })}
+                                  </div>
                                 </div>
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                  {category.moods.map((mood) => {
-                                    const isSelected = selectedMoods.includes(mood.id);
-                                    const currentString = selectedMoods.join(',');
-                                    const wouldExceedLimit = !isSelected && (currentString + (currentString ? ',' : '') + mood.id).length > 255;
-                                    
-                                    return (
-                                      <Button
-                                        key={mood.id}
-                                        variant={isSelected ? "default" : "ghost"}
-                                        size="sm"
-                                        onClick={() => toggleMoodSelection(mood.id)}
-                                        disabled={wouldExceedLimit}
-                                        className={`h-auto min-h-[3rem] p-2 justify-start text-left ${
-                                          isSelected 
-                                            ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-                                            : wouldExceedLimit 
-                                            ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800 text-gray-400'
-                                            : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                                        }`}
-                                        title={wouldExceedLimit ? `Adding this mood would exceed the 255 character limit (current: ${currentString.length}/255)` : mood.subtitle}
-                                      >
-                                        <div className="flex items-center w-full">
-                                          <span className="mr-2 text-base flex-shrink-0">{mood.icon}</span>
-                                          <span className="text-xs font-medium leading-tight break-words hyphens-auto">{mood.label}</span>
-                                        </div>
-                                      </Button>
-                                    );
-                                  })}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
+                              ))}
+                            </div>
+                          )}
 
                           {/* Action Buttons */}
                           <div className="mt-4 pt-3 border-t border-gray-200 dark:border-gray-600 flex justify-between">

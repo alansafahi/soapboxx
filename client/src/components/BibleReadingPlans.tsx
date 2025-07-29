@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight } from "lucide-react";
-import type { ReadingPlan, ReadingPlanDay, UserReadingPlanSubscription, UserReadingProgress, EnhancedMoodIndicator } from "@shared/schema";
+import type { ReadingPlan, ReadingPlanDay, UserReadingPlanSubscription, UserReadingProgress } from "@shared/schema";
 
 interface ReadingPlanWithProgress extends ReadingPlan {
   subscription?: UserReadingPlanSubscription;
@@ -34,24 +34,6 @@ const DayReader = ({ plan, day, userProgress, onComplete }: DayReaderProps) => {
   const [emotionalReaction, setEmotionalReaction] = useState(userProgress?.emotionalReaction || "");
   const [personalInsights, setPersonalInsights] = useState(userProgress?.personalInsights || "");
   const [readingTimeMinutes, setReadingTimeMinutes] = useState(userProgress?.readingTimeMinutes || 0);
-
-  // Fetch Enhanced Mood Indicators for proper EMI integration
-  const { data: allMoods = [] } = useQuery<EnhancedMoodIndicator[]>({
-    queryKey: ["/api/enhanced-mood-indicators"],
-    staleTime: 5 * 60 * 1000, // 5 minute cache
-  });
-
-  // Group moods by category for organized display
-  const moodsByCategory = allMoods.reduce((acc: Record<string, EnhancedMoodIndicator[]>, mood: EnhancedMoodIndicator) => {
-    if (!acc[mood.category]) {
-      acc[mood.category] = [];
-    }
-    acc[mood.category].push(mood);
-    return acc;
-  }, {});
-
-  // Get selected mood data for display
-  const selectedMoodData = allMoods.find(mood => mood.id.toString() === emotionalReaction);
 
   const handleComplete = () => {
     const progressData = {
@@ -199,38 +181,21 @@ const DayReader = ({ plan, day, userProgress, onComplete }: DayReaderProps) => {
               </Label>
               <Select value={emotionalReaction} onValueChange={setEmotionalReaction}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select your emotional response">
-                    {selectedMoodData && (
-                      <span className="flex items-center gap-2">
-                        <span>{selectedMoodData.emoji}</span>
-                        <span>{selectedMoodData.name}</span>
-                      </span>
-                    )}
-                  </SelectValue>
+                  <SelectValue placeholder="Select your emotional response" />
                 </SelectTrigger>
-                <SelectContent className="max-h-[300px] overflow-y-auto">
-                  {Object.keys(moodsByCategory).sort().map((categoryName) => (
-                    <div key={categoryName}>
-                      <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                        {categoryName}
-                      </div>
-                      {moodsByCategory[categoryName].map((mood) => (
-                        <SelectItem key={mood.id} value={mood.id.toString()}>
-                          <span className="flex items-center gap-2">
-                            <span>{mood.emoji}</span>
-                            <span>{mood.name}</span>
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </div>
-                  ))}
+                <SelectContent>
+                  <SelectItem value="peaceful">Peaceful</SelectItem>
+                  <SelectItem value="encouraged">Encouraged</SelectItem>
+                  <SelectItem value="challenged">Challenged</SelectItem>
+                  <SelectItem value="grateful">Grateful</SelectItem>
+                  <SelectItem value="hopeful">Hopeful</SelectItem>
+                  <SelectItem value="convicted">Convicted</SelectItem>
+                  <SelectItem value="inspired">Inspired</SelectItem>
+                  <SelectItem value="confused">Confused</SelectItem>
+                  <SelectItem value="sad">Sad</SelectItem>
+                  <SelectItem value="joyful">Joyful</SelectItem>
                 </SelectContent>
               </Select>
-              {selectedMoodData && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {selectedMoodData.description || `Feeling ${selectedMoodData.name.toLowerCase()}`}
-                </p>
-              )}
             </div>
 
             <div>
