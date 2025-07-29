@@ -385,7 +385,14 @@ export default function MyCommunities() {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to create community");
+        // Handle validation errors with detailed messages
+        if (errorData.details && Array.isArray(errorData.details)) {
+          throw new Error(errorData.message || errorData.details.join('\n'));
+        } else if (errorData.message) {
+          throw new Error(errorData.message);
+        } else {
+          throw new Error("Failed to create community");
+        }
       }
       
       return response.json();
@@ -404,6 +411,7 @@ export default function MyCommunities() {
       setTimeRows([{ id: 1, eventLabel: '', timeSchedule: '', language: 'english' }]);
     },
     onError: (error: any) => {
+      console.error('Community creation error:', error);
       toast({
         title: "Failed to create community",
         description: error.message || "Please try again later.",

@@ -164,9 +164,19 @@ export function CommunityAdminTab() {
       });
       
       if (!response.ok) {
-        const errorText = await response.text();
-
-        throw new Error(`Failed to save community profile: ${errorText}`);
+        const errorData = await response.json().catch(async () => {
+          const errorText = await response.text();
+          return { message: errorText };
+        });
+        
+        // Handle validation errors with detailed messages
+        if (errorData.details && Array.isArray(errorData.details)) {
+          throw new Error(errorData.message || errorData.details.join('\n'));
+        } else if (errorData.message) {
+          throw new Error(errorData.message);
+        } else {
+          throw new Error('Failed to save community profile');
+        }
       }
       
       const result = await response.json();
@@ -178,6 +188,7 @@ export function CommunityAdminTab() {
       queryClient.invalidateQueries({ queryKey: ['community-details', selectedCommunityId] });
     },
     onError: (error: any) => {
+      console.error('Community profile update error:', error);
       toast({ 
         title: "Failed to update community profile", 
         description: error.message,
