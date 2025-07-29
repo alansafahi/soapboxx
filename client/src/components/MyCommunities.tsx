@@ -55,7 +55,8 @@ const createCommunitySchema = z.object({
   instagramUrl: z.string().optional(),
   twitterUrl: z.string().optional(),
   tiktokUrl: z.string().optional(),
-
+  youtubeUrl: z.string().optional(),
+  linkedinUrl: z.string().optional(),
   officeHours: z.string().optional(),
   worshipTimes: z.string().optional()
 });
@@ -223,7 +224,8 @@ export default function MyCommunities() {
       instagramUrl: "",
       twitterUrl: "",
       tiktokUrl: "",
-
+      youtubeUrl: "",
+      linkedinUrl: "",
       sundayService: "",
       wednesdayService: "",
       officeHours: "",
@@ -488,7 +490,7 @@ export default function MyCommunities() {
                 Create A Community
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Create A New Community</DialogTitle>
                 <DialogDescription>
