@@ -1272,7 +1272,7 @@ export const inspirationBookmarks = pgTable("inspiration_bookmarks", {
 export const soapEntries = pgTable("soap_entries", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  communityId: integer("community_id").references(() => communities.id),
+  churchId: integer("church_id").references(() => communities.id),
   scripture: text("scripture").notNull(), // The Bible verse or passage
   scriptureReference: varchar("scripture_reference", { length: 100 }), // e.g., "John 3:16"
   observation: text("observation").notNull(), // What does the passage say?
@@ -1300,7 +1300,7 @@ export const soapEntries = pgTable("soap_entries", {
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("soap_entries_user_idx").on(table.userId),
-  index("soap_entries_community_idx").on(table.communityId),
+  index("soap_entries_community_idx").on(table.churchId),
   index("soap_entries_date_idx").on(table.devotionalDate),
   index("soap_entries_public_idx").on(table.isPublic),
   index("soap_entries_expires_idx").on(table.expiresAt), // Index for expiration queries
