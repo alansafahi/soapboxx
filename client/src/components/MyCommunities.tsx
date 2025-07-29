@@ -1300,19 +1300,19 @@ export default function MyCommunities() {
             </div>
           )}
 
-          {/* Groups Section */}
-          {userCommunities.filter(c => c.type === 'group').length > 0 && (
+          {/* Ministries Section */}
+          {userCommunities.filter(c => c.type === 'ministry').length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Groups</h3>
-                <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                  {userCommunities.filter(c => c.type === 'group').length}
+                <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ministries</h3>
+                <Badge variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                  {userCommunities.filter(c => c.type === 'ministry').length}
                 </Badge>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {userCommunities.filter(c => c.type === 'group').sort((a, b) => a.name.localeCompare(b.name)).map((community) => (
-                  <Card key={community.id} className="hover:shadow-lg transition-shadow border-2 border-green-200 dark:border-green-800">
+                {userCommunities.filter(c => c.type === 'ministry').sort((a, b) => a.name.localeCompare(b.name)).map((community) => (
+                  <Card key={community.id} className="hover:shadow-lg transition-shadow border-2 border-purple-200 dark:border-purple-800">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
@@ -1323,8 +1323,8 @@ export default function MyCommunities() {
                               className="w-12 h-12 rounded-lg object-cover"
                             />
                           ) : (
-                            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                              <Building className="h-6 w-6 text-green-600 dark:text-green-400" />
+                            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                              <Building className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
@@ -1364,18 +1364,38 @@ export default function MyCommunities() {
                       )}
 
                       <div className="flex gap-2 pt-2">
-                        <Link href={`/community-management/${community.id}`} className="flex-1">
-                          <Button variant="outline" size="sm" className="w-full">
-                            <Calendar className="h-4 w-4 mr-2" />
-                            View Details
-                          </Button>
-                        </Link>
-                        {(community.role === 'church_admin' || community.role === 'admin' || community.role === 'pastor') && (
-                          <Link href={`/admin?communityId=${community.id}`}>
-                            <Button size="sm" variant="outline">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => {
+                            setSelectedCommunityId(community.id.toString());
+                            setViewDialogOpen(true);
+                          }}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Details
+                        </Button>
+                        {(community.role === 'church_admin' || community.role === 'admin' || community.role === 'pastor' || community.role === 'lead-pastor' || community.role === 'elder') && (
+                          <>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                window.location.href = `/community-administration?communityId=${community.id}`;
+                              }}
+                            >
                               <Settings className="h-4 w-4" />
                             </Button>
-                          </Link>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => handleDeleteCommunity(community.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
                         )}
                       </div>
                     </CardContent>
@@ -1385,19 +1405,19 @@ export default function MyCommunities() {
             </div>
           )}
 
-          {/* Ministries Section */}
-          {userCommunities.filter(c => c.type === 'ministry').length > 0 && (
+          {/* Groups Section */}
+          {userCommunities.filter(c => c.type === 'group').length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ministries</h3>
-                <Badge variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                  {userCommunities.filter(c => c.type === 'ministry').length}
+                <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Groups</h3>
+                <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                  {userCommunities.filter(c => c.type === 'group').length}
                 </Badge>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {userCommunities.filter(c => c.type === 'ministry').sort((a, b) => a.name.localeCompare(b.name)).map((community) => (
-                  <Card key={community.id} className="hover:shadow-lg transition-shadow border-2 border-purple-200 dark:border-purple-800">
+                {userCommunities.filter(c => c.type === 'group').sort((a, b) => a.name.localeCompare(b.name)).map((community) => (
+                  <Card key={community.id} className="hover:shadow-lg transition-shadow border-2 border-green-200 dark:border-green-800">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
@@ -1408,8 +1428,8 @@ export default function MyCommunities() {
                               className="w-12 h-12 rounded-lg object-cover"
                             />
                           ) : (
-                            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                              <Building className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                              <Building className="h-6 w-6 text-green-600 dark:text-green-400" />
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
