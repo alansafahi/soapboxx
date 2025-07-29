@@ -308,37 +308,24 @@ export default function MyPostsFeed() {
               <CardContent className="pt-0">
                 <div className="mb-4">
                   {post.type === 'soap_reflection' && post.soapData ? (
-                    <div className="soap-sections-preview">
-                      <div className="space-y-3">
-                        {post.soapData.scripture && (
-                          <div>
-                            <h4 className="text-sm font-semibold text-purple-600 dark:text-purple-400 mb-1">📖 Scripture</h4>
-                            {post.soapData.scriptureReference && (
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{post.soapData.scriptureReference}</p>
-                            )}
-                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{post.soapData.scripture}</p>
-                          </div>
-                        )}
-                        {post.soapData.observation && (
-                          <div>
-                            <h4 className="text-sm font-semibold text-blue-600 dark:text-blue-400 mb-1">👁️ Observation</h4>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{post.soapData.observation}</p>
-                          </div>
-                        )}
-                        {post.soapData.application && (
-                          <div>
-                            <h4 className="text-sm font-semibold text-green-600 dark:text-green-400 mb-1">🔧 Application</h4>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{post.soapData.application}</p>
-                          </div>
-                        )}
-                        {post.soapData.prayer && (
-                          <div>
-                            <h4 className="text-sm font-semibold text-red-600 dark:text-red-400 mb-1">🙏 Prayer</h4>
-                            <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{post.soapData.prayer}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <SoapPostCard 
+                      post={{
+                        id: post.id,
+                        content: post.content,
+                        authorId: user?.id || 'unknown',
+                        author: {
+                          id: user?.id || 'unknown',
+                          firstName: user?.firstName || 'Your',
+                          lastName: user?.lastName || 'Reflection',
+                          profileImageUrl: user?.profileImageUrl
+                        },
+                        createdAt: post.createdAt,
+                        type: 'soap_reflection',
+                        soapData: post.soapData,
+                        likeCount: post.likeCount,
+                        commentCount: post.commentCount
+                      }}
+                    />
                   ) : (
                     <FormattedContent 
                       content={post.content} 
