@@ -22,9 +22,8 @@ export default function SocialFeedEMISelector({
 }: SocialFeedEMISelectorProps) {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   
-  // Debug: Component mount
-  console.log("SocialFeedEMISelector mounted, compact:", compact);
-  console.log("SocialFeedEMISelector selectedMoods:", selectedMoods);
+
+
 
   // Fetch mood indicators by category - use the correct endpoint that groups by category
   const { data: moodsByCategory = {}, isLoading } = useQuery<Record<string, EnhancedMoodIndicator[]>>({
@@ -39,22 +38,10 @@ export default function SocialFeedEMISelector({
   const allMoods = Object.values(moodsByCategory).flat();
 
   // FORCE CONSOLE LOGGING ALWAYS
-  console.error("🚨 SOCIAL FEED EMI - USING CORRECT BY-CATEGORY ENDPOINT:");
-  console.error("Total categories fetched:", Object.keys(moodsByCategory).length);
-  console.error("All categories:", Object.keys(moodsByCategory));
-  console.error("Total moods across all categories:", allMoods.length);
-  console.error("Category breakdown:", Object.fromEntries(
-    Object.entries(moodsByCategory).map(([cat, moods]) => [cat, moods.length])
-  ));
 
-  // Debug logging
-  if (allMoods.length > 0) {
-    console.log("SocialFeedEMI Debug - Raw moods count:", allMoods.length);
-    console.log("SocialFeedEMI Debug - Categories:", Object.keys(moodsByCategory));
-    console.log("SocialFeedEMI Debug - Category counts:", Object.fromEntries(
-      Object.entries(moodsByCategory).map(([cat, moods]) => [cat, moods.length])
-    ));
-  }
+
+
+
 
 
 

@@ -637,7 +637,7 @@ export default function SocialFeed() {
     setSelectedMoods(prev => {
       if (prev.includes(moodId)) {
         const newMoods = prev.filter(id => id !== moodId);
-        console.log('Social Feed: Removed mood', moodId, 'new moods:', newMoods);
+
         return newMoods;
       } else {
         // Limit to 3 moods maximum for social posts
@@ -650,7 +650,7 @@ export default function SocialFeed() {
           return prev;
         }
         const newMoods = [...prev, moodId];
-        console.log('Social Feed: Added mood', moodId, 'new moods:', newMoods);
+
         return newMoods;
       }
     });

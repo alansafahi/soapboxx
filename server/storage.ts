@@ -3546,34 +3546,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getChurchMembers(churchId: number): Promise<any[]> {
-    try {
-      const result = await pool.query(`
-        SELECT 
-          u.id,
-          u.email,
-          u.first_name as "firstName",
-          u.last_name as "lastName", 
-          u.phone_number as "phoneNumber",
-          u.city,
-          u.state,
-          u.profile_image_url as "profileImageUrl",
-          u.role,
-          uc.is_active as "isActive",
-          u.created_at as "createdAt",
-          uc.church_id as "churchId",
-          c.name as "churchName"
-        FROM users u
-        LEFT JOIN user_churches uc ON u.id = uc.user_id
-        LEFT JOIN communities c ON uc.church_id = c.id
-        WHERE uc.church_id = $1
-        ORDER BY u.created_at DESC
-      `, [churchId]);
-      return result.rows;
-    } catch (error) {
-      return [];
-    }
-  }
+
 
   async getChurchFeatureSettings(churchId: number): Promise<any[]> {
     try {

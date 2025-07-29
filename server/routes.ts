@@ -1447,7 +1447,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { communityId, role } = req.body;
       const userId = req.session.userId;
       
-      console.log('Staff acceptance attempt:', { communityId, role, userId, hasSession: !!req.session.userId });
+
 
       if (!userId) {
         return res.status(401).json({ message: 'User authentication required' });
@@ -3432,12 +3432,12 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       console.log('Staff acceptance attempt:', { communityId, role, userId, hasSession: !!req.session });
 
       if (!userId) {
-        console.log('No user ID in session');
+
         return res.status(401).json({ message: 'User authentication required' });
       }
 
       if (!communityId || !role) {
-        console.log('Missing communityId or role:', { communityId, role });
+
         return res.status(400).json({ message: 'Community ID and role are required' });
       }
 

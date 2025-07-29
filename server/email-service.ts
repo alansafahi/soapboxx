@@ -123,9 +123,7 @@ export async function sendStaffInvitationEmail(email: string, options: StaffInvi
     ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
     : (process.env.FRONTEND_URL || 'https://soapboxsuperapp.com');
   
-  console.log(`📧 Creating staff invitation link with base URL: ${baseUrl}`);
   const inviteLink = `${baseUrl}/signup?invite=staff&community=${options.communityId}&role=${options.role}`;
-  console.log(`📧 Final invitation link: ${inviteLink}`);
   
   const staffInvitationHtml = `
     <!DOCTYPE html>

@@ -195,7 +195,7 @@ export function setupAuth(app: Express): void {
     try {
       const { email, password, username, firstName, lastName, staffInvite } = req.body;
       
-      console.log('Registration attempt:', { email, username, firstName, lastName, hasStaffInvite: !!staffInvite });
+
 
       if (!email || !password || !username || !firstName || !lastName) {
         return res.status(400).json({ 
@@ -219,7 +219,7 @@ export function setupAuth(app: Express): void {
         // If this is a staff invitation and user exists, create the staff invitation for existing user
         if (staffInvite && staffInvite.communityId && staffInvite.role) {
           try {
-            console.log('Creating staff invitation for existing user:', { email, userId: existingUser.id, staffInvite });
+
             
             // Check if user already has a role in this community
             const existingRole = await pool.query(
@@ -316,7 +316,7 @@ export function setupAuth(app: Express): void {
 
       } catch (emailError) {
         // Continue with registration even if email fails
-        console.log('Email verification sending failed:', emailError);
+
       }
 
       // Handle staff invitation if present
