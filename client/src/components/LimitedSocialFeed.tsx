@@ -10,7 +10,7 @@ import FormattedContent from "../utils/FormattedContent";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { apiRequestEnhanced, mapDiscussion, validateMappedData } from "../lib/field-mapping-client";
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
 import { Textarea } from "./ui/textarea";
 import ShareDialog from "./ShareDialog";
@@ -278,42 +278,19 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
   // Remove unused comments query - now handled by shared CommentDialog
 
-  // Enhanced fetch posts with field mapping and fallback
+  // Fetch posts from the discussions API endpoint
   const { data: posts = [], isLoading, error } = useQuery({
-    queryKey: ["/api/discussions-enhanced", page],
+    queryKey: ["/api/discussions", page],
     queryFn: async () => {
-      try {
-        // Try enhanced endpoint first
-        const enhancedData = await apiRequestEnhanced('GET', `/api/discussions-enhanced?page=${page}&limit=10`);
-        
-        // Validate and map the response
-        const mappedPosts = enhancedData.map((post: any) => {
-          const mapped = mapDiscussion(post);
-          
-          // Validate required fields
-          if (!validateMappedData(mapped, ['id', 'content', 'author'])) {
-            
-            return null;
-          }
-          
-          return mapped;
-        }).filter(Boolean);
-        
-        return mappedPosts;
-      } catch (error) {
-        
-        
-        // Fallback to original endpoint
-        const response = await fetch(`/api/discussions?page=${page}&limit=10`, {
-          credentials: "include",
-        });
+      const response = await fetch(`/api/discussions?page=${page}&limit=10`, {
+        credentials: "include",
+      });
 
-        if (!response.ok) {
-          throw new Error(`Failed to fetch posts: ${response.status}`);
-        }
-
-        return await response.json();
+      if (!response.ok) {
+        throw new Error(`Failed to fetch posts: ${response.status}`);
       }
+
+      return await response.json();
     },
   });
 
@@ -510,8 +487,15 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
     );
   }
 
-  const displayedPosts = allPosts.length > 0 ? allPosts : posts.slice(0, initialLimit);
-  const showInitialLoadMore = allPosts.length === 0 && posts.length > initialLimit && showMoreClicks < 2;
+  // Combine initial posts with any additional loaded posts
+  useEffect(() => {
+    if (posts.length > 0 && allPosts.length === 0) {
+      setAllPosts(posts);
+    }
+  }, [posts, allPosts.length]);
+
+  const displayedPosts = allPosts.length > 0 ? allPosts : posts;
+  const showInitialLoadMore = posts.length >= 10 && hasMore;
 
   // Track posts viewed and show reflection break after 15 posts
   const totalPostsViewed = allPosts.length > 0 ? allPosts.length : Math.min(posts.length, initialLimit);
