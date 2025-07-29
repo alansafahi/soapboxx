@@ -235,20 +235,15 @@ export default function MyPostsFeed() {
 
       {/* Posts List */}
       {posts.length === 0 ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-400 mb-2">
-              No posts yet
-            </h3>
-            <p className="text-gray-500 dark:text-gray-500">
-              {filterType === 'all' 
-                ? "Start sharing your thoughts with the community!"
-                : `No ${getPostTypeLabel(filterType).toLowerCase()}s found.`
-              }
-            </p>
-          </CardContent>
-        </Card>
+        <div className="text-center py-8">
+          <p className="text-gray-500 dark:text-gray-400 mb-4">No posts yet</p>
+          <p className="text-sm text-gray-400 dark:text-gray-500">
+            {filterType === 'all' 
+              ? "Be the first to share something with your community!"
+              : `No ${getPostTypeLabel(filterType).toLowerCase()}s found.`
+            }
+          </p>
+        </div>
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (
