@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
-import { useLocation, useSearch } from "wouter";
+import { useLocation, useSearch, Link } from "wouter";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Button } from "./ui/button";
 import { useToast } from "../hooks/use-toast";
-import { Building2, Settings, Users, Calendar } from "lucide-react";
+import { Building2, Settings, Users, Calendar, Plus } from "lucide-react";
 import { CommunitySettings } from "./CommunitySettings";
 import { ChurchFeatureManager } from "./ChurchFeatureManager";
 import { EventManagement } from "./EventManagement";
@@ -70,7 +71,7 @@ export function CommunityAdminTab() {
 
   // Get communities created by user - always call hooks in same order
   const { data: createdCommunities = [], isLoading: createdLoading, error: createdError } = useQuery({
-    queryKey: ["/api/users/created-churches"],
+    queryKey: ["/api/users/created-communities"],
     enabled: !!user && isAuthenticated,
     retry: 2,
   }) as { data: any[], isLoading: boolean, error: any };
@@ -271,6 +272,12 @@ export function CommunityAdminTab() {
           </p>
         </div>
         <div className="flex items-center space-x-4">
+          <Link href="/communities" className="flex items-center">
+            <Button>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Community
+            </Button>
+          </Link>
           {allAdminCommunities.length > 1 && (
             <Select value={selectedCommunityId || ""} onValueChange={(value) => {
               setSelectedCommunityId(value);

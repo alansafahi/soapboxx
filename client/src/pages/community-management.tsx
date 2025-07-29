@@ -71,7 +71,7 @@ export default function CommunityManagement() {
   const { data: community, isLoading, error } = useQuery({
     queryKey: ['community-details', communityId],
     queryFn: async () => {
-      const response = await fetch(`/api/churches/${communityId}`, { credentials: 'include' });
+      const response = await fetch(`/api/communities/${communityId}`, { credentials: 'include' });
       if (!response.ok) {
         const errorData = await response.text();
         throw new Error(`Failed to fetch community details: ${response.status}`);
@@ -134,7 +134,7 @@ export default function CommunityManagement() {
         }
       }
       
-      const response = await fetch(`/api/churches/${communityId}`, {
+      const response = await fetch(`/api/communities/${communityId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

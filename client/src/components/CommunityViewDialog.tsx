@@ -116,7 +116,7 @@ export function CommunityViewDialog({
   const { data: campuses = [] } = useQuery({
     queryKey: ['community-campuses', communityId],
     queryFn: async () => {
-      const response = await fetch(`/api/churches/${communityId}/campuses`, { credentials: 'include' });
+      const response = await fetch(`/api/communities/${communityId}/campuses`, { credentials: 'include' });
       if (!response.ok) {
         // If campuses endpoint fails, return empty array
         return [];

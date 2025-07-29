@@ -8394,6 +8394,23 @@ Return JSON with this exact structure:
   });
 
   // Get churches created by user (church admin)
+  // Get communities created by user - standardized endpoint
+  app.get('/api/users/created-communities', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      const communities = await storage.getCommunitiesCreatedByUser(userId);
+      res.json(communities);
+    } catch (error) {
+      console.error('Error fetching created communities:', error);
+      res.status(500).json({ message: 'Failed to fetch created communities' });
+    }
+  });
+
+  // Legacy endpoint for backward compatibility - will be deprecated
   app.get('/api/users/created-churches', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub || req.session?.userId;
@@ -8475,6 +8492,162 @@ Return JSON with this exact structure:
       res.json(features);
     } catch (error) {
       res.status(500).json({ error: 'Failed to get church features' });
+    }
+  });
+
+  // ==================== STANDARDIZED COMMUNITY ENDPOINTS ====================
+  
+  // Get community campuses - standardized endpoint
+  app.get('/api/communities/:communityId/campuses', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const communityId = parseInt(req.params.communityId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Get campuses for this community (using same logic as church campuses)
+      const campuses = await storage.getCampusesByChurch(communityId);
+      res.json({ campuses });
+    } catch (error) {
+      console.error('Error fetching community campuses:', error);
+      res.status(500).json({ error: 'Failed to fetch community campuses' });
+    }
+  });
+
+  // Create community campus - standardized endpoint
+  app.post('/api/communities/:communityId/campuses', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const communityId = parseInt(req.params.communityId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Check admin access
+      const userRole = await storage.getUserCommunityRole(userId, communityId);
+      const adminRoles = ['church_admin', 'admin', 'pastor', 'lead-pastor'];
+      
+      if (!userRole || !adminRoles.includes(userRole)) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const campusData = {
+        ...req.body,
+        churchId: communityId,
+        createdBy: userId
+      };
+
+      const newCampus = await storage.createCampus(campusData);
+      res.status(201).json(newCampus);
+    } catch (error) {
+      console.error('Error creating community campus:', error);
+      res.status(500).json({ error: 'Failed to create community campus' });
+    }
+  });
+
+  // Update community campus - standardized endpoint
+  app.put('/api/communities/campuses/:campusId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const campusId = parseInt(req.params.campusId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Get campus to check permissions
+      const campus = await storage.getCampusById(campusId);
+      if (!campus) {
+        return res.status(404).json({ error: 'Campus not found' });
+      }
+
+      // Check admin access
+      const userRole = await storage.getUserCommunityRole(userId, campus.churchId);
+      const adminRoles = ['church_admin', 'admin', 'pastor', 'lead-pastor'];
+      
+      if (!userRole || !adminRoles.includes(userRole)) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      const updatedCampus = await storage.updateCampus(campusId, req.body);
+      res.json(updatedCampus);
+    } catch (error) {
+      console.error('Error updating community campus:', error);
+      res.status(500).json({ error: 'Failed to update community campus' });
+    }
+  });
+
+  // Delete community campus - standardized endpoint
+  app.delete('/api/communities/campuses/:campusId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const campusId = parseInt(req.params.campusId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Get campus to check permissions
+      const campus = await storage.getCampusById(campusId);
+      if (!campus) {
+        return res.status(404).json({ error: 'Campus not found' });
+      }
+
+      // Check admin access
+      const userRole = await storage.getUserCommunityRole(userId, campus.churchId);
+      const adminRoles = ['church_admin', 'admin', 'pastor', 'lead-pastor'];
+      
+      if (!userRole || !adminRoles.includes(userRole)) {
+        return res.status(403).json({ error: 'Admin access required' });
+      }
+
+      await storage.deleteCampus(campusId);
+      res.json({ message: 'Campus deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting community campus:', error);
+      res.status(500).json({ error: 'Failed to delete community campus' });
+    }
+  });
+
+  // Get community features - standardized endpoint
+  app.get('/api/communities/:communityId/features', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const communityId = parseInt(req.params.communityId);
+      
+      if (!userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+
+      // Check if user has access to this community
+      const userRole = await storage.getUserCommunityRole(userId, communityId);
+      const user = await storage.getUser(userId);
+      
+      // Allow access for global admins or community creators
+      let hasAccess = false;
+      
+      if (user?.role === 'soapbox_owner' || user?.role === 'system_admin') {
+        hasAccess = true;
+      } else if (userRole) {
+        hasAccess = true;
+      } else {
+        // Check if user created this community
+        const adminCommunities = await storage.getCommunitiesCreatedByUser(userId);
+        hasAccess = adminCommunities.some(community => community.id === communityId);
+      }
+      
+      if (!hasAccess) {
+        return res.status(403).json({ error: 'Access denied to this community' });
+      }
+
+      const features = await storage.getChurchFeatureSettings(communityId);
+      res.json(features);
+    } catch (error) {
+      console.error('Error fetching community features:', error);
+      res.status(500).json({ error: 'Failed to get community features' });
     }
   });
 
