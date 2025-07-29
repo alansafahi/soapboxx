@@ -518,7 +518,7 @@ export function CommunityForm({
               />
             </div>
             {/* Weekly Attendance - Only for Churches */}
-            {formData.type === 'church' && (
+            {formData.type === 'Church' && (
               <div>
                 <Label htmlFor="weeklyAttendance">👥 Weekly Attendance *</Label>
                 <Select
@@ -853,7 +853,7 @@ export function CommunityForm({
         </Card>
 
         {/* Service Times & Hours - Only for Churches */}
-        {formData.type === 'church' && (
+        {formData.type === 'Church' && (
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
