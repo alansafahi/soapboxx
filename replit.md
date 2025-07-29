@@ -151,6 +151,9 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes
+- July 29, 2025: PRIVACY SETTINGS AND DYNAMIC FORM SYSTEM COMPLETED - Successfully implemented comprehensive privacy control system and dynamic form fields that adapt based on community type
+  - PRIVACY SETTINGS IMPLEMENTED: All communities now require selection of privacy level (Public, Private/Invite Only, Church Members Only) with proper database storage and validation
+  - DYNAMIC FORM FIELDS: Weekly attendance, service times, and worship times now only appear for churches - ministries and groups see streamlined form without church-specific fields
 - July 29, 2025: COMPREHENSIVE FIELD VALIDATION SYSTEM FULLY COMPLETED - Successfully created user-friendly validation system with real-time feedback and complete backend protection for all community creation and editing forms
   - VALIDATION UTILITIES CREATED: Built comprehensive shared/validation.ts with phone, email, URL, ZIP code, year, and platform-specific social media validation
   - REAL-TIME FRONTEND VALIDATION: Added immediate visual feedback with red borders, alert icons, and specific error messages as users type
