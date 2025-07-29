@@ -7,10 +7,10 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
-import { Upload } from "lucide-react";
+import { Upload, Plus, X } from "lucide-react";
 
 // Community creation schema
-const createCommunitySchema = z.object({
+export const createCommunitySchema = z.object({
   name: z.string().min(1, "Community name is required"),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),
@@ -37,7 +37,7 @@ const createCommunitySchema = z.object({
   worshipTimes: z.string().optional()
 });
 
-type CommunityFormData = z.infer<typeof createCommunitySchema>;
+export type CommunityFormData = z.infer<typeof createCommunitySchema>;
 
 // Organization-specific affiliation lists
 const AFFILIATIONS = {
@@ -74,37 +74,58 @@ const denominationDefaults = {
   },
   "Catholic": {
     officeHours: "Mon-Fri 9AM-4PM",
-    worshipTimes: "Saturday: 5PM Vigil\nSunday: 8AM, 10AM, 12PM\nDaily Mass: Mon-Fri 7AM"
+    worshipTimes: "Saturday: 5PM Vigil Mass\nSunday: 8AM, 10AM, 12PM Mass\nDaily Mass: Mon-Fri 8AM"
   },
   "Presbyterian": {
-    officeHours: "Mon-Thu 9AM-4PM, Fri 9AM-12PM",
-    worshipTimes: "Sunday: 10AM Traditional\nWednesday: 7PM Bible Study"
+    officeHours: "Mon-Thu 9AM-4PM, Fri 9AM-1PM",
+    worshipTimes: "Sunday: 9AM Sunday School, 10AM Worship\nWednesday: 7PM Prayer Meeting"
+  },
+  "Pentecostal": {
+    officeHours: "Mon-Thu 10AM-4PM, Fri 10AM-12PM",
+    worshipTimes: "Sunday: 10AM & 6PM\nWednesday: 7PM Bible Study\nFriday: 7PM Prayer Night"
   },
   "Lutheran": {
-    officeHours: "Mon-Thu 9AM-4PM",
-    worshipTimes: "Sunday: 8AM Traditional, 10:30AM Contemporary\nWednesday: 7PM Study"
+    officeHours: "Mon-Thu 9AM-3PM, Fri 9AM-12PM",
+    worshipTimes: "Sunday: 8:30AM Traditional, 10:30AM Contemporary\nWednesday: 7PM Study"
   },
   "Episcopal": {
     officeHours: "Mon-Thu 9AM-4PM",
-    worshipTimes: "Sunday: 8AM Holy Eucharist, 10AM Holy Eucharist\nWednesday: 12PM Eucharist"
-  },
-  "Pentecostal": {
-    officeHours: "Mon-Fri 9AM-4PM",
-    worshipTimes: "Sunday: 10AM & 6PM\nWednesday: 7PM Prayer & Bible Study"
-  },
-  "Assembly of God": {
-    officeHours: "Mon-Fri 9AM-4PM",
-    worshipTimes: "Sunday: 10AM & 6PM\nWednesday: 7PM Bible Study"
+    worshipTimes: "Sunday: 8AM Holy Eucharist, 10AM Family Service\nWednesday: 12PM Holy Eucharist"
   },
   "Non-denominational": {
-    officeHours: "Mon-Thu 9AM-4PM",
-    worshipTimes: "Sunday: 9AM & 11AM\nWednesday: 7PM Bible Study"
-  },
-  "Evangelical": {
-    officeHours: "Mon-Thu 9AM-4PM",
-    worshipTimes: "Sunday: 9AM & 11AM\nWednesday: 7PM Bible Study"
+    officeHours: "Mon-Fri 9AM-4PM",
+    worshipTimes: "Sunday: 9AM & 11AM Services\nWednesday: 7PM Bible Study"
   }
 };
+
+// Weekly attendance categories
+const WEEKLY_ATTENDANCE_OPTIONS = [
+  { value: "under-50", label: "Micro (Under 50)" },
+  { value: "50-99", label: "Small (50-99)" },
+  { value: "100-199", label: "Medium (100-199)" },
+  { value: "200-349", label: "Large (200-349)" },
+  { value: "350-499", label: "Very Large (350-499)" },
+  { value: "500-999", label: "Mega (500-999)" },
+  { value: "1000-4999", label: "Super Mega (1,000-4,999)" },
+  { value: "5000+", label: "Meta Church (5,000+)" }
+];
+
+// Language options
+const LANGUAGE_OPTIONS = [
+  { value: "english", label: "English" },
+  { value: "spanish", label: "Spanish" },
+  { value: "french", label: "French" },
+  { value: "german", label: "German" },
+  { value: "italian", label: "Italian" },
+  { value: "portuguese", label: "Portuguese" },
+  { value: "chinese", label: "Chinese" },
+  { value: "korean", label: "Korean" },
+  { value: "japanese", label: "Japanese" },
+  { value: "arabic", label: "Arabic" },
+  { value: "hindi", label: "Hindi" },
+  { value: "russian", label: "Russian" },
+  { value: "other", label: "Other" }
+];
 
 interface CommunityCreationFormProps {
   onSubmit: (data: CommunityFormData) => void;
@@ -123,6 +144,9 @@ export function CommunityCreationForm({
 }: CommunityCreationFormProps) {
   const [showCustomDenomination, setShowCustomDenomination] = useState(false);
   const [selectedType, setSelectedType] = useState(initialData?.type || "church");
+  const [timeRows, setTimeRows] = useState([
+    { id: 1, eventLabel: '', timeSchedule: '', language: 'english' }
+  ]);
 
   const form = useForm<CommunityFormData>({
     resolver: zodResolver(createCommunitySchema),
@@ -155,6 +179,22 @@ export function CommunityCreationForm({
     }
   });
 
+  // Handle dynamic time rows
+  const addTimeRow = () => {
+    const newId = Math.max(...timeRows.map(row => row.id)) + 1;
+    setTimeRows([...timeRows, { id: newId, eventLabel: '', timeSchedule: '', language: 'english' }]);
+  };
+
+  const removeTimeRow = (id: number) => {
+    setTimeRows(timeRows.filter(row => row.id !== id));
+  };
+
+  const updateTimeRow = (id: number, field: string, value: string) => {
+    setTimeRows(timeRows.map(row => 
+      row.id === id ? { ...row, [field]: value } : row
+    ));
+  };
+
   const handleDenominationChange = (denomination: string) => {
     const defaults = denominationDefaults[denomination as keyof typeof denominationDefaults];
     if (defaults) {
@@ -163,16 +203,27 @@ export function CommunityCreationForm({
     }
   };
 
+  const handleFormSubmit = (data: CommunityFormData) => {
+    // Validate required fields
+    if (!data.denomination || data.denomination.trim() === '') {
+      return;
+    }
+    if (!data.weeklyAttendance || data.weeklyAttendance.trim() === '') {
+      return;
+    }
+    
+    onSubmit(data);
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Basic Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="col-span-2">
                 <FormLabel>Community Name *</FormLabel>
                 <FormControl>
                   <Input placeholder="First Baptist Church" {...field} />
@@ -277,377 +328,419 @@ export function CommunityCreationForm({
 
           <FormField
             control={form.control}
-            name="establishedYear"
+            name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Established Year</FormLabel>
+                <FormLabel>Address *</FormLabel>
                 <FormControl>
-                  <Input placeholder="2020" {...field} />
+                  <Input placeholder="123 Main Street" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-        </div>
 
-        {/* Location Information */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-            Location Information
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address *</FormLabel>
+          <FormField
+            control={form.control}
+            name="city"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>City *</FormLabel>
+                <FormControl>
+                  <Input placeholder="Los Angeles" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="state"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>State *</FormLabel>
+                <FormControl>
+                  <Input placeholder="CA" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="zipCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Zip Code *</FormLabel>
+                <FormControl>
+                  <Input placeholder="90210" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="adminEmail"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Admin Email *</FormLabel>
+                <FormControl>
+                  <Input placeholder="pastor@church.org" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="adminPhone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Admin Phone</FormLabel>
+                <FormControl>
+                  <Input placeholder="(555) 123-4567" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="website"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Website</FormLabel>
+                <FormControl>
+                  <Input placeholder="https://www.church.org" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Tell us about your community..."
+                    rows={3}
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="establishedYear"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Established Year</FormLabel>
+                <FormControl>
+                  <Input type="number" placeholder="2020" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="weeklyAttendance"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>👥 Weekly Attendance *</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
-                    <Input placeholder="123 Main Street" {...field} />
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select attendance size" />
+                    </SelectTrigger>
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                  <SelectContent>
+                    {WEEKLY_ATTENDANCE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="city"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>City *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Los Angeles" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="parentChurchName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Parent Church (if applicable)</FormLabel>
+                <FormControl>
+                  <Input placeholder="Main Campus Church Name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="state"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>State *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="CA" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="missionStatement"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel>Mission Statement</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Our mission is to..."
+                    rows={3}
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="zipCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Zip Code *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="90210" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        {/* Contact Information */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-            Contact Information
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="adminEmail"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Admin Email *</FormLabel>
-                  <FormControl>
-                    <Input placeholder="pastor@church.org" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="adminPhone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Admin Phone</FormLabel>
-                  <FormControl>
-                    <Input placeholder="(555) 123-4567" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="website"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Website</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://www.church.org" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="weeklyAttendance"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Weekly Attendance</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+          {/* Social Media Section */}
+          <div className="col-span-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+              Social Media
+            </h3>
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="facebookUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Facebook URL</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select attendance size" />
-                      </SelectTrigger>
+                      <Input placeholder="https://facebook.com/community" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="micro">Micro Church (1-15 people)</SelectItem>
-                      <SelectItem value="house">House Church (16-35 people)</SelectItem>
-                      <SelectItem value="small">Small Church (36-100 people)</SelectItem>
-                      <SelectItem value="medium">Medium Church (101-350 people)</SelectItem>
-                      <SelectItem value="large">Large Church (351-999 people)</SelectItem>
-                      <SelectItem value="mega">Mega Church (1,000-4,999 people)</SelectItem>
-                      <SelectItem value="giga">Giga Church (5,000-9,999 people)</SelectItem>
-                      <SelectItem value="meta">Meta Church (10,000+ people)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        {/* Community Logo */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-            Community Logo
-          </h3>
-          <div className="flex items-center justify-center w-full">
-            <label htmlFor="logo-upload" className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <Upload className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" />
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold">Upload a logo</span>
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">PNG, JPG up to 5MB</p>
-              </div>
-              <input id="logo-upload" type="file" className="hidden" accept="image/*" />
-            </label>
-          </div>
-        </div>
+              <FormField
+                control={form.control}
+                name="instagramUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Instagram URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://instagram.com/community" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        {/* About Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-            About Your Community
-          </h3>
-          <div className="grid grid-cols-1 gap-4">
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Tell us about your community..."
-                      className="min-h-20"
-                      {...field} 
+              <FormField
+                control={form.control}
+                name="twitterUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Twitter (X) URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://x.com/community" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tiktokUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>TikTok URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://tiktok.com/@community" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="youtubeUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>YouTube URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://youtube.com/@community" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="linkedinUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>LinkedIn URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://linkedin.com/company/community" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Service Times Section */}
+          <div className="col-span-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+              Service Times
+            </h3>
+          </div>
+
+          <FormField
+            control={form.control}
+            name="officeHours"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel>🕒 Office Hours (Auto-filled by denomination)</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Mon-Fri 9AM-4PM"
+                    rows={2}
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="worshipTimes"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel>⛪ Worship Times (Auto-filled by denomination)</FormLabel>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Sunday: 9AM & 11AM"
+                    rows={3}
+                    {...field} 
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Dynamic Service Times Section */}
+          <div className="col-span-2">
+            <div className="flex items-center gap-4 mb-4">
+              <h3 className="text-lg font-semibold">Additional Times</h3>
+            </div>
+            
+            <div className="space-y-4">
+              {timeRows.map((row, index) => (
+                <div key={row.id} className="grid grid-cols-12 gap-3 items-end">
+                  {/* Event/Time Label */}
+                  <div className="col-span-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Event/Time Label
+                    </label>
+                    <Input
+                      placeholder="e.g., Sunday Service, Youth Group"
+                      value={row.eventLabel}
+                      onChange={(e) => updateTimeRow(row.id, 'eventLabel', e.target.value)}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="parentChurchName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Parent Church (if applicable)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Main Campus Church Name" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="missionStatement"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mission Statement</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Our mission is to..."
-                      className="min-h-20"
-                      {...field} 
+                  </div>
+                  
+                  {/* Time/Schedule */}
+                  <div className="col-span-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Time/Schedule
+                    </label>
+                    <Input
+                      placeholder="e.g., Sunday 10:00 AM"
+                      value={row.timeSchedule}
+                      onChange={(e) => updateTimeRow(row.id, 'timeSchedule', e.target.value)}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                  </div>
+                  
+                  {/* Language */}
+                  <div className="col-span-3">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Language
+                    </label>
+                    <Select 
+                      value={row.language} 
+                      onValueChange={(value) => updateTimeRow(row.id, 'language', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LANGUAGE_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {/* Remove Button */}
+                  <div className="col-span-1">
+                    {timeRows.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeTimeRow(row.id)}
+                        className="h-9 w-9 p-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              
+              {/* Add Another Row Button */}
+              {timeRows.length < 6 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addTimeRow}
+                  className="w-full mt-3"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Another Date/Time
+                </Button>
               )}
-            />
+            </div>
           </div>
         </div>
 
-        {/* Social Media Section */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-            Social Media
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="facebookUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Facebook URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://facebook.com/community" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="instagramUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Instagram URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://instagram.com/community" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="twitterUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Twitter (X) URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://x.com/community" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="tiktokUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>TikTok URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://tiktok.com/@community" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="youtubeUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>YouTube URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://youtube.com/@community" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="linkedinUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>LinkedIn URL</FormLabel>
-                  <FormControl>
-                    <Input placeholder="https://linkedin.com/company/community" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+        <div className="flex justify-end gap-3 pt-4">
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Processing..." : submitButtonText}
+          </Button>
         </div>
-
-        {/* Service Times */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-2">
-            Service Times
-          </h3>
-          <div className="grid grid-cols-1 gap-4">
-            <FormField
-              control={form.control}
-              name="officeHours"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Office Hours (Auto-filled by denomination)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Mon-Fri 9AM-4PM"
-                      className="min-h-16"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="worshipTimes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Worship Times (Auto-filled by denomination)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Sunday: 9AM & 11AM"
-                      className="min-h-16"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
-
-        <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading ? "Processing..." : submitButtonText}
-        </Button>
       </form>
     </Form>
   );
