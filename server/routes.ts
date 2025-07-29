@@ -7807,6 +7807,7 @@ Return JSON with this exact structure:
       }
 
       const discoverableCommunities = await storage.getDiscoverableCommunities(userId);
+      console.log('Discovery API - Found communities:', discoverableCommunities.length);
       res.json(discoverableCommunities);
     } catch (error) {
       res.status(500).json({ error: 'Failed to get discoverable communities' });
@@ -8223,20 +8224,7 @@ Return JSON with this exact structure:
   });
 
   // Discover communities (new terminology)
-  app.get('/api/communities/discover', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.session.userId;
-      
-      if (!userId) {
-        return res.status(401).json({ error: 'Authentication required' });
-      }
 
-      const allCommunities = await storage.getAllChurches();
-      res.json(allCommunities || []);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to discover communities' });
-    }
-  });
 
   // Join community (new terminology)
   app.post('/api/communities/:communityId/join', isAuthenticated, async (req: any, res) => {

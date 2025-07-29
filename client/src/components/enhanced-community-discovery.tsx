@@ -14,6 +14,7 @@ import { useToast } from "../hooks/use-toast";
 interface Community {
   id: number;
   name: string;
+  type: string;
   denomination: string;
   address: string;
   city: string;
@@ -38,7 +39,7 @@ export default function EnhancedCommunityDiscovery() {
   const [locationFilter, setLocationFilter] = useState("");
   const [proximityFilter, setProximityFilter] = useState("");
   const [zipCodeFilter, setZipCodeFilter] = useState("");
-  const [communityTypeFilter, setCommunityTypeFilter] = useState("churches"); // Primary filter: churches, groups, ministries
+  const [communityTypeFilter, setCommunityTypeFilter] = useState("all"); // Primary filter: churches, groups, ministries
   const [denominationFilter, setDenominationFilter] = useState(""); // Secondary filter based on type
   const [sizeFilter, setSizeFilter] = useState("");
   const [displayedCount, setDisplayedCount] = useState(6);
@@ -89,9 +90,15 @@ export default function EnhancedCommunityDiscovery() {
     // Primary filter by community type (churches, groups, ministries)
     if (communityTypeFilter && communityTypeFilter !== "all") {
       filtered = filtered.filter(community => {
-        // For now, classify all as churches since we're dealing with church data
-        // This can be expanded when we have actual community type data
-        return communityTypeFilter === "churches";
+        // Map community types: church/ministry/group
+        if (communityTypeFilter === "churches") {
+          return community.type === "church";
+        } else if (communityTypeFilter === "ministries") {
+          return community.type === "ministry";
+        } else if (communityTypeFilter === "groups") {
+          return community.type === "group";
+        }
+        return true;
       });
     }
 
