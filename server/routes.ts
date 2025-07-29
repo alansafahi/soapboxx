@@ -8057,6 +8057,7 @@ Return JSON with this exact structure:
       if (linkedinUrl) socialLinks.linkedin = linkedinUrl;
 
       // Debug: Log processed social links
+      console.log('Social Links:', {
         youtubeUrl,
         linkedinUrl,
         facebookUrl,
@@ -8118,6 +8119,7 @@ Return JSON with this exact structure:
       }
 
       // Debug: Log all extracted field values before database insertion
+      console.log('Extracted Fields:', {
         name: name?.trim(),
         description: description?.trim(),
         zipCode: zipCode?.trim(),
