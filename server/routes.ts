@@ -9235,7 +9235,9 @@ Return JSON with this exact structure:
       
 
       
+      console.log('Creating discussion with data:', discussionData);
       const post = await storage.createDiscussion(discussionData);
+      console.log('Discussion created successfully:', post.id);
       
       // Real-time AI content monitoring with media analysis (1-3 seconds)
       setTimeout(async () => {
