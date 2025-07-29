@@ -9269,6 +9269,8 @@ Return JSON with this exact structure:
   app.get("/api/discussions", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
+      console.log(`[DEBUG] /api/discussions called by user ${userId}`);
+      
       if (!userId) {
         return res.status(401).json({ message: "User authentication required" });
       }
@@ -9278,11 +9280,14 @@ Return JSON with this exact structure:
       const limit = parseInt(req.query.limit as string) || 10;
       const offset = (page - 1) * limit;
       
+      console.log(`[DEBUG] Fetching discussions: page=${page}, limit=${limit}, offset=${offset}`);
+      
       // Check if we need to include flagged content for editing
       const highlightId = req.query.highlight;
       const includeFlagged = highlightId ? true : false;
 
       const discussions = await storage.getDiscussions(limit, offset, undefined, userId, includeFlagged);
+      console.log(`[DEBUG] getDiscussions returned ${discussions.length} posts`);
 
       res.json(discussions);
     } catch (error) {

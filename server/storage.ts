@@ -2460,6 +2460,8 @@ export class DatabaseStorage implements IStorage {
   // Discussion operations
   async getDiscussions(limit?: number, offset?: number, churchId?: number, currentUserId?: string, includeFlagged?: boolean): Promise<any[]> {
     try {
+      console.log(`[DEBUG] getDiscussions called: limit=${limit}, offset=${offset}, userId=${currentUserId}`);
+      
       // Combined query to get both discussions and SOAP entries using UNION
       const combinedResult = await db.execute(sql`
         (
@@ -2484,6 +2486,8 @@ export class DatabaseStorage implements IStorage {
         ORDER BY created_at DESC
         LIMIT ${limit || 50} OFFSET ${offset || 0}
       `);
+
+      console.log(`[DEBUG] UNION query returned ${combinedResult.rows.length} raw rows`);
 
       // Successfully combined discussions and SOAP entries
 
@@ -2629,6 +2633,11 @@ export class DatabaseStorage implements IStorage {
           ? userLikedDiscussions.has(discussion.id)
           : userLikedSoap.has(discussion.id)
       }));
+
+      console.log(`[DEBUG] getDiscussions returning ${discussionsWithCounts.length} processed posts`);
+      if (discussionsWithCounts.length > 0) {
+        console.log(`[DEBUG] Post types: ${discussionsWithCounts.map(d => d.type).join(', ')}`);
+      }
 
       return discussionsWithCounts;
     } catch (error) {
