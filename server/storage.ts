@@ -2488,6 +2488,11 @@ export class DatabaseStorage implements IStorage {
       `);
 
       console.log(`[DEBUG] UNION query returned ${combinedResult.rows.length} raw rows`);
+      
+      // Debug: Log first few raw rows to see what we're getting
+      if (combinedResult.rows.length > 0) {
+        console.log(`[DEBUG] Sample raw row:`, JSON.stringify(combinedResult.rows[0], null, 2));
+      }
 
       // Successfully combined discussions and SOAP entries
 
@@ -2517,6 +2522,11 @@ export class DatabaseStorage implements IStorage {
         } : null,
         isLiked: false
       }));
+
+      console.log(`[DEBUG] After mapping: ${discussions.length} posts processed`);
+      if (discussions.length > 0) {
+        console.log(`[DEBUG] Sample processed post:`, JSON.stringify(discussions[0], null, 2));
+      }
 
       // Separate discussions and SOAP entries
       const discussionPosts = discussions.filter(d => d.type === 'discussion');
