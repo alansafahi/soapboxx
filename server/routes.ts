@@ -7897,54 +7897,33 @@ Return JSON with this exact structure:
         linkedin_url: req.body.linkedin_url
       });
 
-      let { 
-        name, 
-        type, 
-        denomination, 
-        address, 
-        city, 
-        state, 
-        zip_code, 
-        admin_phone, 
-        admin_email, 
-        website, 
-        description, 
-        size,
-        logo_url,
-        established_year,
-        weekly_attendance,
-        parent_church_name,
-        mission_statement,
-        facebook_url,
-        instagram_url,
-        twitter_url,
-        tiktok_url,
-        youtube_url,
-        linkedin_url,
-        // primaryLanguage field removed - not in database schema
-        timeRows, // New dynamic time row data
-        // Legacy fields for backward compatibility
-        sunday_service,
-        wednesday_service
-      } = req.body;
-      
-      // Map snake_case to camelCase for processing
-      const zipCode = zip_code;
-      const adminPhone = admin_phone;
-      const adminEmail = admin_email;
-      const logoUrl = logo_url;
-      const establishedYear = established_year;
-      const weeklyAttendance = weekly_attendance;
-      const parentChurchName = parent_church_name;
-      const missionStatement = mission_statement;
-      const facebookUrl = facebook_url;
-      const instagramUrl = instagram_url;
-      const twitterUrl = twitter_url;
-      const tiktokUrl = tiktok_url;
-      const youtubeUrl = youtube_url;
-      const linkedinUrl = linkedin_url;
-      const sundayService = sunday_service;
-      const wednesdayService = wednesday_service;
+      // Extract all fields directly from req.body (frontend sends snake_case via transformToSnakeCase)
+      const name = req.body.name;
+      const type = req.body.type;
+      const denomination = req.body.denomination;
+      const address = req.body.address;
+      const city = req.body.city;
+      const state = req.body.state;
+      const zipCode = req.body.zip_code;
+      const adminPhone = req.body.admin_phone;
+      const adminEmail = req.body.admin_email;
+      const website = req.body.website;
+      const description = req.body.description;
+      const size = req.body.size;
+      const logoUrl = req.body.logo_url;
+      const establishedYear = req.body.established_year;
+      const weeklyAttendance = req.body.weekly_attendance;
+      const parentChurchName = req.body.parent_church_name;
+      const missionStatement = req.body.mission_statement;
+      const facebookUrl = req.body.facebook_url;
+      const instagramUrl = req.body.instagram_url;
+      const twitterUrl = req.body.twitter_url;
+      const tiktokUrl = req.body.tiktok_url;
+      const youtubeUrl = req.body.youtube_url;
+      const linkedinUrl = req.body.linkedin_url;
+      const timeRows = req.body.timeRows;
+      const sundayService = req.body.sunday_service;
+      const wednesdayService = req.body.wednesday_service;
       
       // Parse timeRows if it's a JSON string (from FormData)
       if (typeof timeRows === 'string') {
@@ -7980,6 +7959,17 @@ Return JSON with this exact structure:
       if (tiktokUrl) socialLinks.tiktok = tiktokUrl;
       if (youtubeUrl) socialLinks.youtube = youtubeUrl;
       if (linkedinUrl) socialLinks.linkedin = linkedinUrl;
+
+      // Debug: Log processed social links
+      console.log('Community creation - Processed social links:', socialLinks);
+      console.log('Community creation - Individual URLs:', {
+        youtubeUrl,
+        linkedinUrl,
+        facebookUrl,
+        instagramUrl,
+        twitterUrl,
+        tiktokUrl
+      });
 
       // Process dynamic time rows into hours of operation and worship times
       const hoursOfOperation: any = {};
