@@ -428,10 +428,11 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
 
   // Initialize posts on first load
   useEffect(() => {
-    if (posts.length > 0 && page === 1) {
+    if (posts.length > 0 && page === 1 && allPosts.length === 0) {
+      setAllPosts(posts);
       setHasMore(posts.length === 10); // Assume more if we got a full page
     }
-  }, [posts, page]);
+  }, [posts, page, allPosts.length]);
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
@@ -486,13 +487,6 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       </div>
     );
   }
-
-  // Combine initial posts with any additional loaded posts
-  useEffect(() => {
-    if (posts.length > 0 && allPosts.length === 0) {
-      setAllPosts(posts);
-    }
-  }, [posts, allPosts.length]);
 
   const displayedPosts = allPosts.length > 0 ? allPosts : posts;
   const showInitialLoadMore = posts.length >= 10 && hasMore;
@@ -781,7 +775,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       )}
 
       {/* Show All Posts Button - After initial expansion */}
-      {allPosts.length > 0 && allPosts.length < 82 && (
+      {hasMore && allPosts.length > 0 && (
         <div className="text-center pt-4">
           <Button
             variant="outline"
@@ -789,7 +783,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
               setIsLoadingMore(true);
               try {
                 // Load all remaining posts at once
-                const response = await fetch(`/api/discussions?page=1&limit=100`, {
+                const response = await fetch(`/api/discussions?page=1&limit=200`, {
                   credentials: "include",
                 });
                 if (!response.ok) throw new Error("Failed to fetch all posts");
@@ -815,19 +809,19 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
               </>
             ) : (
               <>
-                <span>Show All Posts ({82 - allPosts.length} more)</span>
+                <span>Show All Posts</span>
                 <ChevronDown className="w-4 h-4" />
               </>
             )}
           </Button>
           <p className="text-xs text-gray-500 mt-2">
-            Currently showing {allPosts.length} of 82 posts
+            Currently showing {allPosts.length} posts
           </p>
         </div>
       )}
 
       {/* End of feed indicator */}
-      {allPosts.length >= 82 && (
+      {!hasMore && allPosts.length > 0 && (
         <div className="text-center pt-4 pb-8">
           <p className="text-sm text-gray-400 dark:text-gray-500">
             You've seen all {allPosts.length} posts in the feed
