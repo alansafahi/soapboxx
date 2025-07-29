@@ -9236,6 +9236,7 @@ Return JSON with this exact structure:
 
       
       console.log('Creating discussion with data:', discussionData);
+      
       const post = await storage.createDiscussion(discussionData);
       console.log('Discussion created successfully:', post.id);
       
@@ -9302,8 +9303,9 @@ Return JSON with this exact structure:
 
       res.status(201).json(post);
     } catch (error) {
+      console.error('Discussion creation route error:', error);
       res.status(500).json({ 
-        message: "Failed to create post",
+        message: "Failed to create discussion",
         error: error instanceof Error ? error.message : String(error)
       });
     }
