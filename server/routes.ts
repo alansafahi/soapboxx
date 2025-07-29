@@ -1424,7 +1424,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(result.rows);
     } catch (error) {
-      console.error('Error fetching pending staff invitations:', error);
       res.status(500).json({ message: 'Failed to fetch pending staff invitations' });
     }
   });
@@ -1451,7 +1450,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         [userId, communityId, role]
       );
 
-      console.log('Existing role check:', { userId, communityId, requestedRole: role, found: result.rows.length > 0 });
 
       if (result.rows.length === 0) {
         console.log('No pending staff invitation found for user in community');
@@ -1514,7 +1512,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get community name for response
       const community = await storage.getCommunity(communityId);
-      console.log('Staff position accepted successfully:', { userId, communityId, role, communityName: community?.name });
 
       res.json({
         success: true,
@@ -1523,7 +1520,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         community: community?.name || 'Community'
       });
     } catch (error) {
-      console.error('Error accepting staff invitation:', error);
       res.status(500).json({ message: 'Failed to accept staff invitation', error: (error as Error).message });
     }
   });
@@ -1595,7 +1591,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(notifications);
     } catch (error) {
-      console.error('Error fetching admin notifications:', error);
       res.status(500).json({ message: 'Failed to fetch admin notifications' });
     }
   });
@@ -1640,7 +1635,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         globalAdminRole: hasGlobalAdminRole ? user?.role : null
       });
     } catch (error) {
-      console.error('Error fetching admin communities:', error);
       res.status(500).json({ message: 'Failed to fetch admin communities' });
     }
   });
@@ -2793,7 +2787,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(recommendations);
     } catch (error) {
-      console.error('EMI recommendations error:', error);
       res.status(500).json({ 
         message: 'Failed to generate EMI-based recommendations',
         error: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -3417,7 +3410,6 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       const { role } = req.body;
       const userId = req.session.userId;
 
-      console.log('Staff acceptance attempt:', { communityId, role, userId, hasSession: !!req.session });
 
       if (!userId) {
 
@@ -3434,16 +3426,9 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
         'SELECT * FROM user_churches WHERE user_id = $1 AND church_id = $2 LIMIT 1',
         [userId, communityId]
       );
-      
-      console.log('Existing role check:', { 
-        userId, 
-        communityId, 
-        requestedRole: role,
-        existingRole: existingRole.rows[0] 
-      });
+
       
       if (existingRole.rows.length === 0) {
-        console.log('No existing role found for user in community');
         return res.status(404).json({ message: 'No staff invitation found for this community' });
       }
       
@@ -3452,21 +3437,18 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       // If user already has an active role and it's different from requested role,
       // update their role to the new one
       if (currentRole.is_active && currentRole.role !== role) {
-        console.log('Updating existing active role:', { from: currentRole.role, to: role });
         await pool.query(
           'UPDATE user_churches SET role = $1, title = $2, assigned_at = NOW() WHERE user_id = $3 AND church_id = $4',
           [role, role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()), userId, communityId]
         );
       } else if (!currentRole.is_active && currentRole.role === role) {
         // This is a pending invitation for the exact role - activate it
-        console.log('Activating pending invitation for exact role');
         await pool.query(
           'UPDATE user_churches SET is_active = true, joined_at = NOW() WHERE user_id = $1 AND church_id = $2',
           [userId, communityId]
         );
       } else if (!currentRole.is_active && currentRole.role !== role) {
         // Update pending invitation to new role and activate
-        console.log('Updating pending invitation role and activating:', { from: currentRole.role, to: role });
         await pool.query(
           'UPDATE user_churches SET role = $1, title = $2, is_active = true, joined_at = NOW() WHERE user_id = $3 AND church_id = $4',
           [role, role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()), userId, communityId]
@@ -3478,7 +3460,6 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
       // Get community name for response
       const community = await storage.getCommunity(communityId);
-      console.log('Staff position accepted successfully:', { userId, communityId, role, communityName: community?.name });
 
       res.json({
         success: true,
@@ -3487,7 +3468,6 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
         community: community?.name || 'Community'
       });
     } catch (error) {
-      console.error('Error accepting staff invitation:', error);
       res.status(500).json({ message: 'Failed to accept staff invitation', error: (error as Error).message });
     }
   });
@@ -7795,7 +7775,6 @@ Return JSON with this exact structure:
       }
 
       const discoverableCommunities = await storage.getDiscoverableCommunities(userId);
-      console.log('Discovery API - Found communities:', discoverableCommunities.length);
       res.json(discoverableCommunities);
     } catch (error) {
       res.status(500).json({ error: 'Failed to get discoverable communities' });
@@ -7879,7 +7858,6 @@ Return JSON with this exact structure:
       const { communityValidationSchema, phoneValidation, urlValidation, emailValidation, yearValidation, zipCodeValidation, socialMediaValidation } = await import('../shared/validation');
       
       // Debug: Log all received data
-      console.log('Community creation - All req.body fields:', Object.keys(req.body));
 
 
       // MIXED FIELD EXTRACTION: Frontend sends mix of camelCase and snake_case
@@ -8079,8 +8057,6 @@ Return JSON with this exact structure:
       if (linkedinUrl) socialLinks.linkedin = linkedinUrl;
 
       // Debug: Log processed social links
-      console.log('Community creation - Processed social links:', socialLinks);
-      console.log('Community creation - Individual URLs:', {
         youtubeUrl,
         linkedinUrl,
         facebookUrl,
@@ -8142,7 +8118,6 @@ Return JSON with this exact structure:
       }
 
       // Debug: Log all extracted field values before database insertion
-      console.log('Community creation - Extracted field values:', {
         name: name?.trim(),
         description: description?.trim(),
         zipCode: zipCode?.trim(),
@@ -8189,7 +8164,6 @@ Return JSON with this exact structure:
       };
 
       // Debug: Log final communityData object
-      console.log('Community creation - Final database object:', communityData);
 
       const newCommunity = await storage.createChurch(communityData);
 
@@ -8982,13 +8956,10 @@ Return JSON with this exact structure:
       }
 
       const { sort = 'recent', type = 'all' } = req.query;
-      console.log(`[DEBUG] getUserPosts called for user ${userId}, type=${type}`);
       const posts = await storage.getUserPosts(userId, sort as string, type as string);
-      console.log(`[DEBUG] getUserPosts returned ${posts.length} posts`);
       if (posts.length > 0) {
         const soapPosts = posts.filter(p => p.type === 'soap_reflection');
         if (soapPosts.length > 0) {
-          console.log(`[DEBUG] Sample SOAP post from getUserPosts:`, JSON.stringify(soapPosts[0], null, 2));
         }
       }
       res.json(posts);
@@ -9265,7 +9236,6 @@ Return JSON with this exact structure:
   app.get("/api/discussions", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
-      console.log(`[DEBUG] /api/discussions called by user ${userId}`);
       
       if (!userId) {
         return res.status(401).json({ message: "User authentication required" });
@@ -9276,14 +9246,12 @@ Return JSON with this exact structure:
       const limit = parseInt(req.query.limit as string) || 10;
       const offset = (page - 1) * limit;
       
-      console.log(`[DEBUG] Fetching discussions: page=${page}, limit=${limit}, offset=${offset}`);
-      
       // Check if we need to include flagged content for editing
       const highlightId = req.query.highlight;
       const includeFlagged = highlightId ? true : false;
 
       const discussions = await storage.getDiscussions(limit, offset, undefined, userId, includeFlagged);
-      console.log(`[DEBUG] getDiscussions returned ${discussions.length} posts`);
+
 
       res.json(discussions);
     } catch (error) {
@@ -9729,12 +9697,12 @@ Return JSON with this exact structure:
     const discussionId = parseInt(req.params.id);
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
-      console.log(`[DEBUG] Fetching comments for discussion ${discussionId}, user ${userId}`);
+
       const comments = await storage.getDiscussionComments(discussionId, userId);
-      console.log(`[DEBUG] Found ${comments.length} comments for discussion ${discussionId}`);
+
       res.json(comments);
     } catch (error) {
-      console.error(`[ERROR] Failed to fetch comments for discussion ${discussionId}:`, error);
+
       res.status(500).json({ message: "Failed to fetch comments", error: error instanceof Error ? error.message : String(error) });
     }
   });
@@ -9765,12 +9733,9 @@ Return JSON with this exact structure:
   app.get("/api/soap/:id/comments", isAuthenticated, async (req: any, res) => {
     const soapId = parseInt(req.params.id);
     try {
-      console.log(`[DEBUG] Fetching comments for SOAP entry ${soapId}`);
       const comments = await storage.getSoapComments(soapId);
-      console.log(`[DEBUG] Found ${comments.length} comments for SOAP entry ${soapId}`);
       res.json(comments);
     } catch (error) {
-      console.error(`[ERROR] Failed to fetch SOAP comments for entry ${soapId}:`, error);
       res.status(500).json({ message: "Failed to fetch comments", error: error instanceof Error ? error.message : String(error) });
     }
   });
@@ -11183,10 +11148,8 @@ Return JSON with this exact structure:
 
       const entries = await storage.getSoapEntries(userId, options);
 
-      console.log(`[DEBUG] /api/soap-entries returned ${entries.length} entries for user ${userId}`);
       res.json(entries);
     } catch (error) {
-      console.error(`[ERROR] /api/soap-entries failed:`, error);
       res.status(500).json({ message: 'Failed to fetch S.O.A.P. entries', error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -11202,10 +11165,8 @@ Return JSON with this exact structure:
         undefined // Include ALL users including current user
       );
 
-      console.log(`[DEBUG] /api/soap-entries/all returned ${entries.length} entries`);
       res.json(entries);
     } catch (error) {
-      console.error(`[ERROR] /api/soap-entries/all failed:`, error);
       res.status(500).json({ message: 'Failed to fetch all S.O.A.P. entries', error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -11242,7 +11203,6 @@ Return JSON with this exact structure:
         excludeUserId // Exclude current user's entries by default
       );
 
-      console.log(`[DEBUG] /api/soap-entries/public returned ${entries.length} entries for churchId ${userChurchId}, excluding user ${userId}`);
       res.json(entries);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch public S.O.A.P. entries', error: error instanceof Error ? error.message : 'Unknown error' });
@@ -11378,7 +11338,6 @@ Return JSON with this exact structure:
   // AI-powered S.O.A.P. assistance endpoints
   app.post('/api/soap/ai/suggestions', isAuthenticated, async (req: any, res) => {
     try {
-      console.log(`[DEBUG] AI suggestions request from user ${req.session.userId}:`, req.body);
       const { scripture, scriptureReference, userMood, currentEvents, personalContext, generateComplete } = req.body;
       const userId = req.session.userId;
 
@@ -11404,10 +11363,8 @@ Return JSON with this exact structure:
         suggestions = await generateSoapSuggestions(scripture, scriptureReference, contextualInfo);
       }
 
-      console.log(`[DEBUG] AI suggestions response:`, suggestions);
       res.json(suggestions);
     } catch (error) {
-      console.error(`[ERROR] AI suggestions failed:`, error);
       res.status(500).json({ message: (error as Error).message || 'Failed to generate AI suggestions' });
     }
   });
@@ -13463,7 +13420,6 @@ Please provide suggestions for the missing or incomplete sections.`
       const plans = await storage.getReadingPlans();
       res.json(plans);
     } catch (error) {
-      console.error("Error fetching reading plans:", error);
       res.status(500).json({ message: "Failed to fetch reading plans" });
     }
   });
@@ -13482,7 +13438,6 @@ Please provide suggestions for the missing or incomplete sections.`
 
       res.json(plan);
     } catch (error) {
-      console.error("Error fetching reading plan:", error);
       res.status(500).json({ message: "Failed to fetch reading plan" });
     }
   });
@@ -13497,7 +13452,6 @@ Please provide suggestions for the missing or incomplete sections.`
       const days = await storage.getReadingPlanDays(planId);
       res.json(days);
     } catch (error) {
-      console.error("Error fetching reading plan days:", error);
       res.status(500).json({ message: "Failed to fetch reading plan days" });
     }
   });
@@ -13512,7 +13466,6 @@ Please provide suggestions for the missing or incomplete sections.`
       const subscriptions = await storage.getUserReadingPlanSubscriptions(userId);
       res.json(subscriptions);
     } catch (error) {
-      console.error("Error fetching user reading plan subscriptions:", error);
       res.status(500).json({ message: "Failed to fetch user reading plan subscriptions" });
     }
   });
@@ -13577,7 +13530,6 @@ Please provide suggestions for the missing or incomplete sections.`
       const progress = await storage.getUserReadingProgress(userId, planId);
       res.json(progress);
     } catch (error) {
-      console.error("Error fetching reading progress:", error);
       res.status(500).json({ message: "Failed to fetch reading progress" });
     }
   });

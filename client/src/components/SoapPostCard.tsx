@@ -549,7 +549,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
             </button>
             
             {/* Flag Button - Only show for other users' posts */}
-            {user && post.author && (String(user.id) !== String(post.author.id) && user.email !== post.author.email) && (
+            {user && post.author && String(user.id) !== String(post.author.id) && (
               <FlagContentDialog
                 contentType="soap_entry"
                 contentId={post.id}
@@ -567,7 +567,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
             )}
 
             {/* Delete Button - Only show for post author */}
-            {user && post.author && (String(user.id) === String(post.author.id) || user.email === post.author.email) && (
+            {user && post.author && String(user.id) === String(post.author.id) && (
               <button 
                 onClick={handleDeletePost}
                 className="flex items-center space-x-1 group hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors"
@@ -582,10 +582,10 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
         </div>
 
         {/* Comments Section - Show comments below each SOAP post */}
-        {inlineComments && inlineComments.length > 0 && (
+        {inlineComments && Array.isArray(inlineComments) && inlineComments.length > 0 && (
           <div className="mt-4 pt-3 border-t border-purple-100 dark:border-purple-800">
             <div className="space-y-3">
-              {inlineComments.slice(0, 3).map((comment: any) => (
+              {Array.isArray(inlineComments) ? inlineComments.slice(0, 3).map((comment: any) => (
                 <div key={comment.id} className="flex space-x-3">
                   <Avatar className="w-8 h-8">
                     <AvatarImage src={comment.author?.profileImageUrl || undefined} />
@@ -619,8 +619,8 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                     />
                   </div>
                 </div>
-              ))}
-              {inlineComments.length > 3 && (
+              )) : null}
+              {Array.isArray(inlineComments) && inlineComments.length > 3 && (
                 <button
                   onClick={() => setCommentDialogOpen(true)}
                   className="text-sm text-purple-600 hover:text-purple-800 font-medium"
