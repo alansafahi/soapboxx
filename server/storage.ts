@@ -1030,7 +1030,7 @@ export class DatabaseStorage implements IStorage {
         firstName: users.firstName,
         lastName: users.lastName,
         profileImageUrl: users.profileImageUrl,
-        communityId: userChurches.churchId,
+        communityId: userChurches.communityId,
         role: userChurches.role,
         isDiscoverable: sql`${users.isDiscoverable}::boolean`
       })
@@ -1046,7 +1046,7 @@ export class DatabaseStorage implements IStorage {
           ),
           // Safety constraints
           currentUserId ? ne(users.id, currentUserId) : undefined, // Exclude current user
-          churchId ? eq(userChurches.churchId, churchId) : undefined, // Church-scoped search
+          churchId ? eq(userChurches.communityId, churchId) : undefined, // Church-scoped search
           eq(sql`${users.isDiscoverable}::boolean`, true), // Only discoverable users
           eq(userChurches.isActive, true) // Only active church members
         )
@@ -1992,7 +1992,7 @@ export class DatabaseStorage implements IStorage {
       .select({
         id: userChurches.id,
         userId: userChurches.userId,
-        communityId: userChurches.churchId,
+        communityId: userChurches.communityId,
         roleId: userChurches.roleId,
         title: userChurches.title,
         department: userChurches.department,
@@ -2025,7 +2025,7 @@ export class DatabaseStorage implements IStorage {
       .from(userChurches)
       .innerJoin(users, eq(userChurches.userId, users.id))
       .where(and(
-        eq(userChurches.churchId, churchId),
+        eq(userChurches.communityId, churchId),
         eq(userChurches.isActive, true)
       )) as any;
   }
@@ -2047,7 +2047,7 @@ export class DatabaseStorage implements IStorage {
         bio 
       })
       .where(and(
-        eq(userChurches.churchId, churchId),
+        eq(userChurches.communityId, churchId),
         eq(userChurches.userId, userId)
       ))
       .returning();
@@ -2059,7 +2059,7 @@ export class DatabaseStorage implements IStorage {
       .update(userChurches)
       .set({ isActive: false })
       .where(and(
-        eq(userChurches.churchId, churchId),
+        eq(userChurches.communityId, churchId),
         eq(userChurches.userId, userId)
       ));
   }

@@ -13,7 +13,7 @@ import {
   yearValidation, 
   zipCodeValidation, 
   socialMediaValidation 
-} from "../../shared/validation";
+} from "../../../shared/validation";
 
 interface CommunityFormData {
   id?: number;
@@ -165,9 +165,9 @@ export function CommunityForm({
         website: initialData?.website || "",
         logoUrl: initialData?.logoUrl || "",
         establishedYear: initialData?.establishedYear || undefined,
-        weeklyAttendance: initialData?.size || initialData?.weeklyAttendance || "", // Map size to weeklyAttendance
+        weeklyAttendance: (initialData as any)?.size || initialData?.weeklyAttendance || "", // Map size to weeklyAttendance  
         parentChurchName: initialData?.parentChurchName || "",
-        missionStatement: initialData?.bio || initialData?.missionStatement || "", // Map bio to missionStatement
+        missionStatement: (initialData as any)?.bio || initialData?.missionStatement || "", // Map bio to missionStatement
         socialLinks: {
           facebook: initialData?.socialLinks?.facebook || "",
           instagram: initialData?.socialLinks?.instagram || "",
