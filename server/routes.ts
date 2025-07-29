@@ -9188,8 +9188,13 @@ Return JSON with this exact structure:
       const userId = req.session?.userId || req.user?.claims?.sub;
       const { type, content, mood, audience, linkedVerse, attachedMedia, title, category, isPublic, tags, expiresAt } = req.body;
       
-
-
+      console.log('POST /api/discussions - Debug:', {
+        hasSession: !!req.session,
+        sessionUserId: req.session?.userId,
+        hasUser: !!req.user,
+        userClaims: req.user?.claims,
+        finalUserId: userId
+      });
       
       if (!userId) {
         return res.status(401).json({ message: "User authentication required" });
