@@ -9218,11 +9218,11 @@ Return JSON with this exact structure:
         title: title || defaultTitle,
         content: content.trim(),
         authorId: userId,
-        churchId: null,
+        communityId: null,
         category: category || (postType === 'discussion' ? 'general' : 'share'),
         audience: audience || (isPublic !== undefined ? (isPublic ? 'public' : 'church') : 'public'),
         isPublic: isPublic !== undefined ? isPublic : true,
-        mood: mood || null,
+        moodTag: mood || null,
         attachedMedia: attachedMedia || null,
         linkedVerse: linkedVerse || null
       };

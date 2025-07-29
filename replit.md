@@ -151,7 +151,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes
-- July 28, 2025: COMPACT POST COMPOSER EMI INTEGRATION COMPLETED - Successfully replaced hardcoded mood categories with proper Enhanced Mood Indicators (EMI) system in CompactPostComposer component
+- July 29, 2025: COMPACT POST COMPOSER EMI INTEGRATION COMPLETED - Successfully replaced hardcoded mood categories with proper Enhanced Mood Indicators (EMI) system in CompactPostComposer component. Fixed database field mapping issue (churchId → communityId, mood → moodTag) in discussion creation endpoint to resolve 500 Internal Server Error. All components now use unified EMI system with 6 categories and 60 mood indicators.
   - HARDCODED MOOD CATEGORIES REMOVED: Eliminated static mood categories (Spiritual States, Emotional Well-being, Life Circumstances, Seeking Support) with hardcoded mood arrays
   - COMPLETE EMI REPLACEMENT: CompactPostComposer mood selector now uses 60+ mood indicators organized by 6 categories fetched from centralized EMI system
   - MOOD SELECTION UPDATED: Updated toggleMoodSelection function to work with EMI IDs (numbers) instead of hardcoded strings

@@ -103,11 +103,7 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
   // Get all moods as flat array for mood operations
   const allMoods = Object.values(moodsByCategory).flat();
 
-  console.log("CompactPostComposer EMI Debug:", {
-    categoriesCount: Object.keys(moodsByCategory).length,
-    totalMoods: allMoods.length,
-    selectedMoodsCount: selectedMoods.length
-  });
+
 
   const createPostMutation = useMutation({
     mutationFn: async (data: { 
