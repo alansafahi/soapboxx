@@ -161,25 +161,22 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
     try {
       const response = await apiRequest('POST', '/api/soap-entries/reactions', {
         soapId: post.id,
-        reactionType,
+        reactionType: reactionType === 'amen' ? 'Amen' : 'Heart',
         emoji: reactionType === 'amen' ? '🙏' : '❤️'
       });
       
-      if (response.reacted) {
+      // Since API returns {"success": true}, we check for success
+      if (response.success || response.reacted) {
         toast({
-          title: "Amen! 🙏",
-          description: "Your prayer reaction has been added",
-        });
-      } else {
-        toast({
-          title: "Reaction removed",
-          description: "Your reaction has been removed",
+          title: reactionType === 'amen' ? "Amen! 🙏" : "Reaction added ❤️",
+          description: reactionType === 'amen' ? "Your prayer reaction has been added" : "Your heart reaction has been added",
         });
       }
       
-      // Invalidate both feed and discussions queries to refresh reaction counts
+      // Invalidate queries to refresh reaction counts
       queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
       queryClient.invalidateQueries({ queryKey: ["/api/discussions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/soap-entries"] });
     } catch (error) {
       toast({
         title: "Failed to add reaction",
