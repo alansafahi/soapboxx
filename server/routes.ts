@@ -8124,28 +8124,16 @@ Return JSON with this exact structure:
 
       // Check if user has admin access to this community
       const userRoleData = await storage.getUserCommunityRole(userId, communityId);
-      console.log(`[COMMUNITY UPDATE] User ${userId} role data for community ${communityId}:`, userRoleData);
       
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
       
       const user = await storage.getUser(userId);
-      console.log(`[COMMUNITY UPDATE] User ${userId} global role:`, user?.role);
       
       const userRole = userRoleData?.role;
-      console.log(`[COMMUNITY UPDATE] Checking role ${userRole} against admin roles:`, adminRoles);
       
       if (!userRole || (!adminRoles.includes(userRole) && user?.role !== 'soapbox_owner')) {
-        console.log(`[COMMUNITY UPDATE] Access denied - role: ${userRole}, global role: ${user?.role}`);
-        return res.status(403).json({ error: 'Admin access required', debug: { userRole, userGlobalRole: user?.role, adminRoles } });
+        return res.status(403).json({ error: 'Admin access required' });
       }
-      
-      console.log(`[COMMUNITY UPDATE] Access granted for user ${userId} with role ${userRole}`);
-
-      // Debug: Log incoming request body
-      console.log(`[COMMUNITY UPDATE] Request body fields:`, Object.keys(req.body));
-      console.log(`[COMMUNITY UPDATE] Request body type:`, req.body.type);
-      console.log(`[COMMUNITY UPDATE] Request body missionStatement:`, req.body.missionStatement);
-      console.log(`[COMMUNITY UPDATE] Request body establishedYear:`, req.body.establishedYear);
 
       // Extract and map fields properly for database storage
       const {
@@ -8175,6 +8163,7 @@ Return JSON with this exact structure:
         officeHours,
         worshipTimes,
         hoursOfOperation,
+        additionalTimes,
         timeRows,
         socialLinks
       } = req.body;
@@ -8274,7 +8263,7 @@ Return JSON with this exact structure:
         officeHours: officeHours?.trim(),
         worshipTimes: processedWorshipTimes?.trim(),
         hoursOfOperation: processedHoursOfOperation,
-        additionalTimes: timeRows && Array.isArray(timeRows) ? timeRows : null, // Store additional times
+        additionalTimes: additionalTimes && Array.isArray(additionalTimes) && additionalTimes.length > 0 ? additionalTimes : null, // Store additional times
         establishedYear: establishedYear ? parseInt(establishedYear) : undefined,
         parentChurchName: parentChurchName?.trim(),
         updatedAt: new Date()
@@ -8291,12 +8280,7 @@ Return JSON with this exact structure:
         }
       });
 
-      // Debug: Log what we're sending to storage
-      console.log(`[COMMUNITY UPDATE] Filtered updates being sent to storage:`, updates);
-
       const updatedCommunity = await storage.updateChurch(communityId, updates);
-      
-      console.log(`[COMMUNITY UPDATE] Update completed successfully for community ${communityId}`);
       
       res.json(updatedCommunity);
     } catch (error) {
