@@ -7888,42 +7888,42 @@ Return JSON with this exact structure:
     try {
       // Debug: Log all received data
       console.log('Community creation - All req.body fields:', Object.keys(req.body));
-      console.log('Community creation - Social media fields:', {
-        facebook_url: req.body.facebook_url,
-        instagram_url: req.body.instagram_url,
-        twitter_url: req.body.twitter_url,
-        tiktok_url: req.body.tiktok_url,
-        youtube_url: req.body.youtube_url,
-        linkedin_url: req.body.linkedin_url
+      console.log('Community creation - Social media fields (camelCase):', {
+        facebookUrl: req.body.facebookUrl,
+        instagramUrl: req.body.instagramUrl,
+        twitterUrl: req.body.twitterUrl,
+        tiktokUrl: req.body.tiktokUrl,
+        youtubeUrl: req.body.youtubeUrl,
+        linkedinUrl: req.body.linkedinUrl
       });
 
-      // Extract all fields directly from req.body (frontend sends snake_case via transformToSnakeCase)
+      // MIXED FIELD EXTRACTION: Frontend sends mix of camelCase and snake_case
       const name = req.body.name;
       const type = req.body.type;
       const denomination = req.body.denomination;
       const address = req.body.address;
       const city = req.body.city;
       const state = req.body.state;
-      const zipCode = req.body.zip_code;
-      const adminPhone = req.body.admin_phone;
-      const adminEmail = req.body.admin_email;
+      const zipCode = req.body.zip_code; // snake_case
+      const adminPhone = req.body.admin_phone; // snake_case
+      const adminEmail = req.body.admin_email; // snake_case
       const website = req.body.website;
       const description = req.body.description;
       const size = req.body.size;
-      const logoUrl = req.body.logo_url;
-      const establishedYear = req.body.established_year;
-      const weeklyAttendance = req.body.weekly_attendance;
-      const parentChurchName = req.body.parent_church_name;
-      const missionStatement = req.body.mission_statement;
-      const facebookUrl = req.body.facebook_url;
-      const instagramUrl = req.body.instagram_url;
-      const twitterUrl = req.body.twitter_url;
-      const tiktokUrl = req.body.tiktok_url;
-      const youtubeUrl = req.body.youtube_url;
-      const linkedinUrl = req.body.linkedin_url;
+      const logoUrl = req.body.logo_url; // snake_case
+      const establishedYear = req.body.establishedYear; // CAMELCASE
+      const weeklyAttendance = req.body.weeklyAttendance; // CAMELCASE
+      const parentChurchName = req.body.parentChurchName; // CAMELCASE
+      const missionStatement = req.body.missionStatement; // CAMELCASE
+      const facebookUrl = req.body.facebookUrl; // CAMELCASE
+      const instagramUrl = req.body.instagramUrl; // CAMELCASE
+      const twitterUrl = req.body.twitterUrl; // CAMELCASE
+      const tiktokUrl = req.body.tiktokUrl; // CAMELCASE
+      const youtubeUrl = req.body.youtubeUrl; // CAMELCASE
+      const linkedinUrl = req.body.linkedinUrl; // CAMELCASE
       const timeRows = req.body.timeRows;
-      const sundayService = req.body.sunday_service;
-      const wednesdayService = req.body.wednesday_service;
+      const sundayService = req.body.sundayService; // CAMELCASE
+      const wednesdayService = req.body.wednesdayService; // CAMELCASE
       
       // Parse timeRows if it's a JSON string (from FormData)
       if (typeof timeRows === 'string') {
