@@ -34,6 +34,7 @@ interface CommunityFormData {
   weeklyAttendance?: string;
   parentChurchName?: string;
   missionStatement?: string;
+  privacySetting: string;
   socialLinks?: {
     facebook?: string;
     instagram?: string;
@@ -114,6 +115,7 @@ export function CommunityForm({
       name: initialData?.name || "",
       type: initialData?.type || "",
       denomination: initialData?.denomination || "",
+      privacySetting: initialData?.privacySetting || "public",
       description: initialData?.description || "",
       address: initialData?.address || "",
       city: initialData?.city || "",
@@ -152,6 +154,7 @@ export function CommunityForm({
         name: initialData?.name || "",
         type: initialData?.type || "",
         denomination: initialData?.denomination || "",
+        privacySetting: initialData?.privacySetting || "public",
         description: initialData?.description || "",
         address: initialData?.address || "",
         city: initialData?.city || "",
@@ -486,6 +489,23 @@ export function CommunityForm({
                   />
                 </div>
               )}
+            </div>
+            <div>
+              <Label htmlFor="privacySetting">Privacy Setting *</Label>
+              <Select
+                value={formData.privacySetting || 'public'}
+                onValueChange={(value) => handleInputChange('privacySetting', value)}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select privacy level..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="public">🌍 Public - Visible to everyone</SelectItem>
+                  <SelectItem value="private">🔒 Private - Invite only</SelectItem>
+                  <SelectItem value="church_members_only">⛪ Church Members Only</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="establishedYear">Established Year</Label>

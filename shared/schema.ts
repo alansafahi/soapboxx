@@ -233,6 +233,7 @@ export const communities = pgTable("communities", {
   verifiedAt: timestamp("verified_at").defaultNow(), // Auto-approve for now
   verifiedBy: varchar("verified_by").references(() => users.id), // ID of admin who verified
   rejectionReason: text("rejection_reason"), // Reason for rejection if status is rejected
+  privacySetting: varchar("privacy_setting", { length: 30 }).default("public").notNull(), // public, private, church_members_only
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

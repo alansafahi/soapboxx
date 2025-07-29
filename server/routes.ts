@@ -7987,6 +7987,14 @@ Return JSON with this exact structure:
         validationErrors.push('Denomination is required');
       }
 
+      // Privacy setting validation
+      const privacySetting = formData.get('privacySetting') as string;
+      if (!privacySetting?.trim()) {
+        validationErrors.push('Privacy setting is required');
+      } else if (!['public', 'private', 'church_members_only'].includes(privacySetting)) {
+        validationErrors.push('Invalid privacy setting');
+      }
+
       // Weekly attendance only required for churches
       if (type === 'church' && !weeklyAttendance?.trim()) {
         validationErrors.push('Weekly attendance is required');
@@ -8190,6 +8198,7 @@ Return JSON with this exact structure:
         verification_status: 'verified', // snake_case for database
         is_demo: false, // snake_case for database
         is_claimed: true, // snake_case for database
+        privacy_setting: privacySetting?.trim() || 'public', // snake_case for database
         social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null, // FIXED: Must be included
         hours_of_operation: Object.keys(hoursOfOperation).length > 0 ? hoursOfOperation : null, // snake_case for database
         worship_times: worshipTimesArray.length > 0 ? worshipTimesArray.join('; ') : null, // snake_case for database
