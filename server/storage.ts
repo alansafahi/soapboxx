@@ -2465,7 +2465,7 @@ export class DatabaseStorage implements IStorage {
           u.id as user_id, u.email, u.first_name, u.last_name, u.profile_image_url
         FROM discussions d
         LEFT JOIN users u ON d.author_id = u.id
-        WHERE d.is_public = true AND d.expired_at IS NULL
+        WHERE d.is_public = true AND (d.expires_at IS NULL OR d.expires_at > NOW())
         ORDER BY d.created_at DESC
         LIMIT ${limit || 50} OFFSET ${offset || 0}
       `);
@@ -2962,8 +2962,9 @@ export class DatabaseStorage implements IStorage {
       // Get discussions using raw SQL
       if (type === 'all' || type === 'discussion') {
         const discussionResult = await db.execute(sql`
-          SELECT * FROM discussions 
+          SELECT *, church_id as community_id FROM discussions 
           WHERE author_id = ${userId} 
+          AND (expires_at IS NULL OR expires_at > NOW())
           ORDER BY created_at DESC
         `);
         
