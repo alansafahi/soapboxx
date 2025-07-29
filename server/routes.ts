@@ -7987,7 +7987,8 @@ Return JSON with this exact structure:
         validationErrors.push('Denomination is required');
       }
 
-      if (!weeklyAttendance?.trim()) {
+      // Weekly attendance only required for churches
+      if (type === 'church' && !weeklyAttendance?.trim()) {
         validationErrors.push('Weekly attendance is required');
       }
 

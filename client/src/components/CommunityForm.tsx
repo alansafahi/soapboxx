@@ -497,24 +497,27 @@ export function CommunityForm({
                 placeholder="2020"
               />
             </div>
-            <div>
-              <Label htmlFor="weeklyAttendance">👥 Weekly Attendance</Label>
-              <Select
-                value={formData.weeklyAttendance || ''}
-                onValueChange={(value) => handleInputChange('weeklyAttendance', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select attendance size" />
-                </SelectTrigger>
-                <SelectContent>
-                  {WEEKLY_ATTENDANCE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Weekly Attendance - Only for Churches */}
+            {formData.type === 'church' && (
+              <div>
+                <Label htmlFor="weeklyAttendance">👥 Weekly Attendance *</Label>
+                <Select
+                  value={formData.weeklyAttendance || ''}
+                  onValueChange={(value) => handleInputChange('weeklyAttendance', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select attendance size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {WEEKLY_ATTENDANCE_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
               <Label htmlFor="parentChurchName">Parent Church (if applicable)</Label>
               <Input
@@ -829,14 +832,15 @@ export function CommunityForm({
           </CardContent>
         </Card>
 
-        {/* Service Times & Hours */}
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              Service Times & Hours
-            </CardTitle>
-          </CardHeader>
+        {/* Service Times & Hours - Only for Churches */}
+        {formData.type === 'church' && (
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                Service Times & Hours
+              </CardTitle>
+            </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="officeHours">🕒 Office Hours (Auto-filled by denomination)</Label>
@@ -924,6 +928,7 @@ export function CommunityForm({
             </div>
           </CardContent>
         </Card>
+        )}
       </div>
 
       {/* Form Actions */}

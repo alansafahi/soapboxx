@@ -160,6 +160,7 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
   - COMPREHENSIVE COVERAGE: All profile fields validated including social media URLs (Facebook, Instagram, Twitter/X, TikTok, YouTube, LinkedIn) with platform-specific checks
   - REQUIRED FIELDS ENFORCED: Community name, admin email, full address (address, city, state, ZIP code), community type, denomination, and weekly attendance all required for community creation
   - BACKEND VALIDATION PROTECTION: Server-side validation prevents creation of incomplete communities - validation errors block database insertion until all required fields are properly filled
+  - DYNAMIC FORM FIELDS: Weekly attendance, service times, and worship times now only appear for churches - ministries and groups see streamlined form without church-specific fields
 - July 29, 2025: YOUTUBE AND LINKEDIN SOCIAL MEDIA INTEGRATION BACKEND FIX COMPLETED - Successfully resolved critical backend field mapping issue preventing YouTube and LinkedIn URLs from being saved to database
   - ROOT CAUSE IDENTIFIED: Backend route missing critical fields in communityData object for database insertion
   - BACKEND ROUTE FIXED: Added missing fields to communityData object in server/routes.ts (established_year, weekly_attendance, parent_church_name, mission_statement, admin_phone)
