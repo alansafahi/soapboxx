@@ -2563,14 +2563,14 @@ export class DatabaseStorage implements IStorage {
       if (soapPosts.length > 0) {
         const soapIds = soapPosts.map(d => d.id);
         const soapCommentCountResult = await db.execute(sql`
-          SELECT soap_entry_id, COUNT(*) as comment_count 
+          SELECT soap_id, COUNT(*) as comment_count 
           FROM soap_comments 
-          WHERE soap_entry_id IN (${sql.join(soapIds, sql`, `)})
-          GROUP BY soap_entry_id
+          WHERE soap_id IN (${sql.join(soapIds, sql`, `)})
+          GROUP BY soap_id
         `);
         
         soapCommentCounts = soapCommentCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
-          acc[row.soap_entry_id] = Number(row.comment_count);
+          acc[row.soap_id] = Number(row.comment_count);
           return acc;
         }, {});
       }
