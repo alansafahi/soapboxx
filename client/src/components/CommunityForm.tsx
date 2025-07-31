@@ -484,11 +484,11 @@ export function CommunityForm({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 text-black dark:text-white p-4">
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="w-full h-full bg-white dark:bg-gray-800 text-black dark:text-white">
+      <form onSubmit={handleSubmit} className="space-y-6 bg-white dark:bg-gray-800 text-black dark:text-white p-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Basic Information */}
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
@@ -767,7 +767,7 @@ export function CommunityForm({
         </Card>
 
         {/* Contact Information */}
-        <Card>
+        <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Phone className="h-5 w-5" />

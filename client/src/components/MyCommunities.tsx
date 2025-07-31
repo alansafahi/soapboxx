@@ -185,10 +185,10 @@ export default function MyCommunities() {
                 Create A Community
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto z-40">
+            <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto z-40 bg-white dark:bg-gray-900 text-black dark:text-white">
               <DialogHeader>
-                <DialogTitle>Create A New Community</DialogTitle>
-                <DialogDescription>
+                <DialogTitle className="text-black dark:text-white">Create A New Community</DialogTitle>
+                <DialogDescription className="text-gray-600 dark:text-gray-300">
                   Set up a new community and become its administrator
                 </DialogDescription>
               </DialogHeader>
