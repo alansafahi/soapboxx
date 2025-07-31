@@ -5,6 +5,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Checkbox } from "./ui/checkbox";
 import { Building2, MapPin, Phone, Mail, Globe, Clock, Share2, Image, Upload, AlertCircle } from "lucide-react";
 import { 
   phoneValidation, 
@@ -50,6 +51,8 @@ interface CommunityFormData {
     timeSchedule: string;
     language: string;
   }>;
+  hideAddress?: boolean;
+  hidePhone?: boolean;
 }
 
 interface CommunityFormProps {
@@ -140,6 +143,8 @@ export function CommunityForm({
       officeHours: initialData?.officeHours || "",
       worshipTimes: initialData?.worshipTimes || "",
       additionalTimes: initialData?.additionalTimes || [],
+      hideAddress: initialData?.hideAddress || false,
+      hidePhone: initialData?.hidePhone || false,
     };
     return mappedData;
   });
@@ -179,6 +184,8 @@ export function CommunityForm({
         officeHours: initialData?.officeHours || "",
         worshipTimes: initialData?.worshipTimes || "",
         additionalTimes: initialData?.additionalTimes || [],
+        hideAddress: initialData?.hideAddress || false,
+        hidePhone: initialData?.hidePhone || false,
       };
       setFormData(mappedData);
       setLogoPreview(initialData?.logoUrl || "");
@@ -642,6 +649,26 @@ export function CommunityForm({
                 <p className="text-sm text-red-500 mt-1">{validationErrors.zipCode}</p>
               )}
             </div>
+            
+            {/* Privacy Options for Non-Churches */}
+            {(formData.type === 'Ministry' || formData.type === 'Group') && (
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Address Privacy</h4>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="hideAddress"
+                    checked={formData.hideAddress || false}
+                    onCheckedChange={(checked) => handleInputChange('hideAddress', checked)}
+                  />
+                  <Label htmlFor="hideAddress" className="text-sm text-gray-600 dark:text-gray-400">
+                    Hide address from public view (members will still see it)
+                  </Label>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  For privacy, you can hide your address from the Discover Communities page and View Details dialog
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -704,6 +731,26 @@ export function CommunityForm({
                 <p className="text-sm text-red-500 mt-1">{validationErrors.website}</p>
               )}
             </div>
+            
+            {/* Privacy Options for Non-Churches */}
+            {(formData.type === 'Ministry' || formData.type === 'Group') && (
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">Phone Privacy</h4>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="hidePhone"
+                    checked={formData.hidePhone || false}
+                    onCheckedChange={(checked) => handleInputChange('hidePhone', checked)}
+                  />
+                  <Label htmlFor="hidePhone" className="text-sm text-gray-600 dark:text-gray-400">
+                    Hide phone number from public view (members will still see it)
+                  </Label>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  For privacy, you can hide your phone number from the Discover Communities page and View Details dialog
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

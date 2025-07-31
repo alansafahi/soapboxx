@@ -7955,6 +7955,10 @@ Return JSON with this exact structure:
         validationErrors.push('Invalid privacy setting');
       }
 
+      // Privacy options for Ministries and Groups
+      const hideAddress = req.body.hideAddress || false;
+      const hidePhone = req.body.hidePhone || false;
+
       // Weekly attendance only required for churches
       if (type === 'church' && !weeklyAttendance?.trim()) {
         validationErrors.push('Weekly attendance is required for churches');
@@ -8158,6 +8162,8 @@ Return JSON with this exact structure:
         is_demo: false, // snake_case for database
         is_claimed: true, // snake_case for database
         privacy_setting: privacySetting?.trim() || 'public', // snake_case for database
+        hide_address: hideAddress, // Privacy option for Ministries/Groups
+        hide_phone: hidePhone, // Privacy option for Ministries/Groups
         social_links: Object.keys(socialLinks).length > 0 ? socialLinks : null, // FIXED: Must be included
         hours_of_operation: Object.keys(hoursOfOperation).length > 0 ? hoursOfOperation : null, // snake_case for database
         worship_times: worshipTimesArray.length > 0 ? worshipTimesArray.join('; ') : null, // snake_case for database
@@ -8276,7 +8282,9 @@ Return JSON with this exact structure:
         hoursOfOperation,
         additionalTimes,
         timeRows,
-        socialLinks
+        socialLinks,
+        hideAddress,
+        hidePhone
       } = req.body;
 
 
@@ -8378,6 +8386,8 @@ Return JSON with this exact structure:
         additionalTimes: additionalTimes && Array.isArray(additionalTimes) && additionalTimes.length > 0 ? additionalTimes : null, // Store additional times
         establishedYear: establishedYear ? parseInt(establishedYear) : undefined,
         parentChurchName: parentChurchName?.trim(),
+        hideAddress: hideAddress,
+        hidePhone: hidePhone,
         updatedAt: new Date()
       };
 

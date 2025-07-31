@@ -89,6 +89,10 @@ interface CommunityProfile {
   service_language?: string; // Database field mapping
   streetAddress?: string;
   street_address?: string; // Database field mapping
+  hideAddress?: boolean;
+  hide_address?: boolean; // Database field mapping
+  hidePhone?: boolean;
+  hide_phone?: boolean; // Database field mapping
 }
 
 export function CommunityViewDialog({ 
@@ -410,12 +414,22 @@ export function CommunityViewDialog({
               <CardContent className="space-y-3">
                 <div>
                   <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Address</p>
-                  <p className="text-gray-900 dark:text-gray-100">
-                    {community.address}
-                  </p>
-                  <p className="text-gray-900 dark:text-gray-100">
-                    {community.city}, {community.state} {community.zipCode || community.zip_code || ''}
-                  </p>
+                  {(community.hideAddress || community.hide_address) && !hasAdminAccess() ? (
+                    <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                        Address is private. Contact this {community.type?.toLowerCase() || 'community'} directly for location details.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {community.address}
+                      </p>
+                      <p className="text-gray-900 dark:text-gray-100">
+                        {community.city}, {community.state} {community.zipCode || community.zip_code || ''}
+                      </p>
+                    </>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -430,10 +444,18 @@ export function CommunityViewDialog({
               </CardHeader>
               <CardContent className="space-y-3">
                 {community.phone && (
-                  <div className="flex items-center space-x-3">
-                    <Phone className="h-4 w-4 text-gray-500" />
-                    <span className="text-gray-900 dark:text-gray-100">{community.phone}</span>
-                  </div>
+                  (community.hidePhone || community.hide_phone) && !hasAdminAccess() ? (
+                    <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
+                        Phone number is private. Contact via email for phone details.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-3">
+                      <Phone className="h-4 w-4 text-gray-500" />
+                      <span className="text-gray-900 dark:text-gray-100">{community.phone}</span>
+                    </div>
+                  )
                 )}
                 
                 {(community.email || community.adminEmail) && (
