@@ -402,10 +402,19 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                             <SelectValue placeholder="Select community type" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
-                          <SelectItem value="church">Church</SelectItem>
-                          <SelectItem value="ministry">Ministry</SelectItem>
-                          <SelectItem value="group">Group</SelectItem>
+                        <SelectContent 
+                          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-lg z-[9999]"
+                          sideOffset={5}
+                        >
+                          <SelectItem value="church" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">
+                            Churches
+                          </SelectItem>
+                          <SelectItem value="ministry" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">
+                            Ministries
+                          </SelectItem>
+                          <SelectItem value="group" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">
+                            Groups
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -432,9 +441,12 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                               } />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
+                          <SelectContent 
+                            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-lg z-[9999] max-h-60 overflow-y-auto"
+                            sideOffset={5}
+                          >
                             {getDenominationOptions().map((option) => (
-                              <SelectItem key={option} value={option}>
+                              <SelectItem key={option} value={option} className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">
                                 {option}
                               </SelectItem>
                             ))}
@@ -458,14 +470,17 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                             <SelectValue placeholder="Select attendance range..." />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
-                          <SelectItem value="Under 50">Under 50</SelectItem>
-                          <SelectItem value="50-100">50-100</SelectItem>
-                          <SelectItem value="100-200">100-200</SelectItem>
-                          <SelectItem value="200-500">200-500</SelectItem>
-                          <SelectItem value="500-1000">500-1000</SelectItem>
-                          <SelectItem value="1000-2000">1000-2000</SelectItem>
-                          <SelectItem value="Over 2000">Over 2000</SelectItem>
+                        <SelectContent 
+                          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-lg z-[9999]"
+                          sideOffset={5}
+                        >
+                          <SelectItem value="Under 50" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Under 50</SelectItem>
+                          <SelectItem value="50-100" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">50-100</SelectItem>
+                          <SelectItem value="100-200" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">100-200</SelectItem>
+                          <SelectItem value="200-500" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">200-500</SelectItem>
+                          <SelectItem value="500-1000" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">500-1000</SelectItem>
+                          <SelectItem value="1000-2000" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">1000-2000</SelectItem>
+                          <SelectItem value="Over 2000" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Over 2000</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -507,10 +522,13 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                               <SelectValue placeholder="Select privacy level..." />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
-                            <SelectItem value="public">🌍 Public - Visible to everyone</SelectItem>
-                            <SelectItem value="private">🔒 Private - Invite only</SelectItem>
-                            <SelectItem value="church_members_only">⛪ Church Members Only</SelectItem>
+                          <SelectContent 
+                            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-lg z-[9999]"
+                            sideOffset={5}
+                          >
+                            <SelectItem value="public" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">🌍 Public - Visible to everyone</SelectItem>
+                            <SelectItem value="private" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">🔒 Private - Invite only</SelectItem>
+                            <SelectItem value="church_members_only" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">⛪ Church Members Only</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
