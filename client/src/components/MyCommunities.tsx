@@ -73,7 +73,7 @@ interface UserCommunity {
   hidePhoneFromMembers?: boolean;
 }
 
-export function MyCommunities() {
+export default function MyCommunities() {
   const [createCommunityOpen, setCreateCommunityOpen] = useState(false);
   const [viewCommunityOpen, setViewCommunityOpen] = useState(false);
   const [selectedCommunity, setSelectedCommunity] = useState<UserCommunity | null>(null);
