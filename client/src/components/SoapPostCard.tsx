@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
@@ -57,6 +57,14 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
     application: false,
     prayer: false
   });
+  
+  // Local state for reaction count to update UI immediately
+  const [reactionCount, setReactionCount] = useState(post.likeCount || 0);
+  
+  // Sync local reaction count when post data changes
+  useEffect(() => {
+    setReactionCount(post.likeCount || 0);
+  }, [post.likeCount]);
 
   // Helper function to truncate text to first 1-2 lines
   const truncateText = (text: string, maxLength: number = 120) => {
@@ -164,6 +172,9 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
         reactionType,
         emoji: reactionType === 'amen' ? '🙏' : '❤️'
       });
+      
+      // Update local reaction count immediately for instant UI feedback
+      setReactionCount(response.reactionCount || 0);
       
       if (response.reacted) {
         toast({
@@ -471,7 +482,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
               <span className="text-sm font-medium text-gray-600 group-hover:text-purple-600 dark:text-gray-400 dark:group-hover:text-purple-400">
                 Amen
               </span>
-              <span className="text-xs text-gray-400 dark:text-gray-500">{post.likeCount || 0}</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500">{reactionCount}</span>
             </button>
             
             <button 
