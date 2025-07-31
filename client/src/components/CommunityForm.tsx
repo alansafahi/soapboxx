@@ -224,6 +224,7 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
       zipCode: initialData?.zipCode || "",
       phone: initialData?.phone || "",
       email: initialData?.email || "",
+      adminEmail: initialData?.adminEmail || "",
       website: initialData?.website || "",
       privacySetting: initialData?.privacySetting || "public",
       logoUrl: initialData?.logoUrl || "",
@@ -243,10 +244,13 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
       wednesdayService: initialData?.wednesdayService || "",
       customTime1: initialData?.additionalTimes?.[0]?.timeSchedule || "",
       customTime1Label: initialData?.additionalTimes?.[0]?.eventLabel || "",
+      customTime1Language: initialData?.additionalTimes?.[0]?.language || "",
       customTime2: initialData?.additionalTimes?.[1]?.timeSchedule || "",
       customTime2Label: initialData?.additionalTimes?.[1]?.eventLabel || "",
+      customTime2Language: initialData?.additionalTimes?.[1]?.language || "",
       customTime3: initialData?.additionalTimes?.[2]?.timeSchedule || "",
       customTime3Label: initialData?.additionalTimes?.[2]?.eventLabel || "",
+      customTime3Language: initialData?.additionalTimes?.[2]?.language || "",
       hideAddress: initialData?.hideAddress || false,
       hidePhone: initialData?.hidePhone || false,
     },
@@ -787,59 +791,64 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="worshipTimes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Main Worship Times</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Sunday 9:00 AM & 11:00 AM"
-                          {...field}
-                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Main worship times only for churches */}
+                {watchedType === 'church' && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="worshipTimes"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Main Worship Times</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Sunday 9:00 AM & 11:00 AM"
+                              {...field}
+                              className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="sundayService"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sunday Service</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="10:00 AM"
-                          {...field}
-                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="sundayService"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Sunday Service</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="10:00 AM"
+                              {...field}
+                              className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
-                <FormField
-                  control={form.control}
-                  name="wednesdayService"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Wednesday Service</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="7:00 PM"
-                          {...field}
-                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="wednesdayService"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Wednesday Service</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="7:00 PM"
+                              {...field}
+                              className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
 
                 <FormField
                   control={form.control}
