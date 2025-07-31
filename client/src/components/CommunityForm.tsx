@@ -528,30 +528,28 @@ export function CommunityForm({
               <Label htmlFor="denomination">
                 {formData.type === 'church' ? 'Denomination *' : formData.type === 'ministry' ? 'Ministry Type *' : 'Group Type *'}
               </Label>
-              <Select
+              <select
+                id="denomination"
                 value={formData.denomination}
-                onValueChange={(value) => handleInputChange('denomination', value)}
+                onChange={(e) => handleInputChange('denomination', e.target.value)}
                 required
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder={
-                    formData.type === 'church' 
-                      ? "Select denomination"
-                      : formData.type === 'group'
-                      ? "Select group type"
-                      : "Select ministry type"
-                  } />
-                </SelectTrigger>
-                <SelectContent className="z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
+                <option value="">
+                  {formData.type === 'church' 
+                    ? "Select denomination"
+                    : formData.type === 'group'
+                    ? "Select group type"
+                    : "Select ministry type"}
+                </option>
                   {(formData.type === 'church' ? DENOMINATION_OPTIONS :
                     formData.type === 'ministry' ? MINISTRY_TYPE_OPTIONS :
                     GROUP_TYPE_OPTIONS).map((option) => (
-                    <SelectItem key={option} value={option}>
+                    <option key={option} value={option}>
                       {option}
-                    </SelectItem>
+                    </option>
                   ))}
-                </SelectContent>
-              </Select>
+              </select>
               {formData.denomination === 'Other' && (
                 <div className="mt-2">
                   <Input
