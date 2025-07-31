@@ -1,445 +1,148 @@
-import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "../hooks/useAuth";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { Building, MapPin, Users, Calendar, Plus, Settings, Eye, Upload, X, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Plus, Settings, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { CommunityForm } from "./CommunityForm";
 import { CommunityViewDialog } from "./CommunityViewDialog";
-import { Link } from "wouter";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { useForm } from "react-hook-form";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useToast } from "../hooks/use-toast";
-import { z } from "zod";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface Community {
   id: number;
   name: string;
-  type: string; // church, group, ministry
+  type: string;
   denomination: string;
   address: string;
   city: string;
   state: string;
-  memberCount: number;
-  role: string;
+  zipCode: string;
+  adminEmail: string;
+  adminPhone: string;
+  website: string;
   logoUrl?: string;
+  establishedYear?: number;
+  weeklyAttendance?: string;
+  parentChurchName?: string;
   description?: string;
-  website?: string;
-  phone?: string;
+  missionStatement?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  twitterUrl?: string;
+  tiktokUrl?: string;
+  youtubeUrl?: string;
+  linkedinUrl?: string;
+  officeHours?: string;
+  worshipTimes?: string;
+  privacyLevel: string;
+  hideAddressFromMembers?: boolean;
+  hidePhoneFromMembers?: boolean;
 }
 
-// Community creation schema
-const createCommunitySchema = z.object({
-  name: z.string().min(1, "Community name is required"),
-  address: z.string().min(1, "Address is required"),
-  city: z.string().min(1, "City is required"),
-  state: z.string().min(1, "State is required"),
-  zipCode: z.string().min(1, "Zip code is required"),
-  type: z.string().default("church"),
-  denomination: z.string().optional(),
-  privacySetting: z.enum(["public", "private", "church_members_only"]).default("public"),
-  adminEmail: z.string().email("Valid email required"),
-  adminPhone: z.string().optional(),
-  website: z.string().optional(),
-  description: z.string().optional(),
-  logoUrl: z.string().optional(),
-  establishedYear: z.string().optional(),
-  weeklyAttendance: z.string().optional(),
-  parentChurchName: z.string().optional(),
-  missionStatement: z.string().optional(),
-  facebookUrl: z.string().optional(),
-  instagramUrl: z.string().optional(),
-  twitterUrl: z.string().optional(),
-  tiktokUrl: z.string().optional(),
-  youtubeUrl: z.string().optional(),
-  linkedinUrl: z.string().optional(),
-  officeHours: z.string().optional(),
-  worshipTimes: z.string().optional(),
-  hideAddress: z.boolean().optional(),
-  hidePhone: z.boolean().optional()
-});
+interface UserCommunity {
+  id: number;
+  name: string;
+  type: string;
+  denomination: string;
+  role: string;
+  logoUrl?: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  adminEmail: string; 
+  adminPhone: string;
+  website: string;
+  establishedYear?: number;
+  weeklyAttendance?: string;
+  parentChurchName?: string;
+  description?: string;
+  missionStatement?: string;
+  facebookUrl?: string;
+  instagramUrl?: string;
+  twitterUrl?: string;
+  tiktokUrl?: string;
+  youtubeUrl?: string;
+  linkedinUrl?: string;
+  officeHours?: string;
+  worshipTimes?: string;
+  privacyLevel: string;
+  hideAddressFromMembers?: boolean;
+  hidePhoneFromMembers?: boolean;
+}
 
-// Organization-specific affiliation lists
-const AFFILIATIONS = {
-  church: [
-    "Baptist", "Methodist", "Presbyterian", "Lutheran", "Episcopal", "Catholic", "Orthodox",
-    "Pentecostal", "Assembly of God", "Church of Christ", "Disciples of Christ", "Adventist",
-    "Mennonite", "Quaker", "Congregational", "Reformed", "Evangelical", "Non-denominational",
-    "Interdenominational", "Unity", "Unitarian Universalist"
-  ],
-  group: [
-    "Community Organization", "Non-Profit", "Educational", "Support Group", "Recovery Group",
-    "Parent Group", "Youth Organization", "Senior Group", "Health & Wellness", "Environmental",
-    "Cultural Organization", "Arts & Music", "Sports & Recreation", "Professional Association",
-    "Volunteer Group", "Advocacy Group", "Religious Study Group", "Social Club"
-  ],
-  ministry: [
-    "Youth Ministry", "Children's Ministry", "Young Adults Ministry", "Senior Ministry", 
-    "Women's Ministry", "Men's Ministry", "Music Ministry", "Worship Ministry", "Prayer Ministry",
-    "Outreach Ministry", "Missions Ministry", "Education Ministry", "Pastoral Care Ministry",
-    "Community Service Ministry", "Recovery Ministry", "Family Ministry", "Singles Ministry",
-    "Small Groups Ministry", "Discipleship Ministry", "Evangelism Ministry"
-  ]
-};
-
-// Denomination-based defaults for operating hours
-const denominationDefaults = {
-  "Baptist": {
-    officeHours: "Mon-Thu 9AM-4PM, Fri 9AM-12PM",
-    worshipTimes: "Sunday: 9AM & 11AM\nWednesday: 6:30PM Bible Study"
-  },
-  "Methodist": {
-    officeHours: "Mon-Thu 9AM-4PM, Fri 9AM-12PM",
-    worshipTimes: "Sunday: 9AM Traditional, 11AM Contemporary\nWednesday: 6:30PM Study"
-  },
-  "Catholic": {
-    officeHours: "Mon-Fri 9AM-4PM",
-    worshipTimes: "Saturday: 5PM Vigil Mass\nSunday: 8AM, 10AM, 12PM Mass\nDaily Mass: Mon-Fri 8AM"
-  },
-  "Presbyterian": {
-    officeHours: "Mon-Thu 9AM-4PM, Fri 9AM-1PM",
-    worshipTimes: "Sunday: 9AM Sunday School, 10AM Worship\nWednesday: 7PM Prayer Meeting"
-  },
-  "Pentecostal": {
-    officeHours: "Mon-Thu 10AM-4PM, Fri 10AM-12PM",
-    worshipTimes: "Sunday: 10AM & 6PM\nWednesday: 7PM Bible Study\nFriday: 7PM Prayer Night"
-  },
-  "Lutheran": {
-    officeHours: "Mon-Thu 9AM-3PM, Fri 9AM-12PM",
-    worshipTimes: "Sunday: 8:30AM Traditional, 10:30AM Contemporary\nWednesday: 7PM Study"
-  },
-  "Episcopal": {
-    officeHours: "Mon-Thu 9AM-4PM",
-    worshipTimes: "Sunday: 8AM Holy Eucharist, 10AM Family Service\nWednesday: 12PM Holy Eucharist"
-  },
-  "Non-denominational": {
-    officeHours: "Mon-Fri 9AM-4PM",
-    worshipTimes: "Sunday: 9AM & 11AM Services\nWednesday: 7PM Bible Study"
-  }
-};
-
-// Weekly attendance categories
-const WEEKLY_ATTENDANCE_OPTIONS = [
-  { value: "under-50", label: "Micro (Under 50)" },
-  { value: "50-99", label: "Small (50-99)" },
-  { value: "100-199", label: "Medium (100-199)" },
-  { value: "200-349", label: "Large (200-349)" },
-  { value: "350-499", label: "Very Large (350-499)" },
-  { value: "500-999", label: "Mega (500-999)" },
-  { value: "1000-4999", label: "Super Mega (1,000-4,999)" },
-  { value: "5000+", label: "Meta Church (5,000+)" }
-];
-
-// Language options
-const LANGUAGE_OPTIONS = [
-  { value: "english", label: "English" },
-  { value: "spanish", label: "Spanish" },
-  { value: "french", label: "French" },
-  { value: "german", label: "German" },
-  { value: "italian", label: "Italian" },
-  { value: "portuguese", label: "Portuguese" },
-  { value: "chinese", label: "Chinese" },
-  { value: "korean", label: "Korean" },
-  { value: "japanese", label: "Japanese" },
-  { value: "arabic", label: "Arabic" },
-  { value: "hindi", label: "Hindi" },
-  { value: "russian", label: "Russian" },
-  { value: "other", label: "Other" }
-];
-
-export default function MyCommunities() {
-  const { user } = useAuth();
+export function MyCommunities() {
+  const [createCommunityOpen, setCreateCommunityOpen] = useState(false);
+  const [viewCommunityOpen, setViewCommunityOpen] = useState(false);
+  const [selectedCommunity, setSelectedCommunity] = useState<UserCommunity | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
-  // Handle community deletion
-  const deleteCommunityMutation = useMutation({
-    mutationFn: async (communityId: number) => {
-      const response = await fetch(`/api/communities/${communityId}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete community');
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Community Deleted",
-        description: "The community has been successfully deleted.",
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/communities/user'] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Delete Failed",
-        description: error.message || "Failed to delete community",
-        variant: "destructive",
-      });
-    },
+
+  const { data: userCommunities = [], isLoading } = useQuery<UserCommunity[]>({
+    queryKey: ['/api/user/churches'],
   });
 
-  const handleDeleteCommunity = (communityId: number) => {
-    if (window.confirm('Are you sure you want to delete this community? This action cannot be undone.')) {
-      deleteCommunityMutation.mutate(communityId);
-    }
-  };
-  const [createCommunityOpen, setCreateCommunityOpen] = useState(false);
-  const [showCustomDenomination, setShowCustomDenomination] = useState(false);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [logoPreview, setLogoPreview] = useState<string>("");
-  const [timeRows, setTimeRows] = useState([
-    { id: 1, eventLabel: '', timeSchedule: '', language: 'english' }
-  ]);
-  
-  const { data: userCommunities = [], isLoading, error } = useQuery<Community[]>({
-    queryKey: ["/api/users/communities"],
-    enabled: !!user,
-  });
-
-  // Create community form
-  const createForm = useForm({
-    defaultValues: {
-      name: "",
-      address: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      type: "church",
-      denomination: "",
-      privacySetting: "public",
-      adminEmail: "",
-      adminPhone: "",
-      website: "",
-      description: "",
-      logoUrl: "",
-      establishedYear: "",
-      weeklyAttendance: "",
-      parentChurchName: "",
-      missionStatement: "",
-      facebookUrl: "",
-      instagramUrl: "",
-      twitterUrl: "",
-      tiktokUrl: "",
-      youtubeUrl: "",
-      linkedinUrl: "",
-      sundayService: "",
-      wednesdayService: "",
-      officeHours: "",
-      worshipTimes: "",
-      language: "english",
-      customTime1: "",
-      customTime1Label: "",
-      customTime2: "",
-      customTime2Label: "",
-      customTime3: "",
-      customTime3Label: "",
-      customTime4: "",
-      customTime4Label: ""
-    }
-  });
-
-  // Watch the type field to update affiliation options
-  const selectedType = createForm.watch("type") as keyof typeof AFFILIATIONS;
-  const selectedDenomination = createForm.watch("denomination");
-
-  // Auto-fill office hours and worship times based on denomination selection
-  useEffect(() => {
-    if (selectedDenomination && denominationDefaults[selectedDenomination as keyof typeof denominationDefaults]) {
-      const defaults = denominationDefaults[selectedDenomination as keyof typeof denominationDefaults];
-      createForm.setValue('officeHours', defaults.officeHours);
-      createForm.setValue('worshipTimes', defaults.worshipTimes);
-    }
-  }, [selectedDenomination, createForm]);
-
-  // Handle logo upload
-  const handleLogoUpload = async (file: File): Promise<string> => {
-    const formData = new FormData();
-    formData.append('logo', file);
-    
-    const response = await fetch('/api/upload/community-logo', {
-      method: 'POST',
-      credentials: 'include',
-      body: formData,
-    });
-    
-    if (!response.ok) {
-      throw new Error('Failed to upload logo');
-    }
-    
-    const result = await response.json();
-    return result.logoUrl;
-  };
-
-  // Handle logo file selection
-  const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setLogoFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setLogoPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // Helper function to normalize website URL
-  const normalizeWebsiteUrl = (url: string) => {
-    if (!url?.trim()) return "";
-    const trimmedUrl = url.trim();
-    if (trimmedUrl.startsWith("http://") || trimmedUrl.startsWith("https://")) {
-      return trimmedUrl;
-    }
-    return `https://${trimmedUrl}`;
-  };
-
-  // SoapBox Development Standards v1.0 Field Mapping: camelCase -> snake_case
-  const transformToSnakeCase = (data: any) => {
-    const fieldMapping = {
-      adminEmail: 'admin_email',
-      adminPhone: 'admin_phone',
-      zipCode: 'zip_code',
-      logoUrl: 'logo_url',
-      privacySetting: 'privacy_setting'
-      // Only mapping fields that exist in actual database schema
-    };
-
-    const transformed = { ...data };
-    
-    // Transform field names according to standards
-    Object.keys(fieldMapping).forEach(camelKey => {
-      const snakeKey = fieldMapping[camelKey as keyof typeof fieldMapping];
-      if (transformed[camelKey] !== undefined) {
-        transformed[snakeKey] = transformed[camelKey];
-        delete transformed[camelKey];
-      }
-    });
-
-    return transformed;
-  };
-
-  // Helper functions for managing time rows
-  const addTimeRow = () => {
-    if (timeRows.length < 6) {
-      const newId = Math.max(...timeRows.map(row => row.id)) + 1;
-      setTimeRows([...timeRows, { id: newId, eventLabel: '', timeSchedule: '', language: 'english' }]);
-    }
-  };
-
-  const removeTimeRow = (id: number) => {
-    if (timeRows.length > 1) {
-      setTimeRows(timeRows.filter(row => row.id !== id));
-    }
-  };
-
-  const updateTimeRow = (id: number, field: string, value: string) => {
-    setTimeRows(timeRows.map(row => 
-      row.id === id ? { ...row, [field]: value } : row
-    ));
-  };
-
-  // Create community mutation
   const createCommunityMutation = useMutation({
-    mutationFn: async (data: any) => {
-      // Include time rows data as array for backend processing
-      const filteredTimeRows = timeRows.filter(row => 
-        row.eventLabel.trim() || row.timeSchedule.trim()
-      );
-
-      const submissionData = {
-        ...data,
-        website: normalizeWebsiteUrl(data.website),
-        timeRows: filteredTimeRows
-      };
-
-      const normalizedData = transformToSnakeCase(submissionData);
-      
-      // Create FormData for multipart request (to handle logo upload)
-      const formData = new FormData();
-      
-      // Add logo file if selected
-      if (logoFile) {
-        formData.append('logo', logoFile);
-      }
-      
-      // Add all other fields
-      Object.keys(normalizedData).forEach(key => {
-        const value = normalizedData[key];
-        if (value !== null && value !== undefined) {
-          if (typeof value === 'object') {
-            formData.append(key, JSON.stringify(value));
-          } else {
-            formData.append(key, String(value));
-          }
-        }
-      });
-      
-      const response = await fetch("/api/communities", {
-        method: "POST",
-        credentials: 'include',
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        let errorData;
-        const contentType = response.headers.get('content-type');
-        
-        try {
-          if (contentType && contentType.includes('application/json')) {
-            errorData = await response.json();
-          } else {
-            const errorText = await response.text();
-            errorData = { message: errorText };
-          }
-        } catch (parseError) {
-          console.error('Error parsing response:', parseError);
-          errorData = { message: `Server error (${response.status})` };
-        }
-        
-        console.log('Full error data:', errorData);
-        
-        // Handle validation errors with detailed messages
-        if (errorData.details && Array.isArray(errorData.details)) {
-          throw new Error(errorData.message || errorData.details.join('\n• '));
-        } else if (errorData.message) {
-          throw new Error(errorData.message);
-        } else {
-          throw new Error(`Failed to create community (${response.status})`);
-        }
-      }
-      
-      return response.json();
-    },
+    mutationFn: (data: any) => apiRequest('/api/communities', {
+      method: 'POST',
+      body: data,
+    }),
     onSuccess: () => {
       toast({
-        title: "Community created successfully!",
-        description: "Your new community has been created and you are now the administrator.",
+        title: "Success",
+        description: "Community created successfully!",
       });
-      queryClient.invalidateQueries({ queryKey: ["/api/users/communities"] });
       setCreateCommunityOpen(false);
-      createForm.reset();
-      setShowCustomDenomination(false);
-      setLogoFile(null);
-      setLogoPreview("");
-      setTimeRows([{ id: 1, eventLabel: '', timeSchedule: '', language: 'english' }]);
+      queryClient.invalidateQueries({ queryKey: ['/api/user/churches'] });
     },
     onError: (error: any) => {
-      console.error('Community creation error:', error);
       toast({
-        title: "Failed to create community",
-        description: error.message || "Please try again later.",
+        title: "Error",
+        description: error.message || "Failed to create community",
         variant: "destructive",
       });
-    }
+    },
   });
+
+  const handleViewCommunity = (community: UserCommunity) => {
+    setSelectedCommunity(community);
+    setViewCommunityOpen(true);
+  };
+
+  const getRoleColor = (role: string) => {
+    switch (role.toLowerCase()) {
+      case 'owner':
+      case 'creator':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+      case 'lead-pastor':
+      case 'pastor':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'admin':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      case 'elder':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
+      case 'ministry-leader':
+        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300';
+      case 'member':
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'church':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'ministry':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+      case 'group':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+    }
+  };
 
   if (isLoading) {
     return (
@@ -447,60 +150,23 @@ export default function MyCommunities() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Communities</h1>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse">
-              <div className="bg-gray-200 dark:bg-gray-700 rounded-lg h-48"></div>
-            </div>
+            <Card key={i} className="animate-pulse">
+              <CardHeader>
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+              </CardHeader>
+              <CardContent>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full mb-2"></div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>
     );
   }
-
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Communities</h1>
-        </div>
-        <Card>
-          <CardContent className="p-6">
-            <div className="text-center">
-              <Building className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                Unable to load communities
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                There was an issue loading your communities. Please try again later.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case 'church_admin':
-      case 'admin':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
-      case 'pastor':
-      case 'lead-pastor':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'elder':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
-    }
-  };
-
-  const formatRole = (role: string) => {
-    return role.replace('_', ' ').replace('-', ' ').split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  };
 
   return (
     <div className="space-y-6">
@@ -527,697 +193,17 @@ export default function MyCommunities() {
                 </DialogDescription>
               </DialogHeader>
               
-              <Form {...createForm}>
-                <form onSubmit={createForm.handleSubmit((data) => {
-                  // Validate required fields
-                  if (!data.denomination || data.denomination.trim() === '') {
-                    toast({
-                      title: "Validation Error",
-                      description: "Please select a denomination or affiliation.",
-                      variant: "destructive",
-                    });
-                    return;
-                  }
-                  // Weekly attendance only required for churches
-                  if (data.type === 'church' && (!data.weeklyAttendance || data.weeklyAttendance.trim() === '')) {
-                    toast({
-                      title: "Validation Error", 
-                      description: "Please select weekly attendance for churches.",
-                      variant: "destructive",
-                    });
-                    return;
-                  }
-                  
+              <CommunityForm
+                mode="create"
+                onSubmit={(data) => {
                   createCommunityMutation.mutate(data);
-                })} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={createForm.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Community Name *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="First Baptist Church" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createForm.control}
-                      name="type"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Community Type</FormLabel>
-                          <Select onValueChange={(value) => {
-                            field.onChange(value);
-                            createForm.setValue("denomination", "");
-                            setShowCustomDenomination(false);
-                          }} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="church">Church</SelectItem>
-                              <SelectItem value="ministry">Ministry</SelectItem>
-                              <SelectItem value="group">Group</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createForm.control}
-                      name="denomination"
-                      render={({ field }) => {
-                        const currentAffiliations = AFFILIATIONS[selectedType] || AFFILIATIONS.church;
-                        
-                        return (
-                          <FormItem>
-                            <FormLabel>
-                              {selectedType === 'church' ? 'Denomination *' : selectedType === 'ministry' ? 'Ministry Type *' : 'Group Type *'}
-                            </FormLabel>
-                            <Select onValueChange={(value) => {
-                              if (value === "other") {
-                                setShowCustomDenomination(true);
-                                field.onChange("");
-                              } else {
-                                setShowCustomDenomination(false);
-                                field.onChange(value);
-                              }
-                            }} value={showCustomDenomination ? "other" : field.value || ""}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder={
-                                    selectedType === 'church' 
-                                      ? "Select denomination"
-                                      : selectedType === 'group'
-                                      ? "Select group type"
-                                      : "Select ministry type"
-                                  } />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent className="max-h-60 overflow-y-auto">
-                                {currentAffiliations.map((affiliation) => (
-                                  <SelectItem key={affiliation} value={affiliation}>
-                                    {affiliation}
-                                  </SelectItem>
-                                ))}
-                                <SelectItem value="other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            {showCustomDenomination && (
-                              <FormControl>
-                                <Input
-                                  placeholder={
-                                    selectedType === 'church' 
-                                      ? "Enter custom denomination..."
-                                      : selectedType === 'group'
-                                      ? "Enter custom group type..."
-                                      : "Enter custom ministry type..."
-                                  }
-                                  value={field.value || ""}
-                                  onChange={(e) => field.onChange(e.target.value)}
-                                  className="mt-2"
-                                />
-                              </FormControl>
-                            )}
-                            <FormMessage />
-                          </FormItem>
-                        );
-                      }}
-                    />
-
-                    <FormField
-                      control={createForm.control}
-                      name="privacySetting"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>🔒 Privacy Setting *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select privacy level" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="public">🌍 Public - Anyone can find and view this community</SelectItem>
-                              <SelectItem value="private">🔒 Private - Invite only, hidden from search results</SelectItem>
-                              <SelectItem value="church_members_only">⛪ Church Members Only - Only verified church members can join</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Privacy Controls - Only for Ministry and Group types */}
-                    {selectedType === 'Ministry' || selectedType === 'Group' ? (
-                      <div className="col-span-2 space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border">
-                        <div className="space-y-2">
-                          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Privacy Controls</h4>
-                          <p className="text-xs text-gray-600 dark:text-gray-400">
-                            Address and phone information will still be collected but hidden from non-admin members.
-                          </p>
-                        </div>
-                        
-                        <FormField
-                          control={createForm.control}
-                          name="hideAddress"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <input
-                                  type="checkbox"
-                                  checked={field.value || false}
-                                  onChange={field.onChange}
-                                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                />
-                              </FormControl>
-                              <div className="space-y-1 leading-none">
-                                <FormLabel className="text-sm font-normal text-gray-700 dark:text-gray-300">
-                                  Hide address from public view
-                                </FormLabel>
-                              </div>
-                            </FormItem>
-                          )}
-                        />
-                        
-                        <FormField
-                          control={createForm.control}
-                          name="hidePhone"
-                          render={({ field }) => (
-                            <FormItem className="flex flex-row items-center space-x-3 space-y-0">
-                              <FormControl>
-                                <input
-                                  type="checkbox"
-                                  checked={field.value || false}
-                                  onChange={field.onChange}
-                                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                />
-                              </FormControl>
-                              <div className="space-y-1 leading-none">
-                                <FormLabel className="text-sm font-normal text-gray-700 dark:text-gray-300">
-                                  Hide phone number from public view
-                                </FormLabel>
-                              </div>
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    ) : null}
-
-                    <FormField
-                      control={createForm.control}
-                      name="address"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Address *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="123 Main Street" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createForm.control}
-                      name="city"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>City *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Los Angeles" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createForm.control}
-                      name="state"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>State *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="CA" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createForm.control}
-                      name="zipCode"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Zip Code *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="90210" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createForm.control}
-                      name="adminEmail"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Admin Email *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="pastor@church.org" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createForm.control}
-                      name="adminPhone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Admin Phone</FormLabel>
-                          <FormControl>
-                            <Input placeholder="(555) 123-4567" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createForm.control}
-                      name="website"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Website</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://www.church.org" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Logo Upload Section */}
-                    <div className="col-span-2">
-                      <FormLabel>📸 Community Logo</FormLabel>
-                      <div className="mt-2 space-y-3">
-                        {logoPreview ? (
-                          <div className="relative w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden">
-                            <img src={logoPreview} alt="Logo preview" className="w-full h-full object-cover" />
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setLogoFile(null);
-                                setLogoPreview("");
-                              }}
-                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="w-full border-2 border-dashed border-gray-300 rounded-lg p-6">
-                            <div className="text-center">
-                              <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                              <div className="mt-4">
-                                <label htmlFor="logo-upload" className="cursor-pointer">
-                                  <span className="mt-2 block text-sm font-medium text-gray-900 dark:text-white">
-                                    Upload a logo
-                                  </span>
-                                  <span className="text-sm text-gray-500">PNG, JPG up to 5MB</span>
-                                </label>
-                                <input
-                                  id="logo-upload"
-                                  name="logo-upload"
-                                  type="file"
-                                  className="sr-only"
-                                  accept="image/*"
-                                  onChange={handleLogoChange}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <FormField
-                      control={createForm.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Description</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Tell us about your community..."
-                              rows={3}
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createForm.control}
-                      name="establishedYear"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Established Year</FormLabel>
-                          <FormControl>
-                            <Input type="number" placeholder="2020" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Weekly Attendance - Only for Churches */}
-                    {selectedType === 'church' && (
-                      <FormField
-                        control={createForm.control}
-                        name="weeklyAttendance"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>👥 Weekly Attendance *</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select attendance size" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {WEEKLY_ATTENDANCE_OPTIONS.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
-
-                    <FormField
-                      control={createForm.control}
-                      name="parentChurchName"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Parent Church (if applicable)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Main Campus Church Name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={createForm.control}
-                      name="missionStatement"
-                      render={({ field }) => (
-                        <FormItem className="col-span-2">
-                          <FormLabel>Mission Statement</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Our mission is to..."
-                              rows={3}
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    {/* Social Media Section */}
-                    <div className="col-span-2">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
-                        Social Media
-                      </h3>
-                      <div className="grid grid-cols-2 gap-4">
-                        <FormField
-                          control={createForm.control}
-                          name="facebookUrl"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Facebook URL</FormLabel>
-                              <FormControl>
-                                <Input placeholder="https://facebook.com/community" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={createForm.control}
-                          name="instagramUrl"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Instagram URL</FormLabel>
-                              <FormControl>
-                                <Input placeholder="https://instagram.com/community" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={createForm.control}
-                          name="twitterUrl"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Twitter (X) URL</FormLabel>
-                              <FormControl>
-                                <Input placeholder="https://x.com/community" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={createForm.control}
-                          name="tiktokUrl"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>TikTok URL</FormLabel>
-                              <FormControl>
-                                <Input placeholder="https://tiktok.com/@community" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={createForm.control}
-                          name="youtubeUrl"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>YouTube URL</FormLabel>
-                              <FormControl>
-                                <Input placeholder="https://youtube.com/@community" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={createForm.control}
-                          name="linkedinUrl"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>LinkedIn URL</FormLabel>
-                              <FormControl>
-                                <Input placeholder="https://linkedin.com/company/community" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-                    </div>
-
-
-
-                    {/* Service Times Section - Only for Churches */}
-                    {selectedType === 'church' && (
-                      <>
-                        <div className="col-span-2">
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
-                            Service Times
-                          </h3>
-                        </div>
-
-                        <FormField
-                          control={createForm.control}
-                          name="officeHours"
-                          render={({ field }) => (
-                            <FormItem className="col-span-2">
-                              <FormLabel>🕒 Office Hours (Auto-filled by denomination)</FormLabel>
-                              <FormControl>
-                                <Textarea 
-                                  placeholder="Mon-Fri 9AM-4PM"
-                                  rows={2}
-                                  {...field} 
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={createForm.control}
-                          name="worshipTimes"
-                          render={({ field }) => (
-                            <FormItem className="col-span-2">
-                              <FormLabel>⛪ Worship Times (Auto-filled by denomination)</FormLabel>
-                              <FormControl>
-                                <Textarea 
-                                  placeholder="Sunday: 9AM & 11AM"
-                                  rows={3}
-                                  {...field} 
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </>
-                    )}
-
-                    {/* Dynamic Service Times Section */}
-                    <div className="col-span-2">
-                      <div className="flex items-center gap-4 mb-4">
-                        <h3 className="text-lg font-semibold">Additional Times</h3>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        {timeRows.map((row, index) => (
-                          <div key={row.id} className="grid grid-cols-12 gap-3 items-end">
-                            {/* Event/Time Label */}
-                            <div className="col-span-4">
-                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Event/Time Label
-                              </label>
-                              <Input
-                                placeholder="e.g., Sunday Service, Youth Group"
-                                value={row.eventLabel}
-                                onChange={(e) => updateTimeRow(row.id, 'eventLabel', e.target.value)}
-                              />
-                            </div>
-                            
-                            {/* Time/Schedule */}
-                            <div className="col-span-4">
-                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Time/Schedule
-                              </label>
-                              <Input
-                                placeholder="e.g., Sunday 10:00 AM"
-                                value={row.timeSchedule}
-                                onChange={(e) => updateTimeRow(row.id, 'timeSchedule', e.target.value)}
-                              />
-                            </div>
-                            
-                            {/* Language */}
-                            <div className="col-span-3">
-                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                Language
-                              </label>
-                              <Select 
-                                value={row.language} 
-                                onValueChange={(value) => updateTimeRow(row.id, 'language', value)}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {LANGUAGE_OPTIONS.map((option) => (
-                                    <SelectItem key={option.value} value={option.value}>
-                                      {option.label}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            
-                            {/* Remove Button */}
-                            <div className="col-span-1">
-                              {timeRows.length > 1 && (
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => removeTimeRow(row.id)}
-                                  className="h-9 w-9 p-0"
-                                >
-                                  <X className="h-4 w-4" />
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                        
-                        {/* Add Another Row Button */}
-                        {timeRows.length < 6 && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={addTimeRow}
-                            className="w-full mt-3"
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Another Date/Time
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-
-                  </div>
-
-                  <div className="flex justify-end gap-3 pt-4">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => {
-                        setCreateCommunityOpen(false);
-                        createForm.reset();
-                        setShowCustomDenomination(false);
-                        setLogoFile(null);
-                        setLogoPreview("");
-                        setTimeRows([{ id: 1, eventLabel: '', timeSchedule: '', language: 'english' }]);
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit" disabled={createCommunityMutation.isPending}>
-                      {createCommunityMutation.isPending ? "Creating..." : "Create Community"}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
+                }}
+                onCancel={() => {
+                  setCreateCommunityOpen(false);
+                }}
+                isLoading={createCommunityMutation.isPending}
+                submitButtonText="Create Community"
+              />
             </DialogContent>
           </Dialog>
         </div>
@@ -1225,361 +211,247 @@ export default function MyCommunities() {
 
       {userCommunities.length === 0 ? (
         <Card>
-          <CardContent className="p-8">
-            <div className="text-center">
-              <Building className="h-16 w-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                No Communities Yet
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                You haven't joined any communities yet. Discover and connect with faith communities in your area.
-              </p>
-              <div className="flex gap-3 justify-center">
-                <Button 
-                  onClick={() => {
-                    // Scroll to the community discovery section
-                    const discoverySection = document.querySelector('#community-discovery');
-                    if (discoverySection) {
-                      discoverySection.scrollIntoView({ behavior: 'smooth' });
-                    }
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Join a Community
-                </Button>
-              </div>
+          <CardHeader>
+            <CardTitle>No Communities Yet</CardTitle>
+            <CardDescription>
+              You haven't joined any communities yet. Create your first community or discover existing ones to join.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-3">
+              <Button onClick={() => setCreateCommunityOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Community
+              </Button>
             </div>
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-8">
+        <>
           {/* Churches Section */}
-          {userCommunities.filter(c => c.type === 'church').length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Churches</h3>
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                  {userCommunities.filter(c => c.type === 'church').length}
-                </Badge>
-              </div>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {userCommunities.filter(c => c.type === 'church').sort((a, b) => a.name.localeCompare(b.name)).map((community) => (
-                  <Card key={community.id} className="hover:shadow-lg transition-shadow border-2 border-blue-200 dark:border-blue-800">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Churches
+              </h2>
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                {userCommunities.filter(c => c.type === 'church').length}
+              </Badge>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {userCommunities
+                .filter(community => community.type === 'church')
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((community) => (
+                  <Card key={community.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          {community.logoUrl ? (
-                            <img 
-                              src={community.logoUrl} 
-                              alt={`${community.name} logo`}
-                              className="w-12 h-12 rounded-lg object-cover"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                              <Building className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <CardTitle className="text-lg leading-6 truncate">
-                              {community.name}
-                            </CardTitle>
-                            <CardDescription>
-                              {community.denomination}
-                            </CardDescription>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            {community.logoUrl && (
+                              <img 
+                                src={community.logoUrl} 
+                                alt={`${community.name} logo`}
+                                className="w-8 h-8 rounded object-contain"
+                              />
+                            )}
+                            <CardTitle className="text-lg">{community.name}</CardTitle>
                           </div>
+                          <CardDescription className="text-sm">
+                            {community.denomination} • {community.city}, {community.state}
+                          </CardDescription>
                         </div>
-                        <Badge className={getRoleBadgeColor(community.role)}>
-                          {formatRole(community.role)}
-                        </Badge>
+                        <div className="flex flex-col gap-1">
+                          <Badge className={getTypeColor(community.type)}>
+                            {community.type}
+                          </Badge>
+                          <Badge className={getRoleColor(community.role)}>
+                            {community.role}
+                          </Badge>
+                        </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <MapPin className="h-4 w-4 flex-shrink-0" />
-                          <span className="truncate">
-                            {community.city}, {community.state}
-                          </span>
-                        </div>
-                        {community.memberCount && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                            <Users className="h-4 w-4 flex-shrink-0" />
-                            <span>{community.memberCount} members</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {community.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                          {community.description}
-                        </p>
-                      )}
-
-                      <div className="flex gap-2 pt-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                    <CardContent className="pt-0">
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewCommunity(community)}
                           className="flex-1"
-                          onClick={() => {
-                            setSelectedCommunityId(community.id.toString());
-                            setViewDialogOpen(true);
-                          }}
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
                         </Button>
-                        {(community.role === 'church_admin' || community.role === 'admin' || community.role === 'pastor' || community.role === 'lead-pastor' || community.role === 'elder') && (
-                          <>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => {
-                                window.location.href = `/community-administration?communityId=${community.id}`;
-                              }}
-                            >
-                              <Settings className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleDeleteCommunity(community.id)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </>
+                        {(community.role === 'admin' || community.role === 'pastor' || 
+                          community.role === 'lead-pastor' || community.role === 'elder' || 
+                          community.role === 'church_admin') && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.location.href = '/admin?tab=community-admin'}
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
                         )}
                       </div>
                     </CardContent>
                   </Card>
                 ))}
-              </div>
             </div>
-          )}
+          </div>
 
           {/* Ministries Section */}
-          {userCommunities.filter(c => c.type === 'ministry').length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Ministries</h3>
-                <Badge variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                  {userCommunities.filter(c => c.type === 'ministry').length}
-                </Badge>
-              </div>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {userCommunities.filter(c => c.type === 'ministry').sort((a, b) => a.name.localeCompare(b.name)).map((community) => (
-                  <Card key={community.id} className="hover:shadow-lg transition-shadow border-2 border-purple-200 dark:border-purple-800">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Ministries
+              </h2>
+              <Badge variant="secondary" className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">
+                {userCommunities.filter(c => c.type === 'ministry').length}
+              </Badge>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {userCommunities
+                .filter(community => community.type === 'ministry')
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((community) => (
+                  <Card key={community.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          {community.logoUrl ? (
-                            <img 
-                              src={community.logoUrl} 
-                              alt={`${community.name} logo`}
-                              className="w-12 h-12 rounded-lg object-cover"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                              <Building className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <CardTitle className="text-lg leading-6 truncate">
-                              {community.name}
-                            </CardTitle>
-                            <CardDescription>
-                              {community.denomination}
-                            </CardDescription>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            {community.logoUrl && (
+                              <img 
+                                src={community.logoUrl} 
+                                alt={`${community.name} logo`}
+                                className="w-8 h-8 rounded object-contain"
+                              />
+                            )}
+                            <CardTitle className="text-lg">{community.name}</CardTitle>
                           </div>
+                          <CardDescription className="text-sm">
+                            {community.denomination} • {community.city}, {community.state}
+                          </CardDescription>
                         </div>
-                        <Badge className={getRoleBadgeColor(community.role)}>
-                          {formatRole(community.role)}
-                        </Badge>
+                        <div className="flex flex-col gap-1">
+                          <Badge className={getTypeColor(community.type)}>
+                            {community.type}
+                          </Badge>
+                          <Badge className={getRoleColor(community.role)}>
+                            {community.role}
+                          </Badge>
+                        </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <MapPin className="h-4 w-4 flex-shrink-0" />
-                          <span className="truncate">
-                            {community.city}, {community.state}
-                          </span>
-                        </div>
-                        {community.memberCount && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                            <Users className="h-4 w-4 flex-shrink-0" />
-                            <span>{community.memberCount} members</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {community.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                          {community.description}
-                        </p>
-                      )}
-
-                      <div className="flex gap-2 pt-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                    <CardContent className="pt-0">
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewCommunity(community)}
                           className="flex-1"
-                          onClick={() => {
-                            setSelectedCommunityId(community.id.toString());
-                            setViewDialogOpen(true);
-                          }}
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
                         </Button>
-                        {(community.role === 'church_admin' || community.role === 'admin' || community.role === 'pastor' || community.role === 'lead-pastor' || community.role === 'elder') && (
-                          <>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => {
-                                window.location.href = `/community-administration?communityId=${community.id}`;
-                              }}
-                            >
-                              <Settings className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleDeleteCommunity(community.id)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </>
+                        {(community.role === 'admin' || community.role === 'pastor' || 
+                          community.role === 'lead-pastor' || community.role === 'elder' || 
+                          community.role === 'church_admin') && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.location.href = '/admin?tab=community-admin'}
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
                         )}
                       </div>
                     </CardContent>
                   </Card>
                 ))}
-              </div>
             </div>
-          )}
+          </div>
 
           {/* Groups Section */}
-          {userCommunities.filter(c => c.type === 'group').length > 0 && (
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Groups</h3>
-                <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                  {userCommunities.filter(c => c.type === 'group').length}
-                </Badge>
-              </div>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {userCommunities.filter(c => c.type === 'group').sort((a, b) => a.name.localeCompare(b.name)).map((community) => (
-                  <Card key={community.id} className="hover:shadow-lg transition-shadow border-2 border-green-200 dark:border-green-800">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Groups
+              </h2>
+              <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
+                {userCommunities.filter(c => c.type === 'group').length}
+              </Badge>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {userCommunities
+                .filter(community => community.type === 'group')
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((community) => (
+                  <Card key={community.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-3">
-                          {community.logoUrl ? (
-                            <img 
-                              src={community.logoUrl} 
-                              alt={`${community.name} logo`}
-                              className="w-12 h-12 rounded-lg object-cover"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                              <Building className="h-6 w-6 text-green-600 dark:text-green-400" />
-                            </div>
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <CardTitle className="text-lg leading-6 truncate">
-                              {community.name}
-                            </CardTitle>
-                            <CardDescription>
-                              {community.denomination}
-                            </CardDescription>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            {community.logoUrl && (
+                              <img 
+                                src={community.logoUrl} 
+                                alt={`${community.name} logo`}
+                                className="w-8 h-8 rounded object-contain"
+                              />
+                            )}
+                            <CardTitle className="text-lg">{community.name}</CardTitle>
                           </div>
+                          <CardDescription className="text-sm">
+                            {community.denomination} • {community.city}, {community.state}
+                          </CardDescription>
                         </div>
-                        <Badge className={getRoleBadgeColor(community.role)}>
-                          {formatRole(community.role)}
-                        </Badge>
+                        <div className="flex flex-col gap-1">
+                          <Badge className={getTypeColor(community.type)}>
+                            {community.type}
+                          </Badge>
+                          <Badge className={getRoleColor(community.role)}>
+                            {community.role}
+                          </Badge>
+                        </div>
                       </div>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                          <MapPin className="h-4 w-4 flex-shrink-0" />
-                          <span className="truncate">
-                            {community.city}, {community.state}
-                          </span>
-                        </div>
-                        {community.memberCount && (
-                          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                            <Users className="h-4 w-4 flex-shrink-0" />
-                            <span>{community.memberCount} members</span>
-                          </div>
-                        )}
-                      </div>
-                      
-                      {community.description && (
-                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                          {community.description}
-                        </p>
-                      )}
-
-                      <div className="flex gap-2 pt-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                    <CardContent className="pt-0">
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewCommunity(community)}
                           className="flex-1"
-                          onClick={() => {
-                            setSelectedCommunityId(community.id.toString());
-                            setViewDialogOpen(true);
-                          }}
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
                         </Button>
-                        {(community.role === 'church_admin' || community.role === 'admin' || community.role === 'pastor' || community.role === 'lead-pastor' || community.role === 'elder') && (
-                          <>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => {
-                                window.location.href = `/community-administration?communityId=${community.id}`;
-                              }}
-                            >
-                              <Settings className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              onClick={() => handleDeleteCommunity(community.id)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </>
+                        {(community.role === 'admin' || community.role === 'pastor' || 
+                          community.role === 'lead-pastor' || community.role === 'elder' || 
+                          community.role === 'church_admin') && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.location.href = '/admin?tab=community-admin'}
+                          >
+                            <Settings className="h-4 w-4" />
+                          </Button>
                         )}
                       </div>
                     </CardContent>
                   </Card>
                 ))}
-              </div>
             </div>
-          )}
-        </div>
+          </div>
+        </>
       )}
-      
+
       {/* Community View Dialog */}
-      {selectedCommunityId && (
+      {selectedCommunity && (
         <CommunityViewDialog
-          isOpen={viewDialogOpen}
-          onClose={() => {
-            setViewDialogOpen(false);
-            setSelectedCommunityId(null);
-          }}
-          communityId={selectedCommunityId}
-          userRole={userCommunities.find(c => c.id.toString() === selectedCommunityId)?.role}
+          community={selectedCommunity}
+          open={viewCommunityOpen}
+          onOpenChange={setViewCommunityOpen}
         />
       )}
     </div>
