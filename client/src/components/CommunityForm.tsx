@@ -515,15 +515,15 @@ export function CommunityForm({
                   <SelectValue placeholder="Select community type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Church">Church</SelectItem>
-                  <SelectItem value="Ministry">Ministry</SelectItem>
-                  <SelectItem value="Group">Group</SelectItem>
+                  <SelectItem value="church">Church</SelectItem>
+                  <SelectItem value="ministry">Ministry</SelectItem>
+                  <SelectItem value="group">Group</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label htmlFor="denomination">
-                {formData.type === 'Church' ? 'Denomination *' : formData.type === 'Ministry' ? 'Ministry Type *' : 'Group Type *'}
+                {formData.type === 'church' ? 'Denomination *' : formData.type === 'ministry' ? 'Ministry Type *' : 'Group Type *'}
               </Label>
               <Select
                 value={formData.denomination}
@@ -532,16 +532,16 @@ export function CommunityForm({
               >
                 <SelectTrigger>
                   <SelectValue placeholder={
-                    formData.type === 'Church' 
+                    formData.type === 'church' 
                       ? "Select denomination"
-                      : formData.type === 'Group'
+                      : formData.type === 'group'
                       ? "Select group type"
                       : "Select ministry type"
                   } />
                 </SelectTrigger>
                 <SelectContent>
-                  {(formData.type === 'Church' ? DENOMINATION_OPTIONS :
-                    formData.type === 'Ministry' ? MINISTRY_TYPE_OPTIONS :
+                  {(formData.type === 'church' ? DENOMINATION_OPTIONS :
+                    formData.type === 'ministry' ? MINISTRY_TYPE_OPTIONS :
                     GROUP_TYPE_OPTIONS).map((option) => (
                     <SelectItem key={option} value={option}>
                       {option}
@@ -553,9 +553,9 @@ export function CommunityForm({
                 <div className="mt-2">
                   <Input
                     placeholder={
-                      formData.type === 'Church' 
+                      formData.type === 'church' 
                         ? "Enter custom denomination..."
-                        : formData.type === 'Group'
+                        : formData.type === 'group'
                         ? "Enter custom group type..."
                         : "Enter custom ministry type..."
                     }
