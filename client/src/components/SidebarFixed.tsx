@@ -223,10 +223,9 @@ export default function SidebarFixed() {
   // Filter groups based on user permissions and admin access
   const visibleGroups = navigationGroups.filter(group => {
     if (group.label === 'ADMIN PORTAL') {
-      // Show admin portal only for users with actual admin access to communities
-      return user && userAdminCommunities?.hasAdminAccess;
+      // Show admin portal for users with actual admin access to communities OR soapbox_owner
+      return user && (userAdminCommunities?.hasAdminAccess || user?.role === 'soapbox_owner' || hasCommunityAdminRole);
     }
-
     
     return true;
   });
@@ -248,7 +247,7 @@ export default function SidebarFixed() {
   };
 
   return (
-    <div className={`${isCollapsed ? 'w-12 sm:w-16' : 'w-48 sm:w-64'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen flex flex-col transition-all duration-300 ${isMobile ? 'fixed z-50' : 'relative'} overflow-hidden`}>
+    <div key={`sidebar-${forceUpdate}`} className={`${isCollapsed ? 'w-12 sm:w-16' : 'w-48 sm:w-64'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen flex flex-col transition-all duration-300 ${isMobile ? 'fixed z-50' : 'relative'} overflow-hidden`}>
       {/* Header with Logo and Actions */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
         {/* Logo and Toggle */}
