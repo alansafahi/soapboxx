@@ -2956,7 +2956,7 @@ export class DatabaseStorage implements IStorage {
         ORDER BY uc.joined_at DESC
       `);
       
-      console.log(`getUserChurches for user ${userId}: Found ${result.rows.length} communities`);
+
       
       return result.rows.map((row: any) => ({
         id: row.id,

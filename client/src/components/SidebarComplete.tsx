@@ -246,21 +246,10 @@ export default function SidebarComplete() {
     window.location.href = '/login';
   };
 
-  // DEBUG: Log component render
-  console.log("🔍 DEBUG: SidebarComplete component is rendering with", {
-    user: user?.firstName,
-    visibleGroups: visibleGroups.map(g => g.label),
-    adminAccess: userAdminCommunities?.hasAdminAccess,
-    hasCommunityAdminRole,
-    userRole: user?.role
-  });
-
   return (
     <div 
       key={`sidebar-complete-${forceUpdate}`} 
       className={`${isCollapsed ? 'w-12 sm:w-16' : 'w-48 sm:w-64'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen flex flex-col transition-all duration-300 ${isMobile ? 'fixed z-50' : 'relative'} overflow-hidden`}
-      onClick={() => console.log("🎯 CLICKED: SidebarComplete component - This is the NEW complete sidebar")}
-      style={{ border: "3px solid red" }}
     >
       {/* Header with Logo and Actions */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
