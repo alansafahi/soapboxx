@@ -8,7 +8,7 @@ import { useImmediateAuth } from "./lib/immediateAuth";
 import { AnimatePresence, motion } from "framer-motion";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
-import SidebarFixed from "./components/SidebarFixed";
+import SidebarComplete from "./components/SidebarComplete";
 import TopHeader from "./components/TopHeader";
 import ChatWidget from "./components/ChatWidget";
 
@@ -125,7 +125,7 @@ function AppRouter() {
         <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
             {isAuthenticated && (
                 <div className="hidden md:block">
-                    <SidebarFixed />
+                    <SidebarComplete />
                 </div>
             )}
             <div className={isAuthenticated ? "flex-1 flex flex-col min-w-0 overflow-hidden" : "flex-1"}>
