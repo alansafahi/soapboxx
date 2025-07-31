@@ -151,6 +151,13 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes  
+- July 30, 2025: PRIVACY CONTROLS FOR MINISTRIES AND GROUPS FULLY IMPLEMENTED - Successfully added comprehensive privacy control system allowing Ministries and Groups to optionally hide address and phone information from public view
+  - PRIVACY DATABASE SCHEMA: Added hideAddress and hidePhone boolean columns to communities table with proper field mapping
+  - PRIVACY FORM CONTROLS: Enhanced CommunityForm.tsx with checkboxes for Ministry and Group types only (not Churches) to control address/phone visibility
+  - BACKEND INTEGRATION: Updated community creation and update routes to process and save privacy settings with proper snake_case database mapping
+  - PUBLIC VIEW PROTECTION: Modified CommunityViewDialog to hide address/phone from non-admin members when privacy settings are enabled
+  - USER-FRIENDLY INTERFACE: Added clear explanatory text that information is still collected but hidden from public view
+  - CONDITIONAL DISPLAY: Privacy controls only appear for Ministry and Group community types maintaining clean UX for different community needs
 - July 30, 2025: COMMUNITY FORM DYNAMIC LABELING IMPLEMENTATION COMPLETED - Successfully updated both community creation and administration forms with context-aware labeling for improved user experience
   - DYNAMIC LABELS IMPLEMENTED: Changed static "Type" to "Community Type" and "Affiliation" to "Ministry Type"/"Group Type" based on selected community type
   - COMMUNITY ADMINISTRATION FIXED: Updated CommunityForm.tsx to use dynamic labels that change based on community type (Church → Denomination, Ministry → Ministry Type, Group → Group Type)

@@ -481,10 +481,10 @@ export function CommunityForm({
                 <SelectTrigger>
                   <SelectValue placeholder={
                     formData.type === 'Church' 
-                      ? "Select denomination or type..."
+                      ? "Select denomination"
                       : formData.type === 'Group'
-                      ? "Select group type or type..."
-                      : "Select ministry type or type..."
+                      ? "Select group type"
+                      : "Select ministry type"
                   } />
                 </SelectTrigger>
                 <SelectContent>
@@ -528,6 +528,43 @@ export function CommunityForm({
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Privacy Controls - Only for Ministry and Group types */}
+            {(formData.type === 'Ministry' || formData.type === 'Group') && (
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Privacy Controls</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="hideAddress"
+                      checked={formData.hideAddress || false}
+                      onChange={(e) => handleInputChange('hideAddress', e.target.checked)}
+                      className="rounded border-gray-300"
+                    />
+                    <Label htmlFor="hideAddress" className="text-sm text-gray-700 dark:text-gray-300">
+                      Hide address from public view
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      id="hidePhone"
+                      checked={formData.hidePhone || false}
+                      onChange={(e) => handleInputChange('hidePhone', e.target.checked)}
+                      className="rounded border-gray-300"
+                    />
+                    <Label htmlFor="hidePhone" className="text-sm text-gray-700 dark:text-gray-300">
+                      Hide phone number from public view
+                    </Label>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  Address and phone information will still be collected but hidden from non-admin members.
+                </p>
+              </div>
+            )}
+
             <div>
               <Label htmlFor="establishedYear">Established Year</Label>
               <Input
