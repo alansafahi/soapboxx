@@ -59,7 +59,9 @@ const createCommunitySchema = z.object({
   youtubeUrl: z.string().optional(),
   linkedinUrl: z.string().optional(),
   officeHours: z.string().optional(),
-  worshipTimes: z.string().optional()
+  worshipTimes: z.string().optional(),
+  hideAddress: z.boolean().optional(),
+  hidePhone: z.boolean().optional()
 });
 
 // Organization-specific affiliation lists
@@ -614,10 +616,10 @@ export default function MyCommunities() {
                                 <SelectTrigger>
                                   <SelectValue placeholder={
                                     selectedType === 'church' 
-                                      ? "Select denomination or type..."
+                                      ? "Select denomination"
                                       : selectedType === 'group'
-                                      ? "Select group type or type..."
-                                      : "Select ministry type or type..."
+                                      ? "Select group type"
+                                      : "Select ministry type"
                                   } />
                                 </SelectTrigger>
                               </FormControl>
@@ -674,6 +676,62 @@ export default function MyCommunities() {
                         </FormItem>
                       )}
                     />
+
+                    {/* Privacy Controls - Only for Ministry and Group types */}
+                    {selectedType === 'Ministry' || selectedType === 'Group' ? (
+                      <div className="col-span-2 space-y-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border">
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Privacy Controls</h4>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">
+                            Address and phone information will still be collected but hidden from non-admin members.
+                          </p>
+                        </div>
+                        
+                        <FormField
+                          control={createForm.control}
+                          name="hideAddress"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <input
+                                  type="checkbox"
+                                  checked={field.value || false}
+                                  onChange={field.onChange}
+                                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel className="text-sm font-normal text-gray-700 dark:text-gray-300">
+                                  Hide address from public view
+                                </FormLabel>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={createForm.control}
+                          name="hidePhone"
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <input
+                                  type="checkbox"
+                                  checked={field.value || false}
+                                  onChange={field.onChange}
+                                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                              </FormControl>
+                              <div className="space-y-1 leading-none">
+                                <FormLabel className="text-sm font-normal text-gray-700 dark:text-gray-300">
+                                  Hide phone number from public view
+                                </FormLabel>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    ) : null}
 
                     <FormField
                       control={createForm.control}
