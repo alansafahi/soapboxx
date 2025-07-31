@@ -683,6 +683,10 @@ export interface IStorage {
   isSoapEntrySaved(soapId: number, userId: string): Promise<boolean>;
   createSoapEntry(entry: any): Promise<any>;
   
+  // SOAP comment operations
+  createSoapComment(comment: { soapId: number; authorId: string; content: string; parentId?: number | null }): Promise<any>;
+  getSoapComments(soapId: number): Promise<any[]>;
+  
   // AI Scripture History operations for preventing repetition
   getRecentUserScriptures(userId: string, days?: number): Promise<string[]>;
   recordUserScripture(userId: string, scriptureReference: string): Promise<void>;
@@ -5452,7 +5456,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // SOAP comment operations implementation
-  async createSoapComment(comment: { soapId: number; authorId: string; content: string }): Promise<any> {
+  async createSoapComment(comment: { soapId: number; authorId: string; content: string; parentId?: number | null }): Promise<any> {
     try {
       const [newComment] = await db
         .insert(soapComments)
@@ -5460,6 +5464,7 @@ export class DatabaseStorage implements IStorage {
           soapId: comment.soapId,
           authorId: comment.authorId,
           content: comment.content,
+          parentId: comment.parentId || null, // Support threaded replies
           createdAt: new Date(),
           updatedAt: new Date(),
           likeCount: 0
@@ -5489,6 +5494,7 @@ export class DatabaseStorage implements IStorage {
           soapId: soapComments.soapId,
           authorId: soapComments.authorId,
           content: soapComments.content,
+          parentId: soapComments.parentId, // Include parentId for threading
           likeCount: soapComments.likeCount,
           createdAt: soapComments.createdAt,
           updatedAt: soapComments.updatedAt,
@@ -5505,6 +5511,7 @@ export class DatabaseStorage implements IStorage {
         soapId: comment.soapId,
         authorId: comment.authorId,
         content: comment.content,
+        parentId: comment.parentId, // Include parentId for threading
         likeCount: comment.likeCount || 0,
         createdAt: comment.createdAt || new Date(),
         updatedAt: comment.updatedAt || new Date(),

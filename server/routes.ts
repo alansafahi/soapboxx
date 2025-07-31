@@ -632,7 +632,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/soap-entries/reactions", isAuthenticated, async (req: any, res) => {
     try {
       const { soapId, reactionType, emoji } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
 
       // Toggle reaction to SOAP entry
       const result = await storage.addSoapReaction(soapId, userId, reactionType, emoji);
@@ -9738,7 +9742,7 @@ Return JSON with this exact structure:
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
       const soapId = parseInt(req.params.id);
-      const { content } = req.body;
+      const { content, parentId } = req.body; // Add parentId support for threaded replies
       
       if (!content || !content.trim()) {
         return res.status(400).json({ success: false, message: "Comment content is required" });
@@ -9747,7 +9751,8 @@ Return JSON with this exact structure:
       const comment = await storage.createSoapComment({
         soapId,
         authorId: userId,
-        content: content.trim()
+        content: content.trim(),
+        parentId: parentId || null // Support for threaded replies
       });
       
       res.status(201).json({ success: true, data: comment });
