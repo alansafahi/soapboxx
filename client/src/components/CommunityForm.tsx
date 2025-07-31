@@ -483,7 +483,8 @@ export function CommunityForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="bg-white dark:bg-gray-800 text-black dark:text-white p-4">
+      <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Basic Information */}
         <Card>
@@ -1116,5 +1117,6 @@ export function CommunityForm({
         </Button>
       </div>
     </form>
+    </div>
   );
 }
