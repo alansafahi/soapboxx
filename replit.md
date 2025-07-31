@@ -57,3 +57,12 @@ Focus on functionality over technical implementation details.
 - **Solution**: Created complete SidebarComplete.tsx component and updated TopHeader.tsx mobile navigation
 - **Features Restored**: Staff Management, Member Management, Volunteer Management, Background Check Management, Reading Plans, Saved Reflections, Bookmarked Prayers, Engagement Board
 - **Impact**: Complete feature access across desktop and mobile interfaces
+
+### Dropdown Menu Z-Index Fix (July 31, 2025)
+- **Issue Resolved**: Fixed dropdown menus not appearing properly in social feed posts and SOAP journal entries when dialogs are open
+- **Root Cause**: Dropdown menus (z-50) were being covered by dialog overlays (z-50), causing z-index conflicts
+- **Solution**: Updated UI components to use higher z-index values:
+  - DropdownMenuContent: z-50 → z-[60]
+  - DropdownMenuSubContent: z-50 → z-[60]  
+  - SelectContent: z-50 → z-[60]
+- **Impact**: All dropdown menus now properly appear above dialog modals, improving user interaction flow
