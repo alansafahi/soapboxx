@@ -92,6 +92,46 @@ const DENOMINATION_OPTIONS = [
   "Interfaith", "Emerging Church", "House Church", "Multi-denominational", "Other"
 ];
 
+const MINISTRY_TYPE_OPTIONS = [
+  // Age-Based Ministries
+  "Children's Ministry", "Youth Ministry", "Young Adults Ministry", "Senior Adults Ministry",
+  // Life Stage Ministries
+  "Singles Ministry", "Marriage Ministry", "Men's Ministry", "Women's Ministry", "Family Ministry",
+  // Service Ministries
+  "Worship Ministry", "Music Ministry", "Prayer Ministry", "Discipleship Ministry", "Small Groups",
+  // Outreach Ministries
+  "Evangelism Ministry", "Missions Ministry", "Community Outreach", "Food Ministry", "Homeless Ministry",
+  // Support Ministries
+  "Counseling Ministry", "Recovery Ministry", "Grief Support", "Financial Ministry", "Health Ministry",
+  // Educational Ministries
+  "Bible Study Ministry", "Christian Education", "Vacation Bible School", "Sunday School", "Seminary",
+  // Creative Ministries
+  "Drama Ministry", "Arts Ministry", "Media Ministry", "Creative Writing", "Photography Ministry",
+  // Practical Ministries
+  "Hospitality Ministry", "Facilities Ministry", "Transportation Ministry", "Technology Ministry", "Security Ministry",
+  // Other
+  "Multi-Ministry", "Other"
+];
+
+const GROUP_TYPE_OPTIONS = [
+  // Bible Study Groups
+  "Bible Study Group", "Small Group", "Life Group", "Cell Group", "Home Group",
+  // Age-Based Groups
+  "Youth Group", "College Group", "Young Adult Group", "Senior Group", "Children's Group",
+  // Interest-Based Groups
+  "Men's Group", "Women's Group", "Couples Group", "Singles Group", "Parents Group",
+  // Study Groups
+  "Book Club", "Theology Study", "Discipleship Group", "New Members Group", "Baptism Class",
+  // Support Groups
+  "Recovery Group", "Grief Support Group", "Prayer Group", "Accountability Group", "Mentorship Group",
+  // Service Groups
+  "Mission Team", "Volunteer Team", "Worship Team", "Outreach Team", "Community Service Group",
+  // Fellowship Groups
+  "Fellowship Group", "Social Group", "Activity Group", "Hobby Group", "Sports Group",
+  // Other
+  "Multi-Purpose Group", "Other"
+];
+
 const WEEKLY_ATTENDANCE_OPTIONS = [
   { value: "micro", label: "Micro (1-10 people)" },
   { value: "small", label: "Small (11-50 people)" },
@@ -371,7 +411,19 @@ export function CommunityForm({
   };
 
   const handleInputChange = (field: keyof CommunityFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const updated = {
+        ...prev,
+        [field]: value
+      };
+      
+      // Clear denomination when community type changes
+      if (field === 'type') {
+        updated.denomination = '';
+      }
+      
+      return updated;
+    });
     
     // Real-time validation for specific fields
     if (typeof value === 'string') {
@@ -488,9 +540,11 @@ export function CommunityForm({
                   } />
                 </SelectTrigger>
                 <SelectContent>
-                  {DENOMINATION_OPTIONS.map((denomination) => (
-                    <SelectItem key={denomination} value={denomination}>
-                      {denomination}
+                  {(formData.type === 'Church' ? DENOMINATION_OPTIONS :
+                    formData.type === 'Ministry' ? MINISTRY_TYPE_OPTIONS :
+                    GROUP_TYPE_OPTIONS).map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
                     </SelectItem>
                   ))}
                 </SelectContent>
