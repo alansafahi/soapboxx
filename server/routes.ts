@@ -649,7 +649,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/soap-entries/reflect", isAuthenticated, async (req: any, res) => {
     try {
       const { originalSoapId, scripture, scriptureReference } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
 
       // Create a personal reflection template with only scripture and reference
       // Use placeholder text to satisfy schema requirements while encouraging personal reflection
@@ -670,14 +674,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ success: true });
     } catch (error: any) {
-      res.status(500).json({ error: error.message });
+      console.error("Error creating reflection:", error);
+      res.status(500).json({ error: error.message || "Failed to create reflection" });
     }
   });
 
   app.post("/api/soap-entries/save", isAuthenticated, async (req: any, res) => {
     try {
       const { soapId } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
 
       // Save SOAP entry to user's collection
       await storage.saveSoapEntry(soapId, userId);
