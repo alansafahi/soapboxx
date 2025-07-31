@@ -412,6 +412,8 @@ export function CommunityForm({
   };
 
   const handleInputChange = (field: keyof CommunityFormData, value: any) => {
+    console.log(`Form field ${field} updating to:`, value);
+    
     setFormData(prev => {
       const updated = {
         ...prev,
@@ -423,6 +425,7 @@ export function CommunityForm({
         updated.denomination = '';
       }
       
+      console.log('Updated form data state:', updated);
       return updated;
     });
     
@@ -482,6 +485,8 @@ export function CommunityForm({
       logoFile: logoFile || undefined
     } as any);
   };
+
+  console.log('CommunityForm render - current formData:', formData);
 
   return (
     <div className="w-full h-full bg-white dark:bg-gray-800 text-black dark:text-white">
