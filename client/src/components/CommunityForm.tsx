@@ -506,20 +506,21 @@ export function CommunityForm({
             </div>
             <div>
               <Label htmlFor="type">Community Type *</Label>
-              <Select
+              <select
+                id="type"
                 value={formData.type}
-                onValueChange={(value) => handleInputChange('type', value)}
+                onChange={(e) => {
+                  console.log('Community Type selected:', e.target.value);
+                  handleInputChange('type', e.target.value);
+                }}
                 required
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
               >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select community type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="church">Church</SelectItem>
-                  <SelectItem value="ministry">Ministry</SelectItem>
-                  <SelectItem value="group">Group</SelectItem>
-                </SelectContent>
-              </Select>
+                <option value="">Select community type</option>
+                <option value="church">Church</option>  
+                <option value="ministry">Ministry</option>
+                <option value="group">Group</option>
+              </select>
             </div>
             <div>
               <Label htmlFor="denomination">
