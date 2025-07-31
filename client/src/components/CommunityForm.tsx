@@ -498,12 +498,17 @@ export function CommunityForm({
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="name">Community Name *</Label>
-              <Input
+              <input
                 id="name"
+                type="text"
                 required
                 value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                onChange={(e) => {
+                  console.log('Name input changed:', e.target.value);
+                  handleInputChange('name', e.target.value);
+                }}
                 placeholder="First Baptist Church"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
             <div>

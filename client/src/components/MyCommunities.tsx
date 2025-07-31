@@ -185,8 +185,12 @@ export default function MyCommunities() {
                 Create A Community
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto z-[60] bg-white dark:bg-gray-900 text-black dark:text-white border-2 border-gray-300 dark:border-gray-600" 
-              style={{ position: 'relative', zIndex: 60 }}>
+            <DialogContent 
+              className="max-w-4xl max-h-[95vh] overflow-y-auto z-[60] bg-white dark:bg-gray-900 text-black dark:text-white border-2 border-gray-300 dark:border-gray-600"
+              onPointerDownOutside={(e) => {
+                console.log('Pointer down outside detected');
+                e.preventDefault();
+              }}>
               <DialogHeader>
                 <DialogTitle className="text-black dark:text-white">Create A New Community</DialogTitle>
                 <DialogDescription className="text-gray-600 dark:text-gray-300">
