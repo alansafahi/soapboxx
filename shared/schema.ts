@@ -748,6 +748,11 @@ export const discussions = pgTable("discussions", {
   pinCategory: varchar("pin_category", { length: 30 }), // 'announcement', 'sermon', 'weekly_encouragement', 'call_to_action'
   likeCount: integer("like_count").default(0),
   commentCount: integer("comment_count").default(0),
+  // Content moderation fields
+  isHidden: boolean("is_hidden").default(false), // Hidden by moderation
+  hiddenReason: varchar("hidden_reason", { length: 255 }), // Reason for hiding
+  hiddenBy: varchar("hidden_by").references(() => users.id), // Who hid the content
+  hiddenAt: timestamp("hidden_at"), // When it was hidden
   // Data expiration privacy fields
   expiresAt: timestamp("expires_at"), // When content should be hidden for privacy
   expiredAt: timestamp("expired_at"), // When content was actually marked as expired (soft deletion)
@@ -802,6 +807,11 @@ export const prayerRequests = pgTable("prayer_requests", {
   expiredAt: timestamp("expired_at"), // When content was actually marked as expired (soft deletion)
   allowsExpiration: boolean("allows_expiration").default(false), // User permission for content expiration
   expirationReminderSent: boolean("expiration_reminder_sent").default(false), // Track reminder notifications
+  // Content moderation fields
+  isHidden: boolean("is_hidden").default(false), // Hidden by moderation
+  hiddenReason: varchar("hidden_reason", { length: 255 }), // Reason for hiding
+  hiddenBy: varchar("hidden_by").references(() => users.id), // Who hid the content
+  hiddenAt: timestamp("hidden_at"), // When it was hidden
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1294,6 +1304,11 @@ export const soapEntries = pgTable("soap_entries", {
   featuredBy: varchar("featured_by").references(() => users.id),
   featuredAt: timestamp("featured_at"),
   commentCount: integer("comment_count").default(0), // Track comment count
+  // Content moderation fields
+  isHidden: boolean("is_hidden").default(false), // Hidden by moderation
+  hiddenReason: varchar("hidden_reason", { length: 255 }), // Reason for hiding
+  hiddenBy: varchar("hidden_by").references(() => users.id), // Who hid the content
+  hiddenAt: timestamp("hidden_at"), // When it was hidden
   // Data expiration privacy fields
   expiresAt: timestamp("expires_at"), // When content should be hidden for privacy
   allowsExpiration: boolean("allows_expiration").default(false), // Whether user has enabled expiration feature
