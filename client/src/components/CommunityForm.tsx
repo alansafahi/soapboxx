@@ -542,7 +542,7 @@ export function CommunityForm({
                       : "Select ministry type"
                   } />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
                   {(formData.type === 'church' ? DENOMINATION_OPTIONS :
                     formData.type === 'ministry' ? MINISTRY_TYPE_OPTIONS :
                     GROUP_TYPE_OPTIONS).map((option) => (
@@ -578,7 +578,7 @@ export function CommunityForm({
                 <SelectTrigger>
                   <SelectValue placeholder="Select privacy level..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
                   <SelectItem value="public">🌍 Public - Visible to everyone</SelectItem>
                   <SelectItem value="private">🔒 Private - Invite only</SelectItem>
                   <SelectItem value="church_members_only">⛪ Church Members Only</SelectItem>
@@ -643,7 +643,7 @@ export function CommunityForm({
                   <SelectTrigger>
                     <SelectValue placeholder="Select attendance size" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
                     {WEEKLY_ATTENDANCE_OPTIONS.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
@@ -1077,7 +1077,7 @@ export function CommunityForm({
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="z-[100] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600">
                         <SelectItem value="English">English</SelectItem>
                         <SelectItem value="Spanish">Spanish</SelectItem>
                         <SelectItem value="Korean">Korean</SelectItem>
