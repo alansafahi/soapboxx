@@ -6446,6 +6446,396 @@ export class DatabaseStorage implements IStorage {
       console.error('Error recording user scripture:', error);
     }
   }
+
+  // Content Moderation Implementation
+  async createContentReport(report: InsertContentReport): Promise<ContentReport> {
+    try {
+      const [newReport] = await db.insert(contentReports).values(report).returning();
+      return newReport;
+    } catch (error) {
+      throw new Error(`Failed to create content report: ${error}`);
+    }
+  }
+
+  async getContentReports(churchId?: number, status?: string): Promise<ContentReport[]> {
+    try {
+      let query = db
+        .select({
+          id: contentReports.id,
+          reporterId: contentReports.reporterId,
+          contentType: contentReports.contentType,
+          contentId: contentReports.contentId,
+          reason: contentReports.reason,
+          description: contentReports.description,
+          originalContent: contentReports.originalContent,
+          contentMetadata: contentReports.contentMetadata,
+          status: contentReports.status,
+          priority: contentReports.priority,
+          reviewedBy: contentReports.reviewedBy,
+          reviewedAt: contentReports.reviewedAt,
+          reviewNotes: contentReports.reviewNotes,
+          actionTaken: contentReports.actionTaken,
+          createdAt: contentReports.createdAt,
+          updatedAt: contentReports.updatedAt,
+          reporter: {
+            id: users.id,
+            firstName: users.firstName,
+            lastName: users.lastName,
+            email: users.email
+          }
+        })
+        .from(contentReports)
+        .leftJoin(users, eq(contentReports.reporterId, users.id))
+        .orderBy(desc(contentReports.createdAt));
+
+      if (status) {
+        query = query.where(eq(contentReports.status, status));
+      }
+
+      // TODO: Filter by church if needed for church-specific reports
+      // This would require joining with content tables to get church context
+
+      return await query;
+    } catch (error) {
+      throw new Error(`Failed to get content reports: ${error}`);
+    }
+  }
+
+  async getContentReport(reportId: number): Promise<ContentReport | undefined> {
+    try {
+      const reports = await db
+        .select()
+        .from(contentReports)
+        .where(eq(contentReports.id, reportId))
+        .limit(1);
+      
+      return reports[0];
+    } catch (error) {
+      throw new Error(`Failed to get content report: ${error}`);
+    }
+  }
+
+  async updateContentReportStatus(
+    reportId: number, 
+    status: string, 
+    reviewedBy: string, 
+    reviewNotes?: string, 
+    actionTaken?: string
+  ): Promise<ContentReport> {
+    try {
+      const updateData: any = {
+        status,
+        reviewedBy,
+        reviewedAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      if (reviewNotes) updateData.reviewNotes = reviewNotes;
+      if (actionTaken) updateData.actionTaken = actionTaken;
+
+      const [updatedReport] = await db
+        .update(contentReports)
+        .set(updateData)
+        .where(eq(contentReports.id, reportId))
+        .returning();
+
+      return updatedReport;
+    } catch (error) {
+      throw new Error(`Failed to update content report status: ${error}`);
+    }
+  }
+
+  async requestContentEdit(
+    contentType: string, 
+    contentId: number, 
+    feedback: string, 
+    suggestions: string, 
+    moderatorId: string
+  ): Promise<any> {
+    try {
+      // Create a moderation action record for edit request
+      await db.insert(contentModerationActions).values({
+        contentType,
+        contentId,
+        actionType: 'edit_request',
+        reason: feedback,
+        actionData: JSON.stringify({ suggestions }),
+        moderatorId,
+        severity: 'low',
+        isActive: true
+      });
+
+      // TODO: Send notification to content author about edit request
+      // This would require notification system integration
+
+      return { success: true, message: 'Edit request sent successfully' };
+    } catch (error) {
+      throw new Error(`Failed to request content edit: ${error}`);
+    }
+  }
+
+  async hideContent(
+    contentType: string, 
+    contentId: number, 
+    reason: string, 
+    moderatorId: string
+  ): Promise<void> {
+    try {
+      // Create moderation action record
+      await db.insert(contentModerationActions).values({
+        contentType,
+        contentId,
+        actionType: 'hide_content',
+        reason,
+        moderatorId,
+        severity: 'medium',
+        isActive: true
+      });
+
+      // Hide the actual content based on type
+      switch (contentType) {
+        case 'discussion':
+          await db
+            .update(discussions)
+            .set({ isHidden: true, moderatedAt: new Date(), moderatedBy: moderatorId })
+            .where(eq(discussions.id, contentId));
+          break;
+        case 'prayer_request':
+          await db
+            .update(prayerRequests)
+            .set({ isHidden: true, moderatedAt: new Date(), moderatedBy: moderatorId })
+            .where(eq(prayerRequests.id, contentId));
+          break;
+        case 'soap_entry':
+          await db
+            .update(soapEntries)
+            .set({ isHidden: true, moderatedAt: new Date(), moderatedBy: moderatorId })
+            .where(eq(soapEntries.id, contentId));
+          break;
+        // Add other content types as needed
+      }
+    } catch (error) {
+      throw new Error(`Failed to hide content: ${error}`);
+    }
+  }
+
+  async restoreContent(
+    contentType: string, 
+    contentId: number, 
+    moderatorId: string
+  ): Promise<void> {
+    try {
+      // Mark previous moderation actions as inactive
+      await db
+        .update(contentModerationActions)
+        .set({ isActive: false })
+        .where(and(
+          eq(contentModerationActions.contentType, contentType),
+          eq(contentModerationActions.contentId, contentId),
+          eq(contentModerationActions.actionType, 'hide_content')
+        ));
+
+      // Create restoration action record
+      await db.insert(contentModerationActions).values({
+        contentType,
+        contentId,
+        actionType: 'restore_content',
+        reason: 'Content restored by moderator',
+        moderatorId,
+        severity: 'low',
+        isActive: true
+      });
+
+      // Restore the actual content based on type
+      switch (contentType) {
+        case 'discussion':
+          await db
+            .update(discussions)
+            .set({ isHidden: false, moderatedAt: new Date(), moderatedBy: moderatorId })
+            .where(eq(discussions.id, contentId));
+          break;
+        case 'prayer_request':
+          await db
+            .update(prayerRequests)
+            .set({ isHidden: false, moderatedAt: new Date(), moderatedBy: moderatorId })
+            .where(eq(prayerRequests.id, contentId));
+          break;
+        case 'soap_entry':
+          await db
+            .update(soapEntries)
+            .set({ isHidden: false, moderatedAt: new Date(), moderatedBy: moderatorId })
+            .where(eq(soapEntries.id, contentId));
+          break;
+        // Add other content types as needed
+      }
+    } catch (error) {
+      throw new Error(`Failed to restore content: ${error}`);
+    }
+  }
+
+  async createModerationAction(action: InsertContentModerationAction): Promise<ContentModerationAction> {
+    try {
+      const [newAction] = await db.insert(contentModerationActions).values(action).returning();
+      return newAction;
+    } catch (error) {
+      throw new Error(`Failed to create moderation action: ${error}`);
+    }
+  }
+
+  async getModerationActions(contentType?: string, contentId?: number): Promise<ContentModerationAction[]> {
+    try {
+      let query = db.select().from(contentModerationActions).orderBy(desc(contentModerationActions.createdAt));
+
+      if (contentType && contentId) {
+        query = query.where(and(
+          eq(contentModerationActions.contentType, contentType),
+          eq(contentModerationActions.contentId, contentId)
+        ));
+      } else if (contentType) {
+        query = query.where(eq(contentModerationActions.contentType, contentType));
+      }
+
+      return await query;
+    } catch (error) {
+      throw new Error(`Failed to get moderation actions: ${error}`);
+    }
+  }
+
+  async createUserModerationRecord(record: InsertUserModerationHistory): Promise<UserModerationHistory> {
+    try {
+      const [newRecord] = await db.insert(userModerationHistory).values(record).returning();
+      return newRecord;
+    } catch (error) {
+      throw new Error(`Failed to create user moderation record: ${error}`);
+    }
+  }
+
+  async getUserModerationHistory(userId: string): Promise<UserModerationHistory[]> {
+    try {
+      return await db
+        .select()
+        .from(userModerationHistory)
+        .where(eq(userModerationHistory.userId, userId))
+        .orderBy(desc(userModerationHistory.createdAt));
+    } catch (error) {
+      throw new Error(`Failed to get user moderation history: ${error}`);
+    }
+  }
+
+  async getActiveSuspensions(userId: string): Promise<UserModerationHistory[]> {
+    try {
+      return await db
+        .select()
+        .from(userModerationHistory)
+        .where(and(
+          eq(userModerationHistory.userId, userId),
+          eq(userModerationHistory.isActive, true),
+          or(
+            eq(userModerationHistory.actionType, 'suspension'),
+            eq(userModerationHistory.actionType, 'ban')
+          )
+        ));
+    } catch (error) {
+      throw new Error(`Failed to get active suspensions: ${error}`);
+    }
+  }
+
+  async suspendUser(
+    userId: string, 
+    reason: string, 
+    duration: string, 
+    moderatorId: string, 
+    severity: string
+  ): Promise<UserModerationHistory> {
+    try {
+      const suspensionData: InsertUserModerationHistory = {
+        userId,
+        actionType: 'suspension',
+        reason,
+        moderatorId,
+        severity,
+        duration,
+        isActive: true,
+        expiresAt: this.calculateExpirationDate(duration)
+      };
+
+      return await this.createUserModerationRecord(suspensionData);
+    } catch (error) {
+      throw new Error(`Failed to suspend user: ${error}`);
+    }
+  }
+
+  async banUser(userId: string, reason: string, moderatorId: string): Promise<UserModerationHistory> {
+    try {
+      const banData: InsertUserModerationHistory = {
+        userId,
+        actionType: 'ban',
+        reason,
+        moderatorId,
+        severity: 'critical',
+        isActive: true
+      };
+
+      return await this.createUserModerationRecord(banData);
+    } catch (error) {
+      throw new Error(`Failed to ban user: ${error}`);
+    }
+  }
+
+  async bulkModerationAction(
+    contentIds: number[], 
+    contentType: string, 
+    action: string, 
+    moderatorId: string, 
+    reason: string
+  ): Promise<void> {
+    try {
+      // Create moderation action records for all content items
+      const actions = contentIds.map(contentId => ({
+        contentType,
+        contentId,
+        actionType: action,
+        reason,
+        moderatorId,
+        severity: 'medium' as const,
+        isActive: true
+      }));
+
+      await db.insert(contentModerationActions).values(actions);
+
+      // Execute the actual action (e.g., hide content)
+      if (action === 'hide_content') {
+        for (const contentId of contentIds) {
+          await this.hideContent(contentType, contentId, reason, moderatorId);
+        }
+      }
+    } catch (error) {
+      throw new Error(`Failed to perform bulk moderation action: ${error}`);
+    }
+  }
+
+  private calculateExpirationDate(duration: string): Date | null {
+    const now = new Date();
+    const match = duration.match(/(\d+)\s*(day|week|month|year)s?/i);
+    
+    if (!match) return null;
+    
+    const amount = parseInt(match[1]);
+    const unit = match[2].toLowerCase();
+    
+    switch (unit) {
+      case 'day':
+        return new Date(now.getTime() + amount * 24 * 60 * 60 * 1000);
+      case 'week':
+        return new Date(now.getTime() + amount * 7 * 24 * 60 * 60 * 1000);
+      case 'month':
+        return new Date(now.getTime() + amount * 30 * 24 * 60 * 60 * 1000);
+      case 'year':
+        return new Date(now.getTime() + amount * 365 * 24 * 60 * 60 * 1000);
+      default:
+        return null;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
