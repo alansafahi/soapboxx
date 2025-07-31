@@ -214,9 +214,12 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
           scriptureReference: soapData?.scriptureReference
           // Note: observation, application, and prayer intentionally omitted to encourage personal reflection
         });
+        // Invalidate queries to refresh the data
+        queryClient.invalidateQueries({ queryKey: ["/api/soap-entries"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/feed"] });
         toast({
           title: "Scripture copied to your S.O.A.P. journal",
-          description: "Add your own observations, applications, and prayers for personal reflection",
+          description: "Check your S.O.A.P. Journal to add your own observations, applications, and prayers",
         });
       }
     } catch (error) {

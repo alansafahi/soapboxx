@@ -11218,7 +11218,7 @@ Return JSON with this exact structure:
   // Standardized endpoints (Phase 3 migration)
   app.get('/api/soap-entries', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       
       if (!userId) {
         return res.status(401).json({ message: 'User authentication required' });
