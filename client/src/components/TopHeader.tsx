@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles, Building2, CheckCircle } from "lucide-react";
+import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles, Building2, CheckCircle, UserCog, Users2, HandHeart, QrCode, Flag, Trophy, Bookmark, Building } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useTheme } from "../hooks/useTheme";
@@ -246,10 +246,10 @@ export default function TopHeader() {
                 Contacts
               </DropdownMenuItem>
             </Link>
-            <Link href="/churches">
+            <Link href="/communities">
               <DropdownMenuItem className="cursor-pointer">
-                <Users className="w-4 h-4 mr-2" />
-                Churches
+                <Building className="w-4 h-4 mr-2" />
+                Communities
               </DropdownMenuItem>
             </Link>
             <Link href="/events">
@@ -283,6 +283,12 @@ export default function TopHeader() {
                 Today's Reading
               </DropdownMenuItem>
             </Link>
+            <Link href="/reading-plans">
+              <DropdownMenuItem className="cursor-pointer">
+                <Calendar className="w-4 h-4 mr-2" />
+                Reading Plans
+              </DropdownMenuItem>
+            </Link>
             <Link href="/prayer-wall">
               <DropdownMenuItem className="cursor-pointer">
                 <Heart className="w-4 h-4 mr-2" />
@@ -301,6 +307,18 @@ export default function TopHeader() {
                 D.I.V.I.N.E.
               </DropdownMenuItem>
             </Link>
+            <Link href="/saved-reflections">
+              <DropdownMenuItem className="cursor-pointer">
+                <Bookmark className="w-4 h-4 mr-2" />
+                Saved Reflections
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/bookmarked-prayers">
+              <DropdownMenuItem className="cursor-pointer">
+                <Heart className="w-4 h-4 mr-2" />
+                Bookmarked Prayers
+              </DropdownMenuItem>
+            </Link>
             <Link href="/audio-bible">
               <DropdownMenuItem className="cursor-pointer">
                 <Play className="w-4 h-4 mr-2" />
@@ -311,6 +329,12 @@ export default function TopHeader() {
               <DropdownMenuItem className="cursor-pointer">
                 <Mic className="w-4 h-4 mr-2" />
                 Audio Routines
+              </DropdownMenuItem>
+            </Link>
+            <Link href="/leaderboard">
+              <DropdownMenuItem className="cursor-pointer">
+                <Trophy className="w-4 h-4 mr-2" />
+                Engagement Board
               </DropdownMenuItem>
             </Link>
             
@@ -340,10 +364,46 @@ export default function TopHeader() {
                 <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Admin Portal
                 </div>
-                <Link href="/admin">
+                <Link href="/community-administration">
                   <DropdownMenuItem className="cursor-pointer">
                     <Building2 className="w-4 h-4 mr-2" />
-                    Church Administration
+                    Community Administration
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/staff-management">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <UserCog className="w-4 h-4 mr-2" />
+                    Staff Management
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/member-management">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Users2 className="w-4 h-4 mr-2" />
+                    Member Management
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/volunteer-management">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <HandHeart className="w-4 h-4 mr-2" />
+                    Volunteer Management
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/background-check-management">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Shield className="w-4 h-4 mr-2" />
+                    Background Check Management
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/analytics-dashboard">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Analytics Dashboard
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/qr-management">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <QrCode className="w-4 h-4 mr-2" />
+                    QR Code Management
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/donation-analytics">
@@ -368,6 +428,12 @@ export default function TopHeader() {
                   <DropdownMenuItem className="cursor-pointer">
                     <TrendingUp className="w-4 h-4 mr-2" />
                     Engagement Analytics
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/moderation-dashboard">
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Flag className="w-4 h-4 mr-2" />
+                    Content Moderation
                   </DropdownMenuItem>
                 </Link>
 
