@@ -589,6 +589,18 @@ export interface IStorage {
   
   // Bulk moderation operations
   bulkModerationAction(contentIds: number[], contentType: string, action: string, moderatorId: string, reason: string): Promise<void>;
+  
+  // Moderation alerts and notifications
+  sendModerationAlert(alert: {
+    type: string;
+    contentType: string;
+    contentId: number;
+    reason: string;
+    reporterId: string;
+    priority: string;
+    flaggedAt: Date;
+  }): Promise<void>;
+  
   initializeChurchFeatures(churchId: number, churchSize: string): Promise<void>;
   
   // User stats and achievements
@@ -2464,6 +2476,7 @@ export class DatabaseStorage implements IStorage {
       console.log(`[DEBUG] getDiscussions called: limit=${limit}, offset=${offset}, userId=${currentUserId}`);
       
       // Combined query to get both discussions and SOAP entries using UNION
+      // CRITICAL: Filter out hidden content for faith-based app protection
       const combinedResult = await db.execute(sql`
         (
           SELECT 
@@ -2472,7 +2485,9 @@ export class DatabaseStorage implements IStorage {
             NULL::text as scripture, NULL::text as scripture_reference, NULL::text as observation, NULL::text as application, NULL::text as prayer, d.mood_tag
           FROM discussions d
           LEFT JOIN users u ON d.author_id = u.id
-          WHERE d.is_public = true AND (d.expires_at IS NULL OR d.expires_at > NOW())
+          WHERE d.is_public = true 
+            AND (d.expires_at IS NULL OR d.expires_at > NOW())
+            AND (d.is_hidden IS NULL OR d.is_hidden = false)
         )
         UNION ALL
         (
@@ -2483,6 +2498,7 @@ export class DatabaseStorage implements IStorage {
           FROM soap_entries s
           LEFT JOIN users u ON s.user_id = u.id
           WHERE s.is_public = true
+            AND (s.is_hidden IS NULL OR s.is_hidden = false)
         )
         ORDER BY created_at DESC
         LIMIT ${limit || 50} OFFSET ${offset || 0}
@@ -3156,6 +3172,7 @@ export class DatabaseStorage implements IStorage {
           FROM prayer_requests pr
           LEFT JOIN prayer_responses prs ON pr.id = prs.prayer_request_id 
           WHERE pr.author_id = ${userId} 
+            AND (pr.is_hidden IS NULL OR pr.is_hidden = false)
           GROUP BY pr.id
           ORDER BY pr.created_at DESC
         `);
@@ -5835,6 +5852,7 @@ export class DatabaseStorage implements IStorage {
         WHERE pr.is_public = true
         AND (pr.expires_at IS NULL OR pr.expires_at > NOW())
         AND (pr.expired_at IS NULL)
+        AND (pr.is_hidden IS NULL OR pr.is_hidden = false)
       `;
 
       const params: any[] = [];
@@ -6811,6 +6829,99 @@ export class DatabaseStorage implements IStorage {
       }
     } catch (error) {
       throw new Error(`Failed to perform bulk moderation action: ${error}`);
+    }
+  }
+
+  async sendModerationAlert(alert: {
+    type: string;
+    contentType: string;
+    contentId: number;
+    reason: string;
+    reporterId: string;
+    priority: string;
+    flaggedAt: Date;
+  }): Promise<void> {
+    try {
+      // Get content details for alert
+      let contentDetails: any = null;
+      switch (alert.contentType) {
+        case 'discussion':
+          const discussion = await db.select().from(discussions).where(eq(discussions.id, alert.contentId)).limit(1);
+          contentDetails = discussion[0];
+          break;
+        case 'prayer_request':
+          const prayer = await db.select().from(prayerRequests).where(eq(prayerRequests.id, alert.contentId)).limit(1);
+          contentDetails = prayer[0];
+          break;
+        case 'soap_entry':
+          const soap = await db.select().from(soapEntries).where(eq(soapEntries.id, alert.contentId)).limit(1);
+          contentDetails = soap[0];
+          break;
+      }
+
+      // Get reporter details
+      const reporter = await this.getUser(alert.reporterId);
+
+      // Find all SoapBox admins for critical alerts
+      const soapboxAdmins = await db
+        .select()
+        .from(users)
+        .where(eq(users.role, 'soapbox_owner'));
+
+      // Find community admins if content is associated with a church
+      let communityAdmins: any[] = [];
+      if (contentDetails?.churchId) {
+        communityAdmins = await db
+          .select({
+            user: users,
+            role: userChurches.role
+          })
+          .from(userChurches)
+          .leftJoin(users, eq(userChurches.userId, users.id))
+          .where(and(
+            eq(userChurches.churchId, contentDetails.churchId),
+            eq(userChurches.isActive, true),
+            or(
+              eq(userChurches.role, 'church_admin'),
+              eq(userChurches.role, 'lead_pastor'),
+              eq(userChurches.role, 'pastor')
+            )
+          ));
+      }
+
+      // Create notifications for all relevant admins
+      const allAdmins = [
+        ...soapboxAdmins.map(admin => ({ id: admin.id, role: 'soapbox_owner', email: admin.email })),
+        ...communityAdmins.map(ca => ({ id: ca.user.id, role: ca.role, email: ca.user.email }))
+      ];
+
+      for (const admin of allAdmins) {
+        // Create in-app notification
+        await db.insert(notifications).values({
+          userId: admin.id,
+          type: 'moderation_alert',
+          title: `🚨 High Priority Content Flagged`,
+          message: `Content flagged as "${alert.reason}" and automatically hidden. Reporter: ${reporter?.firstName} ${reporter?.lastName}`,
+          data: JSON.stringify({
+            contentType: alert.contentType,
+            contentId: alert.contentId,
+            reason: alert.reason,
+            priority: alert.priority,
+            reporterId: alert.reporterId,
+            contentPreview: contentDetails?.content?.substring(0, 100) || contentDetails?.title?.substring(0, 100) || 'Content preview unavailable'
+          }),
+          isRead: false
+        });
+
+        console.log(`[MODERATION ALERT] Notified ${admin.role} ${admin.email} about ${alert.contentType}:${alert.contentId} flagged for ${alert.reason}`);
+      }
+
+      // Log critical moderation event
+      console.log(`[CRITICAL MODERATION] ${alert.type} - ${alert.contentType}:${alert.contentId} flagged for ${alert.reason} by user ${alert.reporterId} at ${alert.flaggedAt.toISOString()}`);
+
+    } catch (error) {
+      console.error('Failed to send moderation alert:', error);
+      // Don't throw error - moderation alert failure shouldn't break the report process
     }
   }
 

@@ -3959,6 +3959,7 @@ app.post('/api/invitations', async (req: any, res) => {
         switch (reason) {
           case 'harassment':
           case 'inappropriate':
+          case 'sexual_content': // Added for faith-based app protection
             return 'high'; // Immediate moderation required
           case 'misinformation':
           case 'privacy_violation':
@@ -3987,12 +3988,25 @@ app.post('/api/invitations', async (req: any, res) => {
         try {
           await storage.hideContent(contentType, parseInt(contentId), 
             `High priority violation: ${reason}`, userId);
-        } catch (error) {
 
+          // Send critical notifications for faith-based app protection
+          await storage.sendModerationAlert({
+            type: 'high_priority_content_flagged',
+            contentType,
+            contentId: parseInt(contentId),
+            reason,
+            reporterId: userId,
+            priority: 'high',
+            flaggedAt: new Date()
+          });
+
+          console.log(`[CRITICAL] Content ${contentType}:${contentId} automatically hidden due to ${reason} report`);
+        } catch (error) {
+          console.error(`Failed to hide content ${contentType}:${contentId}:`, error);
         }
       }
 
-      res.json({ success: true, report });
+      res.json({ success: true, report, contentHidden: getPriorityLevel(reason) === 'high' });
     } catch (error) {
 
       res.status(500).json({ message: 'Failed to create content report' });
@@ -9813,6 +9827,53 @@ Return JSON with this exact structure:
       
 
       const prayer = await storage.createPrayerRequest(prayerData);
+
+      // Real-time AI content monitoring for prayer requests (1-3 seconds)
+      setTimeout(async () => {
+        try {
+          const { analyzeContentForViolations, createAutoModerationReport } = await import('./ai-moderation');
+          const { analyzeContentMedia } = await import('./media-utils');
+          
+          const combinedContent = `${prayerData.title || ''} ${prayerData.requestText || prayerData.content || ''}`;
+          
+          // Check for media content in prayer request
+          const mediaItems = await analyzeContentMedia(combinedContent, []);
+          let moderationResult;
+          
+          if (mediaItems.length > 0) {
+            // Analyze first media item
+            const firstMedia = mediaItems[0];
+            moderationResult = await analyzeContentForViolations(
+              combinedContent, 
+              'prayer_request', 
+              firstMedia.url, 
+              firstMedia.type
+            );
+          } else {
+            // Text-only analysis
+            moderationResult = await analyzeContentForViolations(combinedContent, 'prayer_request');
+          }
+          
+          if (moderationResult.flagged) {
+            await createAutoModerationReport(storage, 'prayer_request', prayer.id, moderationResult, 'system');
+            
+            // Send alert notifications for faith-based app protection
+            await storage.sendModerationAlert({
+              type: 'ai_content_flagged',
+              contentType: 'prayer_request',
+              contentId: prayer.id,
+              reason: moderationResult.reason,
+              reporterId: 'system',
+              priority: moderationResult.priority,
+              flaggedAt: new Date()
+            });
+            
+            console.log(`[AI MODERATION] Prayer request ${prayer.id} flagged for ${moderationResult.reason} (${moderationResult.priority} priority)`);
+          }
+        } catch (error) {
+          console.error('AI moderation failed for prayer request:', error);
+        }
+      }, 1000); // 1 second delay for real-time analysis
 
       // Prayer requests automatically appear in social feed via getDiscussions UNION query
       // No need to create duplicate discussion entries
