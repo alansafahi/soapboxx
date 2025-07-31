@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -158,7 +158,44 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
   const queryClient = useQueryClient();
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>('');
+  const [additionalTimeSlots, setAdditionalTimeSlots] = useState<number>(3);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Denomination-based defaults for operating hours
+  const denominationDefaults = {
+    "Baptist": {
+      officeHours: "Mon-Thu 9AM-4PM, Fri 9AM-12PM",
+      worshipTimes: "Sunday: 9AM & 11AM\nWednesday: 6:30PM Bible Study"
+    },
+    "Methodist": {
+      officeHours: "Mon-Thu 9AM-4PM, Fri 9AM-12PM",
+      worshipTimes: "Sunday: 9AM Traditional, 11AM Contemporary\nWednesday: 6:30PM Study"
+    },
+    "Catholic": {
+      officeHours: "Mon-Fri 9AM-4PM",
+      worshipTimes: "Saturday: 5PM Vigil Mass\nSunday: 8AM, 10AM, 12PM Mass\nDaily Mass: Mon-Fri 8AM"
+    },
+    "Presbyterian": {
+      officeHours: "Mon-Thu 9AM-4PM, Fri 9AM-1PM",
+      worshipTimes: "Sunday: 9AM Sunday School, 10AM Worship\nWednesday: 7PM Prayer Meeting"
+    },
+    "Pentecostal": {
+      officeHours: "Mon-Thu 10AM-4PM, Fri 10AM-12PM",
+      worshipTimes: "Sunday: 10AM & 6PM\nWednesday: 7PM Bible Study\nFriday: 7PM Prayer Night"
+    },
+    "Lutheran": {
+      officeHours: "Mon-Thu 9AM-3PM, Fri 9AM-12PM",
+      worshipTimes: "Sunday: 8:30AM Traditional, 10:30AM Contemporary\nWednesday: 7PM Study"
+    },
+    "Episcopal": {
+      officeHours: "Mon-Thu 9AM-4PM",
+      worshipTimes: "Sunday: 8AM Holy Eucharist, 10AM Family Service\nWednesday: 12PM Holy Eucharist"
+    },
+    "Non-denominational": {
+      officeHours: "Mon-Fri 9AM-4PM",
+      worshipTimes: "Sunday: 9AM & 11AM Services\nWednesday: 7PM Bible Study"
+    }
+  } as const;
 
   const form = useForm<CommunityFormValues>({
     resolver: zodResolver(formSchema),
@@ -205,6 +242,7 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
   const watchedType = form.watch("type");
   const watchedDenomination = form.watch("denomination");
 
+  // Helper function to get denomination options based on community type
   const getDenominationOptions = () => {
     switch (watchedType) {
       case 'church':
@@ -214,9 +252,18 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
       case 'group':
         return GROUP_TYPE_OPTIONS;
       default:
-        return [];
+        return DENOMINATION_OPTIONS;
     }
   };
+
+  // Auto-populate service times when denomination changes (for churches only)
+  useEffect(() => {
+    if (watchedType === 'church' && watchedDenomination && denominationDefaults[watchedDenomination as keyof typeof denominationDefaults]) {
+      const defaults = denominationDefaults[watchedDenomination as keyof typeof denominationDefaults];
+      form.setValue("officeHours", defaults.officeHours);
+      form.setValue("worshipTimes", defaults.worshipTimes);
+    }
+  }, [watchedDenomination, watchedType, form]);
 
   // Handle logo file selection
   const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -399,6 +446,33 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                   />
                 )}
 
+                <FormField
+                  control={form.control}
+                  name="weeklyAttendance"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Weekly Attendance</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-white dark:bg-gray-700 text-black dark:text-white">
+                            <SelectValue placeholder="Select attendance range..." />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
+                          <SelectItem value="Under 50">Under 50</SelectItem>
+                          <SelectItem value="50-100">50-100</SelectItem>
+                          <SelectItem value="100-200">100-200</SelectItem>
+                          <SelectItem value="200-500">200-500</SelectItem>
+                          <SelectItem value="500-1000">500-1000</SelectItem>
+                          <SelectItem value="1000-2000">1000-2000</SelectItem>
+                          <SelectItem value="Over 2000">Over 2000</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 {watchedDenomination === 'Other' && (
                   <FormField
                     control={form.control}
@@ -419,28 +493,31 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                   />
                 )}
 
-                <FormField
-                  control={form.control}
-                  name="privacySetting"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Privacy Setting *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-white dark:bg-gray-700 text-black dark:text-white">
-                            <SelectValue placeholder="Select privacy level..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
-                          <SelectItem value="public">🌍 Public - Visible to everyone</SelectItem>
-                          <SelectItem value="private">🔒 Private - Invite only</SelectItem>
-                          <SelectItem value="church_members_only">⛪ Church Members Only</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Privacy setting only shows for ministries and groups, not churches */}
+                {(watchedType === 'ministry' || watchedType === 'group') && (
+                  <FormField
+                    control={form.control}
+                    name="privacySetting"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Privacy Setting *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white dark:bg-gray-700 text-black dark:text-white">
+                              <SelectValue placeholder="Select privacy level..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600">
+                            <SelectItem value="public">🌍 Public - Visible to everyone</SelectItem>
+                            <SelectItem value="private">🔒 Private - Invite only</SelectItem>
+                            <SelectItem value="church_members_only">⛪ Church Members Only</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 {/* Logo Upload */}
                 <div>
@@ -781,6 +858,68 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                       )}
                     />
                   </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <FormField
+                      control={form.control}
+                      name="customTime3Label"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="Service Name"
+                              {...field}
+                              className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="customTime3"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="Time"
+                              {...field}
+                              className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {additionalTimeSlots > 3 && (
+                    <>
+                      {[4, 5, 6].slice(0, additionalTimeSlots - 3).map((num) => (
+                        <div key={num} className="grid grid-cols-2 gap-2">
+                          <Input 
+                            placeholder="Service Name"
+                            className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                          />
+                          <Input 
+                            placeholder="Time"
+                            className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                          />
+                        </div>
+                      ))}
+                    </>
+                  )}
+
+                  {additionalTimeSlots < 6 && (
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      onClick={() => setAdditionalTimeSlots(prev => Math.min(prev + 1, 6))}
+                      className="flex items-center gap-2 mt-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add more time
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
