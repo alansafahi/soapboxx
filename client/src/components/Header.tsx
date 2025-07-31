@@ -48,7 +48,7 @@ export default function Header() {
     { href: "/discussions", label: "Discussions", icon: MessageSquare },
     { href: "/devotionals", label: "Devotionals", icon: Book },
     { href: "/members", label: "Members", icon: Users },
-    { href: "/churches", label: "Churches", icon: Church },
+    { href: "/communities", label: "Communities", icon: Church },
     { href: "/gamification", label: "Rewards", icon: Gamepad2 },
   ];
 

@@ -89,16 +89,14 @@ export default function SidebarFixed() {
   });
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL', 'ACCOUNT']));
-  const [forceUpdate, setForceUpdate] = useState(0);
+  const [forceUpdate, setForceUpdate] = useState(Date.now());
 
-
-  
-  // Force re-render every 2 seconds to overcome React caching issues
+  // Force immediate re-render to clear cache  
   useEffect(() => {
-    const interval = setInterval(() => {
-      setForceUpdate(prev => prev + 1);
-    }, 2000);
-    return () => clearInterval(interval);
+    setForceUpdate(Date.now());
+    // Force component refresh to clear navigation cache
+    const timer = setTimeout(() => setForceUpdate(Date.now() + 1), 100);
+    return () => clearTimeout(timer);
   }, []);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
