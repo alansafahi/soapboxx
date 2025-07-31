@@ -81,7 +81,7 @@ export default function MyCommunities() {
   const queryClient = useQueryClient();
 
   const { data: userCommunities = [], isLoading } = useQuery<UserCommunity[]>({
-    queryKey: ['/api/user/churches'],
+    queryKey: ['/api/users/communities'],
   });
 
   const createCommunityMutation = useMutation({
@@ -95,7 +95,7 @@ export default function MyCommunities() {
         description: "Community created successfully!",
       });
       setCreateCommunityOpen(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/user/churches'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/users/communities'] });
     },
     onError: (error: any) => {
       toast({
