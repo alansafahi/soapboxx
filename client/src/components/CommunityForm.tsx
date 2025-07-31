@@ -463,14 +463,22 @@ export function CommunityForm({
               </Select>
             </div>
             <div>
-              <Label htmlFor="denomination">Denomination *</Label>
+              <Label htmlFor="denomination">
+                {formData.type === 'Church' ? 'Denomination *' : formData.type === 'Ministry' ? 'Ministry Type *' : 'Group Type *'}
+              </Label>
               <Select
                 value={formData.denomination}
                 onValueChange={(value) => handleInputChange('denomination', value)}
                 required
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select denomination or type..." />
+                  <SelectValue placeholder={
+                    formData.type === 'Church' 
+                      ? "Select denomination or type..."
+                      : formData.type === 'Group'
+                      ? "Select group type or type..."
+                      : "Select ministry type or type..."
+                  } />
                 </SelectTrigger>
                 <SelectContent>
                   {DENOMINATION_OPTIONS.map((denomination) => (
@@ -483,7 +491,13 @@ export function CommunityForm({
               {formData.denomination === 'Other' && (
                 <div className="mt-2">
                   <Input
-                    placeholder="Please specify denomination"
+                    placeholder={
+                      formData.type === 'Church' 
+                        ? "Enter custom denomination..."
+                        : formData.type === 'Group'
+                        ? "Enter custom group type..."
+                        : "Enter custom ministry type..."
+                    }
                     value={formData.customDenomination || ''}
                     onChange={(e) => handleInputChange('customDenomination', e.target.value)}
                   />

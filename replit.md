@@ -151,6 +151,12 @@ SoapBox Super App is a comprehensive faith community platform that connects chur
 - July 22, 2025: COMPREHENSIVE NAMING CONVENTION AUDIT COMPLETED - Identified critical inconsistencies across database (snake_case), API endpoints (mixed kebab-case/camelCase), and frontend (camelCase) causing integration issues. Created detailed standardization report with 4-phase implementation plan. Recommendation: No changes pre-demo due to risk, implement post-demo with mapping layer approach for safety.
 
 ## Recent Changes  
+- July 30, 2025: COMMUNITY FORM DYNAMIC LABELING IMPLEMENTATION COMPLETED - Successfully updated both community creation and administration forms with context-aware labeling for improved user experience
+  - DYNAMIC LABELS IMPLEMENTED: Changed static "Type" to "Community Type" and "Affiliation" to "Ministry Type"/"Group Type" based on selected community type
+  - COMMUNITY ADMINISTRATION FIXED: Updated CommunityForm.tsx to use dynamic labels that change based on community type (Church → Denomination, Ministry → Ministry Type, Group → Group Type)
+  - PLACEHOLDER TEXT UPDATED: Enhanced form placeholders to match community type context for better user guidance
+  - UNIFIED FORM BEHAVIOR: Both community creation and administration forms now use consistent dynamic labeling from unified CommunityForm.tsx component
+  - USER EXPERIENCE IMPROVED: Form labels now clearly communicate what information is needed based on selected community type
 - July 29, 2025: ENGAGEMENT FEATURES AUTHENTICATION REGRESSION FIXED - Successfully resolved critical authentication mismatch causing Amen reactions, comment counters, and reply threading to fail on SOAP posts
   - ROOT CAUSE IDENTIFIED: SOAP and comment endpoints using deprecated req.session.userId instead of current req.user.claims.sub authentication pattern
   - AUTHENTICATION STANDARDIZED: Updated /api/soap-entries/reactions, /api/soap-entries/reflect, /api/soap-entries/save, /api/soap/:id/comments, /api/soap/comments/:id/like, /api/comments/:id/like, and /api/discussions/:id/comments endpoints
