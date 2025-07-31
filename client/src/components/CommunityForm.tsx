@@ -507,26 +507,28 @@ export function CommunityForm({
                 id="name"
                 type="text"
                 required
-                value={formData.name}
+                value={formData.name || ''}
                 onChange={(e) => {
                   console.log('Name input changed:', e.target.value);
                   handleInputChange('name', e.target.value);
                 }}
                 placeholder="First Baptist Church"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-black dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                style={{ color: 'inherit' }}
               />
             </div>
             <div>
               <Label htmlFor="type">Community Type *</Label>
               <select
                 id="type"
-                value={formData.type}
+                value={formData.type || ''}
                 onChange={(e) => {
                   console.log('Community Type selected:', e.target.value);
                   handleInputChange('type', e.target.value);
                 }}
                 required
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                className="flex h-10 w-full items-center justify-between rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-black dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                style={{ color: 'inherit' }}
               >
                 <option value="">Select community type</option>
                 <option value="church">Church</option>  
@@ -540,10 +542,11 @@ export function CommunityForm({
               </Label>
               <select
                 id="denomination"
-                value={formData.denomination}
+                value={formData.denomination || ''}
                 onChange={(e) => handleInputChange('denomination', e.target.value)}
                 required
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                className="flex h-10 w-full items-center justify-between rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-black dark:text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                style={{ color: 'inherit' }}
               >
                 <option value="">
                   {formData.type === 'church' 
