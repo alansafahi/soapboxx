@@ -1,3 +1,4 @@
+import React, { useState, useRef } from 'react';
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,18 +13,22 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Building2, Globe } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Textarea } from './ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Switch } from './ui/switch';
+import { Badge } from './ui/badge';
+import { Upload, X, Plus, Building2, Users, Globe, Phone, MapPin, Clock, Camera, Facebook, Instagram, Twitter, Youtube, Linkedin } from 'lucide-react';
+import { FaTiktok } from 'react-icons/fa';
 
-// Define a schema based on your database model
+// Complete form schema with all fields
 const formSchema = z.object({
   name: z.string().min(2, { message: "Community name must be at least 2 characters." }),
   type: z.string().min(1, { message: "Please select a community type." }),
   denomination: z.string().optional(),
+  customDenomination: z.string().optional(),
   description: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
@@ -33,29 +38,75 @@ const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }).optional().or(z.literal('')),
   website: z.string().url({ message: "Invalid URL." }).optional().or(z.literal('')),
   privacySetting: z.string().default('public'),
-  customDenomination: z.string().optional(),
+  logoUrl: z.string().optional(),
+  establishedYear: z.number().optional(),
+  weeklyAttendance: z.string().optional(),
+  parentChurchName: z.string().optional(),
+  missionStatement: z.string().optional(),
+  // Social Media Links
+  facebookUrl: z.string().optional(),
+  instagramUrl: z.string().optional(),
+  twitterUrl: z.string().optional(),
+  tiktokUrl: z.string().optional(),
+  youtubeUrl: z.string().optional(),
+  linkedinUrl: z.string().optional(),
+  // Service Times
+  officeHours: z.string().optional(),
+  worshipTimes: z.string().optional(),
+  sundayService: z.string().optional(),
+  wednesdayService: z.string().optional(),
+  // Custom Times
+  customTime1: z.string().optional(),
+  customTime1Label: z.string().optional(),
+  customTime2: z.string().optional(),
+  customTime2Label: z.string().optional(),
+  customTime3: z.string().optional(),
+  customTime3Label: z.string().optional(),
+  // Privacy Settings
+  hideAddress: z.boolean().default(false),
+  hidePhone: z.boolean().default(false),
 });
 
 type CommunityFormValues = z.infer<typeof formSchema>;
 
-// Constants for dropdown options
+// Comprehensive denomination options
 const DENOMINATION_OPTIONS = [
-  'Baptist', 'Methodist', 'Presbyterian', 'Lutheran', 'Episcopal', 'Catholic', 
-  'Pentecostal', 'Assembly of God', 'Non-denominational', 'Other'
+  "Baptist", "Methodist", "Presbyterian", "Lutheran", "Episcopal", "Reformed", "Congregational",
+  "Catholic", "Orthodox", "Eastern Orthodox", "Greek Orthodox", "Russian Orthodox",
+  "Evangelical", "Non-denominational", "Community Church", "Bible Church",
+  "Pentecostal", "Assembly of God", "Charismatic", "Four Square Gospel",
+  "Anglican", "Episcopalian", "United Church of Christ", "Disciples of Christ",
+  "Calvary Chapel", "Vineyard", "Hillsong", "Bethel", "International Church of Christ",
+  "Reformed Church in America", "Presbyterian Church (USA)", "Presbyterian Church in America",
+  "Southern Baptist", "American Baptist", "Independent Baptist", "Missionary Baptist",
+  "Lutheran Church Missouri Synod", "Evangelical Lutheran Church", "Wisconsin Evangelical Lutheran",
+  "United Methodist", "Free Methodist", "African Methodist Episcopal", "Wesleyan",
+  "Seventh-day Adventist", "Church of Christ", "Christian Reformed", "Mennonite", "Quaker",
+  "Unitarian Universalist", "Unity", "Church of God", "Church of the Nazarene", "Salvation Army",
+  "Interfaith", "Emerging Church", "House Church", "Multi-denominational", "Other"
 ];
 
 const MINISTRY_TYPE_OPTIONS = [
-  'Youth Ministry', 'Children Ministry', 'Music Ministry', 'Worship Ministry',
-  'Outreach Ministry', 'Discipleship Ministry', 'Prayer Ministry', 'Other'
+  "Children's Ministry", "Youth Ministry", "Young Adults Ministry", "Senior Adults Ministry",
+  "Singles Ministry", "Marriage Ministry", "Men's Ministry", "Women's Ministry", "Family Ministry",
+  "Worship Ministry", "Music Ministry", "Prayer Ministry", "Discipleship Ministry", "Small Groups",
+  "Evangelism Ministry", "Missions Ministry", "Community Outreach", "Food Ministry", "Homeless Ministry",
+  "Counseling Ministry", "Recovery Ministry", "Grief Support", "Financial Ministry", "Health Ministry",
+  "Bible Study Ministry", "Christian Education", "Vacation Bible School", "Sunday School", "Seminary",
+  "Drama Ministry", "Arts Ministry", "Media Ministry", "Creative Writing", "Photography Ministry",
+  "Hospitality Ministry", "Facilities Ministry", "Transportation Ministry", "Technology Ministry", "Security Ministry",
+  "Multi-Ministry", "Other"
 ];
 
 const GROUP_TYPE_OPTIONS = [
-  'Bible Study', 'Prayer Group', 'Fellowship Group', 'Support Group',
-  'Small Group', 'Life Group', 'Connect Group', 'Other'
+  "Bible Study", "Prayer Group", "Fellowship Group", "Support Group",
+  "Small Group", "Life Group", "Connect Group", "Men's Group", "Women's Group",
+  "Youth Group", "Senior Group", "Singles Group", "Couples Group", "Family Group",
+  "Recovery Group", "Grief Support Group", "Financial Peace Group", "Other"
 ];
 
 interface CommunityFormProps {
-  community?: any; // The community object for editing
+  community?: any;
   onSuccess: () => void;
   onCancel: () => void;
 }
@@ -63,6 +114,9 @@ interface CommunityFormProps {
 export function CommunityForm({ community, onSuccess, onCancel }: CommunityFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<CommunityFormValues>({
     resolver: zodResolver(formSchema),
@@ -70,6 +124,7 @@ export function CommunityForm({ community, onSuccess, onCancel }: CommunityFormP
       name: community?.name || "",
       type: community?.type || "",
       denomination: community?.denomination || "",
+      customDenomination: community?.customDenomination || "",
       description: community?.description || "",
       address: community?.address || "",
       city: community?.city || "",
@@ -79,38 +134,31 @@ export function CommunityForm({ community, onSuccess, onCancel }: CommunityFormP
       email: community?.email || "",
       website: community?.website || "",
       privacySetting: community?.privacySetting || "public",
-      customDenomination: community?.customDenomination || "",
+      logoUrl: community?.logoUrl || "",
+      establishedYear: community?.establishedYear || undefined,
+      weeklyAttendance: community?.weeklyAttendance || "",
+      parentChurchName: community?.parentChurchName || "",
+      missionStatement: community?.missionStatement || "",
+      facebookUrl: community?.socialLinks?.facebook || "",
+      instagramUrl: community?.socialLinks?.instagram || "",
+      twitterUrl: community?.socialLinks?.twitter || "",
+      tiktokUrl: community?.socialLinks?.tiktok || "",
+      youtubeUrl: community?.socialLinks?.youtube || "",
+      linkedinUrl: community?.socialLinks?.linkedin || "",
+      officeHours: community?.officeHours || "",
+      worshipTimes: community?.worshipTimes || "",
+      sundayService: community?.sundayService || "",
+      wednesdayService: community?.wednesdayService || "",
+      customTime1: community?.additionalTimes?.[0]?.timeSchedule || "",
+      customTime1Label: community?.additionalTimes?.[0]?.eventLabel || "",
+      customTime2: community?.additionalTimes?.[1]?.timeSchedule || "",
+      customTime2Label: community?.additionalTimes?.[1]?.eventLabel || "",
+      customTime3: community?.additionalTimes?.[2]?.timeSchedule || "",
+      customTime3Label: community?.additionalTimes?.[2]?.eventLabel || "",
+      hideAddress: community?.hideAddress || false,
+      hidePhone: community?.hidePhone || false,
     },
   });
-
-  const isEditing = !!community?.id;
-
-  // Use useMutation to handle form submission
-  const saveCommunityMutation = useMutation({
-    mutationFn: async (values: CommunityFormValues) => {
-      if (isEditing) {
-        // Update existing community
-        return await apiRequest("PUT", `/api/users/communities/${community.id}`, values);
-      } else {
-        // Create new community
-        return await apiRequest("POST", "/api/users/communities", values);
-      }
-    },
-    onSuccess: () => {
-      const message = isEditing ? "Community updated successfully" : "Community created successfully";
-      toast({ title: "Success", description: message });
-      queryClient.invalidateQueries({ queryKey: ['/api/users/communities'] });
-      onSuccess();
-    },
-    onError: (error: any) => {
-      toast({ title: "Error", description: error.message || "Failed to save community", variant: "destructive" });
-    },
-  });
-
-  const onSubmit = (values: CommunityFormValues) => {
-    console.log('Submitting form with values:', values);
-    saveCommunityMutation.mutate(values);
-  };
 
   const watchedType = form.watch("type");
   const watchedDenomination = form.watch("denomination");
@@ -126,6 +174,96 @@ export function CommunityForm({ community, onSuccess, onCancel }: CommunityFormP
       default:
         return [];
     }
+  };
+
+  // Handle logo file selection
+  const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const isEditing = !!community?.id;
+
+  // Handle form submission with logo upload
+  const saveCommunityMutation = useMutation({
+    mutationFn: async (values: CommunityFormValues) => {
+      let logoUrl = values.logoUrl;
+      
+      // Upload logo if a new file was selected
+      if (logoFile) {
+        const formData = new FormData();
+        formData.append('logo', logoFile);
+        
+        const uploadResponse = await fetch('/api/upload/community-logo', {
+          method: 'POST',
+          credentials: 'include',
+          body: formData,
+        });
+        
+        if (uploadResponse.ok) {
+          const uploadResult = await uploadResponse.json();
+          logoUrl = uploadResult.logoUrl;
+        }
+      }
+
+      // Prepare data for submission
+      const submitData = {
+        ...values,
+        logoUrl,
+        socialLinks: {
+          facebook: values.facebookUrl,
+          instagram: values.instagramUrl,
+          twitter: values.twitterUrl,
+          tiktok: values.tiktokUrl,
+          youtube: values.youtubeUrl,
+          linkedin: values.linkedinUrl,
+        },
+        additionalTimes: [
+          values.customTime1 && values.customTime1Label ? {
+            eventLabel: values.customTime1Label,
+            timeSchedule: values.customTime1,
+            language: "English"
+          } : null,
+          values.customTime2 && values.customTime2Label ? {
+            eventLabel: values.customTime2Label,
+            timeSchedule: values.customTime2,
+            language: "English"
+          } : null,
+          values.customTime3 && values.customTime3Label ? {
+            eventLabel: values.customTime3Label,
+            timeSchedule: values.customTime3,
+            language: "English"
+          } : null,
+        ].filter(Boolean),
+      };
+
+      if (isEditing) {
+        return await apiRequest("PUT", `/api/users/communities/${community.id}`, submitData);
+      } else {
+        return await apiRequest("POST", "/api/users/communities", submitData);
+      }
+    },
+    onSuccess: () => {
+      const message = isEditing ? "Community updated successfully" : "Community created successfully";
+      toast({ title: "Success", description: message });
+      queryClient.invalidateQueries({ queryKey: ['/api/users/communities'] });
+      onSuccess();
+    },
+    onError: (error: any) => {
+      toast({ title: "Error", description: error.message || "Failed to save community", variant: "destructive" });
+    },
+  });
+
+  const onSubmit = (values: CommunityFormValues) => {
+    console.log('Submitting comprehensive form with values:', values);
+    saveCommunityMutation.mutate(values);
   };
 
   return (
@@ -168,7 +306,6 @@ export function CommunityForm({ community, onSuccess, onCancel }: CommunityFormP
                       <FormLabel>Community Type *</FormLabel>
                       <Select onValueChange={(value) => {
                         field.onChange(value);
-                        // Clear denomination when type changes
                         form.setValue("denomination", "");
                       }} value={field.value}>
                         <FormControl>
@@ -262,36 +399,65 @@ export function CommunityForm({ community, onSuccess, onCancel }: CommunityFormP
                     </FormItem>
                   )}
                 />
+
+                {/* Logo Upload */}
+                <div>
+                  <FormLabel>Community Logo</FormLabel>
+                  <div className="flex items-center gap-4 mt-2">
+                    {(logoPreview || form.watch("logoUrl")) && (
+                      <div className="relative">
+                        <img
+                          src={logoPreview || form.watch("logoUrl")}
+                          alt="Logo preview"
+                          className="w-20 h-20 object-cover rounded-lg border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0"
+                          onClick={() => {
+                            setLogoPreview('');
+                            setLogoFile(null);
+                            form.setValue("logoUrl", "");
+                          }}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                    <div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-2"
+                      >
+                        <Camera className="h-4 w-4" />
+                        {logoPreview || form.watch("logoUrl") ? 'Change Logo' : 'Upload Logo'}
+                      </Button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoChange}
+                        className="hidden"
+                      />
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
-            {/* Additional Information */}
+            {/* Contact Information */}
             <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Globe className="h-5 w-5" />
-                  Additional Information
+                  <Phone className="h-5 w-5" />
+                  Contact Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="Describe your community..."
-                          {...field}
-                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
                 <FormField
                   control={form.control}
                   name="email"
@@ -346,9 +512,528 @@ export function CommunityForm({ community, onSuccess, onCancel }: CommunityFormP
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="123 Main Street"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>City</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="Anytown"
+                            {...field}
+                            className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>State</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="CA"
+                            {...field}
+                            className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="zipCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>ZIP Code</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="12345"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Service Times */}
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="h-5 w-5" />
+                  Service Times
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="worshipTimes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Main Worship Times</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Sunday 9:00 AM & 11:00 AM"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="sundayService"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sunday Service</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="10:00 AM"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="wednesdayService"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Wednesday Service</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="7:00 PM"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="officeHours"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Office Hours</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Monday-Friday 9:00 AM - 5:00 PM"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Custom Service Times */}
+                <div className="space-y-3">
+                  <FormLabel>Additional Service Times</FormLabel>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <FormField
+                      control={form.control}
+                      name="customTime1Label"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="Service Name"
+                              {...field}
+                              className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="customTime1"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="Time"
+                              {...field}
+                              className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <FormField
+                      control={form.control}
+                      name="customTime2Label"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="Service Name"
+                              {...field}
+                              className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="customTime2"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="Time"
+                              {...field}
+                              className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Social Media Links */}
+            <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="h-5 w-5" />
+                  Social Media Links
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="facebookUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Facebook className="h-4 w-4" />
+                        Facebook
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://facebook.com/yourcommunity"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="instagramUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Instagram className="h-4 w-4" />
+                        Instagram
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://instagram.com/yourcommunity"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="twitterUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Twitter className="h-4 w-4" />
+                        Twitter/X
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://twitter.com/yourcommunity"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="youtubeUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Youtube className="h-4 w-4" />
+                        YouTube
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://youtube.com/yourcommunity"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tiktokUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <FaTiktok className="h-4 w-4" />
+                        TikTok
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://tiktok.com/@yourcommunity"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="linkedinUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Linkedin className="h-4 w-4" />
+                        LinkedIn
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="https://linkedin.com/company/yourcommunity"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </CardContent>
             </Card>
           </div>
+
+          {/* Additional Information */}
+          <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Additional Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Describe your community..."
+                        {...field}
+                        className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="missionStatement"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mission Statement</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Our mission is to..."
+                        {...field}
+                        className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="establishedYear"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Established Year</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number"
+                          placeholder="1985"
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="weeklyAttendance"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Weekly Attendance</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="150"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {watchedType === 'ministry' && (
+                <FormField
+                  control={form.control}
+                  name="parentChurchName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Parent Church Name</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="First Baptist Church"
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {/* Privacy Options */}
+              <div className="space-y-3 border-t pt-4">
+                <h4 className="font-medium">Privacy Options</h4>
+                
+                <FormField
+                  control={form.control}
+                  name="hideAddress"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel>Hide Address</FormLabel>
+                        <div className="text-sm text-muted-foreground">
+                          Don't show address publicly
+                        </div>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="hidePhone"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
+                      <div className="space-y-0.5">
+                        <FormLabel>Hide Phone Number</FormLabel>
+                        <div className="text-sm text-muted-foreground">
+                          Don't show phone number publicly
+                        </div>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Form Actions */}
           <div className="flex justify-end gap-3 pt-6">
