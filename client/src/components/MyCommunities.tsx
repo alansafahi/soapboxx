@@ -199,15 +199,12 @@ export default function MyCommunities() {
               </DialogHeader>
               
               <CommunityForm
-                mode="create"
-                onSubmit={(data) => {
-                  createCommunityMutation.mutate(data);
+                onSuccess={() => {
+                  setCreateCommunityOpen(false);
                 }}
                 onCancel={() => {
                   setCreateCommunityOpen(false);
                 }}
-                isLoading={createCommunityMutation.isPending}
-                submitButtonText="Create Community"
               />
             </DialogContent>
           </Dialog>
