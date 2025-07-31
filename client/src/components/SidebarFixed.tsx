@@ -88,7 +88,7 @@ export default function SidebarFixed() {
     enabled: !!user,
   });
 
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL', 'SOAPBOX PORTAL', 'ACCOUNT']));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL', 'ACCOUNT']));
   const [forceUpdate, setForceUpdate] = useState(0);
 
 
@@ -228,10 +228,7 @@ export default function SidebarFixed() {
       // Show admin portal only for users with actual admin access to communities
       return user && userAdminCommunities?.hasAdminAccess;
     }
-    
-    if (group.label === 'SOAPBOX PORTAL') {
-      return user?.role === 'soapbox_owner';
-    }
+
     
     return true;
   });
@@ -322,7 +319,7 @@ export default function SidebarFixed() {
             // FORCE SPIRITUAL TOOLS TO BE EXPANDED TO SHOW D.I.V.I.N.E.
             const isExpanded = expandedGroups.has(group.label) || 
               group.label === 'SPIRITUAL TOOLS' ||
-              (user?.role === 'soapbox_owner' && (group.label === 'ADMIN PORTAL' || group.label === 'SOAPBOX PORTAL')) ||
+              (user?.role === 'soapbox_owner' && group.label === 'ADMIN PORTAL') ||
               (userAdminCommunities?.hasAdminAccess && group.label === 'ADMIN PORTAL');
             
             return (
