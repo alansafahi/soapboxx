@@ -36,6 +36,7 @@ const formSchema = z.object({
   zipCode: z.string().optional(),
   phone: z.string().optional(),
   email: z.string().email({ message: "Invalid email address." }).optional().or(z.literal('')),
+  adminEmail: z.string().email({ message: "Invalid admin email address." }).optional().or(z.literal('')),
   website: z.string().url({ message: "Invalid URL." }).optional().or(z.literal('')),
   privacySetting: z.string().default('public'),
   logoUrl: z.string().optional(),
@@ -58,13 +59,25 @@ const formSchema = z.object({
   // Custom Times
   customTime1: z.string().optional(),
   customTime1Label: z.string().optional(),
+  customTime1Language: z.string().optional(),
   customTime2: z.string().optional(),
   customTime2Label: z.string().optional(),
+  customTime2Language: z.string().optional(),
   customTime3: z.string().optional(),
   customTime3Label: z.string().optional(),
+  customTime3Language: z.string().optional(),
   // Privacy Settings
   hideAddress: z.boolean().default(false),
   hidePhone: z.boolean().default(false),
+}).refine((data) => {
+  // Weekly attendance is required for churches only
+  if (data.type === 'church' && !data.weeklyAttendance) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Weekly attendance is required for churches",
+  path: ["weeklyAttendance"]
 });
 
 type CommunityFormValues = z.infer<typeof formSchema>;
@@ -458,35 +471,7 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                   />
                 )}
 
-                <FormField
-                  control={form.control}
-                  name="weeklyAttendance"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Weekly Attendance</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="bg-white dark:bg-gray-700 text-black dark:text-white">
-                            <SelectValue placeholder="Select attendance range..." />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent 
-                          className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-lg z-[9999]"
-                          sideOffset={5}
-                        >
-                          <SelectItem value="Under 50" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Under 50</SelectItem>
-                          <SelectItem value="50-100" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">50-100</SelectItem>
-                          <SelectItem value="100-200" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">100-200</SelectItem>
-                          <SelectItem value="200-500" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">200-500</SelectItem>
-                          <SelectItem value="500-1000" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">500-1000</SelectItem>
-                          <SelectItem value="1000-2000" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">1000-2000</SelectItem>
-                          <SelectItem value="Over 2000" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Over 2000</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+
 
                 {watchedDenomination === 'Other' && (
                   <FormField
@@ -616,13 +601,14 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
 
                 <FormField
                   control={form.control}
-                  name="phone"
+                  name="adminEmail"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone</FormLabel>
+                      <FormLabel>Admin Email (for role assignment)</FormLabel>
                       <FormControl>
                         <Input 
-                          placeholder="(555) 123-4567"
+                          type="email"
+                          placeholder="admin@community.org"
                           {...field}
                           className="bg-white dark:bg-gray-700 text-black dark:text-white"
                         />
@@ -631,6 +617,49 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                     </FormItem>
                   )}
                 />
+
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <div className="flex items-center justify-between">
+                          <FormLabel>Phone</FormLabel>
+                          {(watchedType === 'ministry' || watchedType === 'group') && (
+                            <div className="flex items-center space-x-2">
+                              <FormField
+                                control={form.control}
+                                name="hidePhone"
+                                render={({ field: hideField }) => (
+                                  <FormItem className="flex items-center space-x-2">
+                                    <FormControl>
+                                      <Switch
+                                        checked={hideField.value}
+                                        onCheckedChange={hideField.onChange}
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="text-sm text-gray-600 dark:text-gray-400">
+                                      Don't show phone number publicly
+                                    </FormLabel>
+                                  </FormItem>
+                                )}
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <FormControl>
+                          <Input 
+                            placeholder="(555) 123-4567"
+                            {...field}
+                            className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <FormField
                   control={form.control}
@@ -655,7 +684,30 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                   name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Address</FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Address</FormLabel>
+                        {(watchedType === 'ministry' || watchedType === 'group') && (
+                          <div className="flex items-center space-x-2">
+                            <FormField
+                              control={form.control}
+                              name="hideAddress"
+                              render={({ field: hideField }) => (
+                                <FormItem className="flex items-center space-x-2">
+                                  <FormControl>
+                                    <Switch
+                                      checked={hideField.value}
+                                      onCheckedChange={hideField.onChange}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="text-sm text-gray-600 dark:text-gray-400">
+                                    Don't show address publicly
+                                  </FormLabel>
+                                </FormItem>
+                              )}
+                            />
+                          </div>
+                        )}
+                      </div>
                       <FormControl>
                         <Input 
                           placeholder="123 Main Street"
@@ -811,7 +863,7 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                 <div className="space-y-3">
                   <FormLabel>Additional Service Times</FormLabel>
                   
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <FormField
                       control={form.control}
                       name="customTime1Label"
@@ -834,7 +886,7 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                         <FormItem>
                           <FormControl>
                             <Input 
-                              placeholder="Time"
+                              placeholder="Date & Time"
                               {...field}
                               className="bg-white dark:bg-gray-700 text-black dark:text-white"
                             />
@@ -842,9 +894,43 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name="customTime1Language"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="bg-white dark:bg-gray-700 text-black dark:text-white">
+                                <SelectValue placeholder="Language" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent 
+                              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-lg z-[9999]"
+                              sideOffset={5}
+                            >
+                              <SelectItem value="English" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">English</SelectItem>
+                              <SelectItem value="Spanish" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Spanish</SelectItem>
+                              <SelectItem value="French" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">French</SelectItem>
+                              <SelectItem value="German" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">German</SelectItem>
+                              <SelectItem value="Italian" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Italian</SelectItem>
+                              <SelectItem value="Portuguese" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Portuguese</SelectItem>
+                              <SelectItem value="Russian" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Russian</SelectItem>
+                              <SelectItem value="Arabic" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Arabic</SelectItem>
+                              <SelectItem value="Farsi" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Farsi</SelectItem>
+                              <SelectItem value="Chinese" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Chinese</SelectItem>
+                              <SelectItem value="Korean" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Korean</SelectItem>
+                              <SelectItem value="Japanese" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Japanese</SelectItem>
+                              <SelectItem value="Hindi" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Hindi</SelectItem>
+                              <SelectItem value="Other" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <FormField
                       control={form.control}
                       name="customTime2Label"
@@ -867,7 +953,7 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                         <FormItem>
                           <FormControl>
                             <Input 
-                              placeholder="Time"
+                              placeholder="Date & Time"
                               {...field}
                               className="bg-white dark:bg-gray-700 text-black dark:text-white"
                             />
@@ -875,9 +961,43 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name="customTime2Language"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="bg-white dark:bg-gray-700 text-black dark:text-white">
+                                <SelectValue placeholder="Language" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent 
+                              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-lg z-[9999]"
+                              sideOffset={5}
+                            >
+                              <SelectItem value="English" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">English</SelectItem>
+                              <SelectItem value="Spanish" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Spanish</SelectItem>
+                              <SelectItem value="French" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">French</SelectItem>
+                              <SelectItem value="German" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">German</SelectItem>
+                              <SelectItem value="Italian" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Italian</SelectItem>
+                              <SelectItem value="Portuguese" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Portuguese</SelectItem>
+                              <SelectItem value="Russian" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Russian</SelectItem>
+                              <SelectItem value="Arabic" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Arabic</SelectItem>
+                              <SelectItem value="Farsi" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Farsi</SelectItem>
+                              <SelectItem value="Chinese" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Chinese</SelectItem>
+                              <SelectItem value="Korean" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Korean</SelectItem>
+                              <SelectItem value="Japanese" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Japanese</SelectItem>
+                              <SelectItem value="Hindi" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Hindi</SelectItem>
+                              <SelectItem value="Other" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <FormField
                       control={form.control}
                       name="customTime3Label"
@@ -900,11 +1020,45 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                         <FormItem>
                           <FormControl>
                             <Input 
-                              placeholder="Time"
+                              placeholder="Date & Time"
                               {...field}
                               className="bg-white dark:bg-gray-700 text-black dark:text-white"
                             />
                           </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="customTime3Language"
+                      render={({ field }) => (
+                        <FormItem>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="bg-white dark:bg-gray-700 text-black dark:text-white">
+                                <SelectValue placeholder="Language" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent 
+                              className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-lg z-[9999]"
+                              sideOffset={5}
+                            >
+                              <SelectItem value="English" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">English</SelectItem>
+                              <SelectItem value="Spanish" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Spanish</SelectItem>
+                              <SelectItem value="French" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">French</SelectItem>
+                              <SelectItem value="German" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">German</SelectItem>
+                              <SelectItem value="Italian" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Italian</SelectItem>
+                              <SelectItem value="Portuguese" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Portuguese</SelectItem>
+                              <SelectItem value="Russian" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Russian</SelectItem>
+                              <SelectItem value="Arabic" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Arabic</SelectItem>
+                              <SelectItem value="Farsi" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Farsi</SelectItem>
+                              <SelectItem value="Chinese" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Chinese</SelectItem>
+                              <SelectItem value="Korean" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Korean</SelectItem>
+                              <SelectItem value="Japanese" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Japanese</SelectItem>
+                              <SelectItem value="Hindi" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Hindi</SelectItem>
+                              <SelectItem value="Other" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </FormItem>
                       )}
                     />
@@ -1146,23 +1300,38 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="weeklyAttendance"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Weekly Attendance</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="150"
-                          {...field}
-                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {/* Weekly Attendance only for churches */}
+                {watchedType === 'church' && (
+                  <FormField
+                    control={form.control}
+                    name="weeklyAttendance"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Weekly Attendance *</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="bg-white dark:bg-gray-700 text-black dark:text-white">
+                              <SelectValue placeholder="Select attendance range..." />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent 
+                            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-lg z-[9999]"
+                            sideOffset={5}
+                          >
+                            <SelectItem value="Under 50" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Under 50</SelectItem>
+                            <SelectItem value="50-100" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">50-100</SelectItem>
+                            <SelectItem value="100-200" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">100-200</SelectItem>
+                            <SelectItem value="200-500" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">200-500</SelectItem>
+                            <SelectItem value="500-1000" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">500-1000</SelectItem>
+                            <SelectItem value="1000-2000" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">1000-2000</SelectItem>
+                            <SelectItem value="Over 2000" className="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white">Over 2000</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </div>
 
               {watchedType === 'ministry' && (
@@ -1185,52 +1354,7 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                 />
               )}
 
-              {/* Privacy Options */}
-              <div className="space-y-3 border-t pt-4">
-                <h4 className="font-medium">Privacy Options</h4>
-                
-                <FormField
-                  control={form.control}
-                  name="hideAddress"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                      <div className="space-y-0.5">
-                        <FormLabel>Hide Address</FormLabel>
-                        <div className="text-sm text-muted-foreground">
-                          Don't show address publicly
-                        </div>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
 
-                <FormField
-                  control={form.control}
-                  name="hidePhone"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3">
-                      <div className="space-y-0.5">
-                        <FormLabel>Hide Phone Number</FormLabel>
-                        <div className="text-sm text-muted-foreground">
-                          Don't show phone number publicly
-                        </div>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
             </CardContent>
           </Card>
 
