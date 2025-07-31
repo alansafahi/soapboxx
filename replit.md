@@ -66,3 +66,16 @@ Focus on functionality over technical implementation details.
   - DropdownMenuSubContent: z-50 → z-[60]  
   - SelectContent: z-50 → z-[60]
 - **Impact**: All dropdown menus now properly appear above dialog modals, improving user interaction flow
+
+### SOAP Entry Functionality Fixes (July 31, 2025)
+- **Issue Resolved**: Fixed Amen reaction counter and reflection functionality in SOAP entries
+- **Root Cause**: Counter wasn't updating immediately; reflection endpoint had authentication issues
+- **Solution**: 
+  - Added local state management with immediate UI updates for reaction counts
+  - Fixed unified authentication handling in reflection/save endpoints (session + user claims)
+  - Enhanced error handling and logging for debugging
+- **Features Confirmed**: 
+  - Self-reflection capability: Users can reflect on their own SOAP entries for deeper study
+  - Progressive spiritual learning: Multiple reflection passes help memorize and internalize scripture
+  - Personal growth tracking: Users can revisit and build upon their own insights over time
+- **Impact**: Complete SOAP entry interaction functionality with optimistic UI updates and proper authentication
