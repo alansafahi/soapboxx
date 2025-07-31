@@ -197,9 +197,7 @@ export function CommunityAdminTab() {
     },
   });
 
-  const handleCommunitySubmit = (formData: any) => {
-    saveProfileMutation.mutate(formData);
-  };
+  // Remove old handleCommunitySubmit as the universal form handles its own submission
 
   // Show authentication prompt if user is not logged in
   if (authLoading) {
@@ -346,9 +344,13 @@ export function CommunityAdminTab() {
               <CommunityForm
                 mode="edit"
                 initialData={selectedCommunity}
-                onSubmit={handleCommunitySubmit}
-                isLoading={saveProfileMutation.isPending}
-                submitButtonText="Save Changes"
+                onSuccess={() => {
+                  toast({ title: "Success", description: "Community profile updated successfully!" });
+                  queryClient.invalidateQueries({ queryKey: ['community-details', selectedCommunityId] });
+                }}
+                onCancel={() => {
+                  // No cancel action needed for admin form
+                }}
               />
             </div>
           </TabsContent>

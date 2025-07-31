@@ -105,13 +105,55 @@ const GROUP_TYPE_OPTIONS = [
   "Recovery Group", "Grief Support Group", "Financial Peace Group", "Other"
 ];
 
+interface CommunityData {
+  id?: number;
+  name: string;
+  type: string;
+  denomination?: string;
+  customDenomination?: string;
+  description?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  privacySetting: string;
+  logoUrl?: string;
+  establishedYear?: number;
+  weeklyAttendance?: string;
+  parentChurchName?: string;
+  missionStatement?: string;
+  socialLinks?: {
+    facebook?: string;
+    instagram?: string;
+    twitter?: string;
+    tiktok?: string;
+    youtube?: string;
+    linkedin?: string;
+  };
+  officeHours?: string;
+  worshipTimes?: string;
+  sundayService?: string;
+  wednesdayService?: string;
+  additionalTimes?: Array<{
+    eventLabel: string;
+    timeSchedule: string;
+    language: string;
+  }>;
+  hideAddress?: boolean;
+  hidePhone?: boolean;
+}
+
 interface CommunityFormProps {
-  community?: any;
+  mode: 'create' | 'edit';
+  initialData?: CommunityData; // Community data for editing mode
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export function CommunityForm({ community, onSuccess, onCancel }: CommunityFormProps) {
+export function CommunityForm({ mode, initialData, onSuccess, onCancel }: CommunityFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -121,42 +163,42 @@ export function CommunityForm({ community, onSuccess, onCancel }: CommunityFormP
   const form = useForm<CommunityFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: community?.name || "",
-      type: community?.type || "",
-      denomination: community?.denomination || "",
-      customDenomination: community?.customDenomination || "",
-      description: community?.description || "",
-      address: community?.address || "",
-      city: community?.city || "",
-      state: community?.state || "",
-      zipCode: community?.zipCode || "",
-      phone: community?.phone || "",
-      email: community?.email || "",
-      website: community?.website || "",
-      privacySetting: community?.privacySetting || "public",
-      logoUrl: community?.logoUrl || "",
-      establishedYear: community?.establishedYear || undefined,
-      weeklyAttendance: community?.weeklyAttendance || "",
-      parentChurchName: community?.parentChurchName || "",
-      missionStatement: community?.missionStatement || "",
-      facebookUrl: community?.socialLinks?.facebook || "",
-      instagramUrl: community?.socialLinks?.instagram || "",
-      twitterUrl: community?.socialLinks?.twitter || "",
-      tiktokUrl: community?.socialLinks?.tiktok || "",
-      youtubeUrl: community?.socialLinks?.youtube || "",
-      linkedinUrl: community?.socialLinks?.linkedin || "",
-      officeHours: community?.officeHours || "",
-      worshipTimes: community?.worshipTimes || "",
-      sundayService: community?.sundayService || "",
-      wednesdayService: community?.wednesdayService || "",
-      customTime1: community?.additionalTimes?.[0]?.timeSchedule || "",
-      customTime1Label: community?.additionalTimes?.[0]?.eventLabel || "",
-      customTime2: community?.additionalTimes?.[1]?.timeSchedule || "",
-      customTime2Label: community?.additionalTimes?.[1]?.eventLabel || "",
-      customTime3: community?.additionalTimes?.[2]?.timeSchedule || "",
-      customTime3Label: community?.additionalTimes?.[2]?.eventLabel || "",
-      hideAddress: community?.hideAddress || false,
-      hidePhone: community?.hidePhone || false,
+      name: initialData?.name || "",
+      type: initialData?.type || "",
+      denomination: initialData?.denomination || "",
+      customDenomination: initialData?.customDenomination || "",
+      description: initialData?.description || "",
+      address: initialData?.address || "",
+      city: initialData?.city || "",
+      state: initialData?.state || "",
+      zipCode: initialData?.zipCode || "",
+      phone: initialData?.phone || "",
+      email: initialData?.email || "",
+      website: initialData?.website || "",
+      privacySetting: initialData?.privacySetting || "public",
+      logoUrl: initialData?.logoUrl || "",
+      establishedYear: initialData?.establishedYear || undefined,
+      weeklyAttendance: initialData?.weeklyAttendance || "",
+      parentChurchName: initialData?.parentChurchName || "",
+      missionStatement: initialData?.missionStatement || "",
+      facebookUrl: initialData?.socialLinks?.facebook || "",
+      instagramUrl: initialData?.socialLinks?.instagram || "",
+      twitterUrl: initialData?.socialLinks?.twitter || "",
+      tiktokUrl: initialData?.socialLinks?.tiktok || "",
+      youtubeUrl: initialData?.socialLinks?.youtube || "",
+      linkedinUrl: initialData?.socialLinks?.linkedin || "",
+      officeHours: initialData?.officeHours || "",
+      worshipTimes: initialData?.worshipTimes || "",
+      sundayService: initialData?.sundayService || "",
+      wednesdayService: initialData?.wednesdayService || "",
+      customTime1: initialData?.additionalTimes?.[0]?.timeSchedule || "",
+      customTime1Label: initialData?.additionalTimes?.[0]?.eventLabel || "",
+      customTime2: initialData?.additionalTimes?.[1]?.timeSchedule || "",
+      customTime2Label: initialData?.additionalTimes?.[1]?.eventLabel || "",
+      customTime3: initialData?.additionalTimes?.[2]?.timeSchedule || "",
+      customTime3Label: initialData?.additionalTimes?.[2]?.eventLabel || "",
+      hideAddress: initialData?.hideAddress || false,
+      hidePhone: initialData?.hidePhone || false,
     },
   });
 
@@ -189,7 +231,7 @@ export function CommunityForm({ community, onSuccess, onCancel }: CommunityFormP
     }
   };
 
-  const isEditing = !!community?.id;
+  const isEditing = mode === 'edit' && !!initialData?.id;
 
   // Handle form submission with logo upload
   const saveCommunityMutation = useMutation({
@@ -245,7 +287,7 @@ export function CommunityForm({ community, onSuccess, onCancel }: CommunityFormP
       };
 
       if (isEditing) {
-        return await apiRequest("PUT", `/api/users/communities/${community.id}`, submitData);
+        return await apiRequest("PUT", `/api/users/communities/${initialData.id}`, submitData);
       } else {
         return await apiRequest("POST", "/api/users/communities", submitData);
       }

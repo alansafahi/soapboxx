@@ -199,6 +199,7 @@ export default function MyCommunities() {
               </DialogHeader>
               
               <CommunityForm
+                mode="create"
                 onSuccess={() => {
                   setCreateCommunityOpen(false);
                 }}
