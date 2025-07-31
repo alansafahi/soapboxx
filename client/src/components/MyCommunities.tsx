@@ -568,7 +568,7 @@ export default function MyCommunities() {
                       name="type"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Type</FormLabel>
+                          <FormLabel>Community Type</FormLabel>
                           <Select onValueChange={(value) => {
                             field.onChange(value);
                             createForm.setValue("denomination", "");
@@ -599,7 +599,7 @@ export default function MyCommunities() {
                         return (
                           <FormItem>
                             <FormLabel>
-                              {selectedType === 'church' ? 'Denomination *' : 'Affiliation *'}
+                              {selectedType === 'church' ? 'Denomination *' : selectedType === 'ministry' ? 'Ministry Type *' : 'Group Type *'}
                             </FormLabel>
                             <Select onValueChange={(value) => {
                               if (value === "other") {
