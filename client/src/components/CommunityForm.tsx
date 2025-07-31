@@ -151,7 +151,7 @@ export function CommunityForm({
   isLoading = false,
   submitButtonText = mode === "create" ? "Create Community" : "Save Changes"
 }: CommunityFormProps) {
-  console.log('🎯 CommunityForm rendering with props:', { mode, initialData, isLoading, submitButtonText });
+
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState<CommunityFormData>(() => {
     // Map database fields to form fields
