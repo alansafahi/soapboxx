@@ -1112,6 +1112,10 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                   <Globe className="h-5 w-5" />
                   Social Media Links
                 </CardTitle>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                  Only social media platforms with completed URLs will appear on your public community profile. 
+                  Leave fields blank to hide them from public view.
+                </p>
               </CardHeader>
               <CardContent className="space-y-4">
                 <FormField
