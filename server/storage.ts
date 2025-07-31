@@ -19,6 +19,7 @@ import {
   discussionBookmarks,
   soapEntries,
   soapComments,
+  soapReactions,
   soapBookmarks,
   reactions,
   prayerRequests,
@@ -676,7 +677,7 @@ export interface IStorage {
   getLeaderboard(type: string, category: string, churchId?: number): Promise<LeaderboardEntry[]>;
 
   // SOAP operations
-  addSoapReaction(soapId: number, userId: string, reactionType: string, emoji: string): Promise<void>;
+  addSoapReaction(soapId: number, userId: string, reactionType: string, emoji: string): Promise<{ reacted: boolean; reactionCount: number }>;
   saveSoapEntry(soapId: number, userId: string): Promise<void>;
   getSavedSoapEntries(userId: string): Promise<any[]>;
   removeSavedSoapEntry(soapId: number, userId: string): Promise<void>;
@@ -6929,6 +6930,76 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Failed to send moderation alert:', error);
       // Don't throw error - moderation alert failure shouldn't break the report process
+    }
+  }
+
+  // SOAP Reaction implementation - missing method
+  async addSoapReaction(soapId: number, userId: string, reactionType: string, emoji: string): Promise<{ reacted: boolean; reactionCount: number }> {
+    try {
+      // Check if reaction already exists
+      const existingReaction = await db
+        .select()
+        .from(soapReactions)
+        .where(and(
+          eq(soapReactions.soapId, soapId),
+          eq(soapReactions.userId, userId),
+          eq(soapReactions.reactionType, reactionType)
+        ));
+
+      if (existingReaction.length > 0) {
+        // Remove existing reaction
+        await db
+          .delete(soapReactions)
+          .where(and(
+            eq(soapReactions.soapId, soapId),
+            eq(soapReactions.userId, userId),
+            eq(soapReactions.reactionType, reactionType)
+          ));
+
+        // Get updated count
+        const reactionCount = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(soapReactions)
+          .where(and(
+            eq(soapReactions.soapId, soapId),
+            eq(soapReactions.reactionType, reactionType)
+          ));
+
+        return { reacted: false, reactionCount: Number(reactionCount[0]?.count || 0) };
+      } else {
+        // Add new reaction
+        await db
+          .insert(soapReactions)
+          .values({
+            soapId,
+            userId,
+            reactionType,
+            emoji,
+            createdAt: new Date()
+          });
+
+        // Track user activity for engagement
+        await this.trackUserActivity({
+          userId: userId,
+          activityType: 'soap_reaction',
+          entityId: soapId,
+          points: 2,
+        });
+
+        // Get updated count
+        const reactionCount = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(soapReactions)
+          .where(and(
+            eq(soapReactions.soapId, soapId),
+            eq(soapReactions.reactionType, reactionType)
+          ));
+
+        return { reacted: true, reactionCount: Number(reactionCount[0]?.count || 1) };
+      }
+    } catch (error) {
+      console.error('Failed to add SOAP reaction:', error);
+      throw new Error('Failed to add reaction');
     }
   }
 

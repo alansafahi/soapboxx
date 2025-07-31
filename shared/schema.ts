@@ -1335,6 +1335,18 @@ export const soapComments = pgTable("soap_comments", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// SOAP Reactions - For "Amen", likes, and other spiritual reactions
+export const soapReactions = pgTable("soap_reactions", {
+  id: serial("id").primaryKey(),
+  soapId: integer("soap_id").notNull().references(() => soapEntries.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  reactionType: varchar("reaction_type", { length: 20 }).notNull(), // "amen", "like", "heart", etc.
+  emoji: varchar("emoji", { length: 10 }), // Optional emoji representation
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userSoapReactionUnique: unique().on(table.userId, table.soapId, table.reactionType),
+}));
+
 // SOAP Bookmarks - Dedicated table for saved SOAP reflections
 export const soapBookmarks = pgTable("soap_bookmarks", {
   id: serial("id").primaryKey(),
@@ -2782,6 +2794,10 @@ export type InsertBibleVerseShare = typeof bibleVerseShares.$inferInsert;
 // S.O.A.P. Entry Types
 export type SoapEntry = typeof soapEntries.$inferSelect;
 export type InsertSoapEntry = typeof soapEntries.$inferInsert;
+
+// SOAP Reaction Types
+export type SoapReaction = typeof soapReactions.$inferSelect;
+export type InsertSoapReaction = typeof soapReactions.$inferInsert;
 
 // SOAP Bookmark Types
 export type SoapBookmark = typeof soapBookmarks.$inferSelect;

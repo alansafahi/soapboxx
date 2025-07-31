@@ -199,8 +199,8 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
       if (soapData) {
         await apiRequest('POST', '/api/soap-entries/reflect', {
           originalSoapId: post.id,
-          scripture: soapData.scripture,
-          scriptureReference: soapData.scriptureReference
+          scripture: soapData?.scripture,
+          scriptureReference: soapData?.scriptureReference
           // Note: observation, application, and prayer intentionally omitted to encourage personal reflection
         });
         toast({
@@ -340,10 +340,10 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
             </div>
             <div className="flex-1">
               <h3 className="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-2">
-                Scripture • {soapData.scriptureReference}
+                Scripture • {soapData?.scriptureReference}
               </h3>
               <blockquote className="text-sm text-gray-700 dark:text-gray-200 italic border-l-2 border-purple-200 dark:border-purple-700 pl-3">
-                {soapData.scripture}
+                {soapData?.scripture}
               </blockquote>
             </div>
           </div>
@@ -352,7 +352,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
         {/* Collapsible SOAP Sections */}
         <div className="space-y-2">
           {/* Observation - Only show if content exists */}
-          {soapData.observation && soapData.observation.trim() && (
+          {soapData?.observation && soapData?.observation.trim() !== '' ? (
             <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg border border-blue-100 dark:border-blue-800">
               <div className="p-3">
                 <div className="flex items-center space-x-3 mb-2">
@@ -366,10 +366,10 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                 
                 <div className="ml-9">
                   <p className="text-sm text-gray-700 dark:text-gray-200">
-                    {expandedSections.observation ? soapData.observation : truncateText(soapData.observation)}
+                    {expandedSections.observation ? soapData?.observation : truncateText(soapData?.observation || '')}
                   </p>
                   
-                  {soapData.observation.length > 120 && (
+                  {(soapData?.observation?.length || 0) > 120 && (
                     <button
                       onClick={() => toggleSection('observation')}
                       className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 mt-1 flex items-center space-x-1"
@@ -385,10 +385,10 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                 </div>
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Application - Only show if content exists */}
-          {soapData.application && soapData.application.trim() && (
+          {soapData?.application && soapData?.application.trim() !== '' ? (
             <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg border border-green-100 dark:border-green-800">
               <div className="p-3">
                 <div className="flex items-center space-x-3 mb-2">
@@ -402,10 +402,10 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                 
                 <div className="ml-9">
                   <p className="text-sm text-gray-700 dark:text-gray-200">
-                    {expandedSections.application ? soapData.application : truncateText(soapData.application)}
+                    {expandedSections.application ? soapData?.application : truncateText(soapData?.application || '')}
                   </p>
                   
-                  {soapData.application.length > 120 && (
+                  {(soapData?.application?.length || 0) > 120 && (
                     <button
                       onClick={() => toggleSection('application')}
                       className="text-xs text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 mt-1 flex items-center space-x-1"
@@ -421,10 +421,10 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                 </div>
               </div>
             </div>
-          )}
+          ) : null}
 
           {/* Prayer - Only show if content exists */}
-          {soapData.prayer && soapData.prayer.trim() && (
+          {soapData?.prayer && soapData?.prayer.trim() !== '' ? (
             <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg border border-amber-100 dark:border-amber-800">
               <div className="p-3">
                 <div className="flex items-center space-x-3 mb-2">
@@ -438,10 +438,10 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                 
                 <div className="ml-9">
                   <p className="text-sm text-gray-700 dark:text-gray-200">
-                    {expandedSections.prayer ? soapData.prayer : truncateText(soapData.prayer)}
+                    {expandedSections.prayer ? soapData?.prayer : truncateText(soapData?.prayer || '')}
                   </p>
                   
-                  {soapData.prayer.length > 120 && (
+                  {(soapData?.prayer?.length || 0) > 120 && (
                     <button
                       onClick={() => toggleSection('prayer')}
                       className="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 mt-1 flex items-center space-x-1"
@@ -457,7 +457,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                 </div>
               </div>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Spiritual Reaction Bar */}
