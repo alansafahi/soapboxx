@@ -193,17 +193,22 @@ export default function MyCommunities() {
                 </DialogDescription>
               </DialogHeader>
               
-              <CommunityForm
-                mode="create"
-                onSubmit={(data) => {
-                  createCommunityMutation.mutate(data);
-                }}
-                onCancel={() => {
-                  setCreateCommunityOpen(false);
-                }}
-                isLoading={createCommunityMutation.isPending}
-                submitButtonText="Create Community"
-              />
+              <div style={{ backgroundColor: 'red', padding: '20px', minHeight: '200px' }}>
+                <h2 style={{ color: 'white' }}>DEBUG: Modal Content Container</h2>
+                <CommunityForm
+                  mode="create"
+                  onSubmit={(data) => {
+                    console.log('Form submitted:', data);
+                    createCommunityMutation.mutate(data);
+                  }}
+                  onCancel={() => {
+                    console.log('Form cancelled');
+                    setCreateCommunityOpen(false);
+                  }}
+                  isLoading={createCommunityMutation.isPending}
+                  submitButtonText="Create Community"
+                />
+              </div>
             </DialogContent>
           </Dialog>
         </div>
