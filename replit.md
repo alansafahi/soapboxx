@@ -171,5 +171,5 @@ Focus on functionality over technical implementation details.
   - **Legal Document Integration**: Terms of Service and Privacy Policy now link to actual website (soapboxsuperapp.com/terms-of-service and soapboxsuperapp.com/privacy-policy)
   - **React Fragment Warning Fixed**: Replaced problematic Fragment component with proper div structure in step indicator
   - **Error Handling Enhancement**: Improved API error response parsing for better user-friendly messaging
-- **User Flow**: "Get Started" → Registration → Onboarding (with pre-populated data) → Dashboard
+- **User Flow**: "Get Started" → Onboarding (complete registration + profile setup) → Dashboard
 - **Impact**: Eliminates duplicate data entry, provides professional legal document access, and ensures clean error-free interface for seamless user onboarding experience

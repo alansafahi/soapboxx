@@ -20,8 +20,8 @@ export default function Landing() {
     } catch (error) {
     }
     
-    // Navigate to signup page for new user registration
-    setLocation('/signup');
+    // Navigate directly to onboarding page for streamlined registration
+    setLocation('/onboarding');
   };
 
   const handleLogout = async () => {
