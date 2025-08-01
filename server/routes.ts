@@ -1246,10 +1246,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           u.email,
           u.profile_image_url as "profileImageUrl",
           uc.role,
-          uc.church_id as "communityId"
+          uc.community_id as "communityId"
         FROM users u
         INNER JOIN user_churches uc ON u.id = uc.user_id
-        WHERE uc.church_id = ${currentUserChurch.communityId}
+        WHERE uc.community_id = ${currentUserChurch.communityId}
         AND uc.is_active = true
         AND u.id != ${userId}
       `);
@@ -1426,12 +1426,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get all inactive staff positions for this user
       const result = await pool.query(`
         SELECT 
-          uc.church_id as "communityId",
+          uc.community_id as "communityId",
           uc.role,
           uc.title,
           c.name as "communityName"
         FROM user_churches uc
-        JOIN communities c ON uc.church_id = c.id
+        JOIN communities c ON uc.community_id = c.id
         WHERE uc.user_id = $1 AND uc.is_active = false
       `, [userId]);
 
@@ -1459,7 +1459,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if user has a pending staff invitation (inactive role)
       const result = await pool.query(
-        'SELECT * FROM user_churches WHERE user_id = $1 AND church_id = $2 AND role = $3 AND is_active = false',
+        'SELECT * FROM user_churches WHERE user_id = $1 AND community_id = $2 AND role = $3 AND is_active = false',
         [userId, communityId, role]
       );
 
@@ -1548,7 +1548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get communities where user is an admin
       const adminCommunitiesResult = await pool.query(`
-        SELECT DISTINCT uc.church_id
+        SELECT DISTINCT uc.community_id
         FROM user_churches uc
         WHERE uc.user_id = $1 
         AND uc.is_active = true
@@ -1559,7 +1559,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
 
-      const communityIds = adminCommunitiesResult.rows.map(row => row.church_id);
+      const communityIds = adminCommunitiesResult.rows.map(row => row.community_id);
 
       // Get recently activated staff members in these communities (last 7 days)
       const recentStaffResult = await pool.query(`
@@ -1576,8 +1576,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           c.id as community_id
         FROM users u
         JOIN user_churches uc ON u.id = uc.user_id
-        JOIN communities c ON uc.church_id = c.id
-        WHERE uc.church_id = ANY($1)
+        JOIN communities c ON uc.community_id = c.id
+        WHERE uc.community_id = ANY($1)
         AND uc.is_active = true
         AND uc.joined_at >= NOW() - INTERVAL '7 days'
         AND u.id != $2
@@ -1620,11 +1620,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get communities where user has admin roles
       const adminCommunitiesResult = await pool.query(`
         SELECT DISTINCT 
-          uc.church_id,
+          uc.community_id,
           uc.role,
           c.name as community_name
         FROM user_churches uc
-        JOIN communities c ON uc.church_id = c.id
+        JOIN communities c ON uc.community_id = c.id
         WHERE uc.user_id = $1 
         AND uc.is_active = true
         AND uc.role IN ('lead_pastor', 'associate_pastor', 'administrator', 'church_admin', 'pastor', 'admin')
@@ -1632,7 +1632,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       `, [userId]);
 
       const adminCommunities = adminCommunitiesResult.rows.map(row => ({
-        communityId: row.church_id,
+        communityId: row.community_id,
         role: row.role,
         communityName: row.community_name
       }));
@@ -3436,7 +3436,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
       // Check if user already has ANY role in this community (active or inactive)
       const existingRole = await pool.query(
-        'SELECT * FROM user_churches WHERE user_id = $1 AND church_id = $2 LIMIT 1',
+        'SELECT * FROM user_churches WHERE user_id = $1 AND community_id = $2 LIMIT 1',
         [userId, communityId]
       );
 
@@ -3451,19 +3451,19 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       // update their role to the new one
       if (currentRole.is_active && currentRole.role !== role) {
         await pool.query(
-          'UPDATE user_churches SET role = $1, title = $2, assigned_at = NOW() WHERE user_id = $3 AND church_id = $4',
+          'UPDATE user_churches SET role = $1, title = $2, assigned_at = NOW() WHERE user_id = $3 AND community_id = $4',
           [role, role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()), userId, communityId]
         );
       } else if (!currentRole.is_active && currentRole.role === role) {
         // This is a pending invitation for the exact role - activate it
         await pool.query(
-          'UPDATE user_churches SET is_active = true, joined_at = NOW() WHERE user_id = $1 AND church_id = $2',
+          'UPDATE user_churches SET is_active = true, joined_at = NOW() WHERE user_id = $1 AND community_id = $2',
           [userId, communityId]
         );
       } else if (!currentRole.is_active && currentRole.role !== role) {
         // Update pending invitation to new role and activate
         await pool.query(
-          'UPDATE user_churches SET role = $1, title = $2, is_active = true, joined_at = NOW() WHERE user_id = $3 AND church_id = $4',
+          'UPDATE user_churches SET role = $1, title = $2, is_active = true, joined_at = NOW() WHERE user_id = $3 AND community_id = $4',
           [role, role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()), userId, communityId]
         );
       } else {
@@ -8641,7 +8641,7 @@ Return JSON with this exact structure:
       }
 
       // Check if user has admin access to this church
-      const userChurch = await storage.getUserCommunityRole(userId, feature.church_id);
+      const userChurch = await storage.getUserCommunityRole(userId, feature.community_id);
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
       
       const user = await storage.getUser(userId);
@@ -8656,7 +8656,7 @@ Return JSON with this exact structure:
       } else {
         // Check if user created this church by looking for admin churches
         const adminChurches = await storage.getUserCreatedChurches(userId);
-        hasAccess = adminChurches.some(church => church.id === feature.church_id);
+        hasAccess = adminChurches.some(church => church.id === feature.community_id);
       }
       
       if (!hasAccess) {
@@ -8664,7 +8664,7 @@ Return JSON with this exact structure:
       }
 
       const updatedFeature = await storage.updateChurchFeatureSetting({
-        communityId: feature.church_id,
+        communityId: feature.community_id,
         featureCategory: feature.feature_category,
         featureName: feature.feature_name,
         isEnabled,
@@ -12763,7 +12763,7 @@ Please provide suggestions for the missing or incomplete sections.`
           COUNT(CASE WHEN DATE(donation_date) = CURRENT_DATE THEN 1 END) as today_donations,
           SUM(CASE WHEN DATE(donation_date) = CURRENT_DATE THEN amount ELSE 0 END) as today_amount
         FROM donations 
-        WHERE method = 'SMS' AND church_id = ${communityId} AND status = 'completed'
+        WHERE method = 'SMS' AND community_id = ${communityId} AND status = 'completed'
       `);
 
       const stats = smsStats.rows[0];
