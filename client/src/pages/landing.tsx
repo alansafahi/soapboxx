@@ -20,8 +20,8 @@ export default function Landing() {
     } catch (error) {
     }
     
-    // Navigate to login page using React Router
-    setLocation('/login');
+    // Navigate to signup page for new user registration
+    setLocation('/signup');
   };
 
   const handleLogout = async () => {
