@@ -718,11 +718,7 @@ export default function SocialFeed() {
               />
             )}
             
-            {/* Debug: Show selected moods count - ALWAYS VISIBLE */}
-            <div className="text-xs text-gray-500 mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded">
-              DEBUG: Selected moods count: {selectedMoods.length} | Moods: [{selectedMoods.join(', ')}] | AI should show: {selectedMoods.length > 0 ? 'YES' : 'NO'}
-              <br />State Management Check: selectedMoods array = {JSON.stringify(selectedMoods)}
-            </div>
+
             
             {/* Force show AI recommendations for testing */}
             {selectedMoods.length > 0 ? (

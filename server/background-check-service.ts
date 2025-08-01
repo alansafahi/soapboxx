@@ -786,7 +786,7 @@ export class BackgroundCheckService {
         ? `Your ${checkType} background check has expired and needs immediate renewal.`
         : `Your ${checkType} background check expires in ${daysUntilExpiration} days. Please renew soon.`;
 
-      console.log(`[Background Check Renewal] Email to ${email}: ${message}`);
+
       
       // TODO: Integrate with actual email service
       // await emailService.sendRenewalNotification({
