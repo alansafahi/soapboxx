@@ -3612,6 +3612,79 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Prayer reaction operations
+  async togglePrayerReaction(prayerRequestId: number, userId: string, reactionType: string): Promise<{ reacted: boolean }> {
+    try {
+      // Check if user already reacted with this type
+      const existingReaction = await db.execute(sql`
+        SELECT id FROM prayer_reactions 
+        WHERE prayer_request_id = ${prayerRequestId} 
+        AND user_id = ${userId} 
+        AND reaction_type = ${reactionType}
+      `);
+
+      if (existingReaction.rows.length > 0) {
+        // Remove existing reaction
+        await db.execute(sql`
+          DELETE FROM prayer_reactions 
+          WHERE prayer_request_id = ${prayerRequestId} 
+          AND user_id = ${userId} 
+          AND reaction_type = ${reactionType}
+        `);
+        return { reacted: false };
+      } else {
+        // Add new reaction
+        await db.execute(sql`
+          INSERT INTO prayer_reactions (prayer_request_id, user_id, reaction_type, created_at)
+          VALUES (${prayerRequestId}, ${userId}, ${reactionType}, ${new Date()})
+        `);
+        return { reacted: true };
+      }
+    } catch (error) {
+      throw new Error('Failed to toggle prayer reaction');
+    }
+  }
+
+  async getPrayerReactions(prayerRequestId: number): Promise<Record<string, number>> {
+    try {
+      const result = await db.execute(sql`
+        SELECT reaction_type, COUNT(*) as count
+        FROM prayer_reactions 
+        WHERE prayer_request_id = ${prayerRequestId}
+        GROUP BY reaction_type
+      `);
+      
+      const reactionCounts: Record<string, number> = {
+        heart: 0,
+        fire: 0,
+        praise: 0
+      };
+      
+      result.rows.forEach((row: any) => {
+        reactionCounts[row.reaction_type] = Number(row.count);
+      });
+      
+      return reactionCounts;
+    } catch (error) {
+      return { heart: 0, fire: 0, praise: 0 };
+    }
+  }
+
+  async getUserPrayerReactions(prayerRequestId: number, userId: string): Promise<string[]> {
+    try {
+      const result = await db.execute(sql`
+        SELECT reaction_type 
+        FROM prayer_reactions 
+        WHERE prayer_request_id = ${prayerRequestId} 
+        AND user_id = ${userId}
+      `);
+      
+      return result.rows.map((row: any) => row.reaction_type);
+    } catch (error) {
+      return [];
+    }
+  }
+
   // Messaging system methods to fix 500 errors
   async getUnreadMessageCount(userId: string): Promise<number> {
     try {
