@@ -8955,15 +8955,49 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      // TODO: Fix getUserStats method implementation
-      // For now, return default stats to prevent 500 errors
+      // Get actual user statistics from database
+      const result = await db.execute(sql`
+        SELECT 
+          -- Prayer statistics  
+          (SELECT COUNT(*) FROM prayer_requests WHERE author_id = ${userId}) as prayers_offered,
+          
+          -- Discussion statistics  
+          (SELECT COUNT(*) FROM discussions WHERE author_id = ${userId}) as discussions_created,
+          
+          -- Event statistics
+          (SELECT COUNT(*) FROM event_rsvps WHERE user_id = ${userId}) as events_attended,
+          
+          -- Connection statistics
+          (SELECT COUNT(*) FROM contacts WHERE user_id = ${userId}) as connections,
+          
+          -- SOAP statistics
+          (SELECT COUNT(*) FROM soap_entries WHERE user_id = ${userId}) as soap_entries,
+          
+          -- Prayer reactions given 
+          (SELECT COUNT(*) FROM prayer_reactions WHERE user_id = ${userId}) as prayer_reactions,
+          
+          -- User score data
+          (SELECT current_streak FROM user_scores WHERE user_id = ${userId}) as streak_days,
+          (SELECT total_points FROM user_scores WHERE user_id = ${userId}) as total_points
+      `);
+      
+      const row = result.rows[0] || {};
       const stats = {
-        totalPosts: 0,
-        totalLikes: 0,
-        totalComments: 0,
-        streakDays: 0,
-        totalPrayers: 0
+        prayersOffered: parseInt(row.prayers_offered) || 0,
+        discussions: parseInt(row.discussions_created) || 0,
+        eventsAttended: parseInt(row.events_attended) || 0,
+        connections: parseInt(row.connections) || 0,
+        inspirationsRead: parseInt(row.soap_entries) || 0, // SOAP entries as inspirations
+        prayerRequests: parseInt(row.prayer_reactions) || 0, // Prayer reactions as requests
+        streakDays: parseInt(row.streak_days) || 0,
+        totalPoints: parseInt(row.total_points) || 0,
+        // Legacy fields for compatibility
+        totalPosts: parseInt(row.discussions_created) || 0,
+        totalLikes: parseInt(row.prayer_reactions) || 0,
+        totalComments: parseInt(row.discussions_created) || 0,
+        totalPrayers: parseInt(row.prayers_offered) || 0
       };
+      
       res.json(stats);
     } catch (error) {
       res.status(500).json({ 

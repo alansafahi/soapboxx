@@ -123,3 +123,16 @@ Focus on functionality over technical implementation details.
   - Fixed leaderboard API with direct SQL query including proper ranking and scoring
 - **Data Verified**: Alan's account correctly shows 6 contacts and 200 total points (no evidence of previous 600+ points)
 - **Impact**: Contact page now displays accurate data; engagement board shows proper community rankings
+
+### Profile Statistics and Leaderboard Fixes (August 1, 2025)
+- **Issue Resolved**: Fixed profile statistics showing all zeros and leaderboard showing duplicate users
+- **Root Cause**: `/api/users/stats` endpoint returned hardcoded zeros; leaderboard had duplicate user entries from multiple community associations
+- **Solution**:
+  - Updated stats endpoint to query actual database statistics instead of returning zeros
+  - Fixed leaderboard query using DISTINCT ON to eliminate user duplicates
+  - Updated streak API to pull from user_scores table where real streak data is stored
+- **Data Verified**: Alan's profile now shows:
+  - 34 prayers offered, 70 discussions created, 6 connections, 51 SOAP entries
+  - 12-day current streak properly displayed with animated flame icon
+  - Leaderboard shows unique users: Alan M. Safahi (200 pts), Alan Safahi (150 pts), Alan SGA (0 pts)
+- **Impact**: Profile statistics display actual user engagement data; leaderboard shows proper community member rankings without duplicates
