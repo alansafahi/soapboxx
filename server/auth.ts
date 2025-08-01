@@ -12,6 +12,7 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { storage } from "./storage";
 import { sendVerificationEmail } from "./email-service";
+import { SMSService } from "./sms-service";
 import { pool, db } from "./db";
 import { invitations, userCommunities } from "../shared/schema";
 import { eq } from "drizzle-orm";
@@ -653,6 +654,181 @@ export function setupAuth(app: Express): void {
       res.status(500).json({ 
         success: false,
         message: 'Failed to resend verification email' 
+      });
+    }
+  });
+
+  // SMS Verification routes
+  app.post('/api/auth/send-sms-verification', async (req, res) => {
+    try {
+      const { phoneNumber } = req.body;
+      
+      if (!phoneNumber) {
+        return res.status(400).json({ 
+          success: false,
+          message: 'Phone number is required' 
+        });
+      }
+
+      // Validate phone number format
+      if (!SMSService.validatePhoneNumber(phoneNumber)) {
+        return res.status(400).json({ 
+          success: false,
+          message: 'Invalid phone number format' 
+        });
+      }
+
+      // Check if user is authenticated or provide email for identification
+      const { email } = req.body;
+      const userId = (req.session as any)?.userId;
+      
+      let user;
+      if (userId) {
+        user = await storage.getUserById(userId);
+      } else if (email) {
+        user = await storage.getUserByEmail(email);
+      }
+
+      if (!user) {
+        return res.status(404).json({ 
+          success: false,
+          message: 'User not found' 
+        });
+      }
+
+      // Check rate limiting (max 3 attempts per 15 minutes)
+      const attempts = user.smsVerificationAttempts || 0;
+      const lastAttempt = user.smsVerificationExpires;
+      const now = new Date();
+      
+      if (attempts >= 3 && lastAttempt && (now.getTime() - lastAttempt.getTime()) < 15 * 60 * 1000) {
+        return res.status(429).json({ 
+          success: false,
+          message: 'Too many verification attempts. Please wait 15 minutes before trying again.' 
+        });
+      }
+
+      // Generate and send verification code
+      const verificationCode = SMSService.generateVerificationCode();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+      // Update user with SMS verification data
+      await storage.updateUserSMSVerification(user.id, {
+        smsVerificationCode: verificationCode,
+        smsVerificationExpires: expiresAt,
+        smsVerificationAttempts: attempts + 1,
+        mobileNumber: phoneNumber
+      });
+
+      // Send SMS
+      await SMSService.sendVerificationCode(phoneNumber, verificationCode);
+
+      res.json({ 
+        success: true,
+        message: 'Verification code sent successfully',
+        expiresAt: expiresAt.toISOString(),
+        formattedPhone: SMSService.formatPhoneNumber(phoneNumber)
+      });
+    } catch (error) {
+      console.error('SMS verification error:', error);
+      res.status(500).json({ 
+        success: false,
+        message: 'Failed to send verification code' 
+      });
+    }
+  });
+
+  // Verify SMS code
+  app.post('/api/auth/verify-sms', async (req, res) => {
+    try {
+      const { code, phoneNumber } = req.body;
+      
+      if (!code || !phoneNumber) {
+        return res.status(400).json({ 
+          success: false,
+          message: 'Verification code and phone number are required' 
+        });
+      }
+
+      // Find user by phone number or session
+      const { email } = req.body;
+      const userId = (req.session as any)?.userId;
+      
+      let user;
+      if (userId) {
+        user = await storage.getUserById(userId);
+      } else if (email) {
+        user = await storage.getUserByEmail(email);
+      }
+
+      if (!user) {
+        return res.status(404).json({ 
+          success: false,
+          message: 'User not found' 
+        });
+      }
+
+      // Check if code matches and hasn't expired
+      if (user.smsVerificationCode !== code) {
+        return res.status(400).json({ 
+          success: false,
+          message: 'Invalid verification code' 
+        });
+      }
+
+      if (!user.smsVerificationExpires || new Date() > user.smsVerificationExpires) {
+        return res.status(400).json({ 
+          success: false,
+          message: 'Verification code has expired' 
+        });
+      }
+
+      // Mark phone as verified
+      await storage.verifyUserPhone(user.id);
+
+      res.json({ 
+        success: true,
+        message: 'Phone number verified successfully' 
+      });
+    } catch (error) {
+      console.error('SMS verification error:', error);
+      res.status(500).json({ 
+        success: false,
+        message: 'Failed to verify phone number' 
+      });
+    }
+  });
+
+  // Check SMS verification status
+  app.post('/api/auth/sms-verification-status', async (req, res) => {
+    try {
+      const { email } = req.body;
+      const userId = (req.session as any)?.userId;
+      
+      let user;
+      if (userId) {
+        user = await storage.getUserById(userId);
+      } else if (email) {
+        user = await storage.getUserByEmail(email);
+      }
+
+      if (!user) {
+        return res.status(404).json({ 
+          success: false,
+          message: 'User not found' 
+        });
+      }
+
+      res.json({ 
+        success: true,
+        phoneVerified: user.phoneVerified || false,
+        hasPhoneNumber: !!user.mobileNumber,
+        formattedPhone: user.mobileNumber ? SMSService.formatPhoneNumber(user.mobileNumber) : null
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false,
+        message: 'Failed to check SMS verification status' 
       });
     }
   });

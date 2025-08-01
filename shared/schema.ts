@@ -215,6 +215,9 @@ export const users = pgTable("users", {
   
   // Enhanced profile verification fields for prayer circle guardrails
   phoneVerified: boolean("phone_verified").default(false),
+  smsVerificationCode: varchar("sms_verification_code"),
+  smsVerificationExpires: timestamp("sms_verification_expires"),
+  smsVerificationAttempts: integer("sms_verification_attempts").default(0),
   profileCompleteness: integer("profile_completeness").default(0), // Percentage 0-100
   verificationStatus: varchar("verification_status", { length: 20 }).default("pending"), // pending, verified, incomplete
   verificationNotes: text("verification_notes"), // Admin notes for verification
