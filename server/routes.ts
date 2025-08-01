@@ -14361,7 +14361,9 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       const communityId = userChurches[0].id; // Use the community ID from the id field
+      console.log('GET /api/events - Community ID:', communityId, 'User:', userId);
       const events = await storage.getEventsByChurch(communityId);
+      console.log('GET /api/events - Found events:', events.length);
       res.json(events);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch events' });

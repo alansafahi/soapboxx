@@ -2093,6 +2093,10 @@ export class DatabaseStorage implements IStorage {
     return await query;
   }
 
+  async getEventsByChurch(churchId: number): Promise<Event[]> {
+    return this.getEvents(churchId);
+  }
+
   async getEvent(id: number): Promise<Event | undefined> {
     const [event] = await db.select().from(events).where(eq(events.id, id));
     return event;
