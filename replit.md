@@ -89,3 +89,14 @@ Focus on functionality over technical implementation details.
   - Cleaned up test scripts and temporary development files
   - Preserved essential error logging for production monitoring
 - **Impact**: Codebase is now production-ready with minimal technical debt and clean file structure
+
+### Database Field Standardization (August 1, 2025)
+- **Issue Resolved**: Standardized all database references from `churchId` to `communityId` for consistency
+- **Root Cause**: Mixed usage of `churchId` and `communityId` causing field mapping errors and null constraint violations
+- **Solution**: 
+  - Updated schema definitions across 28 database tables from `church_id` to `community_id`
+  - Migrated all SQL queries and storage methods to use consistent field names
+  - Fixed route handlers to use correct community association field (`userChurches[0].id`)
+  - Updated relations and indexes to match new schema structure
+- **Features Affected**: Events, SOAP entries, prayers, discussions, member management, staff operations, galleries, and all community-scoped functionality
+- **Impact**: Complete elimination of field mapping errors, successful event creation and retrieval, consistent data architecture across entire application

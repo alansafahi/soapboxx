@@ -14361,9 +14361,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       const communityId = userChurches[0].id; // Use the community ID from the id field
-      console.log('GET /api/events - Community ID:', communityId, 'User:', userId);
       const events = await storage.getEventsByChurch(communityId);
-      console.log('GET /api/events - Found events:', events.length);
       res.json(events);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch events' });
@@ -14381,14 +14379,12 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Get user's community for event creation
       const userChurches = await storage.getUserChurches(userId);
-      console.log('User communities for event creation:', userChurches);
       
       if (!userChurches || userChurches.length === 0) {
         return res.status(400).json({ message: 'Must be affiliated with a community to create events' });
       }
 
       const communityId = userChurches[0].id; // The community ID is in the 'id' field
-      console.log('Community ID for event:', communityId);
       
       if (!communityId) {
         return res.status(400).json({ message: 'No valid community ID found for user' });
@@ -14403,8 +14399,6 @@ Please provide suggestions for the missing or incomplete sections.`
         createdAt: new Date(),
         updatedAt: new Date()
       };
-      
-      console.log('Event data being sent to storage:', eventData);
 
       const newEvent = await storage.createEvent(eventData);
       res.status(201).json(newEvent);
