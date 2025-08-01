@@ -574,6 +574,39 @@ export function setupAuth(app: Express): void {
     }
   });
 
+  // Check email verification status for password reset
+  app.post('/api/auth/check-email-verification', async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ 
+          success: false,
+          message: 'Email is required' 
+        });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ 
+          success: false,
+          message: 'User not found' 
+        });
+      }
+
+      res.json({ 
+        success: true,
+        emailVerified: user.emailVerified || false,
+        message: user.emailVerified ? 'Email is verified' : 'Email verification required'
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false,
+        message: 'Failed to check email verification status' 
+      });
+    }
+  });
+
   // Resend verification email
   app.post('/api/auth/resend-verification', async (req, res) => {
     try {

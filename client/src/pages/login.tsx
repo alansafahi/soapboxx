@@ -161,6 +161,32 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      // First check if user exists and email is verified
+      const checkResponse = await fetch('/api/auth/check-email-verification', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: forgotPasswordEmail })
+      });
+
+      const checkResult = await checkResponse.json();
+
+      if (!checkResponse.ok) {
+        throw new Error(checkResult.message || 'Failed to verify email status');
+      }
+
+      if (!checkResult.emailVerified) {
+        toast({
+          title: "Email Verification Required",
+          description: "Please verify your email address before resetting your password. Check your inbox for the verification email.",
+          variant: "destructive"
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // Proceed with password reset if email is verified
       const response = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: {

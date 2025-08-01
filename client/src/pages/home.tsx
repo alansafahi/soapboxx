@@ -24,6 +24,8 @@ import RecentCheckInsStrip from "../components/RecentCheckInsStrip";
 import { ReferralWelcome } from "../components/ReferralWelcome";
 import EditRequestBanner from "../components/EditRequestBanner";
 import EditRequestToast from "../components/EditRequestToast";
+import EmailVerificationBanner from "../components/EmailVerificationBanner";
+import EmailVerificationReminder from "../components/EmailVerificationReminder";
 import { useQuery } from "@tanstack/react-query";
 
 interface HomeProps {
@@ -123,6 +125,10 @@ export default function Home({ referralCode }: HomeProps = {}) {
 
   return (
     <div className="min-h-screen bg-warm-white dark:bg-gray-900">
+      {/* Email Verification Banner - shown at top of dashboard for unverified users */}
+      <EmailVerificationBanner />
+      {/* Periodic Email Verification Reminders - shown as modal dialogs */}
+      <EmailVerificationReminder />
       {/* Edit Request Toast System */}
       <EditRequestToast />
       
