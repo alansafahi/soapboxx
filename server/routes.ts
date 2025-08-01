@@ -10381,8 +10381,17 @@ Return JSON with this exact structure:
 
       let userChurch;
       let isIndependent = false;
+      let userRole = null;
+      
       try {
         userChurch = await storage.getUserChurch(userId);
+        if (userChurch) {
+          // Get user's role in the church
+          const userChurches = await storage.getUserChurches(userId);
+          if (userChurches && userChurches.length > 0) {
+            userRole = userChurches[0];
+          }
+        }
       } catch (error) {
         // Continue without church - allow independent circles
       }
@@ -10420,7 +10429,7 @@ Return JSON with this exact structure:
         memberLimit: memberLimit || null,
         focusAreas: focusAreas || [],
         meetingSchedule: meetingSchedule || null,
-        communityId: userChurch ? userRole.communityId : null, // null for independent circles
+        communityId: userChurch ? userChurch.id : null, // null for independent circles
         createdBy: userId,
         isIndependent: isIndependent, // Mark independent circles
         type: isIndependent ? 'independent' : 'church',
