@@ -14379,12 +14379,19 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Get user's church for event creation
       const userChurches = await storage.getUserChurches(userId);
+      console.log('User churches for event creation:', userChurches);
+      
       if (!userChurches || userChurches.length === 0) {
         return res.status(400).json({ message: 'Must be affiliated with a church to create events' });
       }
 
-      const churchId = userChurches[0].churchId;
+      const churchId = userChurches[0].churchId || userChurches[0].communityId;
+      console.log('Church ID for event:', churchId);
       
+      if (!churchId) {
+        return res.status(400).json({ message: 'No valid church ID found for user' });
+      }
+
       const eventData = {
         ...req.body,
         churchId: churchId,
@@ -14394,6 +14401,8 @@ Please provide suggestions for the missing or incomplete sections.`
         createdAt: new Date(),
         updatedAt: new Date()
       };
+      
+      console.log('Event data being sent to storage:', eventData);
 
       const newEvent = await storage.createEvent(eventData);
       res.status(201).json(newEvent);
