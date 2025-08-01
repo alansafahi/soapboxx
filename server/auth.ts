@@ -193,14 +193,33 @@ export function setupAuth(app: Express): void {
   // User registration endpoint
   app.post('/api/auth/register', async (req, res) => {
     try {
-      const { email, password, username, firstName, lastName, staffInvite } = req.body;
+      const { 
+        email, 
+        password, 
+        username, 
+        firstName, 
+        lastName, 
+        staffInvite,
+        // New onboarding fields
+        mobileNumber,
+        role,
+        gender,
+        ageRange,
+        spiritualStage,
+        ministryInterests,
+        churchAffiliation,
+        inviteToken
+      } = req.body;
       
 
 
-      if (!email || !password || !username || !firstName || !lastName) {
+      // Handle onboarding without username requirement
+      const generatedUsername = username || `${firstName}${lastName}${Date.now()}`.toLowerCase();
+      
+      if (!email || !password || !firstName || !lastName) {
         return res.status(400).json({ 
           success: false,
-          message: 'Email, password, username, first name, and last name are required' 
+          message: 'Email, password, first name, and last name are required' 
         });
       }
 
@@ -259,12 +278,10 @@ export function setupAuth(app: Express): void {
         });
       }
 
-      const existingUsername = await storage.getUserByUsername(username);
+      const existingUsername = await storage.getUserByUsername(generatedUsername);
       if (existingUsername) {
-        return res.status(409).json({ 
-          success: false,
-          message: 'Username already taken' 
-        });
+        // Generate a unique username if collision occurs
+        const finalUsername = `${generatedUsername}_${crypto.randomBytes(4).toString('hex')}`;
       }
 
       // Hash password with high security
@@ -274,19 +291,57 @@ export function setupAuth(app: Express): void {
       // Generate verification token
       const verificationToken = crypto.randomBytes(32).toString('hex');
 
-      // Create unverified user
+      // Handle invite token if provided
+      let inviterCommunityId = null;
+      if (inviteToken) {
+        try {
+          const invite = await db.select()
+            .from(invitations)
+            .where(eq(invitations.inviteCode, inviteToken))
+            .limit(1);
+            
+          if (invite.length && invite[0].status === 'pending') {
+            // Get inviter's community
+            const inviterCommunity = await db.select({ communityId: userCommunities.communityId })
+              .from(userCommunities)
+              .where(eq(userCommunities.userId, invite[0].inviterId))
+              .limit(1);
+              
+            if (inviterCommunity.length) {
+              inviterCommunityId = inviterCommunity[0].communityId;
+            }
+            
+            // Mark invitation as accepted
+            await storage.updateInvitationStatus(inviteToken, 'accepted');
+          }
+        } catch (error) {
+          // Continue registration even if invite processing fails
+        }
+      }
+
+      // Create unverified user with enhanced profile data
+      const finalUsername = existingUsername ? `${generatedUsername}_${crypto.randomBytes(4).toString('hex')}` : generatedUsername;
+      
       const newUser = await storage.createUser({
         id: crypto.randomUUID(),
         email,
-        username,
+        username: finalUsername,
         firstName,
         lastName,
         password: hashedPassword,
-        role: 'member',
+        role: role || 'member',
         emailVerified: false,
         emailVerificationToken: verificationToken,
         emailVerificationSentAt: new Date(),
         churchId: null,
+        // Enhanced profile fields
+        mobileNumber: mobileNumber || null,
+        gender: gender || null,
+        ageRange: ageRange || null,
+        spiritualStage: spiritualStage || null,
+        ministryInterests: ministryInterests || [],
+        churchAffiliation: churchAffiliation || null,
+        hasCompletedOnboarding: true, // Mark as completed since they went through onboarding flow
       });
 
       // Check for pre-assigned church based on email
@@ -322,18 +377,30 @@ export function setupAuth(app: Express): void {
       // Handle staff invitation if present
       if (staffInvite && staffInvite.communityId && staffInvite.role) {
         try {
-
-          
           // Create pending staff invitation directly in user_churches table
           await pool.query(
             'INSERT INTO user_churches (user_id, church_id, role, is_active, assigned_by, assigned_at, title) VALUES ($1, $2, $3, false, $4, NOW(), $5)',
             [newUser.id, staffInvite.communityId, staffInvite.role, newUser.id, staffInvite.role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())]
           );
-          
-
         } catch (staffError) {
           console.error('Failed to create staff invitation during registration:', staffError);
           // Continue with registration even if staff invitation fails
+        }
+      }
+
+      // Handle invite-based community association
+      if (inviterCommunityId && !staffInvite) {
+        try {
+          // Add user to inviter's community as a member
+          await db.insert(userCommunities).values({
+            userId: newUser.id,
+            communityId: inviterCommunityId,
+            role: 'member',
+            isActive: true,
+            joinedAt: new Date()
+          });
+        } catch (communityError) {
+          // Continue with registration even if community association fails
         }
       }
 

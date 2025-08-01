@@ -1,0 +1,132 @@
+Here’s a streamlined and faith-sensitive onboarding flow for **SoapBox Super App**, optimized for **users joining via invite links** (e.g., from a pastor, church leader, or friend).
+
+---
+
+## ✝️ **SoapBox Super App Invite-Driven Onboarding System**
+
+### 🌱 1. **Invite Email Structure**
+
+When a user receives an email invite, it should be warm, spiritual, and action-oriented.
+
+**Subject Line Ideas:**
+
+* *“You’ve been invited to join \[Church Name] on SoapBox Super App!”*
+* *“Alan invited you to grow in faith together.”*
+
+**Email Body:**
+
+* Brief intro to SoapBox (1–2 lines)
+* Who invited them and why (e.g., small group, volunteer team, prayer circle)
+* CTA button: **“Accept Invitation & Create Account”** (includes invite token)
+
+---
+
+### 🚪 2. **First-Time Visitor Flow (Invite Token Detected)**
+
+#### 👣 Step-by-Step Experience:
+
+---
+
+### **STEP 1: Create Account**
+
+**Fields:**
+
+* ✅ Name (required)
+* ✅ Email (auto-filled if invited)
+* ✅ Password (required)
+* 🔲 Mobile number (optional for notifications)
+* 🔲 Agree to terms + privacy policy
+
+> If the invite was from a church, auto-associate the user with that church community.
+
+---
+
+### **STEP 2: Select Your Role / Intent**
+
+> *(“This helps us personalize your experience”)*
+
+* ✅ I'm a member
+* ✅ I'm a volunteer
+* ✅ I'm a church leader
+* ✅ I'm exploring
+
+> ✅ This maps them to relevant UI components and unlocks features like journaling, volunteering, event RSVPs.
+
+---
+
+### **STEP 3: Quick Spiritual Profile (Optional)**
+
+> *(“Help us serve you better. You can skip or edit this anytime.”)*
+
+* 🔲 Gender (optional)
+* 🔲 Age range (dropdown)
+* 🔲 Spiritual stage (dropdown: Exploring, New Believer, Active Disciple, Leader)
+* 🔲 Ministry Interests (multi-select: Youth, Media, Outreach, etc.)
+* 🔲 Church affiliation (auto-filled if invited by a church, editable)
+
+**Skip option available.**
+
+---
+
+### **STEP 4: Welcome & Setup Tips**
+
+**Screen content:**
+
+* Confirm they've joined the right church or group
+* Mini dashboard tour (3-swipe or modal)
+* CTA: “Let’s get started” → takes them to Home feed
+
+---
+
+## 👤 What Fields Are **Mandatory** in Onboarding?
+
+| Field              | Required?                   | Reason                                        |
+| ------------------ | --------------------------- | --------------------------------------------- |
+| Name               | ✅ Yes                       | Needed for community identification           |
+| Email              | ✅ Yes                       | Key for login and invite tracking             |
+| Password           | ✅ Yes                       | Security                                      |
+| Role/Intent        | ✅ Yes                       | Tailors experience                            |
+| Age Range          | 🔲 No                       | Useful but not required                       |
+| Spiritual Stage    | 🔲 No                       | Highly useful for personalization, can skip   |
+| Ministry Interests | 🔲 No                       | Optional but helpful for community engagement |
+| Church Affiliation | ✅ Yes if invited via church | Allows automatic onboarding to that community |
+
+---
+
+## 🔁 How to Prompt Ongoing Profile Updates (Without Being Annoying)
+
+### 🔔 Passive Nudges
+
+* Profile page includes a **progress ring**: “70% Complete”
+* Tooltip reminders: *“Add your ministry interests to find opportunities.”*
+* Highlight incomplete fields: *“Want to personalize your feed?”*
+
+### 💌 Periodic Friendly Nudges
+
+* Email at 7 days: “You’re off to a great start, \[Name]! Add your favorite scripture or spiritual goals to grow even more.”
+* Email at 30 days: “Let’s reflect on your journey so far. Update your profile to keep it aligned with your walk.”
+
+### 🧠 AI-based Prompts
+
+* After a few SOAP reflections: *“We noticed you’re journaling regularly. Want to update your spiritual growth stage?”*
+* When joining a group or event: *“Most members in \[Worship Team] share their ministry interests. Want to update yours?”*
+
+---
+
+## 🔐 Privacy-Respecting Notes
+
+* Show **"Public/Private/Admin Only"** toggles on sensitive fields
+* Default all nonessential info to private unless explicitly marked as public
+* Explain why data helps (e.g., “We use your interests to suggest service opportunities.”)
+
+---
+
+## 🏁 Optional Follow-Up Ideas
+
+* **Gamify onboarding**: 5-step checklist earns a “Welcome Badge”
+* **Onboarding Progress Widget**: “2/5 Steps Completed”
+* **Smart follow-ups**: "New to SoapBox? Try creating your first S.O.A.P. Journal!"
+
+---
+
+Would you like mock screens for this onboarding flow or a working schema that can be fed into your frontend/backend?

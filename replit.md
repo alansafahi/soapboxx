@@ -146,3 +146,20 @@ Focus on functionality over technical implementation details.
   - Removed debug logging from authentication endpoints
 - **Database Schema**: Now fully supports enhanced profile system with 20+ new fields for comprehensive spiritual community engagement
 - **Impact**: Authentication system working properly; enhanced profile functionality ready for deployment with full feature support
+
+### Faith-Sensitive Invite-Driven Onboarding System (August 1, 2025)
+- **System Implemented**: Complete invite-driven onboarding flow with progressive enhancement approach based on user-provided design document
+- **Key Features Delivered**:
+  - Streamlined 4-step onboarding process: Account Creation, Role Selection, Spiritual Profile (optional), Welcome & Setup
+  - Faith-sensitive design with warm, spiritual messaging and role-based personalization
+  - Progressive field collection: mandatory fields (name, email, password, role) → optional spiritual profile data
+  - Automatic community association when users join via invite links from pastors/church leaders
+  - Enhanced registration endpoint supporting new onboarding data structure with invite token processing
+- **Technical Implementation**:
+  - Created comprehensive OnboardingFlow.tsx component with step indicators and validation
+  - Added `/api/invites/details/:token` endpoint for invite information lookup
+  - Updated registration system to handle enhanced profile fields and invite token processing
+  - Integrated with existing invitation system for automatic community association
+  - Routes: `/onboarding` and `/onboarding/:token` for direct and invite-based access
+- **User Experience**: Intuitive tabbed interface with progress tracking, role-based personalization, and skip options for optional fields
+- **Impact**: Complete onboarding system ready for faith community deployment with invite-driven user acquisition and streamlined initial setup

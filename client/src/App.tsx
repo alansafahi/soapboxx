@@ -73,6 +73,7 @@ const SocialFeedPage = lazy(() => import("./pages/social-feed"));
 const BookmarkedPrayersPage = lazy(() => import("./pages/BookmarkedPrayersPage"));
 const SavedReflectionsPage = lazy(() => import("./pages/saved-reflections"));
 const FAQPage = lazy(() => import("./pages/faq"));
+const OnboardingPage = lazy(() => import("./pages/onboarding"));
 const ModerationDashboardPage = lazy(() => import("./pages/moderation-dashboard"));
 const DIVINEPage = lazy(() => import("./pages/ServeWellPage"));
 const DivinePhase2Dashboard = lazy(() => import("./pages/DivinePhase2Dashboard"));
@@ -149,6 +150,8 @@ function AppRouter() {
                                         <ResetPasswordPage />
                                     </Route>
                                     <Route path="/email-verification" component={EmailVerificationPage} />
+                                    <Route path="/onboarding" component={OnboardingPage} />
+                                    <Route path="/onboarding/:token" component={OnboardingPage} />
                                     <Route path="/landing" component={SimpleLanding} />
                                     <ProtectedRoute path="/dashboard" component={Home} />
                                     <ProtectedRoute path="/home" component={Home} />

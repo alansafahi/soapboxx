@@ -3916,6 +3916,72 @@ app.post('/api/invitations', async (req: any, res) => {
     }
   });
 
+  // Get invitation details by token for onboarding
+  app.get('/api/invites/details/:token', async (req: any, res) => {
+    try {
+      const { token } = req.params;
+      
+      // Find invitation by invite code
+      const invitation = await db.select({
+        invitations,
+        inviter: {
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          email: users.email
+        }
+      })
+      .from(invitations)
+      .leftJoin(users, eq(invitations.inviterId, users.id))
+      .where(eq(invitations.inviteCode, token))
+      .limit(1);
+
+      if (!invitation.length) {
+        return res.status(404).json({ message: 'Invitation not found' });
+      }
+
+      const invite = invitation[0];
+      
+      // Check if invitation is expired
+      if (invite.invitations.expiresAt && new Date() > invite.invitations.expiresAt) {
+        return res.status(410).json({ message: 'Invitation has expired' });
+      }
+      
+      // Check if invitation is already accepted
+      if (invite.invitations.status === 'accepted') {
+        return res.status(409).json({ message: 'Invitation has already been accepted' });
+      }
+
+      // Get inviter's church/community info if available
+      let churchName = null;
+      if (invite.inviter?.id) {
+        const churchAssociation = await db.select({
+          community: {
+            id: communities.id,
+            name: communities.name
+          }
+        })
+        .from(userCommunities)
+        .leftJoin(communities, eq(userCommunities.communityId, communities.id))
+        .where(eq(userCommunities.userId, invite.inviter.id))
+        .limit(1);
+        
+        if (churchAssociation.length) {
+          churchName = churchAssociation[0].community?.name;
+        }
+      }
+
+      res.json({
+        inviterName: `${invite.inviter?.firstName || ''} ${invite.inviter?.lastName || ''}`.trim(),
+        churchName,
+        message: invite.invitations.message,
+        email: invite.invitations.email
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch invitation details' });
+    }
+  });
+
   app.post('/api/contacts/import', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
