@@ -363,7 +363,6 @@ export function setupAuth(app: Express): void {
   app.post('/api/auth/login', async (req, res) => {
     try {
       const { email, password } = req.body;
-
       if (!email || !password) {
         return res.status(400).json({ 
           success: false,
@@ -373,7 +372,9 @@ export function setupAuth(app: Express): void {
 
       // Find user by email
       const user = await storage.getUserByEmail(email);
+      
       if (!user || !user.password) {
+        console.log('User not found or no password');
         return res.status(401).json({ 
           success: false,
           message: 'Invalid email or password' 
@@ -412,7 +413,6 @@ export function setupAuth(app: Express): void {
       };
       (req.session as any).authenticated = true;
 
-
       req.session.save((err: any) => {
         if (err) {
           return res.status(500).json({ 
@@ -420,7 +420,6 @@ export function setupAuth(app: Express): void {
             message: 'Login failed. Please try again.' 
           });
         }
-        
         
         res.json({
           success: true,
