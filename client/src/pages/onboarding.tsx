@@ -11,6 +11,15 @@ export default function OnboardingPage() {
 
   // Extract invite token from URL
   const inviteToken = params?.token;
+  
+  // Extract registration data from URL parameters for auto-population
+  const urlParams = new URLSearchParams(window.location.search);
+  const prefilledData = {
+    firstName: urlParams.get('firstName') || '',
+    lastName: urlParams.get('lastName') || '',
+    email: urlParams.get('email') || '',
+    mobileNumber: urlParams.get('mobileNumber') || ''
+  };
 
   // Fetch invite details if token exists
   const { data: inviteData } = useQuery({
@@ -80,6 +89,7 @@ export default function OnboardingPage() {
       inviteToken={inviteToken}
       inviterName={inviteData?.inviterName}
       churchName={inviteData?.churchName}
+      prefilledData={prefilledData}
       onComplete={handleOnboardingComplete}
     />
   );

@@ -136,13 +136,20 @@ export default function SignupPage() {
           // Redirect to login with staff invitation context
           setLocation(`/login?staffInvite=true&communityId=${communityId}&role=${role}`);
         } else {
-          // Regular signup - redirect to onboarding flow instead of login
+          // Regular signup - redirect to onboarding flow with pre-populated data
           toast({
             title: "Let's Get You Started!",
             description: "Complete your profile setup to personalize your SoapBox experience.",
             variant: "default",
           });
-          setLocation('/onboarding');
+          // Pass registration data to onboarding for auto-population
+          const onboardingParams = new URLSearchParams({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            mobileNumber: formData.mobileNumber || ''
+          });
+          setLocation(`/onboarding?${onboardingParams.toString()}`);
         }
       }
     } catch (error: any) {

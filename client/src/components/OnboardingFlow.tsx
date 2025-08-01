@@ -14,6 +14,12 @@ interface OnboardingFlowProps {
   inviteToken?: string;
   inviterName?: string;
   churchName?: string;
+  prefilledData?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    mobileNumber: string;
+  };
   onComplete: (userData: any) => void;
 }
 
@@ -54,18 +60,18 @@ const AGE_RANGES = [
   '65+'
 ];
 
-export default function OnboardingFlow({ inviteToken, inviterName, churchName, onComplete }: OnboardingFlowProps) {
+export default function OnboardingFlow({ inviteToken, inviterName, churchName, prefilledData, onComplete }: OnboardingFlowProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
     // Step 1: Account Creation
-    firstName: '',
-    lastName: '',
-    email: '',
+    firstName: prefilledData?.firstName || '',
+    lastName: prefilledData?.lastName || '',
+    email: prefilledData?.email || '',
     password: '',
-    mobileNumber: '',
+    mobileNumber: prefilledData?.mobileNumber || '',
     agreeToTerms: false,
     
     // Step 2: Role Selection
@@ -142,7 +148,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, o
     <div className="flex items-center justify-center mb-8">
       <div className="flex items-center space-x-2">
         {[1, 2, 3, 4].map(step => (
-          <React.Fragment key={step}>
+          <div key={step} className="flex items-center">
             <div className={`
               w-8 h-8 rounded-full flex items-center justify-center font-medium
               ${step <= currentStep 
@@ -152,8 +158,8 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, o
             `}>
               {step < currentStep ? <CheckCircle className="w-4 h-4" /> : step}
             </div>
-            {step < 4 && <div className={`w-8 h-0.5 ${step < currentStep ? 'bg-purple-600' : 'bg-gray-200'}`} />}
-          </React.Fragment>
+            {step < 4 && <div className={`w-8 h-0.5 ml-2 ${step < currentStep ? 'bg-purple-600' : 'bg-gray-200'}`} />}
+          </div>
         ))}
       </div>
     </div>
@@ -237,7 +243,24 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, o
             onCheckedChange={(checked) => updateFormData('agreeToTerms', checked)}
           />
           <Label htmlFor="agreeToTerms" className="text-sm">
-            I agree to the Terms of Service and Privacy Policy *
+            I agree to the{' '}
+            <a 
+              href="https://soapboxsuperapp.com/terms" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-purple-600 hover:text-purple-800 underline"
+            >
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a 
+              href="https://soapboxsuperapp.com/privacy" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-purple-600 hover:text-purple-800 underline"
+            >
+              Privacy Policy
+            </a> *
           </Label>
         </div>
         
