@@ -14240,7 +14240,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       const userChurches = await storage.getUserChurches(userId);
-      if (!userRolees || userChurches.length === 0) {
+      if (!userChurches || userChurches.length === 0) {
         return res.json([]); // Return empty array if no church
       }
 
@@ -14291,7 +14291,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Simplified leaderboard - use storage methods instead of direct DB access
       const userChurches = await storage.getUserChurches(userId);
-      if (!userRolees || userChurches.length === 0) {
+      if (!userChurches || userChurches.length === 0) {
         return res.json([]); // Empty leaderboard for users not in a church
       }
 
@@ -14330,7 +14330,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       const userChurches = await storage.getUserChurches(userId);
-      if (!userRolees || userChurches.length === 0) {
+      if (!userChurches || userChurches.length === 0) {
         return res.json([]); // Return empty array if no church
       }
 
@@ -14356,7 +14356,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Get events for user's church
       const userChurches = await storage.getUserChurches(userId);
-      if (!userRolees || userChurches.length === 0) {
+      if (!userChurches || userChurches.length === 0) {
         return res.json([]);
       }
 
@@ -14379,7 +14379,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Get user's church for event creation
       const userChurches = await storage.getUserChurches(userId);
-      if (!userRolees || userChurches.length === 0) {
+      if (!userChurches || userChurches.length === 0) {
         return res.status(400).json({ message: 'Must be affiliated with a church to create events' });
       }
 
@@ -14398,7 +14398,8 @@ Please provide suggestions for the missing or incomplete sections.`
       const newEvent = await storage.createEvent(eventData);
       res.status(201).json(newEvent);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to create event' });
+      console.error('Event creation error:', error);
+      res.status(500).json({ message: 'Failed to create event', error: error.message });
     }
   });
 

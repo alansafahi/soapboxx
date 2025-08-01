@@ -2087,7 +2087,7 @@ export class DatabaseStorage implements IStorage {
     const query = db
       .select()
       .from(events)
-      .where(churchId ? eq(events.communityId, churchId) : undefined)
+      .where(churchId ? eq(events.churchId, churchId) : undefined)
       .orderBy(asc(events.eventDate));
     
     return await query;
@@ -2223,7 +2223,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(events)
       .where(and(
-        churchId ? eq(events.communityId, churchId) : undefined,
+        churchId ? eq(events.churchId, churchId) : undefined,
         sql`${events.eventDate} >= ${now}`
       ))
       .orderBy(asc(events.eventDate))
@@ -2237,7 +2237,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(events)
       .where(and(
-        churchId ? eq(events.communityId, churchId) : undefined,
+        churchId ? eq(events.churchId, churchId) : undefined,
         or(
           ilike(events.title, `%${query}%`),
           ilike(events.description, `%${query}%`),
