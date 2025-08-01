@@ -14340,17 +14340,34 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(401).json({ message: 'Authentication required' });
       }
 
-      // Simplified leaderboard - use storage methods instead of direct DB access
-      const userChurches = await storage.getUserChurches(userId);
-      if (!userChurches || userChurches.length === 0) {
-        return res.json([]); // Empty leaderboard for users not in a church
-      }
-
-      // Get the first church's members for leaderboard
-      const communityId = userChurches[0].id;
-      const leaderboardData = await storage.getChurchLeaderboard(communityId);
+      // Direct SQL query for leaderboard data since storage method may not exist
+      const result = await db.execute(sql`
+        SELECT 
+          u.id,
+          u.first_name,
+          u.last_name,
+          u.profile_image_url,
+          COALESCE(us.total_points, 0) as score,
+          ROW_NUMBER() OVER (ORDER BY COALESCE(us.total_points, 0) DESC) as rank
+        FROM users u
+        LEFT JOIN user_scores us ON u.id = us.user_id
+        LEFT JOIN user_churches uc ON u.id = uc.user_id
+        WHERE uc.is_active = true AND COALESCE(us.total_points, 0) > 0
+        ORDER BY us.total_points DESC, u.first_name ASC
+        LIMIT 20
+      `);
       
-      res.json(leaderboardData || []);
+      const leaderboardData = result.rows.map((row: any) => ({
+        rank: row.rank,
+        id: row.id.toString(),
+        firstName: row.first_name,
+        lastName: row.last_name,
+        avatarUrl: row.profile_image_url,
+        profileImageUrl: row.profile_image_url,
+        score: row.score
+      }));
+      
+      res.json(leaderboardData);
     } catch (error) {
       // Enhanced error logging for debugging
       

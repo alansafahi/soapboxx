@@ -112,3 +112,14 @@ Focus on functionality over technical implementation details.
   - Updated prayer reaction frontend to use correct API endpoints with optimistic UI updates
   - Standardized all references to use community terminology instead of church terminology
 - **Impact**: Prayer reaction buttons now work properly with real-time counter updates, prayer circle creation functions without errors
+
+### Contact and Engagement Board Fixes (August 1, 2025)
+- **Issue Resolved**: Fixed contact display showing 0 instead of actual data and non-functional engagement board
+- **Root Cause**: `getUserContacts` method was stubbed returning empty arrays; leaderboard API endpoint was broken
+- **Solution**:
+  - Fixed `getUserContacts` method to properly query database with JOIN for user details
+  - Added `/api/user/score` endpoint to return actual user points from user_scores table  
+  - Updated contacts page to use correct API endpoint for displaying points
+  - Fixed leaderboard API with direct SQL query including proper ranking and scoring
+- **Data Verified**: Alan's account correctly shows 6 contacts and 200 total points (no evidence of previous 600+ points)
+- **Impact**: Contact page now displays accurate data; engagement board shows proper community rankings
