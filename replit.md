@@ -163,3 +163,13 @@ Focus on functionality over technical implementation details.
   - Routes: `/onboarding` and `/onboarding/:token` for direct and invite-based access
 - **User Experience**: Intuitive tabbed interface with progress tracking, role-based personalization, and skip options for optional fields
 - **Impact**: Complete onboarding system ready for faith community deployment with invite-driven user acquisition and streamlined initial setup
+
+### Onboarding Data Flow and User Experience Enhancements (August 1, 2025)
+- **Issue Resolved**: Enhanced registration-to-onboarding flow with seamless data transfer and proper legal document linking
+- **Key Improvements**:
+  - **Data Auto-Population**: Registration data (firstName, lastName, email, mobileNumber) now automatically flows to onboarding form via URL parameters
+  - **Legal Document Integration**: Terms of Service and Privacy Policy now link to actual website (soapboxsuperapp.com/terms and soapboxsuperapp.com/privacy)
+  - **React Fragment Warning Fixed**: Replaced problematic Fragment component with proper div structure in step indicator
+  - **Error Handling Enhancement**: Improved API error response parsing for better user-friendly messaging
+- **User Flow**: "Get Started" → Registration → Onboarding (with pre-populated data) → Dashboard
+- **Impact**: Eliminates duplicate data entry, provides professional legal document access, and ensures clean error-free interface for seamless user onboarding experience

@@ -41,6 +41,7 @@ export default function SignupPage() {
     username: "",
     firstName: "",
     lastName: "",
+    mobileNumber: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
