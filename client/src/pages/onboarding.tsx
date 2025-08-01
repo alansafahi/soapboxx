@@ -30,53 +30,86 @@ export default function OnboardingPage() {
 
   const handleOnboardingComplete = async (userData: any) => {
     try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          ...userData,
-          inviteToken: inviteToken
-        })
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        
-        // If registration successful, attempt login
-        const loginResponse = await fetch('/api/auth/login', {
+      // Check if user came from registration (has prefilled data) vs direct onboarding access
+      const isFromRegistration = prefilledData.email !== '';
+      
+      if (isFromRegistration) {
+        // User came from registration flow - complete profile update instead of re-registering
+        const profileResponse = await fetch('/api/auth/complete-onboarding', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           credentials: 'include',
           body: JSON.stringify({
-            email: userData.email,
-            password: userData.password
+            role: userData.role,
+            gender: userData.gender,
+            ageRange: userData.ageRange,
+            spiritualStage: userData.spiritualStage,
+            ministryInterests: userData.ministryInterests,
+            volunteerInterest: userData.volunteerInterest,
+            churchAffiliation: userData.churchAffiliation,
+            inviteToken: inviteToken
           })
         });
 
-        if (loginResponse.ok) {
+        if (profileResponse.ok) {
           toast({
             title: "Welcome to SoapBox!",
-            description: "Your account has been created and you're now logged in.",
+            description: "Your profile has been completed successfully.",
           });
-          
-          // Redirect to dashboard
           setLocation('/dashboard');
         } else {
-          // Registration succeeded but login failed - redirect to login
-          toast({
-            title: "Account Created!",
-            description: "Please log in with your new credentials.",
-          });
-          setLocation('/login');
+          throw new Error('Failed to complete profile setup');
         }
       } else {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
+        // Direct onboarding access - attempt full registration
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            ...userData,
+            inviteToken: inviteToken
+          })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          
+          // If registration successful, attempt login
+          const loginResponse = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+              email: userData.email,
+              password: userData.password
+            })
+          });
+
+          if (loginResponse.ok) {
+            toast({
+              title: "Welcome to SoapBox!",
+              description: "Your account has been created and you're now logged in.",
+            });
+            setLocation('/dashboard');
+          } else {
+            // Registration succeeded but login failed - redirect to login
+            toast({
+              title: "Account Created!",
+              description: "Please log in with your new credentials.",
+            });
+            setLocation('/login');
+          }
+        } else {
+          const error = await response.json();
+          throw new Error(error.message || 'Registration failed');
+        }
       }
     } catch (error) {
       console.error('Onboarding error:', error);
@@ -87,8 +120,8 @@ export default function OnboardingPage() {
   return (
     <OnboardingFlow
       inviteToken={inviteToken}
-      inviterName={inviteData?.inviterName}
-      churchName={inviteData?.churchName}
+      inviterName={inviteData?.inviterName || ''}
+      churchName={inviteData?.churchName || ''}
       prefilledData={prefilledData}
       onComplete={handleOnboardingComplete}
     />

@@ -1380,6 +1380,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Complete onboarding for existing authenticated users
+  app.post('/api/auth/complete-onboarding', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const {
+        role,
+        gender,
+        ageRange,
+        spiritualStage,
+        ministryInterests,
+        volunteerInterest,
+        churchAffiliation,
+        inviteToken
+      } = req.body;
+
+      // Update user profile with onboarding data
+      await pool.query(`
+        UPDATE users SET 
+          role = $1,
+          gender = $2,
+          age_range = $3,
+          spiritual_stage = $4,
+          ministry_interests = $5,
+          volunteer_interest = $6,
+          church_affiliation = $7,
+          updated_at = NOW()
+        WHERE id = $8
+      `, [
+        role || 'member',
+        gender,
+        ageRange,
+        spiritualStage,
+        JSON.stringify(ministryInterests || []),
+        volunteerInterest,
+        churchAffiliation,
+        userId
+      ]);
+
+      // Handle invite token processing if provided
+      if (inviteToken) {
+        try {
+          const inviteResult = await pool.query(
+            'SELECT * FROM invitations WHERE token = $1 AND status = $2',
+            [inviteToken, 'pending']
+          );
+
+          if (inviteResult.rows.length > 0) {
+            const invite = inviteResult.rows[0];
+            
+            // Add user to the community from invite
+            await pool.query(`
+              INSERT INTO user_churches (user_id, community_id, role, is_active, joined_at, invited_by)
+              VALUES ($1, $2, $3, true, NOW(), $4)
+              ON CONFLICT (user_id, community_id) 
+              DO UPDATE SET role = $3, is_active = true, joined_at = NOW()
+            `, [userId, invite.community_id, role || 'member', invite.invited_by]);
+
+            // Mark invitation as accepted
+            await pool.query(
+              'UPDATE invitations SET status = $1, accepted_at = NOW() WHERE token = $2',
+              ['accepted', inviteToken]
+            );
+          }
+        } catch (inviteError) {
+          console.log('Invite processing failed (non-critical):', inviteError);
+        }
+      }
+
+      res.json({ 
+        success: true, 
+        message: 'Onboarding completed successfully',
+        userId 
+      });
+    } catch (error) {
+      console.error('Complete onboarding error:', error);
+      res.status(500).json({ message: 'Failed to complete onboarding', error: (error as Error).message });
+    }
+  });
+
   // User role endpoint for navigation
   app.get('/api/auth/user-role', isAuthenticated, async (req: any, res) => {
     try {
