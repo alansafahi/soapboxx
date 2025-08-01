@@ -78,6 +78,10 @@ function ContactsPage() {
     queryKey: ["/api/referrals/stats"],
   });
 
+  const { data: userScore } = useQuery({
+    queryKey: ["/api/user/score"],
+  });
+
   const { data: pendingInvites = [] } = useQuery({
     queryKey: ["/api/invitations/pending"],
   });
@@ -597,7 +601,7 @@ function ContactsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">SoapBox Points</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{referralStats?.points || 0}</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{userScore?.total_points || 0}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">
                   <Star className="h-6 w-6 text-white" />

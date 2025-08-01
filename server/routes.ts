@@ -13038,6 +13038,49 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // User score/points endpoint
+  app.get('/api/user/score', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      const result = await db.execute(sql`
+        SELECT 
+          total_points,
+          weekly_points,
+          monthly_points,
+          current_streak,
+          longest_streak,
+          faithfulness_score,
+          prayer_champion_points,
+          service_hours
+        FROM user_scores 
+        WHERE user_id = ${userId}
+      `);
+      
+      if (result.rows.length > 0) {
+        res.json(result.rows[0]);
+      } else {
+        // Create default score record if none exists
+        await db.execute(sql`
+          INSERT INTO user_scores (user_id, total_points, weekly_points, monthly_points, current_streak, longest_streak, faithfulness_score, prayer_champion_points, service_hours)
+          VALUES (${userId}, 0, 0, 0, 0, 0, 0, 0, 0)
+        `);
+        res.json({
+          total_points: 0,
+          weekly_points: 0,
+          monthly_points: 0,
+          current_streak: 0,
+          longest_streak: 0,
+          faithfulness_score: 0,
+          prayer_champion_points: 0,
+          service_hours: 0
+        });
+      }
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch user score' });
+    }
+  });
+
   // Test endpoint for donation receipt functionality
   app.get('/api/donations/:donationId/receipt-info', isAuthenticated, async (req: any, res) => {
     try {

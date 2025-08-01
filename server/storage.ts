@@ -3711,7 +3711,32 @@ export class DatabaseStorage implements IStorage {
 
   async getUserContacts(userId: string): Promise<any[]> {
     try {
-      return [];
+      const result = await db.execute(sql`
+        SELECT 
+          c.*,
+          u.first_name,
+          u.last_name,
+          u.profile_image_url
+        FROM contacts c
+        LEFT JOIN users u ON c.contact_user_id = u.id
+        WHERE c.user_id = ${userId} AND c.is_active = true
+        ORDER BY c.created_at DESC
+      `);
+      
+      return result.rows.map((row: any) => ({
+        id: row.id,
+        email: row.email,
+        phone: row.phone,
+        name: row.name,
+        firstName: row.first_name,
+        lastName: row.last_name,
+        profileImageUrl: row.profile_image_url,
+        status: row.status,
+        contactType: row.contact_type,
+        isActive: row.is_active,
+        lastContactedAt: row.last_contacted_at,
+        createdAt: row.created_at
+      }));
     } catch (error) {
       return [];
     }
