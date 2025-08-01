@@ -98,5 +98,16 @@ Focus on functionality over technical implementation details.
   - Migrated all SQL queries and storage methods to use consistent field names
   - Fixed route handlers to use correct community association field (`userChurches[0].id`)
   - Updated relations and indexes to match new schema structure
-- **Features Affected**: Events, SOAP entries, prayers, discussions, member management, staff operations, galleries, and all community-scoped functionality
+  - Fixed prayer circle creation and reaction systems to use community terminology
+- **Features Affected**: Events, SOAP entries, prayers, discussions, member management, staff operations, galleries, prayer circles, and all community-scoped functionality
 - **Impact**: Complete elimination of field mapping errors, successful event creation and retrieval, consistent data architecture across entire application
+
+### Prayer System Fixes (August 1, 2025)
+- **Issue Resolved**: Fixed non-functional prayer reaction counters and prayer circle creation errors
+- **Root Cause**: Missing storage methods for prayer reactions and undefined variable references in prayer circle creation
+- **Solution**:
+  - Added missing `togglePrayerReaction`, `getPrayerReactions`, and `getUserPrayerReactions` storage methods
+  - Fixed prayer circle creation endpoint to properly handle user roles and community associations
+  - Updated prayer reaction frontend to use correct API endpoints with optimistic UI updates
+  - Standardized all references to use community terminology instead of church terminology
+- **Impact**: Prayer reaction buttons now work properly with real-time counter updates, prayer circle creation functions without errors

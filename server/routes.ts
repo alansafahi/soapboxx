@@ -10384,30 +10384,29 @@ Return JSON with this exact structure:
       let userRole = null;
       
       try {
-        userChurch = await storage.getUserChurch(userId);
-        if (userChurch) {
-          // Get user's role in the church
-          const userChurches = await storage.getUserChurches(userId);
-          if (userChurches && userChurches.length > 0) {
-            userRole = userChurches[0];
-          }
+        // Get user's community associations instead of church
+        const userCommunities = await storage.getUserChurches(userId);
+        if (userCommunities && userCommunities.length > 0) {
+          userChurch = { id: userCommunities[0].id }; // Use community ID
+          userRole = userCommunities[0];
         }
       } catch (error) {
-        // Continue without church - allow independent circles
+        // Continue without community - allow independent circles
       }
 
       if (!userRole) {
         isIndependent = true;
         
         // Check limits for independent circles with user-specific limits
-        const existingIndependentCircles = await storage.getUserCreatedCircles(userId, true); // independent only
+        const existingCircles = await storage.getUserPrayerCircles(userId);
+        const independentCircles = existingCircles.filter(c => c.isIndependent);
         const userLimit = user.independentCircleLimit || 2; // Default to 2, but configurable
         
-        if (existingIndependentCircles.length >= userLimit) {
+        if (independentCircles.length >= userLimit) {
           return res.status(400).json({ 
-            message: `Independent members can create up to ${userLimit} prayer circles. Consider joining a local church for unlimited circles.`,
+            message: `Independent members can create up to ${userLimit} prayer circles. Consider joining a local community for unlimited circles.`,
             limitReached: true,
-            currentCount: existingIndependentCircles.length,
+            currentCount: independentCircles.length,
             limit: userLimit
           });
         }
@@ -10429,10 +10428,10 @@ Return JSON with this exact structure:
         memberLimit: memberLimit || null,
         focusAreas: focusAreas || [],
         meetingSchedule: meetingSchedule || null,
-        communityId: userChurch ? userChurch.id : null, // null for independent circles
+        communityId: userRole ? userRole.id : null, // null for independent circles
         createdBy: userId,
         isIndependent: isIndependent, // Mark independent circles
-        type: isIndependent ? 'independent' : 'church',
+        type: isIndependent ? 'independent' : 'community',
         inviteCode: inviteCode, // Unique invite code for sharing
         status: isIndependent ? 'active' : 'active' // Independent circles start active
       };
