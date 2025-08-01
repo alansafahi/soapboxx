@@ -154,13 +154,17 @@ export default function SignupPage() {
         }
       }
     } catch (error: any) {
+      console.log('Signup error caught:', error);
+      console.log('Error status:', error.status);
+      console.log('Error response:', error.response);
+      console.log('Error message:', error.message);
+      
       // Handle account already exists scenario
       if (error.status === 409 || (error.response && error.response.errorType === 'account_exists')) {
         toast({
           title: "Account Already Exists",
           description: "It looks like you already have an account with this email. Would you like to sign in instead?",
           variant: "default",
-
         });
         return;
       }
