@@ -3103,7 +3103,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      const streak = await storage.getUserCheckInStreak(userId);
+      // Get streak from user_scores table instead of storage method
+      const result = await db.execute(sql`
+        SELECT current_streak, longest_streak 
+        FROM user_scores 
+        WHERE user_id = ${userId}
+      `);
+      
+      const streak = result.rows.length > 0 ? result.rows[0].current_streak : 0;
       res.json({ streak });
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch streak' });
@@ -14340,20 +14347,26 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(401).json({ message: 'Authentication required' });
       }
 
-      // Direct SQL query for leaderboard data since storage method may not exist
+      // Fixed query to avoid duplicates - use subquery to get unique users first
       const result = await db.execute(sql`
+        WITH unique_users AS (
+          SELECT DISTINCT ON (u.id)
+            u.id,
+            u.first_name,
+            u.last_name,
+            u.profile_image_url,
+            COALESCE(us.total_points, 0) as score
+          FROM users u
+          LEFT JOIN user_scores us ON u.id = us.user_id
+          LEFT JOIN user_churches uc ON u.id = uc.user_id
+          WHERE uc.is_active = true
+        )
         SELECT 
-          u.id,
-          u.first_name,
-          u.last_name,
-          u.profile_image_url,
-          COALESCE(us.total_points, 0) as score,
-          ROW_NUMBER() OVER (ORDER BY COALESCE(us.total_points, 0) DESC) as rank
-        FROM users u
-        LEFT JOIN user_scores us ON u.id = us.user_id
-        LEFT JOIN user_churches uc ON u.id = uc.user_id
-        WHERE uc.is_active = true AND COALESCE(us.total_points, 0) > 0
-        ORDER BY us.total_points DESC, u.first_name ASC
+          *,
+          ROW_NUMBER() OVER (ORDER BY score DESC, first_name ASC) as rank
+        FROM unique_users
+        WHERE score > 0 OR (SELECT COUNT(*) FROM unique_users WHERE score > 0) < 5
+        ORDER BY score DESC, first_name ASC
         LIMIT 20
       `);
       
