@@ -71,6 +71,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
     lastName: prefilledData?.lastName || '',
     email: prefilledData?.email || '',
     password: '',
+    confirmPassword: '',
     mobileNumber: prefilledData?.mobileNumber || '',
     agreeToTerms: false,
     
@@ -106,7 +107,19 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
 
   const canProceedFromStep1 = () => {
     return formData.firstName && formData.lastName && formData.email && 
-           formData.password && formData.agreeToTerms;
+           formData.password && formData.confirmPassword && 
+           formData.password === formData.confirmPassword && formData.agreeToTerms;
+  };
+
+  const getPasswordError = () => {
+    if (!formData.password || !formData.confirmPassword) return '';
+    if (formData.password !== formData.confirmPassword) {
+      return 'Passwords do not match';
+    }
+    if (formData.password.length < 8) {
+      return 'Password must be at least 8 characters';
+    }
+    return '';
   };
 
   const canProceedFromStep2 = () => {
@@ -223,6 +236,21 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
             placeholder="Choose a secure password"
             required
           />
+        </div>
+        
+        <div>
+          <Label htmlFor="confirmPassword">Confirm Password *</Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            value={formData.confirmPassword}
+            onChange={(e) => updateFormData('confirmPassword', e.target.value)}
+            placeholder="Re-enter your password"
+            required
+          />
+          {getPasswordError() && (
+            <p className="text-sm text-red-600 mt-1">{getPasswordError()}</p>
+          )}
         </div>
         
         <div>
