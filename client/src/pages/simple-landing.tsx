@@ -89,7 +89,7 @@ export default function SimpleLanding() {
               </Button>
               <Button 
                 className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-2 sm:px-4"
-                onClick={() => window.location.href = '/signup'}
+                onClick={() => window.location.href = '/onboarding'}
               >
                 Get Started
               </Button>
@@ -284,7 +284,7 @@ export default function SimpleLanding() {
             <Button 
               size="lg"
               className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto min-w-[180px]"
-              onClick={() => window.location.href = '/signup'}
+              onClick={() => window.location.href = '/onboarding'}
             >
               Get Started
             </Button>
@@ -351,7 +351,12 @@ export default function SimpleLanding() {
                     <span className="text-sm sm:text-base">100 credits per referral</span>
                   </li>
                 </ul>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 py-3 text-sm sm:text-base">Get Started Free</Button>
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700 py-3 text-sm sm:text-base"
+                  onClick={() => window.location.href = '/onboarding'}
+                >
+                  Get Started Free
+                </Button>
               </div>
 
               <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border-2 border-purple-500 relative">
@@ -611,7 +616,7 @@ export default function SimpleLanding() {
             <Button 
               size="lg"
               className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto min-w-[200px]"
-              onClick={() => window.location.href = '/signup'}
+              onClick={() => window.location.href = '/onboarding'}
             >
               <Play className="w-5 h-5 mr-2" />
               Start Free Today
