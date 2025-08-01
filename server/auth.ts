@@ -12,7 +12,9 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { storage } from "./storage";
 import { sendVerificationEmail } from "./email-service";
-import { pool } from "./db";
+import { pool, db } from "./db";
+import { invitations, userCommunities } from "../shared/schema";
+import { eq } from "drizzle-orm";
 
 // Session configuration
 export function getSession() {
@@ -312,7 +314,9 @@ export function setupAuth(app: Express): void {
             }
             
             // Mark invitation as accepted
-            await storage.updateInvitationStatus(inviteToken, 'accepted');
+            await db.update(invitations)
+              .set({ status: 'accepted' })
+              .where(eq(invitations.inviteCode, inviteToken));
           }
         } catch (error) {
           // Continue registration even if invite processing fails
@@ -346,20 +350,7 @@ export function setupAuth(app: Express): void {
 
       // Check for pre-assigned church based on email
       let claimableChurch = null;
-      try {
-        const church = await storage.getChurchByAdminEmail(email);
-        if (church && !church.claimedBy) {
-          claimableChurch = {
-            id: church.id,
-            name: church.name,
-            address: church.address,
-            city: church.city,
-            state: church.state
-          };
-        }
-      } catch (error) {
-
-      }
+      // Temporarily disabled pre-assigned church logic
 
       // Send verification email
       try {
