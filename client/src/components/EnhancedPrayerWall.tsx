@@ -565,6 +565,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
       return await apiRequest("POST", `/api/prayers/${prayerId}/react`, { reaction });
     },
     onSuccess: (response, { prayerId, reaction }) => {
+      // Update reaction counts immediately with the response data
       setReactions(prev => {
         const newMap = new Map(prev);
         const current = newMap.get(prayerId) || { praying: 0, heart: 0, fire: 0, praise: 0 };
@@ -577,9 +578,19 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
         return newMap;
       });
       
+      // Refresh the prayer list to get updated data
+      queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
+      
       toast({
         title: response.reacted ? "Reaction Added" : "Reaction Removed",
         description: response.message,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: "Failed to add reaction. Please try again.",
+        variant: "destructive",
       });
     },
   });
