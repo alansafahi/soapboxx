@@ -146,6 +146,20 @@ export default function SignupPage() {
         }
       }
     } catch (error: any) {
+      // Handle account already exists scenario
+      if (error.status === 409 || (error.response && error.response.errorType === 'account_exists')) {
+        toast({
+          title: "Account Already Exists",
+          description: "It looks like you already have an account with this email. Would you like to sign in instead?",
+          variant: "default",
+          action: {
+            label: "Sign In",
+            onClick: () => setLocation('/login')
+          }
+        });
+        return;
+      }
+      
       // Handle case where user already exists with staff invitation
       if (error.message && error.message.includes('already exists') && isStaffInvite) {
         toast({

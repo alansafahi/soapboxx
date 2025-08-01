@@ -276,7 +276,9 @@ export function setupAuth(app: Express): void {
         
         return res.status(409).json({ 
           success: false,
-          message: 'Account already exists with this email address. Please log in instead.' 
+          message: 'It looks like you already have an account with this email. Would you like to sign in instead?',
+          errorType: 'account_exists',
+          suggestedAction: 'login'
         });
       }
 
