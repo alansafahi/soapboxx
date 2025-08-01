@@ -9,8 +9,8 @@ async function throwIfResNotOk(res: Response) {
       (error as any).response = errorData;
       throw error;
     } catch (parseError) {
-      const text = await res.text() || res.statusText;
-      const error = new Error(`${res.status}: ${text}`);
+      // Don't try to read text after JSON failed - response body is already consumed
+      const error = new Error(`${res.status}: ${res.statusText}`);
       (error as any).status = res.status;
       throw error;
     }
@@ -94,8 +94,8 @@ export async function apiRequest(
         (error as any).response = errorData;
         throw error;
       } catch (parseError) {
-        const errorText = await res.text();
-        const error = new Error(`${res.status}: ${errorText || res.statusText}`);
+        // Don't try to read text after JSON failed - response body is already consumed
+        const error = new Error(`${res.status}: ${res.statusText}`);
         (error as any).status = res.status;
         throw error;
       }

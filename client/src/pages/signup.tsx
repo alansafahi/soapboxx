@@ -154,10 +154,7 @@ export default function SignupPage() {
         }
       }
     } catch (error: any) {
-      console.log('Signup error caught:', error);
-      console.log('Error status:', error.status);
-      console.log('Error response:', error.response);
-      console.log('Error message:', error.message);
+      // Debug logging removed - error handling fixed
       
       // Handle account already exists scenario
       if (error.status === 409 || (error.response && error.response.errorType === 'account_exists')) {
