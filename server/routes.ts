@@ -14244,7 +14244,7 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.json([]); // Return empty array if no church
       }
 
-      const communityId = userChurches[0].communityId;
+      const communityId = userChurches[0].id; // Use the community ID from the id field
       
       // Get all church members' streak information
       const churchMembers = await storage.getChurchMembers(communityId);
@@ -14334,7 +14334,7 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.json([]); // Return empty array if no church
       }
 
-      const communityId = userChurches[0].communityId;
+      const communityId = userChurches[0].id; // Use the community ID from the id field
       
       // Use the existing getUpcomingEvents method from storage
       const upcomingEvents = await storage.getUpcomingEvents(communityId, limit);
@@ -14360,7 +14360,7 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.json([]);
       }
 
-      const communityId = userChurches[0].communityId;
+      const communityId = userChurches[0].id; // Use the community ID from the id field
       const events = await storage.getEventsByChurch(communityId);
       res.json(events);
     } catch (error) {
