@@ -520,7 +520,14 @@ export default function LoginPage() {
               {isLogin ? "Don't have an account?" : "Already have an account?"}
               <button
                 type="button"
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => {
+                  if (isLogin) {
+                    // Redirect to onboarding instead of showing inline registration
+                    window.location.href = '/onboarding';
+                  } else {
+                    setIsLogin(!isLogin);
+                  }
+                }}
                 className="ml-1 text-purple-600 hover:text-purple-500 font-medium"
               >
                 {isLogin ? "Sign up" : "Sign in"}
