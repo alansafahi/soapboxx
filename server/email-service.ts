@@ -43,14 +43,14 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
       return { success: true, messageId: 'dev-mode' };
     }
   } catch (error: any) {
-    // Log detailed error for debugging
-    console.log('SendGrid Email Error Details:', {
+    // Log detailed error for debugging  
+    const errorDetails = {
       code: error.code,
       message: error.message,
       response: error.response?.body,
       apiKey: process.env.SENDGRID_API_KEY ? 'Present' : 'Missing',
       fromEmail: process.env.SENDGRID_VERIFIED_SENDER || process.env.FROM_EMAIL || 'support@soapboxsuperapp.com'
-    });
+    };
     
     // Provide specific error messages for common issues
     let errorMessage = 'Failed to send email';

@@ -322,7 +322,7 @@ export function setupAuth(app: Express): void {
       // Handle staff invitation if present
       if (staffInvite && staffInvite.communityId && staffInvite.role) {
         try {
-          console.log('Processing staff invitation during registration:', staffInvite);
+
           
           // Create pending staff invitation directly in user_churches table
           await pool.query(
@@ -330,11 +330,7 @@ export function setupAuth(app: Express): void {
             [newUser.id, staffInvite.communityId, staffInvite.role, newUser.id, staffInvite.role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())]
           );
           
-          console.log('Staff invitation created for new user:', { 
-            userId: newUser.id, 
-            communityId: staffInvite.communityId, 
-            role: staffInvite.role 
-          });
+
         } catch (staffError) {
           console.error('Failed to create staff invitation during registration:', staffError);
           // Continue with registration even if staff invitation fails

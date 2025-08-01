@@ -174,7 +174,7 @@ export async function apiRequestCompatible(
       return await apiRequestEnhanced(method, enhancedEndpoint, data);
     } catch (error) {
       // Fall back to original endpoint
-      console.warn('Enhanced endpoint failed, falling back to original:', error);
+
     }
   }
   

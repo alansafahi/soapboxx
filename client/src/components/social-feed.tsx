@@ -720,7 +720,7 @@ export default function SocialFeed() {
             
 
             
-            {/* Force show AI recommendations for testing */}
+            {/* AI recommendations based on mood selection */}
             {selectedMoods.length > 0 ? (
               <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded">
                 <h4 className="font-medium text-green-800 mb-2">✅ AI Recommendations Should Be Here</h4>
