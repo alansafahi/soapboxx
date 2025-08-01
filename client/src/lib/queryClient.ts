@@ -2,8 +2,18 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+    try {
+      const errorData = await res.json();
+      const error = new Error(errorData.message || res.statusText);
+      (error as any).status = res.status;
+      (error as any).response = errorData;
+      throw error;
+    } catch (parseError) {
+      const text = await res.text() || res.statusText;
+      const error = new Error(`${res.status}: ${text}`);
+      (error as any).status = res.status;
+      throw error;
+    }
   }
 }
 
@@ -77,8 +87,18 @@ export async function apiRequest(
     const res = await fetch(validUrl, fetchOptions);
     
     if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(`${res.status}: ${errorText || res.statusText}`);
+      try {
+        const errorData = await res.json();
+        const error = new Error(errorData.message || res.statusText);
+        (error as any).status = res.status;
+        (error as any).response = errorData;
+        throw error;
+      } catch (parseError) {
+        const errorText = await res.text();
+        const error = new Error(`${res.status}: ${errorText || res.statusText}`);
+        (error as any).status = res.status;
+        throw error;
+      }
     }
     
     return await res.json();

@@ -152,10 +152,7 @@ export default function SignupPage() {
           title: "Account Already Exists",
           description: "It looks like you already have an account with this email. Would you like to sign in instead?",
           variant: "default",
-          action: {
-            label: "Sign In",
-            onClick: () => setLocation('/login')
-          }
+
         });
         return;
       }
