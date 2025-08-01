@@ -245,7 +245,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
           <Label htmlFor="agreeToTerms" className="text-sm">
             I agree to the{' '}
             <a 
-              href="https://soapboxsuperapp.com/terms" 
+              href="https://soapboxsuperapp.com/terms-of-service" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-purple-600 hover:text-purple-800 underline"
@@ -254,7 +254,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
             </a>{' '}
             and{' '}
             <a 
-              href="https://soapboxsuperapp.com/privacy" 
+              href="https://soapboxsuperapp.com/privacy-policy" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-purple-600 hover:text-purple-800 underline"

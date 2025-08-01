@@ -168,7 +168,7 @@ Focus on functionality over technical implementation details.
 - **Issue Resolved**: Enhanced registration-to-onboarding flow with seamless data transfer and proper legal document linking
 - **Key Improvements**:
   - **Data Auto-Population**: Registration data (firstName, lastName, email, mobileNumber) now automatically flows to onboarding form via URL parameters
-  - **Legal Document Integration**: Terms of Service and Privacy Policy now link to actual website (soapboxsuperapp.com/terms and soapboxsuperapp.com/privacy)
+  - **Legal Document Integration**: Terms of Service and Privacy Policy now link to actual website (soapboxsuperapp.com/terms-of-service and soapboxsuperapp.com/privacy-policy)
   - **React Fragment Warning Fixed**: Replaced problematic Fragment component with proper div structure in step indicator
   - **Error Handling Enhancement**: Improved API error response parsing for better user-friendly messaging
 - **User Flow**: "Get Started" → Registration → Onboarding (with pre-populated data) → Dashboard
