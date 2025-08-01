@@ -576,7 +576,7 @@ export const activityFeed = pgTable("activity_feed", {
 // Events table - Enhanced for comprehensive management
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   organizerId: varchar("organizer_id").notNull().references(() => users.id),
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
@@ -1257,7 +1257,7 @@ export const personalizedContent = pgTable("personalized_content", {
 // QR codes for physical check-in locations
 export const qrCodes = pgTable("qr_codes", {
   id: varchar("id").primaryKey(), // unique QR code identifier
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   eventId: integer("event_id").references(() => events.id), // null for general church location
   name: varchar("name", { length: 100 }).notNull(), // "Main Sanctuary", "Youth Room", etc.
   description: text("description"),
@@ -1284,7 +1284,7 @@ export const inspirationBookmarks = pgTable("inspiration_bookmarks", {
 export const soapEntries = pgTable("soap_entries", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  churchId: integer("church_id").references(() => communities.id),
+  communityId: integer("community_id").references(() => communities.id),
   scripture: text("scripture").notNull(), // The Bible verse or passage
   scriptureReference: varchar("scripture_reference", { length: 100 }), // e.g., "John 3:16"
   observation: text("observation").notNull(), // What does the passage say?
@@ -1317,7 +1317,7 @@ export const soapEntries = pgTable("soap_entries", {
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
   index("soap_entries_user_idx").on(table.userId),
-  index("soap_entries_community_idx").on(table.churchId),
+  index("soap_entries_community_idx").on(table.communityId),
   index("soap_entries_date_idx").on(table.devotionalDate),
   index("soap_entries_public_idx").on(table.isPublic),
   index("soap_entries_expires_idx").on(table.expiresAt), // Index for expiration queries
@@ -2165,7 +2165,7 @@ export const bibleVerseShares = pgTable("bible_verse_shares", {
 // D.I.V.I.N.E. Phase 2: Enterprise Ready - Multi-Campus Support
 export const campuses = pgTable("campuses", {
   id: serial("id").primaryKey(),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   name: varchar("name", { length: 100 }).notNull(),
   address: text("address"),
   city: varchar("city", { length: 100 }),
@@ -2192,7 +2192,7 @@ export const memberCampusAssignments = pgTable("member_campus_assignments", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   campusId: integer("campus_id").notNull().references(() => campuses.id),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   isPrimaryCampus: boolean("is_primary_campus").default(false),
   membershipStatus: varchar("membership_status", { length: 50 }).default("active"), // active, inactive, transferred, pending
   assignedBy: varchar("assigned_by").references(() => users.id),
@@ -2210,7 +2210,7 @@ export const campusMemberRoles = pgTable("campus_member_roles", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   campusId: integer("campus_id").notNull().references(() => campuses.id),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   roleTitle: varchar("role_title", { length: 100 }).notNull(), // "Campus Coordinator", "Ministry Leader", etc.
   roleDescription: text("role_description"),
   permissions: text("permissions").array(), // ["events", "members", "communications"]
@@ -2228,7 +2228,7 @@ export const memberTransferHistory = pgTable("member_transfer_history", {
   userId: varchar("user_id").notNull().references(() => users.id),
   fromCampusId: integer("from_campus_id").references(() => campuses.id),
   toCampusId: integer("to_campus_id").notNull().references(() => campuses.id),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   transferReason: text("transfer_reason"),
   transferType: varchar("transfer_type", { length: 50 }).default("manual"), // manual, automatic, request
   requestedBy: varchar("requested_by").references(() => users.id),
@@ -2559,7 +2559,7 @@ export const userChurchesRelations = userCommunitiesRelations;
 
 export const eventsRelations = relations(events, ({ one, many }) => ({
   community: one(communities, {
-    fields: [events.churchId],
+    fields: [events.communityId],
     references: [communities.id],
   }),
   organizer: one(users, {
@@ -3391,7 +3391,7 @@ export type InsertActivityFeed = typeof activityFeed.$inferInsert;
 export const memberEngagementMetrics = pgTable("member_engagement_metrics", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   metricType: varchar("metric_type", { length: 50 }).notNull(), // attendance, prayer, reading, giving, volunteering, events
   value: decimal("value", { precision: 10, scale: 2 }).notNull(),
   unit: varchar("unit", { length: 20 }), // hours, count, dollars, percentage
@@ -3406,7 +3406,7 @@ export const memberEngagementMetrics = pgTable("member_engagement_metrics", {
 export const spiritualGrowthTracking = pgTable("spiritual_growth_tracking", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   growthCategory: varchar("growth_category", { length: 50 }).notNull(), // baptism, discipleship, leadership, service, faith_milestone
   milestone: varchar("milestone", { length: 100 }).notNull(),
   description: text("description"),
@@ -3421,7 +3421,7 @@ export const spiritualGrowthTracking = pgTable("spiritual_growth_tracking", {
 // Bulk Communication System
 export const communicationCampaigns = pgTable("communication_campaigns", {
   id: serial("id").primaryKey(),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
@@ -3450,7 +3450,7 @@ export const communicationCampaigns = pgTable("communication_campaigns", {
 
 export const communicationTemplates = pgTable("communication_templates", {
   id: serial("id").primaryKey(),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   name: varchar("name", { length: 255 }).notNull(),
   description: text("description"),
@@ -3484,7 +3484,7 @@ export const eventCapacityManagement = pgTable("event_capacity_management", {
 
 export const recurringEventSeries = pgTable("recurring_event_series", {
   id: serial("id").primaryKey(),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   createdBy: varchar("created_by").notNull().references(() => users.id),
   seriesName: varchar("series_name", { length: 255 }).notNull(),
   description: text("description"),
@@ -3506,7 +3506,7 @@ export const recurringEventSeries = pgTable("recurring_event_series", {
 // Enhanced Volunteer Management System
 export const enhancedVolunteerRoles = pgTable("enhanced_volunteer_roles", {
   id: serial("id").primaryKey(),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
   department: varchar("department", { length: 50 }), // worship, children, youth, hospitality, tech, admin
@@ -3568,7 +3568,7 @@ export const enhancedVolunteerSchedules = pgTable("enhanced_volunteer_schedules"
 // Donation and Financial Tracking
 export const donationCategories = pgTable("donation_categories", {
   id: serial("id").primaryKey(),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   name: varchar("name", { length: 100 }).notNull(),
   description: text("description"),
   code: varchar("code", { length: 20 }), // For accounting integration
@@ -3585,7 +3585,7 @@ export const donationCategories = pgTable("donation_categories", {
 
 export const donations = pgTable("donations", {
   id: serial("id").primaryKey(),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   donorId: varchar("donor_id").references(() => users.id), // Can be null for anonymous donations
   categoryId: integer("category_id").notNull().references(() => donationCategories.id),
   amount: decimal("amount", { precision: 12, scale: 2 }).notNull(),
@@ -3614,7 +3614,7 @@ export const donations = pgTable("donations", {
 
 export const donationReports = pgTable("donation_reports", {
   id: serial("id").primaryKey(),
-  churchId: integer("church_id").notNull().references(() => churches.id),
+  communityId: integer("community_id").notNull().references(() => communities.id),
   generatedBy: varchar("generated_by").notNull().references(() => users.id),
   reportType: varchar("report_type", { length: 50 }).notNull(), // annual_statement, monthly_summary, category_breakdown, donor_history
   reportPeriod: varchar("report_period", { length: 50 }).notNull(), // 2024, 2024-01, Q1-2024, etc.

@@ -666,7 +666,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         prayer: "[Write your prayer based on this scripture...]", // Placeholder for personal reflection
         isPublic: false,
         originalSoapId,
-        churchId: null,
+        communityId: null,
         devotionalDate: new Date(), // Set current date for proper ordering
         createdAt: new Date(),
         updatedAt: new Date()
@@ -791,7 +791,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         observation: "[Add your observations about this scripture...]",
         application: "[How does this apply to your life?...]",
         prayer: "[Write your prayer based on this scripture...]",
-        isPublic: false, originalSoapId, churchId: null,
+        isPublic: false, originalSoapId, communityId: null,
         devotionalDate: new Date(), createdAt: new Date(), updatedAt: new Date()
       });
       res.json({ success: true });
@@ -1188,7 +1188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const searchResults = await storage.searchUsers(
         query.trim(), 
         userId, 
-        currentUserChurch.churchId
+        currentUserChurch.communityId
       );
       
       // Format results with privacy protection
@@ -1198,7 +1198,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
-        churchId: user.churchId,
+        communityId: user.communityId,
         role: user.role,
         // Only show email to church staff
         email: ['church_admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(currentUserChurch.role) 
@@ -1246,10 +1246,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           u.email,
           u.profile_image_url as "profileImageUrl",
           uc.role,
-          uc.church_id as "churchId"
+          uc.church_id as "communityId"
         FROM users u
         INNER JOIN user_churches uc ON u.id = uc.user_id
-        WHERE uc.church_id = ${currentUserChurch.churchId}
+        WHERE uc.church_id = ${currentUserChurch.communityId}
         AND uc.is_active = true
         AND u.id != ${userId}
       `);
@@ -1261,7 +1261,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
-        churchId: user.churchId,
+        communityId: user.communityId,
         role: user.role,
         // Only show email to church staff
         email: ['church_admin', 'pastor', 'lead_pastor', 'soapbox_owner'].includes(currentUserChurch.role) 
@@ -1282,13 +1282,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/users/set-primary-church', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId || req.user?.id;
-      const { churchId } = req.body;
+      const { communityId } = req.body;
       
       if (!userId) {
         return res.status(401).json({ success: false, message: "Authentication required" });
       }
 
-      if (!churchId) {
+      if (!communityId) {
         return res.status(400).json({ success: false, message: "Church ID is required" });
       }
 
@@ -1299,7 +1299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           and(
             eq(userChurches.userId, userId),
-            eq(userChurches.churchId, parseInt(churchId)),
+            eq(userChurches.communityId, parseInt(communityId)),
             eq(userChurches.isActive, true)
           )
         )
@@ -1322,7 +1322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .where(
           and(
             eq(userChurches.userId, userId),
-            eq(userChurches.churchId, parseInt(churchId))
+            eq(userChurches.communityId, parseInt(communityId))
           )
         );
 
@@ -1393,7 +1393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (['soapbox_owner', 'system_admin', 'support_agent'].includes(sessionRole)) {
           return res.json({ 
             role: sessionRole,
-            churchId: null 
+            communityId: null 
           });
         }
       }
@@ -1402,15 +1402,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userChurch = await storage.getUserChurch(userId);
       
       if (!userChurch) {
-        return res.json({ role: 'new_member', churchId: null });
+        return res.json({ role: 'new_member', communityId: null });
       }
       
       res.json({ 
         role: userChurch.role || 'member',
-        churchId: userChurch.churchId 
+        communityId: userChurch.communityId 
       });
     } catch (error) {
-      res.json({ role: 'member', churchId: null });
+      res.json({ role: 'member', communityId: null });
     }
   });
 
@@ -1960,9 +1960,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get user's church to filter pinned posts
       const userChurches = await storage.getUserChurches(userId);
-      const churchId = userChurches?.[0]?.id || null;
+      const communityId = userChurches?.[0]?.id || null;
 
-      const pinnedPosts = await storage.getPinnedDiscussions(churchId);
+      const pinnedPosts = await storage.getPinnedDiscussions(communityId);
 
       res.json(pinnedPosts);
     } catch (error) {
@@ -2586,10 +2586,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.session.userId || req.user?.claims?.sub || req.user?.id;
       if (!userId) return res.status(401).json({ message: "User not authenticated" });
       const userChurch = await storage.getUserChurch(userId);
-      if (!userChurch) return res.json({ role: 'new_member', churchId: null });
-      res.json({ role: userChurch.role || 'member', churchId: userChurch.churchId });
+      if (!userChurch) return res.json({ role: 'new_member', communityId: null });
+      res.json({ role: userChurch.role || 'member', communityId: userChurch.communityId });
     } catch (error) {
-      res.json({ role: 'member', churchId: null });
+      res.json({ role: 'member', communityId: null });
     }
   });
 
@@ -3047,7 +3047,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Verify QR code belongs to user's church
         const user = await storage.getUser(userId);
-        if (user?.churchId && qrValidation.qrCode?.churchId !== user.churchId) {
+        if (user?.communityId && qrValidation.qrCode?.communityId !== user.communityId) {
           return res.status(403).json({ 
             message: 'QR code access denied',
             error: 'QR code belongs to a different church'
@@ -3231,7 +3231,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
       // Get user's church
       const user = await storage.getUser(userId);
-      if (!user?.churchId) {
+      if (!user?.communityId) {
         return res.status(400).json({ message: 'User must be associated with a church to create QR codes' });
       }
 
@@ -3255,7 +3255,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       
       const qrCode = await storage.createQrCode({
         id: qrCodeId,
-        churchId: user.churchId,
+        communityId: user.communityId,
         eventId: eventId || null,
         name,
         description,
@@ -3283,11 +3283,11 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       }
 
       const user = await storage.getUser(userId);
-      if (!user?.churchId) {
+      if (!user?.communityId) {
         return res.status(400).json({ message: 'User must be associated with a church' });
       }
 
-      const qrCodes = await storage.getChurchQrCodes(user.churchId);
+      const qrCodes = await storage.getChurchQrCodes(user.communityId);
       res.json(qrCodes);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch QR codes' });
@@ -3312,7 +3312,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
       // Get user and verify church membership
       const user = await storage.getUser(userId);
-      if (!user?.churchId || existingQrCode.churchId !== user.churchId) {
+      if (!user?.communityId || existingQrCode.communityId !== user.communityId) {
         return res.status(403).json({ message: 'Access denied to this QR code' });
       }
 
@@ -3365,7 +3365,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
       // Get user and verify church membership
       const user = await storage.getUser(userId);
-      if (!user?.churchId || existingQrCode.churchId !== user.churchId) {
+      if (!user?.communityId || existingQrCode.communityId !== user.communityId) {
         return res.status(403).json({ message: 'Access denied to this QR code' });
       }
 
@@ -3396,7 +3396,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       if (validation.valid && validation.qrCode) {
         // Verify QR code belongs to user's church
         const user = await storage.getUser(userId);
-        if (user?.churchId && validation.qrCode.churchId !== user.churchId) {
+        if (user?.communityId && validation.qrCode.communityId !== user.communityId) {
           return res.status(403).json({ 
             valid: false,
             message: 'QR code belongs to a different church'
@@ -4048,16 +4048,16 @@ app.post('/api/invitations', async (req: any, res) => {
       
       // Church-specific filtering: Only SoapBox owners see all reports
       // Church admins only see reports for their churches
-      let churchId: number | undefined;
+      let communityId: number | undefined;
       if (user?.role !== 'soapbox_owner') {
         // Find the church where user is admin (take first one if multiple)
         const adminChurch = userChurches.find(uc => ['church_admin', 'pastor', 'lead-pastor', 'admin'].includes(uc.role));
         if (adminChurch) {
-          churchId = adminChurch.churchId;
+          communityId = adminChurch.communityId;
         }
       }
 
-      const reports = await storage.getContentReports(churchId, status as string);
+      const reports = await storage.getContentReports(communityId, status as string);
 
       res.json(reports);
     } catch (error) {
@@ -5465,7 +5465,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   app.get('/api/admin/member-checkins', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { period = '30', churchId } = req.query;
+      const { period = '30', communityId } = req.query;
       
       // Check if user has admin/pastor permissions
       const userRole = await storage.getUserRole(userId);
@@ -5477,7 +5477,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       startDate.setDate(startDate.getDate() - parseInt(period));
 
       // Get check-in data for all church members
-      const checkinData = await storage.getChurchMemberCheckIns(churchId || 1, startDate);
+      const checkinData = await storage.getChurchMemberCheckIns(communityId || 1, startDate);
       
       res.json({
         period: `${period} days`,
@@ -5494,7 +5494,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   app.get('/api/admin/devotion-analytics', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { period = '30', churchId } = req.query;
+      const { period = '30', communityId } = req.query;
       
       // Check if user has admin/pastor permissions
       const userRole = await storage.getUserRole(userId);
@@ -5506,7 +5506,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       startDate.setDate(startDate.getDate() - parseInt(period));
 
       // Get devotion reading analytics
-      const devotionStats = await storage.getDevotionAnalytics(churchId || 1, startDate);
+      const devotionStats = await storage.getDevotionAnalytics(communityId || 1, startDate);
       
       res.json({
         period: `${period} days`,
@@ -5524,7 +5524,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   app.get('/api/admin/at-risk-members', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { churchId, threshold = '14' } = req.query;
+      const { communityId, threshold = '14' } = req.query;
       
       // Check if user has admin/pastor permissions
       const userRole = await storage.getUserRole(userId);
@@ -5536,7 +5536,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const thresholdDate = new Date();
       thresholdDate.setDate(thresholdDate.getDate() - parseInt(threshold));
 
-      const atRiskMembers = await storage.getAtRiskMembers(churchId || 1, thresholdDate);
+      const atRiskMembers = await storage.getAtRiskMembers(communityId || 1, thresholdDate);
       
       res.json({
         threshold: `${threshold} days`,
@@ -5560,7 +5560,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
   app.get('/api/admin/engagement-overview', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { churchId } = req.query;
+      const { communityId } = req.query;
       
       // Check if user has admin/pastor permissions
       const userRole = await storage.getUserRole(userId);
@@ -5569,7 +5569,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       }
 
       // Get comprehensive engagement overview
-      const engagement = await storage.getEngagementOverview(churchId || 1);
+      const engagement = await storage.getEngagementOverview(communityId || 1);
       
       res.json({
         checkIns: {
@@ -5612,10 +5612,10 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
   app.get('/api/prayer-analytics/answered-prayers', isAuthenticated, async (req, res) => {
     try {
-      const { userId, churchId } = req.query;
+      const { userId, communityId } = req.query;
       const answeredPrayers = await storage.getAnsweredPrayers(
         userId as string, 
-        churchId ? parseInt(churchId as string) : undefined
+        communityId ? parseInt(communityId as string) : undefined
       );
       res.json(answeredPrayers);
     } catch (error) {
@@ -5652,7 +5652,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
     try {
       const filters = req.query;
       const userChurch = await storage.getUserChurch(req.session.userId);
-      const trends = await storage.getPrayerTrends(filters, userChurch?.churchId);
+      const trends = await storage.getPrayerTrends(filters, userChurch?.communityId);
       res.json(trends);
     } catch (error) {
 
@@ -5700,10 +5700,10 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
         return res.status(403).json({ message: "Access denied. Admin privileges required." });
       }
 
-      const churchId = userRole.churchId;
+      const communityId = userRole.communityId;
       const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
 
-      const prayerAnalytics = await storage.getPrayerAnalytics(churchId, startDate);
+      const prayerAnalytics = await storage.getPrayerAnalytics(communityId, startDate);
 
       res.json({
         ...prayerAnalytics,
@@ -5729,9 +5729,9 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
       const { devotional } = req.query;
       const devotionalName = typeof devotional === 'string' ? devotional : 'Lent';
-      const churchId = userRole.churchId;
+      const communityId = userRole.communityId;
 
-      const completions = await storage.getDevotionalCompletions(churchId, devotionalName);
+      const completions = await storage.getDevotionalCompletions(communityId, devotionalName);
 
       res.json({
         devotionalName,
@@ -7096,12 +7096,12 @@ Return JSON with this exact structure:
 
   app.get('/api/videos', isAuthenticated, async (req, res) => {
     try {
-      const { churchId, category, limit = 20, offset = 0 } = req.query;
+      const { communityId, category, limit = 20, offset = 0 } = req.query;
       
       let videos;
-      if (churchId) {
+      if (communityId) {
         videos = await storage.getVideosByChurch(
-          parseInt(churchId as string), 
+          parseInt(communityId as string), 
           category as string
         );
       } else {
@@ -7308,13 +7308,13 @@ Return JSON with this exact structure:
 
   app.get('/api/video-series', isAuthenticated, async (req, res) => {
     try {
-      const { churchId } = req.query;
+      const { communityId } = req.query;
       
-      if (!churchId) {
+      if (!communityId) {
         return res.status(400).json({ message: 'Church ID is required' });
       }
 
-      const series = await storage.getVideoSeriesByChurch(parseInt(churchId as string));
+      const series = await storage.getVideoSeriesByChurch(parseInt(communityId as string));
       res.json(series);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch video series' });
@@ -7663,17 +7663,17 @@ Return JSON with this exact structure:
     }
   });
 
-  app.post('/api/churches/:churchId/claim', isAuthenticated, async (req: any, res) => {
+  app.post('/api/churches/:communityId/claim', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const churchId = parseInt(req.params.churchId);
+      const communityId = parseInt(req.params.communityId);
       const { verifiedDenomination } = req.body; // Admin-verified denomination
 
-      if (!churchId || isNaN(churchId)) {
+      if (!communityId || isNaN(communityId)) {
         return res.status(400).json({ message: 'Valid church ID required' });
       }
 
-      const result = await storage.claimChurch(churchId, userId, verifiedDenomination);
+      const result = await storage.claimChurch(communityId, userId, verifiedDenomination);
       
       if (result.success) {
         res.json({
@@ -7693,27 +7693,27 @@ Return JSON with this exact structure:
   });
 
   // Delete church (SoapBox Owner only)
-  app.delete('/api/churches/:churchId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/churches/:communityId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const churchId = parseInt(req.params.churchId);
+      const communityId = parseInt(req.params.communityId);
 
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      if (!churchId || isNaN(churchId)) {
+      if (!communityId || isNaN(communityId)) {
         return res.status(400).json({ error: 'Valid church ID required' });
       }
 
       // Get church details before deletion for response
-      const church = await storage.getChurch(churchId);
+      const church = await storage.getChurch(communityId);
       if (!church) {
         return res.status(404).json({ error: 'Church not found' });
       }
 
       const user = await storage.getUser(userId);
-      const userRole = await storage.getUserCommunityRole(userId, churchId);
+      const userRole = await storage.getUserCommunityRole(userId, communityId);
       
       // Check if user has permission to delete church
       const canDelete = user?.role === 'soapbox_owner' || 
@@ -7725,12 +7725,12 @@ Return JSON with this exact structure:
       }
 
       // Soft delete church
-      await storage.deleteChurch(churchId);
+      await storage.deleteChurch(communityId);
       
       res.json({ 
         success: true, 
         message: `Church "${church.name}" has been successfully deleted`,
-        churchId 
+        communityId 
       });
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete church' });
@@ -7826,21 +7826,21 @@ Return JSON with this exact structure:
   });
 
   // Get specific church details for church management (legacy endpoint)
-  app.get('/api/churches/:churchId', isAuthenticated, async (req: any, res) => {
+  app.get('/api/churches/:communityId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const churchId = parseInt(req.params.churchId);
+      const communityId = parseInt(req.params.communityId);
       
       
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      if (isNaN(churchId)) {
+      if (isNaN(communityId)) {
         return res.status(400).json({ error: 'Invalid church ID' });
       }
 
-      const church = await storage.getChurch(churchId);
+      const church = await storage.getChurch(communityId);
       
       if (!church) {
         return res.status(404).json({ error: 'Church not found' });
@@ -8476,22 +8476,22 @@ Return JSON with this exact structure:
   });
 
   // Get user's role in a specific church
-  app.get('/api/users/churches/:churchId/role', isAuthenticated, async (req: any, res) => {
+  app.get('/api/users/churches/:communityId/role', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const churchId = parseInt(req.params.churchId);
+      const communityId = parseInt(req.params.communityId);
       
       
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      if (isNaN(churchId)) {
+      if (isNaN(communityId)) {
         return res.status(400).json({ error: 'Invalid church ID' });
       }
 
       // First try to get user's role in this church
-      const userChurch = await storage.getUserCommunityRole(userId, churchId);
+      const userChurch = await storage.getUserCommunityRole(userId, communityId);
       if (userChurch) {
         return res.json({ role: userRole });
       }
@@ -8504,7 +8504,7 @@ Return JSON with this exact structure:
 
       // Check if user created this church by looking for admin churches
       const adminChurches = await storage.getUserCreatedChurches(userId);
-      const isCreator = adminChurches.some(church => church.id === churchId);
+      const isCreator = adminChurches.some(church => church.id === communityId);
       
       if (isCreator) {
         return res.json({ role: 'church_admin' });
@@ -8554,10 +8554,10 @@ Return JSON with this exact structure:
   });
 
   // Update church profile (church admins only)
-  app.put('/api/churches/:churchId', isAuthenticated, async (req: any, res) => {
+  app.put('/api/churches/:communityId', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const churchId = parseInt(req.params.churchId);
+      const communityId = parseInt(req.params.communityId);
       
       
       if (!userId) {
@@ -8565,7 +8565,7 @@ Return JSON with this exact structure:
       }
 
       // Check if user has admin access to this church
-      const userChurch = await storage.getUserCommunityRole(userId, churchId);
+      const userChurch = await storage.getUserCommunityRole(userId, communityId);
       
       const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'system-admin'];
       
@@ -8576,7 +8576,7 @@ Return JSON with this exact structure:
       }
 
       const updates = req.body;
-      const updatedChurch = await storage.updateChurch(churchId, updates);
+      const updatedChurch = await storage.updateChurch(communityId, updates);
       
       res.json(updatedChurch);
     } catch (error) {
@@ -8585,17 +8585,17 @@ Return JSON with this exact structure:
   });
 
   // Get church features for feature management (correct endpoint)
-  app.get('/api/churches/:churchId/features', isAuthenticated, async (req: any, res) => {
+  app.get('/api/churches/:communityId/features', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const churchId = parseInt(req.params.churchId);
+      const communityId = parseInt(req.params.communityId);
       
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
       // Check if user has access to this church
-      const userChurch = await storage.getUserCommunityRole(userId, churchId);
+      const userChurch = await storage.getUserCommunityRole(userId, communityId);
       const user = await storage.getUser(userId);
       
       // Allow access for global admins or church creators
@@ -8608,14 +8608,14 @@ Return JSON with this exact structure:
       } else {
         // Check if user created this church
         const adminChurches = await storage.getUserCreatedChurches(userId);
-        hasAccess = adminChurches.some(church => church.id === churchId);
+        hasAccess = adminChurches.some(church => church.id === communityId);
       }
       
       if (!hasAccess) {
         return res.status(403).json({ error: 'Access denied to this church' });
       }
 
-      const features = await storage.getChurchFeatureSettings(churchId);
+      const features = await storage.getChurchFeatureSettings(communityId);
       res.json(features);
     } catch (error) {
       res.status(500).json({ error: 'Failed to get church features' });
@@ -8664,7 +8664,7 @@ Return JSON with this exact structure:
       }
 
       const updatedFeature = await storage.updateChurchFeatureSetting({
-        churchId: feature.church_id,
+        communityId: feature.church_id,
         featureCategory: feature.feature_category,
         featureName: feature.feature_name,
         isEnabled,
@@ -8678,16 +8678,16 @@ Return JSON with this exact structure:
   });
 
   // Update church access timestamp when user connects/visits a church
-  app.post('/api/users/churches/:churchId/access', isAuthenticated, async (req: any, res) => {
+  app.post('/api/users/churches/:communityId/access', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const churchId = parseInt(req.params.churchId);
+      const communityId = parseInt(req.params.communityId);
       
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      await storage.updateChurchAccess(userId, churchId);
+      await storage.updateChurchAccess(userId, communityId);
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: 'Failed to update church access' });
@@ -8695,10 +8695,10 @@ Return JSON with this exact structure:
   });
 
   // Disconnect user from a church
-  app.post('/api/users/churches/:churchId/disconnect', isAuthenticated, async (req: any, res) => {
+  app.post('/api/users/churches/:communityId/disconnect', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const churchId = parseInt(req.params.churchId);
+      const communityId = parseInt(req.params.communityId);
       
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
@@ -8706,10 +8706,10 @@ Return JSON with this exact structure:
 
       // Get user's churches before disconnecting to check if this is primary
       const userChurches = await storage.getUserChurches(userId);
-      const isPrimaryChurch = userChurches.length > 0 && userChurches[0].id === churchId;
+      const isPrimaryChurch = userChurches.length > 0 && userChurches[0].id === communityId;
       
       // Disconnect from church
-      await storage.removeMember(churchId, userId);
+      await storage.removeMember(communityId, userId);
       
       // If this was the primary church and user has other churches, update access time for next church
       if (isPrimaryChurch && userChurches.length > 1) {
@@ -8728,23 +8728,23 @@ Return JSON with this exact structure:
   });
 
   // Set a church as primary by updating access timestamp
-  app.post('/api/users/churches/:churchId/set-primary', isAuthenticated, async (req: any, res) => {
+  app.post('/api/users/churches/:communityId/set-primary', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const churchId = parseInt(req.params.churchId);
+      const communityId = parseInt(req.params.communityId);
       
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
       // Verify user is member of this church
-      const userChurch = await storage.getUserChurch(userId, churchId);
+      const userChurch = await storage.getUserChurch(userId, communityId);
       if (!userRole) {
         return res.status(403).json({ error: 'Not a member of this church' });
       }
 
       // Update access timestamp to make this church primary
-      await storage.updateChurchAccess(userId, churchId);
+      await storage.updateChurchAccess(userId, communityId);
       
       res.json({ success: true });
     } catch (error) {
@@ -9113,26 +9113,26 @@ Return JSON with this exact structure:
   // Join church endpoint
   app.post('/api/churches/:id/join', isAuthenticated, async (req: any, res) => {
     try {
-      const churchId = parseInt(req.params.id);
+      const communityId = parseInt(req.params.id);
       const userId = req.session.userId;
       
 
       
       // Verify church exists
-      const church = await storage.getChurch(churchId);
+      const church = await storage.getChurch(communityId);
       if (!church) {
         return res.status(404).json({ message: "Church not found" });
       }
       
       // Join the church using storage method
-      await storage.joinChurch(userId, churchId);
+      await storage.joinChurch(userId, communityId);
       
 
       
       res.json({ 
         success: true, 
         message: "Successfully joined church",
-        churchId,
+        communityId,
         churchName: church.name
       });
     } catch (error) {
@@ -9196,7 +9196,7 @@ Return JSON with this exact structure:
           title: title || 'Community Discussion',
           content: content.trim(),
           authorId: userId,
-          churchId: null,
+          communityId: null,
           category: 'general',
           audience: audience,
           isPublic: true,
@@ -9211,7 +9211,7 @@ Return JSON with this exact structure:
           title: title || 'Prayer Share',
           content: content.trim(),
           authorId: userId,
-          churchId: null,
+          communityId: null,
           category: 'share',
           isPublic: true,
           mood: mood || null,
@@ -9224,7 +9224,7 @@ Return JSON with this exact structure:
           title: title || 'Community Announcement',
           content: content.trim(),
           authorId: userId,
-          churchId: null,
+          communityId: null,
           category: 'announcement',
           isPublic: true,
           mood: mood || null,
@@ -9245,7 +9245,7 @@ Return JSON with this exact structure:
           title: title || defaultTitle,
           content: content.trim(),
           authorId: userId,
-          churchId: null,
+          communityId: null,
           category: 'share',
           audience: audience,
           isPublic: true,
@@ -9640,7 +9640,7 @@ Return JSON with this exact structure:
         title: `Shared: ${originalTitle}`,
         content: shareContent,
         category: 'shared',
-        churchId: null,
+        communityId: null,
       });
       
 
@@ -9817,8 +9817,8 @@ Return JSON with this exact structure:
   // Prayer request endpoints
   app.get('/api/prayers', isAuthenticated, async (req: any, res) => {
     try {
-      const { churchId } = req.query;
-      const prayers = await storage.getPrayerRequests(churchId ? parseInt(churchId) : undefined);
+      const { communityId } = req.query;
+      const prayers = await storage.getPrayerRequests(communityId ? parseInt(communityId) : undefined);
       res.json(prayers);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch prayer requests" });
@@ -10027,7 +10027,7 @@ Return JSON with this exact structure:
       const userChurches = await storage.getUserChurches(userId);
       const primaryChurch = userChurches && userChurches.length > 0 ? userChurches[0] : null;
       
-      const bookmarkedPrayers = await storage.getUserBookmarkedPrayers(userId, primaryChurch?.churchId);
+      const bookmarkedPrayers = await storage.getUserBookmarkedPrayers(userId, primaryChurch?.communityId);
       
       res.json(bookmarkedPrayers);
     } catch (error) {
@@ -10328,9 +10328,9 @@ Return JSON with this exact structure:
 
       // Get user's church for scoped prayer circles
       const userChurch = await storage.getUserChurch(userId);
-      const churchId = userChurch?.churchId;
+      const communityId = userChurch?.communityId;
       
-      const prayerCircles = await storage.getPrayerCircles(churchId);
+      const prayerCircles = await storage.getPrayerCircles(communityId);
       res.json(prayerCircles);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch prayer circles" });
@@ -10420,7 +10420,7 @@ Return JSON with this exact structure:
         memberLimit: memberLimit || null,
         focusAreas: focusAreas || [],
         meetingSchedule: meetingSchedule || null,
-        churchId: userChurch ? userRole.churchId : null, // null for independent circles
+        communityId: userChurch ? userRole.communityId : null, // null for independent circles
         createdBy: userId,
         isIndependent: isIndependent, // Mark independent circles
         type: isIndependent ? 'independent' : 'church',
@@ -10480,7 +10480,7 @@ Return JSON with this exact structure:
     try {
       const circleId = parseInt(req.params.id);
       const userId = req.session.userId;
-      const { churchId } = req.body;
+      const { communityId } = req.body;
       
       // Verify user is the creator of the circle
       const circle = await storage.getPrayerCircle(circleId);
@@ -10494,7 +10494,7 @@ Return JSON with this exact structure:
 
       await storage.updatePrayerCircle(circleId, {
         connectToChurchRequested: true,
-        requestedChurchId: churchId,
+        requestedChurchId: communityId,
         status: 'pending_church_review'
       });
       
@@ -10669,7 +10669,7 @@ Return JSON with this exact structure:
         .from(prayerCircles)
         .where(and(
           eq(prayerCircles.createdBy, userId),
-          isNull(prayerCircles.churchId)
+          isNull(prayerCircles.communityId)
         ));
 
       const circleLimit = user.independentCircleLimit || 2;
@@ -11138,9 +11138,9 @@ Return JSON with this exact structure:
       }, Math.random() * 2000 + 1000); // Random delay 1-3 seconds
 
       // If S.O.A.P. entry is shared with pastor, notify pastors
-      if (newEntry.isSharedWithPastor && newEntry.churchId) {
+      if (newEntry.isSharedWithPastor && newEntry.communityId) {
         try {
-          const pastors = await storage.getChurchPastors(newEntry.churchId);
+          const pastors = await storage.getChurchPastors(newEntry.communityId);
           const user = await storage.getUser(userId);
           
           // Create notifications for all pastors
@@ -11180,10 +11180,10 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
       
-      const { churchId, isPublic, limit = 20, offset = 0 } = req.query;
+      const { communityId, isPublic, limit = 20, offset = 0 } = req.query;
 
       const options = {
-        churchId: churchId ? parseInt(churchId) : undefined,
+        communityId: communityId ? parseInt(communityId) : undefined,
         isPublic: isPublic !== undefined ? isPublic === 'true' : undefined,
         limit: parseInt(limit),
         offset: parseInt(offset),
@@ -11224,10 +11224,10 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
       
-      const { churchId, isPublic, limit = 20, offset = 0 } = req.query;
+      const { communityId, isPublic, limit = 20, offset = 0 } = req.query;
 
       const options = {
-        churchId: churchId ? parseInt(churchId) : undefined,
+        communityId: communityId ? parseInt(communityId) : undefined,
         isPublic: isPublic !== undefined ? isPublic === 'true' : undefined,
         limit: parseInt(limit),
         offset: parseInt(offset),
@@ -11261,14 +11261,14 @@ Return JSON with this exact structure:
   app.get('/api/soap/public', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const { churchId, limit = 20, offset = 0, includeOwnEntries = 'false' } = req.query;
+      const { communityId, limit = 20, offset = 0, includeOwnEntries = 'false' } = req.query;
 
       if (!userId) {
         return res.status(401).json({ message: 'User authentication required' });
       }
 
       // For Community tab, we want to show entries from other users in the SAME CHURCH
-      let userChurchId = churchId ? parseInt(churchId as string) : undefined;
+      let userChurchId = communityId ? parseInt(communityId as string) : undefined;
       
       // Get user's church if not specified
       if (!userChurchId) {
@@ -11632,7 +11632,7 @@ Return JSON with this exact structure:
         return res.status(404).json({ message: 'Church affiliation required' });
       }
 
-      const sharedEntries = await storage.getSoapEntriesSharedWithPastor(userId, userRole.churchId);
+      const sharedEntries = await storage.getSoapEntriesSharedWithPastor(userId, userRole.communityId);
       res.json(sharedEntries);
     } catch (error) {
       res.status(500).json({ message: 'Failed to retrieve shared S.O.A.P. entries' });
@@ -11645,12 +11645,12 @@ Return JSON with this exact structure:
       const userId = req.session.userId;
       
       const userChurch = await storage.getUserChurch(userId);
-      const pastors = userChurch ? await storage.getChurchPastors(userRole.churchId) : [];
+      const pastors = userChurch ? await storage.getChurchPastors(userRole.communityId) : [];
       
       res.json({
         hasChurch: !!userRole,
         church: userChurch ? {
-          id: userRole.churchId,
+          id: userRole.communityId,
           name: 'Church Name', // Will be populated from church details
         } : null,
         hasPastors: pastors.length > 0,
@@ -11729,13 +11729,13 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Get message history for the user's church
       const userChurch = await storage.getUserChurch(userId);
-      const churchId = userChurch?.churchId;
+      const communityId = userChurch?.communityId;
       
-      if (!churchId) {
+      if (!communityId) {
         return res.json([]);
       }
       
-      const messageHistory = await storage.getCommunicationHistory(churchId);
+      const messageHistory = await storage.getCommunicationHistory(communityId);
       
       res.json(messageHistory);
     } catch (error) {
@@ -11782,7 +11782,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Get church members based on target audience
       let targetMembers = [];
-      let churchId;
+      let communityId;
       
       if (user.role === 'soapbox_owner') {
         // For SoapBox Owner, get the church from user_churches table
@@ -11799,21 +11799,21 @@ Please provide suggestions for the missing or incomplete sections.`
           return res.status(403).json({ message: "No church association found" });
         }
         
-        churchId = userChurchAssociations[0].churchId;
+        communityId = userChurchAssociations[0].communityId;
       } else {
         const userChurch = await storage.getUserChurch(userId);
         if (!userRole) {
           return res.status(403).json({ message: "Church membership required" });
         }
-        churchId = userRole.churchId;
+        communityId = userRole.communityId;
       }
       
       if (targetAudience?.allMembers) {
         // Send to all church members
-        targetMembers = await storage.getChurchMembers(churchId);
+        targetMembers = await storage.getChurchMembers(communityId);
       } else {
         // Get all church members first, then filter
-        const allMembers = await storage.getChurchMembers(churchId);
+        const allMembers = await storage.getChurchMembers(communityId);
         
         // Filter by roles if specified
         if (targetAudience?.roles?.length > 0) {
@@ -11873,7 +11873,7 @@ Please provide suggestions for the missing or incomplete sections.`
       for (const member of targetMembers) {
         try {
           await storage.createCommunicationRecord({
-            churchId: churchId,
+            communityId: communityId,
             sentBy: userId,
             subject: title,
             content: content,
@@ -11932,9 +11932,9 @@ Please provide suggestions for the missing or incomplete sections.`
       const { title, content, requiresResponse } = req.body;
 
       // Get all church members
-      const churchMembers = await storage.getChurchMembers(userRole.churchId);
+      const churchMembers = await storage.getChurchMembers(userRole.communityId);
       const sender = await storage.getUser(userId);
-      const church = await storage.getChurch(userRole.churchId);
+      const church = await storage.getChurch(userRole.communityId);
       
       // Create urgent in-app notifications for all members
       for (const member of churchMembers) {
@@ -11952,7 +11952,7 @@ Please provide suggestions for the missing or incomplete sections.`
       for (const member of churchMembers) {
         try {
           await storage.createCommunicationRecord({
-            churchId: userRole.churchId,
+            communityId: userRole.communityId,
             sentBy: userId,
             subject: `URGENT: ${title}`,
             content: content,
@@ -11990,11 +11990,11 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Get user's custom templates
       const user = await storage.getUser(userId);
-      const churchId = user?.churchId;
+      const communityId = user?.communityId;
       let customTemplates = [];
       
       try {
-        customTemplates = await storage.getCommunicationTemplates(userId, churchId);
+        customTemplates = await storage.getCommunicationTemplates(userId, communityId);
       } catch (templateError) {
         
         // Continue with empty custom templates
@@ -12107,7 +12107,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Get user's church ID if available
       const user = await storage.getUser(userId);
-      const churchId = user?.churchId || 1; // Default to church ID 1 if not found
+      const communityId = user?.communityId || 1; // Default to church ID 1 if not found
 
       const templateData = {
         name,
@@ -12115,7 +12115,7 @@ Please provide suggestions for the missing or incomplete sections.`
         subject: subject || '',
         content,
         type: category, // Use category as type
-        churchId,
+        communityId,
         createdBy: userId,
         isActive: true,
         usageCount: 0,
@@ -12213,7 +12213,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
       
       // Get only members from the admin's church
-      const members = await storage.getChurchMembers(userRole.churchId);
+      const members = await storage.getChurchMembers(userRole.communityId);
       
       // Transform members to include required display fields
       const transformedMembers = members.map((member: any) => {
@@ -12227,7 +12227,7 @@ Please provide suggestions for the missing or incomplete sections.`
           address: member.city && member.state ? `${member.city}, ${member.state}` : '',
           membershipStatus: member.isActive ? 'active' : 'inactive',
           joinedDate: member.createdAt,
-          churchId: member.churchId?.toString() || '',
+          communityId: member.communityId?.toString() || '',
           churchAffiliation: member.churchName || '',
           denomination: '',
           interests: '',
@@ -12247,7 +12247,7 @@ Please provide suggestions for the missing or incomplete sections.`
   app.post('/api/members', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.claims?.sub || req.user?.id;
-      const { fullName, email, phoneNumber, address, interests, churchId } = req.body;
+      const { fullName, email, phoneNumber, address, interests, communityId } = req.body;
       
       // Get user's church to verify permissions
       const userChurch = await storage.getUserChurch(userId);
@@ -12304,7 +12304,7 @@ Please provide suggestions for the missing or incomplete sections.`
         .insert(userChurches)
         .values({
           userId: newUserId,
-          churchId: churchId || userRole.churchId,
+          communityId: communityId || userRole.communityId,
           roleId: 1, // Default member role
           isActive: true,
         })
@@ -12319,7 +12319,7 @@ Please provide suggestions for the missing or incomplete sections.`
         address: newUser.address,
         membershipStatus: 'active',
         joinedDate: new Date().toISOString(),
-        churchId: (churchId || userRole.churchId).toString(),
+        communityId: (communityId || userRole.communityId).toString(),
         churchAffiliation: '',
         denomination: '',
         interests: interests || '',
@@ -12752,7 +12752,7 @@ Please provide suggestions for the missing or incomplete sections.`
   // SMS Giving Statistics endpoint - Optimized with caching
   app.get('/api/sms-giving/stats', isAuthenticated, async (req: any, res) => {
     try {
-      const churchId = req.user?.churchId || 1;
+      const communityId = req.user?.communityId || 1;
       
       // Use efficient aggregation query instead of loading all records
       const smsStats = await db.execute(sql`
@@ -12763,7 +12763,7 @@ Please provide suggestions for the missing or incomplete sections.`
           COUNT(CASE WHEN DATE(donation_date) = CURRENT_DATE THEN 1 END) as today_donations,
           SUM(CASE WHEN DATE(donation_date) = CURRENT_DATE THEN amount ELSE 0 END) as today_amount
         FROM donations 
-        WHERE method = 'SMS' AND church_id = ${churchId} AND status = 'completed'
+        WHERE method = 'SMS' AND church_id = ${communityId} AND status = 'completed'
       `);
 
       const stats = smsStats.rows[0];
@@ -12805,7 +12805,7 @@ Please provide suggestions for the missing or incomplete sections.`
         donorEmail: null,
         method: 'SMS_INSTRUCTION',
         isRecurring: false,
-        churchId: 1,
+        communityId: 1,
         createdAt: new Date(),
         notes: `Instructions sent to ${phoneNumber} for ${fund} fund`
       });
@@ -12866,7 +12866,7 @@ Please provide suggestions for the missing or incomplete sections.`
         donorEmail: null,
         method: 'SMS',
         isRecurring: false,
-        churchId: 1,
+        communityId: 1,
         createdAt: new Date(),
         notes: `SMS donation from ${phoneNumber}, keyword: ${keyword}`
       });
@@ -13370,7 +13370,7 @@ Please provide suggestions for the missing or incomplete sections.`
   app.post('/api/admin/churches/approve', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const { churchId } = req.body;
+      const { communityId } = req.body;
       
       // Check if user has church management permissions
       const user = await storage.getUser(userId);
@@ -13379,7 +13379,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
       
       // Approve the church
-      await storage.approveChurch(churchId, userId);
+      await storage.approveChurch(communityId, userId);
       
       res.json({ success: true, message: 'Church approved successfully' });
     } catch (error) {
@@ -13390,7 +13390,7 @@ Please provide suggestions for the missing or incomplete sections.`
   app.post('/api/admin/churches/reject', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const { churchId, reason } = req.body;
+      const { communityId, reason } = req.body;
       
       // Check if user has church management permissions
       const user = await storage.getUser(userId);
@@ -13399,7 +13399,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
       
       // Reject the church with reason
-      await storage.rejectChurch(churchId, reason, userId);
+      await storage.rejectChurch(communityId, reason, userId);
       
       res.json({ success: true, message: 'Church rejected successfully' });
     } catch (error) {
@@ -13410,7 +13410,7 @@ Please provide suggestions for the missing or incomplete sections.`
   app.post('/api/admin/churches/suspend', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session.userId;
-      const { churchId, reason } = req.body;
+      const { communityId, reason } = req.body;
       
       // Check if user has church management permissions
       const user = await storage.getUser(userId);
@@ -13419,7 +13419,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
       
       // Suspend the church with reason
-      await storage.suspendChurch(churchId, reason, userId);
+      await storage.suspendChurch(communityId, reason, userId);
       
       res.json({ success: true, message: 'Church suspended successfully' });
     } catch (error) {
@@ -13693,9 +13693,9 @@ Please provide suggestions for the missing or incomplete sections.`
 
   // Admin role assignment endpoint
   // Church Feature Toggle System API Endpoints
-  app.get('/api/church/:churchId/features', isAuthenticated, async (req: any, res) => {
+  app.get('/api/church/:communityId/features', isAuthenticated, async (req: any, res) => {
     try {
-      const { churchId } = req.params;
+      const { communityId } = req.params;
       const userId = req.session.userId;
 
       if (!userId) {
@@ -13703,21 +13703,21 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Check if user has access to this church
-      const userChurch = await storage.getUserChurch(userId, parseInt(churchId));
+      const userChurch = await storage.getUserChurch(userId, parseInt(communityId));
       if (!userRole) {
         return res.status(403).json({ error: 'Access denied to this church' });
       }
 
-      const features = await storage.getChurchFeatureSettings(parseInt(churchId));
+      const features = await storage.getChurchFeatureSettings(parseInt(communityId));
       res.json(features);
     } catch (error) {
       res.status(500).json({ error: 'Failed to retrieve church features' });
     }
   });
 
-  app.put('/api/church/:churchId/features/:category/:featureName', isAuthenticated, async (req: any, res) => {
+  app.put('/api/church/:communityId/features/:category/:featureName', isAuthenticated, async (req: any, res) => {
     try {
-      const { churchId, category, featureName } = req.params;
+      const { communityId, category, featureName } = req.params;
       const { isEnabled, configuration } = req.body;
       const userId = req.session.userId;
 
@@ -13726,13 +13726,13 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Check if user has admin access to this church
-      const userChurch = await storage.getUserChurch(userId, parseInt(churchId));
+      const userChurch = await storage.getUserChurch(userId, parseInt(communityId));
       if (!userRole || !['church_admin', 'owner', 'soapbox_owner'].includes(userRole)) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
       const updatedSetting = await storage.updateChurchFeatureSetting({
-        churchId: parseInt(churchId),
+        communityId: parseInt(communityId),
         featureCategory: category,
         featureName,
         isEnabled,
@@ -13746,25 +13746,25 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
-  app.get('/api/church/:churchId/features/:category/:featureName/status', isAuthenticated, async (req: any, res) => {
+  app.get('/api/church/:communityId/features/:category/:featureName/status', isAuthenticated, async (req: any, res) => {
     try {
-      const { churchId, category, featureName } = req.params;
+      const { communityId, category, featureName } = req.params;
       const userId = req.session.userId;
 
       if (!userId) {
         return res.status(401).json({ error: 'Authentication required' });
       }
 
-      const isEnabled = await storage.isFeatureEnabledForChurch(parseInt(churchId), category, featureName);
+      const isEnabled = await storage.isFeatureEnabledForChurch(parseInt(communityId), category, featureName);
       res.json({ isEnabled });
     } catch (error) {
       res.status(500).json({ error: 'Failed to check feature status' });
     }
   });
 
-  app.post('/api/church/:churchId/features/initialize', isAuthenticated, async (req: any, res) => {
+  app.post('/api/church/:communityId/features/initialize', isAuthenticated, async (req: any, res) => {
     try {
-      const { churchId } = req.params;
+      const { communityId } = req.params;
       const { churchSize } = req.body;
       const userId = req.session.userId;
 
@@ -13773,12 +13773,12 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Check if user has admin access to this church
-      const userChurch = await storage.getUserChurch(userId, parseInt(churchId));
+      const userChurch = await storage.getUserChurch(userId, parseInt(communityId));
       if (!userRole || !['church_admin', 'owner', 'soapbox_owner'].includes(userRole)) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
-      await storage.initializeChurchFeatures(parseInt(churchId), churchSize, userId);
+      await storage.initializeChurchFeatures(parseInt(communityId), churchSize, userId);
       res.json({ success: true, message: 'Church features initialized successfully' });
     } catch (error) {
       res.status(500).json({ error: 'Failed to initialize church features' });
@@ -13926,7 +13926,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const testImages = await db
         .select()
         .from(galleryImages)
-        .where(eq(galleryImages.churchId, 2804))
+        .where(eq(galleryImages.communityId, 2804))
         .limit(5);
 
       res.json({ 
@@ -13952,7 +13952,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const simpleImages = await db
         .select()
         .from(galleryImages)
-        .where(eq(galleryImages.churchId, 2804))
+        .where(eq(galleryImages.communityId, 2804))
         .limit(10);
 
       const mappedImages = simpleImages.map(image => ({
@@ -13970,7 +13970,7 @@ Please provide suggestions for the missing or incomplete sections.`
         commentsCount: image.comments || 0,
         isLiked: false,
         isSaved: false,
-        churchId: image.churchId
+        communityId: image.communityId
       }));
 
       res.json(mappedImages);
@@ -14036,7 +14036,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       // Use the first active church association
       const primaryChurch = userChurchAssociations[0];
-      const churchId = primaryChurch?.churchId;
+      const communityId = primaryChurch?.communityId;
       
       const { title, description, collection, tags } = req.body;
       
@@ -14047,7 +14047,7 @@ Please provide suggestions for the missing or incomplete sections.`
         collection: collection || 'General',
         tags: tags ? JSON.parse(tags) : [],
         uploadedBy: userId,
-        churchId: churchId
+        communityId: communityId
       };
 
       const newImage = await storage.uploadGalleryImage(imageData);
@@ -14186,9 +14186,9 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       const user = await storage.getUser(userId);
-      const churchId = user?.churchId;
+      const communityId = user?.communityId;
       
-      const collections = await storage.getGalleryCollections(churchId);
+      const collections = await storage.getGalleryCollections(communityId);
       res.json(collections);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch collections' });
@@ -14244,10 +14244,10 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.json([]); // Return empty array if no church
       }
 
-      const churchId = userChurches[0].churchId;
+      const communityId = userChurches[0].communityId;
       
       // Get all church members' streak information
-      const churchMembers = await storage.getChurchMembers(churchId);
+      const churchMembers = await storage.getChurchMembers(communityId);
       
       // Calculate streaks for each member using the same logic as getUserStats
       const userStreaks = [];
@@ -14296,8 +14296,8 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Get the first church's members for leaderboard
-      const churchId = userChurches[0].id;
-      const leaderboardData = await storage.getChurchLeaderboard(churchId);
+      const communityId = userChurches[0].id;
+      const leaderboardData = await storage.getChurchLeaderboard(communityId);
       
       res.json(leaderboardData || []);
     } catch (error) {
@@ -14334,10 +14334,10 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.json([]); // Return empty array if no church
       }
 
-      const churchId = userChurches[0].churchId;
+      const communityId = userChurches[0].communityId;
       
       // Use the existing getUpcomingEvents method from storage
-      const upcomingEvents = await storage.getUpcomingEvents(churchId, limit);
+      const upcomingEvents = await storage.getUpcomingEvents(communityId, limit);
       res.json(upcomingEvents);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch upcoming events' });
@@ -14360,8 +14360,8 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.json([]);
       }
 
-      const churchId = userChurches[0].churchId;
-      const events = await storage.getEventsByChurch(churchId);
+      const communityId = userChurches[0].communityId;
+      const events = await storage.getEventsByChurch(communityId);
       res.json(events);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch events' });
@@ -14377,24 +14377,24 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(404).json({ message: 'User not found' });
       }
 
-      // Get user's church for event creation
+      // Get user's community for event creation
       const userChurches = await storage.getUserChurches(userId);
-      console.log('User churches for event creation:', userChurches);
+      console.log('User communities for event creation:', userChurches);
       
       if (!userChurches || userChurches.length === 0) {
-        return res.status(400).json({ message: 'Must be affiliated with a church to create events' });
+        return res.status(400).json({ message: 'Must be affiliated with a community to create events' });
       }
 
-      const churchId = userChurches[0].churchId || userChurches[0].communityId;
-      console.log('Church ID for event:', churchId);
+      const communityId = userChurches[0].id; // The community ID is in the 'id' field
+      console.log('Community ID for event:', communityId);
       
-      if (!churchId) {
-        return res.status(400).json({ message: 'No valid church ID found for user' });
+      if (!communityId) {
+        return res.status(400).json({ message: 'No valid community ID found for user' });
       }
 
       const eventData = {
         ...req.body,
-        churchId: churchId,
+        communityId: communityId,
         organizerId: userId,
         eventDate: new Date(req.body.eventDate),
         endDate: req.body.endDate ? new Date(req.body.endDate) : null,
@@ -14529,8 +14529,8 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(403).json({ message: 'Admin access required' });
       }
 
-      const churchId = req.query.churchId ? parseInt(req.query.churchId as string) : undefined;
-      const result = await storage.getExpiredContentSummary(churchId);
+      const communityId = req.query.communityId ? parseInt(req.query.communityId as string) : undefined;
+      const result = await storage.getExpiredContentSummary(communityId);
       res.json(result);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch expired content summary' });
@@ -14818,7 +14818,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Create volunteer opportunity with ALL Phase 2 features - COMPREHENSIVE DATA STORAGE
       const opportunityData = {
-        churchId: primaryChurch.churchId,
+        communityId: primaryChurch.communityId,
         title: title || 'New Volunteer Position',
         ministry: ministry,
         category: department, // Map department → category
