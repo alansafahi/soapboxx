@@ -136,12 +136,13 @@ export default function SignupPage() {
           // Redirect to login with staff invitation context
           setLocation(`/login?staffInvite=true&communityId=${communityId}&role=${role}`);
         } else {
+          // Regular signup - redirect to onboarding flow instead of login
           toast({
-            title: "Registration Successful",
-            description: "Welcome to SoapBox Super App! Please log in to continue.",
+            title: "Let's Get You Started!",
+            description: "Complete your profile setup to personalize your SoapBox experience.",
             variant: "default",
           });
-          setLocation('/login');
+          setLocation('/onboarding');
         }
       }
     } catch (error: any) {

@@ -86,7 +86,7 @@ export default function LoginPage() {
           return;
         } else {
           let errorMessage = 'Login failed';
-          let toastVariant = "destructive";
+          let toastVariant: "default" | "destructive" = "destructive";
           let toastTitle = "Login Failed";
           
           try {
