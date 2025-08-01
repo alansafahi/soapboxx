@@ -2478,7 +2478,6 @@ export class DatabaseStorage implements IStorage {
   // Discussion operations
   async getDiscussions(limit?: number, offset?: number, churchId?: number, currentUserId?: string, includeFlagged?: boolean): Promise<any[]> {
     try {
-      console.log(`[DEBUG] getDiscussions called: limit=${limit}, offset=${offset}, userId=${currentUserId}`);
       
       // Combined query to get both discussions and SOAP entries using UNION
       // CRITICAL: Filter out hidden content for faith-based app protection
@@ -2509,16 +2508,13 @@ export class DatabaseStorage implements IStorage {
         LIMIT ${limit || 50} OFFSET ${offset || 0}
       `);
 
-      console.log(`[DEBUG] UNION query returned ${combinedResult.rows.length} raw rows`);
       
       // Debug: Log first few raw rows to see what we're getting
       if (combinedResult.rows.length > 0) {
-        console.log(`[DEBUG] Sample raw row:`, JSON.stringify(combinedResult.rows[0], null, 2));
         
         // Check for SOAP entries specifically
         const soapRows = combinedResult.rows.filter(row => row.type === 'soap_reflection');
         if (soapRows.length > 0) {
-          console.log(`[DEBUG] Sample SOAP row:`, JSON.stringify(soapRows[0], null, 2));
         }
       }
 
@@ -2551,21 +2547,17 @@ export class DatabaseStorage implements IStorage {
         isLiked: false
       }));
 
-      console.log(`[DEBUG] After mapping: ${discussions.length} posts processed`);
       if (discussions.length > 0) {
-        console.log(`[DEBUG] Sample processed post:`, JSON.stringify(discussions[0], null, 2));
       }
 
       // Separate discussions and SOAP entries
       const discussionPosts = discussions.filter(d => d.type === 'discussion');
       const soapPosts = discussions.filter(d => d.type === 'soap_reflection');
       
-      console.log(`[DEBUG] Split posts: ${discussionPosts.length} discussions, ${soapPosts.length} SOAP entries`);
       
       // Get comment counts for discussions
       let discussionCommentCounts: Record<number, number> = {};
       if (discussionPosts.length > 0) {
-        console.log(`[DEBUG] Fetching comment counts for discussions...`);
         try {
           const discussionIds = discussionPosts.map(d => d.id);
           const commentCountResult = await db.execute(sql`
@@ -2579,9 +2571,7 @@ export class DatabaseStorage implements IStorage {
             acc[row.discussion_id] = Number(row.comment_count);
             return acc;
           }, {});
-          console.log(`[DEBUG] Discussion comment counts successful`);
         } catch (error) {
-          console.log(`[DEBUG] Discussion comment counts failed:`, error);
           discussionCommentCounts = {};
         }
       }
@@ -2681,14 +2671,12 @@ export class DatabaseStorage implements IStorage {
           : userLikedSoap.has(discussion.id)
       }));
 
-      console.log(`[DEBUG] getDiscussions returning ${discussionsWithCounts.length} processed posts`);
       if (discussionsWithCounts.length > 0) {
-        console.log(`[DEBUG] Post types: ${discussionsWithCounts.map(d => d.type).join(', ')}`);
       }
 
       return discussionsWithCounts;
     } catch (error) {
-      console.log(`[ERROR] getDiscussions failed:`, error);
+      
       return [];
     }
   }
@@ -3048,7 +3036,7 @@ export class DatabaseStorage implements IStorage {
 
   async joinCommunity(userId: string, communityId: number): Promise<any> {
     try {
-      console.log(`joinCommunity: Creating admin relationship for user ${userId} and community ${communityId}`);
+      
       
       // Check if user is already a member
       const existingMembership = await db.execute(sql`
@@ -3057,7 +3045,7 @@ export class DatabaseStorage implements IStorage {
       `);
 
       if (existingMembership.rows.length > 0) {
-        console.log(`joinCommunity: Reactivating existing membership for user ${userId}`);
+        
         // Reactivate if membership exists but is inactive
         await db.execute(sql`
           UPDATE user_churches 
@@ -3065,7 +3053,7 @@ export class DatabaseStorage implements IStorage {
           WHERE user_id = ${userId} AND church_id = ${communityId}
         `);
       } else {
-        console.log(`joinCommunity: Creating new admin membership for user ${userId}`);
+        
         // Create new membership with admin role for community creator
         await db.execute(sql`
           INSERT INTO user_churches (user_id, church_id, role, joined_at, last_accessed_at, is_active)
@@ -3083,7 +3071,7 @@ export class DatabaseStorage implements IStorage {
         WHERE id = ${communityId}
       `);
 
-      console.log(`joinCommunity: Successfully created admin relationship for user ${userId}`);
+      
       return { success: true, message: 'Successfully joined community' };
     } catch (error) {
       console.error('joinCommunity error:', error);
@@ -3451,7 +3439,7 @@ export class DatabaseStorage implements IStorage {
       }
 
       const result = await query;
-      console.log(`Fetched ${result.length} mood indicators${category ? ` for category: ${category}` : ''}`);
+      
       return result;
     } catch (error) {
       console.error("Error fetching enhanced mood indicators:", error);
@@ -3900,7 +3888,6 @@ export class DatabaseStorage implements IStorage {
 
   async getPublicSoapEntries(churchId?: number, limit = 20, offset = 0, excludeUserId?: string): Promise<any[]> {
     try {
-      console.log(`[DEBUG] getPublicSoapEntries called with churchId=${churchId}, excludeUserId=${excludeUserId}, limit=${limit}`);
       
       let conditions = [eq(soapEntries.isPublic, true)];
 
@@ -3909,17 +3896,13 @@ export class DatabaseStorage implements IStorage {
         // For church-specific feed with user exclusion, get entries from same church excluding user
         conditions.push(eq(soapEntries.churchId, churchId));
         conditions.push(ne(soapEntries.userId, excludeUserId));
-        console.log(`[DEBUG] Applied church-specific filter with user exclusion: churchId=${churchId}, excludeUserId=${excludeUserId}`);
       } else if (churchId) {
         // For church-specific feed without exclusion
         conditions.push(eq(soapEntries.churchId, churchId));
-        console.log(`[DEBUG] Applied church-specific filter: churchId=${churchId}`);
       } else if (excludeUserId) {
         // For global feed excluding specific user
         conditions.push(ne(soapEntries.userId, excludeUserId));
-        console.log(`[DEBUG] Applied global filter excluding user: excludeUserId=${excludeUserId}`);
       } else {
-        console.log(`[DEBUG] No additional filters applied - returning all public entries`);
       }
       // else: no filters, get all public entries
 
@@ -3997,7 +3980,6 @@ export class DatabaseStorage implements IStorage {
         }
       }));
       
-      console.log(`[DEBUG] getPublicSoapEntries returning ${finalEntries.length} entries`);
       return finalEntries;
     } catch (error) {
       console.error(`[ERROR] getPublicSoapEntries failed:`, error);
@@ -6324,7 +6306,7 @@ export class DatabaseStorage implements IStorage {
             communityId: data.communityId
           });
         } catch (emailError) {
-          console.log(`Failed to send notification email to ${data.email}:`, emailError);
+          
           // Continue without failing the invitation process
         }
 
@@ -6355,7 +6337,7 @@ export class DatabaseStorage implements IStorage {
             communityId: data.communityId
           });
         } catch (emailError) {
-          console.log(`Failed to send invitation email to ${data.email}:`, emailError);
+          
           // Continue without failing the invitation process
         }
 
@@ -6467,7 +6449,6 @@ export class DatabaseStorage implements IStorage {
       // This method could track scripture usage for future AI recommendations
       // For now, we don't need to store additional records since SOAP entries
       // already contain the scripture references
-      console.log(`[DEBUG] Recording scripture ${scriptureReference} for user ${userId}`);
     } catch (error) {
       console.error('Error recording user scripture:', error);
     }
@@ -6921,11 +6902,11 @@ export class DatabaseStorage implements IStorage {
           isRead: false
         });
 
-        console.log(`[MODERATION ALERT] Notified ${admin.role} ${admin.email} about ${alert.contentType}:${alert.contentId} flagged for ${alert.reason}`);
+        
       }
 
       // Log critical moderation event
-      console.log(`[CRITICAL MODERATION] ${alert.type} - ${alert.contentType}:${alert.contentId} flagged for ${alert.reason} by user ${alert.reporterId} at ${alert.flaggedAt.toISOString()}`);
+      
 
     } catch (error) {
       console.error('Failed to send moderation alert:', error);

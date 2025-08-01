@@ -108,7 +108,6 @@ export function CommunityForm({ community, onSuccess, onCancel }: CommunityFormP
   });
 
   const onSubmit = (values: CommunityFormValues) => {
-    console.log('Submitting form with values:', values);
     saveCommunityMutation.mutate(values);
   };
 

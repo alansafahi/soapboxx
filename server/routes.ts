@@ -1465,7 +1465,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
       if (result.rows.length === 0) {
-        console.log('No pending staff invitation found for user in community');
+        // No pending staff invitation found
         return res.status(404).json({ message: 'No pending staff invitation found for this role' });
       }
 
@@ -3467,7 +3467,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
           [role, role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()), userId, communityId]
         );
       } else {
-        console.log('User already has active role:', currentRole.role);
+        // User already has active role
         return res.status(400).json({ message: 'You already have an active role in this community' });
       }
 
@@ -4013,7 +4013,7 @@ app.post('/api/invitations', async (req: any, res) => {
             flaggedAt: new Date()
           });
 
-          console.log(`[CRITICAL] Content ${contentType}:${contentId} automatically hidden due to ${reason} report`);
+          
         } catch (error) {
           console.error(`Failed to hide content ${contentType}:${contentId}:`, error);
         }
@@ -9395,10 +9395,10 @@ Return JSON with this exact structure:
       
 
       
-      console.log('Creating discussion with data:', discussionData);
+      
       
       const post = await storage.createDiscussion(discussionData);
-      console.log('Discussion created successfully:', post.id);
+      
       
       // Real-time AI content monitoring with media analysis (1-3 seconds)
       setTimeout(async () => {
@@ -9882,7 +9882,7 @@ Return JSON with this exact structure:
               flaggedAt: new Date()
             });
             
-            console.log(`[AI MODERATION] Prayer request ${prayer.id} flagged for ${moderationResult.reason} (${moderationResult.priority} priority)`);
+            
           }
         } catch (error) {
           console.error('AI moderation failed for prayer request:', error);

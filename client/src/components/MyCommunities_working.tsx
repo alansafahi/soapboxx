@@ -405,7 +405,6 @@ export default function MyCommunities() {
           errorData = { message: `Server error (${response.status})` };
         }
         
-        console.log('Full error data:', errorData);
         
         // Handle validation errors with detailed messages
         if (errorData.details && Array.isArray(errorData.details)) {

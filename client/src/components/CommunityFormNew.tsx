@@ -108,7 +108,6 @@ export function CommunityForm({
   };
 
   const handleSubmit = (values: CommunityFormValues) => {
-    console.log('Form submitted with values:', values);
     onSubmit(values);
   };
 

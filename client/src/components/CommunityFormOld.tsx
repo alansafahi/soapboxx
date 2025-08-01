@@ -422,7 +422,6 @@ export function CommunityForm({
   };
 
   const handleInputChange = (field: keyof CommunityFormData, value: any) => {
-    console.log(`Form field ${field} updating to:`, value);
     
     setFormData(prev => {
       const updated = {
@@ -435,7 +434,6 @@ export function CommunityForm({
         updated.denomination = '';
       }
       
-      console.log('Updated form data state:', updated);
       return updated;
     });
     
@@ -496,7 +494,6 @@ export function CommunityForm({
     } as any);
   };
 
-  console.log('CommunityForm render - current formData:', formData);
 
   return (
     <div className="w-full h-full bg-white dark:bg-gray-800 text-black dark:text-white">
@@ -519,7 +516,6 @@ export function CommunityForm({
                 required
                 value={formData.name || ''}
                 onChange={(e) => {
-                  console.log('Name input changed:', e.target.value);
                   handleInputChange('name', e.target.value);
                 }}
                 placeholder="First Baptist Church"
@@ -533,7 +529,6 @@ export function CommunityForm({
                 id="type"
                 value={formData.type || ''}
                 onChange={(e) => {
-                  console.log('Community Type selected:', e.target.value);
                   handleInputChange('type', e.target.value);
                 }}
                 required

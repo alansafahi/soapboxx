@@ -77,7 +77,6 @@ export default function EMIAwareRecommendations({
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  console.log('EMI Recommendations state:', { 
     selectedMoodCount: selectedMoodIds.length, 
     isLoading, 
     error: error?.message, 

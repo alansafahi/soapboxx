@@ -224,8 +224,6 @@ export function validateMappedData(data: any, requiredFields: string[]): boolean
 export function debugFieldMapping(data: any, operation: string): void {
   if (process.env.NODE_ENV === 'development') {
     console.group(`🔍 Client Field Mapping - ${operation}`);
-    console.log('Original data:', data);
-    console.log('Mapped data:', mapServerResponse(data));
     console.groupEnd();
   }
 }

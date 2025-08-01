@@ -188,7 +188,6 @@ export default function MyCommunities() {
             <DialogContent 
               className="max-w-4xl max-h-[95vh] overflow-y-auto z-[60] bg-white dark:bg-gray-900 text-black dark:text-white border-2 border-gray-300 dark:border-gray-600"
               onPointerDownOutside={(e) => {
-                console.log('Pointer down outside detected');
                 e.preventDefault();
               }}>
               <DialogHeader>

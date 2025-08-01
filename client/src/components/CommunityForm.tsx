@@ -368,7 +368,6 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
   });
 
   const onSubmit = (values: CommunityFormValues) => {
-    console.log('Submitting comprehensive form with values:', values);
     saveCommunityMutation.mutate(values);
   };
 
