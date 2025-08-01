@@ -143,24 +143,58 @@ export const notifications = pgTable("notifications", {
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
 
-// User storage table for Replit Auth
+// Enhanced User Profile Table - Community Engagement & AI Features
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().notNull(),
   email: varchar("email").unique(),
   username: varchar("username").unique(),
   password: varchar("password"), // Hashed password for standard auth
   role: varchar("role").default("member"), // User role for permissions
+  
+  // Basic Profile
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: text("profile_image_url"), // Changed to text to support base64 images
-  bio: text("bio"),
+  coverPhotoUrl: text("cover_photo_url"), // Profile banner/cover image
+  bio: text("bio"), // Short spiritual testimony or bio
   mobileNumber: varchar("mobile_number"),
   address: text("address"),
   city: varchar("city"),
   state: varchar("state"),
   zipCode: varchar("zip_code"),
   country: varchar("country").default("United States"),
-  denomination: varchar("denomination"),
+  
+  // Core Demographic & Spiritual Profile
+  ageRange: varchar("age_range", { length: 20 }), // 18-24, 25-34, 35-44, 45-54, 55-64, 65+
+  gender: varchar("gender", { length: 20 }), // Optional: male, female, prefer_not_to_say
+  churchAffiliation: varchar("church_affiliation"), // Church name or campus
+  denomination: varchar("denomination"), // Baptist, Methodist, Catholic, Non-denominational, etc.
+  spiritualStage: varchar("spiritual_stage", { length: 30 }), // exploring_faith, new_believer, active_disciple, leader, elder
+  
+  // Social Engagement Features
+  favoriteScriptures: text("favorite_scriptures").array(), // Array of favorite Bible verses
+  ministryInterests: text("ministry_interests").array(), // youth, worship, missions, media, teaching, etc.
+  volunteerInterest: boolean("volunteer_interest").default(false), // Willing to volunteer
+  smallGroup: varchar("small_group"), // Current small group involvement
+  socialLinks: jsonb("social_links"), // {facebook: "", instagram: "", twitter: ""}
+  
+  // Growth & Impact Tracking
+  publicSharing: boolean("public_sharing").default(false), // Allow public SOAP sharing
+  spiritualScore: integer("spiritual_score").default(0), // Gamified spiritual engagement score
+  
+  // AI-Powered Features
+  prayerPrompt: text("prayer_prompt"), // Current "How can we pray for you?" prompt
+  growthGoals: text("growth_goals").array(), // Personal spiritual growth goals
+  currentReadingPlan: varchar("current_reading_plan"), // Active Bible reading plan
+  
+  // Privacy Settings (granular control)
+  showBioPublicly: boolean("show_bio_publicly").default(true),
+  showChurchAffiliation: boolean("show_church_affiliation").default(true),
+  shareWithGroup: boolean("share_with_group").default(true),
+  showAgeRange: boolean("show_age_range").default(false),
+  showLocation: boolean("show_location").default(false),
+  
+  // Legacy fields maintained for compatibility
   interests: text("interests").array(),
   hasCompletedOnboarding: boolean("has_completed_onboarding").default(false),
   onboardingData: jsonb("onboarding_data"), // Store wizard responses
@@ -178,6 +212,7 @@ export const users = pgTable("users", {
   passwordResetExpires: timestamp("password_reset_expires"),
   lastLoginAt: timestamp("last_login_at"),
   hasCompletedTour: boolean("has_completed_tour").default(false),
+  
   // Enhanced profile verification fields for prayer circle guardrails
   phoneVerified: boolean("phone_verified").default(false),
   profileCompleteness: integer("profile_completeness").default(0), // Percentage 0-100

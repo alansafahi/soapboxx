@@ -1,0 +1,70 @@
+To enhance the **user experience and community engagement** on the **SoapBox Super App profile page**, while still preserving privacy, here are thoughtfully selected **optional and secure profile fields**, grouped by category with brief justifications:
+
+---
+
+## 🔐 CORE (Private by Default, Mandatory Where Needed)
+
+| Field                                                                                                   | Purpose                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **📍 Zip Code / City, State**                                                                           | Helps tailor local content, events, and prayer circles while avoiding exact address exposure.                           |
+| **📅 Date of Birth (or Age Range)**                                                                     | Enables content targeting (e.g., devotionals for Gen Z, Baby Boomers). Can be optional or use age ranges (e.g., 18–24). |
+| **👤 Gender (optional)**                                                                                | Optional for better personalization in journaling AI or group suggestions.                                              |
+| **⛪ Church Affiliation (name or campus)**                                                               | Useful for community targeting, prayer group building, and internal dashboards.                                         |
+| **🧭 Spiritual Journey Stage** (dropdown: Exploring Faith, New Believer, Active Disciple, Leader, etc.) | Great for tailoring the experience, devotional plans, or group invites.                                                 |
+
+---
+
+## 💬 SOCIAL / ENGAGEMENT (Optional, Public if opted-in)
+
+| Field                                                                   | Purpose                                                             |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| **📝 Short Bio or Spiritual Testimony**                                 | Builds community trust, fosters connection                          |
+| **📸 Cover Photo / Banner**                                             | Personalizes the profile visually, inviting others to engage        |
+| **🎯 Favorite Scripture(s)**                                            | Adds depth and spiritual identity to the profile                    |
+| **🔖 Ministry Interests** (tags: Youth, Worship, Missions, Media, etc.) | Enables better matching with service opportunities or content       |
+| **📍 Willing to Volunteer? (Yes/No)**                                   | Enables matching with church events or roles                        |
+| **🔗 Social Media Links (Facebook, IG, X)**                             | Public only if user opts in; helpful for creators or church leaders |
+| **👥 Small Group Involvement** (if applicable)                          | Could auto-connect users in the same group                          |
+
+---
+
+## 📊 GROWTH & IMPACT (Gamified, opt-in)
+
+| Field                                          | Purpose                                                                               |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **🔥 Discipleship Streak / Devotional Streak** | Visual indicator of engagement (already implemented)                                  |
+| **🏆 Achievements/Badges**                     | Celebrates milestones (e.g., 7-day SOAP streak, 30 prayers posted, 10 Amen reactions) |
+| **📈 Progress Journal or Spiritual Score**     | Let users track growth across prayer, journaling, reading, and engagement             |
+| **🔁 Public Sharing Setting**                  | Checkbox to allow public view of S.O.A.P. journal entries, reflections, etc.          |
+
+---
+
+## 🧠 AI-Powered Features (Optional, Smart Enhancers)
+
+| Field                                                                               | Purpose                                        |
+| ----------------------------------------------------------------------------------- | ---------------------------------------------- |
+| **💬 “How can we pray for you today?” prompt (rotating)**                           | Builds community trust and triggers engagement |
+| **🧭 Personal Growth Goals** (checkbox: read Bible daily, pray more, find a mentor) | Allows AI to tailor prompts and encouragement  |
+| **📚 Current Reading Plan or Devotional**                                           | Enables syncing and cross-group encouragement  |
+
+---
+
+## 📦 Suggested Implementation Plan
+
+| Phase       | Fields                                                      |
+| ----------- | ----------------------------------------------------------- |
+| **Phase 1** | Short bio, church affiliation, ministry interests, zip code |
+| **Phase 2** | Favorite verses, growth stage, spiritual goals              |
+| **Phase 3** | Gamification stats, streak badges, AI growth tracking       |
+
+---
+
+## ⚠️ Privacy Notes
+
+* Let users choose which fields are **public, private, or visible to church admins only**
+* Use **granular toggles** ("Show on profile," "Share with group," etc.)
+* Add a **“Download My Profile Data”** button to comply with privacy best practices
+
+---
+
+Would you like mock UI wireframes or JSON schema examples for these fields to integrate into your database and frontend?

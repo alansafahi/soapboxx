@@ -32,6 +32,7 @@ import {
   Edit2
 } from "lucide-react";
 import { format } from "date-fns";
+import EnhancedProfileEditor from "../components/EnhancedProfileEditor";
 
 interface UserProfile {
   id: string;
@@ -39,6 +40,7 @@ interface UserProfile {
   firstName: string | null;
   lastName: string | null;
   profileImageUrl: string | null;
+  coverPhotoUrl: string | null;
   bio: string | null;
   mobileNumber: string | null;
   address: string | null;
@@ -46,7 +48,32 @@ interface UserProfile {
   state: string | null;
   zipCode: string | null;
   country: string | null;
+  
+  // Enhanced Profile Fields
+  ageRange: string | null;
+  gender: string | null;
+  churchAffiliation: string | null;
   denomination: string | null;
+  spiritualStage: string | null;
+  favoriteScriptures: string[] | null;
+  ministryInterests: string[] | null;
+  volunteerInterest: boolean | null;
+  smallGroup: string | null;
+  socialLinks: Record<string, string> | null;
+  publicSharing: boolean | null;
+  spiritualScore: number | null;
+  prayerPrompt: string | null;
+  growthGoals: string[] | null;
+  currentReadingPlan: string | null;
+  
+  // Privacy Settings
+  showBioPublicly: boolean | null;
+  showChurchAffiliation: boolean | null;
+  shareWithGroup: boolean | null;
+  showAgeRange: boolean | null;
+  showLocation: boolean | null;
+  
+  // Legacy
   interests: string[] | null;
   createdAt: Date | null;
   updatedAt: Date | null;
@@ -63,7 +90,7 @@ interface UserStats {
 
 const DENOMINATIONS = [
   "Catholic",
-  "Protestant",
+  "Protestant", 
   "Baptist",
   "Methodist",
   "Presbyterian",
@@ -73,6 +100,50 @@ const DENOMINATIONS = [
   "Orthodox",
   "Non-denominational",
   "Other"
+];
+
+const AGE_RANGES = [
+  "18-24",
+  "25-34", 
+  "35-44",
+  "45-54",
+  "55-64",
+  "65+"
+];
+
+const SPIRITUAL_STAGES = [
+  "exploring_faith",
+  "new_believer", 
+  "active_disciple",
+  "leader",
+  "elder"
+];
+
+const MINISTRY_INTERESTS = [
+  "Youth Ministry",
+  "Worship & Music",
+  "Missions & Outreach",
+  "Media & Technology", 
+  "Teaching & Education",
+  "Children's Ministry",
+  "Prayer Ministry",
+  "Community Service",
+  "Counseling & Care",
+  "Evangelism",
+  "Leadership",
+  "Small Groups"
+];
+
+const GROWTH_GOALS = [
+  "Read Bible Daily",
+  "Pray More Consistently", 
+  "Find a Mentor",
+  "Join a Small Group",
+  "Serve in Ministry",
+  "Share Faith More",
+  "Attend Church Regularly",
+  "Study Theology",
+  "Practice Spiritual Disciplines"
 ];
 
 const SPIRITUAL_INTERESTS = [
@@ -320,296 +391,50 @@ export default function ProfilePage() {
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6">
-            {/* Profile Header Card */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                  {/* Profile Picture */}
-                  <div className="relative">
-                    {(profile?.profileImageUrl || profileData.profileImageUrl) ? (
-                      <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                        <img 
-                          src={isEditing ? (profileData.profileImageUrl || profile?.profileImageUrl || '') : (profile?.profileImageUrl || '')} 
-                          alt={displayName}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="h-32 w-32 rounded-full bg-purple-600 flex items-center justify-center">
-                        <span className="text-2xl font-semibold text-white">{userInitials}</span>
-                      </div>
-                    )}
-                    {isEditing && (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="absolute bottom-0 right-0 rounded-full p-2"
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <Camera className="h-4 w-4" />
-                      </Button>
-                    )}
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleImageUpload}
-                    />
-                  </div>
-
-                  {/* Basic Info */}
-                  <div className="flex-1 space-y-4">
-                    {isEditing ? (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="firstName">First Name</Label>
-                          <Input
-                            id="firstName"
-                            value={profileData.firstName || ""}
-                            onChange={(e) => setProfileData(prev => ({ ...prev, firstName: e.target.value }))}
-                            placeholder="Enter your first name"
+            {!isEditing ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+                    <div className="relative">
+                      {profile?.profileImageUrl ? (
+                        <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                          <img 
+                            src={profile.profileImageUrl} 
+                            alt={displayName}
+                            className="h-full w-full object-cover"
                           />
                         </div>
-                        <div>
-                          <Label htmlFor="lastName">Last Name</Label>
-                          <Input
-                            id="lastName"
-                            value={profileData.lastName || ""}
-                            onChange={(e) => setProfileData(prev => ({ ...prev, lastName: e.target.value }))}
-                            placeholder="Enter your last name"
-                          />
+                      ) : (
+                        <div className="h-32 w-32 rounded-full bg-purple-600 flex items-center justify-center">
+                          <span className="text-2xl font-semibold text-white">{userInitials}</span>
                         </div>
-                        <div className="md:col-span-2">
-                          <Label htmlFor="bio">Bio</Label>
-                          <Textarea
-                            id="bio"
-                            value={profileData.bio || ""}
-                            onChange={(e) => setProfileData(prev => ({ ...prev, bio: e.target.value }))}
-                            placeholder="Tell us about yourself and your faith journey..."
-                            rows={3}
-                          />
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <div>
-                          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{displayName}</h2>
-                          <p className="text-muted-foreground flex items-center gap-2 mt-1">
-                            <Mail className="h-4 w-4" />
-                            {profile?.email || "No email provided"}
-                          </p>
-                        </div>
-                        {displayProfile?.bio && (
-                          <p className="text-gray-600 dark:text-gray-300">{displayProfile.bio}</p>
-                        )}
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="h-4 w-4" />
-                          Member since {profile?.createdAt ? format(new Date(profile.createdAt), "MMMM yyyy") : "Unknown"}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Contact Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Phone className="h-5 w-5" />
-                  Contact Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isEditing ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="email">Email</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={profileData.email || ""}
-                        onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
-                        placeholder="your.email@example.com"
-                      />
+                      )}
                     </div>
-                    <div>
-                      <Label htmlFor="mobileNumber">Mobile Number</Label>
-                      <Input
-                        id="mobileNumber"
-                        type="tel"
-                        value={profileData.mobileNumber || ""}
-                        onChange={(e) => setProfileData(prev => ({ ...prev, mobileNumber: e.target.value }))}
-                        placeholder="(555) 123-4567"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <span>{displayProfile?.email || "Not provided"}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <span>{displayProfile?.mobileNumber || "Not provided"}</span>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Address Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Address
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isEditing ? (
-                  <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <Label htmlFor="address">Street Address</Label>
-                      <Input
-                        id="address"
-                        value={profileData.address || ""}
-                        onChange={(e) => setProfileData(prev => ({ ...prev, address: e.target.value }))}
-                        placeholder="123 Main Street"
-                      />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="flex-1 space-y-4">
                       <div>
-                        <Label htmlFor="city">City</Label>
-                        <Input
-                          id="city"
-                          value={profileData.city || ""}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, city: e.target.value }))}
-                          placeholder="Your City"
-                        />
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{displayName}</h2>
+                        <p className="text-muted-foreground flex items-center gap-2 mt-1">
+                          <Mail className="h-4 w-4" />
+                          {profile?.email || "No email provided"}
+                        </p>
                       </div>
-                      <div>
-                        <Label htmlFor="state">State</Label>
-                        <Input
-                          id="state"
-                          value={profileData.state || ""}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, state: e.target.value }))}
-                          placeholder="CA"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="zipCode">ZIP Code</Label>
-                        <Input
-                          id="zipCode"
-                          value={profileData.zipCode || ""}
-                          onChange={(e) => setProfileData(prev => ({ ...prev, zipCode: e.target.value }))}
-                          placeholder="12345"
-                        />
+                      {profile?.bio && (
+                        <p className="text-gray-600 dark:text-gray-300">{profile.bio}</p>
+                      )}
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        Member since {profile?.createdAt ? format(new Date(profile.createdAt), "MMMM yyyy") : "Unknown"}
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <div>
-                    {displayProfile?.address || displayProfile?.city ? (
-                      <p className="text-gray-600 dark:text-gray-300">
-                        {displayProfile?.address && `${displayProfile.address}, `}
-                        {displayProfile?.city && `${displayProfile.city}, `}
-                        {displayProfile?.state && `${displayProfile.state} `}
-                        {displayProfile?.zipCode}
-                      </p>
-                    ) : (
-                      <p className="text-muted-foreground">No address provided</p>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Faith Information */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Church className="h-5 w-5" />
-                  Faith & Interests
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {isEditing ? (
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="denomination">Denomination</Label>
-                      <Select 
-                        value={profileData.denomination || ""} 
-                        onValueChange={(value) => setProfileData(prev => ({ ...prev, denomination: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your denomination" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {DENOMINATIONS.map((denom) => (
-                            <SelectItem key={denom} value={denom}>{denom}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Spiritual Interests</Label>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {SPIRITUAL_INTERESTS.map((interest) => (
-                          <Badge
-                            key={interest}
-                            variant={selectedInterests.includes(interest) ? "default" : "outline"}
-                            className="cursor-pointer"
-                            onClick={() => toggleInterest(interest)}
-                          >
-                            {interest}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Denomination</p>
-                      <p className="text-gray-900 dark:text-white">
-                        {displayProfile?.denomination || "Not specified"}
-                      </p>
-                    </div>
-                    {displayProfile?.interests && displayProfile.interests.length > 0 && (
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-2">Spiritual Interests</p>
-                        <div className="flex flex-wrap gap-2">
-                          {displayProfile.interests.map((interest) => (
-                            <Badge key={interest} variant="secondary">
-                              {interest}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {isEditing && (
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setIsEditing(false)}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleSaveProfile}
-                  disabled={updateProfileMutation.isPending}
-                  className="flex items-center gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  {updateProfileMutation.isPending ? "Saving..." : "Save Profile"}
-                </Button>
-              </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <EnhancedProfileEditor 
+                profile={profile || {} as UserProfile}
+                onSave={(updates) => updateProfileMutation.mutate(updates)}
+                isLoading={updateProfileMutation.isPending}
+              />
             )}
           </TabsContent>
 
