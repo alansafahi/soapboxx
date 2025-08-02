@@ -39,12 +39,15 @@ import {
   ArrowRight
 } from "lucide-react";
 import ChurchLookupModal from "./ChurchLookupModal";
+import { ObjectUploader } from "./ObjectUploader";
+import type { UploadResult } from "@uppy/core";
 
 interface UserProfile {
   id: string;
   firstName: string | null;
   lastName: string | null;
   bio: string | null;
+  profileImageUrl: string | null;
   coverPhotoUrl: string | null;
   mobileNumber: string | null;
   ageRange: string | null;
@@ -157,6 +160,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const [verseTexts, setVerseTexts] = useState<{ [key: number]: { text: string; reference: string; version: string } }>({});
   const [showChurchLookup, setShowChurchLookup] = useState(false);
   const [currentTab, setCurrentTab] = useState("basic");
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const handleSave = () => {
     onSave({
@@ -167,6 +171,46 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       spiritualGifts: formData.spiritualGifts,
       spiritualProfile: formData.spiritualProfile
     });
+  };
+
+  // Photo upload handlers
+  const handleGetUploadParameters = async () => {
+    const response = await apiRequest("/api/profile/photo/upload", { method: "POST" });
+    if (!response.uploadURL) {
+      throw new Error("Failed to get upload URL");
+    }
+    return {
+      method: "PUT" as const,
+      url: response.uploadURL,
+    };
+  };
+
+  const handlePhotoUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
+    setIsUploadingPhoto(true);
+    try {
+      if (result.successful && result.successful.length > 0) {
+        const uploadedFile = result.successful[0];
+        const photoURL = uploadedFile.uploadURL;
+
+        // Update profile with the uploaded photo
+        const response = await apiRequest("/api/profile/photo", {
+          method: "PUT",
+          body: JSON.stringify({ photoURL }),
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (response.success) {
+          setFormData(prev => ({
+            ...prev,
+            profileImageUrl: response.photoURL
+          }));
+        }
+      }
+    } catch (error) {
+      console.error("Error updating profile photo:", error);
+    } finally {
+      setIsUploadingPhoto(false);
+    }
   };
 
   const addFavoriteVerse = () => {
@@ -768,6 +812,61 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
 
         {/* Basic Information Tab */}
         <TabsContent value="basic" className="space-y-6">
+          {/* Profile Photo Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Camera className="w-5 h-5" />
+                Profile Photo
+              </CardTitle>
+              <CardDescription>
+                Upload a profile photo to help others recognize you in your community
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-6">
+                {/* Current Profile Photo Display */}
+                <div className="flex-shrink-0">
+                  <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-200 dark:border-gray-700 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
+                    {formData.profileImageUrl ? (
+                      <img 
+                        src={formData.profileImageUrl} 
+                        alt="Profile" 
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <User className="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Upload Button */}
+                <div className="flex-1">
+                  <div className="space-y-3">
+                    <ObjectUploader
+                      maxNumberOfFiles={1}
+                      maxFileSize={5 * 1024 * 1024} // 5MB limit
+                      onGetUploadParameters={handleGetUploadParameters}
+                      onComplete={handlePhotoUploadComplete}
+                      buttonClassName="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Camera className="w-4 h-4" />
+                        {isUploadingPhoto ? "Uploading..." : "Upload Photo"}
+                      </div>
+                    </ObjectUploader>
+                    
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      Recommended: 400x400px or larger. Maximum file size: 5MB.
+                      Supported formats: JPG, PNG, GIF
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

@@ -64,6 +64,10 @@ import jwt from "jsonwebtoken";
 import sgMail from "@sendgrid/mail";
 import bcrypt from "bcrypt";
 import { SMSService } from "./sms-service";
+import {
+  ObjectStorageService,
+  ObjectNotFoundError,
+} from "./objectStorage";
 
 
 // Configure file upload directories
@@ -15580,6 +15584,74 @@ Please provide suggestions for the missing or incomplete sections.`
 
   // AI Spiritual Gifts Analysis Endpoint
   app.post('/api/ai/analyze-spiritual-gifts', isAuthenticated, analyzeUserSpiritualGifts);
+
+  // Profile Photo Upload API endpoints
+  const objectStorageService = new ObjectStorageService();
+
+  // Endpoint for getting upload URL for profile photos
+  app.post("/api/profile/photo/upload", isAuthenticated, async (req: any, res) => {
+    try {
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error generating upload URL:", error);
+      res.status(500).json({ error: "Failed to generate upload URL" });
+    }
+  });
+
+  // Endpoint for updating profile with uploaded photo
+  app.put("/api/profile/photo", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+
+      const { photoURL } = req.body;
+      if (!photoURL) {
+        return res.status(400).json({ error: "photoURL is required" });
+      }
+
+      // Set ACL policy for the uploaded photo (public since it's a profile photo)
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        photoURL,
+        {
+          owner: userId,
+          visibility: "public", // Profile photos are public
+        }
+      );
+
+      // Update user's profile with the photo URL
+      await db.update(users)
+        .set({ 
+          profileImageUrl: objectPath,
+          updatedAt: new Date() 
+        })
+        .where(eq(users.id, userId));
+
+      res.json({
+        success: true,
+        photoURL: objectPath,
+      });
+    } catch (error) {
+      console.error("Error updating profile photo:", error);
+      res.status(500).json({ error: "Failed to update profile photo" });
+    }
+  });
+
+  // Endpoint for serving uploaded photos
+  app.get("/objects/:objectPath(*)", async (req, res) => {
+    try {
+      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error serving object:", error);
+      if (error instanceof ObjectNotFoundError) {
+        return res.sendStatus(404);
+      }
+      return res.sendStatus(500);
+    }
+  });
 
   // Simple health check endpoint
   app.get('/health', (req, res) => {
