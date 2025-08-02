@@ -24,7 +24,7 @@ export default function ProfileVerificationBadge({
     if (isLeadership && (emailVerifiedBool || phoneVerifiedBool)) {
       return {
         icon: Crown,
-        bgColor: "bg-gradient-to-r from-purple-500 to-indigo-600",
+        bgColor: "bg-purple-500",
         borderColor: "border-purple-400",
         title: "Leadership Verified"
       };
@@ -33,7 +33,7 @@ export default function ProfileVerificationBadge({
     if (emailVerifiedBool && phoneVerifiedBool) {
       return {
         icon: Shield,
-        bgColor: "bg-gradient-to-r from-green-500 to-emerald-600",
+        bgColor: "bg-green-500",
         borderColor: "border-green-400",
         title: "Fully Verified"
       };
@@ -42,7 +42,7 @@ export default function ProfileVerificationBadge({
     if (emailVerifiedBool || phoneVerifiedBool) {
       return {
         icon: CheckCircle,
-        bgColor: "bg-gradient-to-r from-blue-500 to-cyan-600",
+        bgColor: "bg-blue-500",
         borderColor: "border-blue-400",
         title: phoneVerifiedBool ? "Phone Verified" : "Email Verified"
       };
@@ -53,17 +53,7 @@ export default function ProfileVerificationBadge({
 
   const config = getBadgeConfig();
   
-  // Debug logging in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('ProfileVerificationBadge:', {
-      emailVerified,
-      phoneVerified,
-      isLeadership,
-      emailVerifiedBool,
-      phoneVerifiedBool,
-      config: config ? 'exists' : 'null'
-    });
-  }
+
   
   if (!config) return null;
 
@@ -85,7 +75,7 @@ export default function ProfileVerificationBadge({
   return (
     <div 
       className={cn(
-        "absolute -bottom-1 -right-1 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center shadow-lg z-10",
+        "absolute -bottom-1 -right-1 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center shadow-lg z-30",
         bgColor,
         borderColor,
         sizeConfig[size],

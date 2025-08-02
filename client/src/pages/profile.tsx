@@ -447,12 +447,7 @@ export default function ProfilePage() {
                             isLeadership={profile?.role === 'pastor' || profile?.role === 'admin' || profile?.role === 'owner'}
                             size="lg"
                           />
-                          {/* Debug - force visible badge for testing */}
-                          {process.env.NODE_ENV === 'development' && (
-                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-red-500 rounded-full border-2 border-white z-20 flex items-center justify-center">
-                              <span className="text-white text-xs">!</span>
-                            </div>
-                          )}
+
                         </div>
                       ) : (
                         <div className="h-32 w-32 rounded-full bg-purple-600 flex items-center justify-center relative">
