@@ -30,6 +30,8 @@ import {
 } from "../shared/schema";
 import * as schema from "../shared/schema";
 import { eq, and, or, gte, lte, desc, asc, like, sql, count, sum, ilike, isNotNull, inArray, isNull } from "drizzle-orm";
+import { lookupBibleVerse } from './bible-api';
+import { analyzeUserSpiritualGifts } from './ai-spiritual-gifts';
 
 // Extend session data interface to include userId
 declare module 'express-session' {
@@ -15575,6 +15577,9 @@ Please provide suggestions for the missing or incomplete sections.`
   // Import and register church campus routes
   const churchCampusRoutes = await import('./routes/church-campus-routes.js');
   app.use('/api', churchCampusRoutes.default);
+
+  // AI Spiritual Gifts Analysis Endpoint
+  app.post('/api/ai/analyze-spiritual-gifts', isAuthenticated, analyzeUserSpiritualGifts);
 
   // Simple health check endpoint
   app.get('/health', (req, res) => {

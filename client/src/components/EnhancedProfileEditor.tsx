@@ -188,6 +188,10 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const [verseValidation, setVerseValidation] = useState<{ [key: number]: { isValid: boolean; message: string; suggestion?: string } }>({});
   const [showGiftsAssessment, setShowGiftsAssessment] = useState(false);
   const [showGiftsInfoModal, setShowGiftsInfoModal] = useState(false);
+  const [giftVerses, setGiftVerses] = useState<{ [key: string]: string }>({});
+  const [loadingVerses, setLoadingVerses] = useState(false);
+  const [aiGiftSuggestions, setAiGiftSuggestions] = useState<any>(null);
+  const [loadingAiAnalysis, setLoadingAiAnalysis] = useState(false);
 
   // Profile completion calculation
   const calculateProfileCompletion = () => {
@@ -227,6 +231,68 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   };
 
   const completionPercentage = calculateProfileCompletion();
+
+  // Load scripture verses for spiritual gifts
+  const loadGiftVerses = async () => {
+    if (loadingVerses || Object.keys(giftVerses).length > 0) return;
+    
+    setLoadingVerses(true);
+    const verses: { [key: string]: string } = {};
+    
+    try {
+      for (const [gift, data] of Object.entries(spiritualGiftsData)) {
+        try {
+          const response = await fetch(`https://bible-api.com/${data.scripture}`);
+          if (response.ok) {
+            const verseData = await response.json();
+            verses[gift] = verseData.text?.trim() || '';
+          }
+        } catch (error) {
+          console.log(`Could not load verse for ${gift}:`, error);
+        }
+      }
+      setGiftVerses(verses);
+    } catch (error) {
+      console.log('Error loading gift verses:', error);
+    } finally {
+      setLoadingVerses(false);
+    }
+  };
+
+  // AI-powered SOAP journal analysis for gift suggestions
+  const analyzeJournalingPatterns = async () => {
+    if (!profile.id || loadingAiAnalysis) return;
+    
+    setLoadingAiAnalysis(true);
+    try {
+      const response = await fetch('/api/ai/analyze-spiritual-gifts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: profile.id })
+      });
+      
+      if (response.ok) {
+        const analysis = await response.json();
+        setAiGiftSuggestions(analysis);
+      }
+    } catch (error) {
+      console.log('Error analyzing journaling patterns:', error);
+    } finally {
+      setLoadingAiAnalysis(false);
+    }
+  };
+
+  // Load verses when component mounts
+  React.useEffect(() => {
+    loadGiftVerses();
+  }, []);
+
+  // Load AI analysis when user has spiritual profile
+  React.useEffect(() => {
+    if (formData.spiritualProfile && !aiGiftSuggestions) {
+      analyzeJournalingPatterns();
+    }
+  }, [formData.spiritualProfile]);
 
   // Tab navigation component
   const TabNavigation = ({ currentTabIndex }: { currentTabIndex: number }) => {
@@ -466,6 +532,108 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     { id: 'intercession1', question: 'I spend significant time in prayer for others', gift: 'Intercession' },
     { id: 'intercession2', question: 'I feel called to pray regularly for specific people and situations', gift: 'Intercession' }
   ];
+
+  // Spiritual Gifts Scripture References and Context
+  const spiritualGiftsData = {
+    'Leadership': {
+      scripture: 'Romans 12:8',
+      verseText: '',
+      description: 'The ability to guide and direct others in accomplishing God\'s purposes',
+      soapThemes: ['Direction from God', 'Wisdom in decisions', 'Servant leadership', 'Guiding others'],
+      ministryContext: 'Leading teams, making decisions, casting vision, organizing ministry efforts'
+    },
+    'Teaching': {
+      scripture: '1 Corinthians 12:28',
+      verseText: '',
+      description: 'The ability to communicate biblical truth in ways others can understand and apply',
+      soapThemes: ['Understanding Scripture', 'Sharing insights', 'Learning from God\'s Word', 'Helping others grow'],
+      ministryContext: 'Bible studies, discipleship, preaching, training, educational ministry'
+    },
+    'Administration': {
+      scripture: '1 Corinthians 12:28',
+      verseText: '',
+      description: 'The ability to organize people and resources effectively for ministry',
+      soapThemes: ['God\'s order and planning', 'Stewardship', 'Coordination', 'Faithful management'],
+      ministryContext: 'Event planning, church management, coordinating volunteers, organizing ministries'
+    },
+    'Mercy': {
+      scripture: 'Romans 12:8',
+      verseText: '',
+      description: 'The ability to feel genuine empathy and provide comfort to those suffering',
+      soapThemes: ['God\'s compassion', 'Comfort in trials', 'Healing and restoration', 'Love in action'],
+      ministryContext: 'Counseling, hospital visits, crisis support, caring for hurting people'
+    },
+    'Service': {
+      scripture: '1 Peter 4:11',
+      verseText: '',
+      description: 'The joy in meeting practical needs and supporting others\' ministries',
+      soapThemes: ['Serving like Jesus', 'Humility', 'Meeting needs', 'Supporting others'],
+      ministryContext: 'Volunteer work, maintenance, setup/cleanup, behind-the-scenes support'
+    },
+    'Evangelism': {
+      scripture: 'Ephesians 4:11',
+      verseText: '',
+      description: 'The passion and ability to share the gospel effectively with non-believers',
+      soapThemes: ['Sharing faith', 'God\'s love for the lost', 'Witnessing opportunities', 'Great Commission'],
+      ministryContext: 'Outreach, missions, personal evangelism, community engagement'
+    },
+    'Encouragement': {
+      scripture: 'Romans 12:8',
+      verseText: '',
+      description: 'The ability to strengthen and build up others in their faith journey',
+      soapThemes: ['God\'s faithfulness', 'Hope in trials', 'Building others up', 'Positive perspective'],
+      ministryContext: 'Mentoring, counseling, supporting discouraged believers, cheerleading faith'
+    },
+    'Giving': {
+      scripture: 'Romans 12:8',
+      verseText: '',
+      description: 'The joy in contributing resources generously to support God\'s work',
+      soapThemes: ['God\'s provision', 'Stewardship', 'Generosity', 'Supporting ministry'],
+      ministryContext: 'Financial support, resource donation, funding ministries, supporting missionaries'
+    },
+    'Hospitality': {
+      scripture: '1 Peter 4:9',
+      verseText: '',
+      description: 'The gift of making others feel welcomed and cared for',
+      soapThemes: ['Welcoming others', 'Creating community', 'God\'s welcome to us', 'Fellowship'],
+      ministryContext: 'Hosting events, welcoming newcomers, creating warm environments, fellowship'
+    },
+    'Helps': {
+      scripture: '1 Corinthians 12:28',
+      verseText: '',
+      description: 'The desire to assist and support others in their ministry efforts',
+      soapThemes: ['Supporting others', 'Teamwork', 'Faithful assistance', 'Working together'],
+      ministryContext: 'Assisting pastors/leaders, supporting ministries, administrative help, team support'
+    },
+    'Faith': {
+      scripture: '1 Corinthians 12:9',
+      verseText: '',
+      description: 'Extraordinary trust in God that inspires others to believe and act',
+      soapThemes: ['Trusting God completely', 'God\'s faithfulness', 'Stepping out in faith', 'Impossible things'],
+      ministryContext: 'Prayer ministry, launching new ministries, encouraging faith, believing for miracles'
+    },
+    'Discernment': {
+      scripture: '1 Corinthians 12:10',
+      verseText: '',
+      description: 'The ability to distinguish between truth and error, spirit and flesh',
+      soapThemes: ['Spiritual wisdom', 'Truth vs deception', 'God\'s guidance', 'Spiritual insight'],
+      ministryContext: 'Counseling, leadership decisions, spiritual warfare, protecting the church'
+    },
+    'Wisdom': {
+      scripture: '1 Corinthians 12:8',
+      verseText: '',
+      description: 'The ability to apply biblical knowledge to practical life situations',
+      soapThemes: ['God\'s wisdom', 'Practical application', 'Right decisions', 'Biblical living'],
+      ministryContext: 'Counseling, leadership, teaching, conflict resolution, decision-making'
+    },
+    'Intercession': {
+      scripture: '1 Timothy 2:1',
+      verseText: '',
+      description: 'The calling to pray regularly and effectively for others and their needs',
+      soapThemes: ['Prayer as priority', 'God\'s heart for others', 'Spiritual warfare', 'Intercession'],
+      ministryContext: 'Prayer ministry, prayer chains, spiritual warfare, praying for church/leaders'
+    }
+  };
 
   const spiritualGiftsSchema = z.object({
     responses: z.record(z.number().min(1).max(5))
@@ -968,14 +1136,79 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                           </p>
                         </div>
                         <div>
-                          <h5 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
+                          <h5 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-3">
                             Your Top Spiritual Gifts:
                           </h5>
-                          <div className="flex flex-wrap gap-2">
+                          <div className="space-y-4">
                             {formData.spiritualProfile.topGifts?.map((gift, index) => (
-                              <Badge key={index} className="bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900 dark:text-purple-100">
-                                {gift}
-                              </Badge>
+                              <div key={index} className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
+                                <div className="flex items-start justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <Badge className="bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900 dark:text-purple-100">
+                                      #{index + 1} {gift}
+                                    </Badge>
+                                    {spiritualGiftsData[gift as keyof typeof spiritualGiftsData] && (
+                                      <Badge variant="outline" className="text-xs">
+                                        {spiritualGiftsData[gift as keyof typeof spiritualGiftsData].scripture}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                                
+                                {spiritualGiftsData[gift as keyof typeof spiritualGiftsData] && (
+                                  <div className="space-y-2">
+                                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                                      {spiritualGiftsData[gift as keyof typeof spiritualGiftsData].description}
+                                    </p>
+                                    
+                                    {loadingVerses ? (
+                                      <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
+                                        <div className="flex items-center gap-2">
+                                          <RefreshCw className="w-3 h-3 animate-spin text-blue-600" />
+                                          <p className="text-xs text-blue-600 dark:text-blue-300">Loading Scripture...</p>
+                                        </div>
+                                      </div>
+                                    ) : giftVerses[gift] ? (
+                                      <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
+                                        <p className="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">
+                                          {spiritualGiftsData[gift as keyof typeof spiritualGiftsData].scripture}
+                                        </p>
+                                        <p className="text-sm italic text-blue-700 dark:text-blue-300">
+                                          "{giftVerses[gift]}"
+                                        </p>
+                                      </div>
+                                    ) : (
+                                      <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md">
+                                        <p className="text-xs font-medium text-blue-800 dark:text-blue-200 mb-1">
+                                          {spiritualGiftsData[gift as keyof typeof spiritualGiftsData].scripture}
+                                        </p>
+                                        <p className="text-xs text-blue-600 dark:text-blue-300">
+                                          Scripture reference available
+                                        </p>
+                                      </div>
+                                    )}
+                                    
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                                      <div>
+                                        <p className="font-medium text-gray-800 dark:text-gray-200 mb-1">SOAP Journal Themes:</p>
+                                        <div className="flex flex-wrap gap-1">
+                                          {spiritualGiftsData[gift as keyof typeof spiritualGiftsData].soapThemes.map((theme, i) => (
+                                            <span key={i} className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded-full text-xs">
+                                              {theme}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </div>
+                                      <div>
+                                        <p className="font-medium text-gray-800 dark:text-gray-200 mb-1">Ministry Context:</p>
+                                        <p className="text-gray-600 dark:text-gray-400">
+                                          {spiritualGiftsData[gift as keyof typeof spiritualGiftsData].ministryContext}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
                             ))}
                           </div>
                         </div>
@@ -1000,6 +1233,40 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       </div>
                     </div>
                   </div>
+
+                  {/* AI Analysis Section */}
+                  {aiGiftSuggestions && (
+                    <div className="mt-6 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 p-4 rounded-lg border border-green-200 dark:border-green-700">
+                      <div className="flex items-start gap-3">
+                        <div className="flex-shrink-0 w-8 h-8 bg-green-500 dark:bg-green-600 rounded-full flex items-center justify-center">
+                          <Brain className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-medium text-green-900 dark:text-green-100 mb-2">
+                            AI Analysis of Your SOAP Journals
+                          </h4>
+                          <p className="text-sm text-green-800 dark:text-green-200">
+                            {aiGiftSuggestions.message}
+                          </p>
+                          {aiGiftSuggestions.suggestedGifts && aiGiftSuggestions.suggestedGifts.length > 0 && (
+                            <div className="mt-3">
+                              <p className="text-xs font-medium text-green-800 dark:text-green-200 mb-2">
+                                Gifts reflected in your journaling:
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {aiGiftSuggestions.suggestedGifts.map((gift: string, i: number) => (
+                                  <Badge key={i} className="bg-green-100 text-green-700 border-green-200 dark:bg-green-900 dark:text-green-100">
+                                    {gift}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="mt-6 flex gap-3">
                     <Button
                       type="button"
@@ -1050,7 +1317,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       </div>
                     </div>
                   </div>
-                  <div className="mt-6 flex gap-3">
+                  <div className="mt-6 flex flex-wrap gap-3">
                     <Button
                       type="button"
                       className="bg-purple-600 hover:bg-purple-700 text-white"
@@ -1067,6 +1334,22 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     >
                       Learn About Gifts
                     </Button>
+                    {formData.spiritualProfile && (
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={analyzeJournalingPatterns}
+                        disabled={loadingAiAnalysis}
+                        className="border-green-300 text-green-700 hover:bg-green-50 dark:border-green-600 dark:text-green-300"
+                      >
+                        {loadingAiAnalysis ? (
+                          <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Brain className="w-4 h-4 mr-2" />
+                        )}
+                        {loadingAiAnalysis ? 'Analyzing...' : 'AI Analysis'}
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
