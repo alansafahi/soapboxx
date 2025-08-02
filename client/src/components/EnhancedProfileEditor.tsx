@@ -825,28 +825,38 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
           {/* Profile Photo Section */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Camera className="w-5 h-5" />
+              <CardTitle className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                <Camera className="w-5 h-5 text-purple-600" />
                 Profile Photo
               </CardTitle>
               <CardDescription>
-                Upload a profile photo to help others recognize you in your community
+                Upload a beautiful profile photo to help others connect with you in your faith community
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-6">
                 {/* Current Profile Photo Display */}
                 <div className="flex-shrink-0">
-                  <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-gray-200 dark:border-gray-700 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
-                    {formData.profileImageUrl ? (
-                      <img 
-                        src={formData.profileImageUrl} 
-                        alt="Profile" 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <User className="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                  <div className="relative">
+                    <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-r from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 shadow-lg hover:shadow-xl transition-all duration-200">
+                      <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
+                        {formData.profileImageUrl ? (
+                          <img 
+                            src={formData.profileImageUrl} 
+                            alt="Profile" 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <User className="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    {/* Upload indicator overlay */}
+                    {isUploadingPhoto && (
+                      <div className="absolute inset-0 bg-black bg-opacity-50 rounded-full flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                       </div>
                     )}
                   </div>
@@ -860,18 +870,31 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       maxFileSize={5 * 1024 * 1024} // 5MB limit
                       onGetUploadParameters={handleGetUploadParameters}
                       onComplete={handlePhotoUploadComplete}
-                      buttonClassName="bg-blue-600 hover:bg-blue-700 text-white"
+                      buttonClassName="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                     >
                       <div className="flex items-center gap-2">
                         <Camera className="w-4 h-4" />
-                        {isUploadingPhoto ? "Uploading..." : "Upload Photo"}
+                        {isUploadingPhoto ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <span>Uploading...</span>
+                          </>
+                        ) : (
+                          "Upload Photo"
+                        )}
                       </div>
                     </ObjectUploader>
                     
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      Recommended: 400x400px or larger. Maximum file size: 5MB.
-                      Supported formats: JPG, PNG, GIF
-                    </p>
+                    <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-700">
+                      <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">
+                        📸 Photo Guidelines
+                      </p>
+                      <p className="text-xs text-blue-600 dark:text-blue-400">
+                        • Recommended: 400x400px or larger<br/>
+                        • Maximum file size: 5MB<br/>
+                        • Supported formats: JPG, PNG, GIF
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

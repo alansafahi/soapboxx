@@ -2,6 +2,143 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Uppy Styling for SoapBox */
+.uppy-DashboardModal {
+  z-index: 9999 !important;
+}
+
+.uppy-Dashboard {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+}
+
+.uppy-Dashboard-inner {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+.uppy-Dashboard-AddFiles {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 2px dashed #a855f7 !important;
+  border-radius: 8px !important;
+  margin: 20px !important;
+}
+
+.uppy-Dashboard-AddFiles-title {
+  color: #581c87 !important;
+  font-weight: 600 !important;
+  font-size: 18px !important;
+}
+
+.uppy-Dashboard-note {
+  color: #7c3aed !important;
+  font-weight: 500 !important;
+}
+
+.uppy-Dashboard-browse {
+  color: #7c3aed !important;
+  font-weight: 600 !important;
+  text-decoration: underline !important;
+}
+
+.uppy-Dashboard-browse:hover {
+  color: #5b21b6 !important;
+}
+
+.uppy-DashboardTab {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: none !important;
+  color: white !important;
+  border-radius: 6px !important;
+  margin: 0 4px !important;
+}
+
+.uppy-DashboardTab--active {
+  background: rgba(255, 255, 255, 0.2) !important;
+}
+
+.uppy-Dashboard-Item {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 8px !important;
+  margin: 8px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+.uppy-Dashboard-Item-name {
+  color: #1f2937 !important;
+  font-weight: 600 !important;
+}
+
+.uppy-Dashboard-Item-status {
+  color: #6b7280 !important;
+}
+
+.uppy-ProgressBar {
+  background: linear-gradient(90deg, #7c3aed 0%, #a855f7 100%) !important;
+  border-radius: 4px !important;
+}
+
+.uppy-Dashboard-actions .uppy-c-btn {
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%) !important;
+  border: none !important;
+  border-radius: 6px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  padding: 8px 16px !important;
+  transition: all 0.2s ease !important;
+}
+
+.uppy-Dashboard-actions .uppy-c-btn:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.uppy-Dashboard-close {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border: none !important;
+  border-radius: 50% !important;
+  color: white !important;
+  width: 32px !important;
+  height: 32px !important;
+  right: 16px !important;
+  top: 16px !important;
+}
+
+.uppy-Dashboard-close:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Dark mode overrides */
+.dark .uppy-Dashboard-AddFiles {
+  background: rgba(17, 24, 39, 0.95) !important;
+  border-color: #7c3aed !important;
+}
+
+.dark .uppy-Dashboard-AddFiles-title {
+  color: #c4b5fd !important;
+}
+
+.dark .uppy-Dashboard-note {
+  color: #a78bfa !important;
+}
+
+.dark .uppy-Dashboard-browse {
+  color: #a78bfa !important;
+}
+
+.dark .uppy-Dashboard-Item {
+  background: rgba(17, 24, 39, 0.95) !important;
+  border: 1px solid rgba(124, 58, 237, 0.3) !important;
+}
+
+.dark .uppy-Dashboard-Item-name {
+  color: #f3f4f6 !important;
+}
+
+.dark .uppy-Dashboard-Item-status {
+  color: #9ca3af !important;
+}
+
 /* Chat Widget Mobile Touch Isolation */
 .chat-widget-isolation {
   pointer-events: auto !important;
