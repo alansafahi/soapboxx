@@ -241,7 +241,7 @@ export default function ProfilePage() {
           return { ...oldData, ...data.user };
         });
       } catch (error) {
-        console.error('Error updating cache:', error);
+
       }
       
       toast({
@@ -563,7 +563,7 @@ export default function ProfilePage() {
                   </Button>
                 </div>
                 <EnhancedProfileEditor 
-                  profile={profile || {} as UserProfile}
+                  profile={profile || {} as any}
                   onSave={(updates) => {
                     updateProfileMutation.mutate(updates);
                     // Don't exit edit mode here - let the mutation's onSuccess handle it

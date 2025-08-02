@@ -313,7 +313,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
         url: data.uploadURL,
       };
     } catch (error) {
-      console.error("Error getting upload parameters:", error);
+
       throw error;
     }
   };
@@ -353,7 +353,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
         }
       }
     } catch (error) {
-      console.error("Error updating profile photo:", error);
+
     } finally {
       setIsUploadingPhoto(false);
     }
@@ -432,7 +432,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       }
       setGiftVerses(verses);
     } catch (error) {
-      console.log('Error loading gift verses:', error);
+
     } finally {
       setLoadingVerses(false);
     }
@@ -455,7 +455,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
         setAiGiftSuggestions(analysis);
       }
     } catch (error) {
-      console.log('Error analyzing journaling patterns:', error);
+
     } finally {
       setLoadingAiAnalysis(false);
     }
@@ -524,17 +524,17 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     setVerseLoadingStates(prev => ({ ...prev, [index]: true }));
 
     try {
-      console.log('Looking up verse:', trimmedVerse);
+
       const response = await fetch('/api/bible/lookup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reference: trimmedVerse })
       });
-      console.log('Response status:', response.status);
+
       
       if (response.ok) {
         const verseData = await response.json();
-        console.log('Verse data received:', verseData);
+
         if (verseData.text) {
           setVerseTexts(prev => ({
             ...prev,
@@ -554,7 +554,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
         });
       }
     } catch (error) {
-      console.error('Failed to lookup verse:', error);
+
       // Clear verse text on error
       setVerseTexts(prev => {
         const updated = { ...prev };
@@ -1954,9 +1954,6 @@ const SpiritualGiftsAssessmentModal = ({
   const calculateSpiritualProfile = (responses: Record<string, number>, questions: any[]) => {
     const scores: Record<string, number> = {};
     
-    console.log('Calculating profile for responses:', responses);
-    console.log('Questions available:', questions.length);
-    
     // Calculate scores for each spiritual gift category
     questions.forEach(q => {
       const score = responses[q.id];
@@ -1965,8 +1962,6 @@ const SpiritualGiftsAssessmentModal = ({
         scores[q.gift] += score;
       }
     });
-    
-    console.log('Gift scores calculated:', scores);
     
     // Get top 3 gifts based on actual scores
     const topGifts = Object.entries(scores)
@@ -1979,7 +1974,7 @@ const SpiritualGiftsAssessmentModal = ({
     const totalScore = responseValues.reduce((sum, score) => sum + score, 0);
     const averageScore = responseValues.length > 0 ? totalScore / responseValues.length : 0;
     
-    console.log('Average score calculated:', averageScore, 'from', responseValues.length, 'responses');
+
     
     // Determine spiritual profile label
     let profileLabel = "";
@@ -2029,19 +2024,19 @@ const SpiritualGiftsAssessmentModal = ({
     mutationFn: (data: SpiritualGiftsForm) => 
       apiRequest('/api/volunteers/spiritual-gifts-assessment', 'POST', data),
     onSuccess: (profile) => {
-      console.log('Assessment API success:', profile);
+
       onComplete(profile);
     },
     onError: (error) => {
-      console.log('Assessment API error, calculating locally:', error);
+
       // Calculate the profile locally if API fails
       const responses = form.getValues().responses;
       if (responses && Object.keys(responses).length > 0) {
         const profile = calculateSpiritualProfile(responses, questionsToUse);
-        console.log('Local profile calculated:', profile);
+
         onComplete({ ...profile, success: true });
       } else {
-        console.error('No responses available for local calculation');
+
       }
     }
   });
@@ -2085,7 +2080,7 @@ const SpiritualGiftsAssessmentModal = ({
   );
 
   const onSubmit = (data: SpiritualGiftsForm) => {
-    console.log('Assessment submission data:', data);
+
     const responses = data.responses || {};
     
     // Only count responses for questions that actually exist in the current assessment type
@@ -2095,13 +2090,11 @@ const SpiritualGiftsAssessmentModal = ({
     );
     const answeredQuestions = Object.keys(validResponses).length;
     
-    console.log(`Answered ${answeredQuestions} out of ${questionsToUse.length} questions`);
-    console.log('Valid question IDs:', validQuestionIds);
-    console.log('Valid responses:', validResponses);
+
     
     // Check if all questions are answered
     if (answeredQuestions < questionsToUse.length) {
-      console.error(`Not all questions answered: ${answeredQuestions}/${questionsToUse.length}`);
+
       
       // For expanded assessment, don't auto-submit until all questions are done
       if (assessmentType === 'expanded' && answeredQuestions < questionsToUse.length) {
@@ -2327,10 +2320,7 @@ const SpiritualGiftsAssessmentModal = ({
                   disabled={assessmentMutation.isPending}
                   className="bg-gradient-to-r from-purple-500 to-blue-500"
                   onClick={() => {
-                    console.log('Complete Assessment clicked');
                     const formData = form.getValues();
-                    console.log('Form values:', formData);
-                    console.log('Form errors:', form.formState.errors);
                     
                     // Force trigger submission even with validation errors
                     const responses = formData.responses || {};
