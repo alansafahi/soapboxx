@@ -140,14 +140,17 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     setVerseLoadingStates(prev => ({ ...prev, [index]: true }));
 
     try {
+      console.log('Looking up verse:', trimmedVerse);
       const response = await fetch('/api/bible/lookup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reference: trimmedVerse })
       });
+      console.log('Response status:', response.status);
       
       if (response.ok) {
         const verseData = await response.json();
+        console.log('Verse data received:', verseData);
         if (verseData.text) {
           setVerseTexts(prev => ({
             ...prev,
