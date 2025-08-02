@@ -1100,14 +1100,7 @@ export default function SocialFeed() {
                   isLeadership={post.author?.role === 'pastor' || post.author?.role === 'admin' || post.author?.role === 'owner'}
                   size="sm"
                 >
-                  {/* Debug ALL posts to see the issue */}
-                  {console.log('🔍 FRONTEND POST:', post.id, {
-                    hasAuthor: !!post.author,
-                    author: post.author,
-                    emailVerified: post.author?.emailVerified,
-                    phoneVerified: post.author?.phoneVerified,
-                    role: post.author?.role
-                  })}
+                  {/* ProfileVerificationRing component handles verification display */}
                   <Avatar className="w-10 h-10">
                     <AvatarImage 
                       src={post.author?.profileImageUrl || ""} 

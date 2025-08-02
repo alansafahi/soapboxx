@@ -7,6 +7,7 @@ import { MessageCircle, Heart, Share2, ChevronDown, Loader2, Trash2, Flag } from
 import { formatDistanceToNow } from "date-fns";
 import SoapPostCard from "./SoapPostCard";
 import FormattedContent from "../utils/FormattedContent";
+import ProfileVerificationRing from "./ProfileVerificationRing";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -42,6 +43,9 @@ interface Post {
     firstName: string;
     lastName: string;
     profileImageUrl?: string;
+    emailVerified?: boolean;
+    phoneVerified?: boolean;
+    role?: string;
   };
   likeCount: number;
   commentCount: number;
@@ -534,12 +538,19 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
             <Card className="bg-white dark:bg-gray-800 hover:shadow-md transition-all duration-200 border-0 shadow-sm">
               <CardContent className="p-6">
               <div className="flex space-x-3">
-                <Avatar className="w-10 h-10 ring-2 ring-purple-100 dark:ring-purple-900">
-                  <AvatarImage src={post.author?.profileImageUrl || undefined} />
-                  <AvatarFallback className="bg-purple-100 text-purple-600 font-medium">
-                    {post.author?.firstName?.[0]}{post.author?.lastName?.[0]}
-                  </AvatarFallback>
-                </Avatar>
+                <ProfileVerificationRing
+                  emailVerified={post.author?.emailVerified === true}
+                  phoneVerified={post.author?.phoneVerified === true}
+                  isLeadership={post.author?.role === 'pastor' || post.author?.role === 'admin' || post.author?.role === 'owner' || post.author?.role === 'soapbox_owner'}
+                  size="sm"
+                >
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage src={post.author?.profileImageUrl || undefined} />
+                    <AvatarFallback className="bg-purple-100 text-purple-600 font-medium">
+                      {post.author?.firstName?.[0]}{post.author?.lastName?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                </ProfileVerificationRing>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-3">

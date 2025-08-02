@@ -2626,18 +2626,7 @@ export class DatabaseStorage implements IStorage {
           isLiked: false
         };
         
-        // Debug the first mapped post to ensure verification data is correctly mapped
-        if (row.id === combinedResult.rows[0]?.id) {
-          console.log('🔍 DEBUG - Mapped post author object:', {
-            rawEmailVerified: row.email_verified,
-            rawPhoneVerified: row.phone_verified,
-            rawRole: row.role,
-            mappedEmailVerified: mappedPost.author.emailVerified,
-            mappedPhoneVerified: mappedPost.author.phoneVerified,
-            mappedRole: mappedPost.author.role,
-            fullAuthor: mappedPost.author
-          });
-        }
+        // Post author mapping completed with verification data
         
         return mappedPost;
       });
