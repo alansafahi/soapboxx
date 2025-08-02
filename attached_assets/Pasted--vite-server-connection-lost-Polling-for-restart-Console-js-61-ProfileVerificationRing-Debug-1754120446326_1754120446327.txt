@@ -1,0 +1,13 @@
+[vite] server connection lost. Polling for restart...
+Console.js:61 🔍 ProfileVerificationRing Debug: {emailVerified: false, phoneVerified: false, isLeadership: false, emailVerifiedBool: false, phoneVerifiedBool: false, …}
+Console.js:61 🔍 ProfileVerificationRing Debug: {emailVerified: false, phoneVerified: false, isLeadership: false, emailVerifiedBool: false, phoneVerifiedBool: false, …}
+Console.js:61 🔍 ProfileVerificationRing Debug: {emailVerified: false, phoneVerified: false, isLeadership: false, emailVerifiedBool: false, phoneVerifiedBool: false, …}
+Console.js:61 🔍 ProfileVerificationRing Debug: {emailVerified: false, phoneVerified: false, isLeadership: false, emailVerifiedBool: false, phoneVerifiedBool: false, …}
+Console.js:61 🔍 ProfileVerificationRing Debug: {emailVerified: false, phoneVerified: false, isLeadership: false, emailVerifiedBool: false, phoneVerifiedBool: false, …}
+Console.js:61 🔍 ProfileVerificationRing Debug: {emailVerified: false, phoneVerified: false, isLeadership: false, emailVerifiedBool: false, phoneVerifiedBool: false, …}
+Console.js:61 🔍 ProfileVerificationRing Debug: {emailVerified: false, phoneVerified: false, isLeadership: false, emailVerifiedBool: false, phoneVerifiedBool: false, …}
+Console.js:61 🔍 ProfileVerificationRing Debug: {emailVerified: false, phoneVerified: false, isLeadership: false, emailVerifiedBool: false, phoneVerifiedBool: false, …}
+Console.js:61 🔍 ProfileVerificationRing Debug: {emailVerified: false, phoneVerified: false, isLeadership: false, emailVerifiedBool: false, phoneVerifiedBool: false, …}
+Console.js:61 🔍 ProfileVerificationRing Debug: {emailVerified: false, phoneVerified: false, isLeadership: false, emailVerifiedBool: false, phoneVerifiedBool: false, …}
+Console.js:61 🔍 ProfileVerificationRing Debug: {emailVerified: false, phoneVerified: false, isLeadership: false, emailVerifiedBool: false, phoneVerifiedBool: false, …}
+Console.js:61 🔍 ProfileVerificationRing Debug: {emailVerified: false, phoneVerified: false, isLeadership: false, emailVerifiedBool: false, phoneVerifiedBool: false, …}
