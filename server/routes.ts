@@ -14802,6 +14802,9 @@ Please provide suggestions for the missing or incomplete sections.`
             u.first_name,
             u.last_name,
             u.profile_image_url,
+            u.email_verified,
+            u.phone_verified,
+            uc.role,
             COALESCE(us.total_points, 0) as score
           FROM users u
           LEFT JOIN user_scores us ON u.id = us.user_id
@@ -14824,6 +14827,9 @@ Please provide suggestions for the missing or incomplete sections.`
         lastName: row.last_name,
         avatarUrl: row.profile_image_url,
         profileImageUrl: row.profile_image_url,
+        emailVerified: row.email_verified,
+        phoneVerified: row.phone_verified,
+        role: row.role,
         score: row.score
       }));
       
