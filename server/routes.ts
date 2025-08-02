@@ -9840,7 +9840,7 @@ Return JSON with this exact structure:
         moodTag: mood || null,
         attachedMedia: attachedMedia || null,
         linkedVerse: linkedVerse || null,
-        expiresAt: expiresAt || null
+        expiresAt: expiresAt ? new Date(expiresAt) : null
       };
       
 
