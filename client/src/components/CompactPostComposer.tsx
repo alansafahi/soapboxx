@@ -420,19 +420,21 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
       className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border-0 shadow-md hover:shadow-lg transition-all duration-300 ${isExpanded ? 'p-6' : 'p-4'} ${className}`}
     >
       <div className="flex space-x-3">
-        <ProfileVerificationRing
-          emailVerified={user.emailVerified === true}
-          phoneVerified={user.phoneVerified === true}
-          size="sm"
-          className="flex-shrink-0"
-        >
-          <Avatar className="w-8 h-8 flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
-            <AvatarImage src={user.profileImageUrl || undefined} />
-            <AvatarFallback className="bg-purple-100 text-purple-600 text-sm">
-              {user.firstName?.[0]}{user.lastName?.[0]}
-            </AvatarFallback>
-          </Avatar>
-        </ProfileVerificationRing>
+        <div className="flex-shrink-0 w-8 h-8">
+          <ProfileVerificationRing
+            emailVerified={user.emailVerified === true}
+            phoneVerified={user.phoneVerified === true}
+            size="sm"
+            className="w-full h-full"
+          >
+            <Avatar className="w-full h-full">
+              <AvatarImage src={user.profileImageUrl || undefined} />
+              <AvatarFallback className="bg-purple-100 text-purple-600 text-sm">
+                {user.firstName?.[0]}{user.lastName?.[0]}
+              </AvatarFallback>
+            </Avatar>
+          </ProfileVerificationRing>
+        </div>
         
         <div className="flex-1 space-y-3">
           <Textarea

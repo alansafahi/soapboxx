@@ -539,19 +539,21 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
               <CardContent className="p-6">
               <div className="flex space-x-3">
                 {/* Verification data processed */}
-                <ProfileVerificationRing
-                  emailVerified={post.author?.emailVerified === true}
-                  phoneVerified={post.author?.phoneVerified === true}
-                  size="sm"
-                  className="flex-shrink-0"
-                >
-                  <Avatar className="w-10 h-10 flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
-                    <AvatarImage src={post.author?.profileImageUrl || undefined} />
-                    <AvatarFallback className="bg-purple-100 text-purple-600 font-medium">
-                      {post.author?.firstName?.[0]}{post.author?.lastName?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                </ProfileVerificationRing>
+                <div className="flex-shrink-0 w-10 h-10">
+                  <ProfileVerificationRing
+                    emailVerified={post.author?.emailVerified === true}
+                    phoneVerified={post.author?.phoneVerified === true}
+                    size="sm"
+                    className="w-full h-full"
+                  >
+                    <Avatar className="w-full h-full">
+                      <AvatarImage src={post.author?.profileImageUrl || undefined} />
+                      <AvatarFallback className="bg-purple-100 text-purple-600 font-medium">
+                        {post.author?.firstName?.[0]}{post.author?.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                  </ProfileVerificationRing>
+                </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-3">

@@ -573,19 +573,21 @@ export default function TopHeader() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-12 w-12 rounded-full p-0">
-              <ProfileVerificationRing
-                emailVerified={typedUser?.emailVerified === true}
-                phoneVerified={typedUser?.phoneVerified === true}
-                size="sm"
-                className="flex-shrink-0"
-              >
-                <Avatar className="h-10 w-10 flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
-                  <AvatarImage src={typedUser?.profileImageUrl || undefined} />
-                  <AvatarFallback className="bg-purple-600 text-white text-sm font-semibold">
-                    {getUserInitials()}
-                  </AvatarFallback>
-                </Avatar>
-              </ProfileVerificationRing>
+              <div className="flex-shrink-0 w-10 h-10">
+                <ProfileVerificationRing
+                  emailVerified={typedUser?.emailVerified === true}
+                  phoneVerified={typedUser?.phoneVerified === true}
+                  size="sm"
+                  className="w-full h-full"
+                >
+                  <Avatar className="w-full h-full">
+                    <AvatarImage src={typedUser?.profileImageUrl || undefined} />
+                    <AvatarFallback className="bg-purple-600 text-white text-sm font-semibold">
+                      {getUserInitials()}
+                    </AvatarFallback>
+                  </Avatar>
+                </ProfileVerificationRing>
+              </div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">

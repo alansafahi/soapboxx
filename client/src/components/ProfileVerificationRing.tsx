@@ -43,12 +43,12 @@ export function ProfileVerificationRing({
 
   const { ringClass, title } = ringConfig;
 
-  // Size configurations for different use cases
+  // Size configurations for different use cases - with explicit dimensions
   const sizeConfig = {
-    xs: "p-0.5",
-    sm: "p-1", 
-    md: "p-1.5",
-    lg: "p-2"
+    xs: { padding: "p-0.5", dimensions: "w-6 h-6" },
+    sm: { padding: "p-1", dimensions: "" }, // Let child component control size
+    md: { padding: "p-1.5", dimensions: "" },
+    lg: { padding: "p-2", dimensions: "" }
   };
 
   return (
@@ -56,13 +56,14 @@ export function ProfileVerificationRing({
       className={cn(
         "relative rounded-full flex-shrink-0",
         ringClass,
-        sizeConfig[size],
+        sizeConfig[size].padding,
+        sizeConfig[size].dimensions,
         className
       )}
       title={title}
-      style={{ aspectRatio: '1 / 1', minWidth: 'fit-content' }}
+      style={{ aspectRatio: '1 / 1' }}
     >
-      <div className="rounded-full overflow-hidden w-full h-full flex items-center justify-center flex-shrink-0">
+      <div className="rounded-full overflow-hidden w-full h-full flex items-center justify-center">
         {children}
       </div>
     </div>
