@@ -37,6 +37,7 @@ import { format } from "date-fns";
 import EnhancedProfileEditor from "../components/EnhancedProfileEditor";
 import { SMSVerificationModal } from "../components/SMSVerificationModal";
 import { VerificationBadge, DetailedVerificationStatus } from "../components/VerificationBadge";
+import { ProfileVerificationBadge } from "../components/ProfileVerificationBadge";
 
 interface UserProfile {
   id: string;
@@ -433,16 +434,28 @@ export default function ProfilePage() {
                   <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                     <div className="relative">
                       {profile?.profileImageUrl ? (
-                        <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                        <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
                           <img 
                             src={profile.profileImageUrl} 
                             alt={displayName}
                             className="h-full w-full object-cover"
                           />
+                          <ProfileVerificationBadge 
+                            emailVerified={profile?.emailVerified === true}
+                            phoneVerified={profile?.phoneVerified === true}
+                            isLeadership={profile?.role === 'pastor' || profile?.role === 'admin' || profile?.role === 'owner'}
+                            size="lg"
+                          />
                         </div>
                       ) : (
-                        <div className="h-32 w-32 rounded-full bg-purple-600 flex items-center justify-center">
+                        <div className="h-32 w-32 rounded-full bg-purple-600 flex items-center justify-center relative">
                           <span className="text-2xl font-semibold text-white">{userInitials}</span>
+                          <ProfileVerificationBadge 
+                            emailVerified={profile?.emailVerified === true}
+                            phoneVerified={profile?.phoneVerified === true}
+                            isLeadership={profile?.role === 'pastor' || profile?.role === 'admin' || profile?.role === 'owner'}
+                            size="lg"
+                          />
                         </div>
                       )}
                     </div>
@@ -450,12 +463,7 @@ export default function ProfilePage() {
                       <div>
                         <div className="flex items-center gap-3 mb-2">
                           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{displayName}</h2>
-                          <VerificationBadge 
-                            emailVerified={profile?.emailVerified === true}
-                            phoneVerified={profile?.phoneVerified === true}
-                            isLeadership={profile?.role === 'pastor' || profile?.role === 'admin' || profile?.role === 'owner'}
-                            size="md"
-                          />
+
 
                         </div>
                         <div className="space-y-1 mt-1">
