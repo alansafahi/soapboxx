@@ -6,7 +6,7 @@ import { Alert, AlertDescription } from "./ui/alert";
 import { Mail, Smartphone, Shield, CheckCircle, Clock, Users } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-import SMSVerificationModal from "./SMSVerificationModal";
+import { SMSVerificationModal } from "./SMSVerificationModal";
 import { useQuery } from "@tanstack/react-query";
 
 interface VerificationOptionsModalProps {
