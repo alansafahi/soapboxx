@@ -1101,7 +1101,13 @@ export default function SocialFeed() {
                   size="sm"
                 >
                   {/* Debug author data */}
-                  {console.log('🔍 Social Feed Author Data:', post.author)}
+                  {console.log('🔍 Social Feed Author Data:', {
+                    fullPost: post,
+                    author: post.author,
+                    emailVerified: post.author?.emailVerified,
+                    phoneVerified: post.author?.phoneVerified,
+                    role: post.author?.role
+                  })}
                   <Avatar className="w-10 h-10">
                     <AvatarImage 
                       src={post.author?.profileImageUrl || ""} 
