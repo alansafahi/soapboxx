@@ -199,7 +199,19 @@ export default function ProfilePage() {
   // Profile update mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: Partial<UserProfile>) => {
+      console.log('Sending profile update with privacy settings:', {
+        showBioPublicly: data.showBioPublicly,
+        showChurchAffiliation: data.showChurchAffiliation,
+        shareWithGroup: data.shareWithGroup,
+        showAgeRange: data.showAgeRange,
+        showLocation: data.showLocation,
+        showMobile: data.showMobile,
+        showGender: data.showGender,
+        showDenomination: data.showDenomination,
+        showSpiritualGifts: data.showSpiritualGifts
+      });
       const response = await apiRequest("PUT", "/api/users/profile", data);
+      console.log('Profile update response:', response);
       return response;
     },
     onMutate: async (updatedData) => {

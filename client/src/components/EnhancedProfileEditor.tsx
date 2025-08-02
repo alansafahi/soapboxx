@@ -268,7 +268,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   };
 
   const handleSave = () => {
-    onSave({
+    const saveData = {
       ...formData,
       ministryInterests: selectedMinistries,
       growthGoals: selectedGoals,
@@ -285,7 +285,22 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       showGender: formData.showGender,
       showDenomination: formData.showDenomination,
       showSpiritualGifts: formData.showSpiritualGifts
+    };
+    
+    console.log('Saving profile data:', saveData);
+    console.log('Privacy settings being saved:', {
+      showBioPublicly: saveData.showBioPublicly,
+      showChurchAffiliation: saveData.showChurchAffiliation,
+      shareWithGroup: saveData.shareWithGroup,
+      showAgeRange: saveData.showAgeRange,
+      showLocation: saveData.showLocation,
+      showMobile: saveData.showMobile,
+      showGender: saveData.showGender,
+      showDenomination: saveData.showDenomination,
+      showSpiritualGifts: saveData.showSpiritualGifts
     });
+    
+    onSave(saveData);
   };
 
   // Photo upload handlers
