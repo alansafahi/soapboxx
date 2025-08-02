@@ -29,6 +29,7 @@ interface UserProfile {
   lastName: string | null;
   bio: string | null;
   coverPhotoUrl: string | null;
+  mobileNumber: string | null;
   ageRange: string | null;
   gender: string | null;
   churchAffiliation: string | null;
@@ -209,6 +210,33 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div>
+                <Label htmlFor="mobileNumber">Mobile Number (Optional)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="mobileNumber"
+                    type="tel"
+                    placeholder="+1 (555) 123-4567"
+                    value={formData.mobileNumber || ""}
+                    onChange={(e) => setFormData({...formData, mobileNumber: e.target.value})}
+                    className="flex-1"
+                  />
+                  {formData.mobileNumber && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {/* SMS verification logic will be added */}}
+                    >
+                      Verify
+                    </Button>
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Get prayer alerts, event reminders, and secure access
+                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

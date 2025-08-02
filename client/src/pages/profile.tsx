@@ -66,6 +66,10 @@ interface UserProfile {
   growthGoals: string[] | null;
   currentReadingPlan: string | null;
   
+  // Verification Status
+  emailVerified: boolean | null;
+  phoneVerified: boolean | null;
+  
   // Privacy Settings
   showBioPublicly: boolean | null;
   showChurchAffiliation: boolean | null;
@@ -391,6 +395,32 @@ export default function ProfilePage() {
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6">
+            {/* SMS Verification Banner */}
+            {profile?.emailVerified && !profile?.phoneVerified && (
+              <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-5 w-5 text-orange-600" />
+                    <div className="flex-1">
+                      <h3 className="font-medium text-orange-800 dark:text-orange-200">
+                        Secure your account with a phone number
+                      </h3>
+                      <p className="text-sm text-orange-600 dark:text-orange-300 mt-1">
+                        Get prayer alerts, event reminders, and secure access.
+                      </p>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      className="bg-orange-600 hover:bg-orange-700"
+                      onClick={() => setIsEditing(true)}
+                    >
+                      Add Phone
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {!isEditing ? (
               <Card>
                 <CardContent className="pt-6">
@@ -413,14 +443,103 @@ export default function ProfilePage() {
                     <div className="flex-1 space-y-4">
                       <div>
                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{displayName}</h2>
-                        <p className="text-muted-foreground flex items-center gap-2 mt-1">
-                          <Mail className="h-4 w-4" />
-                          {profile?.email || "No email provided"}
-                        </p>
+                        <div className="space-y-1 mt-1">
+                          <p className="text-muted-foreground flex items-center gap-2">
+                            <Mail className="h-4 w-4" />
+                            {profile?.email || "No email provided"}
+                            {profile?.emailVerified && (
+                              <Badge variant="outline" className="text-xs text-green-600 border-green-200">
+                                Verified
+                              </Badge>
+                            )}
+                          </p>
+                          
+                          {profile?.mobileNumber && (
+                            <p className="text-muted-foreground flex items-center gap-2">
+                              <Phone className="h-4 w-4" />
+                              {profile.mobileNumber}
+                              {profile?.phoneVerified ? (
+                                <Badge variant="outline" className="text-xs text-green-600 border-green-200">
+                                  Verified
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">
+                                  Unverified
+                                </Badge>
+                              )}
+                            </p>
+                          )}
+
+                          {profile?.city && profile?.state && (
+                            <p className="text-muted-foreground flex items-center gap-2">
+                              <MapPin className="h-4 w-4" />
+                              {profile.city}, {profile.state} {profile.zipCode}
+                            </p>
+                          )}
+
+                          {profile?.churchAffiliation && (
+                            <p className="text-muted-foreground flex items-center gap-2">
+                              <Church className="h-4 w-4" />
+                              {profile.churchAffiliation}
+                            </p>
+                          )}
+                        </div>
                       </div>
+
                       {profile?.bio && (
                         <p className="text-gray-600 dark:text-gray-300">{profile.bio}</p>
                       )}
+
+                      {/* Spiritual Profile Section */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {profile?.ageRange && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">Age Range:</span>
+                            <Badge variant="secondary">{profile.ageRange}</Badge>
+                          </div>
+                        )}
+                        
+                        {profile?.gender && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">Gender:</span>
+                            <Badge variant="secondary">
+                              {profile.gender === 'prefer_not_to_say' ? 'Prefer not to say' : 
+                               profile.gender === 'male' ? 'Male' : 'Female'}
+                            </Badge>
+                          </div>
+                        )}
+
+                        {profile?.spiritualStage && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">Faith Journey:</span>
+                            <Badge variant="outline" className="text-purple-600 border-purple-200">
+                              {profile.spiritualStage.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                            </Badge>
+                          </div>
+                        )}
+
+                        {profile?.denomination && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium">Denomination:</span>
+                            <Badge variant="outline">{profile.denomination}</Badge>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Ministry Interests */}
+                      {profile?.ministryInterests && profile.ministryInterests.length > 0 && (
+                        <div>
+                          <span className="text-sm font-medium mb-2 block">Ministry Interests:</span>
+                          <div className="flex flex-wrap gap-2">
+                            {profile.ministryInterests.map((interest, index) => (
+                              <Badge key={index} variant="outline" className="text-blue-600 border-blue-200">
+                                {interest}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Calendar className="h-4 w-4" />
                         Member since {profile?.createdAt ? format(new Date(profile.createdAt), "MMMM yyyy") : "Unknown"}

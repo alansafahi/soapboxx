@@ -498,7 +498,41 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
             </div>
           )}
           
-          <div className="text-left space-y-2">
+          {/* Mobile Verification Prompt */}
+        <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20">
+          <CardContent className="pt-4">
+            <div className="text-center space-y-3">
+              <Phone className="w-8 h-8 text-orange-600 mx-auto" />
+              <div>
+                <h3 className="font-semibold text-orange-800 dark:text-orange-200">
+                  Verify your mobile number (optional but recommended)
+                </h3>
+                <p className="text-sm text-orange-600 dark:text-orange-300 mt-1">
+                  Get prayer alerts, event reminders, and secure access.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-orange-200 text-orange-700 hover:bg-orange-100"
+                  onClick={() => {/* Will implement SMS verification later */}}
+                >
+                  Add Phone Later
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1 bg-orange-600 hover:bg-orange-700"
+                  onClick={() => {/* Will implement SMS verification now */}}
+                >
+                  Verify Phone Now
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="text-left space-y-2">
             <h3 className="font-semibold">What's next:</h3>
             <ul className="space-y-1 text-sm text-muted-foreground">
               <li>• Explore daily inspirations and Bible readings</li>
