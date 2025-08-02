@@ -53,6 +53,18 @@ export default function ProfileVerificationBadge({
 
   const config = getBadgeConfig();
   
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('ProfileVerificationBadge:', {
+      emailVerified,
+      phoneVerified,
+      isLeadership,
+      emailVerifiedBool,
+      phoneVerifiedBool,
+      config: config ? 'exists' : 'null'
+    });
+  }
+  
   if (!config) return null;
 
   const { icon: Icon, bgColor, borderColor, title } = config;
@@ -73,7 +85,7 @@ export default function ProfileVerificationBadge({
   return (
     <div 
       className={cn(
-        "absolute -bottom-0.5 -right-0.5 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center shadow-sm",
+        "absolute -bottom-1 -right-1 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center shadow-lg z-10",
         bgColor,
         borderColor,
         sizeConfig[size],
