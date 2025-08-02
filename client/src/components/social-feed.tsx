@@ -1101,7 +1101,14 @@ export default function SocialFeed() {
                   size="sm"
                 >
                   {/* Debug FULL post data to see structure */}
-                  {console.log('🔍 FULL POST STRUCTURE:', JSON.stringify(post, null, 2))}
+                  {console.log('🔍 FULL POST STRUCTURE - ID:', post.id, 'Author:', post.author)}
+                  {console.log('🔍 AUTHOR VERIFICATION:', {
+                    hasAuthor: !!post.author,
+                    emailVerified: post.author?.emailVerified,
+                    phoneVerified: post.author?.phoneVerified,
+                    role: post.author?.role,
+                    actualAuthorKeys: post.author ? Object.keys(post.author) : 'no author'
+                  })}
                   <Avatar className="w-10 h-10">
                     <AvatarImage 
                       src={post.author?.profileImageUrl || ""} 

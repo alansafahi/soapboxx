@@ -20,16 +20,16 @@ export function ProfileVerificationRing({
   const emailVerifiedBool = emailVerified === true;
   const phoneVerifiedBool = phoneVerified === true;
   
-  // Debug logging - only log if we have any verification data
-  if (emailVerified || phoneVerified || isLeadership) {
-    console.log('🔍 ProfileVerificationRing Debug (HAS DATA):', {
-      emailVerified,
-      phoneVerified,
-      isLeadership,
-      emailVerifiedBool,
-      phoneVerifiedBool
-    });
-  }
+  // Debug logging for all calls to see what's being passed
+  console.log('🔍 ProfileVerificationRing Debug:', {
+    emailVerified,
+    phoneVerified,
+    isLeadership,
+    emailVerifiedBool,
+    phoneVerifiedBool,
+    emailVerifiedType: typeof emailVerified,
+    phoneVerifiedType: typeof phoneVerified
+  });
   
   // Determine ring style based on verification level
   const getRingStyle = () => {
