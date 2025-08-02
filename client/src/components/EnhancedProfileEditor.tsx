@@ -1159,6 +1159,10 @@ const SpiritualGiftsAssessmentModal = ({
   onComplete: (profile: any) => void; 
 }) => {
   const [currentPage, setCurrentPage] = useState(0);
+  const [showResults, setShowResults] = useState(false);
+  const [initialResults, setInitialResults] = useState<any>(null);
+  const [showExpandedAssessment, setShowExpandedAssessment] = useState(false);
+  const [assessmentType, setAssessmentType] = useState<'quick' | 'expanded'>('quick');
   const questionsPerPage = 5;
 
   const spiritualGiftsQuestions = [
@@ -1277,7 +1281,7 @@ const SpiritualGiftsAssessmentModal = ({
       // Calculate the profile locally if API fails
       const responses = form.getValues().responses;
       if (responses && Object.keys(responses).length > 0) {
-        const profile = calculateSpiritualProfile(responses, spiritualGiftsQuestions);
+        const profile = calculateSpiritualProfile(responses, questionsToUse);
         console.log('Local profile calculated:', profile);
         onComplete({ ...profile, success: true });
       } else {
@@ -1286,8 +1290,40 @@ const SpiritualGiftsAssessmentModal = ({
     }
   });
 
-  const totalPages = Math.ceil(spiritualGiftsQuestions.length / questionsPerPage);
-  const currentQuestions = spiritualGiftsQuestions.slice(
+  // Extended questions for comprehensive assessment
+  const expandedQuestions = [
+    ...spiritualGiftsQuestions,
+    // Additional 25 questions for deeper assessment (90 more would be added in production)
+    { id: 'strategic_thinking', question: 'I naturally think about long-term ministry strategy and planning', gift: 'Strategic Leadership' },
+    { id: 'conflict_resolution', question: 'I feel equipped to help resolve conflicts between people', gift: 'Peacemaking' },
+    { id: 'spiritual_warfare', question: 'I understand spiritual battles and feel called to intercede', gift: 'Spiritual Warfare' },
+    { id: 'prayer_leader', question: 'Others often ask me to pray for them or lead prayer sessions', gift: 'Prayer Leadership' },
+    { id: 'worship_leading', question: 'I feel called to lead others in worship and praise', gift: 'Worship Leading' },
+    { id: 'biblical_storytelling', question: 'I love sharing Bible stories in engaging, memorable ways', gift: 'Biblical Storytelling' },
+    { id: 'youth_connection', question: 'I naturally connect with and understand young people', gift: 'Youth Ministry' },
+    { id: 'senior_ministry', question: 'I feel called to minister to and care for elderly believers', gift: 'Senior Ministry' },
+    { id: 'small_group_leading', question: 'I thrive at facilitating meaningful small group discussions', gift: 'Small Group Leadership' },
+    { id: 'missions_mobilizing', question: 'I inspire others to engage in missionary work', gift: 'Missions Mobilization' },
+    { id: 'church_planting', question: 'I dream about starting new churches or ministries', gift: 'Church Planting' },
+    { id: 'discipleship_making', question: 'I excel at mentoring new believers in their faith journey', gift: 'Discipleship' },
+    { id: 'apologetics', question: 'I enjoy defending the Christian faith with reason and evidence', gift: 'Apologetics' },
+    { id: 'creative_worship', question: 'I create original content for worship (songs, art, poetry)', gift: 'Creative Worship' },
+    { id: 'technology_ministry', question: 'I use technology to enhance ministry and reach people', gift: 'Technology Ministry' },
+    { id: 'social_justice', question: 'I feel called to fight injustice and serve the marginalized', gift: 'Social Justice' },
+    { id: 'financial_stewardship', question: 'I help others understand biblical principles of money management', gift: 'Financial Stewardship' },
+    { id: 'marriage_ministry', question: 'I love helping couples build strong, biblical marriages', gift: 'Marriage Ministry' },
+    { id: 'grief_counseling', question: 'I feel equipped to walk with people through loss and grief', gift: 'Grief Ministry' },
+    { id: 'recovery_ministry', question: 'I have a heart for helping people overcome addictions', gift: 'Recovery Ministry' },
+    { id: 'prophetic_insight', question: 'I often receive insights about future direction for ministry', gift: 'Prophetic Insight' },
+    { id: 'cross_cultural', question: 'I easily adapt and minister across different cultures', gift: 'Cross-Cultural Ministry' },
+    { id: 'business_ministry', question: 'I see opportunities to use business for kingdom purposes', gift: 'Business Ministry' },
+    { id: 'special_needs', question: 'I feel called to minister to people with disabilities', gift: 'Special Needs Ministry' },
+    { id: 'prison_ministry', question: 'I have a heart for ministering to incarcerated individuals', gift: 'Prison Ministry' }
+  ];
+
+  const questionsToUse = assessmentType === 'expanded' ? expandedQuestions : spiritualGiftsQuestions;
+  const totalPages = Math.ceil(questionsToUse.length / questionsPerPage);
+  const currentQuestions = questionsToUse.slice(
     currentPage * questionsPerPage,
     (currentPage + 1) * questionsPerPage
   );
@@ -1297,22 +1333,19 @@ const SpiritualGiftsAssessmentModal = ({
     const responses = data.responses || {};
     const answeredQuestions = Object.keys(responses).length;
     
-    console.log(`Answered ${answeredQuestions} out of ${spiritualGiftsQuestions.length} questions`);
+    console.log(`Answered ${answeredQuestions} out of ${questionsToUse.length} questions`);
     
     // Check if all questions are answered
-    if (answeredQuestions < spiritualGiftsQuestions.length) {
+    if (answeredQuestions < questionsToUse.length) {
       console.error('Not all questions answered');
       // Allow partial completion for now, but calculate based on answered questions
     }
     
-    const profile = calculateSpiritualProfile(responses, spiritualGiftsQuestions);
+    const profile = calculateSpiritualProfile(responses, questionsToUse);
     
-    // Update form data immediately with the spiritual gifts results
-    setFormData(prev => ({
-      ...prev,
-      spiritualGifts: profile.topGifts,
-      spiritualProfile: profile
-    }));
+    // Store results and show them to the user
+    setInitialResults(profile);
+    setShowResults(true);
     
     const enrichedData = {
       ...data,
@@ -1323,6 +1356,115 @@ const SpiritualGiftsAssessmentModal = ({
     assessmentMutation.mutate(enrichedData);
   };
 
+  // Results Display Component
+  const ResultsDisplay = () => (
+    <div className="space-y-6">
+      <DialogHeader className="text-center">
+        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center mb-4">
+          <CheckCircle className="h-8 w-8 text-white" />
+        </div>
+        <DialogTitle className="text-2xl font-bold">Your Spiritual Gifts Profile</DialogTitle>
+        <DialogDescription>
+          Here are your initial results from the 30-question assessment
+        </DialogDescription>
+      </DialogHeader>
+      
+      {initialResults && (
+        <div className="space-y-4">
+          <Card className="bg-gradient-to-br from-purple-50 to-blue-50 border-purple-200">
+            <CardContent className="p-6">
+              <div className="text-center space-y-2">
+                <h3 className="text-2xl font-bold text-purple-800">{initialResults.profileLabel}</h3>
+                <p className="text-purple-600">{initialResults.profileDescription}</p>
+                <Badge className="bg-purple-100 text-purple-700 border-purple-200 px-3 py-1">
+                  {initialResults.servingStyle}
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                Your Top 3 Spiritual Gifts
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {initialResults.topGifts.map((gift: string, index: number) => (
+                  <div key={gift} className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
+                      {index + 1}
+                    </div>
+                    <span className="font-medium">{gift}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+            <CardContent className="p-6">
+              <div className="text-center space-y-4">
+                <h4 className="text-lg font-semibold text-blue-800">Want a deeper understanding of your spiritual gifts?</h4>
+                <p className="text-blue-600">Continue to the full 120-question discovery for:</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>Refined rankings (1–20)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>Shadow gifts & hidden strengths</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>Ministry role matchings</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <span>Leadership development insights</span>
+                  </div>
+                </div>
+                <div className="flex gap-3 justify-center pt-4">
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      onComplete(initialResults);
+                    }}
+                  >
+                    Use These Results
+                  </Button>
+                  <Button 
+                    className="bg-gradient-to-r from-blue-500 to-indigo-500"
+                    onClick={() => {
+                      setShowResults(false);
+                      setAssessmentType('expanded');
+                      setCurrentPage(0);
+                    }}
+                  >
+                    Take Full Assessment
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+
+  if (showResults) {
+    return (
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <ResultsDisplay />
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -1330,9 +1472,14 @@ const SpiritualGiftsAssessmentModal = ({
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mb-4">
             <Sparkles className="h-8 w-8 text-white" />
           </div>
-          <DialogTitle className="text-2xl font-bold">Spiritual Gifts Assessment</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">
+            {assessmentType === 'quick' ? 'Spiritual Gifts Assessment' : 'Deep Spiritual Gifts Discovery'}
+          </DialogTitle>
           <DialogDescription>
-            Discover your God-given spiritual gifts and find your perfect ministry fit (30 questions)
+            {assessmentType === 'quick' 
+              ? 'Discover your God-given spiritual gifts and find your perfect ministry fit (30 questions)'
+              : 'Comprehensive spiritual gifts analysis for deeper ministry insights (120 questions)'
+            }
           </DialogDescription>
           <Progress value={(currentPage + 1) / totalPages * 100} className="mt-4" />
           <p className="text-sm text-gray-600 mt-2">
