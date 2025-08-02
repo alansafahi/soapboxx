@@ -709,7 +709,8 @@ export function setupAuth(app: Express): void {
       }
 
       // Generate and send verification code
-      const verificationCode = SMSService.generateVerificationCode();
+      const smsService = new SMSService();
+      const verificationCode = smsService.generateVerificationCode();
       const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
       // Update user with SMS verification data
@@ -721,13 +722,13 @@ export function setupAuth(app: Express): void {
       });
 
       // Send SMS
-      await SMSService.sendVerificationCode(phoneNumber, verificationCode);
+      await smsService.sendVerificationCode(phoneNumber, verificationCode);
 
       res.json({ 
         success: true,
         message: 'Verification code sent successfully',
         expiresAt: expiresAt.toISOString(),
-        formattedPhone: SMSService.formatPhoneNumber(phoneNumber)
+        formattedPhone: smsService.formatPhoneNumber(phoneNumber)
       });
     } catch (error) {
       console.error('SMS verification error:', error);
@@ -823,7 +824,7 @@ export function setupAuth(app: Express): void {
         success: true,
         phoneVerified: user.phoneVerified || false,
         hasPhoneNumber: !!user.mobileNumber,
-        formattedPhone: user.mobileNumber ? SMSService.formatPhoneNumber(user.mobileNumber) : null
+        formattedPhone: user.mobileNumber ? new SMSService().formatPhoneNumber(user.mobileNumber) : null
       });
     } catch (error) {
       res.status(500).json({ 

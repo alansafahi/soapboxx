@@ -42,7 +42,7 @@ class SMSService {
   /**
    * Format phone number for Twilio (E.164 format)
    */
-  private formatPhoneNumber(phoneNumber: string): string {
+  formatPhoneNumber(phoneNumber: string): string {
     const cleaned = phoneNumber.replace(/\D/g, '');
     
     if (cleaned.length === 10) {
