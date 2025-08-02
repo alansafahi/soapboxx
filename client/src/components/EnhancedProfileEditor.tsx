@@ -22,6 +22,7 @@ import {
   Camera,
   Globe
 } from "lucide-react";
+import ChurchLookupModal from "./ChurchLookupModal";
 
 interface UserProfile {
   id: string;
@@ -84,6 +85,8 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const [selectedMinistries, setSelectedMinistries] = useState<string[]>(profile.ministryInterests || []);
   const [selectedGoals, setSelectedGoals] = useState<string[]>(profile.growthGoals || []);
   const [favoriteVerses, setFavoriteVerses] = useState<string[]>(profile.favoriteScriptures || []);
+  const [verseTexts, setVerseTexts] = useState<{ [key: number]: { text: string; reference: string; version: string } }>({});
+  const [showChurchLookup, setShowChurchLookup] = useState(false);
 
   const handleSave = () => {
     onSave({
@@ -106,6 +109,38 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
 
   const removeFavoriteVerse = (index: number) => {
     setFavoriteVerses(favoriteVerses.filter((_, i) => i !== index));
+    // Remove corresponding verse text
+    const newVerseTexts = { ...verseTexts };
+    delete newVerseTexts[index];
+    setVerseTexts(newVerseTexts);
+  };
+
+  const handleVerseBlur = async (verse: string, index: number) => {
+    if (verse.trim() && !verseTexts[index]) {
+      try {
+        const response = await fetch('/api/bible/lookup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reference: verse.trim() })
+        });
+        
+        if (response.ok) {
+          const verseData = await response.json();
+          if (verseData.text) {
+            setVerseTexts(prev => ({
+              ...prev,
+              [index]: {
+                text: verseData.text,
+                reference: verseData.reference,
+                version: verseData.version || 'NIV'
+              }
+            }));
+          }
+        }
+      } catch (error) {
+        console.error('Failed to lookup verse:', error);
+      }
+    }
   };
 
   return (
@@ -284,12 +319,28 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="churchAffiliation">Church/Community</Label>
-                <Input
-                  id="churchAffiliation"
-                  placeholder="e.g., Grace Community Church - Downtown Campus"
-                  value={formData.churchAffiliation || ""}
-                  onChange={(e) => setFormData({...formData, churchAffiliation: e.target.value})}
-                />
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      id="churchAffiliation"
+                      placeholder="e.g., Grace Community Church - Downtown Campus"
+                      value={formData.churchAffiliation || ""}
+                      onChange={(e) => setFormData({...formData, churchAffiliation: e.target.value})}
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowChurchLookup(true)}
+                    >
+                      Find Churches
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Enter your church name or use "Find Churches" to discover local congregations
+                  </p>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -324,20 +375,33 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                 <Label>Favorite Bible Verses</Label>
                 <div className="space-y-2">
                   {favoriteVerses.map((verse, index) => (
-                    <div key={index} className="flex gap-2">
-                      <Input
-                        placeholder="e.g., John 3:16 or Jeremiah 29:11"
-                        value={verse}
-                        onChange={(e) => updateFavoriteVerse(index, e.target.value)}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeFavoriteVerse(index)}
-                      >
-                        Remove
-                      </Button>
+                    <div key={index} className="space-y-2">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="e.g., John 3:16 or Jeremiah 29:11"
+                          value={verse}
+                          onChange={(e) => updateFavoriteVerse(index, e.target.value)}
+                          onBlur={() => handleVerseBlur(verse, index)}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeFavoriteVerse(index)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                      {verseTexts[index] && (
+                        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border-l-4 border-blue-400">
+                          <p className="text-sm text-blue-800 dark:text-blue-200 italic">
+                            "{verseTexts[index].text}"
+                          </p>
+                          <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
+                            — {verseTexts[index].reference} ({verseTexts[index].version})
+                          </p>
+                        </div>
+                      )}
                     </div>
                   ))}
                   <Button
@@ -558,6 +622,19 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
           {isLoading ? "Saving..." : "Save Profile"}
         </Button>
       </div>
+
+      {/* Church Lookup Modal */}
+      <ChurchLookupModal
+        open={showChurchLookup}
+        onOpenChange={setShowChurchLookup}
+        onSelectChurch={(church) => {
+          setFormData(prev => ({
+            ...prev,
+            churchAffiliation: church.name,
+            denomination: church.denomination
+          }));
+        }}
+      />
     </div>
   );
 }

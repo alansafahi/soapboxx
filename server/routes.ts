@@ -1863,6 +1863,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bible verse lookup endpoint
+  app.post('/api/bible/lookup', async (req, res) => {
+    try {
+      const { reference } = req.body;
+      
+      if (!reference) {
+        return res.status(400).json({ error: 'Reference is required' });
+      }
+
+      const { lookupBibleVerse } = await import('./bible-api.js');
+      const verseResult = await lookupBibleVerse(reference);
+      
+      if (verseResult) {
+        res.json(verseResult);
+      } else {
+        res.status(404).json({ error: 'Verse not found' });
+      }
+    } catch (error) {
+      console.error('Error looking up bible verse:', error);
+      res.status(500).json({ error: 'Failed to lookup verse' });
+    }
+  });
+
+  // Church search endpoint
+  app.get('/api/churches/search', async (req, res) => {
+    try {
+      const {
+        denomination = 'all',
+        location = '',
+        churchName = '',
+        size = 'all',
+        limit = 50
+      } = req.query;
+
+      const churches = await storage.searchChurches({
+        denomination: denomination as string,
+        location: location as string,
+        churchName: churchName as string,
+        size: size as string,
+        limit: parseInt(limit as string)
+      });
+
+      res.json({
+        churches,
+        total: churches.length
+      });
+    } catch (error) {
+      console.error('Error searching churches:', error);
+      res.status(500).json({ error: 'Failed to search churches' });
+    }
+  });
+
   // Complete tour endpoint
   app.post('/api/user-tours/complete', isAuthenticated, async (req: any, res) => {
     try {
