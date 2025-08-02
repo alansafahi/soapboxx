@@ -20,7 +20,11 @@ import {
   BookOpen,
   MessageSquare,
   Camera,
-  Globe
+  Globe,
+  Sparkles,
+  ExternalLink,
+  Plus,
+  Minus
 } from "lucide-react";
 import ChurchLookupModal from "./ChurchLookupModal";
 
@@ -53,6 +57,7 @@ interface UserProfile {
   zipCode: string | null;
   city: string | null;
   state: string | null;
+  spiritualGifts: string[] | null;
 }
 
 interface EnhancedProfileEditorProps {
@@ -271,7 +276,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   return (
     <div className="space-y-6">
       <Tabs defaultValue="basic" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="basic" className="flex items-center gap-2">
             <User className="w-4 h-4" />
             Basic
@@ -279,6 +284,10 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
           <TabsTrigger value="spiritual" className="flex items-center gap-2">
             <Church className="w-4 h-4" />
             Spiritual
+          </TabsTrigger>
+          <TabsTrigger value="gifts" className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4" />
+            Gifts
           </TabsTrigger>
           <TabsTrigger value="engagement" className="flex items-center gap-2">
             <Users className="w-4 h-4" />
@@ -388,7 +397,10 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       type="button"
                       variant="outline"
                       size="sm"
-                      onClick={() => {/* SMS verification logic will be added */}}
+                      onClick={() => {
+                        // TODO: Implement SMS verification modal
+                        alert('Mobile verification coming soon! This will open an SMS verification flow to confirm your number for security and notifications.');
+                      }}
                     >
                       Verify
                     </Button>
@@ -493,6 +505,9 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     value={formData.smallGroup || ""}
                     onChange={(e) => setFormData({...formData, smallGroup: e.target.value})}
                   />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Your Bible study or fellowship group - helps connect you with others in similar life stages or interests
+                  </p>
                 </div>
               </div>
 
@@ -578,6 +593,118 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     onClick={addFavoriteVerse}
                   >
                     Add Favorite Verse
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Spiritual Gifts Tab */}
+        <TabsContent value="gifts" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                Spiritual Gifts Assessment
+              </CardTitle>
+              <CardDescription>
+                Discover your unique spiritual gifts to serve the Kingdom more effectively
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-6 rounded-lg border border-purple-200 dark:border-purple-700">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 bg-purple-500 dark:bg-purple-600 rounded-full flex items-center justify-center">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-2">
+                      Uncover Your Spiritual Gifts
+                    </h3>
+                    <p className="text-purple-800 dark:text-purple-200 mb-4 leading-relaxed">
+                      Understanding your spiritual gifts helps you serve God and others with purpose and passion. Our comprehensive assessment will help identify your unique calling and ministry potential.
+                    </p>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                        <span>Comprehensive 120-question assessment</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                        <span>Personalized results with detailed explanations</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                        <span>Ministry matching and service opportunities</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 flex gap-3">
+                  <Button
+                    type="button"
+                    className="bg-purple-600 hover:bg-purple-700 text-white"
+                    onClick={() => window.open('https://spiritualgiftstest.com/', '_blank')}
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Take Assessment
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300"
+                  >
+                    Learn About Gifts
+                  </Button>
+                </div>
+              </div>
+
+              {/* Spiritual Gifts Results Section */}
+              <div>
+                <Label htmlFor="spiritualGifts">My Spiritual Gifts (Optional)</Label>
+                <p className="text-xs text-muted-foreground mb-3">
+                  After completing your assessment, add your top spiritual gifts here
+                </p>
+                <div className="space-y-2">
+                  {(formData.spiritualGifts || []).map((gift, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        placeholder="e.g., Teaching, Leadership, Compassion"
+                        value={gift}
+                        onChange={(e) => {
+                          const newGifts = [...(formData.spiritualGifts || [])];
+                          newGifts[index] = e.target.value;
+                          setFormData({...formData, spiritualGifts: newGifts});
+                        }}
+                        className="flex-1"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const newGifts = (formData.spiritualGifts || []).filter((_, i) => i !== index);
+                          setFormData({...formData, spiritualGifts: newGifts});
+                        }}
+                      >
+                        <Minus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setFormData({
+                        ...formData, 
+                        spiritualGifts: [...(formData.spiritualGifts || []), '']
+                      });
+                    }}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Gift
                   </Button>
                 </div>
               </div>
