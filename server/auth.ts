@@ -684,7 +684,7 @@ export function setupAuth(app: Express): void {
       
       let user;
       if (userId) {
-        user = await storage.getUserById(userId);
+        user = await storage.getUser(userId);
       } else if (email) {
         user = await storage.getUserByEmail(email);
       }
@@ -756,7 +756,7 @@ export function setupAuth(app: Express): void {
       
       let user;
       if (userId) {
-        user = await storage.getUserById(userId);
+        user = await storage.getUser(userId);
       } else if (email) {
         user = await storage.getUserByEmail(email);
       }
@@ -807,7 +807,7 @@ export function setupAuth(app: Express): void {
       
       let user;
       if (userId) {
-        user = await storage.getUserById(userId);
+        user = await storage.getUser(userId);
       } else if (email) {
         user = await storage.getUserByEmail(email);
       }
