@@ -21,9 +21,12 @@ export function VerificationBadge({
 }: VerificationBadgeProps) {
   // Determine verification level
   const getVerificationLevel = () => {
-    if (isLeadership) return "leadership";
-    if (emailVerified && phoneVerified) return "full";
-    if (emailVerified || phoneVerified) return "partial";
+    const emailVerifiedBool = emailVerified === true;
+    const phoneVerifiedBool = phoneVerified === true;
+    
+    if (isLeadership && (emailVerifiedBool || phoneVerifiedBool)) return "leadership";
+    if (emailVerifiedBool && phoneVerifiedBool) return "full";
+    if (emailVerifiedBool || phoneVerifiedBool) return "partial";
     return "none";
   };
 
@@ -53,7 +56,7 @@ export function VerificationBadge({
       case "partial":
         return {
           icon: CheckCircle,
-          text: phoneVerified ? "Phone Verified" : "Email Verified",
+          text: phoneVerified === true ? "Phone Verified" : "Email Verified",
           bgColor: "bg-gradient-to-r from-blue-500 to-cyan-500",
           textColor: "text-white",
           borderColor: "border-blue-300",

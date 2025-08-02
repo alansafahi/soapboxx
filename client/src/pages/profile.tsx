@@ -30,7 +30,8 @@ import {
   MessageSquare,
   Target,
   Edit2,
-  CheckCircle
+  CheckCircle,
+  Shield
 } from "lucide-react";
 import { format } from "date-fns";
 import EnhancedProfileEditor from "../components/EnhancedProfileEditor";
@@ -450,11 +451,17 @@ export default function ProfilePage() {
                         <div className="flex items-center gap-3 mb-2">
                           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{displayName}</h2>
                           <VerificationBadge 
-                            emailVerified={profile?.emailVerified}
-                            phoneVerified={profile?.phoneVerified}
+                            emailVerified={profile?.emailVerified === true}
+                            phoneVerified={profile?.phoneVerified === true}
                             isLeadership={profile?.role === 'pastor' || profile?.role === 'admin' || profile?.role === 'owner'}
                             size="md"
                           />
+                          {/* Debug info - remove after testing */}
+                          {process.env.NODE_ENV === 'development' && (
+                            <span className="text-xs text-gray-500">
+                              E:{String(profile?.emailVerified)} P:{String(profile?.phoneVerified)}
+                            </span>
+                          )}
                         </div>
                         <div className="space-y-1 mt-1">
                           <div className="text-muted-foreground flex items-center gap-2">
