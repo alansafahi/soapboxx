@@ -20,27 +20,34 @@ export function ProfileVerificationRing({
   const emailVerifiedBool = emailVerified === true;
   const phoneVerifiedBool = phoneVerified === true;
   
-  // Verification data processing complete
+  // Debug to see what's happening
+  console.log('🔍 ProfileVerificationRing:', {
+    emailVerified,
+    phoneVerified,
+    isLeadership,
+    emailVerifiedBool,
+    phoneVerifiedBool
+  });
   
   // Determine ring style based on verification level
   const getRingStyle = () => {
     if (isLeadership && (emailVerifiedBool || phoneVerifiedBool)) {
       return {
-        ringClass: "ring-4 ring-purple-500 ring-offset-2 ring-offset-yellow-400",
+        ringClass: "ring-4 ring-purple-600 shadow-lg shadow-purple-300 border-2 border-yellow-400",
         title: "Leadership Verified"
       };
     }
     
     if (emailVerifiedBool && phoneVerifiedBool) {
       return {
-        ringClass: "ring-4 ring-purple-500 ring-offset-2 ring-offset-yellow-400",
+        ringClass: "ring-4 ring-green-500 shadow-lg shadow-green-300 border-2 border-purple-400",
         title: "Fully Verified"
       };
     }
     
     if (emailVerifiedBool || phoneVerifiedBool) {
       return {
-        ringClass: "ring-3 ring-blue-500 ring-offset-2",
+        ringClass: "ring-3 ring-blue-500 shadow-lg shadow-blue-300",
         title: emailVerifiedBool ? "Email Verified" : "Phone Verified"
       };
     }
