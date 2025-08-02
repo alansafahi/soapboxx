@@ -538,14 +538,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
             <Card className="bg-white dark:bg-gray-800 hover:shadow-md transition-all duration-200 border-0 shadow-sm">
               <CardContent className="p-6">
               <div className="flex space-x-3">
-                {/* Debug post author data */}
-                {console.log('🔍 LimitedSocialFeed post.author:', {
-                  name: `${post.author?.firstName} ${post.author?.lastName}`,
-                  emailVerified: post.author?.emailVerified,
-                  phoneVerified: post.author?.phoneVerified,
-                  role: post.author?.role,
-                  postId: post.id
-                })}
+                {/* Verification data processed */}
                 <ProfileVerificationRing
                   emailVerified={post.author?.emailVerified === true}
                   phoneVerified={post.author?.phoneVerified === true}

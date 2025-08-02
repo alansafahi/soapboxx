@@ -20,15 +20,7 @@ export function ProfileVerificationRing({
   const emailVerifiedBool = emailVerified === true;
   const phoneVerifiedBool = phoneVerified === true;
   
-  // Debug with component identification
-  const componentName = new Error().stack?.split('\n')[3]?.match(/at (\w+)/)?.[1] || 'Unknown';
-  console.log(`🔍 ProfileVerificationRing [${componentName}]:`, {
-    emailVerified,
-    phoneVerified,
-    isLeadership,
-    emailVerifiedBool,
-    phoneVerifiedBool
-  });
+  // Verification processing complete
   
   // Determine ring style based on verification level
   const getRingStyle = () => {

@@ -2589,11 +2589,7 @@ export class DatabaseStorage implements IStorage {
 
       // Successfully combined discussions and SOAP entries
 
-      // DEBUG: Log verification data for first few users
-      console.log('🔍 DEBUG - First 3 rows verification data:');
-      combinedResult.rows.slice(0, 3).forEach((row: any, index: number) => {
-        console.log(`User ${index + 1}: emailVerified=${row.email_verified}, phoneVerified=${row.phone_verified}, role=${row.role}, name=${row.first_name} ${row.last_name}`);
-      });
+      // Verification data processing complete
 
       const discussions = combinedResult.rows.map((row: any) => {
         const mappedPost = {
