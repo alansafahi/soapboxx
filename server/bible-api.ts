@@ -125,6 +125,12 @@ function generateReferenceVariations(reference: string): string[] {
     variations.push(`${reference}:1`);
   }
   
+  // Handle incomplete references like "1 Peter 3" - try first verse of chapter
+  const incompletePattern = /^[1-3]?\s*[A-Za-z]+\s+\d+$/;
+  if (incompletePattern.test(reference.trim())) {
+    variations.push(`${reference}:1`);
+  }
+  
   return variations;
 }
 
@@ -147,10 +153,15 @@ export async function lookupBibleVerse(reference: string, preferredVersion: stri
     }
   }
   
-  // Fallback to ChatGPT only if API.Bible is unresponsive
-  const versePattern = /^[1-3]?\s*[A-Za-z]+\s+\d+:\d+/;
+  // Fallback to ChatGPT for complete references or chapter references
+  const versePattern = /^[1-3]?\s*[A-Za-z]+\s+\d+(:\d+)?/;
   if (versePattern.test(reference)) {
-    const openAIResult = await fetchVerseFromOpenAI(reference, preferredVersion);
+    // For chapter-only references, add :1 for ChatGPT
+    let chatGPTReference = reference;
+    if (!reference.includes(':')) {
+      chatGPTReference = `${reference}:1`;
+    }
+    const openAIResult = await fetchVerseFromOpenAI(chatGPTReference, preferredVersion);
     if (openAIResult) {
       return openAIResult;
     }

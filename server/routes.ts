@@ -1872,8 +1872,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'Reference is required' });
       }
 
+      console.log('Server: Looking up verse:', reference);
       const { lookupBibleVerse } = await import('./bible-api.js');
       const verseResult = await lookupBibleVerse(reference);
+      console.log('Server: Verse result:', verseResult);
       
       if (verseResult) {
         res.json(verseResult);

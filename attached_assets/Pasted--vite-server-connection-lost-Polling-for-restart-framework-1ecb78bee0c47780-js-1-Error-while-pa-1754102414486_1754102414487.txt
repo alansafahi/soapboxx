@@ -1,0 +1,180 @@
+[vite] server connection lost. Polling for restart...
+framework-1ecb78bee0c47780.js:1 Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+_ @ framework-1ecb78bee0c47780.js:1
+(anonymous) @ framework-1ecb78bee0c47780.js:1
+uD @ framework-1ecb78bee0c47780.js:1
+uI @ framework-1ecb78bee0c47780.js:1
+uM @ framework-1ecb78bee0c47780.js:1
+uS @ framework-1ecb78bee0c47780.js:1
+C @ framework-1ecb78bee0c47780.js:1
+z @ framework-1ecb78bee0c47780.js:1
+(anonymous) @ setImmediate.js:40
+y @ setImmediate.js:69
+c @ setImmediate.js:109
+postMessage
+n @ setImmediate.js:120
+push.YBdB.f.setImmediate @ setImmediate.js:27
+r @ framework-1ecb78bee0c47780.js:1
+z @ framework-1ecb78bee0c47780.js:1
+(anonymous) @ setImmediate.js:40
+y @ setImmediate.js:69
+c @ setImmediate.js:109
+postMessage
+n @ setImmediate.js:120
+push.YBdB.f.setImmediate @ setImmediate.js:27
+r @ framework-1ecb78bee0c47780.js:1
+I @ framework-1ecb78bee0c47780.js:1
+t.unstable_scheduleCallback @ framework-1ecb78bee0c47780.js:1
+uw @ framework-1ecb78bee0c47780.js:1
+uk @ framework-1ecb78bee0c47780.js:1
+lj @ framework-1ecb78bee0c47780.js:1
+(anonymous) @ _app-8d59c3c9cee47f6c.js:39
+i @ _app-8d59c3c9cee47f6c.js:39
+(anonymous) @ _app-8d59c3c9cee47f6c.js:39
+set @ _app-8d59c3c9cee47f6c.js:39
+(anonymous) @ _app-8d59c3c9cee47f6c.js:39
+(anonymous) @ 4866-d66fd6d2a28def51.js:1
+(anonymous) @ main-209eb5f9a6aa9a91.js:1
+n @ main-209eb5f9a6aa9a91.js:1
+u @ main-209eb5f9a6aa9a91.js:1
+Promise.then
+n @ main-209eb5f9a6aa9a91.js:1
+u @ main-209eb5f9a6aa9a91.js:1
+Promise.then
+n @ main-209eb5f9a6aa9a91.js:1
+u @ main-209eb5f9a6aa9a91.js:1
+Promise.then
+n @ main-209eb5f9a6aa9a91.js:1
+u @ main-209eb5f9a6aa9a91.js:1
+Promise.then
+n @ main-209eb5f9a6aa9a91.js:1
+u @ main-209eb5f9a6aa9a91.js:1
+Promise.then
+n @ main-209eb5f9a6aa9a91.js:1
+u @ main-209eb5f9a6aa9a91.js:1
+Promise.then
+n @ main-209eb5f9a6aa9a91.js:1
+u @ main-209eb5f9a6aa9a91.js:1Understand this error
+queryClient.ts:134  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/users/achievements 500 (Internal Server Error)
+window.fetch @ Network.js:219
+(anonymous) @ queryClient.ts:134
+fetchFn @ @tanstack_react-query.js?v=dbc732d9:881
+run @ @tanstack_react-query.js?v=dbc732d9:513
+start @ @tanstack_react-query.js?v=dbc732d9:555
+fetch @ @tanstack_react-query.js?v=dbc732d9:969
+executeFetch_fn @ @tanstack_react-query.js?v=dbc732d9:2280
+onSubscribe @ @tanstack_react-query.js?v=dbc732d9:1983
+subscribe @ @tanstack_react-query.js?v=dbc732d9:24
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:3147
+subscribeToStore @ chunk-RPCDYKBN.js?v=dbc732d9:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=dbc732d9:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=dbc732d9:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=dbc732d9:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=dbc732d9:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=dbc732d9:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=dbc732d9:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=dbc732d9:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=dbc732d9:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=dbc732d9:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=dbc732d9:19432
+commitRoot @ chunk-RPCDYKBN.js?v=dbc732d9:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=dbc732d9:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=dbc732d9:18718
+workLoop @ chunk-RPCDYKBN.js?v=dbc732d9:197
+flushWork @ chunk-RPCDYKBN.js?v=dbc732d9:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=dbc732d9:384Understand this error
+queryClient.ts:134  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/users/achievements 500 (Internal Server Error)
+window.fetch @ Network.js:219
+(anonymous) @ queryClient.ts:134
+fetchFn @ @tanstack_react-query.js?v=dbc732d9:881
+run @ @tanstack_react-query.js?v=dbc732d9:513
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:534
+Promise.catch
+run @ @tanstack_react-query.js?v=dbc732d9:517
+start @ @tanstack_react-query.js?v=dbc732d9:555
+fetch @ @tanstack_react-query.js?v=dbc732d9:969
+executeFetch_fn @ @tanstack_react-query.js?v=dbc732d9:2280
+onSubscribe @ @tanstack_react-query.js?v=dbc732d9:1983
+subscribe @ @tanstack_react-query.js?v=dbc732d9:24
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:3147
+subscribeToStore @ chunk-RPCDYKBN.js?v=dbc732d9:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=dbc732d9:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=dbc732d9:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=dbc732d9:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=dbc732d9:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=dbc732d9:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=dbc732d9:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=dbc732d9:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=dbc732d9:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=dbc732d9:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=dbc732d9:19432
+commitRoot @ chunk-RPCDYKBN.js?v=dbc732d9:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=dbc732d9:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=dbc732d9:18718
+workLoop @ chunk-RPCDYKBN.js?v=dbc732d9:197
+flushWork @ chunk-RPCDYKBN.js?v=dbc732d9:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=dbc732d9:384Understand this error
+queryClient.ts:134  GET https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/users/achievements 500 (Internal Server Error)
+window.fetch @ Network.js:219
+(anonymous) @ queryClient.ts:134
+fetchFn @ @tanstack_react-query.js?v=dbc732d9:881
+run @ @tanstack_react-query.js?v=dbc732d9:513
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:534
+Promise.catch
+run @ @tanstack_react-query.js?v=dbc732d9:517
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:538
+Promise.then
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:534
+Promise.catch
+run @ @tanstack_react-query.js?v=dbc732d9:517
+start @ @tanstack_react-query.js?v=dbc732d9:555
+fetch @ @tanstack_react-query.js?v=dbc732d9:969
+executeFetch_fn @ @tanstack_react-query.js?v=dbc732d9:2280
+onSubscribe @ @tanstack_react-query.js?v=dbc732d9:1983
+subscribe @ @tanstack_react-query.js?v=dbc732d9:24
+(anonymous) @ @tanstack_react-query.js?v=dbc732d9:3147
+subscribeToStore @ chunk-RPCDYKBN.js?v=dbc732d9:11984
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=dbc732d9:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=dbc732d9:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=dbc732d9:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=dbc732d9:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=dbc732d9:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=dbc732d9:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=dbc732d9:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=dbc732d9:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=dbc732d9:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=dbc732d9:19432
+commitRoot @ chunk-RPCDYKBN.js?v=dbc732d9:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=dbc732d9:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=dbc732d9:18718
+workLoop @ chunk-RPCDYKBN.js?v=dbc732d9:197
+flushWork @ chunk-RPCDYKBN.js?v=dbc732d9:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=dbc732d9:384Understand this error
+Console.js:61 Looking up verse: 1 Peter 3
+EnhancedProfileEditor.tsx:144  POST https://2c924485-4bb4-4841-992a-dd991482cfcd-00-29nlce9a8jvps.kirk.replit.dev/api/bible/lookup 404 (Not Found)
+window.fetch @ Network.js:219
+lookupVerse @ EnhancedProfileEditor.tsx:144
+(anonymous) @ EnhancedProfileEditor.tsx:195
+setTimeout
+handleVerseChange @ EnhancedProfileEditor.tsx:194
+onChange @ EnhancedProfileEditor.tsx:442
+callCallback2 @ chunk-RPCDYKBN.js?v=dbc732d9:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=dbc732d9:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=dbc732d9:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=dbc732d9:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=dbc732d9:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=dbc732d9:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=dbc732d9:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=dbc732d9:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=dbc732d9:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=dbc732d9:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=dbc732d9:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=dbc732d9:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=dbc732d9:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=dbc732d9:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=dbc732d9:5449Understand this error
+Console.js:61 Response status: 404
