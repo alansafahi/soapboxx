@@ -368,8 +368,6 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       soapThemes: ["Sharing faith", "Witnessing opportunities", "Evangelistic conversations"],
       ministryContext: "Outreach ministry, missions, evangelistic events"
     }
-      ministryContext: "Outreach ministry, missions, evangelistic events"
-    }
   };
 
   // Profile completion calculation

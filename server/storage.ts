@@ -959,11 +959,6 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async getUserById(userId: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, userId));
-    return user;
-  }
-
   async getUserByUsername(username: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.username, username));
     return user;
@@ -1437,10 +1432,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId));
   }
 
-  async getUserById(userId: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, userId));
-    return user;
-  }
+
 
   // Password reset operations
   async storePasswordResetToken(userId: string, token: string, expires: Date): Promise<void> {

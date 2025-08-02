@@ -47,7 +47,6 @@ interface RequestWithSession extends express.Request {
 
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
-import { lookupBibleVerse } from "./bible-api.js";
 import { LearningIntegration } from "./learning-integration.js";
 
 import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";
