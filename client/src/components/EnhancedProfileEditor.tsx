@@ -571,45 +571,24 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="languagePreference">Language Preference</Label>
-                  <Select 
-                    value={formData.languagePreference || "English"} 
-                    onValueChange={(value) => setFormData({...formData, languagePreference: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LANGUAGES.map(lang => (
-                        <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Your preferred language for app content and communications
-                  </p>
-                </div>
-                <div>
-                  <Label htmlFor="preferredBibleTranslation">Preferred Bible Translation</Label>
-                  <Select 
-                    value={formData.preferredBibleTranslation || "NIV"} 
-                    onValueChange={(value) => setFormData({...formData, preferredBibleTranslation: value})}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select translation" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {BIBLE_TRANSLATIONS.map(translation => (
-                        <SelectItem key={translation.value} value={translation.value}>{translation.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Default Bible version for scripture lookups and reading plans
-                  </p>
-                </div>
+              <div>
+                <Label htmlFor="languagePreference">Language Preference</Label>
+                <Select 
+                  value={formData.languagePreference || "English"} 
+                  onValueChange={(value) => setFormData({...formData, languagePreference: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LANGUAGES.map(lang => (
+                      <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Your preferred language for app content and communications
+                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -681,7 +660,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Label htmlFor="spiritualStage">Where are you in your faith journey?</Label>
                   <Select 
@@ -699,6 +678,25 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   </Select>
                 </div>
                 <div>
+                  <Label htmlFor="preferredBibleTranslation">Preferred Bible Translation</Label>
+                  <Select 
+                    value={formData.preferredBibleTranslation || "NIV"} 
+                    onValueChange={(value) => setFormData({...formData, preferredBibleTranslation: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select translation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BIBLE_TRANSLATIONS.map(translation => (
+                        <SelectItem key={translation.value} value={translation.value}>{translation.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Default Bible version for scripture lookups
+                  </p>
+                </div>
+                <div>
                   <Label htmlFor="smallGroup">Small Group</Label>
                   <Input
                     id="smallGroup"
@@ -707,7 +705,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     onChange={(e) => setFormData({...formData, smallGroup: e.target.value})}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Your Bible study or fellowship group - helps connect you with others in similar life stages or interests
+                    Your Bible study or fellowship group
                   </p>
                 </div>
               </div>
