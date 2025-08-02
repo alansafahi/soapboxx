@@ -115,32 +115,87 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     setVerseTexts(newVerseTexts);
   };
 
-  const handleVerseBlur = async (verse: string, index: number) => {
-    if (verse.trim() && !verseTexts[index]) {
-      try {
-        const response = await fetch('/api/bible/lookup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ reference: verse.trim() })
-        });
-        
-        if (response.ok) {
-          const verseData = await response.json();
-          if (verseData.text) {
-            setVerseTexts(prev => ({
-              ...prev,
-              [index]: {
-                text: verseData.text,
-                reference: verseData.reference,
-                version: verseData.version || 'NIV'
-              }
-            }));
-          }
-        }
-      } catch (error) {
-        console.error('Failed to lookup verse:', error);
-      }
+  const [verseLoadingStates, setVerseLoadingStates] = useState<{ [key: number]: boolean }>({});
+  const [verseTimeouts, setVerseTimeouts] = useState<{ [key: number]: NodeJS.Timeout }>({});
+
+  const lookupVerse = async (verse: string, index: number) => {
+    const trimmedVerse = verse.trim();
+    
+    // Clear any existing timeout for this index
+    if (verseTimeouts[index]) {
+      clearTimeout(verseTimeouts[index]);
     }
+
+    if (!trimmedVerse) {
+      // Clear verse text if input is empty
+      setVerseTexts(prev => {
+        const updated = { ...prev };
+        delete updated[index];
+        return updated;
+      });
+      return;
+    }
+
+    // Set loading state
+    setVerseLoadingStates(prev => ({ ...prev, [index]: true }));
+
+    try {
+      const response = await fetch('/api/bible/lookup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reference: trimmedVerse })
+      });
+      
+      if (response.ok) {
+        const verseData = await response.json();
+        if (verseData.text) {
+          setVerseTexts(prev => ({
+            ...prev,
+            [index]: {
+              text: verseData.text,
+              reference: verseData.reference,
+              version: verseData.version || 'NIV'
+            }
+          }));
+        }
+      } else {
+        // Clear verse text if not found
+        setVerseTexts(prev => {
+          const updated = { ...prev };
+          delete updated[index];
+          return updated;
+        });
+      }
+    } catch (error) {
+      console.error('Failed to lookup verse:', error);
+      // Clear verse text on error
+      setVerseTexts(prev => {
+        const updated = { ...prev };
+        delete updated[index];
+        return updated;
+      });
+    } finally {
+      setVerseLoadingStates(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
+  const handleVerseChange = (index: number, value: string) => {
+    updateFavoriteVerse(index, value);
+    
+    // Clear any existing timeout
+    if (verseTimeouts[index]) {
+      clearTimeout(verseTimeouts[index]);
+    }
+
+    // Set a new timeout to lookup the verse after user stops typing
+    const timeout = setTimeout(() => {
+      lookupVerse(value, index);
+    }, 800); // Wait 800ms after user stops typing
+
+    setVerseTimeouts(prev => ({
+      ...prev,
+      [index]: timeout
+    }));
   };
 
   return (
@@ -377,12 +432,19 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   {favoriteVerses.map((verse, index) => (
                     <div key={index} className="space-y-2">
                       <div className="flex gap-2">
-                        <Input
-                          placeholder="e.g., John 3:16 or Jeremiah 29:11"
-                          value={verse}
-                          onChange={(e) => updateFavoriteVerse(index, e.target.value)}
-                          onBlur={() => handleVerseBlur(verse, index)}
-                        />
+                        <div className="relative">
+                          <Input
+                            placeholder="e.g., John 3:16 or Jeremiah 29:11"
+                            value={verse}
+                            onChange={(e) => handleVerseChange(index, e.target.value)}
+                            className="pr-10"
+                          />
+                          {verseLoadingStates[index] && (
+                            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                            </div>
+                          )}
+                        </div>
                         <Button
                           type="button"
                           variant="outline"
@@ -393,13 +455,25 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                         </Button>
                       </div>
                       {verseTexts[index] && (
-                        <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border-l-4 border-blue-400">
-                          <p className="text-sm text-blue-800 dark:text-blue-200 italic">
-                            "{verseTexts[index].text}"
-                          </p>
-                          <p className="text-xs text-blue-600 dark:text-blue-300 mt-1">
-                            — {verseTexts[index].reference} ({verseTexts[index].version})
-                          </p>
+                        <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-shrink-0 w-8 h-8 bg-blue-500 dark:bg-blue-600 rounded-full flex items-center justify-center">
+                              <BookOpen className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-medium text-blue-900 dark:text-blue-100 leading-relaxed mb-2">
+                                "{verseTexts[index].text}"
+                              </p>
+                              <div className="flex items-center justify-between">
+                                <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">
+                                  — {verseTexts[index].reference}
+                                </p>
+                                <Badge variant="outline" className="text-xs text-blue-600 dark:text-blue-400 border-blue-300 dark:border-blue-600">
+                                  {verseTexts[index].version}
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>

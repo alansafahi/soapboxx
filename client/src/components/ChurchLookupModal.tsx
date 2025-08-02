@@ -96,7 +96,7 @@ export default function ChurchLookupModal({ open, onOpenChange, onSelectChurch }
     setCurrentPage(1);
   };
 
-  const handleSelectChurch = (church: Church) => {
+  const handleSelectChurch = (church: any) => {
     onSelectChurch(church);
     onOpenChange(false);
   };
