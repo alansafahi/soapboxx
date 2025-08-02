@@ -9015,6 +9015,27 @@ Return JSON with this exact structure:
                   typeof req.body.spiritualInterests === 'string' ? [req.body.spiritualInterests] :
                   typeof req.body.interests === 'string' ? [req.body.interests] : [],
         denomination: req.body.denomination,
+        churchAffiliation: req.body.churchAffiliation,
+        spiritualStage: req.body.spiritualStage,
+        ministryInterests: req.body.ministryInterests,
+        growthGoals: req.body.growthGoals,
+        favoriteScriptures: req.body.favoriteScriptures,
+        spiritualGifts: req.body.spiritualGifts,
+        spiritualProfile: req.body.spiritualProfile,
+        ageRange: req.body.ageRange,
+        languagePreference: req.body.languagePreference,
+        preferredBibleTranslation: req.body.preferredBibleTranslation,
+        
+        // Privacy settings
+        showBioPublicly: req.body.showBioPublicly,
+        showChurchAffiliation: req.body.showChurchAffiliation,
+        shareWithGroup: req.body.shareWithGroup,
+        showAgeRange: req.body.showAgeRange,
+        showLocation: req.body.showLocation,
+        showMobile: req.body.showMobile,
+        showGender: req.body.showGender,
+        showDenomination: req.body.showDenomination,
+        showSpiritualGifts: req.body.showSpiritualGifts,
         
         // Other fields
         dateOfBirth: req.body.dateOfBirth || req.body.date_of_birth,

@@ -251,6 +251,82 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const [aiGiftSuggestions, setAiGiftSuggestions] = useState<any>(null);
   const [loadingAiAnalysis, setLoadingAiAnalysis] = useState(false);
 
+  // Spiritual Gifts Data - moved here to be available early
+  const spiritualGiftsData = {
+    "Leadership": {
+      description: "The ability to guide, direct, and organize groups toward God's purposes",
+      scripture: "Romans 12:8",
+      soapThemes: ["Leading by example", "Vision casting", "Team building"],
+      ministryContext: "Leading teams, organizing events, church leadership"
+    },
+    "Teaching": {
+      description: "The gift of communicating God's truth clearly and effectively",
+      scripture: "1 Corinthians 12:28",
+      soapThemes: ["Bible study insights", "Discipleship moments", "Learning revelations"],
+      ministryContext: "Bible study leadership, discipleship, children's ministry"
+    },
+    "Encouragement": {
+      description: "The ability to uplift, comfort, and motivate others in their faith",
+      scripture: "Romans 12:8",
+      soapThemes: ["Uplifting others", "Comfort in trials", "Motivational insights"],
+      ministryContext: "Counseling, prayer ministry, small group support"
+    },
+    "Service": {
+      description: "The gift of practical help and meeting the physical needs of others",
+      scripture: "1 Peter 4:10",
+      soapThemes: ["Acts of service", "Helping others", "Practical ministry"],
+      ministryContext: "Volunteer coordination, practical assistance, community service"
+    },
+    "Giving": {
+      description: "The ability to contribute resources generously and cheerfully",
+      scripture: "Romans 12:8",
+      soapThemes: ["Generosity insights", "Financial stewardship", "Blessing others"],
+      ministryContext: "Financial support, resource sharing, missions funding"
+    },
+    "Mercy": {
+      description: "The gift of showing compassion and care for those who suffer",
+      scripture: "Romans 12:8",
+      soapThemes: ["Compassion for others", "Care for suffering", "Healing ministry"],
+      ministryContext: "Hospital visitation, grief support, care ministry"
+    },
+    "Hospitality": {
+      description: "The gift of creating welcoming spaces and serving others",
+      scripture: "1 Peter 4:9",
+      soapThemes: ["Welcoming others", "Creating community", "Serving guests"],
+      ministryContext: "Event hosting, newcomer ministry, fellowship coordination"
+    },
+    "Helps": {
+      description: "The gift of supporting and assisting others in ministry",
+      scripture: "1 Corinthians 12:28",
+      soapThemes: ["Supporting ministry", "Behind-the-scenes service", "Team assistance"],
+      ministryContext: "Administrative support, technical assistance, ministry coordination"
+    },
+    "Faith": {
+      description: "The gift of extraordinary trust in God's power and promises",
+      scripture: "1 Corinthians 12:9",
+      soapThemes: ["Trusting God", "Faith in trials", "Believing for miracles"],
+      ministryContext: "Prayer ministry, missions, faith-building ministry"
+    },
+    "Discernment": {
+      description: "The gift of distinguishing between truth and error, good and evil",
+      scripture: "1 Corinthians 12:10",
+      soapThemes: ["Spiritual insight", "Wisdom in decisions", "Discerning God's will"],
+      ministryContext: "Counseling, leadership advisory, spiritual direction"
+    },
+    "Wisdom": {
+      description: "The gift of applying God's truth to practical life situations",
+      scripture: "1 Corinthians 12:8",
+      soapThemes: ["Practical wisdom", "Life application", "Godly counsel"],
+      ministryContext: "Counseling, mentoring, decision-making support"
+    },
+    "Intercession": {
+      description: "The gift of sustained and effective prayer for others",
+      scripture: "1 Timothy 2:1",
+      soapThemes: ["Prayer for others", "Intercession calls", "Spiritual warfare"],
+      ministryContext: "Prayer teams, intercessory ministry, spiritual warfare"
+    }
+  };
+
   // Profile completion calculation
   const calculateProfileCompletion = () => {
     const fields = [
@@ -591,107 +667,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     { id: 'intercession2', question: 'I feel called to pray regularly for specific people and situations', gift: 'Intercession' }
   ];
 
-  // Spiritual Gifts Scripture References and Context
-  const spiritualGiftsData = {
-    'Leadership': {
-      scripture: 'Romans 12:8',
-      verseText: '',
-      description: 'The ability to guide and direct others in accomplishing God\'s purposes',
-      soapThemes: ['Direction from God', 'Wisdom in decisions', 'Servant leadership', 'Guiding others'],
-      ministryContext: 'Leading teams, making decisions, casting vision, organizing ministry efforts'
-    },
-    'Teaching': {
-      scripture: '1 Corinthians 12:28',
-      verseText: '',
-      description: 'The ability to communicate biblical truth in ways others can understand and apply',
-      soapThemes: ['Understanding Scripture', 'Sharing insights', 'Learning from God\'s Word', 'Helping others grow'],
-      ministryContext: 'Bible studies, discipleship, preaching, training, educational ministry'
-    },
-    'Administration': {
-      scripture: '1 Corinthians 12:28',
-      verseText: '',
-      description: 'The ability to organize people and resources effectively for ministry',
-      soapThemes: ['God\'s order and planning', 'Stewardship', 'Coordination', 'Faithful management'],
-      ministryContext: 'Event planning, church management, coordinating volunteers, organizing ministries'
-    },
-    'Mercy': {
-      scripture: 'Romans 12:8',
-      verseText: '',
-      description: 'The ability to feel genuine empathy and provide comfort to those suffering',
-      soapThemes: ['God\'s compassion', 'Comfort in trials', 'Healing and restoration', 'Love in action'],
-      ministryContext: 'Counseling, hospital visits, crisis support, caring for hurting people'
-    },
-    'Service': {
-      scripture: '1 Peter 4:11',
-      verseText: '',
-      description: 'The joy in meeting practical needs and supporting others\' ministries',
-      soapThemes: ['Serving like Jesus', 'Humility', 'Meeting needs', 'Supporting others'],
-      ministryContext: 'Volunteer work, maintenance, setup/cleanup, behind-the-scenes support'
-    },
-    'Evangelism': {
-      scripture: 'Ephesians 4:11',
-      verseText: '',
-      description: 'The passion and ability to share the gospel effectively with non-believers',
-      soapThemes: ['Sharing faith', 'God\'s love for the lost', 'Witnessing opportunities', 'Great Commission'],
-      ministryContext: 'Outreach, missions, personal evangelism, community engagement'
-    },
-    'Encouragement': {
-      scripture: 'Romans 12:8',
-      verseText: '',
-      description: 'The ability to strengthen and build up others in their faith journey',
-      soapThemes: ['God\'s faithfulness', 'Hope in trials', 'Building others up', 'Positive perspective'],
-      ministryContext: 'Mentoring, counseling, supporting discouraged believers, cheerleading faith'
-    },
-    'Giving': {
-      scripture: 'Romans 12:8',
-      verseText: '',
-      description: 'The joy in contributing resources generously to support God\'s work',
-      soapThemes: ['God\'s provision', 'Stewardship', 'Generosity', 'Supporting ministry'],
-      ministryContext: 'Financial support, resource donation, funding ministries, supporting missionaries'
-    },
-    'Hospitality': {
-      scripture: '1 Peter 4:9',
-      verseText: '',
-      description: 'The gift of making others feel welcomed and cared for',
-      soapThemes: ['Welcoming others', 'Creating community', 'God\'s welcome to us', 'Fellowship'],
-      ministryContext: 'Hosting events, welcoming newcomers, creating warm environments, fellowship'
-    },
-    'Helps': {
-      scripture: '1 Corinthians 12:28',
-      verseText: '',
-      description: 'The desire to assist and support others in their ministry efforts',
-      soapThemes: ['Supporting others', 'Teamwork', 'Faithful assistance', 'Working together'],
-      ministryContext: 'Assisting pastors/leaders, supporting ministries, administrative help, team support'
-    },
-    'Faith': {
-      scripture: '1 Corinthians 12:9',
-      verseText: '',
-      description: 'Extraordinary trust in God that inspires others to believe and act',
-      soapThemes: ['Trusting God completely', 'God\'s faithfulness', 'Stepping out in faith', 'Impossible things'],
-      ministryContext: 'Prayer ministry, launching new ministries, encouraging faith, believing for miracles'
-    },
-    'Discernment': {
-      scripture: '1 Corinthians 12:10',
-      verseText: '',
-      description: 'The ability to distinguish between truth and error, spirit and flesh',
-      soapThemes: ['Spiritual wisdom', 'Truth vs deception', 'God\'s guidance', 'Spiritual insight'],
-      ministryContext: 'Counseling, leadership decisions, spiritual warfare, protecting the church'
-    },
-    'Wisdom': {
-      scripture: '1 Corinthians 12:8',
-      verseText: '',
-      description: 'The ability to apply biblical knowledge to practical life situations',
-      soapThemes: ['God\'s wisdom', 'Practical application', 'Right decisions', 'Biblical living'],
-      ministryContext: 'Counseling, leadership, teaching, conflict resolution, decision-making'
-    },
-    'Intercession': {
-      scripture: '1 Timothy 2:1',
-      verseText: '',
-      description: 'The calling to pray regularly and effectively for others and their needs',
-      soapThemes: ['Prayer as priority', 'God\'s heart for others', 'Spiritual warfare', 'Intercession'],
-      ministryContext: 'Prayer ministry, prayer chains, spiritual warfare, praying for church/leaders'
-    }
-  };
+
 
   const spiritualGiftsSchema = z.object({
     responses: z.record(z.number().min(1).max(5))
