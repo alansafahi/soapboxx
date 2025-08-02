@@ -161,6 +161,103 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const [showChurchLookup, setShowChurchLookup] = useState(false);
   const [currentTab, setCurrentTab] = useState("basic");
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [verseLoadingStates, setVerseLoadingStates] = useState<{ [key: number]: boolean }>({});
+  const [verseTimeouts, setVerseTimeouts] = useState<{ [key: number]: NodeJS.Timeout }>({});
+  const [verseValidation, setVerseValidation] = useState<{ [key: number]: { isValid: boolean; message: string; suggestion?: string } }>({});
+  const [showGiftsAssessment, setShowGiftsAssessment] = useState(false);
+  const [showGiftsInfoModal, setShowGiftsInfoModal] = useState(false);
+  const [giftVerses, setGiftVerses] = useState<{ [key: string]: string }>({});
+  const [loadingVerses, setLoadingVerses] = useState(false);
+  const [aiGiftSuggestions, setAiGiftSuggestions] = useState<any>(null);
+  const [loadingAiAnalysis, setLoadingAiAnalysis] = useState(false);
+
+  // Spiritual Gifts Data - defined early for use in functions
+  const spiritualGiftsData = {
+    "Leadership": {
+      description: "The ability to guide, direct, and organize groups toward God's purposes",
+      scripture: "Romans 12:8",
+      soapThemes: ["Leading by example", "Vision casting", "Team building"],
+      ministryContext: "Leading teams, organizing events, church leadership"
+    },
+    "Teaching": {
+      description: "The gift of communicating God's truth clearly and effectively",
+      scripture: "1 Corinthians 12:28",
+      soapThemes: ["Bible study insights", "Discipleship moments", "Learning revelations"],
+      ministryContext: "Bible study leadership, discipleship, children's ministry"
+    },
+    "Encouragement": {
+      description: "The ability to uplift, comfort, and motivate others in their faith",
+      scripture: "Romans 12:8",
+      soapThemes: ["Uplifting others", "Comfort in trials", "Motivational insights"],
+      ministryContext: "Counseling, prayer ministry, small group support"
+    },
+    "Service": {
+      description: "The gift of practical help and meeting the physical needs of others",
+      scripture: "1 Peter 4:10",
+      soapThemes: ["Acts of service", "Helping others", "Practical ministry"],
+      ministryContext: "Volunteer coordination, practical assistance, community service"
+    },
+    "Giving": {
+      description: "The ability to contribute resources generously and cheerfully",
+      scripture: "Romans 12:8",
+      soapThemes: ["Generosity insights", "Financial stewardship", "Blessing others"],
+      ministryContext: "Financial support, resource sharing, missions funding"
+    },
+    "Mercy": {
+      description: "The gift of showing compassion and care for those who suffer",
+      scripture: "Romans 12:8",
+      soapThemes: ["Compassion for others", "Care for suffering", "Healing ministry"],
+      ministryContext: "Hospital visitation, grief support, care ministry"
+    },
+    "Hospitality": {
+      description: "The gift of creating welcoming spaces and serving others",
+      scripture: "1 Peter 4:9",
+      soapThemes: ["Welcoming others", "Creating community", "Serving guests"],
+      ministryContext: "Event hosting, newcomer ministry, fellowship coordination"
+    },
+    "Helps": {
+      description: "The gift of supporting and assisting others in ministry",
+      scripture: "1 Corinthians 12:28",
+      soapThemes: ["Supporting ministry", "Behind-the-scenes service", "Team assistance"],
+      ministryContext: "Administrative support, technical assistance, ministry coordination"
+    },
+    "Faith": {
+      description: "The gift of extraordinary trust in God's power and promises",
+      scripture: "1 Corinthians 12:9",
+      soapThemes: ["Trusting God", "Faith in trials", "Believing for miracles"],
+      ministryContext: "Prayer ministry, missions, faith-building ministry"
+    },
+    "Discernment": {
+      description: "The gift of distinguishing between truth and error, good and evil",
+      scripture: "1 Corinthians 12:10",
+      soapThemes: ["Spiritual insight", "Wisdom in decisions", "Discerning God's will"],
+      ministryContext: "Counseling, leadership advisory, spiritual direction"
+    },
+    "Wisdom": {
+      description: "The gift of applying biblical knowledge to practical life situations",
+      scripture: "1 Corinthians 12:8",
+      soapThemes: ["Practical wisdom", "Sound judgment", "Biblical application"],
+      ministryContext: "Counseling, teaching, leadership advisory"
+    },
+    "Intercession": {
+      description: "The gift of sustained prayer for others and their needs",
+      scripture: "1 Timothy 2:1",
+      soapThemes: ["Prayer for others", "Spiritual warfare", "Intercession ministry"],
+      ministryContext: "Prayer ministry, spiritual warfare, prayer groups"
+    },
+    "Administration": {
+      description: "The gift of organizing and coordinating ministry activities",
+      scripture: "1 Corinthians 12:28",
+      soapThemes: ["Organization", "Planning", "Ministry coordination"],
+      ministryContext: "Event planning, administrative support, ministry management"
+    },
+    "Evangelism": {
+      description: "The gift of sharing the gospel effectively with non-believers",
+      scripture: "Ephesians 4:11",
+      soapThemes: ["Sharing faith", "Witnessing opportunities", "Evangelistic conversations"],
+      ministryContext: "Outreach ministry, missions, evangelistic events"
+    }
+  };
 
   const handleSave = () => {
     onSave({
@@ -272,103 +369,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     setVerseTexts(newVerseTexts);
   };
 
-  const [verseLoadingStates, setVerseLoadingStates] = useState<{ [key: number]: boolean }>({});
-  const [verseTimeouts, setVerseTimeouts] = useState<{ [key: number]: NodeJS.Timeout }>({});
-  const [verseValidation, setVerseValidation] = useState<{ [key: number]: { isValid: boolean; message: string; suggestion?: string } }>({});
-  const [showGiftsAssessment, setShowGiftsAssessment] = useState(false);
-  const [showGiftsInfoModal, setShowGiftsInfoModal] = useState(false);
-  const [giftVerses, setGiftVerses] = useState<{ [key: string]: string }>({});
-  const [loadingVerses, setLoadingVerses] = useState(false);
-  const [aiGiftSuggestions, setAiGiftSuggestions] = useState<any>(null);
-  const [loadingAiAnalysis, setLoadingAiAnalysis] = useState(false);
 
-  // Spiritual Gifts Data - moved here to be available early
-  const spiritualGiftsData = {
-    "Leadership": {
-      description: "The ability to guide, direct, and organize groups toward God's purposes",
-      scripture: "Romans 12:8",
-      soapThemes: ["Leading by example", "Vision casting", "Team building"],
-      ministryContext: "Leading teams, organizing events, church leadership"
-    },
-    "Teaching": {
-      description: "The gift of communicating God's truth clearly and effectively",
-      scripture: "1 Corinthians 12:28",
-      soapThemes: ["Bible study insights", "Discipleship moments", "Learning revelations"],
-      ministryContext: "Bible study leadership, discipleship, children's ministry"
-    },
-    "Encouragement": {
-      description: "The ability to uplift, comfort, and motivate others in their faith",
-      scripture: "Romans 12:8",
-      soapThemes: ["Uplifting others", "Comfort in trials", "Motivational insights"],
-      ministryContext: "Counseling, prayer ministry, small group support"
-    },
-    "Service": {
-      description: "The gift of practical help and meeting the physical needs of others",
-      scripture: "1 Peter 4:10",
-      soapThemes: ["Acts of service", "Helping others", "Practical ministry"],
-      ministryContext: "Volunteer coordination, practical assistance, community service"
-    },
-    "Giving": {
-      description: "The ability to contribute resources generously and cheerfully",
-      scripture: "Romans 12:8",
-      soapThemes: ["Generosity insights", "Financial stewardship", "Blessing others"],
-      ministryContext: "Financial support, resource sharing, missions funding"
-    },
-    "Mercy": {
-      description: "The gift of showing compassion and care for those who suffer",
-      scripture: "Romans 12:8",
-      soapThemes: ["Compassion for others", "Care for suffering", "Healing ministry"],
-      ministryContext: "Hospital visitation, grief support, care ministry"
-    },
-    "Hospitality": {
-      description: "The gift of creating welcoming spaces and serving others",
-      scripture: "1 Peter 4:9",
-      soapThemes: ["Welcoming others", "Creating community", "Serving guests"],
-      ministryContext: "Event hosting, newcomer ministry, fellowship coordination"
-    },
-    "Helps": {
-      description: "The gift of supporting and assisting others in ministry",
-      scripture: "1 Corinthians 12:28",
-      soapThemes: ["Supporting ministry", "Behind-the-scenes service", "Team assistance"],
-      ministryContext: "Administrative support, technical assistance, ministry coordination"
-    },
-    "Faith": {
-      description: "The gift of extraordinary trust in God's power and promises",
-      scripture: "1 Corinthians 12:9",
-      soapThemes: ["Trusting God", "Faith in trials", "Believing for miracles"],
-      ministryContext: "Prayer ministry, missions, faith-building ministry"
-    },
-    "Discernment": {
-      description: "The gift of distinguishing between truth and error, good and evil",
-      scripture: "1 Corinthians 12:10",
-      soapThemes: ["Spiritual insight", "Wisdom in decisions", "Discerning God's will"],
-      ministryContext: "Counseling, leadership advisory, spiritual direction"
-    },
-    "Wisdom": {
-      description: "The gift of applying biblical knowledge to practical life situations",
-      scripture: "1 Corinthians 12:8",
-      soapThemes: ["Practical wisdom", "Sound judgment", "Biblical application"],
-      ministryContext: "Counseling, teaching, leadership advisory"
-    },
-    "Intercession": {
-      description: "The gift of sustained prayer for others and their needs",
-      scripture: "1 Timothy 2:1",
-      soapThemes: ["Prayer for others", "Spiritual warfare", "Intercession ministry"],
-      ministryContext: "Prayer ministry, spiritual warfare, prayer groups"
-    },
-    "Administration": {
-      description: "The gift of organizing and coordinating ministry activities",
-      scripture: "1 Corinthians 12:28",
-      soapThemes: ["Organization", "Planning", "Ministry coordination"],
-      ministryContext: "Event planning, administrative support, ministry management"
-    },
-    "Evangelism": {
-      description: "The gift of sharing the gospel effectively with non-believers",
-      scripture: "Ephesians 4:11",
-      soapThemes: ["Sharing faith", "Witnessing opportunities", "Evangelistic conversations"],
-      ministryContext: "Outreach ministry, missions, evangelistic events"
-    }
-  };
 
   // Profile completion calculation
   const calculateProfileCompletion = () => {
