@@ -13,7 +13,7 @@ import LeaderboardPreview from "../components/LeaderboardPreview";
 import UpcomingEventsPreview from "../components/UpcomingEventsPreview";
 import CompactPostComposer from "../components/CompactPostComposer";
 import LimitedSocialFeed from "../components/LimitedSocialFeed";
-import { EnhancedSocialFeed } from "../components/enhanced-social-feed";
+
 import MyPostsFeed from "../components/my-posts-feed";
 import MobileNav from "../components/mobile-nav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";

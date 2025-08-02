@@ -36,8 +36,7 @@ import {
 import { format } from "date-fns";
 import EnhancedProfileEditor from "../components/EnhancedProfileEditor";
 import { SMSVerificationModal } from "../components/SMSVerificationModal";
-import { VerificationBadge, DetailedVerificationStatus } from "../components/VerificationBadge";
-import ProfileVerificationBadge from "../components/ProfileVerificationBadge";
+import ProfileVerificationRing from "../components/ProfileVerificationRing";
 
 interface UserProfile {
   id: string;
@@ -404,11 +403,11 @@ export default function ProfilePage() {
                       <h3 className="font-medium text-orange-800 dark:text-orange-200 mb-3">
                         Complete Your Account Verification
                       </h3>
-                      <DetailedVerificationStatus 
-                        emailVerified={profile?.emailVerified === true}
-                        phoneVerified={profile?.phoneVerified === true}
-                        isLeadership={profile?.role === 'pastor' || profile?.role === 'admin' || profile?.role === 'owner'}
-                      />
+                      <div className="text-sm text-orange-700 dark:text-orange-300">
+                        {!profile?.emailVerified && !profile?.phoneVerified && "Please verify your email and mobile number"}
+                        {profile?.emailVerified && !profile?.phoneVerified && "Please verify your mobile number"}
+                        {!profile?.emailVerified && profile?.phoneVerified && "Please verify your email address"}
+                      </div>
                       {!profile?.phoneVerified && (
                         <p className="text-sm text-orange-600 dark:text-orange-300 mt-3">
                           Add your mobile number to get prayer alerts, event reminders, and secure access.
@@ -435,32 +434,34 @@ export default function ProfilePage() {
                   <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                     <div className="relative">
                       {profile?.profileImageUrl ? (
-                        <div className="relative">
-                          <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                            <img 
-                              src={profile.profileImageUrl} 
-                              alt={displayName}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                          <ProfileVerificationBadge 
+                        <div className="relative w-32 h-32">
+                          <ProfileVerificationRing
                             emailVerified={profile?.emailVerified === true}
                             phoneVerified={profile?.phoneVerified === true}
-                            isLeadership={profile?.role === 'pastor' || profile?.role === 'admin' || profile?.role === 'owner'}
                             size="lg"
-                          />
+                            className="w-full h-full"
+                          >
+                            <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                              <img 
+                                src={profile.profileImageUrl} 
+                                alt={displayName}
+                                className="h-full w-full object-cover"
+                              />
+                            </div>
+                          </ProfileVerificationRing>
                         </div>
                       ) : (
-                        <div className="relative">
-                          <div className="h-32 w-32 rounded-full bg-purple-600 flex items-center justify-center">
-                            <span className="text-2xl font-semibold text-white">{userInitials}</span>
-                          </div>
-                          <ProfileVerificationBadge 
+                        <div className="relative w-32 h-32">
+                          <ProfileVerificationRing
                             emailVerified={profile?.emailVerified === true}
                             phoneVerified={profile?.phoneVerified === true}
-                            isLeadership={profile?.role === 'pastor' || profile?.role === 'admin' || profile?.role === 'owner'}
                             size="lg"
-                          />
+                            className="w-full h-full"
+                          >
+                            <div className="h-32 w-32 rounded-full bg-purple-600 flex items-center justify-center">
+                              <span className="text-2xl font-semibold text-white">{userInitials}</span>
+                            </div>
+                          </ProfileVerificationRing>
                         </div>
                       )}
                     </div>

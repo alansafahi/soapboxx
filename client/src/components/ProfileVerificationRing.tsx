@@ -3,7 +3,6 @@ import { cn } from "@/lib/utils";
 interface ProfileVerificationRingProps {
   emailVerified?: boolean | null;
   phoneVerified?: boolean | null;
-  isLeadership?: boolean;
   size?: 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
   children: React.ReactNode; // The avatar/profile image
@@ -12,7 +11,6 @@ interface ProfileVerificationRingProps {
 export function ProfileVerificationRing({
   emailVerified = false,
   phoneVerified = false,
-  isLeadership = false,
   size = "md",
   className,
   children
@@ -45,7 +43,7 @@ export function ProfileVerificationRing({
 
   // Size configurations for different use cases - with explicit dimensions
   const sizeConfig = {
-    xs: { padding: "p-0.5", dimensions: "w-6 h-6" },
+    xs: { padding: "p-0.5", dimensions: "" },
     sm: { padding: "p-1", dimensions: "" }, // Let child component control size
     md: { padding: "p-1.5", dimensions: "" },
     lg: { padding: "p-2", dimensions: "" }
