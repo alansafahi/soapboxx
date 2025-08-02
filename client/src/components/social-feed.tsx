@@ -1100,14 +1100,8 @@ export default function SocialFeed() {
                   isLeadership={post.author?.role === 'pastor' || post.author?.role === 'admin' || post.author?.role === 'owner'}
                   size="sm"
                 >
-                  {/* Debug author data */}
-                  {console.log('🔍 Social Feed Author Data:', {
-                    fullPost: post,
-                    author: post.author,
-                    emailVerified: post.author?.emailVerified,
-                    phoneVerified: post.author?.phoneVerified,
-                    role: post.author?.role
-                  })}
+                  {/* Debug FULL post data to see structure */}
+                  {console.log('🔍 FULL POST STRUCTURE:', JSON.stringify(post, null, 2))}
                   <Avatar className="w-10 h-10">
                     <AvatarImage 
                       src={post.author?.profileImageUrl || ""} 
