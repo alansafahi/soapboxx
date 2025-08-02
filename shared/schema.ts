@@ -777,7 +777,7 @@ export const eventMetrics = pgTable("event_metrics", {
 export const discussions = pgTable("discussions", {
   id: serial("id").primaryKey(),
   authorId: varchar("author_id").notNull().references(() => users.id),
-  communityId: integer("church_id").references(() => communities.id),
+  communityId: integer("community_id").references(() => communities.id),
   title: varchar("title", { length: 255 }).notNull(),
   content: text("content").notNull(),
   category: varchar("category", { length: 50 }), // general, prayer, bible_study, events

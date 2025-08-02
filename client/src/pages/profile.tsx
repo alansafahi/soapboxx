@@ -456,19 +456,7 @@ export default function ProfilePage() {
                             isLeadership={profile?.role === 'pastor' || profile?.role === 'admin' || profile?.role === 'owner'}
                             size="md"
                           />
-                          {/* Debug info - remove after testing */}
-                          {process.env.NODE_ENV === 'development' && (
-                            <span className="text-xs text-gray-500">
-                              E:{String(profile?.emailVerified)} P:{String(profile?.phoneVerified)} Role:{profile?.role}
-                            </span>
-                          )}
-                          {/* Force test badge - temporary */}
-                          {process.env.NODE_ENV === 'development' && (
-                            <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-3 py-1.5 rounded-full text-sm inline-flex items-center gap-1.5 border border-green-300 shadow-sm">
-                              <Shield className="w-4 h-4" />
-                              <span className="font-medium">Test Badge</span>
-                            </div>
-                          )}
+
                         </div>
                         <div className="space-y-1 mt-1">
                           <div className="text-muted-foreground flex items-center gap-2">
