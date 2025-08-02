@@ -69,6 +69,17 @@ export function VerificationBadge({
 
   const config = getBadgeConfig();
   
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('VerificationBadge Debug:', {
+      emailVerified,
+      phoneVerified,
+      isLeadership,
+      level,
+      config: config ? 'exists' : 'null'
+    });
+  }
+  
   if (!config || level === "none") return null;
 
   const { icon: Icon, text, bgColor, textColor, borderColor, iconColor } = config;
