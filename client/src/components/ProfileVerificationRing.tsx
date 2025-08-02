@@ -20,8 +20,9 @@ export function ProfileVerificationRing({
   const emailVerifiedBool = emailVerified === true;
   const phoneVerifiedBool = phoneVerified === true;
   
-  // Debug - let's see what's happening with each user
-  console.log('🔍 ProfileVerificationRing:', {
+  // Debug with component identification
+  const componentName = new Error().stack?.split('\n')[3]?.match(/at (\w+)/)?.[1] || 'Unknown';
+  console.log(`🔍 ProfileVerificationRing [${componentName}]:`, {
     emailVerified,
     phoneVerified,
     isLeadership,
