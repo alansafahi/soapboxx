@@ -117,6 +117,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
 
   const [verseLoadingStates, setVerseLoadingStates] = useState<{ [key: number]: boolean }>({});
   const [verseTimeouts, setVerseTimeouts] = useState<{ [key: number]: NodeJS.Timeout }>({});
+  const [verseValidation, setVerseValidation] = useState<{ [key: number]: { isValid: boolean; message: string; suggestion?: string } }>({});
 
   const lookupVerse = async (verse: string, index: number) => {
     const trimmedVerse = verse.trim();
@@ -182,23 +183,89 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     }
   };
 
+  const validateVerseReference = (reference: string): { isValid: boolean; message: string; suggestion?: string } => {
+    const trimmed = reference.trim();
+    
+    if (!trimmed) {
+      return { isValid: true, message: "" };
+    }
+
+    // Check for complete verse reference (Book Chapter:Verse)
+    const completePattern = /^[1-3]?\s*[A-Za-z]+\s+\d+:\d+/;
+    if (completePattern.test(trimmed)) {
+      return { isValid: true, message: "✓ Complete reference" };
+    }
+
+    // Check for incomplete chapter reference (Book Chapter)
+    const chapterPattern = /^[1-3]?\s*[A-Za-z]+\s+\d+$/;
+    if (chapterPattern.test(trimmed)) {
+      return { 
+        isValid: false, 
+        message: "Add verse number for specific verse",
+        suggestion: `${trimmed}:1`
+      };
+    }
+
+    // Check for book only
+    const bookPattern = /^[1-3]?\s*[A-Za-z]+$/;
+    if (bookPattern.test(trimmed)) {
+      return { 
+        isValid: false, 
+        message: "Add chapter and verse number",
+        suggestion: `${trimmed} 1:1`
+      };
+    }
+
+    return { 
+      isValid: false, 
+      message: "Enter format: Book Chapter:Verse (e.g., John 3:16)"
+    };
+  };
+
   const handleVerseChange = (index: number, value: string) => {
     updateFavoriteVerse(index, value);
+    
+    // Validate the reference
+    const validation = validateVerseReference(value);
+    setVerseValidation(prev => ({
+      ...prev,
+      [index]: validation
+    }));
     
     // Clear any existing timeout
     if (verseTimeouts[index]) {
       clearTimeout(verseTimeouts[index]);
     }
 
-    // Set a new timeout to lookup the verse after user stops typing
-    const timeout = setTimeout(() => {
-      lookupVerse(value, index);
-    }, 800); // Wait 800ms after user stops typing
+    // Only lookup if it's a reasonable reference (has some structure)
+    const hasStructure = /^[1-3]?\s*[A-Za-z]+\s+\d+/.test(value.trim());
+    if (hasStructure) {
+      // Set a new timeout to lookup the verse after user stops typing
+      const timeout = setTimeout(() => {
+        lookupVerse(value, index);
+      }, 800); // Wait 800ms after user stops typing
 
-    setVerseTimeouts(prev => ({
+      setVerseTimeouts(prev => ({
+        ...prev,
+        [index]: timeout
+      }));
+    } else {
+      // Clear verse text for incomplete references
+      setVerseTexts(prev => {
+        const updated = { ...prev };
+        delete updated[index];
+        return updated;
+      });
+    }
+  };
+
+  const handleSuggestionClick = (index: number, suggestion: string) => {
+    updateFavoriteVerse(index, suggestion);
+    setVerseValidation(prev => ({
       ...prev,
-      [index]: timeout
+      [index]: { isValid: true, message: "✓ Complete reference" }
     }));
+    lookupVerse(suggestion, index);
   };
 
   return (
@@ -435,12 +502,12 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   {favoriteVerses.map((verse, index) => (
                     <div key={index} className="space-y-2">
                       <div className="flex gap-2">
-                        <div className="relative">
+                        <div className="relative flex-1">
                           <Input
                             placeholder="e.g., John 3:16 or Jeremiah 29:11"
                             value={verse}
                             onChange={(e) => handleVerseChange(index, e.target.value)}
-                            className="pr-10"
+                            className={`pr-10 ${verseValidation[index] && !verseValidation[index].isValid && verse.trim() ? 'border-amber-300 focus:border-amber-400' : ''}`}
                           />
                           {verseLoadingStates[index] && (
                             <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -457,6 +524,29 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                           Remove
                         </Button>
                       </div>
+
+                      {/* Validation Message */}
+                      {verseValidation[index] && verse.trim() && (
+                        <div className={`text-xs flex items-center gap-2 ${
+                          verseValidation[index].isValid 
+                            ? 'text-green-600 dark:text-green-400' 
+                            : 'text-amber-600 dark:text-amber-400'
+                        }`}>
+                          <span>{verseValidation[index].message}</span>
+                          {verseValidation[index].suggestion && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                              onClick={() => handleSuggestionClick(index, verseValidation[index].suggestion!)}
+                            >
+                              Try: {verseValidation[index].suggestion}
+                            </Button>
+                          )}
+                        </div>
+                      )}
+
                       {verseTexts[index] && (
                         <div className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700 shadow-sm">
                           <div className="flex items-start gap-3">
