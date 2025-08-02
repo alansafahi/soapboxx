@@ -67,6 +67,8 @@ interface UserProfile {
   zipCode: string | null;
   city: string | null;
   state: string | null;
+  languagePreference: string | null;
+  preferredBibleTranslation: string | null;
   spiritualGifts: string[] | null;
   spiritualProfile: {
     profileLabel?: string;
@@ -101,6 +103,44 @@ const GROWTH_GOALS = [
   "Read Bible Daily", "Pray More Consistently", "Find a Mentor", "Join a Small Group",
   "Serve in Ministry", "Share Faith More", "Attend Church Regularly", "Study Theology",
   "Practice Spiritual Disciplines"
+];
+
+const LANGUAGES = [
+  { value: "English", label: "English" },
+  { value: "Spanish", label: "Español (Spanish)" },
+  { value: "French", label: "Français (French)" },
+  { value: "Portuguese", label: "Português (Portuguese)" },
+  { value: "German", label: "Deutsch (German)" },
+  { value: "Italian", label: "Italiano (Italian)" },
+  { value: "Dutch", label: "Nederlands (Dutch)" },
+  { value: "Russian", label: "Русский (Russian)" },
+  { value: "Chinese", label: "中文 (Chinese)" },
+  { value: "Japanese", label: "日本語 (Japanese)" },
+  { value: "Korean", label: "한국어 (Korean)" },
+  { value: "Arabic", label: "العربية (Arabic)" },
+  { value: "Hebrew", label: "עברית (Hebrew)" },
+  { value: "Hindi", label: "हिन्दी (Hindi)" },
+  { value: "Farsi", label: "فارسی (Farsi)" },
+  { value: "Armenian", label: "Հայերեն (Armenian)" },
+  { value: "Other", label: "Other" }
+];
+
+const BIBLE_TRANSLATIONS = [
+  { value: "NIV", label: "NIV (New International Version)" },
+  { value: "ESV", label: "ESV (English Standard Version)" },
+  { value: "NLT", label: "NLT (New Living Translation)" },
+  { value: "NKJV", label: "NKJV (New King James Version)" },
+  { value: "KJV", label: "KJV (King James Version)" },
+  { value: "NASB", label: "NASB (New American Standard Bible)" },
+  { value: "CSB", label: "CSB (Christian Standard Bible)" },
+  { value: "MSG", label: "MSG (The Message)" },
+  { value: "AMP", label: "AMP (Amplified Bible)" },
+  { value: "NCV", label: "NCV (New Century Version)" },
+  { value: "CEV", label: "CEV (Contemporary English Version)" },
+  { value: "GNT", label: "GNT (Good News Translation)" },
+  { value: "NRSV", label: "NRSV (New Revised Standard Version)" },
+  { value: "RSV", label: "RSV (Revised Standard Version)" },
+  { value: "NET", label: "NET (New English Translation)" }
 ];
 
 export default function EnhancedProfileEditor({ profile, onSave, isLoading }: EnhancedProfileEditorProps) {
@@ -529,6 +569,47 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                 <p className="text-xs text-muted-foreground mt-1">
                   Get prayer alerts, event reminders, and secure access
                 </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="languagePreference">Language Preference</Label>
+                  <Select 
+                    value={formData.languagePreference || "English"} 
+                    onValueChange={(value) => setFormData({...formData, languagePreference: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LANGUAGES.map(lang => (
+                        <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Your preferred language for app content and communications
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="preferredBibleTranslation">Preferred Bible Translation</Label>
+                  <Select 
+                    value={formData.preferredBibleTranslation || "NIV"} 
+                    onValueChange={(value) => setFormData({...formData, preferredBibleTranslation: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select translation" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BIBLE_TRANSLATIONS.map(translation => (
+                        <SelectItem key={translation.value} value={translation.value}>{translation.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Default Bible version for scripture lookups and reading plans
+                  </p>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -2970,6 +2970,8 @@ export const volunteers = pgTable("volunteers", {
   dateOfBirth: timestamp("date_of_birth"),
   emergencyContactName: varchar("emergency_contact_name", { length: 100 }),
   emergencyContactPhone: varchar("emergency_contact_phone", { length: 20 }),
+  languagePreference: varchar("language_preference", { length: 50 }).default("English"),
+  preferredBibleTranslation: varchar("preferred_bible_translation", { length: 10 }).default("NIV"),
   
   // Enhanced spiritual and skill matching
   skills: text("skills").array(), // Technical and natural skills
