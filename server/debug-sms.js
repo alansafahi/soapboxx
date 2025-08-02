@@ -12,7 +12,8 @@ async function debugTwilio() {
   const fromNumber = process.env.TWILIO_PHONE_NUMBER;
   
   console.log('Account SID:', accountSid ? `${accountSid.substring(0, 10)}...` : 'NOT SET');
-  console.log('Auth Token:', authToken ? `${authToken.substring(0, 10)}...` : 'NOT SET');
+  console.log('Auth Token Length:', authToken ? authToken.length : 'NOT SET');
+  console.log('Auth Token Format:', authToken ? (authToken.startsWith('SK') ? 'API Key' : 'Auth Token') : 'NOT SET');
   console.log('From Number:', fromNumber || 'NOT SET');
   
   if (!accountSid || !authToken || !fromNumber) {
@@ -46,6 +47,45 @@ async function debugTwilio() {
         console.log('  Error Message:', message.errorMessage || 'None');
         console.log('  Date Created:', message.dateCreated);
       });
+    }
+    
+    // Check Messaging Services
+    console.log('\n=== Messaging Services ===');
+    try {
+      const services = await client.messaging.v1.services.list();
+      console.log('Number of Messaging Services:', services.length);
+      
+      for (const service of services) {
+        console.log(`\nService: ${service.friendlyName}`);
+        console.log('  SID:', service.sid);
+        console.log('  Status:', service.status);
+        
+        // Check phone numbers in this service
+        const phoneNumbers = await client.messaging.v1.services(service.sid).phoneNumbers.list();
+        console.log('  Phone Numbers:', phoneNumbers.map(p => p.phoneNumber).join(', ') || 'None');
+      }
+    } catch (error) {
+      console.log('Error checking messaging services:', error.message);
+    }
+    
+    // Check the specific phone number
+    console.log('\n=== Phone Number Details ===');
+    try {
+      const phoneNumbers = await client.incomingPhoneNumbers.list();
+      const ourNumber = phoneNumbers.find(p => p.phoneNumber === fromNumber);
+      
+      if (ourNumber) {
+        console.log('Phone Number Found:');
+        console.log('  SID:', ourNumber.sid);
+        console.log('  Phone Number:', ourNumber.phoneNumber);
+        console.log('  Friendly Name:', ourNumber.friendlyName);
+        console.log('  Capabilities SMS:', ourNumber.capabilities.sms);
+        console.log('  Status:', ourNumber.status);
+      } else {
+        console.log('Phone number not found in account');
+      }
+    } catch (error) {
+      console.log('Error checking phone number:', error.message);
     }
     
     // Test phone number validation
