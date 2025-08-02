@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -411,7 +411,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const completionPercentage = calculateProfileCompletion();
 
   // Load scripture verses for spiritual gifts
-  const loadGiftVerses = async () => {
+  const loadGiftVerses = useCallback(async () => {
     if (loadingVerses || Object.keys(giftVerses).length > 0) return;
     
     setLoadingVerses(true);
@@ -436,7 +436,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     } finally {
       setLoadingVerses(false);
     }
-  };
+  }, [loadingVerses, giftVerses, spiritualGiftsData]);
 
   // AI-powered SOAP journal analysis for gift suggestions
   const analyzeJournalingPatterns = async () => {
@@ -464,7 +464,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   // Load verses when component mounts
   useEffect(() => {
     loadGiftVerses();
-  }, []);
+  }, [loadGiftVerses]);
 
   // Load AI analysis when user has spiritual profile
   useEffect(() => {
