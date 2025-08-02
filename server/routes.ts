@@ -2122,36 +2122,193 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Test SMS endpoint
-  app.post('/api/test-sms', async (req, res) => {
+  // SMS Verification Endpoints
+  
+  // Send SMS verification code
+  app.post('/api/auth/send-sms-verification', isAuthenticated, async (req: any, res) => {
     try {
-      const { phoneNumber } = req.body;
-      if (!phoneNumber) {
-        return res.status(400).json({ message: "Phone number required" });
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
       }
 
-      const { smsService } = await import('./smsService');
-      const token = smsService.generateVerificationToken();
-      const result = await smsService.sendVerificationSMS({
-        phoneNumber,
-        firstName: 'Test User',
-        token
-      });
-      
-      if (result) {
-        res.json({ 
-          success: true, 
-          message: "SMS verification code sent successfully",
-          verificationId: token 
-        });
-      } else {
-        res.status(400).json({ 
-          success: false, 
-          message: "Failed to send SMS verification" 
+      const { phoneNumber } = req.body;
+      if (!phoneNumber) {
+        return res.status(400).json({ message: "Phone number is required" });
+      }
+
+      // Validate phone number format
+      if (!SMSService.validatePhoneNumber(phoneNumber)) {
+        return res.status(400).json({ message: "Invalid phone number format" });
+      }
+
+      // Get user data
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check rate limiting (max 3 attempts per hour)
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      if (user.smsVerificationAttempts >= 3 && user.smsVerificationExpires && user.smsVerificationExpires > oneHourAgo) {
+        return res.status(429).json({ 
+          message: "Too many verification attempts. Please try again later.",
+          nextAttemptAt: new Date(user.smsVerificationExpires.getTime() + 60 * 60 * 1000)
         });
       }
+
+      // Generate verification code
+      const smsService = new SMSService();
+      const verificationCode = smsService.generateVerificationCode();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+      try {
+        // Send SMS
+        await smsService.sendVerificationCode(phoneNumber, verificationCode);
+
+        // Update user with verification code and attempts
+        await db.update(users)
+          .set({
+            mobileNumber: phoneNumber,
+            smsVerificationCode: verificationCode,
+            smsVerificationExpires: expiresAt,
+            smsVerificationAttempts: (user.smsVerificationAttempts || 0) + 1,
+            phoneVerified: false,
+            updatedAt: new Date()
+          })
+          .where(eq(users.id, userId));
+
+        res.json({ 
+          success: true, 
+          message: "Verification code sent successfully",
+          expiresAt,
+          attemptsRemaining: 3 - ((user.smsVerificationAttempts || 0) + 1)
+        });
+
+      } catch (smsError) {
+        return res.status(500).json({ 
+          message: "Failed to send verification code. Please check your phone number and try again."
+        });
+      }
+
     } catch (error) {
-      res.status(500).json({ message: "SMS test failed" });
+      res.status(500).json({ message: "SMS verification failed" });
+    }
+  });
+
+  // Verify SMS code
+  app.post('/api/auth/verify-sms-code', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      const { code } = req.body;
+      if (!code) {
+        return res.status(400).json({ message: "Verification code is required" });
+      }
+
+      // Get user data
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Check if code exists and hasn't expired
+      if (!user.smsVerificationCode || !user.smsVerificationExpires) {
+        return res.status(400).json({ message: "No verification code found. Please request a new code." });
+      }
+
+      if (new Date() > user.smsVerificationExpires) {
+        return res.status(400).json({ message: "Verification code has expired. Please request a new code." });
+      }
+
+      // Verify the code
+      if (user.smsVerificationCode !== code.toString()) {
+        return res.status(400).json({ message: "Invalid verification code. Please try again." });
+      }
+
+      // Mark phone as verified and clear verification data
+      await db.update(users)
+        .set({
+          phoneVerified: true,
+          smsVerificationCode: null,
+          smsVerificationExpires: null,
+          smsVerificationAttempts: 0,
+          verificationStatus: 'verified',
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+
+      res.json({ 
+        success: true, 
+        message: "Phone number verified successfully",
+        phoneVerified: true
+      });
+
+    } catch (error) {
+      res.status(500).json({ message: "SMS verification failed" });
+    }
+  });
+
+  // Resend SMS verification code
+  app.post('/api/auth/resend-sms-verification', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: 'Unauthorized' });
+      }
+
+      // Get user data
+      const [user] = await db.select().from(users).where(eq(users.id, userId));
+      if (!user || !user.mobileNumber) {
+        return res.status(400).json({ message: "No phone number on file. Please update your profile first." });
+      }
+
+      // Check rate limiting (max 3 attempts per hour)
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      if (user.smsVerificationAttempts >= 3 && user.smsVerificationExpires && user.smsVerificationExpires > oneHourAgo) {
+        return res.status(429).json({ 
+          message: "Too many verification attempts. Please try again later.",
+          nextAttemptAt: new Date(user.smsVerificationExpires.getTime() + 60 * 60 * 1000)
+        });
+      }
+
+      // Generate new verification code
+      const smsService = new SMSService();
+      const verificationCode = smsService.generateVerificationCode();
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+      try {
+        // Send SMS
+        await smsService.sendVerificationCode(user.mobileNumber, verificationCode);
+
+        // Update user with new verification code
+        await db.update(users)
+          .set({
+            smsVerificationCode: verificationCode,
+            smsVerificationExpires: expiresAt,
+            smsVerificationAttempts: (user.smsVerificationAttempts || 0) + 1,
+            updatedAt: new Date()
+          })
+          .where(eq(users.id, userId));
+
+        res.json({ 
+          success: true, 
+          message: "Verification code resent successfully",
+          expiresAt,
+          attemptsRemaining: 3 - ((user.smsVerificationAttempts || 0) + 1)
+        });
+
+      } catch (smsError) {
+        return res.status(500).json({ 
+          message: "Failed to send verification code. Please try again."
+        });
+      }
+
+    } catch (error) {
+      res.status(500).json({ message: "SMS verification failed" });
     }
   });
 

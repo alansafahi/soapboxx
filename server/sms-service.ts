@@ -1,98 +1,114 @@
-import twilio from "twilio";
-import crypto from "crypto";
+import twilio from 'twilio';
 
-// Initialize Twilio client
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const twilioPhone = process.env.TWILIO_PHONE_NUMBER;
+class SMSService {
+  private client: any;
 
-if (!accountSid || !authToken || !twilioPhone) {
-  console.warn("Twilio credentials not configured. SMS verification will be disabled.");
-}
+  constructor() {
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    
+    if (accountSid && authToken) {
+      this.client = twilio(accountSid, authToken);
+    } else {
+      console.warn('Twilio credentials not configured');
+    }
+  }
 
-const client = accountSid && authToken ? twilio(accountSid, authToken) : null;
-
-export class SMSService {
   /**
    * Generate a 6-digit verification code
    */
-  static generateVerificationCode(): string {
-    return crypto.randomInt(100000, 999999).toString();
-  }
-
-  /**
-   * Send SMS verification code
-   */
-  static async sendVerificationCode(phoneNumber: string, code: string): Promise<boolean> {
-    if (!client || !twilioPhone) {
-      console.error("Twilio not configured");
-      throw new Error("SMS service not available");
-    }
-
-    try {
-      // Format phone number (ensure it starts with +1 for US numbers)
-      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+1${phoneNumber.replace(/\D/g, '')}`;
-      
-      const message = await client.messages.create({
-        body: `Your SoapBox verification code is: ${code}. This code expires in 10 minutes.`,
-        from: twilioPhone,
-        to: formattedPhone,
-      });
-
-      console.log(`SMS sent successfully: ${message.sid}`);
-      return true;
-    } catch (error) {
-      console.error("Failed to send SMS:", error);
-      throw new Error("Failed to send verification code");
-    }
-  }
-
-  /**
-   * Send SMS notification (for general notifications)
-   */
-  static async sendNotification(phoneNumber: string, message: string): Promise<boolean> {
-    if (!client || !twilioPhone) {
-      console.error("Twilio not configured");
-      return false;
-    }
-
-    try {
-      const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+1${phoneNumber.replace(/\D/g, '')}`;
-      
-      const sms = await client.messages.create({
-        body: message,
-        from: twilioPhone,
-        to: formattedPhone,
-      });
-
-      console.log(`SMS notification sent: ${sms.sid}`);
-      return true;
-    } catch (error) {
-      console.error("Failed to send SMS notification:", error);
-      return false;
-    }
+  generateVerificationCode(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString();
   }
 
   /**
    * Validate phone number format
    */
   static validatePhoneNumber(phoneNumber: string): boolean {
-    // Basic US phone number validation
-    const phoneRegex = /^(\+1)?[2-9]\d{2}[2-9]\d{2}\d{4}$/;
-    const cleanPhone = phoneNumber.replace(/\D/g, '');
-    return phoneRegex.test(cleanPhone) || phoneRegex.test(`+1${cleanPhone}`);
+    // Remove all non-digits
+    const cleaned = phoneNumber.replace(/\D/g, '');
+    
+    // US phone numbers should be 10 or 11 digits (with or without country code)
+    if (cleaned.length === 10) {
+      return /^[2-9]\d{2}[2-9]\d{2}\d{4}$/.test(cleaned);
+    } else if (cleaned.length === 11 && cleaned.startsWith('1')) {
+      const withoutCountry = cleaned.substring(1);
+      return /^[2-9]\d{2}[2-9]\d{2}\d{4}$/.test(withoutCountry);
+    }
+    
+    return false;
   }
 
   /**
-   * Format phone number for display
+   * Format phone number for Twilio (E.164 format)
    */
-  static formatPhoneNumber(phoneNumber: string): string {
-    const cleanPhone = phoneNumber.replace(/\D/g, '');
-    if (cleanPhone.length === 10) {
-      return `(${cleanPhone.slice(0, 3)}) ${cleanPhone.slice(3, 6)}-${cleanPhone.slice(6)}`;
-    } else if (cleanPhone.length === 11 && cleanPhone.startsWith('1')) {
-      return `+1 (${cleanPhone.slice(1, 4)}) ${cleanPhone.slice(4, 7)}-${cleanPhone.slice(7)}`;
+  private formatPhoneNumber(phoneNumber: string): string {
+    const cleaned = phoneNumber.replace(/\D/g, '');
+    
+    if (cleaned.length === 10) {
+      return `+1${cleaned}`;
+    } else if (cleaned.length === 11 && cleaned.startsWith('1')) {
+      return `+${cleaned}`;
     }
-    return phoneNumber; // Return original if can't format
+    
+    throw new Error('Invalid phone number format');
+  }
+
+  /**
+   * Send SMS verification code
+   */
+  async sendVerificationCode(phoneNumber: string, code: string): Promise<boolean> {
+    if (!this.client) {
+      throw new Error('SMS service not configured');
+    }
+
+    try {
+      const fromNumber = process.env.TWILIO_PHONE_NUMBER;
+      if (!fromNumber) {
+        throw new Error('Twilio phone number not configured');
+      }
+
+      const formattedPhone = this.formatPhoneNumber(phoneNumber);
+      const message = `Your SoapBox verification code is: ${code}. This code expires in 10 minutes.`;
+
+      const result = await this.client.messages.create({
+        body: message,
+        from: fromNumber,
+        to: formattedPhone
+      });
+
+      console.log(`SMS sent successfully. SID: ${result.sid}`);
+      return true;
+
+    } catch (error) {
+      console.error('Failed to send SMS:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Legacy method for backwards compatibility
+   */
+  generateVerificationToken(): string {
+    return this.generateVerificationCode();
+  }
+
+  /**
+   * Legacy method for backwards compatibility
+   */
+  async sendVerificationSMS({ phoneNumber, firstName, token }: {
+    phoneNumber: string;
+    firstName: string;
+    token: string;
+  }): Promise<boolean> {
+    try {
+      await this.sendVerificationCode(phoneNumber, token);
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
+
+export { SMSService };
+export default new SMSService();

@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import EnhancedProfileEditor from "../components/EnhancedProfileEditor";
+import { SMSVerificationModal } from "../components/SMSVerificationModal";
 
 interface UserProfile {
   id: string;
@@ -180,6 +181,7 @@ export default function ProfilePage() {
   const [profileData, setProfileData] = useState<Partial<UserProfile>>({});
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [localProfileUpdates, setLocalProfileUpdates] = useState<Partial<UserProfile>>({});
+  const [showSMSVerification, setShowSMSVerification] = useState(false);
 
   // Fetch user profile data
   const { data: profile, isLoading: profileLoading } = useQuery<UserProfile>({
@@ -405,7 +407,7 @@ export default function ProfilePage() {
                     <Button 
                       size="sm" 
                       className="bg-orange-600 hover:bg-orange-700"
-                      onClick={() => setIsEditing(true)}
+                      onClick={() => setShowSMSVerification(true)}
                     >
                       Verify Mobile
                     </Button>
@@ -451,14 +453,20 @@ export default function ProfilePage() {
                             <div className="text-muted-foreground flex items-center gap-2">
                               <Phone className="h-4 w-4" />
                               <span>{profile.mobileNumber}</span>
-                              {profile?.phoneVerified ? (
+                              {profile?.phoneVerified && (
                                 <Badge variant="outline" className="text-xs text-green-600 border-green-200">
                                   Verified
                                 </Badge>
-                              ) : (
-                                <Badge variant="outline" className="text-xs text-orange-600 border-orange-200">
-                                  Unverified
-                                </Badge>
+                              )}
+                              {!profile?.phoneVerified && profile?.mobileNumber && (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="text-xs text-orange-600 border-orange-200 hover:bg-orange-50"
+                                  onClick={() => setShowSMSVerification(true)}
+                                >
+                                  Verify
+                                </Button>
                               )}
                             </div>
                           )}
@@ -691,6 +699,22 @@ export default function ProfilePage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* SMS Verification Modal */}
+      <SMSVerificationModal 
+        isOpen={showSMSVerification}
+        onClose={() => setShowSMSVerification(false)}
+        phoneNumber={profile?.mobileNumber || ''}
+        onVerificationComplete={() => {
+          queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+          setShowSMSVerification(false);
+          toast({
+            title: "Phone Verified!",
+            description: "Your phone number has been successfully verified.",
+          });
+        }}
+        mode="profile"
+      />
     </div>
   );
 }

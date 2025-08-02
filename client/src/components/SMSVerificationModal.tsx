@@ -1,59 +1,55 @@
-import { useState, useEffect } from "react";
-import { Button } from "./ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Alert, AlertDescription } from "./ui/alert";
-import { Smartphone, MessageSquare, Shield, CheckCircle, Loader2, X } from "lucide-react";
-import { useToast } from "../hooks/use-toast";
-import { apiRequest } from "../lib/queryClient";
-import { useMutation } from "@tanstack/react-query";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
+import { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useToast } from '@/hooks/use-toast';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { Shield, Phone, MessageSquare, Clock, RefreshCw } from 'lucide-react';
 
 interface SMSVerificationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  userEmail?: string;
-  onVerificationSuccess?: () => void;
-  title?: string;
-  description?: string;
+  phoneNumber?: string;
+  onVerificationComplete?: () => void;
+  mode?: 'initial' | 'profile' | 'security';
 }
 
-export default function SMSVerificationModal({
-  isOpen,
-  onClose,
-  userEmail,
-  onVerificationSuccess,
-  title = "Verify Your Phone Number",
-  description = "Add an extra layer of security to your account by verifying your phone number."
+export function SMSVerificationModal({ 
+  isOpen, 
+  onClose, 
+  phoneNumber: initialPhoneNumber = '', 
+  onVerificationComplete,
+  mode = 'profile'
 }: SMSVerificationModalProps) {
-  const [step, setStep] = useState<'phone' | 'code'>('phone');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [step, setStep] = useState<'phone' | 'verify'>('phone');
+  const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber);
   const [verificationCode, setVerificationCode] = useState('');
-  const [timeRemaining, setTimeRemaining] = useState(0);
-  const [formattedPhone, setFormattedPhone] = useState('');
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [attempts, setAttempts] = useState(3);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
-  // Countdown timer for resend
+  // Timer for code expiration
   useEffect(() => {
-    if (timeRemaining > 0) {
-      const timer = setTimeout(() => setTimeRemaining(timeRemaining - 1), 1000);
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
     }
-  }, [timeRemaining]);
+  }, [timeLeft]);
 
   // Format phone number as user types
   const formatPhoneNumber = (value: string) => {
-    const phoneNumber = value.replace(/\D/g, '');
+    const phoneNumber = value.replace(/[^\d]/g, '');
     const phoneNumberLength = phoneNumber.length;
     
-    if (phoneNumberLength < 4) {
-      return phoneNumber;
-    } else if (phoneNumberLength < 7) {
+    if (phoneNumberLength < 4) return phoneNumber;
+    if (phoneNumberLength < 7) {
       return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
-    } else {
-      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
     }
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,20 +59,15 @@ export default function SMSVerificationModal({
 
   // Send SMS verification code
   const sendCodeMutation = useMutation({
-    mutationFn: async () => {
-      const cleanPhone = phoneNumber.replace(/\D/g, '');
-      return await apiRequest('/api/auth/send-sms-verification', 'POST', { 
-        phoneNumber: cleanPhone,
-        email: userEmail
-      });
-    },
+    mutationFn: (data: { phoneNumber: string }) => 
+      apiRequest('/api/auth/send-sms-verification', 'POST', data),
     onSuccess: (data) => {
-      setFormattedPhone(data.formattedPhone);
-      setStep('code');
-      setTimeRemaining(60); // 1 minute cooldown
+      setStep('verify');
+      setTimeLeft(600); // 10 minutes
+      setAttempts(data.attemptsRemaining || 3);
       toast({
-        title: "Code Sent!",
-        description: `Verification code sent to ${data.formattedPhone}`,
+        title: "Verification Code Sent",
+        description: `We've sent a 6-digit code to ${phoneNumber}`,
       });
     },
     onError: (error: any) => {
@@ -85,154 +76,169 @@ export default function SMSVerificationModal({
         description: error.message || "Please check your phone number and try again.",
         variant: "destructive",
       });
-    },
+    }
   });
 
   // Verify SMS code
   const verifyCodeMutation = useMutation({
-    mutationFn: async () => {
-      const cleanPhone = phoneNumber.replace(/\D/g, '');
-      return await apiRequest('/api/auth/verify-sms', 'POST', { 
-        code: verificationCode,
-        phoneNumber: cleanPhone,
-        email: userEmail
-      });
-    },
+    mutationFn: (data: { code: string }) => 
+      apiRequest('/api/auth/verify-sms-code', 'POST', data),
     onSuccess: () => {
       toast({
         title: "Phone Verified!",
         description: "Your phone number has been successfully verified.",
-        className: "bg-green-50 border-green-200 text-green-800",
       });
-      onVerificationSuccess?.();
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      onVerificationComplete?.();
       onClose();
     },
     onError: (error: any) => {
       toast({
         title: "Verification Failed",
-        description: error.message || "Invalid or expired verification code.",
+        description: error.message || "Invalid code. Please try again.",
         variant: "destructive",
       });
+      setVerificationCode('');
+    }
+  });
+
+  // Resend verification code
+  const resendCodeMutation = useMutation({
+    mutationFn: () => apiRequest('/api/auth/resend-sms-verification', 'POST', {}),
+    onSuccess: (data) => {
+      setTimeLeft(600); // Reset to 10 minutes
+      setAttempts(data.attemptsRemaining || 3);
+      setVerificationCode('');
+      toast({
+        title: "Code Resent",
+        description: `A new verification code has been sent to ${phoneNumber}`,
+      });
     },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Resend",
+        description: error.message || "Please try again later.",
+        variant: "destructive",
+      });
+    }
   });
 
   const handleSendCode = () => {
-    const cleanPhone = phoneNumber.replace(/\D/g, '');
-    if (cleanPhone.length < 10) {
+    if (!phoneNumber.trim()) {
       toast({
-        title: "Invalid Phone Number",
-        description: "Please enter a valid 10-digit phone number.",
+        title: "Phone Number Required",
+        description: "Please enter your phone number.",
         variant: "destructive",
       });
       return;
     }
-    sendCodeMutation.mutate();
+    
+    // Clean phone number for API
+    const cleanPhone = phoneNumber.replace(/[^\d]/g, '');
+    sendCodeMutation.mutate({ phoneNumber: cleanPhone });
   };
 
   const handleVerifyCode = () => {
-    if (verificationCode.length !== 6) {
+    if (!verificationCode.trim()) {
       toast({
-        title: "Invalid Code",
-        description: "Please enter the 6-digit verification code.",
+        title: "Code Required",
+        description: "Please enter the verification code.",
         variant: "destructive",
       });
       return;
     }
-    verifyCodeMutation.mutate();
+    
+    verifyCodeMutation.mutate({ code: verificationCode });
   };
 
-  const handleResendCode = () => {
-    if (timeRemaining === 0) {
-      sendCodeMutation.mutate();
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const getModalTitle = () => {
+    switch (mode) {
+      case 'initial': return 'Verify Your Phone Number';
+      case 'security': return 'Security Verification';
+      default: return 'Phone Verification';
     }
   };
 
-  const resetModal = () => {
-    setStep('phone');
-    setPhoneNumber('');
-    setVerificationCode('');
-    setTimeRemaining(0);
-    setFormattedPhone('');
-  };
-
-  const handleClose = () => {
-    resetModal();
-    onClose();
+  const getModalDescription = () => {
+    switch (mode) {
+      case 'initial': 
+        return 'Phone verification helps keep your account secure and enables SMS notifications for prayer requests and community updates.';
+      case 'security': 
+        return 'For your security, please verify your phone number to continue.';
+      default: 
+        return 'Verify your phone number to enable SMS notifications and enhance account security.';
+    }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {step === 'phone' ? (
-              <>
-                <Smartphone className="w-5 h-5 text-purple-600" />
-                {title}
-              </>
-            ) : (
-              <>
-                <MessageSquare className="w-5 h-5 text-purple-600" />
-                Enter Verification Code
-              </>
-            )}
+            <Shield className="h-5 w-5 text-blue-500" />
+            {getModalTitle()}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {step === 'phone' ? (
-            // Phone number input step
-            <>
-              <div className="text-center space-y-2">
-                <Shield className="w-12 h-12 text-purple-600 mx-auto" />
-                <p className="text-sm text-muted-foreground">
-                  {description}
-                </p>
-              </div>
+        <div className="space-y-6">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {getModalDescription()}
+          </p>
 
-              <Alert>
-                <Shield className="h-4 w-4" />
-                <AlertDescription>
-                  We'll send a 6-digit code to verify your phone number. Standard message rates may apply.
-                </AlertDescription>
-              </Alert>
-
+          {step === 'phone' && (
+            <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="(555) 123-4567"
-                  value={phoneNumber}
-                  onChange={handlePhoneChange}
-                  maxLength={14}
-                />
-              </div>
-
-              <Button 
-                onClick={handleSendCode}
-                disabled={sendCodeMutation.isPending || phoneNumber.length < 14}
-                className="w-full"
-              >
-                {sendCodeMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Sending Code...
-                  </>
-                ) : (
-                  'Send Verification Code'
-                )}
-              </Button>
-            </>
-          ) : (
-            // Verification code input step
-            <>
-              <div className="text-center space-y-2">
-                <MessageSquare className="w-12 h-12 text-purple-600 mx-auto" />
-                <p className="text-sm text-muted-foreground">
-                  We sent a 6-digit code to {formattedPhone}
+                <div className="relative">
+                  <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="(555) 123-4567"
+                    value={phoneNumber}
+                    onChange={handlePhoneChange}
+                    className="pl-10"
+                    maxLength={14}
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  We'll send a 6-digit verification code to this number
                 </p>
               </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={onClose}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSendCode}
+                  disabled={sendCodeMutation.isPending || !phoneNumber.trim()}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                >
+                  {sendCodeMutation.isPending ? "Sending..." : "Send Code"}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {step === 'verify' && (
+            <div className="space-y-4">
+              <Alert>
+                <MessageSquare className="h-4 w-4" />
+                <AlertDescription>
+                  We've sent a 6-digit code to <strong>{phoneNumber}</strong>
+                </AlertDescription>
+              </Alert>
 
               <div className="space-y-2">
                 <Label htmlFor="code">Verification Code</Label>
@@ -241,53 +247,55 @@ export default function SMSVerificationModal({
                   type="text"
                   placeholder="123456"
                   value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  onChange={(e) => setVerificationCode(e.target.value.replace(/[^\d]/g, '').slice(0, 6))}
+                  className="text-center text-lg tracking-widest"
                   maxLength={6}
-                  className="text-center text-lg letter-spacing-wide"
                 />
               </div>
 
-              <div className="flex gap-2">
+              {timeLeft > 0 && (
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Clock className="h-4 w-4" />
+                  Code expires in {formatTime(timeLeft)}
+                </div>
+              )}
+
+              <div className="flex gap-3">
                 <Button 
-                  variant="outline"
+                  variant="outline" 
                   onClick={() => setStep('phone')}
                   className="flex-1"
                 >
-                  Change Number
+                  Back
                 </Button>
                 <Button 
                   onClick={handleVerifyCode}
-                  disabled={verifyCodeMutation.isPending || verificationCode.length !== 6}
-                  className="flex-1"
+                  disabled={verifyCodeMutation.isPending || !verificationCode.trim() || verificationCode.length !== 6}
+                  className="flex-1 bg-green-600 hover:bg-green-700"
                 >
-                  {verifyCodeMutation.isPending ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Verifying...
-                    </>
-                  ) : (
-                    'Verify'
-                  )}
+                  {verifyCodeMutation.isPending ? "Verifying..." : "Verify"}
                 </Button>
               </div>
 
-              <div className="text-center">
-                <Button
-                  variant="link"
-                  onClick={handleResendCode}
-                  disabled={timeRemaining > 0 || sendCodeMutation.isPending}
-                  className="text-sm"
-                >
-                  {timeRemaining > 0 ? (
-                    `Resend code in ${timeRemaining}s`
-                  ) : sendCodeMutation.isPending ? (
-                    'Sending...'
-                  ) : (
-                    'Resend code'
+              {timeLeft === 0 || attempts < 3 ? (
+                <div className="text-center">
+                  <Button
+                    variant="ghost"
+                    onClick={() => resendCodeMutation.mutate()}
+                    disabled={resendCodeMutation.isPending || attempts <= 0}
+                    className="text-sm text-blue-600 hover:text-blue-700"
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${resendCodeMutation.isPending ? 'animate-spin' : ''}`} />
+                    {resendCodeMutation.isPending ? "Resending..." : "Resend Code"}
+                  </Button>
+                  {attempts <= 0 && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Maximum attempts reached. Please try again later.
+                    </p>
                   )}
-                </Button>
-              </div>
-            </>
+                </div>
+              ) : null}
+            </div>
           )}
         </div>
       </DialogContent>
