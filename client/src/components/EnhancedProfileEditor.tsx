@@ -34,7 +34,9 @@ import {
   Plus,
   Minus,
   CheckCircle,
-  RefreshCw
+  RefreshCw,
+  ArrowLeft,
+  ArrowRight
 } from "lucide-react";
 import ChurchLookupModal from "./ChurchLookupModal";
 
@@ -150,6 +152,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const [favoriteVerses, setFavoriteVerses] = useState<string[]>(profile.favoriteScriptures || []);
   const [verseTexts, setVerseTexts] = useState<{ [key: number]: { text: string; reference: string; version: string } }>({});
   const [showChurchLookup, setShowChurchLookup] = useState(false);
+  const [currentTab, setCurrentTab] = useState("basic");
 
   const handleSave = () => {
     onSave({
@@ -185,6 +188,74 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const [verseValidation, setVerseValidation] = useState<{ [key: number]: { isValid: boolean; message: string; suggestion?: string } }>({});
   const [showGiftsAssessment, setShowGiftsAssessment] = useState(false);
   const [showGiftsInfoModal, setShowGiftsInfoModal] = useState(false);
+
+  // Profile completion calculation
+  const calculateProfileCompletion = () => {
+    const fields = [
+      formData.firstName,
+      formData.lastName,
+      formData.bio,
+      formData.languagePreference,
+      formData.churchAffiliation,
+      formData.spiritualStage,
+      formData.preferredBibleTranslation,
+      formData.spiritualProfile,
+      selectedMinistries.length > 0,
+      selectedGoals.length > 0,
+      favoriteVerses.length > 0
+    ];
+    
+    const completed = fields.filter(Boolean).length;
+    return Math.round((completed / fields.length) * 100);
+  };
+
+  const tabs = ["basic", "spiritual", "gifts", "engagement", "growth", "privacy"];
+  const tabLabels = ["Basic", "Spiritual", "Gifts", "Community", "Growth", "Privacy"];
+
+  const goToNextTab = () => {
+    const currentIndex = tabs.indexOf(currentTab);
+    if (currentIndex < tabs.length - 1) {
+      setCurrentTab(tabs[currentIndex + 1]);
+    }
+  };
+
+  const goToPrevTab = () => {
+    const currentIndex = tabs.indexOf(currentTab);
+    if (currentIndex > 0) {
+      setCurrentTab(tabs[currentIndex - 1]);
+    }
+  };
+
+  const completionPercentage = calculateProfileCompletion();
+
+  // Tab navigation component
+  const TabNavigation = ({ currentTabIndex }: { currentTabIndex: number }) => {
+    const nextTabName = currentTabIndex < tabLabels.length - 1 ? tabLabels[currentTabIndex + 1] : null;
+    
+    return (
+      <div className="flex justify-between pt-6">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={goToPrevTab}
+          disabled={currentTabIndex === 0}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Previous
+        </Button>
+        <Button
+          type="button"
+          onClick={goToNextTab}
+          disabled={currentTabIndex === tabLabels.length - 1}
+          className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+        >
+          {nextTabName ? `Next: ${nextTabName}` : "Save Profile"}
+          <ArrowRight className="w-4 h-4" />
+        </Button>
+      </div>
+    );
+  };
 
   const lookupVerse = async (verse: string, index: number) => {
     const trimmedVerse = verse.trim();
@@ -435,7 +506,30 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="basic" className="w-full">
+      {/* Profile Completion Progress */}
+      <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            Profile Completion
+          </h3>
+          <span className="text-sm font-semibold text-purple-600 dark:text-purple-400">
+            {completionPercentage}%
+          </span>
+        </div>
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+          <div 
+            className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300 ease-out"
+            style={{ width: `${completionPercentage}%` }}
+          ></div>
+        </div>
+        {completionPercentage < 100 && (
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+            Complete your profile to unlock all features and better connect with your community!
+          </p>
+        )}
+      </div>
+
+      <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="basic" className="flex items-center gap-2">
             <User className="w-4 h-4" />
@@ -619,6 +713,8 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
               </div>
             </CardContent>
           </Card>
+          
+          <TabNavigation currentTabIndex={0} />
         </TabsContent>
 
         {/* Spiritual Profile Tab */}
@@ -797,6 +893,8 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
               </div>
             </CardContent>
           </Card>
+          
+          <TabNavigation currentTabIndex={1} />
         </TabsContent>
 
         {/* Spiritual Gifts Tab */}
@@ -986,6 +1084,8 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
               </div>
             </CardContent>
           </Card>
+          
+          <TabNavigation currentTabIndex={2} />
         </TabsContent>
 
         {/* Community Engagement Tab */}
@@ -1033,6 +1133,8 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
               </div>
             </CardContent>
           </Card>
+          
+          <TabNavigation currentTabIndex={3} />
         </TabsContent>
 
         {/* Growth & Goals Tab */}
@@ -1101,6 +1203,8 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
               </div>
             </CardContent>
           </Card>
+          
+          <TabNavigation currentTabIndex={4} />
         </TabsContent>
 
         {/* Privacy Settings Tab */}
@@ -1179,6 +1283,8 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
               </div>
             </CardContent>
           </Card>
+          
+          <TabNavigation currentTabIndex={5} />
         </TabsContent>
       </Tabs>
 
