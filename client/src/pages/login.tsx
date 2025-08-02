@@ -40,6 +40,23 @@ export default function LoginPage() {
     lastName: "",
   });
 
+  // Check for email parameter in URL (from onboarding redirect)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const emailParam = urlParams.get('email');
+    if (emailParam) {
+      setFormData(prev => ({ ...prev, email: emailParam }));
+      // Show a helpful message about existing account
+      toast({
+        title: "Account Already Exists",
+        description: "Please sign in with your existing credentials.",
+        variant: "default"
+      });
+      // Clean up URL
+      window.history.replaceState({}, '', '/login');
+    }
+  }, [toast]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
       ...prev,

@@ -146,12 +146,30 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
         title: "Welcome to SoapBox!",
         description: "Your account has been created successfully.",
       });
-    } catch (error) {
-      toast({
-        title: "Setup Error",
-        description: "There was an issue completing your setup. Please try again.",
-        variant: "destructive"
-      });
+    } catch (error: any) {
+      console.error('Onboarding error:', error);
+      
+      // Check if it's an existing account error
+      const errorMessage = error?.message || error?.toString() || '';
+      if (errorMessage.includes('already have an account') || errorMessage.includes('already exists')) {
+        toast({
+          title: "Account Already Exists",
+          description: "Redirecting you to the login page...",
+          variant: "default"
+        });
+        
+        // Navigate to login immediately with pre-filled email
+        setTimeout(() => {
+          const loginUrl = `/login?email=${encodeURIComponent(formData.email)}`;
+          window.location.href = loginUrl;
+        }, 1500);
+      } else {
+        toast({
+          title: "Setup Error",
+          description: errorMessage || "There was an issue completing your setup. Please try again.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsLoading(false);
     }
