@@ -243,28 +243,32 @@ export default function ProfilePage() {
       });
     },
     onSuccess: async (data) => {
+      console.log('Profile update success - received data:', data);
       
       // Clear local updates on successful save
       setLocalProfileUpdates({});
       
       // Gentle cache refresh without invalidating auth state
       try {
-        
-        // Update the cache data directly instead of invalidating
+        // Update the cache data directly with the returned user data
         queryClient.setQueryData(["/api/auth/user"], (oldData: any) => {
           if (!oldData) return oldData;
-          return { ...oldData, ...data.user };
+          const updatedUser = { ...oldData, ...data.user };
+          console.log('Updating cache with user data:', updatedUser);
+          return updatedUser;
         });
         
-        // Refresh only if needed, without forcing re-authentication
+        // Force a refetch to ensure we get the latest data from the server
         setTimeout(async () => {
-          await queryClient.refetchQueries({ 
+          const refreshedData = await queryClient.refetchQueries({ 
             queryKey: ["/api/auth/user"],
             exact: true 
           });
+          console.log('Refetched user data:', refreshedData);
         }, 500);
         
       } catch (error) {
+        console.error('Error updating cache:', error);
       }
       
       toast({
