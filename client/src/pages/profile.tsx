@@ -199,19 +199,7 @@ export default function ProfilePage() {
   // Profile update mutation
   const updateProfileMutation = useMutation({
     mutationFn: async (data: Partial<UserProfile>) => {
-      console.log('Sending profile update with privacy settings:', {
-        showBioPublicly: data.showBioPublicly,
-        showChurchAffiliation: data.showChurchAffiliation,
-        shareWithGroup: data.shareWithGroup,
-        showAgeRange: data.showAgeRange,
-        showLocation: data.showLocation,
-        showMobile: data.showMobile,
-        showGender: data.showGender,
-        showDenomination: data.showDenomination,
-        showSpiritualGifts: data.showSpiritualGifts
-      });
       const response = await apiRequest("PUT", "/api/users/profile", data);
-      console.log('Profile update response:', response);
       return response;
     },
     onMutate: async (updatedData) => {
@@ -243,30 +231,15 @@ export default function ProfilePage() {
       });
     },
     onSuccess: async (data) => {
-      console.log('Profile update success - received data:', data);
-      
       // Clear local updates on successful save
       setLocalProfileUpdates({});
       
-      // Gentle cache refresh without invalidating auth state
+      // Update the cache with the returned user data
       try {
-        // Update the cache data directly with the returned user data
         queryClient.setQueryData(["/api/auth/user"], (oldData: any) => {
           if (!oldData) return oldData;
-          const updatedUser = { ...oldData, ...data.user };
-          console.log('Updating cache with user data:', updatedUser);
-          return updatedUser;
+          return { ...oldData, ...data.user };
         });
-        
-        // Force a refetch to ensure we get the latest data from the server
-        setTimeout(async () => {
-          const refreshedData = await queryClient.refetchQueries({ 
-            queryKey: ["/api/auth/user"],
-            exact: true 
-          });
-          console.log('Refetched user data:', refreshedData);
-        }, 500);
-        
       } catch (error) {
         console.error('Error updating cache:', error);
       }
