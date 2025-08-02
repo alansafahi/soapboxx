@@ -185,14 +185,32 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
 
   // Photo upload handlers
   const handleGetUploadParameters = async () => {
-    const response = await apiRequest("/api/profile/photo/upload", { method: "POST" });
-    if (!response.uploadURL) {
-      throw new Error("Failed to get upload URL");
+    try {
+      const response = await fetch("/api/profile/photo/upload", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Upload URL request failed: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      if (!data.uploadURL) {
+        throw new Error("Failed to get upload URL");
+      }
+      
+      return {
+        method: "PUT" as const,
+        url: data.uploadURL,
+      };
+    } catch (error) {
+      console.error("Error getting upload parameters:", error);
+      throw error;
     }
-    return {
-      method: "PUT" as const,
-      url: response.uploadURL,
-    };
   };
 
   const handlePhotoUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
@@ -203,17 +221,30 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
         const photoURL = uploadedFile.uploadURL;
 
         // Update profile with the uploaded photo
-        const response = await apiRequest("/api/profile/photo", {
+        const response = await fetch("/api/profile/photo", {
           method: "PUT",
+          credentials: "include",
           body: JSON.stringify({ photoURL }),
           headers: { "Content-Type": "application/json" },
         });
+        
+        if (!response.ok) {
+          throw new Error(`Photo update failed: ${response.status}`);
+        }
+        
+        const data = await response.json();
 
-        if (response.success) {
+        if (data.success) {
           setFormData(prev => ({
             ...prev,
-            profileImageUrl: response.photoURL
+            profileImageUrl: data.objectPath
           }));
+          
+          // Also call the parent's onSave to update the profile
+          onSave({
+            ...formData,
+            profileImageUrl: data.objectPath
+          });
         }
       }
     } catch (error) {

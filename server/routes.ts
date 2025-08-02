@@ -15623,7 +15623,7 @@ Please provide suggestions for the missing or incomplete sections.`
   // Endpoint for updating profile with uploaded photo
   app.put("/api/profile/photo", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub;
+      const userId = req.session.userId || req.user?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ error: "Authentication required" });
       }
