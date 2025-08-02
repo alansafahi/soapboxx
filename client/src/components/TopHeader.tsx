@@ -1,6 +1,7 @@
 import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles, Building2, CheckCircle, UserCog, Users2, HandHeart, QrCode, Flag, Trophy, Bookmark, Building } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import ProfileVerificationRing from "./ProfileVerificationRing";
 import { useTheme } from "../hooks/useTheme";
 import { useImmediateAuth } from "../lib/immediateAuth";
 import { Link } from "wouter";
@@ -572,21 +573,19 @@ export default function TopHeader() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-12 w-12 rounded-full p-0">
-              <div className="h-10 w-10 rounded-full bg-purple-600 flex items-center justify-center text-white text-sm font-semibold relative overflow-hidden">
-                {typedUser?.profileImageUrl ? (
-                  <img 
-                    src={typedUser.profileImageUrl} 
-                    alt="Profile"
-                    className="absolute inset-0 h-full w-full object-cover"
-                    style={{ zIndex: 10 }}
-                    onLoad={() => {}}
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
-                ) : null}
-                <span style={{ zIndex: 5 }}>{getUserInitials()}</span>
-              </div>
+              <ProfileVerificationRing
+                emailVerified={typedUser?.emailVerified === true}
+                phoneVerified={typedUser?.phoneVerified === true}
+                isLeadership={typedUser?.role === 'pastor' || typedUser?.role === 'admin' || typedUser?.role === 'owner' || typedUser?.role === 'soapbox_owner'}
+                size="sm"
+              >
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={typedUser?.profileImageUrl || undefined} />
+                  <AvatarFallback className="bg-purple-600 text-white text-sm font-semibold">
+                    {getUserInitials()}
+                  </AvatarFallback>
+                </Avatar>
+              </ProfileVerificationRing>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">

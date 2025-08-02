@@ -6,6 +6,7 @@ import type { EnhancedMoodIndicator } from "@shared/schema";
 import { useToast } from "../hooks/use-toast";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import ProfileVerificationRing from "./ProfileVerificationRing";
 import { Textarea } from "./ui/textarea";
 import { Input } from "./ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "./ui/dialog";
@@ -419,12 +420,19 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
       className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border-0 shadow-md hover:shadow-lg transition-all duration-300 ${isExpanded ? 'p-6' : 'p-4'} ${className}`}
     >
       <div className="flex space-x-3">
-        <Avatar className="w-8 h-8">
-          <AvatarImage src={user.profileImageUrl || undefined} />
-          <AvatarFallback className="bg-purple-100 text-purple-600 text-sm">
-            {user.firstName?.[0]}{user.lastName?.[0]}
-          </AvatarFallback>
-        </Avatar>
+        <ProfileVerificationRing
+          emailVerified={user.emailVerified === true}
+          phoneVerified={user.phoneVerified === true}
+          isLeadership={user.role === 'pastor' || user.role === 'admin' || user.role === 'owner' || user.role === 'soapbox_owner'}
+          size="sm"
+        >
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={user.profileImageUrl || undefined} />
+            <AvatarFallback className="bg-purple-100 text-purple-600 text-sm">
+              {user.firstName?.[0]}{user.lastName?.[0]}
+            </AvatarFallback>
+          </Avatar>
+        </ProfileVerificationRing>
         
         <div className="flex-1 space-y-3">
           <Textarea

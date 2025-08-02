@@ -67,14 +67,15 @@ export function ProfileVerificationRing({
   return (
     <div 
       className={cn(
-        "relative rounded-full",
+        "relative rounded-full flex-shrink-0",
         ringClass,
         sizeConfig[size],
         className
       )}
       title={title}
+      style={{ aspectRatio: '1 / 1' }}
     >
-      <div className="rounded-full overflow-hidden">
+      <div className="rounded-full overflow-hidden w-full h-full flex items-center justify-center">
         {children}
       </div>
     </div>
