@@ -1160,6 +1160,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         twoFactorEnabled: user.twoFactorEnabled,
         twoFactorMethod: user.twoFactorMethod,
         emailVerified: user.emailVerified,
+        phoneVerified: user.phoneVerified,
+        
+        // Privacy Settings
+        showBioPublicly: user.showBioPublicly,
+        showChurchAffiliation: user.showChurchAffiliation,
+        shareWithGroup: user.shareWithGroup,
+        showAgeRange: user.showAgeRange,
+        showLocation: user.showLocation,
+        showMobile: user.showMobile,
+        showGender: user.showGender,
+        showDenomination: user.showDenomination,
+        showSpiritualGifts: user.showSpiritualGifts,
+        
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
       };
