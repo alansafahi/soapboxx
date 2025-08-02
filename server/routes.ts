@@ -1138,6 +1138,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         zipCode: user.zipCode,
         country: user.country,
         denomination: user.denomination,
+        
+        // Enhanced Profile Fields - Include registration data
+        ageRange: user.ageRange,
+        gender: user.gender,
+        churchAffiliation: user.churchAffiliation,
+        spiritualStage: user.spiritualStage,
+        ministryInterests: user.ministryInterests || [],
+        volunteerInterest: user.volunteerInterest,
+        
         interests: user.interests || [],
         hasCompletedOnboarding: user.hasCompletedOnboarding,
         onboardingData: user.onboardingData,
