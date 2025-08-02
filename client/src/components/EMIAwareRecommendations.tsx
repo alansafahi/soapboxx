@@ -77,12 +77,6 @@ export default function EMIAwareRecommendations({
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-    selectedMoodCount: selectedMoodIds.length, 
-    isLoading, 
-    error: error?.message, 
-    recommendationsCount: recommendations.length 
-  });
-
   if (!isVisible || selectedMoodIds.length === 0) {
 
     return null;
