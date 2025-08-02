@@ -1020,6 +1020,32 @@ export class DatabaseStorage implements IStorage {
       if (profileData.denomination !== undefined) updateData.denomination = profileData.denomination;
       if (profileData.interests !== undefined) updateData.interests = profileData.interests;
       
+      // Profile and demographic fields
+      if (profileData.ageRange !== undefined) updateData.ageRange = profileData.ageRange;
+      if (profileData.gender !== undefined) updateData.gender = profileData.gender;
+      if (profileData.churchAffiliation !== undefined) updateData.churchAffiliation = profileData.churchAffiliation;
+      if (profileData.spiritualStage !== undefined) updateData.spiritualStage = profileData.spiritualStage;
+      if (profileData.preferredBibleTranslation !== undefined) updateData.preferredBibleTranslation = profileData.preferredBibleTranslation;
+      if (profileData.languagePreference !== undefined) updateData.languagePreference = profileData.languagePreference;
+      
+      // Social and ministry fields
+      if (profileData.favoriteScriptures !== undefined) updateData.favoriteScriptures = profileData.favoriteScriptures;
+      if (profileData.ministryInterests !== undefined) updateData.ministryInterests = profileData.ministryInterests;
+      if (profileData.growthGoals !== undefined) updateData.growthGoals = profileData.growthGoals;
+      if (profileData.spiritualGifts !== undefined) updateData.spiritualGifts = profileData.spiritualGifts;
+      if (profileData.spiritualProfile !== undefined) updateData.spiritualProfile = profileData.spiritualProfile;
+      
+      // Privacy settings
+      if (profileData.showBioPublicly !== undefined) updateData.showBioPublicly = profileData.showBioPublicly;
+      if (profileData.showChurchAffiliation !== undefined) updateData.showChurchAffiliation = profileData.showChurchAffiliation;
+      if (profileData.shareWithGroup !== undefined) updateData.shareWithGroup = profileData.shareWithGroup;
+      if (profileData.showAgeRange !== undefined) updateData.showAgeRange = profileData.showAgeRange;
+      if (profileData.showLocation !== undefined) updateData.showLocation = profileData.showLocation;
+      if (profileData.showMobile !== undefined) updateData.showMobile = profileData.showMobile;
+      if (profileData.showGender !== undefined) updateData.showGender = profileData.showGender;
+      if (profileData.showDenomination !== undefined) updateData.showDenomination = profileData.showDenomination;
+      if (profileData.showSpiritualGifts !== undefined) updateData.showSpiritualGifts = profileData.showSpiritualGifts;
+      
       // Always update timestamp
       updateData.updatedAt = new Date();
 
