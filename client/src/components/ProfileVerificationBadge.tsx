@@ -5,7 +5,7 @@ interface ProfileVerificationBadgeProps {
   emailVerified?: boolean | null;
   phoneVerified?: boolean | null;
   isLeadership?: boolean;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   className?: string;
 }
 
@@ -61,12 +61,14 @@ export default function ProfileVerificationBadge({
 
   // Size configurations for small badge next to profile
   const sizeConfig = {
+    xs: "w-3 h-3",
     sm: "w-4 h-4",
     md: "w-5 h-5", 
     lg: "w-6 h-6"
   };
 
   const iconSizeConfig = {
+    xs: "w-2 h-2",
     sm: "w-2.5 h-2.5",
     md: "w-3 h-3",
     lg: "w-3.5 h-3.5"
