@@ -418,21 +418,13 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     const verses: { [key: string]: string } = {};
     
     try {
+      // Use local scripture references instead of external API
       for (const [gift, data] of Object.entries(spiritualGiftsData)) {
-        try {
-          const response = await fetch(`https://bible-api.com/${encodeURIComponent(data.scripture)}`);
-          if (response.ok) {
-            const verseData = await response.json();
-            verses[gift] = verseData.text?.trim() || '';
-          }
-        } catch (error) {
-          // Silently fail verse loading - not critical
-          verses[gift] = '';
-        }
+        verses[gift] = data.scripture || '';
       }
       setGiftVerses(verses);
     } catch (error) {
-      // Silently handle error - verse loading is optional
+      console.log('Error loading gift verses:', error);
     } finally {
       setLoadingVerses(false);
     }
