@@ -9600,6 +9600,18 @@ Return JSON with this exact structure:
       }
       
       const feedPosts = await storage.getFeedPosts(userId);
+      
+      // Debug the first post to see what data is being returned
+      if (feedPosts && feedPosts.length > 0) {
+        console.log('🔍 DEBUG - Feed API Response (first post author):', {
+          authorId: feedPosts[0].author?.id || feedPosts[0].authorId,
+          emailVerified: feedPosts[0].author?.emailVerified,
+          phoneVerified: feedPosts[0].author?.phoneVerified,
+          role: feedPosts[0].author?.role,
+          name: feedPosts[0].author?.name
+        });
+      }
+      
       res.json(feedPosts);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch feed" });
