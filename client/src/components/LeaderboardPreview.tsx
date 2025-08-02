@@ -3,7 +3,7 @@ import { Trophy, Crown, Medal, Award, ChevronRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Link } from 'wouter';
-import { ProfileVerificationBadge } from './ProfileVerificationBadge';
+import ProfileVerificationRing from './ProfileVerificationRing';
 
 interface LeaderboardEntry {
   rank: number;
@@ -121,19 +121,20 @@ export default function LeaderboardPreview() {
             <div className="flex-shrink-0 relative">
               {getRankIcon(user.rank)}
             </div>
-            <div className="flex-shrink-0 w-8 h-8 relative">
-              <img
-                className="w-full h-full rounded-full border border-purple-200 dark:border-purple-600 object-cover"
-                src={user.avatarUrl || user.profileImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName + ' ' + user.lastName)}&background=8b5cf6&color=fff&size=32`}
-                alt={`${user.firstName} ${user.lastName}`}
-              />
-              <ProfileVerificationBadge 
-                emailVerified={user.emailVerified === true}
-                phoneVerified={user.phoneVerified === true}
-                isLeadership={user.role === 'pastor' || user.role === 'admin' || user.role === 'owner'}
-                size="xs"
-              />
-            </div>
+            <ProfileVerificationRing
+              emailVerified={user.emailVerified === true}
+              phoneVerified={user.phoneVerified === true}
+              isLeadership={user.role === 'pastor' || user.role === 'admin' || user.role === 'owner'}
+              size="xs"
+            >
+              <div className="flex-shrink-0 w-8 h-8 relative">
+                <img
+                  className="w-full h-full rounded-full border border-purple-200 dark:border-purple-600 object-cover"
+                  src={user.avatarUrl || user.profileImageUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.firstName + ' ' + user.lastName)}&background=8b5cf6&color=fff&size=32`}
+                  alt={`${user.firstName} ${user.lastName}`}
+                />
+              </div>
+            </ProfileVerificationRing>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                 {user.firstName} {user.lastName}

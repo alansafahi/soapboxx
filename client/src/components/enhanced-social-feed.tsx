@@ -28,7 +28,7 @@ import { formatDistanceToNow } from "date-fns";
 import FormattedContent from '../utils/FormattedContent';
 import { CommentDialog } from './CommentDialog';
 import { VerificationBadge } from './VerificationBadge';
-import { ProfileVerificationBadge } from './ProfileVerificationBadge';
+import ProfileVerificationRing from './ProfileVerificationRing';
 import { 
   apiRequestEnhanced, 
   mapDiscussion, 
@@ -333,7 +333,12 @@ export function EnhancedSocialFeed({ limit = 20, showCreatePost = true }: Enhanc
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="relative">
+                  <ProfileVerificationRing
+                    emailVerified={post.author.emailVerified === true}
+                    phoneVerified={post.author.phoneVerified === true}
+                    isLeadership={post.author.role === 'pastor' || post.author.role === 'admin' || post.author.role === 'owner'}
+                    size="sm"
+                  >
                     <Avatar className="h-10 w-10">
                       <AvatarImage 
                         src={post.author.profileImage} 
@@ -343,13 +348,7 @@ export function EnhancedSocialFeed({ limit = 20, showCreatePost = true }: Enhanc
                         {post.author.name?.charAt(0)?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
-                    <ProfileVerificationBadge 
-                      emailVerified={post.author.emailVerified === true}
-                      phoneVerified={post.author.phoneVerified === true}
-                      isLeadership={post.author.role === 'pastor' || post.author.role === 'admin' || post.author.role === 'owner'}
-                      size="sm"
-                    />
-                  </div>
+                  </ProfileVerificationRing>
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-semibold text-gray-900 dark:text-gray-100">
