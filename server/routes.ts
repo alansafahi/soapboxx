@@ -9753,6 +9753,17 @@ Return JSON with this exact structure:
 
       const discussions = await storage.getDiscussions(limit, offset, undefined, userId, includeFlagged);
 
+      // Debug the first discussion to see what data is being returned
+      if (discussions && discussions.length > 0) {
+        console.log('🔍 DEBUG - Discussions API Response (first post author):', {
+          authorId: discussions[0].author?.id || discussions[0].authorId,
+          emailVerified: discussions[0].author?.emailVerified,
+          phoneVerified: discussions[0].author?.phoneVerified,
+          role: discussions[0].author?.role,
+          name: discussions[0].author?.name,
+          authorObject: discussions[0].author
+        });
+      }
 
       res.json(discussions);
     } catch (error) {
