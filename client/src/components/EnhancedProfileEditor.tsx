@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -283,12 +283,12 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   };
 
   // Load verses when component mounts
-  React.useEffect(() => {
+  useEffect(() => {
     loadGiftVerses();
   }, []);
 
   // Load AI analysis when user has spiritual profile
-  React.useEffect(() => {
+  useEffect(() => {
     if (formData.spiritualProfile && !aiGiftSuggestions) {
       analyzeJournalingPatterns();
     }
