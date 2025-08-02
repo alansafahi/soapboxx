@@ -1021,30 +1021,30 @@ export class DatabaseStorage implements IStorage {
       if (profileData.interests !== undefined) updateData.interests = profileData.interests;
       
       // Profile and demographic fields
-      if (profileData.ageRange !== undefined) updateData.ageRange = profileData.ageRange;
-      if (profileData.gender !== undefined) updateData.gender = profileData.gender;
-      if (profileData.churchAffiliation !== undefined) updateData.churchAffiliation = profileData.churchAffiliation;
-      if (profileData.spiritualStage !== undefined) updateData.spiritualStage = profileData.spiritualStage;
-      if (profileData.preferredBibleTranslation !== undefined) updateData.preferredBibleTranslation = profileData.preferredBibleTranslation;
-      if (profileData.languagePreference !== undefined) updateData.languagePreference = profileData.languagePreference;
+      if ((profileData as any).ageRange !== undefined) updateData.ageRange = (profileData as any).ageRange;
+      if ((profileData as any).gender !== undefined) updateData.gender = (profileData as any).gender;
+      if ((profileData as any).churchAffiliation !== undefined) updateData.churchAffiliation = (profileData as any).churchAffiliation;
+      if ((profileData as any).spiritualStage !== undefined) updateData.spiritualStage = (profileData as any).spiritualStage;
+      if ((profileData as any).preferredBibleTranslation !== undefined) updateData.preferredBibleTranslation = (profileData as any).preferredBibleTranslation;
+      if ((profileData as any).languagePreference !== undefined) updateData.languagePreference = (profileData as any).languagePreference;
       
       // Social and ministry fields
-      if (profileData.favoriteScriptures !== undefined) updateData.favoriteScriptures = profileData.favoriteScriptures;
-      if (profileData.ministryInterests !== undefined) updateData.ministryInterests = profileData.ministryInterests;
-      if (profileData.growthGoals !== undefined) updateData.growthGoals = profileData.growthGoals;
-      if (profileData.spiritualGifts !== undefined) updateData.spiritualGifts = profileData.spiritualGifts;
-      if (profileData.spiritualProfile !== undefined) updateData.spiritualProfile = profileData.spiritualProfile;
+      if ((profileData as any).favoriteScriptures !== undefined) updateData.favoriteScriptures = (profileData as any).favoriteScriptures;
+      if ((profileData as any).ministryInterests !== undefined) updateData.ministryInterests = (profileData as any).ministryInterests;
+      if ((profileData as any).growthGoals !== undefined) updateData.growthGoals = (profileData as any).growthGoals;
+      if ((profileData as any).spiritualGifts !== undefined) updateData.spiritualGifts = (profileData as any).spiritualGifts;
+      if ((profileData as any).spiritualProfile !== undefined) updateData.spiritualProfile = (profileData as any).spiritualProfile;
       
       // Privacy settings
-      if (profileData.showBioPublicly !== undefined) updateData.showBioPublicly = profileData.showBioPublicly;
-      if (profileData.showChurchAffiliation !== undefined) updateData.showChurchAffiliation = profileData.showChurchAffiliation;
-      if (profileData.shareWithGroup !== undefined) updateData.shareWithGroup = profileData.shareWithGroup;
-      if (profileData.showAgeRange !== undefined) updateData.showAgeRange = profileData.showAgeRange;
-      if (profileData.showLocation !== undefined) updateData.showLocation = profileData.showLocation;
-      if (profileData.showMobile !== undefined) updateData.showMobile = profileData.showMobile;
-      if (profileData.showGender !== undefined) updateData.showGender = profileData.showGender;
-      if (profileData.showDenomination !== undefined) updateData.showDenomination = profileData.showDenomination;
-      if (profileData.showSpiritualGifts !== undefined) updateData.showSpiritualGifts = profileData.showSpiritualGifts;
+      if ((profileData as any).showBioPublicly !== undefined) updateData.showBioPublicly = (profileData as any).showBioPublicly;
+      if ((profileData as any).showChurchAffiliation !== undefined) updateData.showChurchAffiliation = (profileData as any).showChurchAffiliation;
+      if ((profileData as any).shareWithGroup !== undefined) updateData.shareWithGroup = (profileData as any).shareWithGroup;
+      if ((profileData as any).showAgeRange !== undefined) updateData.showAgeRange = (profileData as any).showAgeRange;
+      if ((profileData as any).showLocation !== undefined) updateData.showLocation = (profileData as any).showLocation;
+      if ((profileData as any).showMobile !== undefined) updateData.showMobile = (profileData as any).showMobile;
+      if ((profileData as any).showGender !== undefined) updateData.showGender = (profileData as any).showGender;
+      if ((profileData as any).showDenomination !== undefined) updateData.showDenomination = (profileData as any).showDenomination;
+      if ((profileData as any).showSpiritualGifts !== undefined) updateData.showSpiritualGifts = (profileData as any).showSpiritualGifts;
       
       // Always update timestamp
       updateData.updatedAt = new Date();
