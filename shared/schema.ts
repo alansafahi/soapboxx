@@ -178,6 +178,10 @@ export const users = pgTable("users", {
   smallGroup: varchar("small_group"), // Current small group involvement
   socialLinks: jsonb("social_links"), // {facebook: "", instagram: "", twitter: ""}
   
+  // Spiritual Gifts Assessment
+  spiritualGifts: text("spiritual_gifts").array(), // Array of identified spiritual gifts
+  spiritualProfile: jsonb("spiritual_profile"), // Full assessment results including profileLabel, servingStyle, etc.
+  
   // Growth & Impact Tracking
   publicSharing: boolean("public_sharing").default(false), // Allow public SOAP sharing
   spiritualScore: integer("spiritual_score").default(0), // Gamified spiritual engagement score

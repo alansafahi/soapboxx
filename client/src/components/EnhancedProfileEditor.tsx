@@ -9,6 +9,14 @@ import { Badge } from "./ui/badge";
 import { Checkbox } from "./ui/checkbox";
 import { Switch } from "./ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
+import { Progress } from "./ui/progress";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "../lib/queryClient";
 import { 
   User, 
   Heart, 
@@ -58,6 +66,14 @@ interface UserProfile {
   city: string | null;
   state: string | null;
   spiritualGifts: string[] | null;
+  spiritualProfile: {
+    profileLabel?: string;
+    profileDescription?: string;
+    servingStyle?: string;
+    topGifts?: string[];
+    averageScore?: number;
+    engagementLevel?: string;
+  } | null;
 }
 
 interface EnhancedProfileEditorProps {
@@ -98,7 +114,9 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       ...formData,
       ministryInterests: selectedMinistries,
       growthGoals: selectedGoals,
-      favoriteScriptures: favoriteVerses
+      favoriteScriptures: favoriteVerses,
+      spiritualGifts: formData.spiritualGifts,
+      spiritualProfile: formData.spiritualProfile
     });
   };
 
@@ -123,6 +141,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const [verseLoadingStates, setVerseLoadingStates] = useState<{ [key: number]: boolean }>({});
   const [verseTimeouts, setVerseTimeouts] = useState<{ [key: number]: NodeJS.Timeout }>({});
   const [verseValidation, setVerseValidation] = useState<{ [key: number]: { isValid: boolean; message: string; suggestion?: string } }>({});
+  const [showGiftsAssessment, setShowGiftsAssessment] = useState(false);
 
   const lookupVerse = async (verse: string, index: number) => {
     const trimmedVerse = verse.trim();
@@ -271,6 +290,104 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       [index]: { isValid: true, message: "✓ Complete reference" }
     }));
     lookupVerse(suggestion, index);
+  };
+
+  // Spiritual Gifts Assessment Logic
+  const spiritualGiftsQuestions = [
+    { id: 'administration', question: 'I enjoy organizing people and resources for ministry projects', gift: 'Administration' },
+    { id: 'leadership', question: 'People naturally look to me for direction and guidance', gift: 'Leadership' },
+    { id: 'teaching', question: 'I love explaining biblical truths to help others understand', gift: 'Teaching' },
+    { id: 'mercy', question: 'I am drawn to comfort and care for those who are suffering', gift: 'Mercy' },
+    { id: 'evangelism', question: 'I enjoy sharing the gospel with non-believers', gift: 'Evangelism' },
+    { id: 'service', question: 'I find joy in practical acts of service behind the scenes', gift: 'Service' },
+    { id: 'giving', question: 'I feel called to be generous with my resources for ministry', gift: 'Giving' },
+    { id: 'hospitality', question: 'I love welcoming and making people feel at home', gift: 'Hospitality' },
+    { id: 'encouragement', question: 'I naturally encourage and build up others in their faith', gift: 'Encouragement' },
+    { id: 'discernment', question: 'I can often sense spiritual truth or deception', gift: 'Discernment' },
+    { id: 'wisdom', question: 'People seek me out for wise counsel and advice', gift: 'Wisdom' },
+    { id: 'faith', question: 'I have strong faith that God will provide and work miracles', gift: 'Faith' },
+    { id: 'helps', question: 'I love assisting others in completing their ministry tasks', gift: 'Helps' },
+    { id: 'knowledge', question: 'I enjoy deep study of Scripture and theological concepts', gift: 'Knowledge' },
+    { id: 'prophecy', question: 'I feel called to speak truth and challenge others spiritually', gift: 'Prophecy' },
+    // Additional questions to expand to 30 total (expanding the assessment as requested)
+    { id: 'counseling', question: 'I feel called to help people work through personal problems', gift: 'Counseling' },
+    { id: 'intercession', question: 'I spend significant time in prayer for others', gift: 'Intercession' },
+    { id: 'music', question: 'I use musical abilities to worship and minister to others', gift: 'Music' },
+    { id: 'craftsmanship', question: 'I enjoy creating things with my hands for ministry use', gift: 'Craftsmanship' },
+    { id: 'healing', question: 'I have seen God work through me to bring healing to others', gift: 'Healing' },
+    { id: 'miracles', question: 'I believe God works supernatural miracles through faithful believers', gift: 'Miracles' },
+    { id: 'tongues', question: 'I have been given a prayer language or ability to speak in tongues', gift: 'Tongues' },
+    { id: 'interpretation', question: 'I can understand and interpret spiritual messages', gift: 'Interpretation' },
+    { id: 'apostleship', question: 'I feel called to plant new churches or ministries', gift: 'Apostleship' },
+    { id: 'pastoring', question: 'I love shepherding and caring for a group of believers', gift: 'Pastoring' },
+    { id: 'missions', question: 'I feel called to serve God in cross-cultural ministry', gift: 'Missions' },
+    { id: 'volunteerism', question: 'I enjoy volunteering for various church and community needs', gift: 'Volunteerism' },
+    { id: 'coordination', question: 'I excel at coordinating events and bringing people together', gift: 'Coordination' },
+    { id: 'mentoring', question: 'I enjoy investing in and developing other people', gift: 'Mentoring' },
+    { id: 'creativity', question: 'I use creative arts to express worship and minister to others', gift: 'Creativity' }
+  ];
+
+  const spiritualGiftsSchema = z.object({
+    responses: z.record(z.number().min(1).max(5))
+  });
+
+  type SpiritualGiftsForm = z.infer<typeof spiritualGiftsSchema>;
+
+  const calculateSpiritualProfile = (responses: Record<string, number>, questions: any[]) => {
+    const scores: Record<string, number> = {};
+    
+    // Calculate scores for each spiritual gift category
+    questions.forEach(q => {
+      const score = responses[q.id] || 1;
+      if (!scores[q.gift]) scores[q.gift] = 0;
+      scores[q.gift] += score;
+    });
+    
+    // Get top 3 gifts
+    const topGifts = Object.entries(scores)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([gift]) => gift);
+    
+    // Calculate overall engagement level
+    const totalScore = Object.values(responses).reduce((sum, score) => sum + score, 0);
+    const averageScore = totalScore / Object.keys(responses).length;
+    
+    // Determine spiritual profile label (encouraging and inclusive)
+    let profileLabel = "";
+    let profileDescription = "";
+    let servingStyle = "";
+    
+    if (averageScore >= 4.5) {
+      profileLabel = "Kingdom Champion";
+      profileDescription = "Highly gifted leader with strong calling to serve";
+      servingStyle = "Leadership & High-Impact Ministry";
+    } else if (averageScore >= 4.0) {
+      profileLabel = "Faithful Servant";
+      profileDescription = "Dedicated volunteer with clear spiritual gifts";
+      servingStyle = "Active Ministry Participation";
+    } else if (averageScore >= 3.5) {
+      profileLabel = "Growing Disciple";
+      profileDescription = "Developing gifts with heart to serve";
+      servingStyle = "Ministry Support & Growth";
+    } else if (averageScore >= 2.5) {
+      profileLabel = "Willing Helper";
+      profileDescription = "Ready to serve in practical, supportive ways";
+      servingStyle = "Behind-the-Scenes Support";
+    } else {
+      profileLabel = "Humble Servant";
+      profileDescription = "Heart to help with essential support ministry";
+      servingStyle = "Practical Service & Foundation Support";
+    }
+    
+    return {
+      topGifts,
+      profileLabel,
+      profileDescription,
+      servingStyle,
+      averageScore: Math.round(averageScore * 10) / 10,
+      engagementLevel: averageScore >= 3.5 ? "High" : averageScore >= 2.5 ? "Moderate" : "Supportive"
+    };
   };
 
   return (
@@ -613,52 +730,133 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-6 rounded-lg border border-purple-200 dark:border-purple-700">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 bg-purple-500 dark:bg-purple-600 rounded-full flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-2">
-                      Uncover Your Spiritual Gifts
-                    </h3>
-                    <p className="text-purple-800 dark:text-purple-200 mb-4 leading-relaxed">
-                      Understanding your spiritual gifts helps you serve God and others with purpose and passion. Our comprehensive assessment will help identify your unique calling and ministry potential.
-                    </p>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                        <span>Comprehensive 120-question assessment</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                        <span>Personalized results with detailed explanations</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
-                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                        <span>Ministry matching and service opportunities</span>
+              {formData.spiritualProfile ? (
+                // Show completed assessment results
+                <div className="bg-gradient-to-r from-green-50 to-purple-50 dark:from-green-900/20 dark:to-purple-900/20 p-6 rounded-lg border border-green-200 dark:border-green-700">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 bg-green-500 dark:bg-green-600 rounded-full flex items-center justify-center">
+                      <CheckCircle className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-2">
+                        Assessment Complete! 🎉
+                      </h3>
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-medium text-purple-800 dark:text-purple-200 text-xl">
+                            {formData.spiritualProfile.profileLabel}
+                          </h4>
+                          <p className="text-gray-700 dark:text-gray-300 text-sm">
+                            {formData.spiritualProfile.profileDescription}
+                          </p>
+                        </div>
+                        <div>
+                          <h5 className="text-sm font-medium text-gray-800 dark:text-gray-200 mb-2">
+                            Your Top Spiritual Gifts:
+                          </h5>
+                          <div className="flex flex-wrap gap-2">
+                            {formData.spiritualProfile.topGifts?.map((gift, index) => (
+                              <Badge key={index} className="bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900 dark:text-purple-100">
+                                {gift}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <h5 className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                            Serving Style:
+                          </h5>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {formData.spiritualProfile.servingStyle}
+                          </p>
+                        </div>
+                        {formData.spiritualProfile.averageScore && (
+                          <div>
+                            <h5 className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                              Engagement Level:
+                            </h5>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {formData.spiritualProfile.engagementLevel} ({formData.spiritualProfile.averageScore}/5.0)
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
+                  <div className="mt-6 flex gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300"
+                      onClick={() => setShowGiftsAssessment(true)}
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Retake Assessment
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300"
+                      onClick={() => {
+                        alert('Spiritual gifts are special abilities given by God to serve others and build up the church. Use your results to find ministry opportunities that match your calling!');
+                      }}
+                    >
+                      Learn More
+                    </Button>
+                  </div>
                 </div>
-                <div className="mt-6 flex gap-3">
-                  <Button
-                    type="button"
-                    className="bg-purple-600 hover:bg-purple-700 text-white"
-                    onClick={() => window.open('https://spiritualgiftstest.com/', '_blank')}
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Take Assessment
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300"
-                  >
-                    Learn About Gifts
-                  </Button>
+              ) : (
+                // Show assessment invitation
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-6 rounded-lg border border-purple-200 dark:border-purple-700">
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-12 h-12 bg-purple-500 dark:bg-purple-600 rounded-full flex items-center justify-center">
+                      <Sparkles className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-purple-900 dark:text-purple-100 mb-2">
+                        Uncover Your Spiritual Gifts
+                      </h3>
+                      <p className="text-purple-800 dark:text-purple-200 mb-4 leading-relaxed">
+                        Understanding your spiritual gifts helps you serve God and others with purpose and passion. Our comprehensive assessment will help identify your unique calling and ministry potential.
+                      </p>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
+                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                          <span>Comprehensive 30-question assessment</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
+                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                          <span>Personalized results with detailed explanations</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
+                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                          <span>Ministry matching and service opportunities</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-6 flex gap-3">
+                    <Button
+                      type="button"
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                      onClick={() => setShowGiftsAssessment(true)}
+                    >
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Take Assessment
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300"
+                      onClick={() => {
+                        alert('Spiritual gifts are special abilities given by God to serve others and build up the church. Our assessment will help you discover your primary gifts like Leadership, Teaching, Mercy, Service, and more!');
+                      }}
+                    >
+                      Learn About Gifts
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Spiritual Gifts Results Section */}
               <div>
@@ -929,6 +1127,267 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
           }));
         }}
       />
+
+      {/* Spiritual Gifts Assessment Modal */}
+      <SpiritualGiftsAssessmentModal 
+        open={showGiftsAssessment}
+        onClose={() => setShowGiftsAssessment(false)}
+        onComplete={(profile) => {
+          // Update the formData with the assessment results
+          setFormData({
+            ...formData, 
+            spiritualGifts: profile.topGifts || [],
+            spiritualProfile: profile
+          });
+          setShowGiftsAssessment(false);
+        }}
+      />
     </div>
   );
-}
+};
+
+// Spiritual Gifts Assessment Modal Component
+const SpiritualGiftsAssessmentModal = ({ 
+  open, 
+  onClose, 
+  onComplete 
+}: { 
+  open: boolean; 
+  onClose: () => void; 
+  onComplete: (profile: any) => void; 
+}) => {
+  const [currentPage, setCurrentPage] = useState(0);
+  const questionsPerPage = 5;
+
+  const spiritualGiftsQuestions = [
+    { id: 'administration', question: 'I enjoy organizing people and resources for ministry projects', gift: 'Administration' },
+    { id: 'leadership', question: 'People naturally look to me for direction and guidance', gift: 'Leadership' },
+    { id: 'teaching', question: 'I love explaining biblical truths to help others understand', gift: 'Teaching' },
+    { id: 'mercy', question: 'I am drawn to comfort and care for those who are suffering', gift: 'Mercy' },
+    { id: 'evangelism', question: 'I enjoy sharing the gospel with non-believers', gift: 'Evangelism' },
+    { id: 'service', question: 'I find joy in practical acts of service behind the scenes', gift: 'Service' },
+    { id: 'giving', question: 'I feel called to be generous with my resources for ministry', gift: 'Giving' },
+    { id: 'hospitality', question: 'I love welcoming and making people feel at home', gift: 'Hospitality' },
+    { id: 'encouragement', question: 'I naturally encourage and build up others in their faith', gift: 'Encouragement' },
+    { id: 'discernment', question: 'I can often sense spiritual truth or deception', gift: 'Discernment' },
+    { id: 'wisdom', question: 'People seek me out for wise counsel and advice', gift: 'Wisdom' },
+    { id: 'faith', question: 'I have strong faith that God will provide and work miracles', gift: 'Faith' },
+    { id: 'helps', question: 'I love assisting others in completing their ministry tasks', gift: 'Helps' },
+    { id: 'knowledge', question: 'I enjoy deep study of Scripture and theological concepts', gift: 'Knowledge' },
+    { id: 'prophecy', question: 'I feel called to speak truth and challenge others spiritually', gift: 'Prophecy' },
+    // Additional questions expanding to 30 total
+    { id: 'counseling', question: 'I feel called to help people work through personal problems', gift: 'Counseling' },
+    { id: 'intercession', question: 'I spend significant time in prayer for others', gift: 'Intercession' },
+    { id: 'music', question: 'I use musical abilities to worship and minister to others', gift: 'Music' },
+    { id: 'craftsmanship', question: 'I enjoy creating things with my hands for ministry use', gift: 'Craftsmanship' },
+    { id: 'healing', question: 'I have seen God work through me to bring healing to others', gift: 'Healing' },
+    { id: 'miracles', question: 'I believe God works supernatural miracles through faithful believers', gift: 'Miracles' },
+    { id: 'tongues', question: 'I have been given a prayer language or ability to speak in tongues', gift: 'Tongues' },
+    { id: 'interpretation', question: 'I can understand and interpret spiritual messages', gift: 'Interpretation' },
+    { id: 'apostleship', question: 'I feel called to plant new churches or ministries', gift: 'Apostleship' },
+    { id: 'pastoring', question: 'I love shepherding and caring for a group of believers', gift: 'Pastoring' },
+    { id: 'missions', question: 'I feel called to serve God in cross-cultural ministry', gift: 'Missions' },
+    { id: 'volunteerism', question: 'I enjoy volunteering for various church and community needs', gift: 'Volunteerism' },
+    { id: 'coordination', question: 'I excel at coordinating events and bringing people together', gift: 'Coordination' },
+    { id: 'mentoring', question: 'I enjoy investing in and developing other people', gift: 'Mentoring' },
+    { id: 'creativity', question: 'I use creative arts to express worship and minister to others', gift: 'Creativity' }
+  ];
+
+  const spiritualGiftsSchema = z.object({
+    responses: z.record(z.number().min(1).max(5))
+  });
+
+  type SpiritualGiftsForm = z.infer<typeof spiritualGiftsSchema>;
+
+  const calculateSpiritualProfile = (responses: Record<string, number>, questions: any[]) => {
+    const scores: Record<string, number> = {};
+    
+    // Calculate scores for each spiritual gift category
+    questions.forEach(q => {
+      const score = responses[q.id] || 1;
+      if (!scores[q.gift]) scores[q.gift] = 0;
+      scores[q.gift] += score;
+    });
+    
+    // Get top 3 gifts
+    const topGifts = Object.entries(scores)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([gift]) => gift);
+    
+    // Calculate overall engagement level
+    const totalScore = Object.values(responses).reduce((sum, score) => sum + score, 0);
+    const averageScore = totalScore / Object.keys(responses).length;
+    
+    // Determine spiritual profile label
+    let profileLabel = "";
+    let profileDescription = "";
+    let servingStyle = "";
+    
+    if (averageScore >= 4.5) {
+      profileLabel = "Kingdom Champion";
+      profileDescription = "Highly gifted leader with strong calling to serve";
+      servingStyle = "Leadership & High-Impact Ministry";
+    } else if (averageScore >= 4.0) {
+      profileLabel = "Faithful Servant";
+      profileDescription = "Dedicated volunteer with clear spiritual gifts";
+      servingStyle = "Active Ministry Participation";
+    } else if (averageScore >= 3.5) {
+      profileLabel = "Growing Disciple";
+      profileDescription = "Developing gifts with heart to serve";
+      servingStyle = "Ministry Support & Growth";
+    } else if (averageScore >= 2.5) {
+      profileLabel = "Willing Helper";
+      profileDescription = "Ready to serve in practical, supportive ways";
+      servingStyle = "Behind-the-Scenes Support";
+    } else {
+      profileLabel = "Humble Servant";
+      profileDescription = "Heart to help with essential support ministry";
+      servingStyle = "Practical Service & Foundation Support";
+    }
+    
+    return {
+      topGifts,
+      profileLabel,
+      profileDescription,
+      servingStyle,
+      averageScore: Math.round(averageScore * 10) / 10,
+      engagementLevel: averageScore >= 3.5 ? "High" : averageScore >= 2.5 ? "Moderate" : "Supportive"
+    };
+  };
+
+  const form = useForm<SpiritualGiftsForm>({
+    resolver: zodResolver(spiritualGiftsSchema),
+    defaultValues: {
+      responses: {}
+    }
+  });
+
+  const assessmentMutation = useMutation({
+    mutationFn: (data: SpiritualGiftsForm) => 
+      apiRequest('/api/volunteers/spiritual-gifts-assessment', 'POST', data),
+    onSuccess: (profile) => {
+      onComplete(profile);
+    },
+    onError: () => {
+      // Calculate the profile locally if API fails
+      const responses = form.getValues().responses;
+      if (responses && Object.keys(responses).length > 0) {
+        const profile = calculateSpiritualProfile(responses, spiritualGiftsQuestions);
+        onComplete({ ...profile, success: true });
+      }
+    }
+  });
+
+  const totalPages = Math.ceil(spiritualGiftsQuestions.length / questionsPerPage);
+  const currentQuestions = spiritualGiftsQuestions.slice(
+    currentPage * questionsPerPage,
+    (currentPage + 1) * questionsPerPage
+  );
+
+  const onSubmit = (data: SpiritualGiftsForm) => {
+    const profile = calculateSpiritualProfile(data.responses, spiritualGiftsQuestions);
+    const enrichedData = {
+      ...data,
+      profile
+    };
+    assessmentMutation.mutate(enrichedData);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="text-center">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mb-4">
+            <Sparkles className="h-8 w-8 text-white" />
+          </div>
+          <DialogTitle className="text-2xl font-bold">Spiritual Gifts Assessment</DialogTitle>
+          <DialogDescription>
+            Discover your God-given spiritual gifts and find your perfect ministry fit (30 questions)
+          </DialogDescription>
+          <Progress value={(currentPage + 1) / totalPages * 100} className="mt-4" />
+          <p className="text-sm text-gray-600 mt-2">
+            Page {currentPage + 1} of {totalPages}
+          </p>
+        </DialogHeader>
+        
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-4">
+              {currentQuestions.map((q) => (
+                <FormField
+                  key={q.id}
+                  control={form.control}
+                  name={`responses.${q.id}`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex justify-between items-start mb-2">
+                        <FormLabel className="text-base font-medium text-gray-900 dark:text-gray-100 flex-1 pr-4">
+                          {q.question}
+                        </FormLabel>
+                        <Badge className="bg-purple-100 text-purple-700 border-purple-200 text-xs font-medium px-2 py-1 rounded-md whitespace-nowrap">
+                          {q.gift}
+                        </Badge>
+                      </div>
+                      <FormControl>
+                        <div className="flex justify-between items-center mt-2">
+                          <span className="text-sm text-gray-500">Strongly Disagree</span>
+                          <div className="flex space-x-2">
+                            {[1, 2, 3, 4, 5].map((value) => (
+                              <button
+                                key={value}
+                                type="button"
+                                className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-colors font-medium ${
+                                  field.value === value
+                                    ? 'bg-purple-500 border-purple-500 text-white shadow-lg'
+                                    : 'border-gray-300 hover:border-purple-300 hover:bg-purple-50 text-gray-700'
+                                }`}
+                                onClick={() => field.onChange(value)}
+                              >
+                                {value}
+                              </button>
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-500">Strongly Agree</span>
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </div>
+
+            <div className="flex justify-between pt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                disabled={currentPage === 0}
+              >
+                Previous
+              </Button>
+              
+              {currentPage < totalPages - 1 ? (
+                <Button
+                  type="button"
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  className="bg-purple-600 hover:bg-purple-700"
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  disabled={assessmentMutation.isPending}
+                  className="bg-gradient-to-r from-purple-500 to-blue-500"
+                >
+                  {assessmentMutation.isPending ? "Processing..." : "Complete Assessment"}
+                </Button>
+              )}
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+};
