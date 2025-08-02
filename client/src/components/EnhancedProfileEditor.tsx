@@ -800,7 +800,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       variant="outline"
                       className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300"
                       onClick={() => {
-                        alert('Your spiritual gifts are God-given abilities that help you serve others and strengthen your community. These results show where you naturally excel in ministry and can guide you toward serving opportunities that fit your calling and bring you joy.');
+                        alert('These results show you the special ways God has gifted you to serve! Think of them as your spiritual superpowers - areas where you naturally shine and can make the biggest impact. Use these insights to find serving opportunities that match how God made you and will bring you joy!');
                       }}
                     >
                       Learn More
@@ -851,7 +851,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       variant="outline"
                       className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300"
                       onClick={() => {
-                        alert('Your spiritual gifts are unique abilities God has given you to serve and bless others. They might include things like Leadership, Teaching, Encouragement, Serving, or Compassion. Our assessment helps you discover these gifts so you can find meaningful ways to make a difference in your community.');
+                        alert('Your spiritual gifts are special abilities God gives you to help and serve others! These might be things like being good at encouraging people, leading groups, teaching, or showing compassion. Taking this assessment helps you understand how God made you unique so you can find the perfect ways to serve and make a difference!');
                       }}
                     >
                       Learn About Gifts
