@@ -1100,14 +1100,16 @@ export default function SocialFeed() {
                   isLeadership={post.author?.role === 'pastor' || post.author?.role === 'admin' || post.author?.role === 'owner'}
                   size="sm"
                 >
-                  {/* Debug FULL post data to see structure */}
-                  {console.log('🔍 FULL POST STRUCTURE - ID:', post.id, 'Author:', post.author)}
-                  {console.log('🔍 AUTHOR VERIFICATION:', {
+                  {/* Debug first post only to reduce console spam */}
+                  {post.id === feedPosts[0]?.id && console.log('🔍 FRONTEND RECEIVED POST:', {
+                    postId: post.id,
                     hasAuthor: !!post.author,
+                    authorKeys: post.author ? Object.keys(post.author) : 'no author',
                     emailVerified: post.author?.emailVerified,
                     phoneVerified: post.author?.phoneVerified,
                     role: post.author?.role,
-                    actualAuthorKeys: post.author ? Object.keys(post.author) : 'no author'
+                    emailType: typeof post.author?.emailVerified,
+                    phoneType: typeof post.author?.phoneVerified
                   })}
                   <Avatar className="w-10 h-10">
                     <AvatarImage 

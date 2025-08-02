@@ -2595,35 +2595,52 @@ export class DatabaseStorage implements IStorage {
         console.log(`User ${index + 1}: emailVerified=${row.email_verified}, phoneVerified=${row.phone_verified}, role=${row.role}, name=${row.first_name} ${row.last_name}`);
       });
 
-      const discussions = combinedResult.rows.map((row: any) => ({
-        id: row.id,
-        title: row.title,
-        content: row.content,
-        category: row.category,
-        isPublic: row.is_public,
-        createdAt: row.created_at,
-        authorId: row.author_id,
-        author: {
-          id: row.user_id,
-          email: row.email,
-          firstName: row.first_name,
-          lastName: row.last_name,
-          profileImageUrl: row.profile_image_url,
-          emailVerified: row.email_verified,
-          phoneVerified: row.phone_verified,
-          role: row.role,
-        },
-        type: row.type,
-        mood: row.mood_tag,
-        soapData: row.type === 'soap_reflection' ? {
-          scripture: row.scripture,
-          scriptureReference: row.scripture_reference,
-          observation: row.observation,
-          application: row.application,
-          prayer: row.prayer
-        } : null,
-        isLiked: false
-      }));
+      const discussions = combinedResult.rows.map((row: any) => {
+        const mappedPost = {
+          id: row.id,
+          title: row.title,
+          content: row.content,
+          category: row.category,
+          isPublic: row.is_public,
+          createdAt: row.created_at,
+          authorId: row.author_id,
+          author: {
+            id: row.user_id,
+            email: row.email,
+            firstName: row.first_name,
+            lastName: row.last_name,
+            profileImageUrl: row.profile_image_url,
+            emailVerified: row.email_verified,
+            phoneVerified: row.phone_verified,
+            role: row.role,
+          },
+          type: row.type,
+          mood: row.mood_tag,
+          soapData: row.type === 'soap_reflection' ? {
+            scripture: row.scripture,
+            scriptureReference: row.scripture_reference,
+            observation: row.observation,
+            application: row.application,
+            prayer: row.prayer
+          } : null,
+          isLiked: false
+        };
+        
+        // Debug the first mapped post to ensure verification data is correctly mapped
+        if (row.id === combinedResult.rows[0]?.id) {
+          console.log('🔍 DEBUG - Mapped post author object:', {
+            rawEmailVerified: row.email_verified,
+            rawPhoneVerified: row.phone_verified,
+            rawRole: row.role,
+            mappedEmailVerified: mappedPost.author.emailVerified,
+            mappedPhoneVerified: mappedPost.author.phoneVerified,
+            mappedRole: mappedPost.author.role,
+            fullAuthor: mappedPost.author
+          });
+        }
+        
+        return mappedPost;
+      });
 
       if (discussions.length > 0) {
       }
