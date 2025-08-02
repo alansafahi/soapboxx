@@ -552,11 +552,25 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
             ) : (
-              <EnhancedProfileEditor 
-                profile={profile || {} as UserProfile}
-                onSave={(updates) => updateProfileMutation.mutate(updates)}
-                isLoading={updateProfileMutation.isPending}
-              />
+              <div className="space-y-4">
+                <div className="flex justify-end">
+                  <Button
+                    onClick={() => setIsEditing(false)}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+                <EnhancedProfileEditor 
+                  profile={profile || {} as UserProfile}
+                  onSave={(updates) => {
+                    updateProfileMutation.mutate(updates);
+                    // Don't exit edit mode here - let the mutation's onSuccess handle it
+                  }}
+                  isLoading={updateProfileMutation.isPending}
+                />
+              </div>
             )}
           </TabsContent>
 
