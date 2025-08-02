@@ -37,13 +37,14 @@ import { format } from "date-fns";
 import EnhancedProfileEditor from "../components/EnhancedProfileEditor";
 import { SMSVerificationModal } from "../components/SMSVerificationModal";
 import { VerificationBadge, DetailedVerificationStatus } from "../components/VerificationBadge";
-import { ProfileVerificationBadge } from "../components/ProfileVerificationBadge";
+import ProfileVerificationBadge from "../components/ProfileVerificationBadge";
 
 interface UserProfile {
   id: string;
   email: string | null;
   firstName: string | null;
   lastName: string | null;
+  role?: string | null;
   profileImageUrl: string | null;
   coverPhotoUrl: string | null;
   bio: string | null;
