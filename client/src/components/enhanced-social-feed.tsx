@@ -27,6 +27,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import FormattedContent from '../utils/FormattedContent';
 import { CommentDialog } from './CommentDialog';
+import { VerificationBadge } from './VerificationBadge';
 import { 
   apiRequestEnhanced, 
   mapDiscussion, 
@@ -46,6 +47,9 @@ interface EnhancedFeedPost {
     firstName?: string;
     lastName?: string;
     profileImage?: string;
+    emailVerified?: boolean;
+    phoneVerified?: boolean;
+    role?: string;
   };
   authorId: string;
   isPublic: boolean;
@@ -338,9 +342,17 @@ export function EnhancedSocialFeed({ limit = 20, showCreatePost = true }: Enhanc
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-100">
-                      {post.author.name}
-                    </h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100">
+                        {post.author.name}
+                      </h4>
+                      <VerificationBadge 
+                        emailVerified={post.author.emailVerified === true}
+                        phoneVerified={post.author.phoneVerified === true}
+                        isLeadership={post.author.role === 'pastor' || post.author.role === 'admin' || post.author.role === 'owner'}
+                        size="sm"
+                      />
+                    </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="h-3 w-3" />
                       {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true })}
