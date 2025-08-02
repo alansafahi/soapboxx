@@ -800,7 +800,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       variant="outline"
                       className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300"
                       onClick={() => {
-                        alert('Spiritual gifts are special abilities given by God to serve others and build up the church. Use your results to find ministry opportunities that match your calling!');
+                        alert('Your spiritual gifts are God-given abilities that help you serve others and strengthen your community. These results show where you naturally excel in ministry and can guide you toward serving opportunities that fit your calling and bring you joy.');
                       }}
                     >
                       Learn More
@@ -851,7 +851,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       variant="outline"
                       className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300"
                       onClick={() => {
-                        alert('Spiritual gifts are special abilities given by God to serve others and build up the church. Our assessment will help you discover your primary gifts like Leadership, Teaching, Mercy, Service, and more!');
+                        alert('Your spiritual gifts are unique abilities God has given you to serve and bless others. They might include things like Leadership, Teaching, Encouragement, Serving, or Compassion. Our assessment helps you discover these gifts so you can find meaningful ways to make a difference in your community.');
                       }}
                     >
                       Learn About Gifts
@@ -1208,22 +1208,32 @@ const SpiritualGiftsAssessmentModal = ({
   const calculateSpiritualProfile = (responses: Record<string, number>, questions: any[]) => {
     const scores: Record<string, number> = {};
     
+    console.log('Calculating profile for responses:', responses);
+    console.log('Questions available:', questions.length);
+    
     // Calculate scores for each spiritual gift category
     questions.forEach(q => {
-      const score = responses[q.id] || 1;
-      if (!scores[q.gift]) scores[q.gift] = 0;
-      scores[q.gift] += score;
+      const score = responses[q.id];
+      if (score !== undefined && score !== null) {
+        if (!scores[q.gift]) scores[q.gift] = 0;
+        scores[q.gift] += score;
+      }
     });
     
-    // Get top 3 gifts
+    console.log('Gift scores calculated:', scores);
+    
+    // Get top 3 gifts based on actual scores
     const topGifts = Object.entries(scores)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 3)
       .map(([gift]) => gift);
     
-    // Calculate overall engagement level
-    const totalScore = Object.values(responses).reduce((sum, score) => sum + score, 0);
-    const averageScore = totalScore / Object.keys(responses).length;
+    // Calculate overall engagement level from actual responses
+    const responseValues = Object.values(responses).filter(val => val !== undefined && val !== null);
+    const totalScore = responseValues.reduce((sum, score) => sum + score, 0);
+    const averageScore = responseValues.length > 0 ? totalScore / responseValues.length : 0;
+    
+    console.log('Average score calculated:', averageScore, 'from', responseValues.length, 'responses');
     
     // Determine spiritual profile label
     let profileLabel = "";
@@ -1441,7 +1451,9 @@ const SpiritualGiftsAssessmentModal = ({
                     onClick={() => {
                       setShowResults(false);
                       setAssessmentType('expanded');
-                      setCurrentPage(0);
+                      // Continue from page 6 (after the initial 30 questions)
+                      const initialQuestionPages = Math.ceil(spiritualGiftsQuestions.length / questionsPerPage);
+                      setCurrentPage(initialQuestionPages);
                     }}
                   >
                     Take Full Assessment
