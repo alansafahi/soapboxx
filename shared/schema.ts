@@ -197,6 +197,10 @@ export const users = pgTable("users", {
   shareWithGroup: boolean("share_with_group").default(true),
   showAgeRange: boolean("show_age_range").default(false),
   showLocation: boolean("show_location").default(false),
+  showMobile: boolean("show_mobile").default(false),
+  showGender: boolean("show_gender").default(false),
+  showDenomination: boolean("show_denomination").default(true),
+  showSpiritualGifts: boolean("show_spiritual_gifts").default(true),
   
   // Legacy fields maintained for compatibility
   interests: text("interests").array(),

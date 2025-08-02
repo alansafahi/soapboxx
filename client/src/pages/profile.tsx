@@ -76,6 +76,10 @@ interface UserProfile {
   shareWithGroup: boolean | null;
   showAgeRange: boolean | null;
   showLocation: boolean | null;
+  showMobile: boolean | null;
+  showGender: boolean | null;
+  showDenomination: boolean | null;
+  showSpiritualGifts: boolean | null;
   
   // Legacy
   interests: string[] | null;
@@ -454,7 +458,7 @@ export default function ProfilePage() {
                             )}
                           </div>
                           
-                          {profile?.mobileNumber && (
+                          {profile?.mobileNumber && profile?.showMobile && (
                             <div className="text-muted-foreground flex items-center gap-2">
                               <Phone className="h-4 w-4" />
                               <span>{profile.mobileNumber}</span>
@@ -470,7 +474,7 @@ export default function ProfilePage() {
                             </div>
                           )}
 
-                          {profile?.city && profile?.state && (
+                          {profile?.city && profile?.state && profile?.showLocation && (
                             <div className="text-muted-foreground flex items-center gap-2">
                               <MapPin className="h-4 w-4" />
                               <span>{profile.city}, {profile.state} {profile.zipCode}</span>
@@ -487,14 +491,14 @@ export default function ProfilePage() {
 
                       {/* Spiritual Profile Section */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {profile?.ageRange && (
+                        {profile?.ageRange && profile?.showAgeRange && (
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium">Age Range:</span>
                             <Badge variant="secondary">{profile.ageRange}</Badge>
                           </div>
                         )}
                         
-                        {profile?.gender && (
+                        {profile?.gender && profile?.showGender && (
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium">Gender:</span>
                             <Badge variant="secondary">
@@ -513,7 +517,7 @@ export default function ProfilePage() {
                           </div>
                         )}
 
-                        {profile?.denomination && (
+                        {profile?.denomination && profile?.showDenomination && (
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium">Denomination:</span>
                             <Badge variant="outline">{profile.denomination}</Badge>
@@ -522,7 +526,7 @@ export default function ProfilePage() {
                       </div>
 
                       {/* Church Affiliation Section */}
-                      {profile?.churchAffiliation && (
+                      {profile?.churchAffiliation && profile?.showChurchAffiliation && (
                         <div className="border-t pt-4">
                           <div className="flex items-center gap-2 mb-2">
                             <Church className="h-4 w-4 text-purple-600" />

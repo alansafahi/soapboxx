@@ -66,6 +66,10 @@ interface UserProfile {
   shareWithGroup: boolean | null;
   showAgeRange: boolean | null;
   showLocation: boolean | null;
+  showMobile: boolean | null;
+  showGender: boolean | null;
+  showDenomination: boolean | null;
+  showSpiritualGifts: boolean | null;
   zipCode: string | null;
   city: string | null;
   state: string | null;
@@ -1598,6 +1602,54 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     id="showLocation"
                     checked={formData.showLocation ?? false}
                     onCheckedChange={(checked) => setFormData({...formData, showLocation: checked})}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="showMobile" className="font-medium">Show mobile number</Label>
+                    <p className="text-sm text-gray-600">Display your phone number publicly</p>
+                  </div>
+                  <Switch
+                    id="showMobile"
+                    checked={formData.showMobile ?? false}
+                    onCheckedChange={(checked) => setFormData({...formData, showMobile: checked})}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="showGender" className="font-medium">Show gender</Label>
+                    <p className="text-sm text-gray-600">Display your gender publicly</p>
+                  </div>
+                  <Switch
+                    id="showGender"
+                    checked={formData.showGender ?? false}
+                    onCheckedChange={(checked) => setFormData({...formData, showGender: checked})}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="showDenomination" className="font-medium">Show denomination</Label>
+                    <p className="text-sm text-gray-600">Display your denomination publicly</p>
+                  </div>
+                  <Switch
+                    id="showDenomination"
+                    checked={formData.showDenomination ?? true}
+                    onCheckedChange={(checked) => setFormData({...formData, showDenomination: checked})}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="showSpiritualGifts" className="font-medium">Show spiritual gifts</Label>
+                    <p className="text-sm text-gray-600">Display your spiritual gifts assessment results</p>
+                  </div>
+                  <Switch
+                    id="showSpiritualGifts"
+                    checked={formData.showSpiritualGifts ?? true}
+                    onCheckedChange={(checked) => setFormData({...formData, showSpiritualGifts: checked})}
                   />
                 </div>
               </div>
