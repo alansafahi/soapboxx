@@ -107,10 +107,10 @@ export default function TopHeader() {
   }, [serverNotifications]);
 
   // Convert staff invitations to notifications format
-  const staffNotifications = (staffInvitations || []).map((invitation: any) => ({
+  const staffNotifications = (Array.isArray(staffInvitations) ? staffInvitations : []).map((invitation: any) => ({
     id: `staff-${invitation.communityId}-${invitation.role}`,
     type: 'staff_invitation',
-    title: `Staff Invitation: ${invitation.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}`,
+    title: `Staff Invitation: ${invitation.role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}`,
     message: `You've been invited to join ${invitation.communityName} as a ${invitation.role.replace('_', ' ')}. Click to accept your position.`,
     isRead: false,
     createdAt: new Date().toISOString(),
@@ -118,7 +118,7 @@ export default function TopHeader() {
   }));
 
   // Convert admin notifications to notifications format
-  const adminStaffNotifications = (adminNotifications || []).map((notification: any) => ({
+  const adminStaffNotifications = (Array.isArray(adminNotifications) ? adminNotifications : []).map((notification: any) => ({
     id: notification.id,
     type: notification.type,
     title: notification.title,

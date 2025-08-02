@@ -66,7 +66,7 @@ export default function SocialFeedPage() {
           
           <TabsContent value="all">
             {/* Phase 3: Enhanced Social Feed with standardized field mapping */}
-            <SocialFeed limit={50} showCreatePost={true} />
+            <SocialFeed />
           </TabsContent>
           
           <TabsContent value="myposts">

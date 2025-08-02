@@ -608,7 +608,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                       </button>
 
                       {/* Flag Button - Only show for other users' posts */}
-                      {user && post.author && (user.email !== post.author.email && String(user.id) !== String(post.authorId)) && (
+                      {user && post.author && String(user.id) !== String(post.authorId) && (
                         <FlagContentDialog
                           contentType={post.type === 'soap_reflection' ? 'soap_entry' : 'discussion'}
                           contentId={post.id}
@@ -625,7 +625,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                       )}
 
                       {/* Delete Button - Only show for post author */}
-                      {user && post.author && (user.email === post.author.email || String(user.id) === String(post.authorId)) && (
+                      {user && post.author && String(user.id) === String(post.authorId) && (
                         <button 
                           onClick={() => handleDeletePost(post.id, post.type || 'discussion')}
                           className="flex items-center space-x-2 hover:text-red-500 transition-colors"
@@ -732,7 +732,7 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
       <ShareDialog 
         isOpen={shareDialogOpen !== null}
         onClose={() => setShareDialogOpen(null)}
-        content={shareDialogOpen ? displayedPosts.find(p => p.id === shareDialogOpen)?.content || '' : ''}
+        content={shareDialogOpen ? displayedPosts.find((p: any) => p.id === shareDialogOpen)?.content || '' : ''}
       />
 
       {/* Delete Confirmation Dialog */}
