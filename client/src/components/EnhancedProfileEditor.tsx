@@ -1341,24 +1341,37 @@ const SpiritualGiftsAssessmentModal = ({
   const onSubmit = (data: SpiritualGiftsForm) => {
     console.log('Assessment submission data:', data);
     const responses = data.responses || {};
-    const answeredQuestions = Object.keys(responses).length;
+    
+    // Only count responses for questions that actually exist in the current assessment type
+    const validQuestionIds = questionsToUse.map(q => q.id);
+    const validResponses = Object.fromEntries(
+      Object.entries(responses).filter(([id]) => validQuestionIds.includes(id))
+    );
+    const answeredQuestions = Object.keys(validResponses).length;
     
     console.log(`Answered ${answeredQuestions} out of ${questionsToUse.length} questions`);
+    console.log('Valid question IDs:', validQuestionIds);
+    console.log('Valid responses:', validResponses);
     
     // Check if all questions are answered
     if (answeredQuestions < questionsToUse.length) {
-      console.error('Not all questions answered');
-      // Allow partial completion for now, but calculate based on answered questions
+      console.error(`Not all questions answered: ${answeredQuestions}/${questionsToUse.length}`);
+      
+      // For expanded assessment, don't auto-submit until all questions are done
+      if (assessmentType === 'expanded' && answeredQuestions < questionsToUse.length) {
+        alert(`Please answer all ${questionsToUse.length} questions before completing the assessment. You have answered ${answeredQuestions} so far.`);
+        return;
+      }
     }
     
-    const profile = calculateSpiritualProfile(responses, questionsToUse);
+    const profile = calculateSpiritualProfile(validResponses, questionsToUse);
     
     // Store results and show them to the user
     setInitialResults(profile);
     setShowResults(true);
     
     const enrichedData = {
-      ...data,
+      responses: validResponses,
       profile
     };
     
@@ -1451,12 +1464,11 @@ const SpiritualGiftsAssessmentModal = ({
                     onClick={() => {
                       setShowResults(false);
                       setAssessmentType('expanded');
-                      // Continue from page 6 (after the initial 30 questions)
-                      const initialQuestionPages = Math.ceil(spiritualGiftsQuestions.length / questionsPerPage);
-                      setCurrentPage(initialQuestionPages);
+                      // Keep existing responses and continue with expanded assessment
+                      setCurrentPage(0);
                     }}
                   >
-                    Take Full Assessment
+                    Take Full Assessment (55 Questions)
                   </Button>
                 </div>
               </div>
