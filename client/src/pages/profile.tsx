@@ -29,11 +29,13 @@ import {
   Users,
   MessageSquare,
   Target,
-  Edit2
+  Edit2,
+  CheckCircle
 } from "lucide-react";
 import { format } from "date-fns";
 import EnhancedProfileEditor from "../components/EnhancedProfileEditor";
 import { SMSVerificationModal } from "../components/SMSVerificationModal";
+import { VerificationBadge, DetailedVerificationStatus } from "../components/VerificationBadge";
 
 interface UserProfile {
   id: string;
@@ -390,27 +392,35 @@ export default function ProfilePage() {
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6">
-            {/* SMS Verification Banner */}
-            {profile?.emailVerified && !profile?.phoneVerified && (
+            {/* Verification Status Card */}
+            {(!profile?.emailVerified || !profile?.phoneVerified) && (
               <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20">
                 <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-orange-600" />
+                  <div className="flex items-start gap-4">
                     <div className="flex-1">
-                      <h3 className="font-medium text-orange-800 dark:text-orange-200">
-                        Secure your account with a mobile number
+                      <h3 className="font-medium text-orange-800 dark:text-orange-200 mb-3">
+                        Complete Your Account Verification
                       </h3>
-                      <p className="text-sm text-orange-600 dark:text-orange-300 mt-1">
-                        Get prayer alerts, event reminders, and secure access.
-                      </p>
+                      <DetailedVerificationStatus 
+                        emailVerified={profile?.emailVerified}
+                        phoneVerified={profile?.phoneVerified}
+                        isLeadership={profile?.role === 'pastor' || profile?.role === 'admin' || profile?.role === 'owner'}
+                      />
+                      {!profile?.phoneVerified && (
+                        <p className="text-sm text-orange-600 dark:text-orange-300 mt-3">
+                          Add your mobile number to get prayer alerts, event reminders, and secure access.
+                        </p>
+                      )}
                     </div>
-                    <Button 
-                      size="sm" 
-                      className="bg-orange-600 hover:bg-orange-700"
-                      onClick={() => setShowSMSVerification(true)}
-                    >
-                      Verify Mobile
-                    </Button>
+                    {!profile?.phoneVerified && (
+                      <Button 
+                        size="sm" 
+                        className="bg-orange-600 hover:bg-orange-700"
+                        onClick={() => setShowSMSVerification(true)}
+                      >
+                        Verify Mobile
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -437,13 +447,22 @@ export default function ProfilePage() {
                     </div>
                     <div className="flex-1 space-y-4">
                       <div>
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{displayName}</h2>
+                        <div className="flex items-center gap-3 mb-2">
+                          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{displayName}</h2>
+                          <VerificationBadge 
+                            emailVerified={profile?.emailVerified}
+                            phoneVerified={profile?.phoneVerified}
+                            isLeadership={profile?.role === 'pastor' || profile?.role === 'admin' || profile?.role === 'owner'}
+                            size="md"
+                          />
+                        </div>
                         <div className="space-y-1 mt-1">
                           <div className="text-muted-foreground flex items-center gap-2">
                             <Mail className="h-4 w-4" />
                             <span>{profile?.email || "No email provided"}</span>
                             {profile?.emailVerified && (
-                              <Badge variant="outline" className="text-xs text-green-600 border-green-200">
+                              <Badge variant="outline" className="text-xs text-green-600 border-green-200 bg-green-50 dark:bg-green-900/20">
+                                <CheckCircle className="w-3 h-3 mr-1" />
                                 Verified
                               </Badge>
                             )}
@@ -454,7 +473,8 @@ export default function ProfilePage() {
                               <Phone className="h-4 w-4" />
                               <span>{profile.mobileNumber}</span>
                               {profile?.phoneVerified && (
-                                <Badge variant="outline" className="text-xs text-green-600 border-green-200">
+                                <Badge variant="outline" className="text-xs text-blue-600 border-blue-200 bg-blue-50 dark:bg-blue-900/20">
+                                  <Shield className="w-3 h-3 mr-1" />
                                   Verified
                                 </Badge>
                               )}
