@@ -173,7 +173,22 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
 
   // Update formData when profile prop changes
   useEffect(() => {
-    setFormData(profile);
+    // Initialize privacy settings with database defaults when null
+    const initializedProfile = {
+      ...profile,
+      // Apply database schema defaults for privacy settings when null
+      showBioPublicly: profile.showBioPublicly ?? true,
+      showChurchAffiliation: profile.showChurchAffiliation ?? true,
+      shareWithGroup: profile.shareWithGroup ?? true,
+      showAgeRange: profile.showAgeRange ?? false,
+      showLocation: profile.showLocation ?? false,
+      showMobile: profile.showMobile ?? false,
+      showGender: profile.showGender ?? false,
+      showDenomination: profile.showDenomination ?? true,
+      showSpiritualGifts: profile.showSpiritualGifts ?? true,
+    };
+    
+    setFormData(initializedProfile);
     setSelectedMinistries(profile.ministryInterests || []);
     setSelectedGoals(profile.growthGoals || []);
     setFavoriteVerses(profile.favoriteScriptures || []);
@@ -1705,7 +1720,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   </div>
                   <Switch
                     id="showBioPublicly"
-                    checked={formData.showBioPublicly ?? true}
+                    checked={formData.showBioPublicly === true}
                     onCheckedChange={(checked) => setFormData({...formData, showBioPublicly: checked})}
                   />
                 </div>
@@ -1717,7 +1732,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   </div>
                   <Switch
                     id="showChurchAffiliation"
-                    checked={formData.showChurchAffiliation ?? true}
+                    checked={formData.showChurchAffiliation === true}
                     onCheckedChange={(checked) => setFormData({...formData, showChurchAffiliation: checked})}
                   />
                 </div>
@@ -1729,7 +1744,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   </div>
                   <Switch
                     id="shareWithGroup"
-                    checked={formData.shareWithGroup ?? true}
+                    checked={formData.shareWithGroup === true}
                     onCheckedChange={(checked) => setFormData({...formData, shareWithGroup: checked})}
                   />
                 </div>
@@ -1741,7 +1756,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   </div>
                   <Switch
                     id="showAgeRange"
-                    checked={formData.showAgeRange ?? false}
+                    checked={formData.showAgeRange === true}
                     onCheckedChange={(checked) => setFormData({...formData, showAgeRange: checked})}
                   />
                 </div>
@@ -1753,7 +1768,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   </div>
                   <Switch
                     id="showLocation"
-                    checked={formData.showLocation ?? false}
+                    checked={formData.showLocation === true}
                     onCheckedChange={(checked) => setFormData({...formData, showLocation: checked})}
                   />
                 </div>
@@ -1765,7 +1780,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   </div>
                   <Switch
                     id="showMobile"
-                    checked={formData.showMobile ?? false}
+                    checked={formData.showMobile === true}
                     onCheckedChange={(checked) => setFormData({...formData, showMobile: checked})}
                   />
                 </div>
@@ -1777,7 +1792,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   </div>
                   <Switch
                     id="showGender"
-                    checked={formData.showGender ?? false}
+                    checked={formData.showGender === true}
                     onCheckedChange={(checked) => setFormData({...formData, showGender: checked})}
                   />
                 </div>
@@ -1789,7 +1804,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   </div>
                   <Switch
                     id="showDenomination"
-                    checked={formData.showDenomination ?? true}
+                    checked={formData.showDenomination === true}
                     onCheckedChange={(checked) => setFormData({...formData, showDenomination: checked})}
                   />
                 </div>
@@ -1801,7 +1816,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   </div>
                   <Switch
                     id="showSpiritualGifts"
-                    checked={formData.showSpiritualGifts ?? true}
+                    checked={formData.showSpiritualGifts === true}
                     onCheckedChange={(checked) => setFormData({...formData, showSpiritualGifts: checked})}
                   />
                 </div>
