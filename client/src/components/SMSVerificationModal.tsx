@@ -88,7 +88,10 @@ export function SMSVerificationModal({
         title: "Phone Verified!",
         description: "Your phone number has been successfully verified.",
       });
+      // Invalidate all user-related queries to refresh verification status
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/profile'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/user/profile'] });
       onVerificationComplete?.();
       onClose();
     },
