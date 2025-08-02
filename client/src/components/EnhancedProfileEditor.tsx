@@ -345,16 +345,30 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       ministryContext: "Counseling, leadership advisory, spiritual direction"
     },
     "Wisdom": {
-      description: "The gift of applying God's truth to practical life situations",
+      description: "The gift of applying biblical knowledge to practical life situations",
       scripture: "1 Corinthians 12:8",
-      soapThemes: ["Practical wisdom", "Life application", "Godly counsel"],
-      ministryContext: "Counseling, mentoring, decision-making support"
+      soapThemes: ["Practical wisdom", "Sound judgment", "Biblical application"],
+      ministryContext: "Counseling, teaching, leadership advisory"
     },
     "Intercession": {
-      description: "The gift of sustained and effective prayer for others",
+      description: "The gift of sustained prayer for others and their needs",
       scripture: "1 Timothy 2:1",
-      soapThemes: ["Prayer for others", "Intercession calls", "Spiritual warfare"],
-      ministryContext: "Prayer teams, intercessory ministry, spiritual warfare"
+      soapThemes: ["Prayer for others", "Spiritual warfare", "Intercession ministry"],
+      ministryContext: "Prayer ministry, spiritual warfare, prayer groups"
+    },
+    "Administration": {
+      description: "The gift of organizing and coordinating ministry activities",
+      scripture: "1 Corinthians 12:28",
+      soapThemes: ["Organization", "Planning", "Ministry coordination"],
+      ministryContext: "Event planning, administrative support, ministry management"
+    },
+    "Evangelism": {
+      description: "The gift of sharing the gospel effectively with non-believers",
+      scripture: "Ephesians 4:11",
+      soapThemes: ["Sharing faith", "Witnessing opportunities", "Evangelistic conversations"],
+      ministryContext: "Outreach ministry, missions, evangelistic events"
+    }
+      ministryContext: "Outreach ministry, missions, evangelistic events"
     }
   };
 
@@ -407,18 +421,19 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     try {
       for (const [gift, data] of Object.entries(spiritualGiftsData)) {
         try {
-          const response = await fetch(`https://bible-api.com/${data.scripture}`);
+          const response = await fetch(`https://bible-api.com/${encodeURIComponent(data.scripture)}`);
           if (response.ok) {
             const verseData = await response.json();
             verses[gift] = verseData.text?.trim() || '';
           }
         } catch (error) {
-          console.log(`Could not load verse for ${gift}:`, error);
+          // Silently fail verse loading - not critical
+          verses[gift] = '';
         }
       }
       setGiftVerses(verses);
     } catch (error) {
-      console.log('Error loading gift verses:', error);
+      // Silently handle error - verse loading is optional
     } finally {
       setLoadingVerses(false);
     }
