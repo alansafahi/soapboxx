@@ -144,6 +144,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const [verseTimeouts, setVerseTimeouts] = useState<{ [key: number]: NodeJS.Timeout }>({});
   const [verseValidation, setVerseValidation] = useState<{ [key: number]: { isValid: boolean; message: string; suggestion?: string } }>({});
   const [showGiftsAssessment, setShowGiftsAssessment] = useState(false);
+  const [showGiftsInfoModal, setShowGiftsInfoModal] = useState(false);
 
   const lookupVerse = async (verse: string, index: number) => {
     const trimmedVerse = verse.trim();
@@ -799,9 +800,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       type="button"
                       variant="outline"
                       className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300"
-                      onClick={() => {
-                        alert('These results show you the special ways God has gifted you to serve! Think of them as your spiritual superpowers - areas where you naturally shine and can make the biggest impact. Use these insights to find serving opportunities that match how God made you and will bring you joy!');
-                      }}
+                      onClick={() => setShowGiftsInfoModal(true)}
                     >
                       Learn More
                     </Button>
@@ -850,9 +849,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       type="button"
                       variant="outline"
                       className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300"
-                      onClick={() => {
-                        alert('Your spiritual gifts are special abilities God gives you to help and serve others! These might be things like being good at encouraging people, leading groups, teaching, or showing compassion. Taking this assessment helps you understand how God made you unique so you can find the perfect ways to serve and make a difference!');
-                      }}
+                      onClick={() => setShowGiftsInfoModal(true)}
                     >
                       Learn About Gifts
                     </Button>
@@ -1144,6 +1141,45 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
           setShowGiftsAssessment(false);
         }}
       />
+
+      {/* Spiritual Gifts Info Modal */}
+      <Dialog open={showGiftsInfoModal} onOpenChange={setShowGiftsInfoModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader className="text-center">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center mb-4">
+              <Sparkles className="h-8 w-8 text-white" />
+            </div>
+            <DialogTitle className="text-xl font-bold text-gray-900 dark:text-gray-100">
+              About Spiritual Gifts
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 text-center">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Your spiritual gifts are special abilities God gives you to help and serve others! 
+            </p>
+            
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 p-4 rounded-lg">
+              <p className="text-sm text-purple-800 dark:text-purple-200">
+                These might be things like being good at encouraging people, leading groups, teaching, or showing compassion.
+              </p>
+            </div>
+            
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+              Think of them as your spiritual superpowers - areas where you naturally shine and can make the biggest impact!
+            </p>
+            
+            <div className="pt-4">
+              <Button 
+                onClick={() => setShowGiftsInfoModal(false)}
+                className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600"
+              >
+                Got It!
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
