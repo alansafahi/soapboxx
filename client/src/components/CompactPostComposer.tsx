@@ -423,8 +423,8 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
         <ProfileVerificationRing
           emailVerified={user.emailVerified === true}
           phoneVerified={user.phoneVerified === true}
-          isLeadership={user.role === 'pastor' || user.role === 'admin' || user.role === 'owner' || user.role === 'soapbox_owner'}
           size="sm"
+          className="flex-shrink-0"
         >
           <Avatar className="w-8 h-8">
             <AvatarImage src={user.profileImageUrl || undefined} />

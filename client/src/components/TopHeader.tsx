@@ -576,7 +576,6 @@ export default function TopHeader() {
               <ProfileVerificationRing
                 emailVerified={typedUser?.emailVerified === true}
                 phoneVerified={typedUser?.phoneVerified === true}
-                isLeadership={typedUser?.role === 'pastor' || typedUser?.role === 'admin' || typedUser?.role === 'owner' || typedUser?.role === 'soapbox_owner'}
                 size="sm"
               >
                 <Avatar className="h-10 w-10">

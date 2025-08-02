@@ -22,26 +22,13 @@ export function ProfileVerificationRing({
   
   // Verification processing complete
   
-  // Determine ring style based on verification level
+  // Simplified verification logic: Gold circle only for fully verified users
   const getRingStyle = () => {
-    if (isLeadership && (emailVerifiedBool || phoneVerifiedBool)) {
-      return {
-        ringClass: "ring-4 ring-purple-600 shadow-lg shadow-purple-300 border-2 border-yellow-400",
-        title: "Leadership Verified"
-      };
-    }
-    
+    // Only show verification circle if user has BOTH email and phone verified
     if (emailVerifiedBool && phoneVerifiedBool) {
       return {
-        ringClass: "ring-4 ring-green-600 shadow-lg shadow-green-400 border-4 border-blue-300",
+        ringClass: "ring-4 ring-yellow-500 shadow-lg shadow-yellow-400/50 border-2 border-yellow-600",
         title: "Fully Verified"
-      };
-    }
-    
-    if (emailVerifiedBool || phoneVerifiedBool) {
-      return {
-        ringClass: "ring-4 ring-blue-600 shadow-lg shadow-blue-400 border-2 border-green-300",
-        title: emailVerifiedBool ? "Email Verified" : "Phone Verified"
       };
     }
     

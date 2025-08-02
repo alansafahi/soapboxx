@@ -542,7 +542,6 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                 <ProfileVerificationRing
                   emailVerified={post.author?.emailVerified === true}
                   phoneVerified={post.author?.phoneVerified === true}
-                  isLeadership={post.author?.role === 'pastor' || post.author?.role === 'admin' || post.author?.role === 'owner' || post.author?.role === 'soapbox_owner'}
                   size="sm"
                 >
                   <Avatar className="w-10 h-10">
