@@ -75,6 +75,13 @@ interface FeedPost {
     id: string;
     name: string;
     profileImage?: string;
+    profileImageUrl?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    emailVerified?: boolean;
+    phoneVerified?: boolean;
+    role?: string;
   };
   church?: {
     id: number;
@@ -1093,6 +1100,8 @@ export default function SocialFeed() {
                   isLeadership={post.author?.role === 'pastor' || post.author?.role === 'admin' || post.author?.role === 'owner'}
                   size="sm"
                 >
+                  {/* Debug author data */}
+                  {console.log('🔍 Social Feed Author Data:', post.author)}
                   <Avatar className="w-10 h-10">
                     <AvatarImage 
                       src={post.author?.profileImageUrl || ""} 
