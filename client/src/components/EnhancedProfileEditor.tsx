@@ -406,39 +406,65 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     lookupVerse(suggestion, index);
   };
 
-  // Spiritual Gifts Assessment Logic
+  // Spiritual Gifts Assessment Logic - Each gift now has multiple questions for accuracy
   const spiritualGiftsQuestions = [
-    { id: 'administration', question: 'I enjoy organizing people and resources for ministry projects', gift: 'Administration' },
-    { id: 'leadership', question: 'People naturally look to me for direction and guidance', gift: 'Leadership' },
-    { id: 'teaching', question: 'I love explaining biblical truths to help others understand', gift: 'Teaching' },
-    { id: 'mercy', question: 'I am drawn to comfort and care for those who are suffering', gift: 'Mercy' },
-    { id: 'evangelism', question: 'I enjoy sharing the gospel with non-believers', gift: 'Evangelism' },
-    { id: 'service', question: 'I find joy in practical acts of service behind the scenes', gift: 'Service' },
-    { id: 'giving', question: 'I feel called to be generous with my resources for ministry', gift: 'Giving' },
-    { id: 'hospitality', question: 'I love welcoming and making people feel at home', gift: 'Hospitality' },
-    { id: 'encouragement', question: 'I naturally encourage and build up others in their faith', gift: 'Encouragement' },
-    { id: 'discernment', question: 'I can often sense spiritual truth or deception', gift: 'Discernment' },
-    { id: 'wisdom', question: 'People seek me out for wise counsel and advice', gift: 'Wisdom' },
-    { id: 'faith', question: 'I have strong faith that God will provide and work miracles', gift: 'Faith' },
-    { id: 'helps', question: 'I love assisting others in completing their ministry tasks', gift: 'Helps' },
-    { id: 'knowledge', question: 'I enjoy deep study of Scripture and theological concepts', gift: 'Knowledge' },
-    { id: 'prophecy', question: 'I feel called to speak truth and challenge others spiritually', gift: 'Prophecy' },
-    // Additional questions to expand to 30 total (expanding the assessment as requested)
-    { id: 'counseling', question: 'I feel called to help people work through personal problems', gift: 'Counseling' },
-    { id: 'intercession', question: 'I spend significant time in prayer for others', gift: 'Intercession' },
-    { id: 'music', question: 'I use musical abilities to worship and minister to others', gift: 'Music' },
-    { id: 'craftsmanship', question: 'I enjoy creating things with my hands for ministry use', gift: 'Craftsmanship' },
-    { id: 'healing', question: 'I have seen God work through me to bring healing to others', gift: 'Healing' },
-    { id: 'miracles', question: 'I believe God works supernatural miracles through faithful believers', gift: 'Miracles' },
-    { id: 'tongues', question: 'I have been given a prayer language or ability to speak in tongues', gift: 'Tongues' },
-    { id: 'interpretation', question: 'I can understand and interpret spiritual messages', gift: 'Interpretation' },
-    { id: 'apostleship', question: 'I feel called to plant new churches or ministries', gift: 'Apostleship' },
-    { id: 'pastoring', question: 'I love shepherding and caring for a group of believers', gift: 'Pastoring' },
-    { id: 'missions', question: 'I feel called to serve God in cross-cultural ministry', gift: 'Missions' },
-    { id: 'volunteerism', question: 'I enjoy volunteering for various church and community needs', gift: 'Volunteerism' },
-    { id: 'coordination', question: 'I excel at coordinating events and bringing people together', gift: 'Coordination' },
-    { id: 'mentoring', question: 'I enjoy investing in and developing other people', gift: 'Mentoring' },
-    { id: 'creativity', question: 'I use creative arts to express worship and minister to others', gift: 'Creativity' }
+    // Leadership questions (3 questions)
+    { id: 'leadership1', question: 'People naturally look to me for direction and guidance', gift: 'Leadership' },
+    { id: 'leadership2', question: 'I enjoy taking charge of projects and seeing them through', gift: 'Leadership' },
+    { id: 'leadership3', question: 'Others often ask me to lead groups or initiatives', gift: 'Leadership' },
+    
+    // Teaching questions (3 questions)
+    { id: 'teaching1', question: 'I love explaining biblical truths to help others understand', gift: 'Teaching' },
+    { id: 'teaching2', question: 'I enjoy breaking down complex concepts into simple terms', gift: 'Teaching' },
+    { id: 'teaching3', question: 'People tell me I have a gift for making things clear', gift: 'Teaching' },
+    
+    // Administration questions (2 questions)
+    { id: 'administration1', question: 'I enjoy organizing people and resources for ministry projects', gift: 'Administration' },
+    { id: 'administration2', question: 'I excel at planning events and managing details', gift: 'Administration' },
+    
+    // Mercy questions (2 questions)
+    { id: 'mercy1', question: 'I am drawn to comfort and care for those who are suffering', gift: 'Mercy' },
+    { id: 'mercy2', question: 'I feel deeply moved by others\' pain and want to help', gift: 'Mercy' },
+    
+    // Service questions (2 questions)
+    { id: 'service1', question: 'I find joy in practical acts of service behind the scenes', gift: 'Service' },
+    { id: 'service2', question: 'I prefer helping others rather than being in the spotlight', gift: 'Service' },
+    
+    // Evangelism questions (2 questions)
+    { id: 'evangelism1', question: 'I enjoy sharing the gospel with non-believers', gift: 'Evangelism' },
+    { id: 'evangelism2', question: 'I look for opportunities to tell others about Jesus', gift: 'Evangelism' },
+    
+    // Encouragement questions (2 questions)
+    { id: 'encouragement1', question: 'I naturally encourage and build up others in their faith', gift: 'Encouragement' },
+    { id: 'encouragement2', question: 'People say I help them feel better about themselves and their situation', gift: 'Encouragement' },
+    
+    // Giving questions (2 questions)
+    { id: 'giving1', question: 'I feel called to be generous with my resources for ministry', gift: 'Giving' },
+    { id: 'giving2', question: 'I get excited about supporting good causes financially', gift: 'Giving' },
+    
+    // Hospitality questions (2 questions)
+    { id: 'hospitality1', question: 'I love welcoming and making people feel at home', gift: 'Hospitality' },
+    { id: 'hospitality2', question: 'I enjoy hosting others and creating comfortable environments', gift: 'Hospitality' },
+    
+    // Helps questions (2 questions)
+    { id: 'helps1', question: 'I love assisting others in completing their ministry tasks', gift: 'Helps' },
+    { id: 'helps2', question: 'I find satisfaction in supporting others\' ministries', gift: 'Helps' },
+    
+    // Faith questions (2 questions)
+    { id: 'faith1', question: 'I have strong faith that God will provide and work miracles', gift: 'Faith' },
+    { id: 'faith2', question: 'I trust God completely even in difficult circumstances', gift: 'Faith' },
+    
+    // Discernment questions (2 questions)
+    { id: 'discernment1', question: 'I can often sense spiritual truth or deception', gift: 'Discernment' },
+    { id: 'discernment2', question: 'I can tell when something doesn\'t feel spiritually right', gift: 'Discernment' },
+    
+    // Wisdom questions (2 questions)
+    { id: 'wisdom1', question: 'People seek me out for wise counsel and advice', gift: 'Wisdom' },
+    { id: 'wisdom2', question: 'I often know the right thing to do in difficult situations', gift: 'Wisdom' },
+    
+    // Intercession questions (2 questions)
+    { id: 'intercession1', question: 'I spend significant time in prayer for others', gift: 'Intercession' },
+    { id: 'intercession2', question: 'I feel called to pray regularly for specific people and situations', gift: 'Intercession' }
   ];
 
   const spiritualGiftsSchema = z.object({
@@ -457,8 +483,19 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       scores[q.gift] += score;
     });
     
-    // Get top 3 gifts
-    const topGifts = Object.entries(scores)
+    // Calculate average scores per gift (since gifts have different numbers of questions)
+    const giftQuestionCounts: Record<string, number> = {};
+    questions.forEach(q => {
+      giftQuestionCounts[q.gift] = (giftQuestionCounts[q.gift] || 0) + 1;
+    });
+    
+    const averageScores: Record<string, number> = {};
+    Object.entries(scores).forEach(([gift, totalScore]) => {
+      averageScores[gift] = totalScore / giftQuestionCounts[gift];
+    });
+    
+    // Get top 3 gifts based on average scores (more accurate)
+    const topGifts = Object.entries(averageScores)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 3)
       .map(([gift]) => gift);
