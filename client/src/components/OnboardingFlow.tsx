@@ -518,14 +518,14 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
                   className="flex-1 border-orange-200 text-orange-700 hover:bg-orange-100"
                   onClick={() => {/* Will implement SMS verification later */}}
                 >
-                  Add Phone Later
+                  Add Mobile Later
                 </Button>
                 <Button
                   size="sm"
                   className="flex-1 bg-orange-600 hover:bg-orange-700"
                   onClick={() => {/* Will implement SMS verification now */}}
                 >
-                  Verify Phone Now
+                  Verify Mobile Now
                 </Button>
               </div>
             </div>

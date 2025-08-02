@@ -403,7 +403,7 @@ export default function ProfilePage() {
                     <Phone className="h-5 w-5 text-orange-600" />
                     <div className="flex-1">
                       <h3 className="font-medium text-orange-800 dark:text-orange-200">
-                        Secure your account with a phone number
+                        Secure your account with a mobile number
                       </h3>
                       <p className="text-sm text-orange-600 dark:text-orange-300 mt-1">
                         Get prayer alerts, event reminders, and secure access.
@@ -414,7 +414,7 @@ export default function ProfilePage() {
                       className="bg-orange-600 hover:bg-orange-700"
                       onClick={() => setIsEditing(true)}
                     >
-                      Add Phone
+                      Verify Mobile
                     </Button>
                   </div>
                 </CardContent>
@@ -444,20 +444,20 @@ export default function ProfilePage() {
                       <div>
                         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{displayName}</h2>
                         <div className="space-y-1 mt-1">
-                          <p className="text-muted-foreground flex items-center gap-2">
+                          <div className="text-muted-foreground flex items-center gap-2">
                             <Mail className="h-4 w-4" />
-                            {profile?.email || "No email provided"}
+                            <span>{profile?.email || "No email provided"}</span>
                             {profile?.emailVerified && (
                               <Badge variant="outline" className="text-xs text-green-600 border-green-200">
                                 Verified
                               </Badge>
                             )}
-                          </p>
+                          </div>
                           
                           {profile?.mobileNumber && (
-                            <p className="text-muted-foreground flex items-center gap-2">
+                            <div className="text-muted-foreground flex items-center gap-2">
                               <Phone className="h-4 w-4" />
-                              {profile.mobileNumber}
+                              <span>{profile.mobileNumber}</span>
                               {profile?.phoneVerified ? (
                                 <Badge variant="outline" className="text-xs text-green-600 border-green-200">
                                   Verified
@@ -467,22 +467,17 @@ export default function ProfilePage() {
                                   Unverified
                                 </Badge>
                               )}
-                            </p>
+                            </div>
                           )}
 
                           {profile?.city && profile?.state && (
-                            <p className="text-muted-foreground flex items-center gap-2">
+                            <div className="text-muted-foreground flex items-center gap-2">
                               <MapPin className="h-4 w-4" />
-                              {profile.city}, {profile.state} {profile.zipCode}
-                            </p>
+                              <span>{profile.city}, {profile.state} {profile.zipCode}</span>
+                            </div>
                           )}
 
-                          {profile?.churchAffiliation && (
-                            <p className="text-muted-foreground flex items-center gap-2">
-                              <Church className="h-4 w-4" />
-                              {profile.churchAffiliation}
-                            </p>
-                          )}
+
                         </div>
                       </div>
 
@@ -525,6 +520,21 @@ export default function ProfilePage() {
                           </div>
                         )}
                       </div>
+
+                      {/* Church Affiliation Section */}
+                      {profile?.churchAffiliation && (
+                        <div className="border-t pt-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Church className="h-4 w-4 text-purple-600" />
+                            <span className="text-sm font-medium">Church/Community:</span>
+                          </div>
+                          <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
+                            <p className="font-medium text-purple-800 dark:text-purple-200">
+                              {profile.churchAffiliation}
+                            </p>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Ministry Interests */}
                       {profile?.ministryInterests && profile.ministryInterests.length > 0 && (
