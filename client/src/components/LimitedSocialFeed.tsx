@@ -543,8 +543,9 @@ export default function LimitedSocialFeed({ initialLimit = 5, className = "" }: 
                   emailVerified={post.author?.emailVerified === true}
                   phoneVerified={post.author?.phoneVerified === true}
                   size="sm"
+                  className="flex-shrink-0"
                 >
-                  <Avatar className="w-10 h-10">
+                  <Avatar className="w-10 h-10 flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
                     <AvatarImage src={post.author?.profileImageUrl || undefined} />
                     <AvatarFallback className="bg-purple-100 text-purple-600 font-medium">
                       {post.author?.firstName?.[0]}{post.author?.lastName?.[0]}

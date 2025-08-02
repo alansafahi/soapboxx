@@ -60,9 +60,9 @@ export function ProfileVerificationRing({
         className
       )}
       title={title}
-      style={{ aspectRatio: '1 / 1' }}
+      style={{ aspectRatio: '1 / 1', minWidth: 'fit-content' }}
     >
-      <div className="rounded-full overflow-hidden w-full h-full flex items-center justify-center">
+      <div className="rounded-full overflow-hidden w-full h-full flex items-center justify-center flex-shrink-0">
         {children}
       </div>
     </div>

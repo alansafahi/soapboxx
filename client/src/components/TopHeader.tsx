@@ -577,8 +577,9 @@ export default function TopHeader() {
                 emailVerified={typedUser?.emailVerified === true}
                 phoneVerified={typedUser?.phoneVerified === true}
                 size="sm"
+                className="flex-shrink-0"
               >
-                <Avatar className="h-10 w-10">
+                <Avatar className="h-10 w-10 flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
                   <AvatarImage src={typedUser?.profileImageUrl || undefined} />
                   <AvatarFallback className="bg-purple-600 text-white text-sm font-semibold">
                     {getUserInitials()}

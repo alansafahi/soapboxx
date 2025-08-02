@@ -426,7 +426,7 @@ export default function CompactPostComposer({ className = "" }: CompactPostCompo
           size="sm"
           className="flex-shrink-0"
         >
-          <Avatar className="w-8 h-8">
+          <Avatar className="w-8 h-8 flex-shrink-0" style={{ aspectRatio: '1 / 1' }}>
             <AvatarImage src={user.profileImageUrl || undefined} />
             <AvatarFallback className="bg-purple-100 text-purple-600 text-sm">
               {user.firstName?.[0]}{user.lastName?.[0]}
