@@ -169,7 +169,17 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       growthGoals: selectedGoals,
       favoriteScriptures: favoriteVerses,
       spiritualGifts: formData.spiritualGifts,
-      spiritualProfile: formData.spiritualProfile
+      spiritualProfile: formData.spiritualProfile,
+      // Ensure all privacy settings are included
+      showBioPublicly: formData.showBioPublicly,
+      showChurchAffiliation: formData.showChurchAffiliation,
+      shareWithGroup: formData.shareWithGroup,
+      showAgeRange: formData.showAgeRange,
+      showLocation: formData.showLocation,
+      showMobile: formData.showMobile,
+      showGender: formData.showGender,
+      showDenomination: formData.showDenomination,
+      showSpiritualGifts: formData.showSpiritualGifts
     });
   };
 
