@@ -75,7 +75,7 @@ export default function ProfileVerificationBadge({
   return (
     <div 
       className={cn(
-        "absolute -bottom-1 -right-1 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center shadow-lg z-30",
+        "absolute bottom-0 right-0 rounded-full border-2 border-white dark:border-gray-900 flex items-center justify-center shadow-lg z-30",
         bgColor,
         borderColor,
         sizeConfig[size],

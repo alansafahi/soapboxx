@@ -435,23 +435,26 @@ export default function ProfilePage() {
                   <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
                     <div className="relative">
                       {profile?.profileImageUrl ? (
-                        <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 relative">
-                          <img 
-                            src={profile.profileImageUrl} 
-                            alt={displayName}
-                            className="h-full w-full object-cover"
-                          />
+                        <div className="relative">
+                          <div className="h-32 w-32 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                            <img 
+                              src={profile.profileImageUrl} 
+                              alt={displayName}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
                           <ProfileVerificationBadge 
                             emailVerified={profile?.emailVerified === true}
                             phoneVerified={profile?.phoneVerified === true}
                             isLeadership={profile?.role === 'pastor' || profile?.role === 'admin' || profile?.role === 'owner'}
                             size="lg"
                           />
-
                         </div>
                       ) : (
-                        <div className="h-32 w-32 rounded-full bg-purple-600 flex items-center justify-center relative">
-                          <span className="text-2xl font-semibold text-white">{userInitials}</span>
+                        <div className="relative">
+                          <div className="h-32 w-32 rounded-full bg-purple-600 flex items-center justify-center">
+                            <span className="text-2xl font-semibold text-white">{userInitials}</span>
+                          </div>
                           <ProfileVerificationBadge 
                             emailVerified={profile?.emailVerified === true}
                             phoneVerified={profile?.phoneVerified === true}
