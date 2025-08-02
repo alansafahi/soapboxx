@@ -64,6 +64,7 @@ import { CommentConfirmationDialog } from './CommentConfirmationDialog';
 import { CommentDialog } from './CommentDialog';
 import SocialFeedEMISelector from './SocialFeedEMISelector';
 import EMIAwareRecommendations from './EMIAwareRecommendations';
+import { ProfileVerificationBadge } from './ProfileVerificationBadge';
 
 interface FeedPost {
   id: number;
@@ -1086,17 +1087,25 @@ export default function SocialFeed() {
           <Card key={post.id} id={`post-${post.id}`} className="border border-gray-200 dark:border-gray-700">
             <CardContent className="p-6">
               <div className="flex items-start space-x-3 mb-4">
-                <Avatar className="w-10 h-10">
-                  <AvatarImage 
-                    src={post.author?.profileImageUrl || ""} 
-                    alt={`${post.author?.firstName} ${post.author?.lastName}` || 'User'}
-                    className="object-cover"
+                <div className="relative">
+                  <Avatar className="w-10 h-10">
+                    <AvatarImage 
+                      src={post.author?.profileImageUrl || ""} 
+                      alt={`${post.author?.firstName} ${post.author?.lastName}` || 'User'}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-purple-600 text-white">
+                      {((post.author?.firstName?.[0] || '') + (post.author?.lastName?.[0] || '')) ||
+                       post.author?.email?.charAt(0) || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <ProfileVerificationBadge 
+                    emailVerified={post.author?.emailVerified === true}
+                    phoneVerified={post.author?.phoneVerified === true}
+                    isLeadership={post.author?.role === 'pastor' || post.author?.role === 'admin' || post.author?.role === 'owner'}
+                    size="sm"
                   />
-                  <AvatarFallback className="bg-purple-600 text-white">
-                    {((post.author?.firstName?.[0] || '') + (post.author?.lastName?.[0] || '')) ||
-                     post.author?.email?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
+                </div>
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
                     <h4 className="font-semibold text-gray-900 dark:text-white">
