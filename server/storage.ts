@@ -2554,7 +2554,7 @@ export class DatabaseStorage implements IStorage {
         (
           SELECT 
             d.id, 'discussion' as type, d.title, d.content, d.category, d.is_public, d.created_at, d.author_id::text as author_id,
-            u.id as user_id, u.email, u.first_name, u.last_name, u.profile_image_url,
+            u.id as user_id, u.email, u.first_name, u.last_name, u.profile_image_url, u.email_verified, u.phone_verified, u.role,
             NULL::text as scripture, NULL::text as scripture_reference, NULL::text as observation, NULL::text as application, NULL::text as prayer, d.mood_tag
           FROM discussions d
           LEFT JOIN users u ON d.author_id = u.id
@@ -2566,7 +2566,7 @@ export class DatabaseStorage implements IStorage {
         (
           SELECT 
             s.id, 'soap_reflection' as type, s.scripture_reference as title, s.scripture as content, 'reflection' as category, s.is_public, s.created_at, s.user_id as author_id,
-            u.id as user_id, u.email, u.first_name, u.last_name, u.profile_image_url,
+            u.id as user_id, u.email, u.first_name, u.last_name, u.profile_image_url, u.email_verified, u.phone_verified, u.role,
             s.scripture, s.scripture_reference, s.observation, s.application, s.prayer, s.mood_tag
           FROM soap_entries s
           LEFT JOIN users u ON s.user_id = u.id
@@ -2603,6 +2603,9 @@ export class DatabaseStorage implements IStorage {
           firstName: row.first_name,
           lastName: row.last_name,
           profileImageUrl: row.profile_image_url,
+          emailVerified: row.email_verified,
+          phoneVerified: row.phone_verified,
+          role: row.role,
         },
         type: row.type,
         mood: row.mood_tag,
@@ -7148,6 +7151,17 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Failed to add SOAP reaction:', error);
       throw new Error('Failed to add reaction');
+    }
+  }
+
+  // Implementation of getFeedPosts - use the same query as getDiscussions
+  async getFeedPosts(userId: string): Promise<any[]> {
+    try {
+      // Use the same logic as getDiscussions but with user-specific filtering
+      return await this.getDiscussions(20, 0, undefined, userId, false);
+    } catch (error) {
+      console.error('Failed to get feed posts:', error);
+      throw new Error('Failed to fetch feed posts');
     }
   }
 

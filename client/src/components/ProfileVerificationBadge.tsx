@@ -9,7 +9,7 @@ interface ProfileVerificationBadgeProps {
   className?: string;
 }
 
-export default function ProfileVerificationBadge({
+export function ProfileVerificationBadge({
   emailVerified = false,
   phoneVerified = false,
   isLeadership = false,
@@ -89,3 +89,5 @@ export default function ProfileVerificationBadge({
     </div>
   );
 }
+
+export default ProfileVerificationBadge;

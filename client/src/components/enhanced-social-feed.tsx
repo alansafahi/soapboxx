@@ -85,9 +85,9 @@ export function EnhancedSocialFeed({ limit = 20, showCreatePost = true }: Enhanc
     error,
     refetch 
   } = useQuery({
-    queryKey: ['/api/discussions-enhanced', limit],
+    queryKey: ['/api/discussions', limit],
     queryFn: async () => {
-      const response = await apiRequestEnhanced('GET', `/api/discussions-enhanced?limit=${limit}`);
+      const response = await apiRequestEnhanced('GET', `/api/discussions?limit=${limit}`);
       
       // Validate and map the response data
       const mappedPosts = response.map((post: any) => {
@@ -110,7 +110,7 @@ export function EnhancedSocialFeed({ limit = 20, showCreatePost = true }: Enhanc
   // Enhanced post creation mutation
   const createPostMutation = useMutation({
     mutationFn: async (postData: { title?: string; content: string; isPublic?: boolean }) => {
-      return await apiRequestEnhanced('POST', '/api/discussions-enhanced', {
+      return await apiRequestEnhanced('POST', '/api/discussions', {
         title: postData.title || undefined,
         content: postData.content,
         isPublic: postData.isPublic ?? true,
@@ -121,7 +121,7 @@ export function EnhancedSocialFeed({ limit = 20, showCreatePost = true }: Enhanc
       // Validate new post data
       const mappedPost = mapDiscussion(newPost);
       if (validateMappedData(mappedPost, ['id', 'content', 'author'])) {
-        queryClient.invalidateQueries({ queryKey: ['/api/discussions-enhanced'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
         queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
         
         toast({
@@ -151,7 +151,7 @@ export function EnhancedSocialFeed({ limit = 20, showCreatePost = true }: Enhanc
     mutationFn: async (postId: number) => {
       // Use enhanced endpoint if available, fall back to original
       try {
-        return await apiRequestEnhanced('POST', `/api/discussions-enhanced/${postId}/like`);
+        return await apiRequestEnhanced('POST', `/api/discussions/${postId}/like`);
       } catch (error) {
         // Fallback to original endpoint
         return await fetch(`/api/discussions/${postId}/like`, {
@@ -166,7 +166,7 @@ export function EnhancedSocialFeed({ limit = 20, showCreatePost = true }: Enhanc
     },
     onSuccess: () => {
       // Invalidate both enhanced and original queries
-      queryClient.invalidateQueries({ queryKey: ['/api/discussions-enhanced'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
     }
   });
@@ -175,7 +175,7 @@ export function EnhancedSocialFeed({ limit = 20, showCreatePost = true }: Enhanc
   const deleteMutation = useMutation({
     mutationFn: async (postId: number) => {
       try {
-        return await apiRequestEnhanced('DELETE', `/api/discussions-enhanced/${postId}`);
+        return await apiRequestEnhanced('DELETE', `/api/discussions/${postId}`);
       } catch (error) {
         // Fallback to original endpoint
         return await fetch(`/api/discussions/${postId}`, {
@@ -188,7 +188,7 @@ export function EnhancedSocialFeed({ limit = 20, showCreatePost = true }: Enhanc
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/discussions-enhanced'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       toast({
         title: "Post deleted",
