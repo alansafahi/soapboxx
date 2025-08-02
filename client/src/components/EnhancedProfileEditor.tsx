@@ -171,6 +171,14 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const [aiGiftSuggestions, setAiGiftSuggestions] = useState<any>(null);
   const [loadingAiAnalysis, setLoadingAiAnalysis] = useState(false);
 
+  // Update formData when profile prop changes
+  useEffect(() => {
+    setFormData(profile);
+    setSelectedMinistries(profile.ministryInterests || []);
+    setSelectedGoals(profile.growthGoals || []);
+    setFavoriteVerses(profile.favoriteScriptures || []);
+  }, [profile]);
+
   // Spiritual Gifts Data - defined early for use in functions
   const spiritualGiftsData = {
     "Leadership": {
