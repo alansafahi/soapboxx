@@ -116,23 +116,23 @@ const GROWTH_GOALS = [
 ];
 
 const LANGUAGES = [
-  { value: "English", label: "English" },
-  { value: "Spanish", label: "Español (Spanish)" },
-  { value: "French", label: "Français (French)" },
-  { value: "Portuguese", label: "Português (Portuguese)" },
-  { value: "German", label: "Deutsch (German)" },
-  { value: "Italian", label: "Italiano (Italian)" },
-  { value: "Dutch", label: "Nederlands (Dutch)" },
-  { value: "Russian", label: "Русский (Russian)" },
-  { value: "Chinese", label: "中文 (Chinese)" },
-  { value: "Korean", label: "한국어 (Korean)" },
-  { value: "Japanese", label: "日本語 (Japanese)" },
-  { value: "Farsi", label: "فارسی (Farsi)" },
-  { value: "Armenian", label: "Հայերեն (Armenian)" },
-  { value: "Arabic", label: "العربية (Arabic)" },
-  { value: "Hebrew", label: "עברית (Hebrew)" },
-  { value: "Hindi", label: "हिन्दी (Hindi)" },
-  { value: "Other", label: "Other" }
+  { value: "English", label: "🇺🇸 English" },
+  { value: "Spanish", label: "🇪🇸 Español (Spanish)" },
+  { value: "French", label: "🇫🇷 Français (French)" },
+  { value: "Portuguese", label: "🇵🇹 Português (Portuguese)" },
+  { value: "German", label: "🇩🇪 Deutsch (German)" },
+  { value: "Italian", label: "🇮🇹 Italiano (Italian)" },
+  { value: "Dutch", label: "🇳🇱 Nederlands (Dutch)" },
+  { value: "Russian", label: "🇷🇺 Русский (Russian)" },
+  { value: "Chinese", label: "🇨🇳 中文 (Chinese)" },
+  { value: "Korean", label: "🇰🇷 한국어 (Korean)" },
+  { value: "Japanese", label: "🇯🇵 日本語 (Japanese)" },
+  { value: "Farsi", label: "🇮🇷 فارسی (Farsi)" },
+  { value: "Armenian", label: "🇦🇲 Հայերեն (Armenian)" },
+  { value: "Arabic", label: "🇸🇦 العربية (Arabic)" },
+  { value: "Hebrew", label: "🇮🇱 עברית (Hebrew)" },
+  { value: "Hindi", label: "🇮🇳 हिन्दी (Hindi)" },
+  { value: "Other", label: "🌐 Other" }
 ];
 
 const BIBLE_TRANSLATIONS = [

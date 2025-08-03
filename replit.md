@@ -5,11 +5,14 @@ The SoapBox Super App is a comprehensive faith community platform designed to co
 
 **Recent Status**: Successfully restructured onboarding flow to prioritize user experience and reduce friction. Moved spiritual assessment from mandatory step 4 to optional end-of-flow choice, allowing users to complete core onboarding (account creation, role selection, profile setup) before deciding on personalized spiritual content. Fixed AI content generation JSON parsing errors and improved user name display handling.
 
-**Latest Update**: Implemented smart UX redesign to eliminate cognitive overload during profile setup. Removed Current Reading Plan and Prayer Request input fields from profile editor, replacing them with contextual prompts that guide users to appropriate features when they're ready. This prevents form errors, reduces complexity, and follows modern UX principles by not asking for information users can't meaningfully provide yet. Reading plans auto-populate when users join groups, and prayer requests are accessible via dedicated Prayer Wall. This creates a smoother, more intuitive user experience focused on essential profile completion.
+**Latest Update**: Enhanced language selection with visual flag indicators and custom language support. Added flag emojis to 17 supported languages (English, Spanish, French, Portuguese, German, Italian, Dutch, Russian, Chinese, Korean, Japanese, Farsi, Armenian, Arabic, Hebrew, Hindi) plus "Other" option with custom text input. Fixed all profile data persistence issues including spiritual gifts assessment pagination and field mapping in user endpoint. Mobile verification button now properly shows/hides based on verification status.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 Focus on functionality over technical implementation details.
+Language support priority: Farsi and Armenian above Arabic, Korean above Japanese, Hindi at end.
+Visual enhancements: Flag icons for language selection.
+Future consideration: Implement same language list on main website (soapboxsuperapp.com).
 
 ## System Architecture
 
@@ -42,7 +45,7 @@ Focus on functionality over technical implementation details.
 - **Enhanced Bible Verse System**: SoapBox Bible cache (52 authentic verses), smart detection for scripture references, categories, fast lookup API.
 - **Comprehensive Verification System**: Tiered verification approach - Level 1 (Email OR SMS choice), Level 2 (Both email and SMS), Level 3 (Leadership with additional verification). Complete SMS verification integration with Twilio, phone number validation, rate limiting (3 attempts/hour), 10-minute expiration, resend cooldown, and user-friendly verification modals with real-time countdown timers.
 - **Adaptive Spiritual Gifts Assessment**: Two-tier assessment system - Quick 30-question assessment for most users with option to upgrade to comprehensive 120-question deep discovery. Features initial results display with personality labels (Kingdom Champion, Faithful Servant, etc.), expanded assessment unlock for refined rankings (1-20), shadow gifts identification, ministry role matchings, and leadership development insights.
-- **UI/UX Decisions**: Radix UI with Tailwind for consistent design, dynamic labeling, spiritual-themed custom icons, gradient color schemes, light/dark mode support, mobile-first responsive design, consistent button styling, and unified visual hierarchy. Chat widget positioned bottom-right.
+- **UI/UX Decisions**: Radix UI with Tailwind for consistent design, dynamic labeling, spiritual-themed custom icons, gradient color schemes, light/dark mode support, mobile-first responsive design, consistent button styling, and unified visual hierarchy. Enhanced language selection with flag indicators and custom language input. Chat widget positioned bottom-right.
 - **System Design Choices**: Unified communication interface, multi-campus support, AI content moderation (four-tier priority, multi-modal analysis, user-empowered edit requests), role-based permissions, comprehensive field validation, dynamic form fields, and automated church verification.
 - **Invite-Driven Onboarding**: Streamlined 4-step process including account creation, role selection, spiritual profile, and welcome setup. Supports automatic community association via invite links and includes email verification with gentle reminders and security protection.
 
