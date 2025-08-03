@@ -9296,6 +9296,7 @@ Return JSON with this exact structure:
         churchAffiliation: req.body.churchAffiliation,
         spiritualStage: req.body.spiritualStage,
         ministryInterests: req.body.ministryInterests,
+        volunteerInterest: req.body.volunteerInterest,
         growthGoals: req.body.growthGoals,
         favoriteScriptures: req.body.favoriteScriptures || [],
         spiritualGifts: req.body.spiritualGifts,
@@ -9314,6 +9315,7 @@ Return JSON with this exact structure:
         showGender: req.body.showGender,
         showDenomination: req.body.showDenomination,
         showSpiritualGifts: req.body.showSpiritualGifts,
+        publicSharing: req.body.publicSharing,
         
         // Other fields
         dateOfBirth: req.body.dateOfBirth || req.body.date_of_birth,
