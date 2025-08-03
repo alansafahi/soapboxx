@@ -1037,9 +1037,11 @@ export class DatabaseStorage implements IStorage {
       // Social and ministry fields
       if ((profileData as any).favoriteScriptures !== undefined) updateData.favoriteScriptures = (profileData as any).favoriteScriptures;
       if ((profileData as any).ministryInterests !== undefined) updateData.ministryInterests = (profileData as any).ministryInterests;
+      if ((profileData as any).volunteerInterest !== undefined) updateData.volunteerInterest = (profileData as any).volunteerInterest;
       if ((profileData as any).growthGoals !== undefined) updateData.growthGoals = (profileData as any).growthGoals;
       if ((profileData as any).spiritualGifts !== undefined) updateData.spiritualGifts = (profileData as any).spiritualGifts;
       if ((profileData as any).spiritualProfile !== undefined) updateData.spiritualProfile = (profileData as any).spiritualProfile;
+      if ((profileData as any).publicSharing !== undefined) updateData.publicSharing = (profileData as any).publicSharing;
       
       // Privacy settings
       if ((profileData as any).showBioPublicly !== undefined) updateData.showBioPublicly = (profileData as any).showBioPublicly;
