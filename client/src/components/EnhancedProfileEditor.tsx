@@ -186,6 +186,12 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       showGender: profile.showGender ?? false,
       showDenomination: profile.showDenomination ?? true,
       showSpiritualGifts: profile.showSpiritualGifts ?? true,
+      // Initialize language preference to English if null
+      languagePreference: profile.languagePreference || "English",
+      // Initialize bible translation to NIV if null
+      preferredBibleTranslation: profile.preferredBibleTranslation || "NIV",
+      // Initialize small group to not_interested if null
+      smallGroup: profile.smallGroup || "not_interested",
     };
     
     setFormData(initializedProfile);
@@ -283,11 +289,12 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   };
 
   const handleSave = () => {
-    onSave({
+    // Ensure favorite verses are properly included in the save data
+    const saveData = {
       ...formData,
       ministryInterests: selectedMinistries,
       growthGoals: selectedGoals,
-      favoriteScriptures: favoriteVerses,
+      favoriteScriptures: favoriteVerses.filter(verse => verse && verse.trim() !== ''), // Filter out empty verses
       spiritualGifts: formData.spiritualGifts,
       spiritualProfile: formData.spiritualProfile,
       // Ensure all privacy settings are included
@@ -300,7 +307,10 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       showGender: formData.showGender,
       showDenomination: formData.showDenomination,
       showSpiritualGifts: formData.showSpiritualGifts
-    });
+    };
+    
+    console.log('Saving profile data:', saveData);
+    onSave(saveData);
   };
 
   // Photo upload handlers
@@ -1179,15 +1189,23 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   </p>
                 </div>
                 <div>
-                  <Label htmlFor="smallGroup">Small Group</Label>
-                  <Input
-                    id="smallGroup"
-                    placeholder="e.g., Young Adults Life Group (leave blank if none)"
-                    value={formData.smallGroup || ""}
-                    onChange={(e) => setFormData({...formData, smallGroup: e.target.value})}
-                  />
+                  <Label htmlFor="smallGroup">Small Group Participation</Label>
+                  <Select 
+                    value={formData.smallGroup || "not_interested"} 
+                    onValueChange={(value) => setFormData({...formData, smallGroup: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your small group status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="interested">Interested - Want to join a small group</SelectItem>
+                      <SelectItem value="looking_for_info">Looking for Info - Want to learn more about groups</SelectItem>
+                      <SelectItem value="current_member">Current Member - Already in a small group</SelectItem>
+                      <SelectItem value="not_interested">Not Interested - Not looking to join right now</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Your Bible study or fellowship group (optional)
+                    Your interest level in Bible study and fellowship groups
                   </p>
                 </div>
               </div>
