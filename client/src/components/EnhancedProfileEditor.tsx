@@ -197,7 +197,27 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     setFormData(initializedProfile);
     setSelectedMinistries(profile.ministryInterests || []);
     setSelectedGoals(profile.growthGoals || []);
-    setFavoriteVerses(profile.favoriteScriptures || []);
+    
+    // Handle favorite verses - they might be strings or objects
+    const verses = profile.favoriteScriptures || [];
+    const verseRefs: string[] = [];
+    const verseTextsData: { [key: number]: { text: string; reference: string; version: string } } = {};
+    
+    verses.forEach((verse: any, index: number) => {
+      if (typeof verse === 'string') {
+        verseRefs.push(verse);
+      } else if (verse && typeof verse === 'object' && verse.reference) {
+        verseRefs.push(verse.reference);
+        verseTextsData[index] = {
+          text: verse.text || '',
+          reference: verse.reference,
+          version: verse.version || 'NIV'
+        };
+      }
+    });
+    
+    setFavoriteVerses(verseRefs);
+    setVerseTexts(verseTextsData);
   }, [profile]);
 
   // Spiritual Gifts Data - defined early for use in functions
@@ -289,12 +309,28 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   };
 
   const handleSave = () => {
+    // Build complete verse objects with both reference and text
+    const completeVerses = favoriteVerses
+      .filter(verse => verse && verse.trim() !== '') // Filter out empty verses
+      .map((verse, index) => {
+        // If we have verse text for this index, save both reference and text
+        if (verseTexts[index]) {
+          return {
+            reference: verse,
+            text: verseTexts[index].text,
+            version: verseTexts[index].version
+          };
+        }
+        // Otherwise, just save the reference (for backward compatibility)
+        return verse;
+      });
+
     // Ensure favorite verses are properly included in the save data
     const saveData = {
       ...formData,
       ministryInterests: selectedMinistries,
       growthGoals: selectedGoals,
-      favoriteScriptures: favoriteVerses.filter(verse => verse && verse.trim() !== ''), // Filter out empty verses
+      favoriteScriptures: completeVerses,
       spiritualGifts: formData.spiritualGifts,
       spiritualProfile: formData.spiritualProfile,
       // Ensure all privacy settings are included
@@ -309,7 +345,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       showSpiritualGifts: formData.showSpiritualGifts
     };
     
-    console.log('Saving profile data:', saveData);
+    console.log('Saving profile data with complete verses:', saveData);
     onSave(saveData);
   };
 
