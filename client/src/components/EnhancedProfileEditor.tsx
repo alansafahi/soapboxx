@@ -203,18 +203,20 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     const verseRefs: string[] = [];
     const verseTextsData: { [key: number]: { text: string; reference: string; version: string } } = {};
     
-    verses.forEach((verse: any, index: number) => {
-      if (typeof verse === 'string') {
-        verseRefs.push(verse);
-      } else if (verse && typeof verse === 'object' && verse.reference) {
-        verseRefs.push(verse.reference);
-        verseTextsData[index] = {
-          text: verse.text || '',
-          reference: verse.reference,
-          version: verse.version || 'NIV'
-        };
-      }
-    });
+    if (Array.isArray(verses)) {
+      verses.forEach((verse: any, index: number) => {
+        if (typeof verse === 'string') {
+          verseRefs.push(verse);
+        } else if (verse && typeof verse === 'object' && verse.reference) {
+          verseRefs.push(verse.reference);
+          verseTextsData[index] = {
+            text: verse.text || '',
+            reference: verse.reference,
+            version: verse.version || 'NIV'
+          };
+        }
+      });
+    }
     
     setFavoriteVerses(verseRefs);
     setVerseTexts(verseTextsData);

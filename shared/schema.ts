@@ -172,7 +172,7 @@ export const users = pgTable("users", {
   spiritualStage: varchar("spiritual_stage", { length: 30 }), // exploring_faith, new_believer, active_disciple, leader, elder
   
   // Social Engagement Features
-  favoriteScriptures: text("favorite_scriptures").array(), // Array of favorite Bible verses
+  favoriteScriptures: jsonb("favorite_scriptures"), // Array of favorite Bible verses (can be strings or objects with text)
   ministryInterests: text("ministry_interests").array(), // youth, worship, missions, media, teaching, etc.
   volunteerInterest: boolean("volunteer_interest").default(false), // Willing to volunteer
   smallGroup: varchar("small_group"), // Current small group involvement
