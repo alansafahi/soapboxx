@@ -1182,12 +1182,12 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   <Label htmlFor="smallGroup">Small Group</Label>
                   <Input
                     id="smallGroup"
-                    placeholder="e.g., Young Adults Life Group"
+                    placeholder="e.g., Young Adults Life Group (leave blank if none)"
                     value={formData.smallGroup || ""}
                     onChange={(e) => setFormData({...formData, smallGroup: e.target.value})}
                   />
                   <p className="text-xs text-muted-foreground mt-1">
-                    Your Bible study or fellowship group
+                    Your Bible study or fellowship group (optional)
                   </p>
                 </div>
               </div>
