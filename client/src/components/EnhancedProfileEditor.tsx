@@ -77,6 +77,7 @@ interface UserProfile {
   city: string | null;
   state: string | null;
   languagePreference: string | null;
+  customLanguage: string | null;
   preferredBibleTranslation: string | null;
   spiritualGifts: string[] | null;
   spiritualProfile: {
@@ -342,6 +343,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       spiritualGifts: formData.spiritualGifts,
       spiritualProfile: formData.spiritualProfile,
       publicSharing: formData.publicSharing,
+      customLanguage: formData.customLanguage,
       // Ensure all privacy settings are included
       showBioPublicly: formData.showBioPublicly,
       showChurchAffiliation: formData.showChurchAffiliation,
@@ -1116,7 +1118,13 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                 <Label htmlFor="languagePreference">Language Preference</Label>
                 <Select 
                   value={formData.languagePreference || "English"} 
-                  onValueChange={(value) => setFormData({...formData, languagePreference: value})}
+                  onValueChange={(value) => {
+                    setFormData({...formData, languagePreference: value});
+                    // Clear custom language if not selecting "Other"
+                    if (value !== "Other") {
+                      setFormData(prev => ({...prev, languagePreference: value, customLanguage: null}));
+                    }
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select language" />
@@ -1127,6 +1135,19 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     ))}
                   </SelectContent>
                 </Select>
+                
+                {/* Show custom language input when "Other" is selected */}
+                {formData.languagePreference === "Other" && (
+                  <div className="mt-2">
+                    <Input
+                      placeholder="Please specify your language"
+                      value={formData.customLanguage || ""}
+                      onChange={(e) => setFormData({...formData, customLanguage: e.target.value})}
+                      className="text-sm"
+                    />
+                  </div>
+                )}
+                
                 <p className="text-xs text-muted-foreground mt-1">
                   Your preferred language for app content and communications
                 </p>
