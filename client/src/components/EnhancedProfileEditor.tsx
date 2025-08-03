@@ -1732,14 +1732,14 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
               <div>
                 <Label htmlFor="currentReadingPlan">Current Reading Plan</Label>
                 <Select 
-                  value={formData.currentReadingPlan || ""} 
-                  onValueChange={(value) => setFormData({...formData, currentReadingPlan: value})}
+                  value={formData.currentReadingPlan || "none"} 
+                  onValueChange={(value) => setFormData({...formData, currentReadingPlan: value === "none" ? null : value})}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a reading plan or leave blank" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No current plan</SelectItem>
+                    <SelectItem value="none">No current plan</SelectItem>
                     <SelectItem value="bible_in_a_year">Bible in a Year</SelectItem>
                     <SelectItem value="daily_devotional">Daily Devotional</SelectItem>
                     <SelectItem value="chronological_bible">Chronological Bible Reading</SelectItem>
