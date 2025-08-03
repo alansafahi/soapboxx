@@ -1967,12 +1967,12 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
         open={showGiftsAssessment}
         onClose={() => setShowGiftsAssessment(false)}
         onComplete={(profile) => {
-          // Update the formData with the assessment results
-          setFormData({
-            ...formData, 
+          // Update the formData with the assessment results using functional update
+          setFormData(prevFormData => ({
+            ...prevFormData, 
             spiritualGifts: profile.topGifts || [],
             spiritualProfile: profile
-          });
+          }));
           setShowGiftsAssessment(false);
         }}
       />
