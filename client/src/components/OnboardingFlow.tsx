@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Heart, Users, BookOpen, Compass, CheckCircle, ArrowRight, ArrowLeft, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import OnboardingSpiritualFlow from './OnboardingSpiritualFlow';
 
 interface OnboardingFlowProps {
   inviteToken?: string;
@@ -86,15 +85,19 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
     ministryInterests: [] as string[],
     churchAffiliation: churchName || '',
     
-    // Step 4: Will be handled by OnboardingSpiritualFlow
-    // spiritualAssessment: null,
+    // Step 4: Privacy & Preferences
+    emailUpdates: true,
+    prayerRequestNotifications: true,
+    dailyDevotionReminders: false,
+    showInDirectory: true,
+    allowDirectMessages: true,
     
     // Metadata
     inviteToken: inviteToken || '',
     inviterName: inviterName || ''
   });
 
-  const [showSpiritualFlow, setShowSpiritualFlow] = useState(false);
+
 
   const updateFormData = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -109,7 +112,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
     }));
   };
 
-  const getStepProgress = () => (currentStep / 4) * 100;
+  const getStepProgress = () => (currentStep / 5) * 100;
 
   const canProceedFromStep1 = () => {
     return formData.firstName && formData.lastName && formData.email && 
@@ -133,7 +136,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
   };
 
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -144,48 +147,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
     }
   };
 
-  const handleSpiritualFlowComplete = async (spiritualData: any) => {
-    // Merge spiritual assessment data with existing form data
-    const completeFormData = {
-      ...formData,
-      spiritualAssessment: spiritualData
-    };
-    
-    setIsLoading(true);
-    try {
-      await onComplete(completeFormData);
-      toast({
-        title: "Welcome to SoapBox!",
-        description: "Your personalized spiritual profile has been created.",
-      });
-    } catch (error: any) {
-      console.error('Onboarding error:', error);
-      
-      // Check if it's an existing account error
-      const errorMessage = error?.message || error?.toString() || '';
-      if (errorMessage.includes('already have an account') || errorMessage.includes('already exists')) {
-        toast({
-          title: "Account Already Exists",
-          description: "Redirecting you to the login page...",
-          variant: "default"
-        });
-        
-        // Navigate to login immediately with pre-filled email
-        setTimeout(() => {
-          const loginUrl = `/login?email=${encodeURIComponent(formData.email)}`;
-          window.location.href = loginUrl;
-        }, 1500);
-      } else {
-        toast({
-          title: "Setup Error",
-          description: errorMessage || "There was an issue completing your setup. Please try again.",
-          variant: "destructive"
-        });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
 
   const handleComplete = async () => {
     // This handles completion without spiritual assessment
@@ -228,7 +190,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center mb-8">
       <div className="flex items-center space-x-2">
-        {[1, 2, 3, 4].map(step => (
+        {[1, 2, 3, 4, 5].map(step => (
           <div key={step} className="flex items-center">
             <div className={`
               w-8 h-8 rounded-full flex items-center justify-center font-medium
@@ -239,7 +201,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
             `}>
               {step < currentStep ? <CheckCircle className="w-4 h-4" /> : step}
             </div>
-            {step < 4 && <div className={`w-8 h-0.5 ml-2 ${step < currentStep ? 'bg-purple-600' : 'bg-gray-200'}`} />}
+            {step < 5 && <div className={`w-8 h-0.5 ml-2 ${step < currentStep ? 'bg-purple-600' : 'bg-gray-200'}`} />}
           </div>
         ))}
       </div>
@@ -527,6 +489,93 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
     <Card>
       <CardHeader className="text-center">
         <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
+          Privacy & Preferences
+        </CardTitle>
+        <p className="text-muted-foreground">
+          Let us know how you'd like to stay connected and what interests you
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          <div className="space-y-3">
+            <Label className="text-base font-medium">Communication Preferences</Label>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="email-updates" 
+                  checked={formData.emailUpdates || false}
+                  onCheckedChange={(checked) => updateFormData('emailUpdates', checked)}
+                />
+                <Label htmlFor="email-updates" className="text-sm">
+                  Receive email updates about events and announcements
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="prayer-requests" 
+                  checked={formData.prayerRequestNotifications || false}
+                  onCheckedChange={(checked) => updateFormData('prayerRequestNotifications', checked)}
+                />
+                <Label htmlFor="prayer-requests" className="text-sm">
+                  Get notified about prayer requests from the community
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="daily-devotions" 
+                  checked={formData.dailyDevotionReminders || false}
+                  onCheckedChange={(checked) => updateFormData('dailyDevotionReminders', checked)}
+                />
+                <Label htmlFor="daily-devotions" className="text-sm">
+                  Daily devotion and Bible reading reminders
+                </Label>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-base font-medium">Profile Visibility</Label>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="show-in-directory" 
+                  checked={formData.showInDirectory !== false}
+                  onCheckedChange={(checked) => updateFormData('showInDirectory', checked)}
+                />
+                <Label htmlFor="show-in-directory" className="text-sm">
+                  Show my profile in the church member directory
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="allow-messages" 
+                  checked={formData.allowDirectMessages !== false}
+                  onCheckedChange={(checked) => updateFormData('allowDirectMessages', checked)}
+                />
+                <Label htmlFor="allow-messages" className="text-sm">
+                  Allow other members to send me direct messages
+                </Label>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex space-x-4">
+          <Button variant="outline" onClick={handleBack} className="flex-1">
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back
+          </Button>
+          <Button onClick={handleNext} className="flex-1">
+            Next <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  const renderStep5 = () => (
+    <Card>
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
           Welcome to SoapBox!
         </CardTitle>
         <p className="text-muted-foreground">
@@ -582,40 +631,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
           </CardContent>
         </Card>
 
-        {/* Optional Spiritual Assessment Offer */}
-        <Card className="border-purple-200 bg-purple-50 dark:bg-purple-900/20">
-          <CardContent className="pt-4">
-            <div className="text-center space-y-3">
-              <Heart className="w-8 h-8 text-purple-600 mx-auto" />
-              <div>
-                <h3 className="font-semibold text-purple-800 dark:text-purple-200">
-                  Take our Spiritual Assessment (Optional)
-                </h3>
-                <p className="text-sm text-purple-600 dark:text-purple-300 mt-1">
-                  Get personalized spiritual content and Bible reading recommendations
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <Button 
-                  onClick={handleComplete} 
-                  disabled={isLoading}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-100"
-                >
-                  {isLoading ? "Setting up..." : "Skip for Now"}
-                </Button>
-                <Button
-                  size="sm"
-                  className="flex-1 bg-purple-600 hover:bg-purple-700"
-                  onClick={() => setShowSpiritualFlow(true)}
-                >
-                  Take Assessment
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
 
         <div className="text-left space-y-2">
             <h3 className="font-semibold">What's next:</h3>
@@ -632,25 +648,19 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
           <Button variant="outline" onClick={handleBack} className="flex-1">
             <ArrowLeft className="w-4 h-4 mr-2" /> Back
           </Button>
+          <Button 
+            onClick={handleComplete} 
+            disabled={isLoading}
+            className="flex-1"
+          >
+            {isLoading ? "Setting up..." : "Complete Setup"}
+          </Button>
         </div>
       </CardContent>
     </Card>
   );
 
-  // If showing spiritual flow, render it instead of regular steps
-  if (showSpiritualFlow) {
-    return (
-      <OnboardingSpiritualFlow 
-        onComplete={handleSpiritualFlowComplete}
-        onBack={() => setShowSpiritualFlow(false)}
-        userProfile={{
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          role: formData.role
-        }}
-      />
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-100 dark:from-slate-900 dark:to-slate-800 p-4">
@@ -665,6 +675,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
         {currentStep === 2 && renderStep2()}
         {currentStep === 3 && renderStep3()}
         {currentStep === 4 && renderStep4()}
+        {currentStep === 5 && renderStep5()}
       </div>
     </div>
   );
