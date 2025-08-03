@@ -1158,6 +1158,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         spiritualProfile: user.spiritualProfile,
         growthGoals: user.growthGoals || [],
         publicSharing: user.publicSharing,
+        languagePreference: user.languagePreference,
+        customLanguage: user.customLanguage,
         
         interests: user.interests || [],
         hasCompletedOnboarding: user.hasCompletedOnboarding,

@@ -190,6 +190,8 @@ export const users = pgTable("users", {
   prayerPrompt: text("prayer_prompt"), // Current "How can we pray for you?" prompt
   growthGoals: text("growth_goals").array(), // Personal spiritual growth goals
   currentReadingPlan: varchar("current_reading_plan"), // Active Bible reading plan
+  languagePreference: varchar("language_preference", { length: 50 }), // User's preferred language
+  customLanguage: varchar("custom_language", { length: 100 }), // Custom language when "Other" is selected
   
   // Privacy Settings (granular control)
   showBioPublicly: boolean("show_bio_publicly").default(true),

@@ -25,13 +25,15 @@ import {
   Calendar,
   Trophy,
   Flame,
-  Book,
+  BookOpen,
   Users,
   MessageSquare,
   Target,
   Edit2,
   CheckCircle,
-  Shield
+  Shield,
+  Globe,
+  Sparkles
 } from "lucide-react";
 import { format } from "date-fns";
 import EnhancedProfileEditor from "../components/EnhancedProfileEditor";
@@ -70,6 +72,9 @@ interface UserProfile {
   prayerPrompt: string | null;
   growthGoals: string[] | null;
   currentReadingPlan: string | null;
+  languagePreference: string | null;
+  customLanguage: string | null;
+  spiritualGifts: string[] | null;
   
   // Verification Status
   emailVerified: boolean | null;
@@ -575,13 +580,94 @@ export default function ProfilePage() {
                         </div>
                       )}
 
+                      {/* Language Preference */}
+                      {profile?.languagePreference && (
+                        <div className="border-t pt-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Globe className="h-4 w-4 text-blue-600" />
+                            <span className="text-sm font-medium">Language Preference:</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="text-blue-600 border-blue-200">
+                              {profile.languagePreference === "Other" && profile.customLanguage ? 
+                                `🌐 ${profile.customLanguage}` : 
+                                profile.languagePreference === "English" ? "🇺🇸 English" :
+                                profile.languagePreference === "Spanish" ? "🇪🇸 Español" :
+                                profile.languagePreference === "French" ? "🇫🇷 Français" :
+                                profile.languagePreference === "Portuguese" ? "🇵🇹 Português" :
+                                profile.languagePreference === "German" ? "🇩🇪 Deutsch" :
+                                profile.languagePreference === "Italian" ? "🇮🇹 Italiano" :
+                                profile.languagePreference === "Dutch" ? "🇳🇱 Nederlands" :
+                                profile.languagePreference === "Russian" ? "🇷🇺 Русский" :
+                                profile.languagePreference === "Chinese" ? "🇨🇳 中文" :
+                                profile.languagePreference === "Korean" ? "🇰🇷 한국어" :
+                                profile.languagePreference === "Japanese" ? "🇯🇵 日本語" :
+                                profile.languagePreference === "Farsi" ? "🇮🇷 فارسی" :
+                                profile.languagePreference === "Armenian" ? "🇦🇲 Հայերեն" :
+                                profile.languagePreference === "Arabic" ? "🇸🇦 العربية" :
+                                profile.languagePreference === "Hebrew" ? "🇮🇱 עברית" :
+                                profile.languagePreference === "Hindi" ? "🇮🇳 हिन्दी" :
+                                profile.languagePreference
+                              }
+                            </Badge>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Spiritual Gifts */}
+                      {profile?.spiritualGifts && profile.spiritualGifts.length > 0 && profile?.showSpiritualGifts && (
+                        <div className="border-t pt-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Sparkles className="h-4 w-4 text-yellow-600" />
+                            <span className="text-sm font-medium">Spiritual Gifts:</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {profile.spiritualGifts.slice(0, 5).map((gift, index) => (
+                              <Badge key={index} variant="outline" className="text-yellow-600 border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20">
+                                {gift}
+                              </Badge>
+                            ))}
+                            {profile.spiritualGifts.length > 5 && (
+                              <Badge variant="outline" className="text-gray-500 border-gray-200">
+                                +{profile.spiritualGifts.length - 5} more
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Growth Goals */}
+                      {profile?.growthGoals && profile.growthGoals.length > 0 && (
+                        <div className="border-t pt-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Target className="h-4 w-4 text-green-600" />
+                            <span className="text-sm font-medium">Growth Goals:</span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {profile.growthGoals.slice(0, 4).map((goal, index) => (
+                              <Badge key={index} variant="outline" className="text-green-600 border-green-200 bg-green-50 dark:bg-green-900/20">
+                                {goal}
+                              </Badge>
+                            ))}
+                            {profile.growthGoals.length > 4 && (
+                              <Badge variant="outline" className="text-gray-500 border-gray-200">
+                                +{profile.growthGoals.length - 4} more
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Ministry Interests */}
                       {profile?.ministryInterests && profile.ministryInterests.length > 0 && (
-                        <div>
-                          <span className="text-sm font-medium mb-2 block">Ministry Interests:</span>
+                        <div className="border-t pt-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Heart className="h-4 w-4 text-purple-600" />
+                            <span className="text-sm font-medium">Ministry Interests:</span>
+                          </div>
                           <div className="flex flex-wrap gap-2">
                             {profile.ministryInterests.map((interest, index) => (
-                              <Badge key={index} variant="outline" className="text-blue-600 border-blue-200">
+                              <Badge key={index} variant="outline" className="text-purple-600 border-purple-200 bg-purple-50 dark:bg-purple-900/20">
                                 {interest}
                               </Badge>
                             ))}
@@ -589,7 +675,34 @@ export default function ProfilePage() {
                         </div>
                       )}
 
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      {/* Favorite Scriptures */}
+                      {profile?.favoriteScriptures && profile.favoriteScriptures.length > 0 && (
+                        <div className="border-t pt-4">
+                          <div className="flex items-center gap-2 mb-2">
+                            <BookOpen className="h-4 w-4 text-indigo-600" />
+                            <span className="text-sm font-medium">Favorite Scriptures:</span>
+                          </div>
+                          <div className="space-y-2">
+                            {profile.favoriteScriptures.slice(0, 3).map((scripture, index) => (
+                              <div key={index} className="bg-indigo-50 dark:bg-indigo-900/20 p-2 rounded text-sm">
+                                <span className="font-medium text-indigo-700 dark:text-indigo-300">
+                                  {typeof scripture === 'string' ? scripture : scripture.reference || 'Scripture'}
+                                </span>
+                                {typeof scripture === 'object' && scripture.text && (
+                                  <p className="text-indigo-600 dark:text-indigo-400 mt-1 text-xs italic">
+                                    "{scripture.text}"
+                                  </p>
+                                )}
+                              </div>
+                            ))}
+                            {profile.favoriteScriptures.length > 3 && (
+                              <p className="text-xs text-gray-500">+{profile.favoriteScriptures.length - 3} more verses</p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground border-t pt-4">
                         <Calendar className="h-4 w-4" />
                         Member since {profile?.createdAt ? format(new Date(profile.createdAt), "MMMM yyyy") : "Unknown"}
                       </div>
@@ -673,7 +786,7 @@ export default function ProfilePage() {
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex items-center space-x-2">
-                    <Book className="h-8 w-8 text-orange-500" />
+                    <BookOpen className="h-8 w-8 text-orange-500" />
                     <div>
                       <p className="text-2xl font-bold">{stats?.inspirationsRead || 0}</p>
                       <p className="text-sm text-muted-foreground">Inspirations Read</p>
