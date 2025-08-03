@@ -1550,6 +1550,14 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     </Button>
                     <Button
                       type="button"
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      onClick={() => window.location.href = '/spiritual-assessment'}
+                    >
+                      <Target className="w-4 h-4 mr-2" />
+                      Take Full Assessment
+                    </Button>
+                    <Button
+                      type="button"
                       variant="outline"
                       className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300"
                       onClick={() => setShowGiftsInfoModal(true)}
