@@ -396,6 +396,24 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
 
   // Profile completion calculation
   const calculateProfileCompletion = () => {
+    const fieldNames = [
+      'firstName',
+      'lastName', 
+      'bio',
+      'ageRange',
+      'gender',
+      'languagePreference',
+      'churchAffiliation',
+      'spiritualStage',
+      'preferredBibleTranslation',
+      'city',
+      'state',
+      'selectedMinistries',
+      'selectedGoals',
+      'favoriteVerses',
+      'spiritualProfile/Gifts'
+    ];
+    
     const fields = [
       formData.firstName,
       formData.lastName,
@@ -414,13 +432,25 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       formData.spiritualProfile || formData.spiritualGifts
     ];
     
-    const completed = fields.filter(field => {
-      if (typeof field === 'boolean') return field;
-      if (typeof field === 'string') return field && field.trim() !== '';
-      return Boolean(field);
-    }).length;
+    const completed = fields.filter((field, index) => {
+      const isCompleted = (() => {
+        if (typeof field === 'boolean') return field;
+        if (typeof field === 'string') return field && field.trim() !== '';
+        return Boolean(field);
+      })();
+      
+      // Debug logging to identify missing fields
+      if (!isCompleted) {
+        console.log(`Missing field ${fieldNames[index]}:`, field);
+      }
+      
+      return isCompleted;
+    });
     
-    return Math.round((completed / fields.length) * 100);
+    const percentage = Math.round((completed.length / fields.length) * 100);
+    console.log(`Profile completion: ${completed.length}/${fields.length} fields (${percentage}%)`);
+    
+    return percentage;
   };
 
   const tabs = ["basic", "spiritual", "gifts", "engagement", "growth", "privacy"];
