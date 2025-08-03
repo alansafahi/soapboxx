@@ -25,150 +25,151 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
   // Check if assessment is mandatory for Church Admin roles
   const isRoleMandatory = userRole === 'admin' || userRole === 'church_admin' || userRole === 'owner';
   
-  // 120 spiritual gifts assessment questions
+  // 120 spiritual gifts assessment questions with redundancy and validity checks
+  // Each gift has 10 questions with some redundant phrasing and inverse statements
   const spiritualGiftsQuestions = [
-    // Leadership (Questions 1-10)
+    // Leadership (Questions 1-10) - Mix of positive and inverse statements
     "I enjoy organizing people and resources to accomplish goals.",
-    "Others naturally look to me for direction during group activities.",
-    "I am comfortable making decisions that affect other people.",
+    "Others naturally look to me for direction during group activities.", 
+    "I prefer to follow rather than lead in group situations.", // INVERSE
     "I can see the big picture when others get caught up in details.",
     "People often ask me to take charge of projects or activities.",
-    "I am willing to take responsibility when things go wrong.",
+    "I avoid taking responsibility when things go wrong.", // INVERSE
     "I enjoy motivating others to reach their potential.",
-    "I can delegate tasks effectively to team members.",
+    "I feel uncomfortable when others look to me for leadership.", // INVERSE
     "I am comfortable with the authority that comes with leadership.",
     "I have a vision for how things could be improved in my community.",
 
     // Teaching (Questions 11-20)
     "I enjoy explaining biblical concepts to others.",
     "People tell me I make complex ideas easy to understand.",
-    "I spend time studying to ensure I understand Scripture correctly.",
+    "I get frustrated when I have to explain things to others.", // INVERSE
     "I enjoy preparing lessons or presentations.",
     "I get excited when I see others learn something new.",
-    "I am comfortable speaking in front of groups.",
+    "I avoid speaking in front of groups whenever possible.", // INVERSE
     "I enjoy answering questions about faith and the Bible.",
-    "I like to research topics thoroughly before sharing them.",
+    "I find it draining to help others understand new concepts.", // INVERSE
     "I feel fulfilled when I help others grow in their understanding.",
     "I am patient with people who learn at different speeds.",
 
     // Mercy (Questions 21-30)
     "I am deeply moved by the suffering of others.",
     "I am drawn to help people who are hurting emotionally.",
-    "I can sense when someone is sad even if they don't say anything.",
+    "I tend to avoid people who are going through difficult times.", // INVERSE
     "I prefer to help people one-on-one rather than in groups.",
     "I am a good listener when people need to talk.",
-    "I often cry when I see others in pain.",
+    "Other people's emotional problems don't really affect me.", // INVERSE
     "I am patient with people who are struggling.",
     "I feel called to comfort those who are grieving.",
-    "I am gentle in my approach to helping others.",
+    "I find it uncomfortable when people share their problems with me.", // INVERSE
     "I remember people's personal struggles and check on them.",
 
     // Administration (Questions 31-40)
     "I enjoy organizing events and making sure details are covered.",
     "I am good at creating systems that help things run smoothly.",
-    "I like to make lists and check things off as they are completed.",
+    "I prefer spontaneity over detailed planning.", // INVERSE
     "I am comfortable managing budgets and keeping track of expenses.",
     "I enjoy coordinating schedules and logistics for others.",
-    "I am detail-oriented and notice when things are out of place.",
+    "Details and organization are not important to me.", // INVERSE
     "I like to plan ahead and prepare for potential problems.",
     "I am good at keeping records and maintaining files.",
-    "I enjoy creating order out of chaos.",
+    "I find administrative tasks boring and tedious.", // INVERSE
     "I am efficient at managing time and resources.",
 
     // Evangelism (Questions 41-50)
     "I enjoy sharing my faith with people who don't know Jesus.",
     "I look for opportunities to tell others about God's love.",
-    "I am comfortable talking to strangers about spiritual matters.",
+    "I feel uncomfortable discussing spiritual matters with non-believers.", // INVERSE
     "I feel burdened for people who don't have a relationship with God.",
     "I enjoy inviting people to church or Christian events.",
+    "I prefer to keep my faith private rather than share it.", // INVERSE
     "I can easily relate to people from different backgrounds.",
-    "I am not embarrassed to be identified as a Christian.",
     "I enjoy reading books about how to share my faith effectively.",
+    "I worry about offending people if I talk about Jesus.", // INVERSE
     "I get excited when I hear about people coming to faith.",
-    "I am persistent but respectful when sharing the gospel.",
 
     // Service/Helps (Questions 51-60)
     "I enjoy doing practical tasks that help others.",
     "I am happy to work behind the scenes without recognition.",
+    "I prefer tasks that give me public recognition and visibility.", // INVERSE
     "I notice when things need to be done and am willing to do them.",
-    "I find joy in meeting the physical needs of others.",
     "I am good with my hands and enjoy practical projects.",
-    "I am willing to do jobs that others might consider unimportant.",
+    "I avoid manual or physical work whenever possible.", // INVERSE
     "I enjoy setting up for events and cleaning up afterwards.",
     "I like to help in ways that free others to use their gifts.",
-    "I am dependable when people ask for my help.",
+    "I expect others to handle practical tasks while I focus on more important things.", // INVERSE
     "I feel fulfilled when I can make someone's day easier.",
 
     // Encouragement/Exhortation (Questions 61-70)
     "I enjoy motivating others to grow in their faith.",
     "I can see potential in people and help them develop it.",
-    "I am good at giving advice that helps people make positive changes.",
+    "I find it difficult to stay positive when helping others through challenges.", // INVERSE
     "I enjoy mentoring and discipling other believers.",
     "I can help people see solutions to their problems.",
-    "I am optimistic and help others see the bright side of situations.",
+    "I tend to focus on people's weaknesses rather than their strengths.", // INVERSE
     "I enjoy coaching others to reach their goals.",
     "I am comfortable challenging people to take the next step.",
-    "I can help people apply biblical principles to their daily lives.",
+    "I avoid confronting people even when they need encouragement to grow.", // INVERSE
     "I enjoy seeing others succeed and reach their potential.",
 
     // Giving (Questions 71-80)
     "I enjoy giving generously to support God's work.",
     "I look for opportunities to meet financial needs I become aware of.",
-    "I am careful with money so I can give more to others.",
+    "I believe I should hold onto my money for my own security first.", // INVERSE
     "I get more joy from giving than from receiving.",
     "I prefer to give anonymously without recognition.",
-    "I research organizations to make sure my gifts are used wisely.",
+    "I only give when I know I'll receive public acknowledgment.", // INVERSE
     "I am willing to sacrifice personal comforts to give more.",
     "I feel led to give to specific needs or ministries.",
-    "I encourage others to be generous with their resources.",
+    "I find it difficult to part with my money, even for good causes.", // INVERSE
     "I see my possessions as belonging to God, not to me.",
 
     // Hospitality (Questions 81-90)
     "I enjoy having people in my home.",
     "I like to make visitors feel welcome and comfortable.",
+    "I prefer to keep my personal space private and not entertain guests.", // INVERSE
     "I am good at creating a warm, inviting atmosphere.",
-    "I enjoy cooking for others and serving meals.",
     "I notice when someone is alone and try to include them.",
-    "I like to connect people with others who have similar interests.",
+    "I tend to stick with my close friends rather than welcoming newcomers.", // INVERSE
     "I am comfortable entertaining people I don't know well.",
     "I enjoy planning social gatherings for my friends.",
-    "I like to make sure everyone feels included in group activities.",
+    "I find hosting events stressful and prefer to attend rather than host.", // INVERSE
     "I am naturally hospitable and enjoy serving others.",
 
     // Faith (Questions 91-100)
     "I believe God can do miraculous things in response to prayer.",
     "I am willing to step out in faith when others hesitate.",
-    "I trust God to provide even when circumstances look impossible.",
+    "I prefer to see concrete proof before I trust God for big things.", // INVERSE
     "I enjoy praying for big, seemingly impossible requests.",
     "I encourage others to trust God in difficult situations.",
-    "I am willing to take risks when I believe God is leading.",
+    "I tend to worry and doubt when facing uncertain situations.", // INVERSE
     "I have seen God answer prayers in remarkable ways.",
     "I believe God's promises even when I can't see how they'll be fulfilled.",
-    "I am not easily discouraged by setbacks or obstacles.",
+    "I need to have backup plans because I can't fully rely on God's provision.", // INVERSE
     "I inspire others to have greater faith in God's power.",
 
     // Wisdom (Questions 101-110)
     "People often come to me for advice about important decisions.",
     "I can usually see the best course of action in complex situations.",
-    "I am good at discerning people's true motives.",
+    "I prefer to avoid giving advice because I might be wrong.", // INVERSE
     "I can often see the long-term consequences of decisions.",
     "I enjoy helping people think through difficult problems.",
+    "I find it overwhelming when people ask me for guidance on important matters.", // INVERSE
     "I have insight into how biblical principles apply to modern situations.",
-    "I can usually tell when someone is not being completely honest.",
     "I am good at mediating conflicts between people.",
-    "I can see connections between seemingly unrelated things.",
+    "I try to stay out of other people's disputes and problems.", // INVERSE
     "I often have a sense of what God wants in a particular situation.",
 
     // Intercession/Prayer (Questions 111-120)
     "I enjoy spending extended time in prayer.",
     "I often feel led to pray for specific people or situations.",
-    "I enjoy praying with others more than praying alone.",
+    "I find it difficult to concentrate during long prayer times.", // INVERSE
     "I keep prayer lists and pray for people regularly.",
     "I feel called to pray for church leaders and ministries.",
-    "I enjoy participating in prayer meetings and prayer groups.",
+    "I prefer brief prayers rather than extended intercession.", // INVERSE
     "I often wake up with someone on my heart to pray for.",
     "I believe prayer is one of the most important ministries.",
-    "I enjoy learning about different methods and types of prayer.",
+    "I find intercessory prayer boring and prefer other forms of ministry.", // INVERSE
     "I have seen God work in powerful ways through prayer."
   ];
 
@@ -205,6 +206,9 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
     return responses[currentQuestionIndex] > 0;
   };
 
+  // Track which questions are inverse statements for proper scoring
+  const inverseQuestions = [2, 5, 7, 12, 15, 17, 22, 25, 28, 32, 35, 38, 42, 45, 48, 52, 55, 58, 62, 65, 68, 72, 75, 78, 82, 85, 88, 92, 95, 98, 102, 105, 108, 112, 115, 118];
+
   const getGiftCategory = (questionIndex: number) => {
     if (questionIndex < 10) return "Leadership";
     if (questionIndex < 20) return "Teaching";
@@ -220,15 +224,21 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
     return "Prayer/Intercession";
   };
 
+  const isInverseQuestion = (questionIndex: number) => {
+    return inverseQuestions.includes(questionIndex);
+  };
+
   const renderQuestion = () => {
     const currentQuestion = spiritualGiftsQuestions[currentQuestionIndex];
     const currentGiftCategory = getGiftCategory(currentQuestionIndex);
+    const isInverse = isInverseQuestion(currentQuestionIndex);
     
     return (
       <div className="space-y-6">
         <div className="text-center space-y-2">
           <div className="text-sm text-purple-600 dark:text-purple-400 font-medium">
             {currentGiftCategory} • Question {currentQuestionIndex + 1} of {totalQuestions}
+            {isInverse && <span className="ml-2 text-xs text-orange-500">(Validity Check)</span>}
           </div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
             {currentQuestion}
