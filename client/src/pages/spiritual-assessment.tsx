@@ -52,6 +52,7 @@ export default function SpiritualAssessmentPage() {
           lastName: "",
           role: "member"
         }}
+        isRoleBasedMandatory={false} // Direct access - optional for all roles
       />
     );
   }
@@ -62,29 +63,30 @@ export default function SpiritualAssessmentPage() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Spiritual Assessment
+              Comprehensive Spiritual Assessment
             </CardTitle>
             <p className="text-lg text-muted-foreground">
-              Discover your personalized spiritual journey and receive tailored content recommendations
+              Complete 120-question spiritual evaluation for personalized ministry placement and growth planning
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="text-center space-y-4">
               <div className="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-lg">
-                <h3 className="font-semibold text-lg mb-3">What You'll Get:</h3>
+                <h3 className="font-semibold text-lg mb-3">Comprehensive Assessment Benefits:</h3>
                 <ul className="text-left space-y-2 text-sm text-muted-foreground">
-                  <li>• Personalized Bible reading recommendations</li>
-                  <li>• Customized daily devotional content</li>
-                  <li>• Spiritual growth insights and goals</li>
-                  <li>• Community connection suggestions</li>
-                  <li>• Ministry opportunity matches</li>
+                  <li>• Detailed spiritual gifts analysis with rankings (1-20)</li>
+                  <li>• Ministry role matchings and placement recommendations</li>
+                  <li>• Leadership development insights and growth pathways</li>
+                  <li>• Shadow gifts and hidden strengths identification</li>
+                  <li>• Personalized discipleship and mentoring guidance</li>
+                  <li>• Community placement for optimal ministry fit</li>
                 </ul>
               </div>
 
               <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  <strong>Time Required:</strong> About 10-15 minutes<br/>
-                  <strong>Questions:</strong> 8 thoughtful sections<br/>
+                  <strong>Time Required:</strong> About 20-25 minutes<br/>
+                  <strong>Questions:</strong> 120 comprehensive questions across 12 sections<br/>
                   <strong>Privacy:</strong> Your responses are kept confidential
                 </p>
               </div>

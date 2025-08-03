@@ -22,24 +22,55 @@ export interface SpiritualAssessmentData {
   difficultyLevel: string;
   currentChallenges: string;
   spiritualHopes: string;
+  // Expanded assessment fields for 120-question comprehensive version
+  leadershipExperience: string[];
+  ministryInterests: string[];
+  personalityTraits: string[];
+  conflictResolution: string[];
+  teachingPreferences: string[];
+  pastoralCare: string[];
+  evangelismComfort: string[];
+  administrativeSkills: string[];
+  worshipParticipation: string[];
+  discipleshipExperience: string[];
+  communityEngagement: string[];
+  spiritualGiftsIndicators: string[];
 }
 
 interface SpiritualAssessmentProps {
   onComplete: (data: SpiritualAssessmentData) => void;
   onBack?: () => void;
+  userRole?: string; // Added to check role-based requirements
+  isFullAssessment?: boolean; // Added to distinguish between 30 and 120 question versions
 }
 
-export default function SpiritualAssessment({ onComplete, onBack }: SpiritualAssessmentProps) {
+export default function SpiritualAssessment({ onComplete, onBack, userRole, isFullAssessment = true }: SpiritualAssessmentProps) {
   const [currentStep, setCurrentStep] = useState(0);
+  
+  // Check if assessment is mandatory for Church Admin roles
+  const isRoleMandatory = userRole === 'admin' || userRole === 'church_admin' || userRole === 'owner';
   const [responses, setResponses] = useState<Partial<SpiritualAssessmentData>>({
     spiritualPractices: [],
     lifeChallenges: [],
     learningStyle: [],
     contentFocus: [],
-    prayerTypes: []
+    prayerTypes: [],
+    // Initialize expanded fields
+    leadershipExperience: [],
+    ministryInterests: [],
+    personalityTraits: [],
+    conflictResolution: [],
+    teachingPreferences: [],
+    pastoralCare: [],
+    evangelismComfort: [],
+    administrativeSkills: [],
+    worshipParticipation: [],
+    discipleshipExperience: [],
+    communityEngagement: [],
+    spiritualGiftsIndicators: []
   });
 
-  const totalSteps = 8;
+  const totalSteps = 12; // Expanded from 8 to 12 sections for comprehensive 120-question assessment
   const progress = ((currentStep + 1) / totalSteps) * 100;
 
   const handleMultiSelect = (field: keyof SpiritualAssessmentData, value: string) => {
@@ -88,6 +119,10 @@ export default function SpiritualAssessment({ onComplete, onBack }: SpiritualAss
       case 5: return responses.lifeChallenges && responses.lifeChallenges.length > 0;
       case 6: return responses.learningStyle && responses.learningStyle.length > 0;
       case 7: return responses.timeAvailability;
+      case 8: return responses.leadershipExperience && responses.leadershipExperience.length > 0;
+      case 9: return responses.ministryInterests && responses.ministryInterests.length > 0;
+      case 10: return responses.personalityTraits && responses.personalityTraits.length > 0;
+      case 11: return responses.spiritualGiftsIndicators && responses.spiritualGiftsIndicators.length > 0;
       default: return false;
     }
   };
@@ -482,6 +517,170 @@ export default function SpiritualAssessment({ onComplete, onBack }: SpiritualAss
           </div>
         );
 
+      case 8:
+        return (
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <Users className="w-12 h-12 text-purple-600 mx-auto" />
+              <h3 className="text-xl font-semibold">Leadership Experience</h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                What leadership roles have you held? (Select all that apply)
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                { id: 'team_leader', label: 'Team/Project Leader', desc: 'Led teams in work or volunteer settings' },
+                { id: 'small_group', label: 'Small Group Leader', desc: 'Facilitated Bible study or discussion groups' },
+                { id: 'ministry_leader', label: 'Ministry Leadership', desc: 'Led church ministries or departments' },
+                { id: 'youth_leader', label: 'Youth/Children Leader', desc: 'Mentored young people in faith' },
+                { id: 'worship_leader', label: 'Worship Leadership', desc: 'Led music or creative worship' },
+                { id: 'teacher_trainer', label: 'Teacher/Trainer', desc: 'Taught or trained others' },
+                { id: 'admin_leader', label: 'Administrative Role', desc: 'Managed operations or logistics' },
+                { id: 'no_leadership', label: 'No Leadership Experience', desc: 'Ready to explore leadership opportunities' }
+              ].map((experience) => (
+                <div
+                  key={experience.id}
+                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    responses.leadershipExperience?.includes(experience.id)
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                      : 'border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={() => handleMultiSelect('leadershipExperience', experience.id)}
+                >
+                  <div className="font-medium">{experience.label}</div>
+                  <div className="text-sm text-gray-500">{experience.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 9:
+        return (
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <Target className="w-12 h-12 text-purple-600 mx-auto" />
+              <h3 className="text-xl font-semibold">Ministry Interests</h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                Which ministries interest you most? (Select all that apply)
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                { id: 'children_ministry', label: 'Children\'s Ministry', desc: 'Teaching and nurturing young children' },
+                { id: 'youth_ministry', label: 'Youth Ministry', desc: 'Discipling teenagers and young adults' },
+                { id: 'worship_ministry', label: 'Worship Ministry', desc: 'Music, creative arts, and worship leading' },
+                { id: 'missions', label: 'Missions & Outreach', desc: 'Local and global evangelism efforts' },
+                { id: 'pastoral_care', label: 'Pastoral Care', desc: 'Counseling, visitation, and spiritual support' },
+                { id: 'teaching', label: 'Teaching Ministry', desc: 'Bible study, discipleship, and education' },
+                { id: 'administration', label: 'Administration', desc: 'Operations, finance, and organizational support' },
+                { id: 'hospitality', label: 'Hospitality Ministry', desc: 'Welcoming visitors and event coordination' },
+                { id: 'prayer_ministry', label: 'Prayer Ministry', desc: 'Intercessory prayer and prayer support' },
+                { id: 'media_tech', label: 'Media & Technology', desc: 'Audio/visual, social media, and communications' }
+              ].map((ministry) => (
+                <div
+                  key={ministry.id}
+                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    responses.ministryInterests?.includes(ministry.id)
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                      : 'border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={() => handleMultiSelect('ministryInterests', ministry.id)}
+                >
+                  <div className="font-medium">{ministry.label}</div>
+                  <div className="text-sm text-gray-500">{ministry.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 10:
+        return (
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <Brain className="w-12 h-12 text-purple-600 mx-auto" />
+              <h3 className="text-xl font-semibold">Personality & Working Style</h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                How do you prefer to work and serve? (Select all that apply)
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                { id: 'behind_scenes', label: 'Behind the Scenes', desc: 'Prefer to serve without public recognition' },
+                { id: 'public_speaking', label: 'Public Speaking', desc: 'Comfortable teaching or presenting' },
+                { id: 'one_on_one', label: 'One-on-One', desc: 'Excel in personal mentoring relationships' },
+                { id: 'team_collaboration', label: 'Team Collaboration', desc: 'Thrive working with others' },
+                { id: 'detail_oriented', label: 'Detail-Oriented', desc: 'Focus on accuracy and thoroughness' },
+                { id: 'big_picture', label: 'Big Picture Thinker', desc: 'See patterns and long-term vision' },
+                { id: 'hands_on', label: 'Hands-On Service', desc: 'Prefer practical, tangible tasks' },
+                { id: 'creative_artistic', label: 'Creative/Artistic', desc: 'Express through arts and creativity' },
+                { id: 'analytical', label: 'Analytical', desc: 'Process information and solve problems' },
+                { id: 'people_focused', label: 'People-Focused', desc: 'Energized by relationships and interaction' }
+              ].map((trait) => (
+                <div
+                  key={trait.id}
+                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    responses.personalityTraits?.includes(trait.id)
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                      : 'border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={() => handleMultiSelect('personalityTraits', trait.id)}
+                >
+                  <div className="font-medium">{trait.label}</div>
+                  <div className="text-sm text-gray-500">{trait.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 11:
+        return (
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
+              <Heart className="w-12 h-12 text-purple-600 mx-auto" />
+              <h3 className="text-xl font-semibold">Spiritual Gifts Indicators</h3>
+              <p className="text-gray-600 dark:text-gray-300">
+                Which spiritual activities energize you most? (Select all that apply)
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                { id: 'teaching_explaining', label: 'Teaching & Explaining', desc: 'Love helping others understand truth' },
+                { id: 'encouraging_others', label: 'Encouraging Others', desc: 'Natural at lifting spirits and motivating' },
+                { id: 'organizing_events', label: 'Organizing & Planning', desc: 'Excel at coordination and logistics' },
+                { id: 'caring_hurting', label: 'Caring for Hurting', desc: 'Drawn to comfort those in pain' },
+                { id: 'practical_service', label: 'Practical Service', desc: 'Find joy in meeting tangible needs' },
+                { id: 'sharing_faith', label: 'Sharing Faith', desc: 'Comfortable discussing God with others' },
+                { id: 'generous_giving', label: 'Generous Giving', desc: 'Find fulfillment in financial generosity' },
+                { id: 'welcoming_guests', label: 'Welcoming Guests', desc: 'Natural at making others feel at home' },
+                { id: 'discerning_truth', label: 'Discerning Truth', desc: 'Sense when something doesn\'t align with Scripture' },
+                { id: 'prayer_intercession', label: 'Prayer & Intercession', desc: 'Called to devoted prayer ministry' },
+                { id: 'faith_mountains', label: 'Faith for Big Things', desc: 'Believe God for seemingly impossible things' },
+                { id: 'wise_counsel', label: 'Wise Counsel', desc: 'Others seek your advice for decisions' }
+              ].map((indicator) => (
+                <div
+                  key={indicator.id}
+                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    responses.spiritualGiftsIndicators?.includes(indicator.id)
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                      : 'border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
+                  }`}
+                  onClick={() => handleMultiSelect('spiritualGiftsIndicators', indicator.id)}
+                >
+                  <div className="font-medium">{indicator.label}</div>
+                  <div className="text-sm text-gray-500">{indicator.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
       default:
         return null;
     }
@@ -492,12 +691,22 @@ export default function SpiritualAssessment({ onComplete, onBack }: SpiritualAss
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between mb-4">
-            <CardTitle className="text-2xl">Spiritual Assessment</CardTitle>
+            <div>
+              <CardTitle className="text-2xl">Comprehensive Spiritual Assessment</CardTitle>
+              {isRoleMandatory && (
+                <p className="text-sm text-orange-600 dark:text-orange-400 mt-1">
+                  Required for Church Leadership roles
+                </p>
+              )}
+            </div>
             <div className="text-sm text-gray-500">
               {currentStep + 1} of {totalSteps}
             </div>
           </div>
           <Progress value={progress} className="w-full" />
+          <div className="mt-3 text-xs text-muted-foreground text-center">
+            120 questions • Approximately 20-25 minutes
+          </div>
         </CardHeader>
         
         <CardContent>

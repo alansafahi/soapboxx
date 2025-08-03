@@ -14,9 +14,10 @@ interface OnboardingSpiritualFlowProps {
     lastName: string;
     role: string;
   };
+  isRoleBasedMandatory?: boolean; // Added to indicate if assessment is mandatory for user role
 }
 
-export default function OnboardingSpiritualFlow({ onComplete, onBack, userProfile }: OnboardingSpiritualFlowProps) {
+export default function OnboardingSpiritualFlow({ onComplete, onBack, userProfile, isRoleBasedMandatory = false }: OnboardingSpiritualFlowProps) {
   const [currentStep, setCurrentStep] = useState<'assessment' | 'baseline' | 'welcome'>('assessment');
   const [assessmentData, setAssessmentData] = useState<SpiritualAssessmentData | null>(null);
   const [baselineData, setBaselineData] = useState<any>(null);
@@ -87,6 +88,8 @@ export default function OnboardingSpiritualFlow({ onComplete, onBack, userProfil
         <SpiritualAssessment
           onComplete={handleAssessmentComplete}
           onBack={handleBackFromAssessment}
+          userRole={userProfile.role}
+          isFullAssessment={true} // Always full assessment for direct navigation
         />
       )}
       
