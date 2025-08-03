@@ -430,10 +430,12 @@ export function setupAuth(app: Express): void {
       }
 
       // Find user by email
+      console.log('Looking up user:', email);
       const user = await storage.getUserByEmail(email);
+      console.log('User found:', user ? `${user.firstName} ${user.lastName}` : 'None');
       
       if (!user || !user.password) {
-        console.log('User not found or no password');
+        console.log('User not found or no password:', { userExists: !!user, hasPassword: !!(user?.password) });
         return res.status(401).json({ 
           success: false,
           message: 'Invalid email or password' 
@@ -493,9 +495,11 @@ export function setupAuth(app: Express): void {
         });
       });
     } catch (error) {
+      console.error('Login error:', error);
       res.status(500).json({ 
         success: false,
-        message: 'Login failed. Please try again.' 
+        message: 'Login failed. Please try again.',
+        error: (error as Error).message
       });
     }
   });
