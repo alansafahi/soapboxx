@@ -173,7 +173,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
 
   // Update formData when profile prop changes
   useEffect(() => {
-    // Initialize privacy settings with database defaults when null
+    // Initialize all fields with database defaults when null
     const initializedProfile = {
       ...profile,
       // Apply database schema defaults for privacy settings when null
@@ -186,6 +186,11 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       showGender: profile.showGender ?? false,
       showDenomination: profile.showDenomination ?? true,
       showSpiritualGifts: profile.showSpiritualGifts ?? true,
+      // Initialize core profile fields
+      publicSharing: profile.publicSharing ?? false,
+      volunteerInterest: profile.volunteerInterest ?? false,
+      spiritualGifts: profile.spiritualGifts || [],
+      spiritualProfile: profile.spiritualProfile || null,
       // Initialize language preference to English if null
       languagePreference: profile.languagePreference || "English",
       // Initialize bible translation to NIV if null
