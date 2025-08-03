@@ -442,7 +442,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
 
 
 
-  // Profile completion calculation
+  // Profile completion calculation - focused on essential fields only
   const calculateProfileCompletion = () => {
     const fields = [
       formData.firstName,
@@ -1729,41 +1729,56 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                 </div>
               </div>
 
-              <div>
-                <Label htmlFor="currentReadingPlan">Current Reading Plan</Label>
-                <Select 
-                  value={formData.currentReadingPlan || "none"} 
-                  onValueChange={(value) => setFormData({...formData, currentReadingPlan: value === "none" ? null : value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a reading plan or leave blank" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No current plan</SelectItem>
-                    <SelectItem value="bible_in_a_year">Bible in a Year</SelectItem>
-                    <SelectItem value="daily_devotional">Daily Devotional</SelectItem>
-                    <SelectItem value="chronological_bible">Chronological Bible Reading</SelectItem>
-                    <SelectItem value="new_testament_30_days">New Testament in 30 Days</SelectItem>
-                    <SelectItem value="psalms_proverbs">Psalms & Proverbs Monthly</SelectItem>
-                    <SelectItem value="gospels_study">Four Gospels Study</SelectItem>
-                    <SelectItem value="themed_studies">Themed Bible Studies</SelectItem>
-                    <SelectItem value="custom">Custom Reading Plan</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Choose your current Bible reading plan - this will be auto-populated when you join a plan
-                </p>
+              {/* Smart Reading Plan Prompt */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                    <BookOpen className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
+                      Bible Reading Plan
+                    </h4>
+                    <p className="text-sm text-blue-800 dark:text-blue-200 mb-3">
+                      You can choose a Bible reading plan later. This will auto-update when you join a group or select a plan.
+                    </p>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      className="border-blue-300 text-blue-700 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-300"
+                    >
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      Explore Reading Plans
+                    </Button>
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <Label htmlFor="prayerPrompt">Current Prayer Request</Label>
-                <Textarea
-                  id="prayerPrompt"
-                  placeholder="How can our community pray for you?"
-                  value={formData.prayerPrompt || ""}
-                  onChange={(e) => setFormData({...formData, prayerPrompt: e.target.value})}
-                  className="min-h-[80px]"
-                />
+              {/* Smart Prayer Request Prompt */}
+              <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                    <Heart className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-medium text-purple-900 dark:text-purple-100 mb-1">
+                      Prayer Requests
+                    </h4>
+                    <p className="text-sm text-purple-800 dark:text-purple-200 mb-3">
+                      You can submit prayer requests anytime from the Prayer Wall. Share your needs with your church or small group when you're ready.
+                    </p>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm"
+                      className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300"
+                    >
+                      <Heart className="w-4 h-4 mr-2" />
+                      Visit Prayer Wall
+                    </Button>
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center space-x-2">
