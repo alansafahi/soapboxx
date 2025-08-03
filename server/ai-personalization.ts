@@ -60,7 +60,9 @@ export class AIPersonalizationService {
       const response = completion.choices[0]?.message?.content;
       if (!response) throw new Error("No response from OpenAI");
 
-      const content = JSON.parse(response);
+      // Clean the response to handle markdown code blocks
+      const cleanedResponse = response.replace(/```json\s*|\s*```/g, '').trim();
+      const content = JSON.parse(cleanedResponse);
       return content;
     } catch (error) {
       console.error('Error generating welcome content:', error);

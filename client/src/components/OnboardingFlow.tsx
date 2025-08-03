@@ -109,7 +109,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
     }));
   };
 
-  const getStepProgress = () => (currentStep / 5) * 100;
+  const getStepProgress = () => (currentStep / 4) * 100;
 
   const canProceedFromStep1 = () => {
     return formData.firstName && formData.lastName && formData.email && 
@@ -133,10 +133,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
   };
 
   const handleNext = () => {
-    if (currentStep === 3) {
-      // After step 3 (spiritual profile), transition to spiritual assessment flow
-      setShowSpiritualFlow(true);
-    } else if (currentStep < 4) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -159,7 +156,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
       await onComplete(completeFormData);
       toast({
         title: "Welcome to SoapBox!",
-        description: "Your account has been created successfully.",
+        description: "Your personalized spiritual profile has been created.",
       });
     } catch (error: any) {
       console.error('Onboarding error:', error);
@@ -231,18 +228,18 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center mb-8">
       <div className="flex items-center space-x-2">
-        {[1, 2, 3, 4, 5].map(step => (
+        {[1, 2, 3, 4].map(step => (
           <div key={step} className="flex items-center">
             <div className={`
               w-8 h-8 rounded-full flex items-center justify-center font-medium
-              ${step <= currentStep || (step === 4 && showSpiritualFlow) || (step === 5 && showSpiritualFlow)
+              ${step <= currentStep 
                 ? 'bg-purple-600 text-white' 
                 : 'bg-gray-200 text-gray-500'
               }
             `}>
               {step < currentStep ? <CheckCircle className="w-4 h-4" /> : step}
             </div>
-            {step < 5 && <div className={`w-8 h-0.5 ml-2 ${step < currentStep || (step >= 3 && showSpiritualFlow) ? 'bg-purple-600' : 'bg-gray-200'}`} />}
+            {step < 4 && <div className={`w-8 h-0.5 ml-2 ${step < currentStep ? 'bg-purple-600' : 'bg-gray-200'}`} />}
           </div>
         ))}
       </div>
@@ -585,6 +582,41 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
           </CardContent>
         </Card>
 
+        {/* Optional Spiritual Assessment Offer */}
+        <Card className="border-purple-200 bg-purple-50 dark:bg-purple-900/20">
+          <CardContent className="pt-4">
+            <div className="text-center space-y-3">
+              <Heart className="w-8 h-8 text-purple-600 mx-auto" />
+              <div>
+                <h3 className="font-semibold text-purple-800 dark:text-purple-200">
+                  Take our Spiritual Assessment (Optional)
+                </h3>
+                <p className="text-sm text-purple-600 dark:text-purple-300 mt-1">
+                  Get personalized spiritual content and Bible reading recommendations
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button 
+                  onClick={handleComplete} 
+                  disabled={isLoading}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-100"
+                >
+                  {isLoading ? "Setting up..." : "Skip for Now"}
+                </Button>
+                <Button
+                  size="sm"
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  onClick={() => setShowSpiritualFlow(true)}
+                >
+                  Take Assessment
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="text-left space-y-2">
             <h3 className="font-semibold">What's next:</h3>
             <ul className="space-y-1 text-sm text-muted-foreground">
@@ -599,13 +631,6 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
         <div className="flex space-x-4">
           <Button variant="outline" onClick={handleBack} className="flex-1">
             <ArrowLeft className="w-4 h-4 mr-2" /> Back
-          </Button>
-          <Button 
-            onClick={handleComplete} 
-            disabled={isLoading}
-            className="flex-1"
-          >
-            {isLoading ? "Setting up..." : "Let's get started!"}
           </Button>
         </div>
       </CardContent>
