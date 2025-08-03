@@ -327,14 +327,16 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
         return verse;
       });
 
-    // Ensure favorite verses are properly included in the save data
+    // Ensure ALL fields are properly included in the save data
     const saveData = {
       ...formData,
       ministryInterests: selectedMinistries,
       growthGoals: selectedGoals,
       favoriteScriptures: completeVerses,
+      volunteerInterest: formData.volunteerInterest,
       spiritualGifts: formData.spiritualGifts,
       spiritualProfile: formData.spiritualProfile,
+      publicSharing: formData.publicSharing,
       // Ensure all privacy settings are included
       showBioPublicly: formData.showBioPublicly,
       showChurchAffiliation: formData.showChurchAffiliation,
@@ -1912,26 +1914,16 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   />
                 </div>
 
-                {/* SOAP Journal Sharing Privacy Setting */}
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-700">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 mr-4">
-                      <Label htmlFor="publicSharing" className="font-medium text-yellow-900 dark:text-yellow-100">
-                        Share SOAP journal entries publicly
-                      </Label>
-                      <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
-                        When enabled, allows your SOAP journal reflections to be shared with the broader community for encouragement and inspiration. This is completely optional and disabled by default to protect your privacy.
-                      </p>
-                      <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
-                        <strong>Privacy Note:</strong> Only you control this setting. Your personal reflections stay private unless you choose to share them.
-                      </p>
-                    </div>
-                    <Switch
-                      id="publicSharing"
-                      checked={formData.publicSharing === true}
-                      onCheckedChange={(checked) => setFormData({...formData, publicSharing: checked})}
-                    />
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor="publicSharing" className="font-medium">Share SOAP journal entries publicly</Label>
+                    <p className="text-sm text-gray-600">Allow your spiritual reflections to inspire the community</p>
                   </div>
+                  <Switch
+                    id="publicSharing"
+                    checked={formData.publicSharing === true}
+                    onCheckedChange={(checked) => setFormData({...formData, publicSharing: checked})}
+                  />
                 </div>
               </div>
             </CardContent>
