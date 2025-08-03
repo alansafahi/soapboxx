@@ -193,7 +193,7 @@ export default function ProfilePage() {
   });
 
   // Debug phone verification status
-  React.useEffect(() => {
+  useEffect(() => {
     if (profile) {
       console.log('Profile phone verification debug:', {
         phoneVerified: profile.phoneVerified,
@@ -496,7 +496,7 @@ export default function ProfilePage() {
                             )}
                           </div>
                           
-                          {profile?.mobileNumber && profile?.showMobile && (
+                          {profile?.mobileNumber && (
                             <div className="text-muted-foreground flex items-center gap-2">
                               <Phone className="h-4 w-4" />
                               <span>{profile.mobileNumber}</span>
@@ -513,7 +513,7 @@ export default function ProfilePage() {
                                   className="text-xs text-orange-600 border-orange-200 hover:bg-orange-50"
                                   onClick={() => setShowSMSVerification(true)}
                                 >
-                                  Verify
+                                  Verify (Debug: {JSON.stringify(profile?.phoneVerified !== true)})
                                 </Button>
                               )}
                             </div>
