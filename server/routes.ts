@@ -1152,6 +1152,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ministryInterests: user.ministryInterests || [],
         volunteerInterest: user.volunteerInterest,
         
+        // Spiritual Growth Fields
+        favoriteScriptures: user.favoriteScriptures || [],
+        spiritualGifts: user.spiritualGifts || [],
+        spiritualProfile: user.spiritualProfile,
+        growthGoals: user.growthGoals || [],
+        publicSharing: user.publicSharing,
+        
         interests: user.interests || [],
         hasCompletedOnboarding: user.hasCompletedOnboarding,
         onboardingData: user.onboardingData,

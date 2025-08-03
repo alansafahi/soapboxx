@@ -2328,8 +2328,9 @@ const SpiritualGiftsAssessmentModal = ({
                     onClick={() => {
                       setShowResults(false);
                       setAssessmentType('expanded');
-                      // Keep existing responses and continue with expanded assessment
-                      setCurrentPage(0);
+                      // Continue from where quick assessment left off (30 questions = 6 pages)
+                      const quickAssessmentPages = Math.ceil(spiritualGiftsQuestions.length / questionsPerPage);
+                      setCurrentPage(quickAssessmentPages);
                     }}
                   >
                     Take Full Assessment (55 Questions)
