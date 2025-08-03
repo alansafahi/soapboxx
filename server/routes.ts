@@ -1161,9 +1161,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         twoFactorMethod: user.twoFactorMethod,
         emailVerified: user.emailVerified,
         phoneVerified: user.phoneVerified,
-        // Debug info - remove after testing
-        phoneVerifiedRaw: user.phoneVerified,
-        phoneVerifiedType: typeof user.phoneVerified,
+
         
         // Privacy Settings
         showBioPublicly: user.showBioPublicly,

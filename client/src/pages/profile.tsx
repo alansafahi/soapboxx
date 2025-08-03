@@ -192,17 +192,7 @@ export default function ProfilePage() {
     queryKey: ["/api/auth/user"],
   });
 
-  // Debug phone verification status
-  useEffect(() => {
-    if (profile) {
-      console.log('Profile phone verification debug:', {
-        phoneVerified: profile.phoneVerified,
-        phoneVerifiedType: typeof profile.phoneVerified,
-        phoneVerifiedRaw: (profile as any).phoneVerifiedRaw,
-        mobileNumber: profile.mobileNumber
-      });
-    }
-  }, [profile]);
+
 
   // Fetch user stats
   const { data: stats } = useQuery<UserStats>({
@@ -506,14 +496,14 @@ export default function ProfilePage() {
                                   Verified
                                 </Badge>
                               )}
-                              {profile?.phoneVerified !== true && profile?.mobileNumber && (
+                              {!profile?.phoneVerified && profile?.mobileNumber && (
                                 <Button 
                                   size="sm" 
                                   variant="outline" 
                                   className="text-xs text-orange-600 border-orange-200 hover:bg-orange-50"
                                   onClick={() => setShowSMSVerification(true)}
                                 >
-                                  Verify (Debug: {JSON.stringify(profile?.phoneVerified !== true)})
+                                  Verify
                                 </Button>
                               )}
                             </div>

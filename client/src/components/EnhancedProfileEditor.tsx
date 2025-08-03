@@ -400,17 +400,26 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       formData.firstName,
       formData.lastName,
       formData.bio,
+      formData.ageRange,
+      formData.gender,
       formData.languagePreference,
       formData.churchAffiliation,
       formData.spiritualStage,
       formData.preferredBibleTranslation,
-      formData.spiritualProfile,
+      formData.city,
+      formData.state,
       selectedMinistries.length > 0,
       selectedGoals.length > 0,
-      favoriteVerses.length > 0
+      favoriteVerses.length > 0,
+      formData.spiritualProfile || formData.spiritualGifts
     ];
     
-    const completed = fields.filter(Boolean).length;
+    const completed = fields.filter(field => {
+      if (typeof field === 'boolean') return field;
+      if (typeof field === 'string') return field && field.trim() !== '';
+      return Boolean(field);
+    }).length;
+    
     return Math.round((completed / fields.length) * 100);
   };
 
