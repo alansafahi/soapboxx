@@ -35,6 +35,157 @@ export interface MoodBasedContent {
 }
 
 export class AIPersonalizationService {
+
+  // Generate welcome content package based on spiritual assessment
+  async generateWelcomeContentPackage(assessmentData: any): Promise<any> {
+    try {
+      const prompt = this.buildWelcomeContentPrompt(assessmentData);
+      
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a pastoral AI assistant specializing in creating personalized spiritual content packages for new community members. Generate authentic, encouraging, and biblically-grounded content appropriate for their spiritual maturity level and stated needs."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 3000
+      });
+
+      const response = completion.choices[0]?.message?.content;
+      if (!response) throw new Error("No response from OpenAI");
+
+      const content = JSON.parse(response);
+      return content;
+    } catch (error) {
+      console.error('Error generating welcome content:', error);
+      return this.generateFallbackWelcomeContent(assessmentData);
+    }
+  }
+
+  private buildWelcomeContentPrompt(assessmentData: any): string {
+    const {
+      faithJourney,
+      bibleFamiliarity,
+      prayerLife,
+      churchExperience,
+      spiritualPractices,
+      lifeChallenges,
+      learningStyle,
+      timeAvailability,
+      currentChallenges,
+      spiritualHopes
+    } = assessmentData;
+
+    return `
+Create a comprehensive welcome package for a new community member based on their spiritual assessment:
+
+ASSESSMENT PROFILE:
+- Faith Journey: ${faithJourney}
+- Bible Familiarity: ${bibleFamiliarity}
+- Prayer Life: ${prayerLife}
+- Church Experience: ${churchExperience}
+- Spiritual Practices: ${Array.isArray(spiritualPractices) ? spiritualPractices.join(', ') : spiritualPractices}
+- Life Challenges: ${Array.isArray(lifeChallenges) ? lifeChallenges.join(', ') : lifeChallenges}
+- Learning Style: ${Array.isArray(learningStyle) ? learningStyle.join(', ') : learningStyle}
+- Time Available: ${timeAvailability}
+- Current Challenges: ${currentChallenges || 'None shared'}
+- Spiritual Hopes: ${spiritualHopes || 'None shared'}
+
+Generate a JSON response with this structure:
+{
+  "welcomeMessage": "Personalized welcome message (2-3 sentences)",
+  "scriptures": [
+    {
+      "verse": "Full scripture text",
+      "reference": "Book Chapter:Verse",
+      "explanation": "Brief explanation of why this verse is relevant to their journey"
+    }
+  ],
+  "devotionals": [
+    {
+      "day": 1,
+      "title": "Devotional title",
+      "content": "Full devotional content (200-300 words)",
+      "readTime": 3,
+      "theme": "New Beginnings"
+    }
+  ],
+  "personalizedPrayer": {
+    "title": "Prayer title",
+    "content": "Complete prayer text",
+    "guidance": "How to use this prayer"
+  },
+  "readingPlan": {
+    "title": "Plan name",
+    "description": "Plan description",
+    "duration": "30 days",
+    "difficulty": "Beginner"
+  },
+  "communityConnections": [
+    {
+      "type": "discussion",
+      "title": "Suggested discussion topic",
+      "description": "Why this would be valuable"
+    }
+  ]
+}
+
+Guidelines:
+- Include 4-5 scripture verses appropriate for their maturity level
+- Create 7 devotionals for their first week
+- Address their specific life challenges and hopes
+- Match content difficulty to their experience level
+- Consider their time availability for content length
+- Make the prayer personal to their stated needs
+- Recommend appropriate reading plans based on their bible familiarity
+`;
+  }
+
+  private generateFallbackWelcomeContent(assessmentData: any): any {
+    return {
+      welcomeMessage: "Welcome to your spiritual journey! We're excited to walk alongside you as you grow in faith and community.",
+      scriptures: [
+        {
+          verse: "For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope.",
+          reference: "Jeremiah 29:11",
+          explanation: "This verse reminds us that God has good plans for your spiritual journey ahead."
+        }
+      ],
+      devotionals: [
+        {
+          day: 1,
+          title: "A New Beginning",
+          content: "Today marks the start of something beautiful. As you join this community, remember that every great journey begins with a single step. God is with you in this new chapter.",
+          readTime: 2,
+          theme: "New Beginnings"
+        }
+      ],
+      personalizedPrayer: {
+        title: "A Prayer for Your Journey",
+        content: "Lord, thank You for this new beginning in faith community. Guide my steps, open my heart to Your truth, and help me grow in relationship with You and others. Amen.",
+        guidance: "Use this prayer to start your spiritual journey each day."
+      },
+      readingPlan: {
+        title: "Psalms of Comfort",
+        description: "A 30-day journey through encouraging Psalms",
+        duration: "30 days",
+        difficulty: "Beginner"
+      },
+      communityConnections: [
+        {
+          type: "discussion",
+          title: "Newcomer Introductions",
+          description: "Connect with other new community members"
+        }
+      ]
+    };
+  }
   
   private buildMoodBasedPrompt(mood: string, moodScore: number, notes?: string, userId?: string, emiCategories?: string[]): string {
     return `

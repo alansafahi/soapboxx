@@ -206,6 +206,13 @@ export const users = pgTable("users", {
   interests: text("interests").array(),
   hasCompletedOnboarding: boolean("has_completed_onboarding").default(false),
   onboardingData: jsonb("onboarding_data"), // Store wizard responses
+  
+  // Spiritual Assessment Fields
+  spiritualMaturityLevel: varchar("spiritual_maturity_level", { length: 20 }), // beginner, growing, mature
+  contentPreferences: jsonb("content_preferences"), // Detailed content preferences from assessment
+  baselineEMIState: jsonb("baseline_emi_state"), // Initial EMI check-in data
+  welcomeContentGenerated: boolean("welcome_content_generated").default(false),
+  onboardingSpiritualAssessment: jsonb("onboarding_spiritual_assessment"), // Full assessment responses
   referredBy: varchar("referred_by"), // ID of user who referred this user
   referralCode: varchar("referral_code").unique(), // This user's unique referral code
   twoFactorEnabled: boolean("two_factor_enabled").default(false),

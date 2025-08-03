@@ -7,8 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Heart, Users, BookOpen, Compass, CheckCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Heart, Users, BookOpen, Compass, CheckCircle, ArrowRight, ArrowLeft, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import OnboardingSpiritualFlow from './OnboardingSpiritualFlow';
 
 interface OnboardingFlowProps {
   inviteToken?: string;
@@ -85,10 +86,15 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
     ministryInterests: [] as string[],
     churchAffiliation: churchName || '',
     
+    // Step 4: Will be handled by OnboardingSpiritualFlow
+    // spiritualAssessment: null,
+    
     // Metadata
     inviteToken: inviteToken || '',
     inviterName: inviterName || ''
   });
+
+  const [showSpiritualFlow, setShowSpiritualFlow] = useState(false);
 
   const updateFormData = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -103,7 +109,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
     }));
   };
 
-  const getStepProgress = () => (currentStep / 4) * 100;
+  const getStepProgress = () => (currentStep / 5) * 100;
 
   const canProceedFromStep1 = () => {
     return formData.firstName && formData.lastName && formData.email && 
@@ -127,7 +133,10 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
   };
 
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (currentStep === 3) {
+      // After step 3 (spiritual profile), transition to spiritual assessment flow
+      setShowSpiritualFlow(true);
+    } else if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -138,7 +147,51 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
     }
   };
 
+  const handleSpiritualFlowComplete = async (spiritualData: any) => {
+    // Merge spiritual assessment data with existing form data
+    const completeFormData = {
+      ...formData,
+      spiritualAssessment: spiritualData
+    };
+    
+    setIsLoading(true);
+    try {
+      await onComplete(completeFormData);
+      toast({
+        title: "Welcome to SoapBox!",
+        description: "Your account has been created successfully.",
+      });
+    } catch (error: any) {
+      console.error('Onboarding error:', error);
+      
+      // Check if it's an existing account error
+      const errorMessage = error?.message || error?.toString() || '';
+      if (errorMessage.includes('already have an account') || errorMessage.includes('already exists')) {
+        toast({
+          title: "Account Already Exists",
+          description: "Redirecting you to the login page...",
+          variant: "default"
+        });
+        
+        // Navigate to login immediately with pre-filled email
+        setTimeout(() => {
+          const loginUrl = `/login?email=${encodeURIComponent(formData.email)}`;
+          window.location.href = loginUrl;
+        }, 1500);
+      } else {
+        toast({
+          title: "Setup Error",
+          description: errorMessage || "There was an issue completing your setup. Please try again.",
+          variant: "destructive"
+        });
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleComplete = async () => {
+    // This handles completion without spiritual assessment
     setIsLoading(true);
     try {
       await onComplete(formData);
@@ -178,18 +231,18 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
   const renderStepIndicator = () => (
     <div className="flex items-center justify-center mb-8">
       <div className="flex items-center space-x-2">
-        {[1, 2, 3, 4].map(step => (
+        {[1, 2, 3, 4, 5].map(step => (
           <div key={step} className="flex items-center">
             <div className={`
               w-8 h-8 rounded-full flex items-center justify-center font-medium
-              ${step <= currentStep 
+              ${step <= currentStep || (step === 4 && showSpiritualFlow) || (step === 5 && showSpiritualFlow)
                 ? 'bg-purple-600 text-white' 
                 : 'bg-gray-200 text-gray-500'
               }
             `}>
               {step < currentStep ? <CheckCircle className="w-4 h-4" /> : step}
             </div>
-            {step < 4 && <div className={`w-8 h-0.5 ml-2 ${step < currentStep ? 'bg-purple-600' : 'bg-gray-200'}`} />}
+            {step < 5 && <div className={`w-8 h-0.5 ml-2 ${step < currentStep || (step >= 3 && showSpiritualFlow) ? 'bg-purple-600' : 'bg-gray-200'}`} />}
           </div>
         ))}
       </div>
@@ -558,6 +611,21 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
       </CardContent>
     </Card>
   );
+
+  // If showing spiritual flow, render it instead of regular steps
+  if (showSpiritualFlow) {
+    return (
+      <OnboardingSpiritualFlow 
+        onComplete={handleSpiritualFlowComplete}
+        onSkip={handleComplete}
+        userProfile={{
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          role: formData.role
+        }}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-100 dark:from-slate-900 dark:to-slate-800 p-4">

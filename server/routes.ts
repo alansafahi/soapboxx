@@ -3129,6 +3129,117 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Spiritual Assessment API endpoints
+  app.post('/api/users/spiritual-onboarding', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const { assessmentData, baselineEMIState, generateWelcomeContent = true } = req.body;
+
+      // Save spiritual assessment
+      await storage.saveSpiritualAssessment(userId, assessmentData, baselineEMIState);
+
+      let welcomeContent = null;
+      if (generateWelcomeContent) {
+        try {
+          // Generate AI-powered welcome content
+          welcomeContent = await aiPersonalizationService.generateWelcomeContentPackage(assessmentData);
+          
+          // Save welcome content
+          await storage.saveWelcomeContent(userId, welcomeContent);
+        } catch (aiError) {
+          console.error('Failed to generate welcome content:', aiError);
+          // Continue without failing the assessment save
+        }
+      }
+
+      res.json({
+        success: true,
+        message: 'Spiritual assessment saved successfully',
+        welcomeContent
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Failed to save spiritual assessment',
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  app.get('/api/users/spiritual-assessment', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const assessment = await storage.getSpiritualAssessment(userId);
+      res.json(assessment);
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Failed to fetch spiritual assessment',
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  app.post('/api/ai/welcome-content', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const { assessmentData } = req.body;
+
+      if (!assessmentData) {
+        return res.status(400).json({ message: 'Assessment data is required' });
+      }
+
+      // Check if welcome content already exists
+      let welcomeContent = await storage.getWelcomeContent(userId);
+      
+      if (!welcomeContent) {
+        // Generate new welcome content
+        welcomeContent = await aiPersonalizationService.generateWelcomeContentPackage(assessmentData);
+        
+        // Save it for future use
+        await storage.saveWelcomeContent(userId, welcomeContent);
+      }
+
+      res.json(welcomeContent);
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Failed to generate welcome content',
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  app.get('/api/users/welcome-content', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const welcomeContent = await storage.getWelcomeContent(userId);
+      res.json(welcomeContent);
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Failed to fetch welcome content',
+        error: (error as Error).message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // REST-only messaging - no WebSocket dependencies

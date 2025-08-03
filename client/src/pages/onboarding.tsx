@@ -54,9 +54,32 @@ export default function OnboardingPage() {
         });
 
         if (profileResponse.ok) {
+          // If user completed spiritual assessment, save it
+          if (userData.spiritualAssessment) {
+            try {
+              await fetch('/api/users/spiritual-onboarding', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                  assessmentData: userData.spiritualAssessment.assessmentData,
+                  baselineEMIState: userData.spiritualAssessment.baselineEMIState,
+                  generateWelcomeContent: true
+                }),
+              });
+            } catch (assessmentError) {
+              console.error('Failed to save spiritual assessment:', assessmentError);
+              // Don't fail the entire onboarding for this
+            }
+          }
+
           toast({
             title: "Welcome to SoapBox!",
-            description: "Your profile has been completed successfully.",
+            description: userData.spiritualAssessment 
+              ? "Your profile and spiritual assessment have been completed successfully."
+              : "Your profile has been completed successfully.",
           });
           setLocation('/dashboard');
         } else {
@@ -93,9 +116,32 @@ export default function OnboardingPage() {
           });
 
           if (loginResponse.ok) {
+            // If user completed spiritual assessment, save it
+            if (userData.spiritualAssessment) {
+              try {
+                await fetch('/api/users/spiritual-onboarding', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  credentials: 'include',
+                  body: JSON.stringify({
+                    assessmentData: userData.spiritualAssessment.assessmentData,
+                    baselineEMIState: userData.spiritualAssessment.baselineEMIState,
+                    generateWelcomeContent: true
+                  }),
+                });
+              } catch (assessmentError) {
+                console.error('Failed to save spiritual assessment:', assessmentError);
+                // Don't fail the entire onboarding for this
+              }
+            }
+
             toast({
               title: "Welcome to SoapBox!",
-              description: "Your account has been created and you're now logged in.",
+              description: userData.spiritualAssessment 
+                ? "Your account and spiritual assessment have been saved successfully."
+                : "Your account has been created and you're now logged in.",
             });
             setLocation('/dashboard');
           } else {

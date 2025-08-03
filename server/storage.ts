@@ -361,6 +361,12 @@ export interface IStorage {
   getUserNotificationPreferences(userId: string): Promise<any>;
   updateUserNotificationPreferences(userId: string, preferences: any): Promise<any>;
   
+  // Spiritual assessment operations
+  saveSpiritualAssessment(userId: string, assessmentData: any, baselineEMI: any): Promise<void>;
+  getSpiritualAssessment(userId: string): Promise<any>;
+  saveWelcomeContent(userId: string, content: any): Promise<void>;
+  getWelcomeContent(userId: string): Promise<any>;
+  
   // User statistics and achievements
   getUserStats(userId: string): Promise<any>;
   getUserAchievements(userId: string): Promise<any>;
@@ -7194,6 +7200,126 @@ export class DatabaseStorage implements IStorage {
       default:
         return null;
     }
+  }
+
+  // Spiritual assessment operations
+  async saveSpiritualAssessment(userId: string, assessmentData: any, baselineEMI: any): Promise<void> {
+    try {
+      // Determine spiritual maturity level from assessment
+      const spiritualMaturityLevel = this.determineSpiritualMaturity(assessmentData);
+      
+      // Save assessment data to user profile
+      const [updatedUser] = await db
+        .update(users)
+        .set({
+          spiritualMaturityLevel,
+          contentPreferences: assessmentData,
+          baselineEMIState: baselineEMI,
+          onboardingSpiritualAssessment: assessmentData,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId))
+        .returning();
+
+      if (!updatedUser) {
+        throw new Error('User not found');
+      }
+    } catch (error) {
+      throw new Error(`Failed to save spiritual assessment: ${error}`);
+    }
+  }
+
+  async getSpiritualAssessment(userId: string): Promise<any> {
+    try {
+      const [user] = await db
+        .select({
+          spiritualMaturityLevel: users.spiritualMaturityLevel,
+          contentPreferences: users.contentPreferences,
+          baselineEMIState: users.baselineEMIState,
+          onboardingSpiritualAssessment: users.onboardingSpiritualAssessment
+        })
+        .from(users)
+        .where(eq(users.id, userId));
+
+      return user || null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async saveWelcomeContent(userId: string, content: any): Promise<void> {
+    try {
+      await db
+        .update(users)
+        .set({
+          welcomeContentGenerated: true,
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+
+      // Store welcome content in personalized content
+      await this.savePersonalizedContent({
+        userId,
+        contentType: 'welcome_package',
+        title: 'Welcome to Your Spiritual Journey',
+        content: JSON.stringify(content)
+      });
+    } catch (error) {
+      throw new Error(`Failed to save welcome content: ${error}`);
+    }
+  }
+
+  async getWelcomeContent(userId: string): Promise<any> {
+    try {
+      const [content] = await db
+        .select()
+        .from(userPersonalization)
+        .where(and(
+          eq(userPersonalization.userId, userId),
+          eq(userPersonalization.contentType, 'welcome_package')
+        ))
+        .orderBy(desc(userPersonalization.createdAt))
+        .limit(1);
+
+      if (content && content.content) {
+        return JSON.parse(content.content as string);
+      }
+      return null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  private determineSpiritualMaturity(assessmentData: any): string {
+    const { faithJourney, bibleFamiliarity, prayerLife, churchExperience } = assessmentData;
+    
+    // Score based on responses
+    let score = 0;
+    
+    // Faith journey scoring
+    if (faithJourney === 'mature') score += 3;
+    else if (faithJourney === 'growing') score += 2;
+    else if (faithJourney === 'new_believer') score += 1;
+    
+    // Bible familiarity scoring
+    if (bibleFamiliarity === 'deep_study') score += 3;
+    else if (bibleFamiliarity === 'regular_reader') score += 2;
+    else if (bibleFamiliarity === 'some_experience') score += 1;
+    
+    // Prayer life scoring
+    if (prayerLife === 'multiple_daily') score += 3;
+    else if (prayerLife === 'daily') score += 2;
+    else if (prayerLife === 'occasional') score += 1;
+    
+    // Church experience scoring
+    if (churchExperience === 'leadership_role') score += 3;
+    else if (churchExperience === 'established_member') score += 2;
+    else if (churchExperience === 'growing_involvement') score += 1;
+    
+    // Determine level based on total score
+    if (score >= 9) return 'mature';
+    else if (score >= 5) return 'growing';
+    else return 'beginner';
   }
 }
 
