@@ -395,7 +395,7 @@ export default function ProfilePage() {
 
           <TabsContent value="profile" className="space-y-6">
             {/* Verification Status Card */}
-            {(!profile?.emailVerified || !profile?.phoneVerified) && (
+            {(profile?.emailVerified !== true || profile?.phoneVerified !== true) && (
               <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20">
                 <CardContent className="pt-6">
                   <div className="flex items-start gap-4">
@@ -404,17 +404,17 @@ export default function ProfilePage() {
                         Complete Your Account Verification
                       </h3>
                       <div className="text-sm text-orange-700 dark:text-orange-300">
-                        {!profile?.emailVerified && !profile?.phoneVerified && "Please verify your email and mobile number"}
-                        {profile?.emailVerified && !profile?.phoneVerified && "Please verify your mobile number"}
-                        {!profile?.emailVerified && profile?.phoneVerified && "Please verify your email address"}
+                        {profile?.emailVerified !== true && profile?.phoneVerified !== true && "Please verify your email and mobile number"}
+                        {profile?.emailVerified === true && profile?.phoneVerified !== true && "Please verify your mobile number"}
+                        {profile?.emailVerified !== true && profile?.phoneVerified === true && "Please verify your email address"}
                       </div>
-                      {!profile?.phoneVerified && (
+                      {profile?.phoneVerified !== true && (
                         <p className="text-sm text-orange-600 dark:text-orange-300 mt-3">
                           Add your mobile number to get prayer alerts, event reminders, and secure access.
                         </p>
                       )}
                     </div>
-                    {!profile?.phoneVerified && (
+                    {profile?.phoneVerified !== true && (
                       <Button 
                         size="sm" 
                         className="bg-orange-600 hover:bg-orange-700"
@@ -476,7 +476,7 @@ export default function ProfilePage() {
                           <div className="text-muted-foreground flex items-center gap-2">
                             <Mail className="h-4 w-4" />
                             <span>{profile?.email || "No email provided"}</span>
-                            {profile?.emailVerified && (
+                            {profile?.emailVerified === true && (
                               <Badge variant="outline" className="text-xs text-green-600 border-green-200 bg-green-50 dark:bg-green-900/20">
                                 <CheckCircle className="w-3 h-3 mr-1" />
                                 Verified
@@ -488,13 +488,13 @@ export default function ProfilePage() {
                             <div className="text-muted-foreground flex items-center gap-2">
                               <Phone className="h-4 w-4" />
                               <span>{profile.mobileNumber}</span>
-                              {profile?.phoneVerified && (
+                              {profile?.phoneVerified === true && (
                                 <Badge variant="outline" className="text-xs text-blue-600 border-blue-200 bg-blue-50 dark:bg-blue-900/20">
                                   <Shield className="w-3 h-3 mr-1" />
                                   Verified
                                 </Badge>
                               )}
-                              {!profile?.phoneVerified && profile?.mobileNumber && (
+                              {profile?.phoneVerified !== true && profile?.mobileNumber && (
                                 <Button 
                                   size="sm" 
                                   variant="outline" 
