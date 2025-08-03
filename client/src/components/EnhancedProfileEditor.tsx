@@ -1781,14 +1781,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="publicSharing"
-                  checked={formData.publicSharing || false}
-                  onCheckedChange={(checked) => setFormData({...formData, publicSharing: checked})}
-                />
-                <Label htmlFor="publicSharing">Allow public sharing of my SOAP journal entries</Label>
-              </div>
+
             </CardContent>
           </Card>
           
@@ -1915,6 +1908,28 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     checked={formData.showSpiritualGifts === true}
                     onCheckedChange={(checked) => setFormData({...formData, showSpiritualGifts: checked})}
                   />
+                </div>
+
+                {/* SOAP Journal Sharing Privacy Setting */}
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 mr-4">
+                      <Label htmlFor="publicSharing" className="font-medium text-yellow-900 dark:text-yellow-100">
+                        Share SOAP journal entries publicly
+                      </Label>
+                      <p className="text-sm text-yellow-800 dark:text-yellow-200 mt-1">
+                        When enabled, allows your SOAP journal reflections to be shared with the broader community for encouragement and inspiration. This is completely optional and disabled by default to protect your privacy.
+                      </p>
+                      <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-2">
+                        <strong>Privacy Note:</strong> Only you control this setting. Your personal reflections stay private unless you choose to share them.
+                      </p>
+                    </div>
+                    <Switch
+                      id="publicSharing"
+                      checked={formData.publicSharing === true}
+                      onCheckedChange={(checked) => setFormData({...formData, publicSharing: checked})}
+                    />
+                  </div>
                 </div>
               </div>
             </CardContent>
