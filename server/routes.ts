@@ -9297,7 +9297,7 @@ Return JSON with this exact structure:
         spiritualStage: req.body.spiritualStage,
         ministryInterests: req.body.ministryInterests,
         growthGoals: req.body.growthGoals,
-        favoriteScriptures: req.body.favoriteScriptures,
+        favoriteScriptures: req.body.favoriteScriptures || [],
         spiritualGifts: req.body.spiritualGifts,
         spiritualProfile: req.body.spiritualProfile,
         ageRange: req.body.ageRange,

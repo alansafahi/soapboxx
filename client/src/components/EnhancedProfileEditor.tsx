@@ -1731,12 +1731,28 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
 
               <div>
                 <Label htmlFor="currentReadingPlan">Current Reading Plan</Label>
-                <Input
-                  id="currentReadingPlan"
-                  placeholder="e.g., Bible in a Year, Daily Devotional"
-                  value={formData.currentReadingPlan || ""}
-                  onChange={(e) => setFormData({...formData, currentReadingPlan: e.target.value})}
-                />
+                <Select 
+                  value={formData.currentReadingPlan || ""} 
+                  onValueChange={(value) => setFormData({...formData, currentReadingPlan: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a reading plan or leave blank" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">No current plan</SelectItem>
+                    <SelectItem value="bible_in_a_year">Bible in a Year</SelectItem>
+                    <SelectItem value="daily_devotional">Daily Devotional</SelectItem>
+                    <SelectItem value="chronological_bible">Chronological Bible Reading</SelectItem>
+                    <SelectItem value="new_testament_30_days">New Testament in 30 Days</SelectItem>
+                    <SelectItem value="psalms_proverbs">Psalms & Proverbs Monthly</SelectItem>
+                    <SelectItem value="gospels_study">Four Gospels Study</SelectItem>
+                    <SelectItem value="themed_studies">Themed Bible Studies</SelectItem>
+                    <SelectItem value="custom">Custom Reading Plan</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Choose your current Bible reading plan - this will be auto-populated when you join a plan
+                </p>
               </div>
 
               <div>
