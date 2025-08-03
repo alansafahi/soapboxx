@@ -1087,7 +1087,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     onChange={(e) => setFormData({...formData, mobileNumber: e.target.value})}
                     className="flex-1"
                   />
-                  {formData.mobileNumber && (
+                  {formData.mobileNumber && !formData.phoneVerified && (
                     <Button
                       type="button"
                       variant="outline"
@@ -1099,6 +1099,12 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     >
                       Verify
                     </Button>
+                  )}
+                  {formData.mobileNumber && formData.phoneVerified && (
+                    <div className="flex items-center gap-1 px-2 py-1 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded text-green-700 dark:text-green-300 text-sm">
+                      <CheckCircle className="w-4 h-4" />
+                      Verified
+                    </div>
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
