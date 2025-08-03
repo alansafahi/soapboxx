@@ -111,6 +111,13 @@ export default function SpiritualAssessment({ onComplete, onBack }: SpiritualAss
             >
               <div className="space-y-3">
                 <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <RadioGroupItem value="seeking" id="seeking" />
+                  <Label htmlFor="seeking" className="cursor-pointer flex-1">
+                    <div className="font-medium">Seeking & Exploring</div>
+                    <div className="text-sm text-gray-500">Curious about faith and wanting to learn more</div>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                   <RadioGroupItem value="new_believer" id="new_believer" />
                   <Label htmlFor="new_believer" className="cursor-pointer flex-1">
                     <div className="font-medium">New Believer</div>
@@ -129,13 +136,6 @@ export default function SpiritualAssessment({ onComplete, onBack }: SpiritualAss
                   <Label htmlFor="mature" className="cursor-pointer flex-1">
                     <div className="font-medium">Mature Believer</div>
                     <div className="text-sm text-gray-500">Established faith with deep understanding</div>
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <RadioGroupItem value="seeking" id="seeking" />
-                  <Label htmlFor="seeking" className="cursor-pointer flex-1">
-                    <div className="font-medium">Seeking & Exploring</div>
-                    <div className="text-sm text-gray-500">Curious about faith and wanting to learn more</div>
                   </Label>
                 </div>
               </div>
