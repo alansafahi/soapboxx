@@ -617,7 +617,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
     return (
       <OnboardingSpiritualFlow 
         onComplete={handleSpiritualFlowComplete}
-        onSkip={handleComplete}
+        onBack={() => setShowSpiritualFlow(false)}
         userProfile={{
           firstName: formData.firstName,
           lastName: formData.lastName,

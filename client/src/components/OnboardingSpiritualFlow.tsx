@@ -9,9 +9,14 @@ import WelcomeSpiritualContent from './WelcomeSpiritualContent';
 interface OnboardingSpiritualFlowProps {
   onComplete: () => void;
   onBack?: () => void;
+  userProfile: {
+    firstName: string;
+    lastName: string;
+    role: string;
+  };
 }
 
-export default function OnboardingSpiritualFlow({ onComplete, onBack }: OnboardingSpiritualFlowProps) {
+export default function OnboardingSpiritualFlow({ onComplete, onBack, userProfile }: OnboardingSpiritualFlowProps) {
   const [currentStep, setCurrentStep] = useState<'assessment' | 'baseline' | 'welcome'>('assessment');
   const [assessmentData, setAssessmentData] = useState<SpiritualAssessmentData | null>(null);
   const [baselineData, setBaselineData] = useState<any>(null);
