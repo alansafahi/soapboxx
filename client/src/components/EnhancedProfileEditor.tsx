@@ -124,13 +124,13 @@ const LANGUAGES = [
   { value: "Dutch", label: "Nederlands (Dutch)" },
   { value: "Russian", label: "Русский (Russian)" },
   { value: "Chinese", label: "中文 (Chinese)" },
-  { value: "Japanese", label: "日本語 (Japanese)" },
   { value: "Korean", label: "한국어 (Korean)" },
+  { value: "Japanese", label: "日本語 (Japanese)" },
+  { value: "Farsi", label: "فارسی (Farsi)" },
+  { value: "Armenian", label: "Հայերեն (Armenian)" },
   { value: "Arabic", label: "العربية (Arabic)" },
   { value: "Hebrew", label: "עברית (Hebrew)" },
   { value: "Hindi", label: "हिन्दी (Hindi)" },
-  { value: "Farsi", label: "فارسی (Farsi)" },
-  { value: "Armenian", label: "Հայերեն (Armenian)" },
   { value: "Other", label: "Other" }
 ];
 
