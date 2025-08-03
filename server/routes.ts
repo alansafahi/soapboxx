@@ -1420,7 +1420,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role,
         gender,
         ageRange,
-        spiritualStage,
         ministryInterests,
         volunteerInterest,
         churchAffiliation,
@@ -1433,17 +1432,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           role = $1,
           gender = $2,
           age_range = $3,
-          spiritual_stage = $4,
-          ministry_interests = $5,
-          volunteer_interest = $6,
-          church_affiliation = $7,
+          ministry_interests = $4,
+          volunteer_interest = $5,
+          church_affiliation = $6,
           updated_at = NOW()
-        WHERE id = $8
+        WHERE id = $7
       `, [
         role || 'member',
         gender,
         ageRange,
-        spiritualStage,
         JSON.stringify(ministryInterests || []),
         volunteerInterest,
         churchAffiliation,

@@ -24,10 +24,10 @@ interface OnboardingFlowProps {
 }
 
 const ROLES = [
+  { id: 'exploring', label: "I'm exploring", icon: Compass, description: "Learning about faith and community" },
   { id: 'member', label: "I'm a member", icon: Heart, description: "Join our community and grow in faith" },
   { id: 'volunteer', label: "I'm a volunteer", icon: Users, description: "Serve and make a difference" },
-  { id: 'leader', label: "I'm a church leader", icon: BookOpen, description: "Lead and guide others" },
-  { id: 'exploring', label: "I'm exploring", icon: Compass, description: "Learning about faith and community" }
+  { id: 'leader', label: "I'm a church leader", icon: BookOpen, description: "Lead and guide others" }
 ];
 
 const SPIRITUAL_STAGES = [
@@ -81,7 +81,6 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
     // Step 3: Spiritual Profile (Optional)
     gender: '',
     ageRange: '',
-    spiritualStage: '',
     ministryInterests: [] as string[],
     churchAffiliation: churchName || '',
     
@@ -428,19 +427,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
           </div>
         </div>
         
-        <div>
-          <Label htmlFor="spiritualStage">Spiritual Stage</Label>
-          <Select value={formData.spiritualStage} onValueChange={(value) => updateFormData('spiritualStage', value)}>
-            <SelectTrigger>
-              <SelectValue placeholder="Where are you in your faith journey?" />
-            </SelectTrigger>
-            <SelectContent>
-              {SPIRITUAL_STAGES.map(stage => (
-                <SelectItem key={stage} value={stage}>{stage}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+
         
         <div>
           <Label>Ministry Interests (Select all that apply)</Label>

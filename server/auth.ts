@@ -208,7 +208,6 @@ export function setupAuth(app: Express): void {
         role,
         gender,
         ageRange,
-        spiritualStage,
         ministryInterests,
         churchAffiliation,
         inviteToken
@@ -345,7 +344,6 @@ export function setupAuth(app: Express): void {
         mobileNumber: mobileNumber || null,
         gender: gender || null,
         ageRange: ageRange || null,
-        spiritualStage: spiritualStage || null,
         ministryInterests: ministryInterests || [],
         churchAffiliation: churchAffiliation || null,
         hasCompletedOnboarding: true, // Mark as completed since they went through onboarding flow
