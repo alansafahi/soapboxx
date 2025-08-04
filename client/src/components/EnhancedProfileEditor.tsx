@@ -208,7 +208,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       }));
 
       // Invalidate query cache to refresh profile data in parent component
-      queryClient.invalidateQueries({ queryKey: ['/api/users/profile'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       
     } catch (error) {
       console.error('Auto-save failed:', error);
