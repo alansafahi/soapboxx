@@ -1543,6 +1543,14 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   <div className="mt-6 flex gap-3">
                     <Button
                       type="button"
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                      onClick={() => window.location.href = '/spiritual-assessment-results?returnTo=profile'}
+                    >
+                      <BookOpen className="w-4 h-4 mr-2" />
+                      View Full Results
+                    </Button>
+                    <Button
+                      type="button"
                       variant="outline"
                       className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300"
                       onClick={() => setShowGiftsAssessment(true)}
@@ -1565,15 +1573,6 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       onClick={() => setShowGiftsInfoModal(true)}
                     >
                       Learn More
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300"
-                      onClick={() => window.location.href = '/spiritual-assessment-results?returnTo=profile'}
-                    >
-                      <BookOpen className="w-4 h-4 mr-2" />
-                      View Full Results
                     </Button>
                   </div>
                 </div>
