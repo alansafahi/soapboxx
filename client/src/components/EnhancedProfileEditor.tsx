@@ -173,13 +173,13 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const [aiGiftSuggestions, setAiGiftSuggestions] = useState<any>(null);
   const [loadingAiAnalysis, setLoadingAiAnalysis] = useState(false);
 
-  // Auto-save mutation for preferred Bible translation
+  // Auto-save mutation for preferences
   const [saving, setSaving] = useState(false);
   
-  const autoSaveTranslation = async (translation: string) => {
+  const autoSavePreference = async (field: string, value: string) => {
     try {
       setSaving(true);
-      console.log('Auto-saving Bible translation:', translation);
+      console.log(`Auto-saving ${field}:`, value);
       
       const response = await fetch('/api/users/profile', {
         method: 'PUT',
@@ -188,7 +188,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
         },
         body: JSON.stringify({
           ...formData,  // Include all existing form data
-          preferredBibleTranslation: translation
+          [field]: value
         }),
       });
 
@@ -204,7 +204,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       // Update the form data to reflect the saved value
       setFormData(prev => ({
         ...prev,
-        preferredBibleTranslation: translation
+        [field]: value
       }));
 
       // Invalidate query cache to refresh profile data in parent component
@@ -215,6 +215,14 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     } finally {
       setSaving(false);
     }
+  };
+
+  const autoSaveTranslation = (translation: string) => {
+    autoSavePreference('preferredBibleTranslation', translation);
+  };
+
+  const autoSaveSmallGroup = (smallGroup: string) => {
+    autoSavePreference('smallGroup', smallGroup);
   };
 
   // Update formData when profile prop changes
@@ -1324,7 +1332,11 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   <Label htmlFor="smallGroup">Small Group Participation</Label>
                   <Select 
                     value={formData.smallGroup || "not_interested"} 
-                    onValueChange={(value) => setFormData({...formData, smallGroup: value})}
+                    onValueChange={(value) => {
+                      setFormData(prev => ({...prev, smallGroup: value}));
+                      // Auto-save the small group preference immediately
+                      autoSaveSmallGroup(value);
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select your small group status" />
@@ -1337,7 +1349,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Your interest level in Bible study and fellowship groups
+                    Your interest level in Bible study and fellowship groups {saving ? '(saving...)' : ''}
                   </p>
                 </div>
               </div>
