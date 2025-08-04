@@ -232,9 +232,9 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
     return inverseQuestions.includes(questionIndex);
   };
 
-  const questionsPerPage = 5;
+  const questionsPerPage = 10; // 10 questions per gift category  
   const currentPage = Math.floor(currentQuestionIndex / questionsPerPage);
-  const totalPages = Math.ceil(totalQuestions / questionsPerPage);
+  const totalPages = Math.ceil(totalQuestions / questionsPerPage); // 12 pages total
   const startIndex = currentPage * questionsPerPage;
   const endIndex = Math.min(startIndex + questionsPerPage, totalQuestions);
   const currentPageQuestions = spiritualGiftsQuestions.slice(startIndex, endIndex);
@@ -244,23 +244,16 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
     
     return (
       <div className="space-y-6">
-        <div className="text-center space-y-2">
-          <div className="text-sm text-purple-600 dark:text-purple-400 font-medium">
-            {currentGiftCategory}
-          </div>
-        </div>
-        
-        <div className="space-y-8">
+        <div className="space-y-6">
           {currentPageQuestions.map((question, index) => {
             const absoluteIndex = startIndex + index;
             const isInverse = isInverseQuestion(absoluteIndex);
             
             return (
-              <div key={absoluteIndex} className="space-y-4">
+              <div key={absoluteIndex} className="space-y-3">
                 <div className="flex justify-between items-start">
-                  <h3 className="text-base font-medium text-gray-900 dark:text-white flex-1 pr-4">
+                  <h3 className="text-sm font-normal text-gray-900 dark:text-white flex-1 pr-4">
                     {question}
-                    {isInverse && <span className="ml-2 text-xs text-orange-500">(Validity Check)</span>}
                   </h3>
                   <div className="text-xs text-purple-600 dark:text-purple-400 font-medium whitespace-nowrap">
                     {currentGiftCategory}
@@ -268,25 +261,25 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
                 </div>
                 
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-gray-500">Strongly Disagree</span>
-                  <span className="text-xs text-gray-500">Strongly Agree</span>
+                  <span className="text-xs text-gray-500 font-normal">Strongly Disagree</span>
+                  <span className="text-xs text-gray-500 font-normal">Strongly Agree</span>
                 </div>
                 
                 <RadioGroup 
                   value={responses[absoluteIndex]?.toString() || ''} 
                   onValueChange={(value) => handleResponse(absoluteIndex, parseInt(value))}
                 >
-                  <div className="flex justify-center space-x-4">
+                  <div className="flex justify-center space-x-2">
                     {[1, 2, 3, 4, 5].map((value) => (
-                      <div key={value} className="flex flex-col items-center">
+                      <div key={value} className="flex flex-col items-center space-y-1">
                         <RadioGroupItem 
                           value={value.toString()} 
                           id={`q${absoluteIndex}-option-${value}`}
-                          className="w-8 h-8 border-2 border-gray-300 rounded-full flex items-center justify-center hover:border-purple-500 transition-colors"
+                          className="w-6 h-6 border-2 border-gray-300 rounded-full flex items-center justify-center hover:border-purple-500 transition-colors data-[state=checked]:border-purple-600 data-[state=checked]:bg-purple-600"
                         />
                         <Label 
                           htmlFor={`q${absoluteIndex}-option-${value}`} 
-                          className="mt-1 text-xs text-gray-600 cursor-pointer font-medium"
+                          className="text-xs text-gray-600 cursor-pointer font-normal"
                         >
                           {value}
                         </Label>
