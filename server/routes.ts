@@ -1958,7 +1958,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate AI recommendations endpoint
   app.post('/api/user/generate-recommendations', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
       
       // Get user profile and preferences for personalized recommendations
       const user = await storage.getUser(userId);

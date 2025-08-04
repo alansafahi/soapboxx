@@ -759,17 +759,21 @@ export default function UserPreferences() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="en">🇺🇸 English</SelectItem>
-                      <SelectItem value="es">🇪🇸 Español</SelectItem>
-                      <SelectItem value="fr">🇫🇷 Français</SelectItem>
-                      <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
-                      <SelectItem value="pt">🇵🇹 Português</SelectItem>
-                      <SelectItem value="zh">🇨🇳 中文</SelectItem>
+                      <SelectItem value="es">🇪🇸 Español (Spanish)</SelectItem>
+                      <SelectItem value="fr">🇫🇷 Français (French)</SelectItem>
+                      <SelectItem value="pt">🇵🇹 Português (Portuguese)</SelectItem>
+                      <SelectItem value="de">🇩🇪 Deutsch (German)</SelectItem>
+                      <SelectItem value="it">🇮🇹 Italiano (Italian)</SelectItem>
+                      <SelectItem value="nl">🇳🇱 Nederlands (Dutch)</SelectItem>
+                      <SelectItem value="ru">🇷🇺 Русский (Russian)</SelectItem>
+                      <SelectItem value="zh">🇨🇳 中文 (Chinese)</SelectItem>
                       <SelectItem value="fa">🇮🇷 فارسی (Farsi)</SelectItem>
                       <SelectItem value="hy">🇦🇲 Հայերեն (Armenian)</SelectItem>
-                      <SelectItem value="ar">🇸🇦 العربية</SelectItem>
-                      <SelectItem value="ko">🇰🇷 한국어</SelectItem>
-                      <SelectItem value="ja">🇯🇵 日本語</SelectItem>
-                      <SelectItem value="hi">🇮🇳 हिन्दी</SelectItem>
+                      <SelectItem value="ar">🇸🇦 العربية (Arabic)</SelectItem>
+                      <SelectItem value="ko">🇰🇷 한국어 (Korean)</SelectItem>
+                      <SelectItem value="ja">🇯🇵 日本語 (Japanese)</SelectItem>
+                      <SelectItem value="he">🇮🇱 עברית (Hebrew)</SelectItem>
+                      <SelectItem value="hi">🇮🇳 हिन्दी (Hindi)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

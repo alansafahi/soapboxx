@@ -1250,8 +1250,6 @@ export class DatabaseStorage implements IStorage {
           prayerReminders: true,
           communityUpdates: true,
           eventReminders: true,
-          weeklyCheckins: true,
-          engagementReminders: true,
           smsNotifications: false,
           emailNotifications: true,
           webPushEnabled: false,
@@ -1327,8 +1325,6 @@ export class DatabaseStorage implements IStorage {
       if (preferences.prayerReminders !== undefined) updateData.prayerReminders = preferences.prayerReminders;
       if (preferences.communityUpdates !== undefined) updateData.communityUpdates = preferences.communityUpdates;
       if (preferences.eventReminders !== undefined) updateData.eventReminders = preferences.eventReminders;
-      if (preferences.weeklyCheckins !== undefined) updateData.weeklyCheckins = preferences.weeklyCheckins;
-      if (preferences.engagementReminders !== undefined) updateData.engagementReminders = preferences.engagementReminders;
       if (preferences.smsNotifications !== undefined) updateData.smsNotifications = preferences.smsNotifications;
       if (preferences.emailNotifications !== undefined) updateData.emailNotifications = preferences.emailNotifications;
       if (preferences.webPushEnabled !== undefined) updateData.webPushEnabled = preferences.webPushEnabled;
@@ -1359,8 +1355,6 @@ export class DatabaseStorage implements IStorage {
         prayerReminders: true,
         communityUpdates: true,
         eventReminders: true,
-        weeklyCheckins: true,
-        engagementReminders: true,
         smsNotifications: false,
         emailNotifications: true,
         webPushEnabled: false,
