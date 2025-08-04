@@ -53,6 +53,7 @@ import {
   mediaCollectionItems,
   galleryImages,
   galleryImageLikes,
+  userPersonalization,
   galleryImageComments,
   galleryImageSaves,
   dailyVerses,

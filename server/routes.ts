@@ -3193,11 +3193,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         isGenerated: user?.welcomeContentGenerated || false,
         hasContent: !!welcomeContent,
-        content: welcomeContent
+        content: welcomeContent || null
       });
     } catch (error) {
       res.status(500).json({ 
-        message: 'Failed to fetch welcome content status',
+        message: 'Failed to check welcome content status',
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  // Get spiritual assessment results
+  app.get('/api/users/spiritual-assessment-results', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const user = await storage.getUserById(userId);
+      const welcomeContent = await storage.getWelcomeContent(userId);
+      
+      if (!user?.onboardingSpiritualAssessment) {
+        return res.status(404).json({ message: 'No spiritual assessment found' });
+      }
+
+      res.json({
+        assessmentData: user.onboardingSpiritualAssessment,
+        spiritualMaturityLevel: user.spiritualMaturityLevel,
+        spiritualGifts: user.spiritualGifts || [],
+        spiritualProfile: user.spiritualProfile || {},
+        baselineEMI: user.baselineEmiState,
+        welcomeContent: welcomeContent,
+        isWelcomeContentReady: user.welcomeContentGenerated || false
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Failed to fetch spiritual assessment results',
         error: (error as Error).message 
       });
     }
