@@ -192,6 +192,8 @@ export const users = pgTable("users", {
   currentReadingPlan: varchar("current_reading_plan"), // Active Bible reading plan
   languagePreference: varchar("language_preference", { length: 50 }), // User's preferred language
   customLanguage: varchar("custom_language", { length: 100 }), // Custom language when "Other" is selected
+  bibleTranslationPreference: varchar("bible_translation_preference", { length: 50 }).default("NIV"), // Preferred Bible translation
+  smallGroupParticipation: varchar("small_group_participation", { length: 50 }).default("interested"), // Small group interest level
   
   // Privacy Settings (granular control)
   showBioPublicly: boolean("show_bio_publicly").default(true),
