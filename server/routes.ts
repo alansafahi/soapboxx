@@ -4756,8 +4756,15 @@ app.post('/api/invitations', async (req: any, res) => {
 
       
       if (!contentType || !originalContent || !violationReason) {
-
-        return res.status(400).json({ message: 'Missing required fields' });
+        const missing = [];
+        if (!contentType) missing.push('contentType');
+        if (!originalContent) missing.push('originalContent');
+        if (!violationReason) missing.push('violationReason');
+        
+        return res.status(400).json({ 
+          message: `Missing required fields: ${missing.join(', ')}`,
+          missingFields: missing
+        });
       }
 
 
