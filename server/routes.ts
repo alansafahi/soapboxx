@@ -276,6 +276,13 @@ async function checkForNewRoleAssignment(userId: string, currentRole: string): P
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configuration constants - centralized role definitions (SBX-STD-004 compliance)
+  const ADMIN_ROLES = ['admin', 'pastor', 'lead_pastor', 'church_admin', 'administrator', 'associate_pastor'];
+  const GLOBAL_ADMIN_ROLES = ['soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin', 'system-admin', 'super-admin'];
+  
+  // Helper function to check admin permissions
+  const hasAdminPermission = (userRole: string): boolean => ADMIN_ROLES.includes(userRole);
+  
   // Initialize AI personalization service
   const aiPersonalizationService = new AIPersonalizationService();
 
@@ -320,7 +327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/bible/verse/:book/:chapter/:verse', async (req, res) => {
     try {
       const { book, chapter, verse } = req.params;
-      const { translation = 'NIV' } = req.query;
+      const { translation = 'NIV' } = req.query; // Default for public API when no user context
       
       const verseData = await storage.getBibleVerse(book, parseInt(chapter), parseInt(verse), translation as string);
       
@@ -339,7 +346,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Public random Bible verse
   app.get('/api/bible/random', async (req, res) => {
     try {
-      const { translation = 'NIV' } = req.query;
+      const { translation = 'NIV' } = req.query; // Default for public API when no user context
       
       const verse = await storage.getRandomBibleVerse(translation as string);
       
@@ -404,10 +411,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       
       // Test verse lookup
-      const testVerse = await scriptureApiService.lookupVerse('John 3:16', 'NIV');
+      const testVerse = await scriptureApiService.lookupVerse('John 3:16', 'NIV'); // Test endpoint uses NIV for consistency
       
       // Test search
-      const searchResults = await scriptureApiService.searchVersesByText('love', 'NIV', 5);
+      const searchResults = await scriptureApiService.searchVersesByText('love', 'NIV', 5); // Test endpoint uses NIV for consistency
       
       // Test available translations
       const translations = scriptureApiService.getAvailableTranslations();
@@ -417,7 +424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: new Date().toISOString(),
         tests: {
           verseLookup: {
-            query: "John 3:16 (NIV)",
+            query: "John 3:16 (NIV)", // Test endpoint uses NIV for API verification
             success: !!testVerse,
             result: testVerse
           },
@@ -1748,9 +1755,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         JOIN communities c ON uc.community_id = c.id
         WHERE uc.user_id = $1 
         AND uc.is_active = true
-        AND uc.role IN ('lead_pastor', 'associate_pastor', 'administrator', 'church_admin', 'pastor', 'admin')
+        AND uc.role = ANY($2::text[])
         ORDER BY c.name
-      `, [userId]);
+      `, [userId, ADMIN_ROLES]);
 
       const adminCommunities = adminCommunitiesResult.rows.map(row => ({
         communityId: row.community_id,
@@ -1759,9 +1766,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }));
 
       // Also check if user has global admin roles (soapbox_owner, etc.)
-      const globalAdminRoles = ['soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin', 'system-admin', 'super-admin'];
       const user = await storage.getUser(userId);
-      const hasGlobalAdminRole = user && globalAdminRoles.includes(user.role || '');
+      const hasGlobalAdminRole = user && GLOBAL_ADMIN_ROLES.includes(user.role || '');
 
       res.json({
         hasAdminAccess: adminCommunities.length > 0 || hasGlobalAdminRole,
@@ -3283,15 +3289,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get spiritual assessment results - temporary bypass for demo
+  // Get spiritual assessment results
   app.get('/api/users/spiritual-assessment-results', async (req: any, res) => {
     try {
-      let userId = req.session?.userId;
+      const userId = req.session?.userId;
       
-      // Temporary fallback for demo - use Alan's user ID
       if (!userId) {
-        
-        userId = 'xinjk1vlu2l'; // Alan's user ID
+        return res.status(401).json({ message: 'User authentication required' });
       }
       
       
@@ -6144,7 +6148,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       // Check if user has admin/pastor permissions
       const userRole = await storage.getUserRole(userId);
-      if (!['admin', 'pastor', 'lead_pastor', 'church_admin'].includes(userRole)) {
+      if (!hasAdminPermission(userRole)) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -6173,15 +6177,18 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       // Check if user has admin/pastor permissions
       const userRole = await storage.getUserRole(userId);
-      if (!['admin', 'pastor', 'lead_pastor', 'church_admin'].includes(userRole)) {
+      if (!hasAdminPermission(userRole)) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - parseInt(period));
 
-      // Get devotion reading analytics
-      const devotionStats = await storage.getDevotionAnalytics(communityId || 1, startDate);
+      // Get devotion reading analytics - require communityId parameter
+      if (!communityId) {
+        return res.status(400).json({ message: "Community ID is required" });
+      }
+      const devotionStats = await storage.getDevotionAnalytics(communityId, startDate);
       
       res.json({
         period: `${period} days`,
@@ -6203,7 +6210,7 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       // Check if user has admin/pastor permissions
       const userRole = await storage.getUserRole(userId);
-      if (!['admin', 'pastor', 'lead_pastor', 'church_admin'].includes(userRole)) {
+      if (!hasAdminPermission(userRole)) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
@@ -6211,7 +6218,11 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const thresholdDate = new Date();
       thresholdDate.setDate(thresholdDate.getDate() - parseInt(threshold));
 
-      const atRiskMembers = await storage.getAtRiskMembers(communityId || 1, thresholdDate);
+      // Require communityId parameter
+      if (!communityId) {
+        return res.status(400).json({ message: "Community ID is required" });
+      }
+      const atRiskMembers = await storage.getAtRiskMembers(communityId, thresholdDate);
       
       res.json({
         threshold: `${threshold} days`,
@@ -6239,12 +6250,15 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       
       // Check if user has admin/pastor permissions
       const userRole = await storage.getUserRole(userId);
-      if (!['admin', 'pastor', 'lead_pastor', 'church_admin'].includes(userRole)) {
+      if (!hasAdminPermission(userRole)) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
-      // Get comprehensive engagement overview
-      const engagement = await storage.getEngagementOverview(communityId || 1);
+      // Get comprehensive engagement overview - require communityId parameter
+      if (!communityId) {
+        return res.status(400).json({ message: "Community ID is required" });
+      }
+      const engagement = await storage.getEngagementOverview(communityId);
       
       res.json({
         checkIns: {
