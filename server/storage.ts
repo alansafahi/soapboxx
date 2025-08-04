@@ -7713,6 +7713,134 @@ export class DatabaseStorage implements IStorage {
       throw new Error('Failed to create in-app notification');
     }
   }
+
+  // Web Push Subscription methods
+  async getUserPushSubscriptions(userId: string): Promise<any[]> {
+    try {
+      const subscriptions = await db
+        .select()
+        .from(pushSubscriptions)
+        .where(eq(pushSubscriptions.userId, userId))
+        .where(eq(pushSubscriptions.isActive, true));
+      
+      return subscriptions;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async savePushSubscription(userId: string, subscription: any): Promise<any> {
+    try {
+      // Check if subscription already exists
+      const existing = await db
+        .select()
+        .from(pushSubscriptions)
+        .where(eq(pushSubscriptions.userId, userId))
+        .where(eq(pushSubscriptions.endpoint, subscription.endpoint))
+        .limit(1);
+
+      if (existing.length > 0) {
+        // Update existing subscription
+        const [updated] = await db
+          .update(pushSubscriptions)
+          .set({
+            p256dhKey: subscription.keys.p256dh,
+            authKey: subscription.keys.auth,
+            userAgent: subscription.userAgent,
+            isActive: true,
+            updatedAt: new Date()
+          })
+          .where(eq(pushSubscriptions.id, existing[0].id))
+          .returning();
+        
+        return updated;
+      } else {
+        // Create new subscription
+        const [newSubscription] = await db
+          .insert(pushSubscriptions)
+          .values({
+            userId,
+            endpoint: subscription.endpoint,
+            p256dhKey: subscription.keys.p256dh,
+            authKey: subscription.keys.auth,
+            userAgent: subscription.userAgent,
+            isActive: true,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          })
+          .returning();
+        
+        return newSubscription;
+      }
+    } catch (error) {
+      throw new Error('Failed to save push subscription');
+    }
+  }
+
+  async removePushSubscription(subscriptionId: number): Promise<void> {
+    try {
+      await db
+        .update(pushSubscriptions)
+        .set({ isActive: false, updatedAt: new Date() })
+        .where(eq(pushSubscriptions.id, subscriptionId));
+    } catch (error) {
+      // Silent error handling
+    }
+  }
+
+  async getUserActivePrayerRequests(userId: string): Promise<any[]> {
+    try {
+      const prayers = await db
+        .select()
+        .from(prayerRequests)
+        .where(eq(prayerRequests.requesterId, userId))
+        .where(eq(prayerRequests.status, 'active'))
+        .orderBy(desc(prayerRequests.createdAt));
+      
+      return prayers;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  // Notification preferences methods
+  async getNotificationPreferences(userId: string): Promise<any> {
+    try {
+      const prefs = await db
+        .select()
+        .from(notificationPreferences)
+        .where(eq(notificationPreferences.userId, userId))
+        .limit(1);
+      
+      return prefs[0] || null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async updateNotificationPreferences(userId: string, updates: any): Promise<void> {
+    try {
+      const existing = await this.getNotificationPreferences(userId);
+      
+      if (existing) {
+        await db
+          .update(notificationPreferences)
+          .set({ ...updates, updatedAt: new Date() })
+          .where(eq(notificationPreferences.userId, userId));
+      } else {
+        await db
+          .insert(notificationPreferences)
+          .values({
+            userId,
+            ...updates,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+      }
+    } catch (error) {
+      throw new Error('Failed to update notification preferences');
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

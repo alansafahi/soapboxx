@@ -16102,6 +16102,92 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Web Push Notification routes
+  app.get("/api/push/vapid-key", (req, res) => {
+    try {
+      const { webPushService } = require('./web-push-service');
+      res.json({ publicKey: webPushService.getVapidPublicKey() });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to get VAPID key" });
+    }
+  });
+
+  app.post("/api/push/subscribe", isAuthenticated, async (req: RequestWithSession, res) => {
+    try {
+      const subscription = req.body;
+      const result = await storage.savePushSubscription(req.session.userId!, subscription);
+      res.json({ success: true, subscription: result });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to save push subscription" });
+    }
+  });
+
+  app.post("/api/push/unsubscribe", isAuthenticated, async (req: RequestWithSession, res) => {
+    try {
+      const { endpoint } = req.body;
+      const subscriptions = await storage.getUserPushSubscriptions(req.session.userId!);
+      const subscription = subscriptions.find(sub => sub.endpoint === endpoint);
+      
+      if (subscription) {
+        await storage.removePushSubscription(subscription.id);
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to unsubscribe" });
+    }
+  });
+
+  app.post("/api/push/test", isAuthenticated, async (req: RequestWithSession, res) => {
+    try {
+      const { webPushService } = require('./web-push-service');
+      const success = await webPushService.sendNotificationToUser(req.session.userId!, {
+        title: "🎉 Test Notification",
+        body: "Your push notifications are working perfectly!",
+        icon: "/icons/icon-192x192.png",
+        url: "/achievements"
+      });
+      
+      res.json({ success, message: success ? "Test notification sent!" : "No active subscriptions found" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to send test notification" });
+    }
+  });
+
+  // Notification preferences routes
+  app.get("/api/notification-preferences", isAuthenticated, async (req: RequestWithSession, res) => {
+    try {
+      const preferences = await storage.getNotificationPreferences(req.session.userId!);
+      res.json(preferences || {
+        dailyReading: true,
+        prayerReminders: true,
+        communityUpdates: true,
+        eventReminders: true,
+        weeklyCheckins: true,
+        engagementReminders: true,
+        smsNotifications: false,
+        emailNotifications: true,
+        webPushEnabled: false,
+        friendActivity: false,
+        dailyReadingTime: "08:00",
+        prayerTimes: [],
+        quietHours: { start: "22:00", end: "07:00" }
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch notification preferences" });
+    }
+  });
+
+  app.put("/api/notification-preferences", isAuthenticated, async (req: RequestWithSession, res) => {
+    try {
+      const updates = req.body;
+      await storage.updateNotificationPreferences(req.session.userId!, updates);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update notification preferences" });
+    }
+  });
+
   // Simple health check endpoint
   app.get('/health', (req, res) => {
     res.json({ 

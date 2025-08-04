@@ -353,6 +353,20 @@ export class MilestoneService {
 
       // Send celebration notification
       await this.sendCelebrationNotification(userId, milestone);
+      
+      // Send web push notification for milestone
+      try {
+        const { webPushService } = await import('./web-push-service');
+        await webPushService.sendMilestoneCelebrationNotification(userId, {
+          title: `🎉 ${milestone.name}`,
+          message: milestone.description,
+          actionUrl: '/achievements',
+          milestoneId: milestone.id,
+          bonusPoints: this.calculateBonusPoints(milestone)
+        });
+      } catch (error) {
+        // Silent error handling for push notifications
+      }
 
       // Update user achievements count
       await this.updateUserAchievementStats(userId);
