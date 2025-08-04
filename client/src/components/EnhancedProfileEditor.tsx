@@ -15,7 +15,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../lib/queryClient";
 import { 
   User, 
@@ -154,6 +154,7 @@ const BIBLE_TRANSLATIONS = [
 ];
 
 export default function EnhancedProfileEditor({ profile, onSave, isLoading }: EnhancedProfileEditorProps) {
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState<Partial<UserProfile>>(profile);
   const [selectedMinistries, setSelectedMinistries] = useState<string[]>(profile.ministryInterests || []);
   const [selectedGoals, setSelectedGoals] = useState<string[]>(profile.growthGoals || []);
@@ -186,6 +187,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          ...formData,  // Include all existing form data
           preferredBibleTranslation: translation
         }),
       });
@@ -204,6 +206,9 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
         ...prev,
         preferredBibleTranslation: translation
       }));
+
+      // Invalidate query cache to refresh profile data in parent component
+      queryClient.invalidateQueries({ queryKey: ['/api/users/profile'] });
       
     } catch (error) {
       console.error('Auto-save failed:', error);
@@ -214,35 +219,39 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
 
   // Update formData when profile prop changes
   useEffect(() => {
-    // Initialize all fields with database defaults when null
-    const initializedProfile = {
-      ...profile,
-      // Apply database schema defaults for privacy settings when null
-      showBioPublicly: profile.showBioPublicly ?? true,
-      showChurchAffiliation: profile.showChurchAffiliation ?? true,
-      shareWithGroup: profile.shareWithGroup ?? true,
-      showAgeRange: profile.showAgeRange ?? false,
-      showLocation: profile.showLocation ?? false,
-      showMobile: profile.showMobile ?? false,
-      showGender: profile.showGender ?? false,
-      showDenomination: profile.showDenomination ?? true,
-      showSpiritualGifts: profile.showSpiritualGifts ?? true,
-      // Initialize core profile fields
-      publicSharing: profile.publicSharing ?? false,
-      volunteerInterest: profile.volunteerInterest ?? false,
-      spiritualGifts: profile.spiritualGifts || [],
-      spiritualProfile: profile.spiritualProfile || null,
-      // Initialize language preference to English if null
-      languagePreference: profile.languagePreference || "English",
-      // Initialize bible translation to NIV if null
-      preferredBibleTranslation: profile.preferredBibleTranslation || "NIV",
-      // Initialize small group to not_interested if null
-      smallGroup: profile.smallGroup || "not_interested",
-    };
-    
-    setFormData(initializedProfile);
-    setSelectedMinistries(profile.ministryInterests || []);
-    setSelectedGoals(profile.growthGoals || []);
+    // Only initialize if formData is empty or if this is the first load
+    // Don't overwrite formData if user has made changes
+    if (!formData.id || formData.id !== profile.id) {
+      // Initialize all fields with database defaults when null
+      const initializedProfile = {
+        ...profile,
+        // Apply database schema defaults for privacy settings when null
+        showBioPublicly: profile.showBioPublicly ?? true,
+        showChurchAffiliation: profile.showChurchAffiliation ?? true,
+        shareWithGroup: profile.shareWithGroup ?? true,
+        showAgeRange: profile.showAgeRange ?? false,
+        showLocation: profile.showLocation ?? false,
+        showMobile: profile.showMobile ?? false,
+        showGender: profile.showGender ?? false,
+        showDenomination: profile.showDenomination ?? true,
+        showSpiritualGifts: profile.showSpiritualGifts ?? true,
+        // Initialize core profile fields
+        publicSharing: profile.publicSharing ?? false,
+        volunteerInterest: profile.volunteerInterest ?? false,
+        spiritualGifts: profile.spiritualGifts || [],
+        spiritualProfile: profile.spiritualProfile || null,
+        // Initialize language preference to English if null
+        languagePreference: profile.languagePreference || "English",
+        // Initialize bible translation to NIV if null
+        preferredBibleTranslation: profile.preferredBibleTranslation || "NIV",
+        // Initialize small group to not_interested if null
+        smallGroup: profile.smallGroup || "not_interested",
+      };
+      
+      setFormData(initializedProfile);
+      setSelectedMinistries(profile.ministryInterests || []);
+      setSelectedGoals(profile.growthGoals || []);
+    }
     
     // Handle favorite verses - they might be strings or objects
     const verses = profile.favoriteScriptures || [];
