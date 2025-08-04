@@ -44,7 +44,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [pendingVerse, setPendingVerse] = useState<{ reference: string; text: string; version: string } | null>(null);
   const [isLookingUpVerse, setIsLookingUpVerse] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState('NIV'); // Default until user preference loads
+  const [selectedVersion, setSelectedVersion] = useState('NIV'); // Temporary default, replaced by user's actual preference
   const [autoLookupTimeout, setAutoLookupTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isAutoLookingUp, setIsAutoLookingUp] = useState(false);
   
@@ -102,8 +102,9 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     queryKey: ['/api/auth/user'],
   });
 
-  // Initialize selectedVersion from user's Bible translation preference
+  // Dynamically load user's current Bible translation preference
   useEffect(() => {
+    // Always use the user's current preference, whatever it may be
     if (user?.bibleTranslationPreference) {
       setSelectedVersion(user.bibleTranslationPreference);
     }
