@@ -2020,7 +2020,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
           className="flex items-center gap-2"
         >
           <Heart className="w-4 h-4" />
-          {isLoading ? "Saving..." : "Save Profile"}
+          {isLoading ? "Saving..." : "Save Changes"}
         </Button>
       </div>
 
