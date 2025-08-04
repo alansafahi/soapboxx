@@ -20,6 +20,7 @@ import { insertSoapEntrySchema, type SoapEntry } from "../../../shared/schema";
 import { z } from "zod";
 import { moodCategories, allMoods, getMoodsByIds } from "../lib/moodCategories";
 import ExpirationSettings from "./ExpirationSettings";
+import { API_SUPPORTED_TRANSLATIONS } from "../../../shared/bible-translations";
 
 const formSchema = insertSoapEntrySchema.extend({
   devotionalDate: z.string(),
@@ -885,12 +886,11 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                       <SelectValue placeholder={selectedVersion || "Select Bible version..."} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="KJV">KJV - King James Version</SelectItem>
-                      <SelectItem value="KJVA">KJVA - King James Version with Strong's</SelectItem>
-                      <SelectItem value="WEB">WEB - World English Bible</SelectItem>
-                      <SelectItem value="ASV">ASV - American Standard Version</SelectItem>
-                      <SelectItem value="CEV">CEV - Contemporary English Version</SelectItem>
-                      <SelectItem value="GNT">GNT - Good News Translation</SelectItem>
+                      {API_SUPPORTED_TRANSLATIONS.map((translation) => (
+                        <SelectItem key={translation.code} value={translation.code}>
+                          {translation.displayName}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </FormItem>

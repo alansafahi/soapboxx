@@ -41,6 +41,7 @@ import {
 import ChurchLookupModal from "./ChurchLookupModal";
 import { ObjectUploader } from "./ObjectUploader";
 import type { UploadResult } from "@uppy/core";
+import { ACTIVE_BIBLE_TRANSLATIONS } from "../../../shared/bible-translations";
 
 interface UserProfile {
   id: string;
@@ -135,23 +136,7 @@ const LANGUAGES = [
   { value: "Other", label: "🌐 Other" }
 ];
 
-const BIBLE_TRANSLATIONS = [
-  { value: "NIV", label: "NIV (New International Version)" },
-  { value: "ESV", label: "ESV (English Standard Version)" },
-  { value: "NLT", label: "NLT (New Living Translation)" },
-  { value: "NKJV", label: "NKJV (New King James Version)" },
-  { value: "KJV", label: "KJV (King James Version)" },
-  { value: "NASB", label: "NASB (New American Standard Bible)" },
-  { value: "CSB", label: "CSB (Christian Standard Bible)" },
-  { value: "MSG", label: "MSG (The Message)" },
-  { value: "AMP", label: "AMP (Amplified Bible)" },
-  { value: "NCV", label: "NCV (New Century Version)" },
-  { value: "CEV", label: "CEV (Contemporary English Version)" },
-  { value: "GNT", label: "GNT (Good News Translation)" },
-  { value: "NRSV", label: "NRSV (New Revised Standard Version)" },
-  { value: "RSV", label: "RSV (Revised Standard Version)" },
-  { value: "NET", label: "NET (New English Translation)" }
-];
+// Removed hardcoded BIBLE_TRANSLATIONS - now using centralized system from shared/bible-translations.ts
 
 export default function EnhancedProfileEditor({ profile, onSave, isLoading }: EnhancedProfileEditorProps) {
   const queryClient = useQueryClient();
@@ -1315,8 +1300,8 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       <SelectValue placeholder="Select translation" />
                     </SelectTrigger>
                     <SelectContent>
-                      {BIBLE_TRANSLATIONS.map(translation => (
-                        <SelectItem key={translation.value} value={translation.value}>{translation.label}</SelectItem>
+                      {ACTIVE_BIBLE_TRANSLATIONS.map(translation => (
+                        <SelectItem key={translation.code} value={translation.code}>{translation.displayName}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
