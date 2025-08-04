@@ -814,21 +814,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                             )}
                           />
 
-                          <FormField
-                            control={form.control}
-                            name="isSilent"
-                            render={({ field }) => (
-                              <FormItem className="flex items-center justify-between">
-                                <FormLabel>Silent Prayer Mode</FormLabel>
-                                <FormControl>
-                                  <Switch
-                                    checked={field.value}
-                                    onCheckedChange={field.onChange}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
+
                         </div>
 
                         {/* Privacy & Expiration Settings */}
