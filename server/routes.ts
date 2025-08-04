@@ -1161,6 +1161,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         publicSharing: user.publicSharing,
         languagePreference: user.languagePreference,
         customLanguage: user.customLanguage,
+        bibleTranslationPreference: user.bibleTranslationPreference,
+        smallGroupParticipation: user.smallGroupParticipation,
         
         interests: user.interests || [],
         hasCompletedOnboarding: user.hasCompletedOnboarding,

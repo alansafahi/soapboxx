@@ -104,8 +104,8 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
   // Initialize selectedVersion from user's Bible translation preference
   useEffect(() => {
-    if (user && (user as any)?.bibleTranslationPreference) {
-      setSelectedVersion((user as any).bibleTranslationPreference);
+    if (user && user.bibleTranslationPreference) {
+      setSelectedVersion(user.bibleTranslationPreference);
     }
   }, [user]);
 
