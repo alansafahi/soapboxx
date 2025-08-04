@@ -44,7 +44,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [pendingVerse, setPendingVerse] = useState<{ reference: string; text: string; version: string } | null>(null);
   const [isLookingUpVerse, setIsLookingUpVerse] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState('KJV');
+  const [selectedVersion, setSelectedVersion] = useState('NIV'); // Will be updated from user preferences
   const [autoLookupTimeout, setAutoLookupTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isAutoLookingUp, setIsAutoLookingUp] = useState(false);
   
@@ -101,6 +101,13 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const { data: user } = useQuery({
     queryKey: ['/api/auth/user'],
   });
+
+  // Initialize selectedVersion from user's Bible translation preference
+  useEffect(() => {
+    if (user?.bibleTranslationPreference) {
+      setSelectedVersion(user.bibleTranslationPreference);
+    }
+  }, [user?.bibleTranslationPreference]);
 
   const { data: churchAffiliation } = useQuery({
     queryKey: ['/api/user-profiles/church-affiliation'],
@@ -832,7 +839,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                         <Input 
                           {...field} 
                           value={field.value || ''}
-                          placeholder="e.g., John 3:16, Psalm 23:1-3 (auto-loads NIV)" 
+                          placeholder={`e.g., John 3:16, Psalm 23:1-3 (auto-loads ${selectedVersion})`} 
                           onChange={(e) => {
                             field.onChange(e);
                             // Immediately trigger lookup when reference changes
