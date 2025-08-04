@@ -848,20 +848,38 @@ export default function ProfilePage() {
               <CardContent>
                 {achievements && Array.isArray(achievements) && achievements.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {achievements.map((achievement: any) => (
-                      <div
-                        key={achievement.id}
-                        className="flex items-center space-x-3 p-4 rounded-lg border bg-card"
-                      >
-                        <Trophy className="h-8 w-8 text-yellow-500" />
-                        <div>
-                          <p className="font-medium">{achievement.achievementType}</p>
-                          <p className="text-sm text-muted-foreground">
-                            Level {achievement.achievementLevel}
-                          </p>
+                    {achievements.map((achievement: any) => {
+                      // Format achievement type to readable title
+                      const formatAchievementTitle = (type: string) => {
+                        switch (type) {
+                          case 'social_butterfly':
+                            return 'Social Butterfly';
+                          case 'faithful_attendee':
+                            return 'Faithful Attendee';
+                          case 'community_builder':
+                            return 'Community Builder';
+                          case 'prayer_warrior':
+                            return 'Prayer Warrior';
+                          default:
+                            return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        }
+                      };
+
+                      return (
+                        <div
+                          key={achievement.id}
+                          className="flex items-center space-x-3 p-4 rounded-lg border bg-card"
+                        >
+                          <Trophy className="h-8 w-8 text-yellow-500" />
+                          <div>
+                            <p className="font-medium">{formatAchievementTitle(achievement.achievementType)}</p>
+                            <p className="text-sm text-muted-foreground">
+                              Level {achievement.achievementLevel}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
