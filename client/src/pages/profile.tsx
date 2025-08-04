@@ -187,6 +187,7 @@ export default function ProfilePage() {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [currentTab, setCurrentTab] = useState("profile");
   const [profileData, setProfileData] = useState<Partial<UserProfile>>({});
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [localProfileUpdates, setLocalProfileUpdates] = useState<Partial<UserProfile>>({});
@@ -363,37 +364,45 @@ export default function ProfilePage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Profile</h1>
-          <div className="flex gap-2">
-            {isEditing && (
+          {currentTab === "profile" && (
+            <div className="flex gap-2">
+              {isEditing && (
+                <Button
+                  onClick={handleSaveProfile}
+                  disabled={updateProfileMutation.isPending}
+                  className="flex items-center gap-2"
+                >
+                  <Save className="h-4 w-4" />
+                  {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+                </Button>
+              )}
               <Button
-                onClick={handleSaveProfile}
-                disabled={updateProfileMutation.isPending}
+                onClick={handleEditToggle}
+                variant={isEditing ? "outline" : "default"}
                 className="flex items-center gap-2"
               >
-                <Save className="h-4 w-4" />
-                {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
+                {isEditing ? (
+                  <>
+                    Cancel
+                  </>
+                ) : (
+                  <>
+                    <Edit2 className="h-4 w-4" />
+                    Edit Profile
+                  </>
+                )}
               </Button>
-            )}
-            <Button
-              onClick={handleEditToggle}
-              variant={isEditing ? "outline" : "default"}
-              className="flex items-center gap-2"
-            >
-              {isEditing ? (
-                <>
-                  Cancel
-                </>
-              ) : (
-                <>
-                  <Edit2 className="h-4 w-4" />
-                  Edit Profile
-                </>
-              )}
-            </Button>
-          </div>
+            </div>
+          )}
         </div>
 
-        <Tabs defaultValue="profile" className="space-y-6">
+        <Tabs defaultValue="profile" className="space-y-6" onValueChange={(value) => {
+          // Track current tab and exit edit mode when switching away from Profile tab
+          setCurrentTab(value);
+          if (value !== "profile" && isEditing) {
+            setIsEditing(false);
+          }
+        }}>
           <TabsList className="grid w-full grid-cols-3 h-auto">
             <TabsTrigger value="profile" className="text-xs sm:text-sm py-2 px-2">Profile</TabsTrigger>
             <TabsTrigger value="stats" className="text-xs sm:text-sm py-2 px-2">Statistics</TabsTrigger>
