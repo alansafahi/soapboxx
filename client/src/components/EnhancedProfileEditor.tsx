@@ -172,6 +172,19 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const [aiGiftSuggestions, setAiGiftSuggestions] = useState<any>(null);
   const [loadingAiAnalysis, setLoadingAiAnalysis] = useState(false);
 
+  // Auto-save mutation for preferred Bible translation
+  const autoSaveMutation = useMutation({
+    mutationFn: async (updates: Partial<UserProfile>) => {
+      return await apiRequest("PATCH", `/api/users/${profile.id}`, updates);
+    },
+    onSuccess: () => {
+      // Optionally show a toast notification
+    },
+    onError: (error) => {
+      console.error('Auto-save failed:', error);
+    }
+  });
+
   // Update formData when profile prop changes
   useEffect(() => {
     // Initialize all fields with database defaults when null
@@ -1252,7 +1265,12 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   <Label htmlFor="preferredBibleTranslation">Preferred Bible Translation</Label>
                   <Select 
                     value={formData.preferredBibleTranslation || "NIV"} 
-                    onValueChange={(value) => setFormData({...formData, preferredBibleTranslation: value})}
+                    onValueChange={(value) => {
+                      const newFormData = {...formData, preferredBibleTranslation: value};
+                      setFormData(newFormData);
+                      // Auto-save the translation preference immediately
+                      autoSaveMutation.mutate({ preferredBibleTranslation: value });
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select translation" />
@@ -1264,7 +1282,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Default Bible version for scripture lookups
+                    Default Bible version for scripture lookups {autoSaveMutation.isPending ? '(saving...)' : ''}
                   </p>
                 </div>
                 <div>

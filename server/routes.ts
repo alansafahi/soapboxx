@@ -1889,17 +1889,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Bible verse lookup endpoint
-  app.post('/api/bible/lookup', async (req, res) => {
+  app.post('/api/bible/lookup', async (req: any, res) => {
     try {
-      const { reference, version = 'NIV' } = req.body;
+      const { reference, version } = req.body;
       
       if (!reference) {
         return res.status(400).json({ error: 'Reference is required' });
       }
 
-      console.log('Server: Looking up verse:', reference);
+      // Get user's preferred Bible translation if version not specified and user is logged in
+      let preferredVersion = version || 'NIV';
+      if (!version && req.session?.userId) {
+        try {
+          const user = await storage.getUser(req.session.userId);
+          preferredVersion = user?.preferredBibleTranslation || 'NIV';
+        } catch (error) {
+          // If user lookup fails, fallback to NIV
+          preferredVersion = 'NIV';
+        }
+      }
+
+      console.log('Server: Looking up verse:', reference, 'in', preferredVersion);
       const { lookupBibleVerse } = await import('./bible-api.js');
-      const verseResult = await lookupBibleVerse(reference, version);
+      const verseResult = await lookupBibleVerse(reference, preferredVersion);
       console.log('Server: Verse result:', verseResult);
       
       if (verseResult) {
