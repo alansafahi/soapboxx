@@ -7,6 +7,8 @@ The SoapBox Super App is a comprehensive faith community platform designed to co
 
 **Production Ready**: Both auto-save dropdown features are fully functional with instant saving and persistence. Removed 79+ screenshot files, cleaned debug statements, fixed TypeScript errors, and eliminated development artifacts. Database field mappings corrected in storage and routes. Code is now optimized for production deployment with clean error handling and proper type safety.
 
+**Latest Enhancement**: Implemented completely dynamic Bible translation system for SOAP entry forms. Forms now automatically read and use each user's individual Bible translation preference (NKJV, AMP, ESV, CEV, NIV, etc.) without hardcoded values. Enhanced SoapBox Development Standards v1.0 with Rule SBX-STD-004 prohibiting hardcoded values in production code.
+
 **Latest Enhancement**: Completed comprehensive engagement trilogy with Weekly Check-in Reminder System featuring structured spiritual reflection tracking, streak management, and automated multi-channel reminders. Built sophisticated 4-step weekly check-in form with spiritual growth assessments, gratitude tracking, prayer requests, and goal setting. Implemented intelligent scheduling with Sunday 7 PM reminders, re-engagement notifications for inactive users, and comprehensive analytics with growth area insights. Combined with milestone celebrations and web push notifications to create complete user retention ecosystem.
 
 ## User Preferences
@@ -15,6 +17,7 @@ Focus on functionality over technical implementation details.
 Language support priority: Farsi and Armenian above Arabic, Korean above Japanese, Hindi at end.
 Visual enhancements: Flag icons for language selection.
 Future consideration: Implement same language list on main website (soapboxsuperapp.com).
+Code quality emphasis: No hardcoded values in production - all user preferences, settings, and configurations must be dynamically loaded from database/user profiles.
 
 ## System Architecture
 

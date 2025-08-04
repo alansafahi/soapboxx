@@ -567,6 +567,65 @@ const sanitizeContent = (content: string): string => {
 
 ---
 
+## Production Code Quality Standards
+
+### Rule SBX-STD-004: No Hardcoding Allowed in Production
+
+**Rule Title:** No Hardcoding in Production  
+**Scope:** All frontend and backend codebases in the SoapBox Super App project  
+**Priority:** Critical
+
+#### Rule Description
+Developers must not use hardcoded values (e.g., static user IDs, default reading plans, fixed environment strings, API keys, or placeholder logic) in staging or production environments.
+
+**Temporary Usage Allowed:**
+- During active testing/debugging in local development
+- Within protected test environments
+
+**Mandatory Removal Before:**
+- Committing to the staging branch
+- Pushing to production (main or release branches)  
+- Generating production builds in Replit or any CI/CD pipeline
+
+#### Compliant Alternatives
+```typescript
+// ✅ REQUIRED: Use dynamic user preferences
+const bibleTranslation = user.bibleTranslationPreference || 'NIV';
+
+// ✅ REQUIRED: Use environment variables
+const apiKey = process.env.OPENAI_API_KEY;
+
+// ✅ REQUIRED: Use database lookups
+const defaultPlan = await storage.getDefaultReadingPlan(user.id);
+
+// ✅ REQUIRED: Use feature flags
+const enableFeature = await storage.getUserFeatureFlag(userId, 'advanced_mode');
+```
+
+#### Violation Examples
+```typescript
+// ❌ FORBIDDEN: Hardcoded user data
+const userId = 'abc123';
+const planId = 3;
+
+// ❌ FORBIDDEN: Static role assignment
+const role = 'admin';
+
+// ❌ FORBIDDEN: Embedded API keys
+const openaiKey = 'sk-abc123...';
+
+// ❌ FORBIDDEN: Fixed configuration
+const bibleVersion = 'NKJV';
+```
+
+#### Enforcement Policy
+- Pull requests automatically flagged for hardcoded values
+- Code review rejection for violations
+- CI/CD deployment blocks for non-compliant code
+- All hardcoded logic must use dynamic alternatives
+
+---
+
 ## Performance Guidelines
 
 ### Bundle Size Management
