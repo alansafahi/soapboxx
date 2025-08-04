@@ -24,7 +24,16 @@ export default function SpiritualAssessmentResultsPage() {
   }, [data, error]);
 
   const handleContinue = () => {
-    window.location.href = '/dashboard';
+    // Check if user came from profile edit page
+    const referrer = document.referrer;
+    const urlParams = new URLSearchParams(window.location.search);
+    const returnTo = urlParams.get('returnTo');
+    
+    if (returnTo === 'profile' || referrer.includes('/profile')) {
+      window.location.href = '/profile';
+    } else {
+      window.location.href = '/dashboard';
+    }
   };
 
   if (isLoading) {

@@ -625,7 +625,7 @@ export default function ProfilePage() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => window.location.href = '/spiritual-assessment-results'}
+                              onClick={() => window.location.href = '/spiritual-assessment-results?returnTo=profile'}
                               className="text-xs px-3 py-1 h-7 text-purple-600 border-purple-200 hover:bg-purple-50 dark:hover:bg-purple-900/20"
                             >
                               View Full Results
@@ -649,7 +649,7 @@ export default function ProfilePage() {
                               <Button 
                                 variant="outline" 
                                 size="sm"
-                                onClick={() => window.location.href = '/spiritual-assessment-results'}
+                                onClick={() => window.location.href = '/spiritual-assessment-results?returnTo=profile'}
                                 className="text-sm px-4 py-2 text-purple-600 border-purple-200 hover:bg-purple-50 dark:hover:bg-purple-900/20"
                               >
                                 <BookOpen className="w-4 h-4 mr-2" />
