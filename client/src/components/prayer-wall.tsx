@@ -574,40 +574,6 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="privacyLevel"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prayer Request Privacy</FormLabel>
-                    <FormControl>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select privacy level" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {privacyLevels.map((level) => (
-                            <SelectItem key={level.value} value={level.value}>
-                              <div className="flex items-center space-x-2">
-                                <span>{level.icon}</span>
-                                <div>
-                                  <div className="font-medium">{level.label}</div>
-                                  <div className="text-xs text-muted-foreground">{level.description}</div>
-                                </div>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <div className="text-xs text-muted-foreground">
-                      Choose who can see and pray for your request
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <div className="flex space-x-2 pt-4">
                 <Button
                   type="button"
