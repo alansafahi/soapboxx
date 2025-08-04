@@ -179,7 +179,6 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const autoSavePreference = async (field: string, value: string) => {
     try {
       setSaving(true);
-      console.log(`Auto-saving ${field}:`, value);
       
       const response = await fetch('/api/users/profile', {
         method: 'PUT',
@@ -193,13 +192,10 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Auto-save response error:', errorText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
-      console.log('Auto-save successful:', result);
       
       // Update the form data to reflect the saved value
       setFormData(prev => ({
@@ -211,7 +207,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
       
     } catch (error) {
-      console.error('Auto-save failed:', error);
+      // Silent error handling - could add toast notification here if needed
     } finally {
       setSaving(false);
     }
@@ -413,7 +409,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       showSpiritualGifts: formData.showSpiritualGifts
     };
     
-    console.log('Saving profile data with complete verses:', saveData);
+    
     onSave(saveData);
   };
 

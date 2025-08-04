@@ -46,7 +46,7 @@ export class AIPersonalizationService {
       
       // Check cache first
       if (this.welcomeContentCache.has(cacheKey)) {
-        console.log('Using cached welcome content for similar profile');
+        
         return this.welcomeContentCache.get(cacheKey);
       }
 
@@ -87,7 +87,7 @@ export class AIPersonalizationService {
 
       return content;
     } catch (error) {
-      console.error('Error generating welcome content:', error);
+      
       return this.generateFallbackWelcomeContent(assessmentData);
     }
   }

@@ -23,15 +23,15 @@ const testUsers = [
 ];
 
 async function createTestUsers() {
-  console.log("Creating test users for verification testing...");
-  console.log(`Common password: ${testPassword}`);
-  console.log("=".repeat(60));
+  
+  
+  
 
   const hashedPassword = await bcrypt.hash(testPassword, 12);
 
   for (const userData of testUsers) {
     try {
-      console.log(`Creating ${userData.email}...`);
+      
       
       // Generate username from email
       const username = userData.email.split('@')[0].replace('.', '_');
@@ -50,39 +50,39 @@ async function createTestUsers() {
         isDiscoverable: true
       });
 
-      console.log(`✓ Created user: ${user.id} - ${userData.email}`);
-      console.log(`  Role: ${userData.role}`);
-      console.log(`  Email Verified: ${userData.emailVerified}`);
-      console.log(`  Phone Verified: ${userData.phoneVerified}`);
-      console.log(`  Mobile: ${userData.phone || 'None'}`);
-      console.log("");
+      
+      
+      
+      
+      
+      
 
     } catch (error) {
-      console.error(`✗ Failed to create ${userData.email}:`, error.message);
+      
     }
   }
 
-  console.log("=".repeat(60));
-  console.log("TEST USER CREDENTIALS SUMMARY");
-  console.log("=".repeat(60));
-  console.log(`Password for all users: ${testPassword}`);
-  console.log("");
-  console.log("MEMBER ROLE:");
-  console.log("  New User: member.new@soapboxtest.com");
-  console.log("  Email Verified: member.email@soapboxtest.com");  
-  console.log("  SMS Verified: member.sms@soapboxtest.com");
-  console.log("");
-  console.log("CHURCH LEADER ROLE:");
-  console.log("  New User: leader.new@soapboxtest.com");
-  console.log("  Email Verified: leader.email@soapboxtest.com");
-  console.log("  SMS Verified: leader.sms@soapboxtest.com");
-  console.log("");
-  console.log("VOLUNTEER ROLE:");
-  console.log("  New User: volunteer.new@soapboxtest.com");
-  console.log("  Email Verified: volunteer.email@soapboxtest.com");
-  console.log("  SMS Verified: volunteer.sms@soapboxtest.com");
-  console.log("");
-  console.log("Ready for comprehensive verification testing!");
+  
+  
+  
+  
+  
+  
+  
+    
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 }
 
 createTestUsers().catch(console.error);

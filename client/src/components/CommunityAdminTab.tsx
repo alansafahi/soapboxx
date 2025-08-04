@@ -188,7 +188,7 @@ export function CommunityAdminTab() {
       queryClient.invalidateQueries({ queryKey: ['community-details', selectedCommunityId] });
     },
     onError: (error: any) => {
-      console.error('Community profile update error:', error);
+      
       toast({ 
         title: "Failed to update community profile", 
         description: error.message,

@@ -70,7 +70,7 @@ export default function OnboardingPage() {
                 }),
               });
             } catch (assessmentError) {
-              console.error('Failed to save spiritual assessment:', assessmentError);
+              
               // Don't fail the entire onboarding for this
             }
           }
@@ -132,7 +132,7 @@ export default function OnboardingPage() {
                   }),
                 });
               } catch (assessmentError) {
-                console.error('Failed to save spiritual assessment:', assessmentError);
+                
                 // Don't fail the entire onboarding for this
               }
             }
@@ -158,7 +158,7 @@ export default function OnboardingPage() {
         }
       }
     } catch (error) {
-      console.error('Onboarding error:', error);
+      
       throw error; // Re-throw so OnboardingFlow can handle it
     }
   };

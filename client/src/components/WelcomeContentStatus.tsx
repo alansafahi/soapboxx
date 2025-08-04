@@ -55,7 +55,7 @@ export default function WelcomeContentStatus({ onComplete, onViewContent }: Welc
         setIsChecking(false);
       }
     } catch (error) {
-      console.error('Failed to check welcome content status:', error);
+      
       setIsChecking(false);
     }
   };

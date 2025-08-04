@@ -62,7 +62,7 @@ export default function SpiritualAssessmentPage() {
 
   const handleViewWelcomeContent = (content: any) => {
     // Could open a modal or navigate to a dedicated welcome page
-    console.log('Welcome content:', content);
+    
     toast({
       title: "Welcome Package Ready",
       description: "Your personalized spiritual content is now available.",

@@ -1657,12 +1657,12 @@ export class DatabaseStorage implements IStorage {
           isDemo: communities.isDemo,
           createdAt: communities.createdAt,
           updatedAt: communities.updatedAt,
-          actualMemberCount: sql<number>`COALESCE(COUNT(${userChurches.churchId}), 0)::int`,
+          actualMemberCount: sql<number>`COALESCE(COUNT(${userChurches.communityId}), 0)::int`,
           distance: sql<number>`0` // Placeholder for distance
         })
         .from(communities)
         .leftJoin(userChurches, and(
-          eq(userChurches.churchId, communities.id),
+          eq(userChurches.communityId, communities.id),
           eq(userChurches.isActive, true)
         ))
         .where(whereConditions.length > 1 ? and(...whereConditions) : whereConditions[0])
@@ -2071,16 +2071,16 @@ export class DatabaseStorage implements IStorage {
   async getChurchFeature(featureId: number): Promise<any> {
     const [feature] = await db
       .select()
-      .from(churchFeatures)
-      .where(eq(churchFeatures.id, featureId));
+      .from(churchFeatureSettings)
+      .where(eq(churchFeatureSettings.id, featureId));
     return feature;
   }
 
   async updateChurchFeature(featureId: number, updates: any): Promise<any> {
     const [updatedFeature] = await db
-      .update(churchFeatures)
+      .update(churchFeatureSettings)
       .set(updates)
-      .where(eq(churchFeatures.id, featureId))
+      .where(eq(churchFeatureSettings.id, featureId))
       .returning();
     return updatedFeature;
   }
@@ -3084,7 +3084,7 @@ export class DatabaseStorage implements IStorage {
         joinedAt: row.joined_at,
       }));
     } catch (error) {
-      console.error('getUserChurches error:', error);
+      
       return [];
     }
   }
@@ -3169,7 +3169,7 @@ export class DatabaseStorage implements IStorage {
       
       return { success: true, message: 'Successfully joined community' };
     } catch (error) {
-      console.error('joinCommunity error:', error);
+      
       throw error;
     }
   }
@@ -3537,7 +3537,7 @@ export class DatabaseStorage implements IStorage {
       
       return result;
     } catch (error) {
-      console.error("Error fetching enhanced mood indicators:", error);
+      
       return [];
     }
   }
@@ -4175,7 +4175,7 @@ export class DatabaseStorage implements IStorage {
       
       return finalEntries;
     } catch (error) {
-      console.error(`[ERROR] getPublicSoapEntries failed:`, error);
+      
       return [];
     }
   }
@@ -6080,7 +6080,7 @@ export class DatabaseStorage implements IStorage {
         authorProfileImageUrl: row.author_profile_image_url
       }));
     } catch (error) {
-      console.error('Error fetching prayer requests:', error);
+      
       return [];
     }
   }
@@ -6124,7 +6124,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: row.updated_at,
       }));
     } catch (error) {
-      console.error('Error fetching reading plans:', error);
+      
       throw new Error('Failed to fetch reading plans');
     }
   }
@@ -6169,7 +6169,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: row.updated_at,
       };
     } catch (error) {
-      console.error('Error fetching reading plan:', error);
+      
       throw new Error('Failed to fetch reading plan');
     }
   }
@@ -6212,7 +6212,7 @@ export class DatabaseStorage implements IStorage {
         createdAt: row.created_at,
       }));
     } catch (error) {
-      console.error('Error fetching reading plan days:', error);
+      
       throw new Error('Failed to fetch reading plan days');
     }
   }
@@ -6262,7 +6262,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: row.updated_at,
       }));
     } catch (error) {
-      console.error('Error fetching user reading plan subscriptions:', error);
+      
       throw new Error('Failed to fetch user reading plan subscriptions');
     }
   }
@@ -6302,7 +6302,7 @@ export class DatabaseStorage implements IStorage {
         updatedAt: row.updated_at,
       };
     } catch (error) {
-      console.error('Error subscribing to reading plan:', error);
+      
       throw new Error('Failed to subscribe to reading plan');
     }
   }
@@ -6370,7 +6370,7 @@ export class DatabaseStorage implements IStorage {
         createdAt: row.created_at,
       };
     } catch (error) {
-      console.error('Error recording reading progress:', error);
+      
       throw new Error('Failed to record reading progress');
     }
   }
@@ -6402,7 +6402,7 @@ export class DatabaseStorage implements IStorage {
         createdAt: row.created_at,
       }));
     } catch (error) {
-      console.error('Error fetching user reading progress:', error);
+      
       throw new Error('Failed to fetch user reading progress');
     }
   }
@@ -6632,7 +6632,7 @@ export class DatabaseStorage implements IStorage {
         .map(entry => entry.scriptureReference)
         .filter(ref => ref && ref.trim() !== '');
     } catch (error) {
-      console.error('Error getting recent user scriptures:', error);
+      
       return [];
     }
   }
@@ -6643,7 +6643,7 @@ export class DatabaseStorage implements IStorage {
       // For now, we don't need to store additional records since SOAP entries
       // already contain the scripture references
     } catch (error) {
-      console.error('Error recording user scripture:', error);
+      
     }
   }
 
@@ -7102,7 +7102,7 @@ export class DatabaseStorage implements IStorage {
       
 
     } catch (error) {
-      console.error('Failed to send moderation alert:', error);
+      
       // Don't throw error - moderation alert failure shouldn't break the report process
     }
   }
@@ -7172,7 +7172,7 @@ export class DatabaseStorage implements IStorage {
         return { reacted: true, reactionCount: Number(reactionCount[0]?.count || 1) };
       }
     } catch (error) {
-      console.error('Failed to add SOAP reaction:', error);
+      
       throw new Error('Failed to add reaction');
     }
   }
@@ -7183,7 +7183,7 @@ export class DatabaseStorage implements IStorage {
       // Use the same logic as getDiscussions but with user-specific filtering
       return await this.getDiscussions(20, 0, undefined, userId, false);
     } catch (error) {
-      console.error('Failed to get feed posts:', error);
+      
       throw new Error('Failed to fetch feed posts');
     }
   }
@@ -7535,9 +7535,9 @@ export class DatabaseStorage implements IStorage {
   async initializeBadges(): Promise<void> {
     try {
       // Initialize default badges - this could be expanded
-      console.log('Prayer badges initialized');
+      
     } catch (error) {
-      console.error('Failed to initialize badges:', error);
+      
     }
   }
 
@@ -7551,7 +7551,7 @@ export class DatabaseStorage implements IStorage {
       
       return achievements;
     } catch (error) {
-      console.error('Failed to get user achievements:', error);
+      
       return [];
     }
   }

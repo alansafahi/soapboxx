@@ -680,7 +680,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({ success: true });
     } catch (error: any) {
-      console.error("Error creating reflection:", error);
+      
       res.status(500).json({ error: error.message || "Failed to create reflection" });
     }
   });
@@ -1483,7 +1483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             );
           }
         } catch (inviteError) {
-          console.log('Invite processing failed (non-critical):', inviteError);
+          
         }
       }
 
@@ -1493,7 +1493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId 
       });
     } catch (error) {
-      console.error('Complete onboarding error:', error);
+      
       res.status(500).json({ message: 'Failed to complete onboarding', error: (error as Error).message });
     }
   });
@@ -1636,7 +1636,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               html: emailContent
             });
           } catch (emailError) {
-            console.error('Failed to send admin notification email:', emailError);
+            
           }
         }
       }
@@ -1909,10 +1909,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      console.log('Server: Looking up verse:', reference, 'in', preferredVersion);
+      
       const { lookupBibleVerse } = await import('./bible-api.js');
       const verseResult = await lookupBibleVerse(reference, preferredVersion);
-      console.log('Server: Verse result:', verseResult);
+      
       
       if (verseResult) {
         res.json(verseResult);
@@ -1920,7 +1920,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.status(404).json({ error: 'Verse not found' });
       }
     } catch (error) {
-      console.error('Error looking up bible verse:', error);
+      
       res.status(500).json({ error: 'Failed to lookup verse' });
     }
   });
@@ -1949,7 +1949,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         total: churches.length
       });
     } catch (error) {
-      console.error('Error searching churches:', error);
+      
       res.status(500).json({ error: 'Failed to search churches' });
     }
   });
@@ -3173,12 +3173,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (generateWelcomeContent) {
         setImmediate(async () => {
           try {
-            console.log(`Starting background welcome content generation for user ${userId}`);
+            
             const welcomeContent = await aiPersonalizationService.generateWelcomeContentPackage(assessmentData);
             await storage.saveWelcomeContent(userId, welcomeContent);
-            console.log(`Welcome content generated successfully for user ${userId}`);
+            
           } catch (aiError) {
-            console.error(`Failed to generate welcome content for user ${userId}:`, aiError);
+            
           }
         });
       }
@@ -3222,19 +3222,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Temporary fallback for demo - use Alan's user ID
       if (!userId) {
-        console.log('No session userId, using demo user');
+        
         userId = 'xinjk1vlu2l'; // Alan's user ID
       }
       
-      console.log('Assessment results request - userId:', userId, 'session:', !!req.session);
+      
 
       const user = await storage.getUserById(userId);
       const welcomeContent = await storage.getWelcomeContent(userId);
       
-      console.log('User found:', !!user, 'has assessment:', !!user?.onboardingSpiritualAssessment);
+      
       
       if (!user?.onboardingSpiritualAssessment) {
-        console.log('No assessment data found for user');
+        
         return res.status(404).json({ message: 'No spiritual assessment found', userId: userId });
       }
 
@@ -3248,10 +3248,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isWelcomeContentReady: user.welcomeContentGenerated || false
       };
       
-      console.log('Sending assessment results:', Object.keys(response));
+      
       res.json(response);
     } catch (error) {
-      console.error('Assessment results error:', error);
+      
       res.status(500).json({ 
         message: 'Failed to fetch spiritual assessment results',
         error: (error as Error).message 
@@ -4610,7 +4610,7 @@ app.post('/api/invitations', async (req: any, res) => {
 
           
         } catch (error) {
-          console.error(`Failed to hide content ${contentType}:${contentId}:`, error);
+          
         }
       }
 
@@ -9954,7 +9954,7 @@ Return JSON with this exact structure:
 
       res.json(discussions);
     } catch (error) {
-      console.error('Error in /api/discussions:', error);
+      
       res.status(500).json({ message: "Failed to fetch discussions", error: error instanceof Error ? error.message : 'Unknown error' });
     }
   });
@@ -10123,7 +10123,7 @@ Return JSON with this exact structure:
 
       res.status(201).json(post);
     } catch (error) {
-      console.error('Discussion creation route error:', error);
+      
       res.status(500).json({ 
         message: "Failed to create discussion",
         error: error instanceof Error ? error.message : String(error)
@@ -10545,7 +10545,7 @@ Return JSON with this exact structure:
             
           }
         } catch (error) {
-          console.error('AI moderation failed for prayer request:', error);
+          
         }
       }, 1000); // 1 second delay for real-time analysis
 
@@ -14284,7 +14284,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const subscription = await storage.subscribeToReadingPlan(userId, planId);
       res.json(subscription);
     } catch (error) {
-      console.error("Error subscribing to reading plan:", error);
+      
       res.status(500).json({ message: "Failed to subscribe to reading plan" });
     }
   });
@@ -14311,7 +14311,7 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json(progress);
     } catch (error) {
-      console.error("Error recording reading progress:", error);
+      
       res.status(500).json({ message: "Failed to record reading progress" });
     }
   });
@@ -15143,7 +15143,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const newEvent = await storage.createEvent(eventData);
       res.status(201).json(newEvent);
     } catch (error) {
-      console.error('Event creation error:', error);
+      
       res.status(500).json({ message: 'Failed to create event', error: error.message });
     }
   });
@@ -15847,7 +15847,7 @@ Please provide suggestions for the missing or incomplete sections.`
       `);
       res.json(volunteers.rows);
     } catch (error) {
-      console.error('Volunteer fetch error:', error);
+      
       res.status(500).json({ error: 'Failed to fetch volunteers' });
     }
   });
@@ -15929,7 +15929,7 @@ Please provide suggestions for the missing or incomplete sections.`
       `);
       res.json(opportunities.rows);
     } catch (error) {
-      console.error('Opportunities fetch error:', error);
+      
       res.status(500).json({ error: 'Failed to fetch opportunities' });
     }
   });
@@ -16000,7 +16000,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
       res.json({ uploadURL });
     } catch (error) {
-      console.error("Error generating upload URL:", error);
+      
       res.status(500).json({ error: "Failed to generate upload URL" });
     }
   });
@@ -16040,7 +16040,7 @@ Please provide suggestions for the missing or incomplete sections.`
         photoURL: objectPath,
       });
     } catch (error) {
-      console.error("Error updating profile photo:", error);
+      
       res.status(500).json({ error: "Failed to update profile photo" });
     }
   });
@@ -16051,7 +16051,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const objectFile = await objectStorageService.getObjectEntityFile(req.path);
       objectStorageService.downloadObject(objectFile, res);
     } catch (error) {
-      console.error("Error serving object:", error);
+      
       if (error instanceof ObjectNotFoundError) {
         return res.sendStatus(404);
       }

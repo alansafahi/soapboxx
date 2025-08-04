@@ -101,7 +101,7 @@ Respond with JSON in this format:
       prayer: result.prayer || ''
     };
   } catch (error) {
-    console.error(`[ERROR] generateSoapSuggestions failed:`, error);
+    
     throw new Error('Failed to generate AI suggestions. Please try again.');
   }
 }

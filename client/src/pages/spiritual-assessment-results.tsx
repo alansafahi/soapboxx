@@ -16,10 +16,10 @@ export default function SpiritualAssessmentResultsPage() {
   // Debug logging
   React.useEffect(() => {
     if (error) {
-      console.error('Spiritual assessment results error:', error);
+      
     }
     if (data) {
-      console.log('Spiritual assessment results data:', data);
+      
     }
   }, [data, error]);
 

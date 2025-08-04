@@ -799,7 +799,7 @@ export class BackgroundCheckService {
       // });
 
     } catch (error) {
-      console.error(`Failed to send renewal notification to ${email}:`, error);
+      
     }
   }
 

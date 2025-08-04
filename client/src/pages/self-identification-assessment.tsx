@@ -8,7 +8,7 @@ export default function SelfIdentificationAssessmentPage() {
   const [showFlow, setShowFlow] = useState(false);
 
   const handleAssessmentComplete = (data: SelfIdentificationData) => {
-    console.log('Self-identification assessment completed:', data);
+    
     // Here you would typically save the assessment data
     // For now, show the spiritual flow
     setShowFlow(true);

@@ -401,7 +401,7 @@ export default function MyCommunities() {
             errorData = { message: errorText };
           }
         } catch (parseError) {
-          console.error('Error parsing response:', parseError);
+          
           errorData = { message: `Server error (${response.status})` };
         }
         
@@ -432,7 +432,7 @@ export default function MyCommunities() {
       setTimeRows([{ id: 1, eventLabel: '', timeSchedule: '', language: 'english' }]);
     },
     onError: (error: any) => {
-      console.error('Community creation error:', error);
+      
       toast({
         title: "Failed to create community",
         description: error.message || "Please try again later.",

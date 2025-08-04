@@ -270,7 +270,7 @@ export function setupAuth(app: Express): void {
               });
             }
           } catch (staffError) {
-            console.error('Failed to create staff invitation for existing user:', staffError);
+            
           }
         }
         
@@ -375,7 +375,7 @@ export function setupAuth(app: Express): void {
             [newUser.id, staffInvite.communityId, staffInvite.role, newUser.id, staffInvite.role.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())]
           );
         } catch (staffError) {
-          console.error('Failed to create staff invitation during registration:', staffError);
+          
           // Continue with registration even if staff invitation fails
         }
       }
@@ -409,7 +409,7 @@ export function setupAuth(app: Express): void {
 
       res.status(201).json(response);
     } catch (error) {
-      console.error('Registration error:', error);
+      
       res.status(500).json({ 
         success: false,
         message: 'Registration failed. Please try again.',
@@ -430,12 +430,12 @@ export function setupAuth(app: Express): void {
       }
 
       // Find user by email
-      console.log('Looking up user:', email);
+      
       const user = await storage.getUserByEmail(email);
-      console.log('User found:', user ? `${user.firstName} ${user.lastName}` : 'None');
+      
       
       if (!user || !user.password) {
-        console.log('User not found or no password:', { userExists: !!user, hasPassword: !!(user?.password) });
+        
         return res.status(401).json({ 
           success: false,
           message: 'Invalid email or password' 
@@ -495,7 +495,7 @@ export function setupAuth(app: Express): void {
         });
       });
     } catch (error) {
-      console.error('Login error:', error);
+      
       res.status(500).json({ 
         success: false,
         message: 'Login failed. Please try again.',
@@ -733,7 +733,7 @@ export function setupAuth(app: Express): void {
         formattedPhone: smsService.formatPhoneNumber(phoneNumber)
       });
     } catch (error) {
-      console.error('SMS verification error:', error);
+      
       res.status(500).json({ 
         success: false,
         message: 'Failed to send verification code' 
@@ -794,7 +794,7 @@ export function setupAuth(app: Express): void {
         message: 'Phone number verified successfully' 
       });
     } catch (error) {
-      console.error('SMS verification error:', error);
+      
       res.status(500).json({ 
         success: false,
         message: 'Failed to verify phone number' 

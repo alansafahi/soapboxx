@@ -86,7 +86,7 @@ Focus on authentic patterns, not just keywords. Consider their heart, concerns, 
     res.json(analysis);
 
   } catch (error) {
-    console.error('Error analyzing spiritual gifts:', error);
+    
     res.status(500).json({ 
       error: 'Failed to analyze spiritual gifts',
       message: "I'm having trouble analyzing your journal entries right now. Your assessment results are still valid!"

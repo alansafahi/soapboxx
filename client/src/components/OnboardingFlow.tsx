@@ -158,7 +158,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
         description: "Your account has been created successfully.",
       });
     } catch (error: any) {
-      console.error('Onboarding error:', error);
+      
       
       // Check if it's an existing account error
       const errorMessage = error?.message || error?.toString() || '';

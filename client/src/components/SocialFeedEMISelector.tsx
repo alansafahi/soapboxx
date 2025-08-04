@@ -67,9 +67,9 @@ export default function SocialFeedEMISelector({
   let categories = Object.keys(moodsByCategory);
   
   // SHOW ALL 6 CATEGORIES - NO FILTERING
-  console.error("🎯 EMI SYSTEM - Total categories found:", categories.length);
-  console.error("🎯 EMI SYSTEM - All categories:", categories);
-  console.error("🎯 EMI SYSTEM - Total moods available:", allMoods.length);
+  
+  
+  
   
   const selectedMoodsData = getSelectedMoodsData();
 

@@ -10,7 +10,7 @@ class SMSService {
     if (accountSid && authToken) {
       this.client = twilio(accountSid, authToken);
     } else {
-      console.warn('Twilio credentials not configured');
+      
     }
   }
 
@@ -77,11 +77,11 @@ class SMSService {
         to: formattedPhone
       });
 
-      console.log(`SMS sent successfully. SID: ${result.sid}`);
+      
       return true;
 
     } catch (error) {
-      console.error('Failed to send SMS:', error);
+      
       throw error;
     }
   }
