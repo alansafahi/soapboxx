@@ -44,7 +44,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [pendingVerse, setPendingVerse] = useState<{ reference: string; text: string; version: string } | null>(null);
   const [isLookingUpVerse, setIsLookingUpVerse] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState('NIV'); // Will be updated from user preferences
+  const [selectedVersion, setSelectedVersion] = useState('NIV'); // Default until user preference loads
   const [autoLookupTimeout, setAutoLookupTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isAutoLookingUp, setIsAutoLookingUp] = useState(false);
   
@@ -104,10 +104,10 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
   // Initialize selectedVersion from user's Bible translation preference
   useEffect(() => {
-    if (user && user.bibleTranslationPreference) {
+    if (user?.bibleTranslationPreference) {
       setSelectedVersion(user.bibleTranslationPreference);
     }
-  }, [user]);
+  }, [user?.bibleTranslationPreference]);
 
   const { data: churchAffiliation } = useQuery({
     queryKey: ['/api/user-profiles/church-affiliation'],
