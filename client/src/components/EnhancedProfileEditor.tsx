@@ -559,13 +559,13 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
     const nextTabName = currentTabIndex < tabLabels.length - 1 ? tabLabels[currentTabIndex + 1] : null;
     
     return (
-      <div className="flex justify-between pt-6">
+      <div className="flex flex-col sm:flex-row justify-between gap-3 pt-6">
         <Button
           type="button"
           variant="outline"
           onClick={goToPrevTab}
           disabled={currentTabIndex === 0}
-          className="flex items-center gap-2"
+          className="flex items-center justify-center gap-2 w-full sm:w-auto order-2 sm:order-1"
         >
           <ArrowLeft className="w-4 h-4" />
           Previous
@@ -574,9 +574,10 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
           type="button"
           onClick={goToNextTab}
           disabled={currentTabIndex === tabLabels.length - 1}
-          className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+          className="flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white w-full sm:w-auto order-1 sm:order-2"
         >
-          {nextTabName ? `Next: ${nextTabName}` : "Save Profile"}
+          <span className="hidden sm:inline">{nextTabName ? `Next: ${nextTabName}` : "Save Profile"}</span>
+          <span className="sm:hidden">{nextTabName ? `Next` : "Save"}</span>
           <ArrowRight className="w-4 h-4" />
         </Button>
       </div>
@@ -895,30 +896,33 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       </div>
 
       <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="basic" className="flex items-center gap-2">
-            <User className="w-4 h-4" />
-            Basic
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1">
+          <TabsTrigger value="basic" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+            <User className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Basic</span>
+            <span className="sm:hidden">Info</span>
           </TabsTrigger>
-          <TabsTrigger value="spiritual" className="flex items-center gap-2">
-            <Church className="w-4 h-4" />
-            Spiritual
+          <TabsTrigger value="spiritual" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+            <Church className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Spiritual</span>
+            <span className="sm:hidden">Faith</span>
           </TabsTrigger>
-          <TabsTrigger value="gifts" className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4" />
-            Gifts
+          <TabsTrigger value="gifts" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span>Gifts</span>
           </TabsTrigger>
-          <TabsTrigger value="engagement" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Community
+          <TabsTrigger value="engagement" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+            <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Community</span>
+            <span className="sm:hidden">Social</span>
           </TabsTrigger>
-          <TabsTrigger value="growth" className="flex items-center gap-2">
-            <Target className="w-4 h-4" />
-            Growth
+          <TabsTrigger value="growth" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+            <Target className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span>Growth</span>
           </TabsTrigger>
-          <TabsTrigger value="privacy" className="flex items-center gap-2">
-            <Shield className="w-4 h-4" />
-            Privacy
+          <TabsTrigger value="privacy" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
+            <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span>Privacy</span>
           </TabsTrigger>
         </TabsList>
 
@@ -936,11 +940,11 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                 {/* Current Profile Photo Display */}
                 <div className="flex-shrink-0">
                   <div className="relative">
-                    <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-r from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 shadow-lg hover:shadow-xl transition-all duration-200">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full p-1 bg-gradient-to-r from-purple-400 to-blue-400 dark:from-purple-600 dark:to-blue-600 shadow-lg hover:shadow-xl transition-all duration-200">
                       <div className="w-full h-full rounded-full overflow-hidden bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">
                         {formData.profileImageUrl ? (
                           <img 
@@ -1201,7 +1205,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
               <div>
                 <Label htmlFor="churchAffiliation">Church/Community</Label>
                 <div className="space-y-2">
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <Input
                       id="churchAffiliation"
                       placeholder="e.g., Grace Community Church - Downtown Campus"
@@ -1214,8 +1218,10 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       variant="outline"
                       size="sm"
                       onClick={() => setShowChurchLookup(true)}
+                      className="w-full sm:w-auto whitespace-nowrap"
                     >
-                      Find Churches
+                      <span className="hidden sm:inline">Find Churches</span>
+                      <span className="sm:hidden">Find Church</span>
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -1460,7 +1466,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                                       </div>
                                     )}
                                     
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                                    <div className="grid grid-cols-1 gap-3 text-xs">
                                       <div>
                                         <p className="font-medium text-gray-800 dark:text-gray-200 mb-1">SOAP Journal Themes:</p>
                                         <div className="flex flex-wrap gap-1">
@@ -1540,19 +1546,20 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     </div>
                   )}
 
-                  <div className="mt-6 flex gap-3">
+                  <div className="mt-6 flex flex-col sm:flex-row gap-3">
                     <Button
                       type="button"
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                      className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
                       onClick={() => window.location.href = '/spiritual-assessment-results?returnTo=profile'}
                     >
                       <BookOpen className="w-4 h-4 mr-2" />
-                      View Full Results
+                      <span className="hidden sm:inline">View Full Results</span>
+                      <span className="sm:hidden">View Results</span>
                     </Button>
                     <Button
                       type="button"
                       variant="outline"
-                      className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300"
+                      className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300 dark:hover:bg-purple-900/20 w-full sm:w-auto"
                       onClick={() => {
                         // Detect assessment type and redirect accordingly
                         const assessmentLength = formData.assessmentData?.responses?.length || 0;
@@ -1566,7 +1573,8 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       }}
                     >
                       <RefreshCw className="w-4 h-4 mr-2" />
-                      Retake Assessment
+                      <span className="hidden sm:inline">Retake Assessment</span>
+                      <span className="sm:hidden">Retake</span>
                     </Button>
                     {(() => {
                       const assessmentLength = formData.assessmentData?.responses?.length || 0;
@@ -1577,11 +1585,12 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                         return (
                           <Button
                             type="button"
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"
                             onClick={() => window.location.href = '/spiritual-assessment'}
                           >
                             <Target className="w-4 h-4 mr-2" />
-                            Take Full Assessment
+                            <span className="hidden sm:inline">Take Full Assessment</span>
+                            <span className="sm:hidden">Full Test</span>
                           </Button>
                         );
                       }
@@ -1590,10 +1599,11 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     <Button
                       type="button"
                       variant="outline"
-                      className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300"
+                      className="border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 w-full sm:w-auto"
                       onClick={() => setShowGiftsInfoModal(true)}
                     >
-                      Learn More
+                      <span className="hidden sm:inline">Learn More</span>
+                      <span className="sm:hidden">Info</span>
                     </Button>
                   </div>
                 </div>
@@ -1733,9 +1743,9 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
             <CardContent className="space-y-4">
               <div>
                 <Label>Ministry Interests</Label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-2">
                   {MINISTRY_INTERESTS.map(interest => (
-                    <div key={interest} className="flex items-center space-x-2">
+                    <div key={interest} className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                       <Checkbox
                         id={interest}
                         checked={selectedMinistries.includes(interest)}
@@ -1747,7 +1757,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                           }
                         }}
                       />
-                      <Label htmlFor={interest} className="text-sm">{interest}</Label>
+                      <Label htmlFor={interest} className="text-sm cursor-pointer flex-1">{interest}</Label>
                     </div>
                   ))}
                 </div>
@@ -1782,9 +1792,9 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
             <CardContent className="space-y-4">
               <div>
                 <Label>Personal Growth Goals</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
                   {GROWTH_GOALS.map(goal => (
-                    <div key={goal} className="flex items-center space-x-2">
+                    <div key={goal} className="flex items-center space-x-2 p-2 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                       <Checkbox
                         id={goal}
                         checked={selectedGoals.includes(goal)}
@@ -1796,7 +1806,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                           }
                         }}
                       />
-                      <Label htmlFor={goal} className="text-sm">{goal}</Label>
+                      <Label htmlFor={goal} className="text-sm cursor-pointer flex-1">{goal}</Label>
                     </div>
                   ))}
                 </div>
@@ -1876,11 +1886,11 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="showBioPublicly" className="font-medium">Show bio publicly</Label>
-                    <p className="text-sm text-gray-600">Let others see your bio and testimony</p>
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="flex-1">
+                    <Label htmlFor="showBioPublicly" className="font-medium text-gray-900 dark:text-gray-100">Show bio publicly</Label>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Let others see your bio and testimony</p>
                   </div>
                   <Switch
                     id="showBioPublicly"
@@ -1889,10 +1899,10 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   />
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="showChurchAffiliation" className="font-medium">Show church affiliation</Label>
-                    <p className="text-sm text-gray-600">Display your church or community</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="flex-1">
+                    <Label htmlFor="showChurchAffiliation" className="font-medium text-gray-900 dark:text-gray-100">Show church affiliation</Label>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Display your church or community</p>
                   </div>
                   <Switch
                     id="showChurchAffiliation"
@@ -1901,10 +1911,10 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   />
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="shareWithGroup" className="font-medium">Share with small group</Label>
-                    <p className="text-sm text-gray-600">Allow small group members to see more details</p>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <div className="flex-1">
+                    <Label htmlFor="shareWithGroup" className="font-medium text-gray-900 dark:text-gray-100">Share with small group</Label>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Allow small group members to see more details</p>
                   </div>
                   <Switch
                     id="shareWithGroup"
