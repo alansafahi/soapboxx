@@ -377,9 +377,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       ...formData,
       ministryInterests: selectedMinistries,
       growthGoals: selectedGoals,
-      favoriteScriptures: completeVerses.map(verse => 
-        typeof verse === 'string' ? verse : verse.reference
-      ),
+      favoriteScriptures: completeVerses, // ✅ FIXED: Save complete verse objects, not just references
       volunteerInterest: formData.volunteerInterest,
       spiritualGifts: formData.spiritualGifts,
       spiritualProfile: formData.spiritualProfile,
