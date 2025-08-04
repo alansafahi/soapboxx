@@ -382,6 +382,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       spiritualProfile: formData.spiritualProfile,
       publicSharing: formData.publicSharing,
       customLanguage: formData.customLanguage,
+      bibleTranslationPreference: formData.preferredBibleTranslation, // ✅ CRITICAL: Fix field name to match database schema
       // Ensure all privacy settings are included
       showBioPublicly: formData.showBioPublicly,
       showChurchAffiliation: formData.showChurchAffiliation,
