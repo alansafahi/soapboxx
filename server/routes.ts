@@ -3150,28 +3150,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Save spiritual assessment
       await storage.saveSpiritualAssessment(userId, assessmentData, baselineEMIState);
 
-      let welcomeContent = null;
-      if (generateWelcomeContent) {
-        try {
-          // Generate AI-powered welcome content
-          welcomeContent = await aiPersonalizationService.generateWelcomeContentPackage(assessmentData);
-          
-          // Save welcome content
-          await storage.saveWelcomeContent(userId, welcomeContent);
-        } catch (aiError) {
-          console.error('Failed to generate welcome content:', aiError);
-          // Continue without failing the assessment save
-        }
-      }
-
+      // Respond immediately to prevent user dropoff
       res.json({
         success: true,
         message: 'Spiritual assessment saved successfully',
-        welcomeContent
+        welcomeContentGenerating: generateWelcomeContent
       });
+
+      // Generate welcome content in background (don't block response)
+      if (generateWelcomeContent) {
+        setImmediate(async () => {
+          try {
+            console.log(`Starting background welcome content generation for user ${userId}`);
+            const welcomeContent = await aiPersonalizationService.generateWelcomeContentPackage(assessmentData);
+            await storage.saveWelcomeContent(userId, welcomeContent);
+            console.log(`Welcome content generated successfully for user ${userId}`);
+          } catch (aiError) {
+            console.error(`Failed to generate welcome content for user ${userId}:`, aiError);
+          }
+        });
+      }
     } catch (error) {
       res.status(500).json({ 
         message: 'Failed to save spiritual assessment',
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  // New endpoint to check welcome content status
+  app.get('/api/users/welcome-content-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const welcomeContent = await storage.getWelcomeContent(userId);
+      const user = await storage.getUserById(userId);
+      
+      res.json({
+        isGenerated: user?.welcomeContentGenerated || false,
+        hasContent: !!welcomeContent,
+        content: welcomeContent
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Failed to fetch welcome content status',
         error: (error as Error).message 
       });
     }

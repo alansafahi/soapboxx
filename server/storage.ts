@@ -7259,13 +7259,24 @@ export class DatabaseStorage implements IStorage {
         })
         .where(eq(users.id, userId));
 
-      // Store welcome content in personalized content
-      await this.savePersonalizedContent({
-        userId,
-        contentType: 'welcome_package',
-        title: 'Welcome to Your Spiritual Journey',
-        content: JSON.stringify(content)
-      });
+      // Store welcome content in personalized content table
+      await db
+        .insert(userPersonalization)
+        .values({
+          userId,
+          contentType: 'welcome_package',
+          title: 'Welcome to Your Spiritual Journey',
+          content: JSON.stringify(content),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .onConflictDoUpdate({
+          target: [userPersonalization.userId, userPersonalization.contentType],
+          set: {
+            content: JSON.stringify(content),
+            updatedAt: new Date()
+          }
+        });
     } catch (error) {
       throw new Error(`Failed to save welcome content: ${error}`);
     }

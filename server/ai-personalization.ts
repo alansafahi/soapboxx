@@ -35,26 +35,38 @@ export interface MoodBasedContent {
 }
 
 export class AIPersonalizationService {
+  // Cache for common spiritual profiles to speed up generation
+  private welcomeContentCache = new Map<string, any>();
 
   // Generate welcome content package based on spiritual assessment
   async generateWelcomeContentPackage(assessmentData: any): Promise<any> {
     try {
-      const prompt = this.buildWelcomeContentPrompt(assessmentData);
+      // Create cache key for similar profiles
+      const cacheKey = this.createWelcomeCacheKey(assessmentData);
+      
+      // Check cache first
+      if (this.welcomeContentCache.has(cacheKey)) {
+        console.log('Using cached welcome content for similar profile');
+        return this.welcomeContentCache.get(cacheKey);
+      }
+
+      // Use optimized prompt for faster generation
+      const prompt = this.buildOptimizedWelcomePrompt(assessmentData);
       
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4o-mini", // Faster model for welcome content
         messages: [
           {
             role: "system",
-            content: "You are a pastoral AI assistant specializing in creating personalized spiritual content packages for new community members. Generate authentic, encouraging, and biblically-grounded content appropriate for their spiritual maturity level and stated needs."
+            content: "You are a pastoral AI assistant. Create concise, personalized spiritual welcome content. Return valid JSON only with no extra text."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        temperature: 0.7,
-        max_tokens: 3000
+        temperature: 0.6,
+        max_tokens: 1500 // Reduced for faster generation
       });
 
       const response = completion.choices[0]?.message?.content;
@@ -63,11 +75,47 @@ export class AIPersonalizationService {
       // Clean the response to handle markdown code blocks
       const cleanedResponse = response.replace(/```json\s*|\s*```/g, '').trim();
       const content = JSON.parse(cleanedResponse);
+      
+      // Cache the content for similar profiles
+      this.welcomeContentCache.set(cacheKey, content);
+      
+      // Clean cache if it gets too large
+      if (this.welcomeContentCache.size > 30) {
+        const firstKey = this.welcomeContentCache.keys().next().value;
+        this.welcomeContentCache.delete(firstKey);
+      }
+
       return content;
     } catch (error) {
       console.error('Error generating welcome content:', error);
       return this.generateFallbackWelcomeContent(assessmentData);
     }
+  }
+
+  private createWelcomeCacheKey(assessmentData: any): string {
+    // Create cache key based on key characteristics for deduplication
+    const { faithJourney, bibleFamiliarity, prayerLife, churchExperience } = assessmentData;
+    return `${faithJourney}-${bibleFamiliarity}-${prayerLife}-${churchExperience}`;
+  }
+
+  private buildOptimizedWelcomePrompt(assessmentData: any): string {
+    const { faithJourney, bibleFamiliarity, prayerLife, churchExperience, timeAvailability, currentChallenges, spiritualHopes } = assessmentData;
+
+    return `Create spiritual welcome content for: Faith=${faithJourney}, Bible=${bibleFamiliarity}, Prayer=${prayerLife}, Church=${churchExperience}.
+
+Return JSON:
+{
+  "welcomeMessage": "brief personal welcome (2 sentences)",
+  "scriptures": ["relevant verse with reference"],
+  "recommendations": {
+    "devotionals": ["2 specific topics"],
+    "bibleReading": "reading plan name",
+    "prayer": "focus area",
+    "ministry": "suggested area"
+  },
+  "nextSteps": ["2 immediate actionable steps"],
+  "encouragement": "motivating message (1 sentence)"
+}`;
   }
 
   private buildWelcomeContentPrompt(assessmentData: any): string {

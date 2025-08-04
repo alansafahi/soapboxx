@@ -5,11 +5,13 @@ import { ArrowLeft } from 'lucide-react';
 import { Link } from 'wouter';
 import { useToast } from '@/hooks/use-toast';
 import OnboardingSpiritualFlow from '../components/OnboardingSpiritualFlow';
+import WelcomeContentStatus from '../components/WelcomeContentStatus';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../lib/queryClient';
 
 export default function SpiritualAssessmentPage() {
   const [isStarted, setIsStarted] = useState(false);
+  const [showWelcomeStatus, setShowWelcomeStatus] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -21,13 +23,18 @@ export default function SpiritualAssessmentPage() {
         generateWelcomeContent: true
       });
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       toast({
-        title: "Spiritual Profile Updated",
-        description: "Your personalized spiritual content has been generated.",
+        title: "Assessment Completed",
+        description: "Your responses have been saved successfully.",
       });
-      // Redirect to dashboard or profile
-      window.location.href = '/dashboard';
+      
+      // Show welcome content status if generation is in progress
+      if (response.welcomeContentGenerating) {
+        setShowWelcomeStatus(true);
+      } else {
+        window.location.href = '/dashboard';
+      }
     },
     onError: (error: any) => {
       toast({
@@ -41,6 +48,33 @@ export default function SpiritualAssessmentPage() {
   const handleAssessmentComplete = async (spiritualData: any) => {
     await saveSpiritualDataMutation.mutateAsync(spiritualData);
   };
+
+  const handleWelcomeContentComplete = () => {
+    window.location.href = '/dashboard';
+  };
+
+  const handleViewWelcomeContent = (content: any) => {
+    // Could open a modal or navigate to a dedicated welcome page
+    console.log('Welcome content:', content);
+    toast({
+      title: "Welcome Package Ready",
+      description: "Your personalized spiritual content is now available.",
+    });
+    window.location.href = '/dashboard';
+  };
+
+  if (showWelcomeStatus) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-purple-100 dark:from-slate-900 dark:to-slate-800 p-4">
+        <div className="max-w-2xl mx-auto py-8">
+          <WelcomeContentStatus
+            onComplete={handleWelcomeContentComplete}
+            onViewContent={handleViewWelcomeContent}
+          />
+        </div>
+      </div>
+    );
+  }
 
   if (isStarted) {
     return (
