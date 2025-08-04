@@ -93,12 +93,13 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
 
-  // Initialize selectedVersion from user's profile once data is loaded
+  // Initialize selectedVersion from user's current dynamic preference
   useEffect(() => {
     if (user?.bibleTranslationPreference) {
+      // Always use whatever translation the user currently has selected (dynamic XYZ value)
       setSelectedVersion(user.bibleTranslationPreference);
     } else if (user && !user.bibleTranslationPreference) {
-      // User profile loaded but no translation preference set - keep empty
+      // User profile loaded but no translation preference set - keep empty until they choose
       setSelectedVersion('');
     }
   }, [user]);

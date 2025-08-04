@@ -7,7 +7,7 @@ The SoapBox Super App is a comprehensive faith community platform designed to co
 
 **Production Ready**: Both auto-save dropdown features are fully functional with instant saving and persistence. Removed 79+ screenshot files, cleaned debug statements, fixed TypeScript errors, and eliminated development artifacts. Database field mappings corrected in storage and routes. Code is now optimized for production deployment with clean error handling and proper type safety.
 
-**Latest Enhancement**: Created centralized Bible Translation Configuration System (`shared/bible-translations.ts`) to eliminate inconsistencies across components and ensure SBX-STD-004 compliance. System supports 11 active translations (NIV, ESV, NKJV, KJV, NLT, NASB, KJVA, WEB, ASV, CEV, GNT) with structured API support verification and inactive translations for future expansion. Both SOAP Entry Form and Profile Editor now use the centralized system, preventing hardcoded translation lists and ensuring consistent translation options across all components.
+**Latest Enhancement**: Fixed dynamic Bible Translation system with complete SBX-STD-004 compliance. System now properly handles user's Bible translation preference as a dynamic value that can change at any moment. Fixed auto-save functionality in Profile Editor (corrected database field mapping from `preferredBibleTranslation` to `bibleTranslationPreference`). All Scripture lookups now use current user preference dynamically. Centralized configuration system supports 12 active translations with proper API fallback hierarchy. SOAP Entry Form and all components now respect real-time changes to user's Bible translation selection.
 
 **Latest Enhancement**: Completed comprehensive engagement trilogy with Weekly Check-in Reminder System featuring structured spiritual reflection tracking, streak management, and automated multi-channel reminders. Built sophisticated 4-step weekly check-in form with spiritual growth assessments, gratitude tracking, prayer requests, and goal setting. Implemented intelligent scheduling with Sunday 7 PM reminders, re-engagement notifications for inactive users, and comprehensive analytics with growth area insights. Combined with milestone celebrations and web push notifications to create complete user retention ecosystem.
 
@@ -17,7 +17,7 @@ Focus on functionality over technical implementation details.
 Language support priority: Farsi and Armenian above Arabic, Korean above Japanese, Hindi at end.
 Visual enhancements: Flag icons for language selection.
 Future consideration: Implement same language list on main website (soapboxsuperapp.com).
-Code quality emphasis: No hardcoded values in production - all user preferences, settings, and configurations must be dynamically loaded from database/user profiles. Centralized configuration systems for all lookup lists (Bible translations, languages, etc.) maintained in `/shared/` directory.
+Code quality emphasis: No hardcoded values in production - all user preferences, settings, and configurations must be dynamically loaded from database/user profiles. Bible translation preferences are completely dynamic (user can change at any moment) - system must always use current user selection, never assume specific translations. Centralized configuration systems for all lookup lists (Bible translations, languages, etc.) maintained in `/shared/` directory.
 
 ## System Architecture
 
