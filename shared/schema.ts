@@ -926,6 +926,28 @@ export const prayerResponses = pgTable("prayer_responses", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Prayer comments - comprehensive comment system for prayer requests
+export const prayerComments = pgTable("prayer_comments", {
+  id: serial("id").primaryKey(),
+  prayerRequestId: integer("prayer_request_id").notNull().references(() => prayerRequests.id),
+  authorId: varchar("author_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  parentId: integer("parent_id").references((): any => prayerComments.id),
+  likeCount: integer("like_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Prayer comment likes
+export const prayerCommentLikes = pgTable("prayer_comment_likes", {
+  id: serial("id").primaryKey(),
+  prayerCommentId: integer("prayer_comment_id").notNull().references(() => prayerComments.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userCommentLikeUnique: unique().on(table.userId, table.prayerCommentId),
+}));
+
 // Prayer follow-ups for admin tracking
 export const prayerFollowUps = pgTable("prayer_follow_ups", {
   id: serial("id").primaryKey(),
@@ -2730,6 +2752,7 @@ export const prayerRequestsRelations = relations(prayerRequests, ({ one, many })
     references: [communities.id],
   }),
   prayerResponses: many(prayerResponses),
+  comments: many(prayerComments),
 }));
 
 export const prayerResponsesRelations = relations(prayerResponses, ({ one }) => ({
@@ -2739,6 +2762,34 @@ export const prayerResponsesRelations = relations(prayerResponses, ({ one }) => 
   }),
   user: one(users, {
     fields: [prayerResponses.userId],
+    references: [users.id],
+  }),
+}));
+
+export const prayerCommentsRelations = relations(prayerComments, ({ one, many }) => ({
+  prayerRequest: one(prayerRequests, {
+    fields: [prayerComments.prayerRequestId],
+    references: [prayerRequests.id],
+  }),
+  author: one(users, {
+    fields: [prayerComments.authorId],
+    references: [users.id],
+  }),
+  parent: one(prayerComments, {
+    fields: [prayerComments.parentId],
+    references: [prayerComments.id],
+  }),
+  replies: many(prayerComments),
+  likes: many(prayerCommentLikes),
+}));
+
+export const prayerCommentLikesRelations = relations(prayerCommentLikes, ({ one }) => ({
+  prayerComment: one(prayerComments, {
+    fields: [prayerCommentLikes.prayerCommentId],
+    references: [prayerComments.id],
+  }),
+  user: one(users, {
+    fields: [prayerCommentLikes.userId],
     references: [users.id],
   }),
 }));
@@ -3374,6 +3425,12 @@ export type PrayerRequest = typeof prayerRequests.$inferSelect;
 
 export type InsertPrayerResponse = typeof prayerResponses.$inferInsert;
 export type PrayerResponse = typeof prayerResponses.$inferSelect;
+
+export type InsertPrayerComment = typeof prayerComments.$inferInsert;
+export type PrayerComment = typeof prayerComments.$inferSelect;
+
+export type InsertPrayerCommentLike = typeof prayerCommentLikes.$inferInsert;
+export type PrayerCommentLike = typeof prayerCommentLikes.$inferSelect;
 
 export type InsertPrayerCircle = typeof prayerCircles.$inferInsert;
 export type PrayerCircle = typeof prayerCircles.$inferSelect;

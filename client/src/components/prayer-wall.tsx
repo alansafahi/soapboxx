@@ -25,6 +25,7 @@ import { formatDistanceToNow } from "date-fns";
 import type { PrayerRequest } from "../../../shared/schema";
 import SmartScriptureTextarea from "./SmartScriptureTextarea";
 import { ScriptureExpandedText } from "./ScriptureExpandedText";
+import { CommentDialog } from "./CommentDialog";
 
 // Extended type for prayer requests with author information from the server
 interface PrayerRequestWithAuthor extends PrayerRequest {
@@ -90,10 +91,7 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
   const [likedRequests, setLikedRequests] = useState<Set<number>>(new Set());
   const [bookmarkedRequests, setBookmarkedRequests] = useState<Set<number>>(new Set());
   const [animatingButtons, setAnimatingButtons] = useState<Set<number>>(new Set());
-  const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
   const [showWhosPraying, setShowWhosPraying] = useState<Map<number, boolean>>(new Map());
-  const [supportComments, setSupportComments] = useState<Map<number, string>>(new Map());
-  const [supportMessages, setSupportMessages] = useState<Map<number, any[]>>(new Map());
   const [prayerCircles, setPrayerCircles] = useState<any[]>([]);
   const [reactions, setReactions] = useState<Map<number, {praying: number, heart: number, fire: number, praise: number}>>(new Map());
   const [isAIAssistanceOpen, setIsAIAssistanceOpen] = useState(false);
@@ -105,6 +103,7 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
   });
   const [aiSuggestions, setAISuggestions] = useState<any[]>([]);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
+  const [commentDialogPrayerId, setCommentDialogPrayerId] = useState<number | null>(null);
 
   const form = useForm<PrayerRequestFormData>({
     resolver: zodResolver(prayerRequestSchema),
@@ -125,38 +124,8 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
   });
 
   // Comment handling functions
-  const toggleComments = async (prayerId: number) => {
-    setExpandedComments(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(prayerId)) {
-        newSet.delete(prayerId);
-      } else {
-        newSet.add(prayerId);
-        // Fetch support messages when expanding comments
-        fetchSupportMessages(prayerId);
-      }
-      return newSet;
-    });
-  };
-
-  const fetchSupportMessages = async (prayerId: number) => {
-    try {
-      const response = await fetch(`/api/prayers/${prayerId}/support`, {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        return;
-      }
-      
-      const messages = await response.json();
-      setSupportMessages(prev => {
-        const newMap = new Map(prev);
-        newMap.set(prayerId, messages || []);
-        return newMap;
-      });
-    } catch (error) {
-    }
+  const openCommentDialog = (prayerId: number) => {
+    setCommentDialogPrayerId(prayerId);
   };
 
   // Pray for request mutation (prayer counter)
@@ -292,58 +261,7 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
     },
   });
 
-  // Support comment mutation
-  const supportCommentMutation = useMutation({
-    mutationFn: async ({ prayerRequestId, content }: { prayerRequestId: number; content: string }) => {
-      const response = await fetch(`/api/prayers/${prayerRequestId}/support`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ content })
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to send support message');
-      }
-      
-      return response.json();
-    },
-    onSuccess: (_, { prayerRequestId }) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
-      setSupportComments(prev => {
-        const newMap = new Map(prev);
-        newMap.set(prayerRequestId, '');
-        return newMap;
-      });
-      // Refresh support messages for this prayer
-      fetchSupportMessages(prayerRequestId);
-      toast({
-        title: "Support sent",
-        description: "Your encouraging message has been shared.",
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: "Failed to send support message. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
+
 
   // Delete prayer request mutation
   const deletePrayerMutation = useMutation({
@@ -966,26 +884,15 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
                         </motion.div>
 
                         {/* Comments Button */}
-                        <Collapsible 
-                          open={expandedComments.has(prayer.id)}
-                          onOpenChange={() => toggleComments(prayer.id)}
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => openCommentDialog(prayer.id)}
+                          className="text-gray-500 hover:text-blue-500 transition-colors"
                         >
-                          <CollapsibleTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="text-gray-500 hover:text-blue-500 transition-colors"
-                            >
-                              <MessageCircle className="w-4 h-4 mr-1" />
-                              <span className="text-sm">Support</span>
-                              {expandedComments.has(prayer.id) ? (
-                                <ChevronUp className="w-3 h-3 ml-1" />
-                              ) : (
-                                <ChevronDown className="w-3 h-3 ml-1" />
-                              )}
-                            </Button>
-                          </CollapsibleTrigger>
-                        </Collapsible>
+                          <MessageCircle className="w-4 h-4 mr-1" />
+                          <span className="text-sm">Comments</span>
+                        </Button>
                       </div>
                       
                       {/* Delete Button - Only show for prayer author */}
@@ -1004,109 +911,7 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
                       )}
                     </div>
 
-                    {/* Collapsible Comments Section */}
-                    <Collapsible 
-                      open={expandedComments.has(prayer.id)}
-                      onOpenChange={() => toggleComments(prayer.id)}
-                    >
-                      <CollapsibleContent className="pt-4 border-t border-gray-100 dark:border-gray-700">
-                        <div className="space-y-4">
-                          {/* Support Messages */}
-                          <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                            <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center">
-                              <MessageCircle className="w-4 h-4 mr-2" />
-                              Community Support
-                            </h4>
-                            <div className="space-y-3 text-sm">
-                              {supportMessages.get(prayer.id)?.map((message: any) => (
-                                <div key={message.id} className="flex items-start space-x-3">
-                                  <Avatar className="w-6 h-6">
-                                    <AvatarImage src={message.user?.profileImageUrl} />
-                                    <AvatarFallback className="bg-blue-100 text-blue-600 text-xs">
-                                      {message.user?.firstName?.[0] || message.user?.email?.[0]?.toUpperCase() || "U"}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1">
-                                    <p className="text-blue-800 dark:text-blue-200">
-                                      {message.content}
-                                    </p>
-                                    <span className="text-blue-600 dark:text-blue-400 text-xs">
-                                      {message.user?.firstName || message.user?.email || "Community Member"} • {new Date(message.createdAt).toLocaleDateString()}
-                                    </span>
-                                  </div>
-                                </div>
-                              )) || (
-                                <p className="text-blue-700 dark:text-blue-300 text-sm italic">
-                                  No support messages yet. Be the first to share encouragement!
-                                </p>
-                              )}
-                            </div>
-                          </div>
 
-                          {/* Add Support Comment Form */}
-                          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                            <h5 className="font-medium text-gray-900 dark:text-white mb-3">Share Words of Encouragement</h5>
-                            <div className="flex space-x-3">
-                              <Avatar className="w-8 h-8">
-                                <AvatarImage src="/placeholder-avatar.png" />
-                                <AvatarFallback className="bg-purple-100 text-purple-600">
-                                  {(user as any)?.firstName?.[0] || "U"}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <SmartScriptureTextarea
-                                  value={supportComments.get(prayer.id) || ''}
-                                  onChange={(value) => {
-                                    const newMap = new Map(supportComments);
-                                    newMap.set(prayer.id, value);
-                                    setSupportComments(newMap);
-                                  }}
-                                  placeholder="Share an encouraging message or Bible verse... (Type 'Romans 8:28' for auto-population)"
-                                  className="border-gray-200 dark:border-gray-700"
-                                  minHeight="min-h-[80px]"
-                                  maxLength={500}
-                                />
-                                <div className="flex justify-between items-center mt-3">
-                                  <span className="text-xs text-gray-500">Your words can bring hope and comfort</span>
-                                  <Button 
-                                    size="sm" 
-                                    className="bg-blue-600 hover:bg-blue-700"
-                                    onClick={() => {
-                                      const content = supportComments.get(prayer.id)?.trim();
-                                      if (content) {
-                                        supportCommentMutation.mutate({ 
-                                          prayerRequestId: prayer.id, 
-                                          content 
-                                        });
-                                      }
-                                    }}
-                                    disabled={supportCommentMutation.isPending || !supportComments.get(prayer.id)?.trim()}
-                                  >
-                                    <Send className="w-3 h-3 mr-1" />
-                                    {supportCommentMutation.isPending ? 'Sending...' : 'Send Support'}
-                                  </Button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Prayer Updates Section */}
-                          {prayer.isAnswered && (
-                            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
-                              <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center">
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Prayer Update
-                              </h4>
-                              <p className="text-green-800 dark:text-green-200 text-sm">
-                                "Thank you all for your prayers! God has answered in such a beautiful way. 
-                                Feeling grateful for this amazing community. 🌟"
-                              </p>
-                              <span className="text-green-600 dark:text-green-400 text-xs">Prayer Author • 1 day ago</span>
-                            </div>
-                          )}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
                   </div>
                 </CardContent>
               </Card>
@@ -1135,6 +940,16 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
           </Card>
         )}
       </div>
+
+      {/* Comment Dialog */}
+      {commentDialogPrayerId && (
+        <CommentDialog
+          isOpen={commentDialogPrayerId !== null}
+          onClose={() => setCommentDialogPrayerId(null)}
+          postId={commentDialogPrayerId}
+          postType="prayer"
+        />
+      )}
     </div>
   );
 }

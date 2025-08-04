@@ -11046,6 +11046,71 @@ Return JSON with this exact structure:
     }
   });
 
+  // Prayer Comments endpoints
+  app.post('/api/prayers/:id/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const prayerRequestId = parseInt(req.params.id);
+      const { content, parentId } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      if (!content || !content.trim()) {
+        return res.status(400).json({ message: 'Comment content is required' });
+      }
+      
+      const comment = await storage.createPrayerComment({
+        prayerRequestId,
+        authorId: userId,
+        content: content.trim(),
+        parentId: parentId || null
+      });
+      
+      res.status(201).json(comment);
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Failed to create comment',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.get('/api/prayers/:id/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const prayerRequestId = parseInt(req.params.id);
+      const userId = req.session.userId;
+      
+      const comments = await storage.getPrayerComments(prayerRequestId, userId);
+      res.json(comments);
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Failed to fetch comments',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  app.post('/api/prayers/comments/:id/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const commentId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+      
+      const result = await storage.togglePrayerCommentLike(commentId, userId);
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Failed to toggle comment like',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   // REMOVED: Duplicate endpoint - using enhanced version below
 
   // Prayer Circles endpoints

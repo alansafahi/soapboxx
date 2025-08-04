@@ -499,6 +499,11 @@ export interface IStorage {
   getDiscussionComments(discussionId: number): Promise<DiscussionComment[]>;
   createDiscussionComment(comment: InsertDiscussionComment): Promise<DiscussionComment>;
   
+  // Prayer comment operations
+  getPrayerComments(prayerRequestId: number, userId?: string): Promise<any[]>;
+  createPrayerComment(comment: any): Promise<any>;
+  togglePrayerCommentLike(commentId: number, userId: string): Promise<{ liked: boolean; likeCount: number }>;
+  
   // Prayer request operations
   getPrayerRequests(churchId?: number): Promise<PrayerRequest[]>;
   getPrayerRequest(id: number): Promise<PrayerRequest | undefined>;
@@ -5682,6 +5687,148 @@ export class DatabaseStorage implements IStorage {
       }));
     } catch (error) {
       return [];
+    }
+  }
+
+  // Prayer comment operations implementation
+  async createPrayerComment(comment: { prayerRequestId: number; authorId: string; content: string; parentId?: number | null }): Promise<any> {
+    try {
+      const [newComment] = await db.execute(sql`
+        INSERT INTO prayer_comments (prayer_request_id, author_id, content, parent_id, like_count, created_at, updated_at)
+        VALUES (${comment.prayerRequestId}, ${comment.authorId}, ${comment.content}, ${comment.parentId || null}, 0, NOW(), NOW())
+        RETURNING *
+      `);
+
+      return {
+        id: newComment.rows[0].id,
+        prayerRequestId: comment.prayerRequestId,
+        authorId: comment.authorId,
+        content: comment.content,
+        parentId: comment.parentId || null,
+        likeCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+    } catch (error) {
+      throw new Error(`Failed to create prayer comment: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  async getPrayerComments(prayerRequestId: number, userId?: string): Promise<any[]> {
+    try {
+      const commentsResult = await db.execute(sql`
+        SELECT 
+          pc.id,
+          pc.prayer_request_id as "prayerRequestId",
+          pc.author_id as "authorId",
+          pc.content,
+          pc.parent_id as "parentId",
+          pc.like_count as "likeCount",
+          pc.created_at as "createdAt",
+          pc.updated_at as "updatedAt",
+          COALESCE(u.first_name, 'Unknown') as "authorFirstName",
+          COALESCE(u.last_name, '') as "authorLastName",
+          u.email as "authorEmail",
+          u.profile_image_url as "authorProfileImageUrl"
+        FROM prayer_comments pc
+        LEFT JOIN users u ON pc.author_id = u.id
+        WHERE pc.prayer_request_id = ${prayerRequestId}
+        ORDER BY pc.created_at ASC
+      `);
+
+      const comments = commentsResult.rows;
+
+      // Get user's liked comments if userId provided
+      let userLikedComments: Set<number> = new Set();
+      if (userId && comments.length > 0) {
+        try {
+          const commentIds = comments.map((c: any) => c.id);
+          const userLikesResult = await db.execute(sql`
+            SELECT prayer_comment_id 
+            FROM prayer_comment_likes 
+            WHERE user_id = ${userId} AND prayer_comment_id IN (${sql.join(commentIds, sql`, `)})
+          `);
+          
+          userLikedComments = new Set(userLikesResult.rows.map((row: any) => row.prayer_comment_id));
+        } catch (likesError) {
+          // Continue without like status if table doesn't exist or has issues
+        }
+      }
+
+      return comments.map((comment: any) => ({
+        id: comment.id,
+        prayerRequestId: comment.prayerRequestId,
+        authorId: comment.authorId,
+        content: comment.content,
+        parentId: comment.parentId,
+        likeCount: comment.likeCount || 0,
+        isLiked: userLikedComments.has(comment.id),
+        createdAt: comment.createdAt,
+        updatedAt: comment.updatedAt,
+        author: {
+          id: comment.authorId,
+          firstName: comment.authorFirstName || 'Unknown',
+          lastName: comment.authorLastName || '',
+          email: comment.authorEmail,
+          profileImageUrl: comment.authorProfileImageUrl
+        }
+      }));
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async togglePrayerCommentLike(commentId: number, userId: string): Promise<{ liked: boolean; likeCount: number }> {
+    try {
+      // Check if user already liked this comment
+      const existingLikeResult = await db.execute(sql`
+        SELECT id FROM prayer_comment_likes 
+        WHERE user_id = ${userId} AND prayer_comment_id = ${commentId}
+      `);
+
+      const isCurrentlyLiked = existingLikeResult.rows.length > 0;
+
+      if (isCurrentlyLiked) {
+        // Remove like
+        await db.execute(sql`
+          DELETE FROM prayer_comment_likes 
+          WHERE user_id = ${userId} AND prayer_comment_id = ${commentId}
+        `);
+        
+        // Decrease like count
+        await db.execute(sql`
+          UPDATE prayer_comments 
+          SET like_count = GREATEST(like_count - 1, 0), updated_at = NOW()
+          WHERE id = ${commentId}
+        `);
+      } else {
+        // Add like
+        await db.execute(sql`
+          INSERT INTO prayer_comment_likes (prayer_comment_id, user_id, created_at)
+          VALUES (${commentId}, ${userId}, NOW())
+        `);
+        
+        // Increase like count
+        await db.execute(sql`
+          UPDATE prayer_comments 
+          SET like_count = like_count + 1, updated_at = NOW()
+          WHERE id = ${commentId}
+        `);
+      }
+
+      // Get updated like count
+      const likeCountResult = await db.execute(sql`
+        SELECT like_count FROM prayer_comments WHERE id = ${commentId}
+      `);
+
+      const likeCount = likeCountResult.rows[0]?.like_count || 0;
+
+      return {
+        liked: !isCurrentlyLiked,
+        likeCount: Number(likeCount)
+      };
+    } catch (error) {
+      throw new Error(`Failed to toggle prayer comment like: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
