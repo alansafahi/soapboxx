@@ -736,15 +736,7 @@ export default function ProfilePage() {
               </Card>
             ) : (
               <div className="space-y-4">
-                <div className="flex justify-end">
-                  <Button
-                    onClick={() => setIsEditing(false)}
-                    variant="outline"
-                    className="flex items-center gap-2"
-                  >
-                    Cancel
-                  </Button>
-                </div>
+                {/* Removed duplicate cancel button - cancel functionality is available in the header */}
                 <EnhancedProfileEditor 
                   profile={profile || {} as any}
                   onSave={(updates) => {
