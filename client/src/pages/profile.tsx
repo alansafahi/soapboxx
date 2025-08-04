@@ -615,7 +615,7 @@ export default function ProfilePage() {
                       )}
 
                       {/* Spiritual Gifts */}
-                      {profile?.spiritualGifts && profile.spiritualGifts.length > 0 && profile?.showSpiritualGifts && (
+                      {profile?.spiritualGifts && profile.spiritualGifts.length > 0 && (
                         <div className="border-t pt-4">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
@@ -631,17 +631,31 @@ export default function ProfilePage() {
                               View Full Results
                             </Button>
                           </div>
-                          <div className="flex flex-wrap gap-2">
-                            {profile.spiritualGifts.slice(0, 5).map((gift, index) => (
-                              <Badge key={index} variant="outline" className="text-yellow-600 border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20">
-                                {gift}
-                              </Badge>
-                            ))}
-                            {profile.spiritualGifts.length > 5 && (
-                              <Badge variant="outline" className="text-gray-500 border-gray-200">
-                                +{profile.spiritualGifts.length - 5} more
-                              </Badge>
-                            )}
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap gap-2">
+                              {profile.spiritualGifts.slice(0, 5).map((gift, index) => (
+                                <Badge key={index} variant="outline" className="text-yellow-600 border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20">
+                                  {gift}
+                                </Badge>
+                              ))}
+                              {profile.spiritualGifts.length > 5 && (
+                                <Badge variant="outline" className="text-gray-500 border-gray-200">
+                                  +{profile.spiritualGifts.length - 5} more
+                                </Badge>
+                              )}
+                            </div>
+                            {/* View Full Results Button */}
+                            <div className="pt-2">
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => window.location.href = '/spiritual-assessment-results'}
+                                className="text-sm px-4 py-2 text-purple-600 border-purple-200 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                              >
+                                <BookOpen className="w-4 h-4 mr-2" />
+                                View Full Assessment Results
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       )}
