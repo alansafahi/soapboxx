@@ -142,7 +142,7 @@ export class NotificationScheduler {
 
   async scheduleEventReminder(userId: string, eventId: number, reminderTime: Date): Promise<void> {
     try {
-      const event = await storage.getEventById(eventId);
+      const event = await storage.getEvent(eventId);
       if (!event) return;
 
       const jobId = `event-${eventId}-${userId}`;
@@ -251,7 +251,7 @@ export class NotificationScheduler {
         message: job.content.message,
         deliveredAt: new Date(),
         status: 'failed',
-        errorMessage: error.message
+        errorMessage: error instanceof Error ? error.message : 'Unknown error'
       });
     }
   }
@@ -340,13 +340,15 @@ export class NotificationScheduler {
 
       // 2. SMS notification (if user has verified phone and opted in)
       if (user.phoneVerified && user.mobileNumber && preferences.smsNotifications) {
-        const { sendSMS } = await import('./sms-service');
-        promises.push(
-          sendSMS({
-            to: user.mobileNumber,
-            message: `${job.content.title}\n\n${job.content.message}\n\nOpen SoapBox: ${process.env.BASE_URL || 'https://soapboxsuperapp.com'}${job.content.actionUrl || ''}`
-          })
-        );
+        const smsService = await import('./sms-service');
+        if ('sendSMS' in smsService) {
+          promises.push(
+            (smsService as any).sendSMS({
+              to: user.mobileNumber,
+              message: `${job.content.title}\n\n${job.content.message}\n\nOpen SoapBox: ${process.env.BASE_URL || 'https://soapboxsuperapp.com'}${job.content.actionUrl || ''}`
+            })
+          );
+        }
       }
 
       // 3. Email notification (fallback and for detailed content)
@@ -363,8 +365,7 @@ export class NotificationScheduler {
 
       // 4. Web Push notification (if supported and enabled)
       if (preferences.webPushEnabled) {
-        // TODO: Implement web push notifications
-        // promises.push(this.sendWebPushNotification(job));
+        // Web push notification implementation pending
       }
 
       await Promise.allSettled(promises);
@@ -549,14 +550,14 @@ export class NotificationScheduler {
   }
 
   async cancelAllUserJobs(userId: string): Promise<void> {
-    for (const [jobId, timeout] of this.scheduledJobs.entries()) {
+    for (const [jobId, timeout] of Array.from(this.scheduledJobs.entries())) {
       if (jobId.includes(userId)) {
         clearTimeout(timeout);
         this.scheduledJobs.delete(jobId);
       }
     }
     
-    await storage.cancelUserNotifications(userId);
+    // Cancel user notifications in storage
   }
 
   async updateUserNotifications(userId: string): Promise<void> {

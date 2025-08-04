@@ -272,10 +272,6 @@ export function createBackwardCompatibleMapping(newData: any, legacyFieldMap: Re
  */
 export function debugFieldMapping(data: any, operation: string): void {
   if (process.env.NODE_ENV === 'development') {
-    console.group(`🔍 Field Mapping Debug - ${operation}`);
-    
-    
-    
-    console.groupEnd();
+    // Debug logging removed for production readiness
   }
 }

@@ -172,7 +172,7 @@ export class BackgroundCheckService {
           .update(backgroundChecks)
           .set({
             status: "pending",
-            notes: `${backgroundCheck.notes}\nAPI Error: ${apiError.message}. Falling back to simulation mode.`
+            notes: `${backgroundCheck.notes}\nAPI Error: ${apiError instanceof Error ? apiError.message : 'Unknown error'}. Falling back to simulation mode.`
           })
           .where(eq(backgroundChecks.id, backgroundCheck.id));
 
@@ -181,7 +181,7 @@ export class BackgroundCheckService {
       }
 
     } catch (error) {
-      throw new Error(`Failed to request background check: ${error.message}`);
+      throw new Error(`Failed to request background check: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
@@ -788,15 +788,7 @@ export class BackgroundCheckService {
 
 
       
-      // TODO: Integrate with actual email service
-      // await emailService.sendRenewalNotification({
-      //   to: email,
-      //   name,
-      //   type,
-      //   checkType,
-      //   daysUntilExpiration,
-      //   renewalUrl: `${process.env.BASE_URL}/volunteer/background-check-renewal`
-      // });
+      // Email service integration pending for renewal notifications
 
     } catch (error) {
       

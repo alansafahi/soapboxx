@@ -69,7 +69,6 @@ self.addEventListener('notificationclick', function(event) {
 
 self.addEventListener('notificationclose', function(event) {
   // Analytics or cleanup when notification is dismissed
-  console.log('Notification closed:', event.notification.tag);
 });
 
 // Background sync for offline support
@@ -90,21 +89,19 @@ async function syncWeeklyCheckin() {
     });
     
     if (response.ok) {
-      console.log('Weekly check-in synced successfully');
+      // Weekly check-in synced successfully
     }
   } catch (error) {
-    console.error('Failed to sync weekly check-in:', error);
+    // Failed to sync weekly check-in
   }
 }
 
 // Install event
 self.addEventListener('install', function(event) {
-  console.log('Service Worker installing');
   self.skipWaiting();
 });
 
 // Activate event
 self.addEventListener('activate', function(event) {
-  console.log('Service Worker activating');
   event.waitUntil(clients.claim());
 });

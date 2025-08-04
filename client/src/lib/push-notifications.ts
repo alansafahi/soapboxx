@@ -18,7 +18,7 @@ class PushNotificationManager {
       const data = await response.json();
       this.vapidPublicKey = data.publicKey;
     } catch (error) {
-      console.error('Failed to initialize push notifications:', error);
+
       throw error;
     }
   }
@@ -52,7 +52,7 @@ class PushNotificationManager {
 
       return response.ok;
     } catch (error) {
-      console.error('Failed to subscribe to push notifications:', error);
+
       return false;
     }
   }
@@ -82,7 +82,7 @@ class PushNotificationManager {
 
       return true;
     } catch (error) {
-      console.error('Failed to unsubscribe from push notifications:', error);
+
       return false;
     }
   }
@@ -104,7 +104,7 @@ class PushNotificationManager {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
     const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
     const rawData = window.atob(base64);
-    return new Uint8Array([...rawData].map(char => char.charCodeAt(0)));
+    return new Uint8Array(Array.from(rawData).map(char => char.charCodeAt(0)));
   }
 }
 

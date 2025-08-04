@@ -34,7 +34,7 @@ interface SoapEntryFormProps {
   onSuccess: () => void;
 }
 
-// Use comprehensive mood system from shared library
+
 
 export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps) {
   const [isLoadingAI, setIsLoadingAI] = useState(false);
@@ -45,7 +45,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [pendingVerse, setPendingVerse] = useState<{ reference: string; text: string; version: string } | null>(null);
   const [isLookingUpVerse, setIsLookingUpVerse] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState(''); // Will be set from user profile - no hardcoded default
+  const [selectedVersion, setSelectedVersion] = useState('');
   const [autoLookupTimeout, setAutoLookupTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isAutoLookingUp, setIsAutoLookingUp] = useState(false);
   
@@ -69,7 +69,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const { toast } = useToast();
 
   const form = useForm<FormData>({
-    // resolver: zodResolver(formSchema), // Simplified validation
+    resolver: zodResolver(formSchema),
     defaultValues: {
       scripture: entry?.scripture || "",
       scriptureReference: entry?.scriptureReference || "",
@@ -95,9 +95,9 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
   // Initialize selectedVersion from user's current dynamic preference
   useEffect(() => {
-    if (user && 'bibleTranslationPreference' in user && user.bibleTranslationPreference) {
-      setSelectedVersion(user.bibleTranslationPreference);
-    } else if (user && !('bibleTranslationPreference' in user)) {
+    if (user && (user as any).bibleTranslationPreference) {
+      setSelectedVersion((user as any).bibleTranslationPreference);
+    } else if (user && !(user as any).bibleTranslationPreference) {
       setSelectedVersion('');
     }
   }, [user]);
@@ -168,7 +168,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
         }
       }
     } catch (error) {
-      // Silently handle errors for better UX
+      // Handle errors silently for better UX
     } finally {
       setIsDetectingMood(false);
     }
@@ -191,17 +191,16 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   useEffect(() => {
     if (worldEvents && liturgicalContext) {
       setContextualInfo({
-        worldEvents: worldEvents.events || [],
-        spiritualThemes: worldEvents.spiritualThemes || [],
-        liturgicalSeason: liturgicalContext.currentSeason,
-        upcomingHolidays: liturgicalContext.upcomingHolidays || [],
-        seasonalFocus: liturgicalContext.seasonalFocus
+        worldEvents: (worldEvents as any).events || [],
+        spiritualThemes: (worldEvents as any).spiritualThemes || [],
+        liturgicalSeason: (liturgicalContext as any).currentSeason,
+        upcomingHolidays: (liturgicalContext as any).upcomingHolidays || [],
+        seasonalFocus: (liturgicalContext as any).seasonalFocus
       });
     }
 
-    // Fallback to recent check-in mood only if no moods selected and no AI suggestions
-    if (recentCheckins && recentCheckins.length > 0 && selectedMoods.length === 0 && aiMoodSuggestions.length === 0) {
-      const latestCheckin = recentCheckins[0];
+    if (recentCheckins && (recentCheckins as any).length > 0 && selectedMoods.length === 0 && aiMoodSuggestions.length === 0) {
+      const latestCheckin = (recentCheckins as any)[0];
       if (latestCheckin.mood && !form.getValues('moodTag')) {
         form.setValue('moodTag', latestCheckin.mood);
       }
@@ -213,7 +212,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
       
       const payload = {
         ...data,
-        churchId: user?.churchId || 1,
+        churchId: (user as any)?.churchId || 1,
         devotionalDate: new Date(data.devotionalDate).toISOString(),
         tags: data.tags || [],
         expiresAt: expirationSettings.expiresAt ? expirationSettings.expiresAt.toISOString() : null,
@@ -1237,7 +1236,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                 render={({ field }) => (
                   <FormItem className="hidden">
                     <FormControl>
-                      <Input {...field} type="hidden" />
+                      <Input {...field} value={field.value || ''} type="hidden" />
                     </FormControl>
                   </FormItem>
                 )}
@@ -1285,13 +1284,13 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                   render={({ field }) => (
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label className={!churchAffiliation?.hasChurch ? "text-muted-foreground" : ""}>
+                        <Label className={!(churchAffiliation as any)?.hasChurch ? "text-muted-foreground" : ""}>
                           Share with Pastor
                         </Label>
-                        {churchAffiliation?.hasChurch ? (
-                          churchAffiliation.hasPastors ? (
+                        {(churchAffiliation as any)?.hasChurch ? (
+                          (churchAffiliation as any).hasPastors ? (
                             <p className="text-sm text-muted-foreground">
-                              Share this reflection with your church pastors ({churchAffiliation.pastorCount} pastor{churchAffiliation.pastorCount !== 1 ? 's' : ''})
+                              Share this reflection with your church pastors ({(churchAffiliation as any).pastorCount} pastor{(churchAffiliation as any).pastorCount !== 1 ? 's' : ''})
                             </p>
                           ) : (
                             <p className="text-sm text-orange-600">
@@ -1307,8 +1306,8 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                       <FormControl>
                         <Switch 
                           checked={field.value || false} 
-                          onCheckedChange={churchAffiliation?.hasChurch && churchAffiliation?.hasPastors ? field.onChange : undefined}
-                          disabled={!churchAffiliation?.hasChurch || !churchAffiliation?.hasPastors}
+                          onCheckedChange={(churchAffiliation as any)?.hasChurch && (churchAffiliation as any)?.hasPastors ? field.onChange : undefined}
+                          disabled={!(churchAffiliation as any)?.hasChurch || !(churchAffiliation as any)?.hasPastors}
                         />
                       </FormControl>
                     </div>
@@ -1536,8 +1535,9 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
           {/* Expiration Settings */}
           <ExpirationSettings
-            contentType="S.O.A.P. entry"
-            settings={expirationSettings}
+            contentType="soap"
+            initialExpiresAt={expirationSettings.expiresAt}
+            allowsExpiration={expirationSettings.allowsExpiration}
             onSettingsChange={setExpirationSettings}
           />
 

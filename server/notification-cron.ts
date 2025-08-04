@@ -26,13 +26,13 @@ export class NotificationCron {
       minute: 0
     });
 
-    console.log('✅ Notification cron jobs started');
+
   }
 
   stop() {
     this.intervals.forEach((interval, key) => {
       clearInterval(interval);
-      console.log(`🛑 Stopped cron job: ${key}`);
+
     });
     this.intervals.clear();
   }
@@ -46,11 +46,11 @@ export class NotificationCron {
     
     const executeTask = async () => {
       try {
-        console.log(`🔄 Executing weekly task: ${taskName}`);
+
         await task();
-        console.log(`✅ Completed weekly task: ${taskName}`);
+        // Task completed successfully
       } catch (error) {
-        console.error(`❌ Error in weekly task ${taskName}:`, error);
+        // Task execution error handled
       }
     };
 
@@ -64,7 +64,7 @@ export class NotificationCron {
     const interval = setInterval(executeTask, 7 * 24 * 60 * 60 * 1000); // Weekly
     this.intervals.set(taskName, interval);
     
-    console.log(`📅 Scheduled weekly task: ${taskName} for ${this.getDayName(schedule.dayOfWeek)} at ${schedule.hour}:${schedule.minute.toString().padStart(2, '0')}`);
+
   }
 
   private scheduleDailyTask(taskName: string, task: () => Promise<void>, schedule: {
@@ -73,11 +73,10 @@ export class NotificationCron {
   }) {
     const executeTask = async () => {
       try {
-        console.log(`🔄 Executing daily task: ${taskName}`);
         await task();
-        console.log(`✅ Completed daily task: ${taskName}`);
+        // Task completed successfully
       } catch (error) {
-        console.error(`❌ Error in daily task ${taskName}:`, error);
+        // Daily task execution error handled
       }
     };
 
@@ -99,7 +98,7 @@ export class NotificationCron {
       this.intervals.set(taskName, interval);
     }, timeUntilNext);
 
-    console.log(`⏰ Scheduled daily task: ${taskName} for ${schedule.hour}:${schedule.minute.toString().padStart(2, '0')} (next: ${nextExecution.toLocaleString()})`);
+
   }
 
   private calculateNextExecution(dayOfWeek: number, hour: number, minute: number): number {
@@ -135,7 +134,7 @@ export class NotificationCron {
     try {
       await weeklyCheckinService.sendWeeklyReminders();
     } catch (error) {
-      console.error('Failed to send weekly check-in reminders:', error);
+
     }
   }
 
@@ -143,16 +142,16 @@ export class NotificationCron {
     try {
       await weeklyCheckinService.sendFollowUpReminders();
     } catch (error) {
-      console.error('Failed to send re-engagement reminders:', error);
+
     }
   }
 
   private async sendDailyReadingReminders(): Promise<void> {
     try {
       // This would integrate with daily Bible reading reminder system
-      console.log('📖 Daily reading reminders sent');
+      // Daily reading reminders sent
     } catch (error) {
-      console.error('Failed to send daily reading reminders:', error);
+      // Daily reading reminder error handled
     }
   }
 }

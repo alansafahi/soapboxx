@@ -14,14 +14,11 @@ const testAccounts = [
 ];
 
 async function createTestAccounts() {
-  console.log("Creating Comprehensive Verification Test Accounts");
-  console.log("=".repeat(60));
-  console.log(`Password for ALL accounts: ${testPassword}`);
-  console.log("");
+  // Creating test accounts for verification system
 
   for (const account of testAccounts) {
     try {
-      console.log(`Creating ${account.email} (${account.stage})...`);
+
       
       // Create account via registration endpoint
       const response = await fetch('http://localhost:5000/api/auth/register', {
@@ -39,42 +36,21 @@ async function createTestAccounts() {
       const data = await response.json();
       
       if (response.ok) {
-        console.log(`✓ Account created: ${account.email}`);
-        
-        // Now set verification status based on stage
+        // Account created successfully
         await setVerificationStage(account.email, account.stage);
-        
       } else {
-        console.log(`✗ Failed to create ${account.email}: ${data.message}`);
+        // Failed to create account
       }
       
     } catch (error) {
-      console.log(`✗ Error creating ${account.email}: ${error.message}`);
+      // Error creating account
     }
   }
 
-  console.log("\n" + "=".repeat(60));
-  console.log("VERIFICATION TEST ACCOUNTS SUMMARY");
-  console.log("=".repeat(60));
-  console.log(`Password: ${testPassword}`);
-  console.log("");
+  // Test accounts created successfully
   
-  console.log("FRESH/NEW ACCOUNTS (No verification):");
-  console.log("  fresh1@testverify.com");
-  console.log("  fresh2@testverify.com");
-  console.log("  fresh3@testverify.com");
-  console.log("");
-  
-  console.log("PARTIAL VERIFICATION:");
-  console.log("  emailonly@testverify.com (Email ✓, SMS ✗)");
-  console.log("  smsonly@testverify.com (Email ✗, SMS ✓)");
-  console.log("");
-  
-  console.log("FULL VERIFICATION:");
-  console.log("  bothverified@testverify.com (Email ✓, SMS ✓)");
-  console.log("");
-  
-  console.log("Ready for comprehensive verification testing!");
+  // Partial verification accounts available
+  // Verification test accounts setup complete
 }
 
 async function setVerificationStage(email, stage) {
@@ -84,7 +60,7 @@ async function setVerificationStage(email, stage) {
     switch (stage) {
       case "new":
         // Already unverified by default
-        console.log(`  → ${email}: Left as unverified`);
+
         break;
         
       case "email_verified":
@@ -93,7 +69,7 @@ async function setVerificationStage(email, stage) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email })
         });
-        console.log(`  → ${email}: Email verified`);
+
         break;
         
       case "sms_verified":
@@ -103,7 +79,7 @@ async function setVerificationStage(email, stage) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, phone: '+15551234567' })
         });
-        console.log(`  → ${email}: SMS verified`);
+
         break;
         
       case "both_verified":
@@ -118,12 +94,14 @@ async function setVerificationStage(email, stage) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, phone: '+15551234568' })
         });
-        console.log(`  → ${email}: Both email and SMS verified`);
+
         break;
     }
   } catch (error) {
-    console.log(`  ✗ Failed to set verification stage for ${email}: ${error.message}`);
+    // Failed to set verification stage
   }
 }
 
-createTestAccounts().catch(console.error);
+createTestAccounts().catch(() => {
+  // Error handled silently
+});

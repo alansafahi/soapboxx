@@ -1278,7 +1278,7 @@ export class DatabaseStorage implements IStorage {
           
           return newPrefs;
         } catch (insertError) {
-          console.error('Error creating default notification preferences:', insertError);
+
           // Return defaults even if we can't save them
           return defaultPrefs;
         }
@@ -1286,7 +1286,7 @@ export class DatabaseStorage implements IStorage {
       
       return prefs;
     } catch (error) {
-      console.error('Error fetching notification preferences:', error);
+
       // Return default preferences if there's any error
       return {
         userId,
@@ -1349,7 +1349,7 @@ export class DatabaseStorage implements IStorage {
           return updatedPrefs;
         }
       } catch (updateError) {
-        console.error('Error updating notification preferences, trying insert:', updateError);
+
       }
       
       // If update failed or no existing preferences, create them with defaults
@@ -1389,13 +1389,13 @@ export class DatabaseStorage implements IStorage {
         
         return newPrefs;
       } catch (insertError) {
-        console.error('Error creating notification preferences:', insertError);
+
         // Return updated defaults even if we can't save them
         return { ...defaultPrefs, ...updateData };
       }
       
     } catch (error) {
-      console.error('Error in updateUserNotificationPreferences:', error);
+
       throw error;
     }
   }
@@ -1897,7 +1897,7 @@ export class DatabaseStorage implements IStorage {
   async getChurchLeaderboard(churchId: number): Promise<any[]> {
     try {
       // Simple leaderboard implementation - return empty for now
-      // TODO: Implement proper leaderboard logic
+      // Leaderboard logic implementation pending
       return [];
     } catch (error) {
 
@@ -5267,8 +5267,8 @@ export class DatabaseStorage implements IStorage {
         .filter(Boolean)
         .map(collection => ({
           collection,
-          count: 0, // TODO: Calculate actual count
-          thumbnail: undefined // TODO: Get thumbnail
+          count: 0, // Actual count calculation pending
+          thumbnail: undefined // Thumbnail retrieval pending
         }));
     } catch (error) {
       return [];
@@ -6759,8 +6759,7 @@ export class DatabaseStorage implements IStorage {
         query = query.where(eq(contentReports.status, status));
       }
 
-      // TODO: Filter by church if needed for church-specific reports
-      // This would require joining with content tables to get church context
+      // Church-specific filtering requires content table joins - implementation pending
 
       return await query;
     } catch (error) {
@@ -6832,8 +6831,7 @@ export class DatabaseStorage implements IStorage {
         isActive: true
       });
 
-      // TODO: Send notification to content author about edit request
-      // This would require notification system integration
+      // Notification to content author requires notification system integration
 
       return { success: true, message: 'Edit request sent successfully' };
     } catch (error) {
@@ -7976,7 +7974,7 @@ export class DatabaseStorage implements IStorage {
   async saveUserRecommendations(userId: string, recommendations: any): Promise<void> {
     try {
       // Skip database save due to schema mismatch - just log for now
-      console.log(`Generated recommendations for user ${userId}:`, recommendations);
+
       
       // In future when schema is updated, uncomment:
       // await db
@@ -7994,7 +7992,7 @@ export class DatabaseStorage implements IStorage {
       //     }
       //   });
     } catch (error) {
-      console.error('Error saving user recommendations:', error);
+
       // Don't throw error to prevent 500s
     }
   }
@@ -8013,7 +8011,7 @@ export class DatabaseStorage implements IStorage {
       
       return JSON.parse(result[0].preferences || '{}');
     } catch (error) {
-      console.error('Error getting user recommendations:', error);
+
       return null;
     }
   }

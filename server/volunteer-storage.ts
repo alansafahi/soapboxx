@@ -389,9 +389,7 @@ export class VolunteerStorage {
           .where(eq(volunteerOpportunities.status, 'open'))
           .limit(3);
 
-        // Suggested alternative opportunities for volunteer - silent logging
-        // TODO: Create new volunteer matches for these alternatives
-        // This could trigger new AI matching and divine appointments
+        // Alternative opportunity matching and divine appointment triggering pending
       }
     } catch (error) {
       // Error logged for internal tracking

@@ -29,7 +29,7 @@ export function PushNotificationSettings() {
       const subscribed = await pushNotificationManager.isSubscribed();
       setIsSubscribed(subscribed);
     } catch (error) {
-      console.error('Error checking notification status:', error);
+
     } finally {
       setIsLoading(false);
     }

@@ -2023,7 +2023,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         recommendations
       });
     } catch (error) {
-      console.error('Generate recommendations error:', error);
+
       res.status(500).json({ error: 'Failed to generate recommendations' });
     }
   });
@@ -8776,15 +8776,7 @@ Return JSON with this exact structure:
       if (youtubeUrl) socialLinks.youtube = youtubeUrl;
       if (linkedinUrl) socialLinks.linkedin = linkedinUrl;
 
-      // Debug: Log processed social links
-      console.log('Social Links:', {
-        youtubeUrl,
-        linkedinUrl,
-        facebookUrl,
-        instagramUrl,
-        twitterUrl,
-        tiktokUrl
-      });
+      // Social links processing completed
 
       // Process dynamic time rows into hours of operation and worship times
       const hoursOfOperation: any = {};
@@ -8838,19 +8830,7 @@ Return JSON with this exact structure:
         worshipTimesArray.push(`Wednesday Service: ${wednesdayService}`);
       }
 
-      // Debug: Log all extracted field values before database insertion
-      console.log('Extracted Fields:', {
-        name: name?.trim(),
-        description: description?.trim(),
-        zipCode: zipCode?.trim(),
-        establishedYear: establishedYear?.trim(),
-        parentChurchName: parentChurchName?.trim(),
-        missionStatement: missionStatement?.trim(),
-        adminEmail: adminEmail?.trim(),
-        adminPhone: adminPhone?.trim(),
-        finalLogoUrl,
-        socialLinks
-      });
+      // Field extraction processing completed
 
       // SoapBox Development Standards v1.0: snake_case for database fields
       const communityData = {
@@ -10104,13 +10084,7 @@ Return JSON with this exact structure:
       const userId = req.session?.userId || req.user?.claims?.sub;
       const { type, content, mood, audience, linkedVerse, attachedMedia, title, category, isPublic, tags, expiresAt } = req.body;
       
-      console.log('POST /api/discussions - Debug:', {
-        hasSession: !!req.session,
-        sessionUserId: req.session?.userId,
-        hasUser: !!req.user,
-        userClaims: req.user?.claims,
-        finalUserId: userId
-      });
+      // Discussion creation processing completed
       
       if (!userId) {
         return res.status(401).json({ message: "User authentication required" });
@@ -14116,8 +14090,7 @@ Please provide suggestions for the missing or incomplete sections.`
     try {
       const userId = req.session.userId || req.user?.claims?.sub;
       
-      // TODO: Implement getUserEditRequestNotifications method
-      // For now, return empty array to prevent 500 errors
+      // Return empty array - edit requests not implemented yet
       const editRequests: any[] = [];
       
       res.json(editRequests);

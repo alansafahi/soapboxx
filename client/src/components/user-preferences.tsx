@@ -143,7 +143,7 @@ export default function UserPreferences() {
       queryClient.invalidateQueries({ queryKey: ["/api/user/notification-preferences"] });
     },
     onError: (error: any) => {
-      console.error("Notification update error:", error);
+
       toast({
         title: "Error",
         description: error?.message || "Failed to update notification settings. Please try again.",
@@ -165,7 +165,7 @@ export default function UserPreferences() {
       queryClient.invalidateQueries({ queryKey: ["/api/content/personalized"] });
     },
     onError: (error: any) => {
-      console.error("Generate recommendations error:", error);
+
       toast({
         title: "Error",
         description: error?.message || "Failed to generate recommendations. Please try again.",
@@ -187,20 +187,20 @@ export default function UserPreferences() {
 
   useEffect(() => {
     if (userPrefs) {
-      setPreferences(userPrefs);
+      setPreferences(userPrefs as UserPreferences);
       // Apply saved theme and font size to context
-      if (userPrefs.theme) {
-        setTheme(userPrefs.theme);
+      if ((userPrefs as any).theme) {
+        setTheme((userPrefs as any).theme);
       }
-      if (userPrefs.fontSize) {
-        setFontSize(userPrefs.fontSize);
+      if ((userPrefs as any).fontSize) {
+        setFontSize((userPrefs as any).fontSize);
       }
     }
   }, [userPrefs, setTheme, setFontSize]);
 
   useEffect(() => {
     if (notificationSettings) {
-      setNotificationPrefs(notificationSettings);
+      setNotificationPrefs(notificationSettings as NotificationPreferences);
     }
   }, [notificationSettings]);
 
