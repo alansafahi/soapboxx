@@ -79,7 +79,7 @@ interface UserProfile {
   state: string | null;
   languagePreference: string | null;
   customLanguage: string | null;
-  preferredBibleTranslation: string | null;
+  bibleTranslationPreference: string | null;
   spiritualGifts: string[] | null;
   spiritualProfile: {
     profileLabel?: string;
@@ -383,7 +383,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       spiritualProfile: formData.spiritualProfile,
       publicSharing: formData.publicSharing,
       customLanguage: formData.customLanguage,
-      bibleTranslationPreference: formData.preferredBibleTranslation, // ✅ CRITICAL: Fix field name to match database schema
+      bibleTranslationPreference: formData.bibleTranslationPreference, // ✅ CRITICAL: Fix field name to match database schema
       // Ensure all privacy settings are included
       showBioPublicly: formData.showBioPublicly,
       showChurchAffiliation: formData.showChurchAffiliation,
@@ -647,7 +647,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
 
     try {
 
-      const currentTranslation = formData.preferredBibleTranslation || 'NIV';
+      const currentTranslation = formData.bibleTranslationPreference || 'NIV';
       const response = await fetch('/api/bible/lookup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
