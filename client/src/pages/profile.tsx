@@ -394,10 +394,10 @@ export default function ProfilePage() {
         </div>
 
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="stats">Statistics</TabsTrigger>
-            <TabsTrigger value="achievements">Achievements</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 h-auto">
+            <TabsTrigger value="profile" className="text-xs sm:text-sm py-2 px-2">Profile</TabsTrigger>
+            <TabsTrigger value="stats" className="text-xs sm:text-sm py-2 px-2">Statistics</TabsTrigger>
+            <TabsTrigger value="achievements" className="text-xs sm:text-sm py-2 px-2">Achievements</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6">

@@ -896,33 +896,30 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
       </div>
 
       <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1">
-          <TabsTrigger value="basic" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
-            <User className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Basic</span>
-            <span className="sm:hidden">Info</span>
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-0.5 h-auto p-1">
+          <TabsTrigger value="basic" className="flex flex-col items-center gap-1 text-xs px-1 py-2 h-auto min-h-[3rem]">
+            <User className="w-3 h-3" />
+            <span className="text-[10px] leading-tight text-center">Info</span>
           </TabsTrigger>
-          <TabsTrigger value="spiritual" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
-            <Church className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Spiritual</span>
-            <span className="sm:hidden">Faith</span>
+          <TabsTrigger value="spiritual" className="flex flex-col items-center gap-1 text-xs px-1 py-2 h-auto min-h-[3rem]">
+            <Church className="w-3 h-3" />
+            <span className="text-[10px] leading-tight text-center">Faith</span>
           </TabsTrigger>
-          <TabsTrigger value="gifts" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
-            <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span>Gifts</span>
+          <TabsTrigger value="gifts" className="flex flex-col items-center gap-1 text-xs px-1 py-2 h-auto min-h-[3rem]">
+            <Sparkles className="w-3 h-3" />
+            <span className="text-[10px] leading-tight text-center">Gifts</span>
           </TabsTrigger>
-          <TabsTrigger value="engagement" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
-            <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Community</span>
-            <span className="sm:hidden">Social</span>
+          <TabsTrigger value="engagement" className="flex flex-col items-center gap-1 text-xs px-1 py-2 h-auto min-h-[3rem]">
+            <Users className="w-3 h-3" />
+            <span className="text-[10px] leading-tight text-center">Social</span>
           </TabsTrigger>
-          <TabsTrigger value="growth" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
-            <Target className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span>Growth</span>
+          <TabsTrigger value="growth" className="flex flex-col items-center gap-1 text-xs px-1 py-2 h-auto min-h-[3rem]">
+            <Target className="w-3 h-3" />
+            <span className="text-[10px] leading-tight text-center">Growth</span>
           </TabsTrigger>
-          <TabsTrigger value="privacy" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3 py-2">
-            <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span>Privacy</span>
+          <TabsTrigger value="privacy" className="flex flex-col items-center gap-1 text-xs px-1 py-2 h-auto min-h-[3rem]">
+            <Shield className="w-3 h-3" />
+            <span className="text-[10px] leading-tight text-center">Privacy</span>
           </TabsTrigger>
         </TabsList>
 
