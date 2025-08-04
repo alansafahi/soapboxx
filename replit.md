@@ -7,6 +7,8 @@ The SoapBox Super App is a comprehensive faith community platform designed to co
 
 **Production Ready**: Both auto-save dropdown features are fully functional with instant saving and persistence. Removed 79+ screenshot files, cleaned debug statements, fixed TypeScript errors, and eliminated development artifacts. Database field mappings corrected in storage and routes. Code is now optimized for production deployment with clean error handling and proper type safety.
 
+**Latest Enhancement**: Added comprehensive weekly check-in reminder system with multi-channel notification support (SMS, Email, In-app, Web Push). Implemented engagement tracking for user retention with smart re-engagement notifications. Enhanced notification preferences with SMS opt-in integration.
+
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 Focus on functionality over technical implementation details.

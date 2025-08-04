@@ -4,7 +4,7 @@ import { aiPersonalizationService } from "./ai-personalization";
 interface NotificationJob {
   id: string;
   userId: string;
-  type: 'daily_reading' | 'prayer_reminder' | 'community_update' | 'event_reminder';
+  type: 'daily_reading' | 'prayer_reminder' | 'community_update' | 'event_reminder' | 'weekly_checkin' | 'engagement_reminder';
   scheduledTime: Date;
   content: {
     title: string;
@@ -42,12 +42,23 @@ export class NotificationScheduler {
         }
       }
 
+      // Schedule weekly check-in reminders
+      if (preferences.weeklyCheckins) {
+        await this.scheduleWeeklyCheckin(userId);
+      }
+
+      // Schedule engagement reminders for inactive users
+      if (preferences.engagementReminders) {
+        await this.scheduleEngagementReminders(userId);
+      }
+
       // Schedule weekend notifications if different
       if (preferences.weekendPreferences?.differentSchedule) {
         await this.scheduleWeekendNotifications(userId, preferences.weekendPreferences);
       }
 
     } catch (error) {
+      // Silent error handling for production
     }
   }
 
@@ -245,25 +256,136 @@ export class NotificationScheduler {
     }
   }
 
-  private async sendNotification(job: NotificationJob): Promise<void> {
-    // Implement with your preferred notification service (Push notifications, Email, SMS)
+  async scheduleWeeklyCheckin(userId: string): Promise<void> {
+    const jobId = `weekly-checkin-${userId}`;
+    this.cancelJob(jobId);
 
-    
-    // For web push notifications, you would integrate with a service like:
-    // - Firebase Cloud Messaging (FCM)
-    // - OneSignal
-    // - Native Web Push API
-    
-    // For now, we'll store it as an in-app notification
-    await storage.createInAppNotification({
-      userId: job.userId,
-      type: job.type,
-      title: job.content.title,
-      message: job.content.message,
-      actionUrl: job.content.actionUrl,
-      data: job.content.data,
-      isRead: false,
-    });
+    const job: NotificationJob = {
+      id: jobId,
+      userId,
+      type: 'weekly_checkin',
+      scheduledTime: this.getNextSunday(), // Sunday evening check-ins
+      content: {
+        title: "Weekly Spiritual Check-in",
+        message: "How has your spiritual journey been this week? Share your reflections and see how you're growing.",
+        actionUrl: "/weekly-checkin",
+      },
+      isRecurring: true,
+      recurringPattern: {
+        frequency: 'weekly',
+        daysOfWeek: [0] // Sunday
+      }
+    };
+
+    this.scheduleJob(job);
+  }
+
+  async scheduleEngagementReminders(userId: string): Promise<void> {
+    const jobId = `engagement-${userId}`;
+    this.cancelJob(jobId);
+
+    // Check user's last activity and schedule appropriate reminders
+    const lastActivity = await storage.getUserLastActivity(userId);
+    const daysSinceActivity = lastActivity ? Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+
+    if (daysSinceActivity >= 3) {
+      const job: NotificationJob = {
+        id: jobId,
+        userId,
+        type: 'engagement_reminder',
+        scheduledTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
+        content: {
+          title: "We miss you!",
+          message: "Your spiritual community is here when you're ready. Check out what's new this week.",
+          actionUrl: "/home",
+        },
+        isRecurring: false
+      };
+
+      this.scheduleJob(job);
+    }
+  }
+
+  private getNextSunday(): Date {
+    const now = new Date();
+    const nextSunday = new Date(now);
+    const daysUntilSunday = (7 - now.getDay()) % 7;
+    nextSunday.setDate(now.getDate() + (daysUntilSunday === 0 ? 7 : daysUntilSunday));
+    nextSunday.setHours(19, 0, 0, 0); // 7 PM Sunday
+    return nextSunday;
+  }
+
+  private async sendNotification(job: NotificationJob): Promise<void> {
+    try {
+      const user = await storage.getUser(job.userId);
+      const preferences = await storage.getNotificationPreferences(job.userId);
+      
+      if (!user || !preferences) return;
+
+      // Multi-channel notification delivery
+      const promises: Promise<any>[] = [];
+
+      // 1. In-app notification (always sent)
+      promises.push(
+        storage.createInAppNotification({
+          userId: job.userId,
+          type: job.type,
+          title: job.content.title,
+          message: job.content.message,
+          actionUrl: job.content.actionUrl,
+          data: job.content.data,
+          isRead: false,
+        })
+      );
+
+      // 2. SMS notification (if user has verified phone and opted in)
+      if (user.phoneVerified && user.mobileNumber && preferences.smsNotifications) {
+        const { sendSMS } = await import('./sms-service');
+        promises.push(
+          sendSMS({
+            to: user.mobileNumber,
+            message: `${job.content.title}\n\n${job.content.message}\n\nOpen SoapBox: ${process.env.BASE_URL || 'https://soapboxsuperapp.com'}${job.content.actionUrl || ''}`
+          })
+        );
+      }
+
+      // 3. Email notification (fallback and for detailed content)
+      if (user.email && user.emailVerified && preferences.emailNotifications) {
+        const { sendEmail } = await import('./email-service');
+        promises.push(
+          sendEmail({
+            to: user.email,
+            subject: job.content.title,
+            html: this.buildNotificationEmail(job.content, user)
+          })
+        );
+      }
+
+      // 4. Web Push notification (if supported and enabled)
+      if (preferences.webPushEnabled) {
+        // TODO: Implement web push notifications
+        // promises.push(this.sendWebPushNotification(job));
+      }
+
+      await Promise.allSettled(promises);
+    } catch (error) {
+      // Silent error handling for production
+    }
+  }
+
+  private buildNotificationEmail(content: any, user: any): string {
+    return `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #7C3AED;">${content.title}</h2>
+        <p>Hi ${user.firstName || 'Friend'},</p>
+        <p>${content.message}</p>
+        ${content.actionUrl ? `<a href="${process.env.BASE_URL || 'https://soapboxsuperapp.com'}${content.actionUrl}" style="background: #7C3AED; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; margin: 16px 0;">Take Action</a>` : ''}
+        <p style="color: #666; font-size: 14px; margin-top: 24px;">
+          Blessings,<br>
+          The SoapBox Community Team
+        </p>
+      </div>
+    `;
   }
 
   private rescheduleRecurringJob(job: NotificationJob): void {

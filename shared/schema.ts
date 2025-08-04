@@ -382,6 +382,11 @@ export const notificationPreferences = pgTable("notification_preferences", {
   prayerReminders: boolean("prayer_reminders").default(true),
   communityUpdates: boolean("community_updates").default(true),
   eventReminders: boolean("event_reminders").default(true),
+  weeklyCheckins: boolean("weekly_checkins").default(true),
+  engagementReminders: boolean("engagement_reminders").default(true),
+  smsNotifications: boolean("sms_notifications").default(false), // Opt-in SMS
+  emailNotifications: boolean("email_notifications").default(true),
+  webPushEnabled: boolean("web_push_enabled").default(false),
   friendActivity: boolean("friend_activity").default(false),
   dailyReadingTime: varchar("daily_reading_time").default("08:00"), // HH:MM format
   prayerTimes: text("prayer_times").array().default([]), // Array of HH:MM times
