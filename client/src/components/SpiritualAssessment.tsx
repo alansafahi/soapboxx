@@ -237,57 +237,39 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
       <div className="space-y-6">
         <div className="text-center space-y-2">
           <div className="text-sm text-purple-600 dark:text-purple-400 font-medium">
-            {currentGiftCategory} • Question {currentQuestionIndex + 1} of {totalQuestions}
+            {currentGiftCategory}
             {isInverse && <span className="ml-2 text-xs text-orange-500">(Validity Check)</span>}
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             {currentQuestion}
           </h3>
-          <p className="text-gray-600 dark:text-gray-300">
-            How accurately does this statement describe you?
-          </p>
+        </div>
+        
+        <div className="flex justify-between items-center mb-6">
+          <span className="text-sm text-gray-500">Strongly Disagree</span>
+          <span className="text-sm text-gray-500">Strongly Agree</span>
         </div>
         
         <RadioGroup 
           value={responses[currentQuestionIndex]?.toString() || ''} 
           onValueChange={(value) => handleResponse(currentQuestionIndex, parseInt(value))}
         >
-          <div className="space-y-3">
-            <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-              <RadioGroupItem value="1" id="strongly_disagree" />
-              <Label htmlFor="strongly_disagree" className="cursor-pointer flex-1">
-                <div className="font-medium text-red-700 dark:text-red-400">Strongly Disagree</div>
-                <div className="text-sm text-gray-500">This does not describe me at all</div>
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-              <RadioGroupItem value="2" id="disagree" />
-              <Label htmlFor="disagree" className="cursor-pointer flex-1">
-                <div className="font-medium text-orange-700 dark:text-orange-400">Disagree</div>
-                <div className="text-sm text-gray-500">This describes me a little</div>
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-              <RadioGroupItem value="3" id="neutral" />
-              <Label htmlFor="neutral" className="cursor-pointer flex-1">
-                <div className="font-medium text-gray-700 dark:text-gray-400">Neutral</div>
-                <div className="text-sm text-gray-500">This somewhat describes me</div>
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-              <RadioGroupItem value="4" id="agree" />
-              <Label htmlFor="agree" className="cursor-pointer flex-1">
-                <div className="font-medium text-blue-700 dark:text-blue-400">Agree</div>
-                <div className="text-sm text-gray-500">This describes me well</div>
-              </Label>
-            </div>
-            <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-              <RadioGroupItem value="5" id="strongly_agree" />
-              <Label htmlFor="strongly_agree" className="cursor-pointer flex-1">
-                <div className="font-medium text-green-700 dark:text-green-400">Strongly Agree</div>
-                <div className="text-sm text-gray-500">This describes me completely</div>
-              </Label>
-            </div>
+          <div className="flex justify-center space-x-4">
+            {[1, 2, 3, 4, 5].map((value) => (
+              <div key={value} className="flex flex-col items-center">
+                <RadioGroupItem 
+                  value={value.toString()} 
+                  id={`option-${value}`}
+                  className="w-8 h-8 border-2 border-gray-300 rounded-full flex items-center justify-center hover:border-purple-500 transition-colors"
+                />
+                <Label 
+                  htmlFor={`option-${value}`} 
+                  className="mt-2 text-xs text-gray-600 cursor-pointer font-medium"
+                >
+                  {value}
+                </Label>
+              </div>
+            ))}
           </div>
         </RadioGroup>
       </div>
@@ -295,47 +277,56 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between mb-4">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto">
+              <Target className="w-8 h-8 text-white" />
+            </div>
             <div>
-              <CardTitle className="text-2xl">Comprehensive Spiritual Assessment</CardTitle>
+              <CardTitle className="text-2xl mb-2">Spiritual Gifts Assessment</CardTitle>
+              <p className="text-gray-600 dark:text-gray-300">
+                Discover your God-given spiritual gifts and find your perfect ministry fit (120 questions)
+              </p>
               {isRoleMandatory && (
-                <p className="text-sm text-orange-600 dark:text-orange-400 mt-1">
+                <p className="text-sm text-orange-600 dark:text-orange-400 mt-2">
                   Required for Church Leadership roles
                 </p>
               )}
             </div>
             <div className="text-sm text-gray-500">
-              {currentQuestionIndex + 1} of {totalQuestions}
+              Page {Math.floor(currentQuestionIndex / 10) + 1} of 12
             </div>
-          </div>
-          <Progress value={progress} className="w-full" />
-          <div className="mt-3 text-xs text-muted-foreground text-center">
-            120 questions • Approximately 20-25 minutes
           </div>
         </CardHeader>
         
-        <CardContent>
+        <CardContent className="space-y-8">
+          <Progress value={progress} className="w-full h-2" />
+          
           {renderQuestion()}
           
-          <div className="flex justify-between mt-8">
+          <div className="flex justify-between items-center">
             <Button
               variant="outline"
               onClick={prevQuestion}
+              disabled={currentQuestionIndex === 0}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              {currentQuestionIndex === 0 ? 'Back' : 'Previous'}
+              Previous
             </Button>
+            
+            <div className="text-sm text-gray-500">
+              Question {currentQuestionIndex + 1} of {totalQuestions}
+            </div>
             
             <Button
               onClick={nextQuestion}
               disabled={!isQuestionAnswered()}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
             >
-              {currentQuestionIndex === totalQuestions - 1 ? 'Complete Assessment' : 'Next'}
+              {currentQuestionIndex === totalQuestions - 1 ? 'Complete' : 'Next'}
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
