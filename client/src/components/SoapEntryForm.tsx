@@ -882,7 +882,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                     }
                   }}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select Bible version..." />
+                      <SelectValue placeholder={selectedVersion || "Select Bible version..."} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="KJV">KJV - King James Version</SelectItem>
@@ -906,7 +906,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                       {(isLookingUpVerse || isAutoLookingUp) && (
                         <span className="text-xs text-purple-600 font-normal flex items-center gap-1">
                           <div className="animate-spin h-3 w-3 border border-purple-600 border-t-transparent rounded-full"></div>
-                          {isAutoLookingUp ? "Auto-loading NIV..." : "Looking up..."}
+                          {isAutoLookingUp ? `Auto-loading ${selectedVersion}...` : "Looking up..."}
                         </span>
                       )}
                     </FormLabel>
@@ -916,7 +916,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                         value={field.value || ''}
                         placeholder={
                           isLookingUpVerse ? "Looking up verse..." : 
-                          isAutoLookingUp ? "Auto-loading NIV text..." :
+                          isAutoLookingUp ? `Auto-loading ${selectedVersion} text...` :
                           "Enter the Scripture passage you're reflecting on..."
                         }
                         rows={4}
@@ -930,7 +930,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                     </FormControl>
                     <p className="text-xs text-muted-foreground">
                       {isAutoLookingUp ? (
-                        <span className="text-purple-600">Auto-populating NIV text for your reference...</span>
+                        <span className="text-purple-600">Auto-populating {selectedVersion} text for your reference...</span>
                       ) : (
                         "Type a reference above (like \"John 3:16\") and NIV text will auto-load. Change version to switch translations."
                       )}
