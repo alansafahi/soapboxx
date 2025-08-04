@@ -104,10 +104,10 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
   // Initialize selectedVersion from user's Bible translation preference
   useEffect(() => {
-    if (user?.bibleTranslationPreference) {
-      setSelectedVersion(user.bibleTranslationPreference);
+    if (user && (user as any)?.bibleTranslationPreference) {
+      setSelectedVersion((user as any).bibleTranslationPreference);
     }
-  }, [user?.bibleTranslationPreference]);
+  }, [user]);
 
   const { data: churchAffiliation } = useQuery({
     queryKey: ['/api/user-profiles/church-affiliation'],
