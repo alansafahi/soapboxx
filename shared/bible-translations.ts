@@ -105,6 +105,15 @@ export const BIBLE_TRANSLATIONS: BibleTranslation[] = [
     sortOrder: 11
   },
   
+  {
+    code: 'CSB',
+    name: 'Christian Standard Bible',
+    displayName: 'CSB - Christian Standard Bible',
+    isActive: true,
+    apiSupported: true,
+    sortOrder: 12
+  },
+  
   // Future translations (inactive until API support confirmed)
   {
     code: 'AMP',
@@ -112,7 +121,7 @@ export const BIBLE_TRANSLATIONS: BibleTranslation[] = [
     displayName: 'AMP - Amplified Bible',
     isActive: false, // Disabled until API support verified
     apiSupported: false,
-    sortOrder: 12
+    sortOrder: 13
   },
   {
     code: 'MSG',
@@ -120,7 +129,7 @@ export const BIBLE_TRANSLATIONS: BibleTranslation[] = [
     displayName: 'MSG - The Message',
     isActive: false, // Disabled until API support verified
     apiSupported: false,
-    sortOrder: 13
+    sortOrder: 14
   },
   {
     code: 'NCV',
@@ -128,7 +137,7 @@ export const BIBLE_TRANSLATIONS: BibleTranslation[] = [
     displayName: 'NCV - New Century Version',
     isActive: false, // Disabled until API support verified  
     apiSupported: false,
-    sortOrder: 14
+    sortOrder: 15
   },
   {
     code: 'NRSV',
@@ -136,7 +145,7 @@ export const BIBLE_TRANSLATIONS: BibleTranslation[] = [
     displayName: 'NRSV - New Revised Standard Version',
     isActive: false, // Disabled until API support verified
     apiSupported: false,
-    sortOrder: 15
+    sortOrder: 16
   }
 ];
 
@@ -159,7 +168,9 @@ export const isValidBibleTranslation = (code: string): boolean => {
 };
 
 export const getDefaultBibleTranslation = (): string => {
-  return 'NIV'; // Most widely used translation
+  // Return the first active translation instead of hardcoding
+  const firstActive = getActiveBibleTranslations()[0];
+  return firstActive ? firstActive.code : 'NIV';
 };
 
 // Export for easy imports

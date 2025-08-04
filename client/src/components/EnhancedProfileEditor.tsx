@@ -231,8 +231,8 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
         spiritualProfile: profile.spiritualProfile || null,
         // Initialize language preference to English if null
         languagePreference: profile.languagePreference || "English",
-        // Initialize bible translation to NIV if null
-        preferredBibleTranslation: profile.preferredBibleTranslation || "NIV",
+        // Initialize bible translation to user's actual preference (no hardcoded fallback)
+        preferredBibleTranslation: profile.preferredBibleTranslation || "",
         // Initialize small group to not_interested if null
         smallGroup: profile.smallGroup || "not_interested",
       };
@@ -256,7 +256,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
           verseTextsData[index] = {
             text: verse.text || '',
             reference: verse.reference,
-            version: verse.version || 'NIV'
+            version: verse.version || profile.preferredBibleTranslation || 'NIV'
           };
         }
       });
@@ -1289,7 +1289,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                 <div>
                   <Label htmlFor="preferredBibleTranslation">Preferred Bible Translation</Label>
                   <Select 
-                    value={formData.preferredBibleTranslation || "NIV"} 
+                    value={formData.preferredBibleTranslation || ""} 
                     onValueChange={(value) => {
                       setFormData(prev => ({...prev, preferredBibleTranslation: value}));
                       // Auto-save the translation preference immediately

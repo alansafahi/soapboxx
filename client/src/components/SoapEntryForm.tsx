@@ -45,7 +45,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [pendingVerse, setPendingVerse] = useState<{ reference: string; text: string; version: string } | null>(null);
   const [isLookingUpVerse, setIsLookingUpVerse] = useState(false);
-  const [selectedVersion, setSelectedVersion] = useState('NIV'); // Temporary default, replaced by user's actual preference
+  const [selectedVersion, setSelectedVersion] = useState(''); // Will be set from user profile - no hardcoded default
   const [autoLookupTimeout, setAutoLookupTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isAutoLookingUp, setIsAutoLookingUp] = useState(false);
   
@@ -87,6 +87,19 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     },
   });
 
+  // Fetch user profile to get Bible translation preference
+  const { data: user } = useQuery({
+    queryKey: ['/api/auth/user'],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  // Initialize selectedVersion from user's profile once data is loaded
+  useEffect(() => {
+    if (user?.bibleTranslationPreference && !selectedVersion) {
+      setSelectedVersion(user.bibleTranslationPreference);
+    }
+  }, [user?.bibleTranslationPreference, selectedVersion]);
+
   // Initialize mood state from entry data
   useEffect(() => {
     if (entry?.moodTag) {
@@ -99,17 +112,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     }
   }, [entry?.moodTag]);
 
-  const { data: user } = useQuery({
-    queryKey: ['/api/auth/user'],
-  });
-
-  // Dynamically load user's current Bible translation preference
-  useEffect(() => {
-    // Always use the user's current preference, whatever it may be
-    if (user?.bibleTranslationPreference) {
-      setSelectedVersion(user.bibleTranslationPreference);
-    }
-  }, [user?.bibleTranslationPreference]);
+  // Removed duplicate user query - already defined above
 
   const { data: churchAffiliation } = useQuery({
     queryKey: ['/api/user-profiles/church-affiliation'],
