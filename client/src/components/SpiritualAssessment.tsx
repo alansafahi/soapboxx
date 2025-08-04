@@ -185,25 +185,29 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
     setResponses(newResponses);
   };
 
-  const nextQuestion = () => {
-    if (currentQuestionIndex < totalQuestions - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+  const nextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentQuestionIndex((currentPage + 1) * questionsPerPage);
     } else {
-      // Complete assessment
       onComplete({ responses });
     }
   };
 
-  const prevQuestion = () => {
-    if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
+  const prevPage = () => {
+    if (currentPage > 0) {
+      setCurrentQuestionIndex((currentPage - 1) * questionsPerPage);
     } else if (onBack) {
       onBack();
     }
   };
 
-  const isQuestionAnswered = () => {
-    return responses[currentQuestionIndex] > 0;
+  const isPageComplete = () => {
+    for (let i = startIndex; i < endIndex; i++) {
+      if (responses[i] === 0) { // 0 = not answered
+        return false;
+      }
+    }
+    return true;
   };
 
   // Track which questions are inverse statements for proper scoring
@@ -228,50 +232,72 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
     return inverseQuestions.includes(questionIndex);
   };
 
-  const renderQuestion = () => {
-    const currentQuestion = spiritualGiftsQuestions[currentQuestionIndex];
-    const currentGiftCategory = getGiftCategory(currentQuestionIndex);
-    const isInverse = isInverseQuestion(currentQuestionIndex);
+  const questionsPerPage = 5;
+  const currentPage = Math.floor(currentQuestionIndex / questionsPerPage);
+  const totalPages = Math.ceil(totalQuestions / questionsPerPage);
+  const startIndex = currentPage * questionsPerPage;
+  const endIndex = Math.min(startIndex + questionsPerPage, totalQuestions);
+  const currentPageQuestions = spiritualGiftsQuestions.slice(startIndex, endIndex);
+
+  const renderQuestionPage = () => {
+    const currentGiftCategory = getGiftCategory(startIndex);
     
     return (
       <div className="space-y-6">
         <div className="text-center space-y-2">
           <div className="text-sm text-purple-600 dark:text-purple-400 font-medium">
             {currentGiftCategory}
-            {isInverse && <span className="ml-2 text-xs text-orange-500">(Validity Check)</span>}
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            {currentQuestion}
-          </h3>
         </div>
         
-        <div className="flex justify-between items-center mb-6">
-          <span className="text-sm text-gray-500">Strongly Disagree</span>
-          <span className="text-sm text-gray-500">Strongly Agree</span>
-        </div>
-        
-        <RadioGroup 
-          value={responses[currentQuestionIndex]?.toString() || ''} 
-          onValueChange={(value) => handleResponse(currentQuestionIndex, parseInt(value))}
-        >
-          <div className="flex justify-center space-x-4">
-            {[1, 2, 3, 4, 5].map((value) => (
-              <div key={value} className="flex flex-col items-center">
-                <RadioGroupItem 
-                  value={value.toString()} 
-                  id={`option-${value}`}
-                  className="w-8 h-8 border-2 border-gray-300 rounded-full flex items-center justify-center hover:border-purple-500 transition-colors"
-                />
-                <Label 
-                  htmlFor={`option-${value}`} 
-                  className="mt-2 text-xs text-gray-600 cursor-pointer font-medium"
+        <div className="space-y-8">
+          {currentPageQuestions.map((question, index) => {
+            const absoluteIndex = startIndex + index;
+            const isInverse = isInverseQuestion(absoluteIndex);
+            
+            return (
+              <div key={absoluteIndex} className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <h3 className="text-base font-medium text-gray-900 dark:text-white flex-1 pr-4">
+                    {question}
+                    {isInverse && <span className="ml-2 text-xs text-orange-500">(Validity Check)</span>}
+                  </h3>
+                  <div className="text-xs text-purple-600 dark:text-purple-400 font-medium whitespace-nowrap">
+                    {currentGiftCategory}
+                  </div>
+                </div>
+                
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs text-gray-500">Strongly Disagree</span>
+                  <span className="text-xs text-gray-500">Strongly Agree</span>
+                </div>
+                
+                <RadioGroup 
+                  value={responses[absoluteIndex]?.toString() || ''} 
+                  onValueChange={(value) => handleResponse(absoluteIndex, parseInt(value))}
                 >
-                  {value}
-                </Label>
+                  <div className="flex justify-center space-x-4">
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <div key={value} className="flex flex-col items-center">
+                        <RadioGroupItem 
+                          value={value.toString()} 
+                          id={`q${absoluteIndex}-option-${value}`}
+                          className="w-8 h-8 border-2 border-gray-300 rounded-full flex items-center justify-center hover:border-purple-500 transition-colors"
+                        />
+                        <Label 
+                          htmlFor={`q${absoluteIndex}-option-${value}`} 
+                          className="mt-1 text-xs text-gray-600 cursor-pointer font-medium"
+                        >
+                          {value}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </RadioGroup>
               </div>
-            ))}
-          </div>
-        </RadioGroup>
+            );
+          })}
+        </div>
       </div>
     );
   };
@@ -296,7 +322,7 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
               )}
             </div>
             <div className="text-sm text-gray-500">
-              Page {Math.floor(currentQuestionIndex / 10) + 1} of 12
+              Page {currentPage + 1} of {totalPages}
             </div>
           </div>
         </CardHeader>
@@ -304,13 +330,13 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
         <CardContent className="space-y-8">
           <Progress value={progress} className="w-full h-2" />
           
-          {renderQuestion()}
+          {renderQuestionPage()}
           
           <div className="flex justify-between items-center">
             <Button
               variant="outline"
-              onClick={prevQuestion}
-              disabled={currentQuestionIndex === 0}
+              onClick={prevPage}
+              disabled={currentPage === 0}
               className="flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -318,15 +344,15 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
             </Button>
             
             <div className="text-sm text-gray-500">
-              Question {currentQuestionIndex + 1} of {totalQuestions}
+              Page {currentPage + 1} of {totalPages}
             </div>
             
             <Button
-              onClick={nextQuestion}
-              disabled={!isQuestionAnswered()}
+              onClick={nextPage}
+              disabled={!isPageComplete()}
               className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
             >
-              {currentQuestionIndex === totalQuestions - 1 ? 'Complete' : 'Next'}
+              {currentPage === totalPages - 1 ? 'Complete' : 'Next'}
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
