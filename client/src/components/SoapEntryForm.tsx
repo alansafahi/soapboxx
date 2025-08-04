@@ -20,7 +20,7 @@ import { insertSoapEntrySchema, type SoapEntry } from "../../../shared/schema";
 import { z } from "zod";
 import { moodCategories, allMoods, getMoodsByIds } from "../lib/moodCategories";
 import ExpirationSettings from "./ExpirationSettings";
-import { API_SUPPORTED_TRANSLATIONS } from "../../../shared/bible-translations";
+import { getActiveBibleTranslations } from "../../../shared/bible-translations";
 
 const formSchema = insertSoapEntrySchema.extend({
   devotionalDate: z.string(),
@@ -890,10 +890,10 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                     }
                   }}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select Bible version..." />
+                      <SelectValue placeholder={selectedVersion ? `Using ${selectedVersion}` : "Loading your preference..."} />
                     </SelectTrigger>
                     <SelectContent>
-                      {API_SUPPORTED_TRANSLATIONS.map((translation) => (
+                      {getActiveBibleTranslations().map((translation) => (
                         <SelectItem key={translation.code} value={translation.code}>
                           {translation.displayName}
                         </SelectItem>
@@ -939,7 +939,9 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                       {isAutoLookingUp ? (
                         <span className="text-purple-600">Auto-populating {selectedVersion} text for your reference...</span>
                       ) : (
-                        "Type a reference above (like \"John 3:16\") and NIV text will auto-load. Change version to switch translations."
+                        selectedVersion ? 
+                          `Type a reference above (like "John 3:16") and ${selectedVersion} text will auto-load. Change version to switch translations.` :
+                          "Type a reference above (like \"John 3:16\") and your preferred translation will auto-load."
                       )}
                     </p>
                     <FormMessage />
