@@ -625,7 +625,7 @@ export default function ProfilePage() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => window.location.href = '/spiritual-assessment-results-demo'}
+                              onClick={() => window.location.href = '/spiritual-assessment-results'}
                               className="text-xs px-3 py-1 h-7 text-purple-600 border-purple-200 hover:bg-purple-50 dark:hover:bg-purple-900/20"
                             >
                               View Full Results

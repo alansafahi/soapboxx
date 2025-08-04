@@ -971,6 +971,11 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async getUserById(userId: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    return user;
+  }
+
   async createUser(userData: any): Promise<User> {
     const [user] = await db
       .insert(users)
