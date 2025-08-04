@@ -173,17 +173,44 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   const [loadingAiAnalysis, setLoadingAiAnalysis] = useState(false);
 
   // Auto-save mutation for preferred Bible translation
-  const autoSaveMutation = useMutation({
-    mutationFn: async (updates: Partial<UserProfile>) => {
-      return await apiRequest("PATCH", `/api/users/${profile.id}`, updates);
-    },
-    onSuccess: () => {
-      // Optionally show a toast notification
-    },
-    onError: (error) => {
+  const [saving, setSaving] = useState(false);
+  
+  const autoSaveTranslation = async (translation: string) => {
+    try {
+      setSaving(true);
+      console.log('Auto-saving Bible translation:', translation);
+      
+      const response = await fetch('/api/users/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          preferredBibleTranslation: translation
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Auto-save response error:', errorText);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Auto-save successful:', result);
+      
+      // Update the form data to reflect the saved value
+      setFormData(prev => ({
+        ...prev,
+        preferredBibleTranslation: translation
+      }));
+      
+    } catch (error) {
       console.error('Auto-save failed:', error);
+    } finally {
+      setSaving(false);
     }
-  });
+  };
 
   // Update formData when profile prop changes
   useEffect(() => {
@@ -1266,10 +1293,9 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                   <Select 
                     value={formData.preferredBibleTranslation || "NIV"} 
                     onValueChange={(value) => {
-                      const newFormData = {...formData, preferredBibleTranslation: value};
-                      setFormData(newFormData);
+                      setFormData(prev => ({...prev, preferredBibleTranslation: value}));
                       // Auto-save the translation preference immediately
-                      autoSaveMutation.mutate({ preferredBibleTranslation: value });
+                      autoSaveTranslation(value);
                     }}
                   >
                     <SelectTrigger>
@@ -1282,7 +1308,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground mt-1">
-                    Default Bible version for scripture lookups {autoSaveMutation.isPending ? '(saving...)' : ''}
+                    Default Bible version for scripture lookups {saving ? '(saving...)' : ''}
                   </p>
                 </div>
                 <div>

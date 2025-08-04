@@ -7539,6 +7539,21 @@ export class DatabaseStorage implements IStorage {
       console.error('Failed to initialize badges:', error);
     }
   }
+
+  async getUserAchievements(userId: string): Promise<UserAchievement[]> {
+    try {
+      const achievements = await db
+        .select()
+        .from(userAchievements)
+        .where(eq(userAchievements.userId, userId))
+        .orderBy(desc(userAchievements.createdAt));
+      
+      return achievements;
+    } catch (error) {
+      console.error('Failed to get user achievements:', error);
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
