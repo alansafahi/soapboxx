@@ -95,10 +95,13 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
   // Initialize selectedVersion from user's profile once data is loaded
   useEffect(() => {
-    if (user?.bibleTranslationPreference && !selectedVersion) {
+    if (user?.bibleTranslationPreference) {
       setSelectedVersion(user.bibleTranslationPreference);
+    } else if (user && !user.bibleTranslationPreference) {
+      // User profile loaded but no translation preference set - keep empty
+      setSelectedVersion('');
     }
-  }, [user?.bibleTranslationPreference, selectedVersion]);
+  }, [user]);
 
   // Initialize mood state from entry data
   useEffect(() => {
@@ -844,7 +847,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                         <Input 
                           {...field} 
                           value={field.value || ''}
-                          placeholder={`e.g., John 3:16, Psalm 23:1-3 (auto-loads ${selectedVersion})`} 
+                          placeholder={selectedVersion ? `e.g., John 3:16, Psalm 23:1-3 (auto-loads ${selectedVersion})` : "e.g., John 3:16, Psalm 23:1-3"} 
                           onChange={(e) => {
                             field.onChange(e);
                             // Immediately trigger lookup when reference changes
@@ -874,7 +877,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
 
                 <FormItem>
                   <FormLabel>Look Up With</FormLabel>
-                  <Select value={selectedVersion} onValueChange={(value) => {
+                  <Select value={selectedVersion || ""} onValueChange={(value) => {
                     setSelectedVersion(value);
                     // Force immediate lookup when version is changed if there's a reference
                     const reference = form.getValues('scriptureReference');
@@ -886,7 +889,7 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
                     }
                   }}>
                     <SelectTrigger>
-                      <SelectValue placeholder={selectedVersion || "Select Bible version..."} />
+                      <SelectValue placeholder="Select Bible version..." />
                     </SelectTrigger>
                     <SelectContent>
                       {API_SUPPORTED_TRANSLATIONS.map((translation) => (
