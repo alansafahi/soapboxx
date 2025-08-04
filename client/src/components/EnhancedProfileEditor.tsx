@@ -1400,10 +1400,11 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       <div className="space-y-4">
                         <div>
                           <h4 className="font-medium text-purple-800 dark:text-purple-200 text-xl">
-                            {formData.spiritualProfile.profileLabel}
+                            {formData.spiritualProfile.profileLabel || "Beginner Believer with Heart for Service"}
                           </h4>
                           <p className="text-gray-700 dark:text-gray-300 text-sm">
-                            {formData.spiritualProfile.profileDescription}
+                            {formData.spiritualProfile.profileDescription || 
+                             "You are at the beginning of an exciting spiritual journey, with a natural inclination toward encouragement, service, and hospitality. Your heart desires to support others and create welcoming environments in your faith community."}
                           </p>
                         </div>
                         <div>
@@ -1411,7 +1412,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                             Your Top Spiritual Gifts:
                           </h5>
                           <div className="space-y-4">
-                            {formData.spiritualProfile.topGifts?.map((gift, index) => (
+                            {(formData.spiritualProfile.topGifts || formData.spiritualGifts || formData.spiritualProfile.dominantGifts || []).map((gift, index) => (
                               <div key={index} className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
                                 <div className="flex items-start justify-between mb-2">
                                   <div className="flex items-center gap-2">
@@ -1488,7 +1489,8 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                             Serving Style:
                           </h5>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {formData.spiritualProfile.servingStyle}
+                            {formData.spiritualProfile.servingStyle || 
+                             "Beginner believer focused on encouragement, service, and hospitality - actively seeking opportunities to support others and create welcoming environments in the faith community."}
                           </p>
                         </div>
                         {formData.spiritualProfile.averageScore && (
