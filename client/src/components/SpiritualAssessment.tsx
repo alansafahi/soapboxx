@@ -232,35 +232,34 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
     return inverseQuestions.includes(questionIndex);
   };
 
-  const questionsPerPage = 10; // 10 questions per gift category  
+  const questionsPerPage = 4; // 4 questions per page like 30-question format
   const currentPage = Math.floor(currentQuestionIndex / questionsPerPage);
-  const totalPages = Math.ceil(totalQuestions / questionsPerPage); // 12 pages total
+  const totalPages = Math.ceil(totalQuestions / questionsPerPage); // 30 pages total
   const startIndex = currentPage * questionsPerPage;
   const endIndex = Math.min(startIndex + questionsPerPage, totalQuestions);
   const currentPageQuestions = spiritualGiftsQuestions.slice(startIndex, endIndex);
 
   const renderQuestionPage = () => {
-    const currentGiftCategory = getGiftCategory(startIndex);
-    
     return (
       <div className="space-y-6">
-        <div className="space-y-6">
-          {currentPageQuestions.map((question, index) => {
-            const absoluteIndex = startIndex + index;
-            const isInverse = isInverseQuestion(absoluteIndex);
-            
-            return (
-              <div key={absoluteIndex} className="space-y-3">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-sm font-normal text-gray-900 dark:text-white flex-1 pr-4">
-                    {question}
-                  </h3>
-                  <div className="text-xs text-purple-600 dark:text-purple-400 font-medium whitespace-nowrap">
-                    {currentGiftCategory}
-                  </div>
+        {currentPageQuestions.map((question, index) => {
+          const absoluteIndex = startIndex + index;
+          const currentGiftCategory = getGiftCategory(absoluteIndex);
+          const isInverse = isInverseQuestion(absoluteIndex);
+          
+          return (
+            <div key={absoluteIndex} className="space-y-3">
+              <div className="flex justify-between items-start">
+                <h3 className="text-sm font-normal text-gray-900 dark:text-white flex-1 pr-4">
+                  {question}
+                </h3>
+                <div className="text-xs text-purple-600 dark:text-purple-400 font-medium whitespace-nowrap">
+                  {currentGiftCategory}
                 </div>
-                
-                <div className="flex justify-between items-center mb-2">
+              </div>
+              
+              <div className="relative">
+                <div className="flex justify-between items-center mb-4">
                   <span className="text-xs text-gray-500 font-normal">Strongly Disagree</span>
                   <span className="text-xs text-gray-500 font-normal">Strongly Agree</span>
                 </div>
@@ -269,17 +268,17 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
                   value={responses[absoluteIndex]?.toString() || ''} 
                   onValueChange={(value) => handleResponse(absoluteIndex, parseInt(value))}
                 >
-                  <div className="flex justify-center space-x-2">
+                  <div className="flex justify-between items-center px-8">
                     {[1, 2, 3, 4, 5].map((value) => (
-                      <div key={value} className="flex flex-col items-center space-y-1">
+                      <div key={value} className="relative flex items-center justify-center">
                         <RadioGroupItem 
                           value={value.toString()} 
                           id={`q${absoluteIndex}-option-${value}`}
-                          className="w-6 h-6 border-2 border-gray-300 rounded-full flex items-center justify-center hover:border-purple-500 transition-colors data-[state=checked]:border-purple-600 data-[state=checked]:bg-purple-600"
+                          className="w-8 h-8 border-2 border-gray-300 rounded-full hover:border-purple-500 transition-colors data-[state=checked]:border-purple-600 data-[state=checked]:bg-purple-600"
                         />
                         <Label 
                           htmlFor={`q${absoluteIndex}-option-${value}`} 
-                          className="text-xs text-gray-600 cursor-pointer font-normal"
+                          className="absolute inset-0 flex items-center justify-center text-xs text-gray-700 cursor-pointer font-medium data-[state=checked]:text-white"
                         >
                           {value}
                         </Label>
@@ -288,9 +287,9 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
                   </div>
                 </RadioGroup>
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
       </div>
     );
   };
