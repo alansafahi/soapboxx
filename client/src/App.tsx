@@ -76,6 +76,7 @@ const FAQPage = lazy(() => import("./pages/faq"));
 const OnboardingPage = lazy(() => import("./pages/onboarding"));
 const SpiritualAssessmentPage = lazy(() => import("./pages/spiritual-assessment"));
 const SpiritualAssessmentResultsPage = lazy(() => import("./pages/spiritual-assessment-results"));
+const SpiritualAssessmentResultsDemo = lazy(() => import("./pages/spiritual-assessment-results-demo"));
 const SelfIdentificationAssessmentPage = lazy(() => import("./pages/self-identification-assessment"));
 const ModerationDashboardPage = lazy(() => import("./pages/moderation-dashboard"));
 const DIVINEPage = lazy(() => import("./pages/ServeWellPage"));
@@ -199,6 +200,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/settings" component={SettingsPage} />
                                     <ProtectedRoute path="/spiritual-assessment" component={SpiritualAssessmentPage} />
                                     <ProtectedRoute path="/spiritual-assessment-results" component={SpiritualAssessmentResultsPage} />
+                                    <ProtectedRoute path="/spiritual-assessment-results-demo" component={SpiritualAssessmentResultsDemo} />
                                     <ProtectedRoute path="/self-identification-assessment" component={SelfIdentificationAssessmentPage} />
                                     <ProtectedRoute path="/divine" component={DIVINEPage} />
                                     

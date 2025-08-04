@@ -8,8 +8,20 @@ import SpiritualAssessmentResults from '../components/SpiritualAssessmentResults
 export default function SpiritualAssessmentResultsPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['/api/users/spiritual-assessment-results'],
-    retry: 2
+    retry: 2,
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5 // 5 minutes
   });
+
+  // Debug logging
+  React.useEffect(() => {
+    if (error) {
+      console.error('Spiritual assessment results error:', error);
+    }
+    if (data) {
+      console.log('Spiritual assessment results data:', data);
+    }
+  }, [data, error]);
 
   const handleContinue = () => {
     window.location.href = '/dashboard';
