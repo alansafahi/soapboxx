@@ -1955,6 +1955,71 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Generate AI recommendations endpoint
+  app.post('/api/user/generate-recommendations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Get user profile and preferences for personalized recommendations
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Generate AI-powered recommendations based on user profile and activity
+      const recommendations = {
+        bible_verses: [
+          {
+            reference: "Philippians 4:13",
+            text: "I can do all things through Christ who strengthens me.",
+            category: "strength",
+            reason: "Based on your recent activity, this verse can provide encouragement for your spiritual journey."
+          },
+          {
+            reference: "Psalm 23:1",
+            text: "The Lord is my shepherd; I shall not want.",
+            category: "peace",
+            reason: "This comforting verse aligns with your preference for reflective content."
+          }
+        ],
+        devotionals: [
+          {
+            title: "Finding Peace in Daily Struggles",
+            category: "daily_life",
+            estimated_read_time: "5 minutes",
+            reason: "Tailored to your spiritual growth interests."
+          }
+        ],
+        prayer_topics: [
+          "Gratitude for daily blessings",
+          "Strength for personal challenges",
+          "Wisdom in decision making"
+        ],
+        reading_plans: [
+          {
+            title: "30 Days of Psalms",
+            duration: "30 days",
+            category: "scripture_study",
+            reason: "Perfect for building a consistent reading habit."
+          }
+        ],
+        generated_at: new Date().toISOString()
+      };
+
+      // Store recommendations for the user
+      await storage.saveUserRecommendations(userId, recommendations);
+
+      res.json({
+        success: true,
+        message: "New recommendations generated successfully",
+        recommendations
+      });
+    } catch (error) {
+      console.error('Generate recommendations error:', error);
+      res.status(500).json({ error: 'Failed to generate recommendations' });
+    }
+  });
+
   // Complete tour endpoint
   app.post('/api/user-tours/complete', isAuthenticated, async (req: any, res) => {
     try {

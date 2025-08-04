@@ -142,10 +142,33 @@ export default function UserPreferences() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/user/notification-preferences"] });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Notification update error:", error);
       toast({
         title: "Error",
-        description: "Failed to update notification settings.",
+        description: error?.message || "Failed to update notification settings. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Generate AI recommendations mutation
+  const generateRecommendationsMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/user/generate-recommendations", {}),
+    onSuccess: () => {
+      toast({
+        title: "Recommendations Generated",
+        description: "New personalized recommendations have been created for you.",
+      });
+      // Invalidate related queries to refresh recommendations
+      queryClient.invalidateQueries({ queryKey: ["/api/user/recommendations"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/content/personalized"] });
+    },
+    onError: (error: any) => {
+      console.error("Generate recommendations error:", error);
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to generate recommendations. Please try again.",
         variant: "destructive",
       });
     },
@@ -199,6 +222,10 @@ export default function UserPreferences() {
     const newNotificationPrefs = { ...notificationPrefs, [key]: value };
     setNotificationPrefs(newNotificationPrefs);
     updateNotificationsMutation.mutate({ [key]: value });
+  };
+
+  const handleGenerateRecommendations = () => {
+    generateRecommendationsMutation.mutate();
   };
 
   const addPrayerTime = () => {
@@ -698,9 +725,14 @@ export default function UserPreferences() {
                     </ul>
                   </div>
                   
-                  <Button className="w-full" variant="outline">
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={handleGenerateRecommendations}
+                    disabled={generateRecommendationsMutation.isPending}
+                  >
                     <Brain className="h-4 w-4 mr-2" />
-                    Generate New Recommendations
+                    {generateRecommendationsMutation.isPending ? "Generating..." : "Generate New Recommendations"}
                   </Button>
                 </div>
               </CardContent>
@@ -726,16 +758,18 @@ export default function UserPreferences() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="es">Español</SelectItem>
-                      <SelectItem value="fr">Français</SelectItem>
-                      <SelectItem value="de">Deutsch</SelectItem>
-                      <SelectItem value="pt">Português</SelectItem>
-                      <SelectItem value="zh">中文</SelectItem>
-                      <SelectItem value="ko">한국어</SelectItem>
-                      <SelectItem value="ja">日本語</SelectItem>
-                      <SelectItem value="ar">العربية</SelectItem>
-                      <SelectItem value="hi">हिन्दी</SelectItem>
+                      <SelectItem value="en">🇺🇸 English</SelectItem>
+                      <SelectItem value="es">🇪🇸 Español</SelectItem>
+                      <SelectItem value="fr">🇫🇷 Français</SelectItem>
+                      <SelectItem value="de">🇩🇪 Deutsch</SelectItem>
+                      <SelectItem value="pt">🇵🇹 Português</SelectItem>
+                      <SelectItem value="zh">🇨🇳 中文</SelectItem>
+                      <SelectItem value="fa">🇮🇷 فارسی (Farsi)</SelectItem>
+                      <SelectItem value="hy">🇦🇲 Հայերեն (Armenian)</SelectItem>
+                      <SelectItem value="ar">🇸🇦 العربية</SelectItem>
+                      <SelectItem value="ko">🇰🇷 한국어</SelectItem>
+                      <SelectItem value="ja">🇯🇵 日本語</SelectItem>
+                      <SelectItem value="hi">🇮🇳 हिन्दी</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

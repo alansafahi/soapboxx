@@ -7917,6 +7917,50 @@ export class DatabaseStorage implements IStorage {
       return [];
     }
   }
+
+  // User recommendations methods
+  async saveUserRecommendations(userId: string, recommendations: any): Promise<void> {
+    try {
+      // For now, we'll store recommendations in the user personalization table
+      // In production, you might want a dedicated recommendations table
+      await db
+        .insert(userPersonalization)
+        .values({
+          userId,
+          preferences: JSON.stringify(recommendations),
+          updatedAt: new Date()
+        })
+        .onConflictDoUpdate({
+          target: [userPersonalization.userId],
+          set: {
+            preferences: JSON.stringify(recommendations),
+            updatedAt: new Date()
+          }
+        });
+    } catch (error) {
+      console.error('Error saving user recommendations:', error);
+      throw error;
+    }
+  }
+
+  async getUserRecommendations(userId: string): Promise<any> {
+    try {
+      const result = await db
+        .select()
+        .from(userPersonalization)
+        .where(eq(userPersonalization.userId, userId))
+        .limit(1);
+      
+      if (result.length === 0) {
+        return null;
+      }
+      
+      return JSON.parse(result[0].preferences || '{}');
+    } catch (error) {
+      console.error('Error getting user recommendations:', error);
+      return null;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
