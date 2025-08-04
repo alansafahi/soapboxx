@@ -232,9 +232,9 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
     return inverseQuestions.includes(questionIndex);
   };
 
-  const questionsPerPage = 4; // 4 questions per page like 30-question format
+  const questionsPerPage = 5; // 5 questions per page like 30-question format
   const currentPage = Math.floor(currentQuestionIndex / questionsPerPage);
-  const totalPages = Math.ceil(totalQuestions / questionsPerPage); // 30 pages total
+  const totalPages = Math.ceil(totalQuestions / questionsPerPage); // 24 pages total
   const startIndex = currentPage * questionsPerPage;
   const endIndex = Math.min(startIndex + questionsPerPage, totalQuestions);
   const currentPageQuestions = spiritualGiftsQuestions.slice(startIndex, endIndex);
