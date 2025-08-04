@@ -204,7 +204,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
   };
 
   const autoSaveSmallGroup = (smallGroup: string) => {
-    autoSavePreference('smallGroup', smallGroup);
+    autoSavePreference('smallGroupParticipation', smallGroup);
   };
 
   // Update formData when profile prop changes
@@ -233,9 +233,9 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
         // Initialize language preference to English if null
         languagePreference: profile.languagePreference || "English",
         // Initialize bible translation to user's actual preference (no hardcoded fallback)
-        preferredBibleTranslation: profile.preferredBibleTranslation || "",
+        bibleTranslationPreference: profile.bibleTranslationPreference || "",
         // Initialize small group to not_interested if null
-        smallGroup: profile.smallGroup || "not_interested",
+        smallGroupParticipation: profile.smallGroupParticipation || "not_interested",
       };
       
       setFormData(initializedProfile);
@@ -257,7 +257,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
           verseTextsData[index] = {
             text: verse.text || '',
             reference: verse.reference,
-            version: verse.version || profile.preferredBibleTranslation || 'NIV'
+            version: verse.version || profile.bibleTranslationPreference || 'NIV'
           };
         }
       });
@@ -1292,9 +1292,9 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                 <div>
                   <Label htmlFor="preferredBibleTranslation">Preferred Bible Translation</Label>
                   <Select 
-                    value={formData.preferredBibleTranslation || ""} 
+                    value={formData.bibleTranslationPreference || ""} 
                     onValueChange={(value) => {
-                      setFormData(prev => ({...prev, preferredBibleTranslation: value}));
+                      setFormData(prev => ({...prev, bibleTranslationPreference: value}));
                       // Auto-save the translation preference immediately
                       autoSaveTranslation(value);
                     }}
@@ -1315,9 +1315,9 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                 <div>
                   <Label htmlFor="smallGroup">Small Group Participation</Label>
                   <Select 
-                    value={formData.smallGroup || "not_interested"} 
+                    value={formData.smallGroupParticipation || "not_interested"} 
                     onValueChange={(value) => {
-                      setFormData(prev => ({...prev, smallGroup: value}));
+                      setFormData(prev => ({...prev, smallGroupParticipation: value}));
                       // Auto-save the small group preference immediately
                       autoSaveSmallGroup(value);
                     }}
