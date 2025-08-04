@@ -258,17 +258,14 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
                 </div>
               </div>
               
-              <div className="relative">
-                <div className="flex justify-between items-center mb-4">
+              <RadioGroup 
+                value={responses[absoluteIndex]?.toString() || ''} 
+                onValueChange={(value) => handleResponse(absoluteIndex, parseInt(value))}
+              >
+                <div className="flex justify-between items-center">
                   <span className="text-xs text-gray-500 font-normal">Strongly Disagree</span>
-                  <span className="text-xs text-gray-500 font-normal">Strongly Agree</span>
-                </div>
-                
-                <RadioGroup 
-                  value={responses[absoluteIndex]?.toString() || ''} 
-                  onValueChange={(value) => handleResponse(absoluteIndex, parseInt(value))}
-                >
-                  <div className="flex justify-between items-center px-8">
+                  
+                  <div className="flex items-center space-x-4">
                     {[1, 2, 3, 4, 5].map((value) => (
                       <div key={value} className="relative flex items-center justify-center">
                         <RadioGroupItem 
@@ -285,8 +282,10 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
                       </div>
                     ))}
                   </div>
-                </RadioGroup>
-              </div>
+                  
+                  <span className="text-xs text-gray-500 font-normal">Strongly Agree</span>
+                </div>
+              </RadioGroup>
             </div>
           );
         })}
