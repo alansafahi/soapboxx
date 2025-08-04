@@ -1039,6 +1039,7 @@ export class DatabaseStorage implements IStorage {
       if ((profileData as any).spiritualStage !== undefined) updateData.spiritualStage = (profileData as any).spiritualStage;
       if ((profileData as any).preferredBibleTranslation !== undefined) updateData.preferredBibleTranslation = (profileData as any).preferredBibleTranslation;
       if ((profileData as any).languagePreference !== undefined) updateData.languagePreference = (profileData as any).languagePreference;
+      if ((profileData as any).smallGroup !== undefined) updateData.smallGroup = (profileData as any).smallGroup;
       
       // Social and ministry fields
       if ((profileData as any).favoriteScriptures !== undefined) updateData.favoriteScriptures = (profileData as any).favoriteScriptures;
