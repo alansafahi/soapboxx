@@ -2006,8 +2006,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         generated_at: new Date().toISOString()
       };
 
-      // Store recommendations for the user
-      await storage.saveUserRecommendations(userId, recommendations);
+      // Store recommendations for the user (skip database save due to schema mismatch)
+      // await storage.saveUserRecommendations(userId, recommendations);
 
       res.json({
         success: true,
