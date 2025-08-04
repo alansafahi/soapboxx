@@ -569,23 +569,34 @@ const sanitizeContent = (content: string): string => {
 
 ## Production Code Quality Standards
 
-### Rule SBX-STD-004: No Hardcoding Allowed in Production
+### Rule SBX-STD-004: No Hardcoding or Placeholder Data in Production
 
-**Rule Title:** No Hardcoding in Production  
-**Scope:** All frontend and backend codebases in the SoapBox Super App project  
+**Rule Title:** No Hardcoding or Placeholder Data in Production  
+**Scope:** Applies to all environments beyond local development, including staging, production, and public-facing test environments  
 **Priority:** Critical
 
 #### Rule Description
-Developers must not use hardcoded values (e.g., static user IDs, default reading plans, fixed environment strings, API keys, or placeholder logic) in staging or production environments.
+Developers must not include hardcoded values, placeholder data, or randomly generated test content in staging or production environments. This includes, but is not limited to:
 
-**Temporary Usage Allowed:**
-- During active testing/debugging in local development
-- Within protected test environments
+- Static user IDs
+- Fixed reading plan IDs  
+- Default role assignments
+- Dummy prayer requests or SOAP entries
+- Placeholder profile photos or names
+- Randomized values (e.g., Math.random(), lorem ipsum) used for testing
 
-**Mandatory Removal Before:**
-- Committing to the staging branch
-- Pushing to production (main or release branches)  
-- Generating production builds in Replit or any CI/CD pipeline
+#### ✅ Allowed During Testing Only
+You may use hardcoded or dummy data during local development and testing, provided that:
+- It is explicitly labeled or isolated (e.g., `if (process.env.NODE_ENV === 'development')`)
+- It is fully removed or replaced with dynamic, user-generated, or system-derived values before merging to staging or production
+
+#### 🧠 What To Use Instead
+| Instead of... | Use... |
+|---------------|---------|
+| `userId = 'abc123'` | `getCurrentUserId()` from auth session |
+| `readingPlanId = 1` | Retrieve from database based on user selection |
+| `name = 'John Doe'` | Use actual profile fields or fallback to anonymized user display name |
+| `Math.random()` in production | Remove or replace with meaningful system-generated defaults |
 
 #### Compliant Alternatives
 ```typescript
@@ -602,26 +613,31 @@ const defaultPlan = await storage.getDefaultReadingPlan(user.id);
 const enableFeature = await storage.getUserFeatureFlag(userId, 'advanced_mode');
 ```
 
-#### Violation Examples
+#### 🚫 Example Violations
 ```typescript
-// ❌ FORBIDDEN: Hardcoded user data
+// BAD – production hardcoded fallback
+const planId = 1;
+
+// BAD – fake name in staging
+const name = "Jane Placeholder";
+
+// BAD – random ID for production testing
+const trackingId = "demo-" + Math.floor(Math.random() * 10000);
+
+// BAD – lorem ipsum content
+const description = "Lorem ipsum dolor sit amet...";
+
+// BAD – hardcoded user data
 const userId = 'abc123';
-const planId = 3;
 
-// ❌ FORBIDDEN: Static role assignment
-const role = 'admin';
-
-// ❌ FORBIDDEN: Embedded API keys
+// BAD – embedded API keys
 const openaiKey = 'sk-abc123...';
-
-// ❌ FORBIDDEN: Fixed configuration
-const bibleVersion = 'NKJV';
 ```
 
-#### Enforcement Policy
-- Pull requests automatically flagged for hardcoded values
-- Code review rejection for violations
-- CI/CD deployment blocks for non-compliant code
+#### 🔁 Enforcement Guidelines
+- Code reviews must verify removal of all hardcoded, placeholder, or dummy values
+- CI/CD pipelines should reject builds if artifacts include strings like 'Lorem Ipsum', 'test-user', 'planId = 1', or `Math.random()` in production code
+- Feature flags or test environments should be used for internal demos instead
 - All hardcoded logic must use dynamic alternatives
 
 ---
