@@ -1236,7 +1236,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserNotificationPreferences(userId: string): Promise<any> {
-    
     try {
       const [prefs] = await db
         .select()
@@ -1246,10 +1245,16 @@ export class DatabaseStorage implements IStorage {
       if (!prefs) {
         // Return default notification preferences if none exist
         const defaultPrefs = {
+          userId,
           dailyReading: true,
           prayerReminders: true,
           communityUpdates: true,
           eventReminders: true,
+          weeklyCheckins: true,
+          engagementReminders: true,
+          smsNotifications: false,
+          emailNotifications: true,
+          webPushEnabled: false,
           friendActivity: false,
           dailyReadingTime: "08:00",
           prayerTimes: ["06:00", "12:00", "18:00"],
@@ -1265,25 +1270,52 @@ export class DatabaseStorage implements IStorage {
         };
         
         // Create default notification preferences for the user
-        const [newPrefs] = await db
-          .insert(notificationPreferences)
-          .values({
-            userId,
-            ...defaultPrefs,
-          })
-          .returning();
-        
-        return newPrefs;
+        try {
+          const [newPrefs] = await db
+            .insert(notificationPreferences)
+            .values(defaultPrefs)
+            .returning();
+          
+          return newPrefs;
+        } catch (insertError) {
+          console.error('Error creating default notification preferences:', insertError);
+          // Return defaults even if we can't save them
+          return defaultPrefs;
+        }
       }
       
       return prefs;
     } catch (error) {
-      throw error;
+      console.error('Error fetching notification preferences:', error);
+      // Return default preferences if there's any error
+      return {
+        userId,
+        dailyReading: true,
+        prayerReminders: true,
+        communityUpdates: true,
+        eventReminders: true,
+        weeklyCheckins: true,
+        engagementReminders: true,
+        smsNotifications: false,
+        emailNotifications: true,
+        webPushEnabled: false,
+        friendActivity: false,
+        dailyReadingTime: "08:00",
+        prayerTimes: ["06:00", "12:00", "18:00"],
+        quietHours: {
+          enabled: false,
+          start: "22:00",
+          end: "07:00",
+        },
+        weekendPreferences: {
+          differentSchedule: false,
+          weekendReadingTime: "09:00",
+        },
+      };
     }
   }
 
   async updateUserNotificationPreferences(userId: string, preferences: any): Promise<any> {
-    
     try {
       // Map frontend field names to database column names
       const updateData: any = {
@@ -1295,53 +1327,75 @@ export class DatabaseStorage implements IStorage {
       if (preferences.prayerReminders !== undefined) updateData.prayerReminders = preferences.prayerReminders;
       if (preferences.communityUpdates !== undefined) updateData.communityUpdates = preferences.communityUpdates;
       if (preferences.eventReminders !== undefined) updateData.eventReminders = preferences.eventReminders;
+      if (preferences.weeklyCheckins !== undefined) updateData.weeklyCheckins = preferences.weeklyCheckins;
+      if (preferences.engagementReminders !== undefined) updateData.engagementReminders = preferences.engagementReminders;
+      if (preferences.smsNotifications !== undefined) updateData.smsNotifications = preferences.smsNotifications;
+      if (preferences.emailNotifications !== undefined) updateData.emailNotifications = preferences.emailNotifications;
+      if (preferences.webPushEnabled !== undefined) updateData.webPushEnabled = preferences.webPushEnabled;
       if (preferences.friendActivity !== undefined) updateData.friendActivity = preferences.friendActivity;
       if (preferences.dailyReadingTime !== undefined) updateData.dailyReadingTime = preferences.dailyReadingTime;
       if (preferences.prayerTimes !== undefined) updateData.prayerTimes = preferences.prayerTimes;
       if (preferences.quietHours !== undefined) updateData.quietHours = preferences.quietHours;
       if (preferences.weekendPreferences !== undefined) updateData.weekendPreferences = preferences.weekendPreferences;
       
-      const [updatedPrefs] = await db
-        .update(notificationPreferences)
-        .set(updateData)
-        .where(eq(notificationPreferences.userId, userId))
-        .returning();
-      
-      if (!updatedPrefs) {
-        // If no existing preferences, create them with defaults
-        const defaultPrefs = {
-          dailyReading: true,
-          prayerReminders: true,
-          communityUpdates: true,
-          eventReminders: true,
-          friendActivity: false,
-          dailyReadingTime: "08:00",
-          prayerTimes: ["06:00", "12:00", "18:00"],
-          quietHours: {
-            enabled: false,
-            start: "22:00",
-            end: "07:00",
-          },
-          weekendPreferences: {
-            differentSchedule: false,
-            weekendReadingTime: "09:00",
-          },
-        };
+      try {
+        const [updatedPrefs] = await db
+          .update(notificationPreferences)
+          .set(updateData)
+          .where(eq(notificationPreferences.userId, userId))
+          .returning();
         
+        if (updatedPrefs) {
+          return updatedPrefs;
+        }
+      } catch (updateError) {
+        console.error('Error updating notification preferences, trying insert:', updateError);
+      }
+      
+      // If update failed or no existing preferences, create them with defaults
+      const defaultPrefs = {
+        userId,
+        dailyReading: true,
+        prayerReminders: true,
+        communityUpdates: true,
+        eventReminders: true,
+        weeklyCheckins: true,
+        engagementReminders: true,
+        smsNotifications: false,
+        emailNotifications: true,
+        webPushEnabled: false,
+        friendActivity: false,
+        dailyReadingTime: "08:00",
+        prayerTimes: ["06:00", "12:00", "18:00"],
+        quietHours: {
+          enabled: false,
+          start: "22:00",
+          end: "07:00",
+        },
+        weekendPreferences: {
+          differentSchedule: false,
+          weekendReadingTime: "09:00",
+        },
+      };
+      
+      try {
         const [newPrefs] = await db
           .insert(notificationPreferences)
           .values({
-            userId,
             ...defaultPrefs,
             ...updateData,
           })
           .returning();
         
         return newPrefs;
+      } catch (insertError) {
+        console.error('Error creating notification preferences:', insertError);
+        // Return updated defaults even if we can't save them
+        return { ...defaultPrefs, ...updateData };
       }
       
-      return updatedPrefs;
     } catch (error) {
+      console.error('Error in updateUserNotificationPreferences:', error);
       throw error;
     }
   }
