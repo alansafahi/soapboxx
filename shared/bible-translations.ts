@@ -106,14 +106,21 @@ export const BIBLE_TRANSLATIONS: BibleTranslation[] = [
     apiSupported: false, // ⚠️ Limited: AI/SoapBox fallback only
     sortOrder: 11
   },
-  
+  {
+    code: 'LSB',
+    name: 'Legacy Standard Bible',
+    displayName: 'LSB - Legacy Standard Bible ⚠️',
+    isActive: true,
+    apiSupported: false, // ⚠️ Limited: AI/SoapBox fallback only
+    sortOrder: 12
+  },
   {
     code: 'CSB',
     name: 'Christian Standard Bible',
     displayName: 'CSB - Christian Standard Bible ⚠️',
     isActive: true,
     apiSupported: false, // ⚠️ Limited: AI/SoapBox fallback only
-    sortOrder: 12
+    sortOrder: 13
   },
   
   // Future translations (inactive until API support confirmed)
@@ -123,7 +130,7 @@ export const BIBLE_TRANSLATIONS: BibleTranslation[] = [
     displayName: 'AMP - Amplified Bible',
     isActive: false, // Disabled until API support verified
     apiSupported: false,
-    sortOrder: 13
+    sortOrder: 14
   },
   {
     code: 'MSG',
@@ -131,7 +138,7 @@ export const BIBLE_TRANSLATIONS: BibleTranslation[] = [
     displayName: 'MSG - The Message',
     isActive: false, // Disabled until API support verified
     apiSupported: false,
-    sortOrder: 14
+    sortOrder: 15
   },
   {
     code: 'NCV',
@@ -139,7 +146,7 @@ export const BIBLE_TRANSLATIONS: BibleTranslation[] = [
     displayName: 'NCV - New Century Version',
     isActive: false, // Disabled until API support verified  
     apiSupported: false,
-    sortOrder: 15
+    sortOrder: 16
   },
   {
     code: 'NRSV',
@@ -147,7 +154,7 @@ export const BIBLE_TRANSLATIONS: BibleTranslation[] = [
     displayName: 'NRSV - New Revised Standard Version',
     isActive: false, // Disabled until API support verified
     apiSupported: false,
-    sortOrder: 16
+    sortOrder: 17
   }
 ];
 
