@@ -213,15 +213,20 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
   // Track which questions are inverse statements for proper scoring
   const inverseQuestions = [2, 5, 7, 12, 15, 17, 22, 25, 28, 32, 35, 38, 42, 45, 48, 52, 55, 58, 62, 65, 68, 72, 75, 78, 82, 85, 88, 92, 95, 98, 102, 105, 108, 112, 115, 118];
 
-  // Mixed categories array created from the shuffled questions
-  const giftCategories = [
-    "Leadership", "Teaching", "Mercy", "Administration", "Evangelism", "Service", 
-    "Encouragement", "Giving", "Hospitality", "Faith", "Wisdom", "Prayer"
-  ];
-
   const getGiftCategory = (questionIndex: number) => {
-    // Since questions are now mixed, we cycle through categories
-    return giftCategories[questionIndex % giftCategories.length];
+    // Questions are still grouped by category in blocks of 10
+    if (questionIndex < 10) return "Leadership";
+    if (questionIndex < 20) return "Teaching";
+    if (questionIndex < 30) return "Mercy";
+    if (questionIndex < 40) return "Administration";
+    if (questionIndex < 50) return "Evangelism";
+    if (questionIndex < 60) return "Service";
+    if (questionIndex < 70) return "Encouragement";
+    if (questionIndex < 80) return "Giving";
+    if (questionIndex < 90) return "Hospitality";
+    if (questionIndex < 100) return "Faith";
+    if (questionIndex < 110) return "Wisdom";
+    return "Prayer";
   };
 
   const isInverseQuestion = (questionIndex: number) => {
