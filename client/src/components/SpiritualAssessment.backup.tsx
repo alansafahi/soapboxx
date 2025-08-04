@@ -225,6 +225,122 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
   };
 
   const { questions: spiritualGiftsQuestions, categories: questionCategories } = createMixedAssessment();
+    "I prefer to help people one-on-one rather than in groups.",
+    "I am a good listener when people need to talk.",
+    "Other people's emotional problems don't really affect me.", // INVERSE
+    "I am patient with people who are struggling.",
+    "I feel called to comfort those who are grieving.",
+    "I find it uncomfortable when people share their problems with me.", // INVERSE
+    "I remember people's personal struggles and check on them.",
+
+    // Administration (Questions 31-40)
+    "I enjoy organizing events and making sure details are covered.",
+    "I am good at creating systems that help things run smoothly.",
+    "I prefer spontaneity over detailed planning.", // INVERSE
+    "I am comfortable managing budgets and keeping track of expenses.",
+    "I enjoy coordinating schedules and logistics for others.",
+    "Details and organization are not important to me.", // INVERSE
+    "I like to plan ahead and prepare for potential problems.",
+    "I am good at keeping records and maintaining files.",
+    "I find administrative tasks boring and tedious.", // INVERSE
+    "I am efficient at managing time and resources.",
+
+    // Evangelism (Questions 41-50)
+    "I enjoy sharing my faith with people who don't know Jesus.",
+    "I look for opportunities to tell others about God's love.",
+    "I feel uncomfortable discussing spiritual matters with non-believers.", // INVERSE
+    "I feel burdened for people who don't have a relationship with God.",
+    "I enjoy inviting people to church or Christian events.",
+    "I prefer to keep my faith private rather than share it.", // INVERSE
+    "I can easily relate to people from different backgrounds.",
+    "I enjoy reading books about how to share my faith effectively.",
+    "I worry about offending people if I talk about Jesus.", // INVERSE
+    "I get excited when I hear about people coming to faith.",
+
+    // Service/Helps (Questions 51-60)
+    "I enjoy doing practical tasks that help others.",
+    "I am happy to work behind the scenes without recognition.",
+    "I prefer tasks that give me public recognition and visibility.", // INVERSE
+    "I notice when things need to be done and am willing to do them.",
+    "I am good with my hands and enjoy practical projects.",
+    "I avoid manual or physical work whenever possible.", // INVERSE
+    "I enjoy setting up for events and cleaning up afterwards.",
+    "I like to help in ways that free others to use their gifts.",
+    "I expect others to handle practical tasks while I focus on more important things.", // INVERSE
+    "I feel fulfilled when I can make someone's day easier.",
+
+    // Encouragement/Exhortation (Questions 61-70)
+    "I enjoy motivating others to grow in their faith.",
+    "I can see potential in people and help them develop it.",
+    "I find it difficult to stay positive when helping others through challenges.", // INVERSE
+    "I enjoy mentoring and discipling other believers.",
+    "I can help people see solutions to their problems.",
+    "I tend to focus on people's weaknesses rather than their strengths.", // INVERSE
+    "I enjoy coaching others to reach their goals.",
+    "I am comfortable challenging people to take the next step.",
+    "I avoid confronting people even when they need encouragement to grow.", // INVERSE
+    "I enjoy seeing others succeed and reach their potential.",
+
+    // Giving (Questions 71-80)
+    "I enjoy giving generously to support God's work.",
+    "I look for opportunities to meet financial needs I become aware of.",
+    "I believe I should hold onto my money for my own security first.", // INVERSE
+    "I get more joy from giving than from receiving.",
+    "I prefer to give anonymously without recognition.",
+    "I only give when I know I'll receive public acknowledgment.", // INVERSE
+    "I am willing to sacrifice personal comforts to give more.",
+    "I feel led to give to specific needs or ministries.",
+    "I find it difficult to part with my money, even for good causes.", // INVERSE
+    "I see my possessions as belonging to God, not to me.",
+
+    // Hospitality (Questions 81-90)
+    "I enjoy having people in my home.",
+    "I like to make visitors feel welcome and comfortable.",
+    "I prefer to keep my personal space private and not entertain guests.", // INVERSE
+    "I am good at creating a warm, inviting atmosphere.",
+    "I notice when someone is alone and try to include them.",
+    "I tend to stick with my close friends rather than welcoming newcomers.", // INVERSE
+    "I am comfortable entertaining people I don't know well.",
+    "I enjoy planning social gatherings for my friends.",
+    "I find hosting events stressful and prefer to attend rather than host.", // INVERSE
+    "I am naturally hospitable and enjoy serving others.",
+
+    // Faith (Questions 91-100)
+    "I believe God can do miraculous things in response to prayer.",
+    "I am willing to step out in faith when others hesitate.",
+    "I prefer to see concrete proof before I trust God for big things.", // INVERSE
+    "I enjoy praying for big, seemingly impossible requests.",
+    "I encourage others to trust God in difficult situations.",
+    "I tend to worry and doubt when facing uncertain situations.", // INVERSE
+    "I have seen God answer prayers in remarkable ways.",
+    "I believe God's promises even when I can't see how they'll be fulfilled.",
+    "I need to have backup plans because I can't fully rely on God's provision.", // INVERSE
+    "I inspire others to have greater faith in God's power.",
+
+    // Wisdom (Questions 101-110)
+    "People often come to me for advice about important decisions.",
+    "I can usually see the best course of action in complex situations.",
+    "I prefer to avoid giving advice because I might be wrong.", // INVERSE
+    "I can often see the long-term consequences of decisions.",
+    "I enjoy helping people think through difficult problems.",
+    "I find it overwhelming when people ask me for guidance on important matters.", // INVERSE
+    "I have insight into how biblical principles apply to modern situations.",
+    "I am good at mediating conflicts between people.",
+    "I try to stay out of other people's disputes and problems.", // INVERSE
+    "I often have a sense of what God wants in a particular situation.",
+
+    // Intercession/Prayer (Questions 111-120)
+    "I enjoy spending extended time in prayer.",
+    "I often feel led to pray for specific people or situations.",
+    "I find it difficult to concentrate during long prayer times.", // INVERSE
+    "I keep prayer lists and pray for people regularly.",
+    "I feel called to pray for church leaders and ministries.",
+    "I prefer brief prayers rather than extended intercession.", // INVERSE
+    "I often wake up with someone on my heart to pray for.",
+    "I believe prayer is one of the most important ministries.",
+    "I find intercessory prayer boring and prefer other forms of ministry.", // INVERSE
+    "I have seen God work in powerful ways through prayer."
+  ];
 
   const [responses, setResponses] = useState<number[]>(new Array(120).fill(0)); // 0 = not answered, 1-5 = scale responses
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -337,88 +453,61 @@ export default function SpiritualAssessment({ onComplete, onBack, userRole }: Sp
   };
 
   return (
-    <Card className="w-full max-w-4xl mx-auto bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700">
-      <CardHeader className="space-y-4 pb-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-              <Heart className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+    <div className="max-w-4xl mx-auto p-6">
+      <Card>
+        <CardHeader>
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto">
+              <Target className="w-8 h-8 text-white" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
-                Spiritual Gifts Assessment
-              </CardTitle>
-              <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <CardTitle className="text-2xl mb-2">Spiritual Gifts Assessment</CardTitle>
+              <p className="text-gray-600 dark:text-gray-300">
                 Discover your God-given spiritual gifts and find your perfect ministry fit (120 questions)
-              </CardDescription>
+              </p>
+              {isRoleMandatory && (
+                <p className="text-sm text-orange-600 dark:text-orange-400 mt-2">
+                  Required for Church Leadership roles
+                </p>
+              )}
+            </div>
+            <div className="text-sm text-gray-500">
+              Page {currentPage + 1} of {totalPages}
             </div>
           </div>
-        </div>
+        </CardHeader>
         
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-gray-600 dark:text-gray-400">
-              Page {currentPage + 1} of {totalPages}
-            </span>
-            <span className="text-gray-600 dark:text-gray-400">
-              {Math.round(progress)}% Complete
-            </span>
-          </div>
+        <CardContent className="space-y-8">
           <Progress value={progress} className="w-full h-2" />
-        </div>
-
-        {!isRoleMandatory && (
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              <span className="font-medium">Optional Assessment:</span> This comprehensive assessment helps us provide personalized spiritual content and ministry recommendations.
-            </p>
-          </div>
-        )}
-
-        {isRoleMandatory && (
-          <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
-            <p className="text-sm text-purple-800 dark:text-purple-200">
-              <span className="font-medium">Required for Church Administration:</span> This assessment helps us provide leadership insights and ministry placement recommendations.
-            </p>
-          </div>
-        )}
-      </CardHeader>
-
-      <CardContent className="space-y-6">
-        {renderQuestionPage()}
-        
-        <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-          <Button
-            variant="outline"
-            onClick={prevPage}
-            className="flex items-center space-x-2 px-4 py-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>{currentPage === 0 ? 'Back' : 'Previous'}</span>
-          </Button>
           
-          <div className="flex items-center space-x-4">
-            {!isRoleMandatory && (
-              <Button
-                variant="ghost"
-                onClick={() => onComplete({ responses })}
-                className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-              >
-                Skip Assessment
-              </Button>
-            )}
+          {renderQuestionPage()}
+          
+          <div className="flex justify-between items-center">
+            <Button
+              variant="outline"
+              onClick={prevPage}
+              disabled={currentPage === 0}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Previous
+            </Button>
+            
+            <div className="text-sm text-gray-500">
+              Page {currentPage + 1} of {totalPages}
+            </div>
             
             <Button
               onClick={nextPage}
               disabled={!isPageComplete()}
-              className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white"
+              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
             >
-              <span>{currentPage === totalPages - 1 ? 'Complete Assessment' : 'Next'}</span>
-              <ArrowRight className="h-4 w-4" />
+              {currentPage === totalPages - 1 ? 'Complete' : 'Next'}
+              <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
