@@ -1365,7 +1365,9 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                     variant="outline"
                     size="sm"
                     onClick={addFavoriteVerse}
+                    className="w-full sm:w-auto bg-purple-50 hover:bg-purple-100 border-purple-300 text-purple-700 dark:bg-purple-900/20 dark:hover:bg-purple-900/40 dark:border-purple-600 dark:text-purple-300"
                   >
+                    <Plus className="w-4 h-4 mr-2" />
                     Add Favorite Verse
                   </Button>
                 </div>
