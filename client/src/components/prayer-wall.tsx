@@ -26,6 +26,14 @@ import type { PrayerRequest } from "../../../shared/schema";
 import SmartScriptureTextarea from "./SmartScriptureTextarea";
 import { ScriptureExpandedText } from "./ScriptureExpandedText";
 
+// Extended type for prayer requests with author information from the server
+interface PrayerRequestWithAuthor extends PrayerRequest {
+  authorProfileImageUrl?: string;
+  authorFirstName?: string;
+  authorLastName?: string;
+  authorEmail?: string;
+}
+
 const prayerRequestSchema = z.object({
   title: z.string().optional(),
   content: z.string().min(1, "Prayer request content is required"),
@@ -33,6 +41,7 @@ const prayerRequestSchema = z.object({
   category: z.string().default("general"),
   churchId: z.number().optional(),
   isPublic: z.boolean().default(true),
+  privacyLevel: z.string().default("public"), // public, community, prayer_team, pastor_only
   isUrgent: z.boolean().default(false),
 });
 
@@ -57,6 +66,13 @@ const prayerCategories = [
   { id: 'family', label: 'Family', icon: '👨‍👩‍👧‍👦', color: 'green' },
   { id: 'urgent', label: 'Urgent', icon: '⚡', color: 'yellow' },
   { id: 'general', label: 'General', icon: '🤲', color: 'gray' },
+];
+
+const privacyLevels = [
+  { value: 'public', label: 'Public', description: 'Visible to everyone in the community', icon: '🌐' },
+  { value: 'community', label: 'My Community', description: 'Only visible to your church members', icon: '⛪' },
+  { value: 'prayer_team', label: 'Prayer Circle/Team', description: 'Only visible to prayer team members', icon: '🔗' },
+  { value: 'pastor_only', label: 'My Pastor/Priest', description: 'Only visible to church leadership', icon: '✝️' },
 ];
 
 interface PrayerWallProps {
@@ -99,11 +115,12 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
       category: "general",
       churchId: undefined,
       isPublic: true,
+      privacyLevel: "public",
     },
   });
 
   // Fetch prayer requests
-  const { data: prayerRequests = [], isLoading } = useQuery<PrayerRequest[]>({
+  const { data: prayerRequests = [], isLoading } = useQuery<PrayerRequestWithAuthor[]>({
     queryKey: ["/api/prayers"],
   });
 
@@ -413,6 +430,7 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
       category: 'general',
       churchId: undefined,
       isPublic: true,
+      privacyLevel: 'public',
       isUrgent: false,
     };
     
@@ -600,6 +618,40 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="privacyLevel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Prayer Request Privacy</FormLabel>
+                    <FormControl>
+                      <Select value={field.value} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select privacy level" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {privacyLevels.map((level) => (
+                            <SelectItem key={level.value} value={level.value}>
+                              <div className="flex items-center space-x-2">
+                                <span>{level.icon}</span>
+                                <div>
+                                  <div className="font-medium">{level.label}</div>
+                                  <div className="text-xs text-muted-foreground">{level.description}</div>
+                                </div>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <div className="text-xs text-muted-foreground">
+                      Choose who can see and pray for your request
+                    </div>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -800,6 +852,25 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
                               <Badge className="bg-green-100 text-green-800 ml-2">
                                 <CheckCircle className="w-3 h-3 mr-1" />
                                 Answered
+                              </Badge>
+                            )}
+                            {/* Privacy Level Indicator */}
+                            {prayer.privacyLevel && (
+                              <Badge 
+                                variant="outline" 
+                                className={`ml-2 text-xs ${
+                                  prayer.privacyLevel === 'public' ? 'border-blue-200 text-blue-700 bg-blue-50' :
+                                  prayer.privacyLevel === 'community' ? 'border-green-200 text-green-700 bg-green-50' :
+                                  prayer.privacyLevel === 'prayer_circle' ? 'border-orange-200 text-orange-700 bg-orange-50' :
+                                  prayer.privacyLevel === 'pastoral' ? 'border-purple-200 text-purple-700 bg-purple-50' :
+                                  'border-gray-200 text-gray-700 bg-gray-50'
+                                }`}
+                              >
+                                {prayer.privacyLevel === 'public' ? 'Public' :
+                                 prayer.privacyLevel === 'community' ? 'My Community' :
+                                 prayer.privacyLevel === 'prayer_circle' ? 'Prayer Circle' :
+                                 prayer.privacyLevel === 'pastoral' ? 'Pastor Only' :
+                                 'Private'}
                               </Badge>
                             )}
                           </div>

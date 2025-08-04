@@ -890,7 +890,8 @@ export const prayerRequests = pgTable("prayer_requests", {
   isAnswered: boolean("is_answered").default(false),
   answeredAt: timestamp("answered_at"),
   prayerCount: integer("prayer_count").default(0),
-  isPublic: boolean("is_public").default(true),
+  isPublic: boolean("is_public").default(true), // Legacy field - kept for backward compatibility
+  privacyLevel: varchar("privacy_level", { length: 20 }).default("public"), // public, community, prayer_team, pastor_only
   category: varchar("category", { length: 50 }), // health, family, guidance, gratitude, other
   status: varchar("status", { length: 20 }).default("pending"), // pending, approved, flagged, archived
   moderationNotes: text("moderation_notes"),
