@@ -48,6 +48,7 @@ interface RequestWithSession extends express.Request {
 import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
 import { LearningIntegration } from "./learning-integration.js";
+import { milestoneService } from "./milestone-service";
 
 import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";
 import enhancedRoutes from "./enhanced-routes";
@@ -16068,6 +16069,36 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.sendStatus(404);
       }
       return res.sendStatus(500);
+    }
+  });
+
+  // Milestone and achievement routes
+  app.get("/api/milestones", isAuthenticated, async (req: RequestWithSession, res) => {
+    try {
+      const progress = await milestoneService.getUserMilestoneProgress(req.session.userId!);
+      res.json({ milestones: progress });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch milestones" });
+    }
+  });
+
+  app.get("/api/achievements", isAuthenticated, async (req: RequestWithSession, res) => {
+    try {
+      const achievements = await storage.getUserAchievements(req.session.userId!);
+      res.json({ achievements });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
+
+  // Milestone trigger route for testing
+  app.post("/api/milestones/check", isAuthenticated, async (req: RequestWithSession, res) => {
+    try {
+      const { activityType, data } = req.body;
+      await milestoneService.checkMilestones(req.session.userId!, activityType, data);
+      res.json({ message: "Milestones checked successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check milestones" });
     }
   });
 

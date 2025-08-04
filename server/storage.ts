@@ -5783,6 +5783,19 @@ export class DatabaseStorage implements IStorage {
         points: activity.points || 0,
         createdAt: new Date(),
       });
+
+      // Trigger milestone checking asynchronously (don't wait)
+      setImmediate(async () => {
+        try {
+          const { milestoneService } = await import('./milestone-service');
+          await milestoneService.checkMilestones(activity.userId, activity.activityType, { 
+            entityId: activity.entityId,
+            points: activity.points 
+          });
+        } catch (error) {
+          // Silent error handling for milestone checks
+        }
+      });
     } catch (error) {
       // Don't throw error to avoid breaking main functionality
     }
@@ -7553,6 +7566,151 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       
       return [];
+    }
+  }
+
+  // Milestone-related methods
+  async getUserAchievement(userId: string, achievementId: string): Promise<any> {
+    try {
+      const achievement = await db
+        .select()
+        .from(userAchievements)
+        .where(and(
+          eq(userAchievements.userId, userId),
+          eq(userAchievements.achievementId, achievementId)
+        ))
+        .limit(1);
+      return achievement[0] || null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async createUserAchievement(achievement: any): Promise<any> {
+    try {
+      const result = await db
+        .insert(userAchievements)
+        .values({
+          userId: achievement.userId,
+          achievementId: achievement.achievementId,
+          achievementName: achievement.achievementName,
+          achievementDescription: achievement.achievementDescription,
+          badgeIcon: achievement.badgeIcon,
+          category: achievement.category,
+          pointsAwarded: achievement.pointsAwarded,
+          unlockedAt: achievement.unlockedAt || new Date()
+        })
+        .returning();
+      return result[0];
+    } catch (error) {
+      throw new Error('Failed to create user achievement');
+    }
+  }
+
+  async getUserAchievementCount(userId: string): Promise<number> {
+    try {
+      const result = await db
+        .select({ count: count() })
+        .from(userAchievements)
+        .where(eq(userAchievements.userId, userId));
+      return result[0]?.count || 0;
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  async getUserStreak(userId: string, streakType: string): Promise<any> {
+    try {
+      const streak = await db
+        .select()
+        .from(streaks)
+        .where(and(
+          eq(streaks.userId, userId),
+          eq(streaks.type, streakType)
+        ))
+        .limit(1);
+      return streak[0] || null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async getUserLastActivity(userId: string): Promise<Date | null> {
+    try {
+      const activity = await db
+        .select()
+        .from(userActivities)
+        .where(eq(userActivities.userId, userId))
+        .orderBy(desc(userActivities.createdAt))
+        .limit(1);
+      return activity[0]?.createdAt || null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async updateUserStats(userId: string, stats: any): Promise<void> {
+    try {
+      const userScore = await this.getUserScore(userId);
+      if (userScore) {
+        await db
+          .update(userScores)
+          .set({ ...stats, updatedAt: new Date() })
+          .where(eq(userScores.userId, userId));
+      }
+    } catch (error) {
+      // Silent error handling
+    }
+  }
+
+  async saveScheduledNotification(job: any): Promise<void> {
+    try {
+      // For now, we'll store in a simple format
+      // In production, you might want a dedicated scheduled_jobs table
+      await db
+        .insert(notifications)
+        .values({
+          userId: job.userId,
+          title: job.content.title,
+          content: job.content.message,
+          type: job.type,
+          isRead: false,
+          createdAt: new Date()
+        });
+    } catch (error) {
+      // Silent error handling
+    }
+  }
+
+  async logNotificationDelivery(log: any): Promise<void> {
+    try {
+      // Store delivery logs for analytics
+      await db.execute(sql`
+        INSERT INTO notification_logs (user_id, type, title, message, delivered_at, status, error_message)
+        VALUES (${log.userId}, ${log.type}, ${log.title}, ${log.message}, ${log.deliveredAt}, ${log.status}, ${log.errorMessage || null})
+        ON CONFLICT DO NOTHING
+      `);
+    } catch (error) {
+      // Silent error handling - logs are not critical
+    }
+  }
+
+  async createInAppNotification(notification: any): Promise<void> {
+    try {
+      await db
+        .insert(notifications)
+        .values({
+          userId: notification.userId,
+          title: notification.title,
+          content: notification.message,
+          type: notification.type,
+          actionUrl: notification.actionUrl,
+          data: notification.data,
+          isRead: false,
+          createdAt: new Date()
+        });
+    } catch (error) {
+      throw new Error('Failed to create in-app notification');
     }
   }
 }

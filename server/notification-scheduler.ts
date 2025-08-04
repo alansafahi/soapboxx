@@ -4,7 +4,7 @@ import { aiPersonalizationService } from "./ai-personalization";
 interface NotificationJob {
   id: string;
   userId: string;
-  type: 'daily_reading' | 'prayer_reminder' | 'community_update' | 'event_reminder' | 'weekly_checkin' | 'engagement_reminder';
+  type: 'daily_reading' | 'prayer_reminder' | 'community_update' | 'event_reminder' | 'weekly_checkin' | 'engagement_reminder' | 'milestone_celebration';
   scheduledTime: Date;
   content: {
     title: string;
@@ -373,7 +373,50 @@ export class NotificationScheduler {
     }
   }
 
+  async scheduleCelebrationNotification(userId: string, celebrationData: any): Promise<void> {
+    const jobId = `celebration-${userId}-${Date.now()}`;
+    
+    const job: NotificationJob = {
+      id: jobId,
+      userId,
+      type: 'milestone_celebration',
+      scheduledTime: new Date(Date.now() + 1000), // Send immediately
+      content: {
+        title: celebrationData.title,
+        message: celebrationData.message,
+        actionUrl: celebrationData.actionUrl,
+        data: celebrationData
+      },
+      isRecurring: false
+    };
+
+    this.scheduleJob(job);
+  }
+
   private buildNotificationEmail(content: any, user: any): string {
+    const isCelebration = content.data?.milestoneId;
+    
+    if (isCelebration) {
+      return `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #7C3AED, #EC4899); color: white; border-radius: 12px; padding: 32px;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <div style="font-size: 48px; margin-bottom: 16px;">${content.data.badge}</div>
+            <h1 style="color: white; margin: 0; font-size: 28px;">${content.title}</h1>
+          </div>
+          <div style="background: white; color: #333; border-radius: 8px; padding: 24px; margin: 24px 0;">
+            <p style="font-size: 16px; line-height: 1.6;">Hi ${user.firstName || 'Friend'},</p>
+            <p style="font-size: 16px; line-height: 1.6;">${content.message}</p>
+            ${content.data.bonusPoints ? `<p style="background: #F3F4F6; padding: 12px; border-radius: 6px; text-align: center; font-weight: bold; color: #7C3AED;">🎁 Bonus: +${content.data.bonusPoints} points!</p>` : ''}
+            ${content.actionUrl ? `<div style="text-align: center; margin-top: 24px;"><a href="${process.env.BASE_URL || 'https://soapboxsuperapp.com'}${content.actionUrl}" style="background: #7C3AED; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold;">Continue Your Journey</a></div>` : ''}
+          </div>
+          <p style="color: rgba(255,255,255,0.8); font-size: 14px; text-align: center; margin-top: 24px;">
+            Celebrating your spiritual growth,<br>
+            The SoapBox Community Team
+          </p>
+        </div>
+      `;
+    }
+
     return `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #7C3AED;">${content.title}</h2>
