@@ -617,9 +617,19 @@ export default function ProfilePage() {
                       {/* Spiritual Gifts */}
                       {profile?.spiritualGifts && profile.spiritualGifts.length > 0 && profile?.showSpiritualGifts && (
                         <div className="border-t pt-4">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Sparkles className="h-4 w-4 text-yellow-600" />
-                            <span className="text-sm font-medium">Spiritual Gifts:</span>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="h-4 w-4 text-yellow-600" />
+                              <span className="text-sm font-medium">Spiritual Gifts:</span>
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => window.location.href = '/spiritual-assessment-results-demo'}
+                              className="text-xs px-3 py-1 h-7 text-purple-600 border-purple-200 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                            >
+                              View Full Results
+                            </Button>
                           </div>
                           <div className="flex flex-wrap gap-2">
                             {profile.spiritualGifts.slice(0, 5).map((gift, index) => (
