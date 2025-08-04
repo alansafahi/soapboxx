@@ -1553,19 +1553,40 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
                       type="button"
                       variant="outline"
                       className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300"
-                      onClick={() => setShowGiftsAssessment(true)}
+                      onClick={() => {
+                        // Detect assessment type and redirect accordingly
+                        const assessmentLength = formData.assessmentData?.responses?.length || 0;
+                        const isFullAssessment = assessmentLength >= 100; // 120-question assessment
+                        
+                        if (isFullAssessment) {
+                          window.location.href = '/spiritual-assessment';
+                        } else {
+                          setShowGiftsAssessment(true);
+                        }
+                      }}
                     >
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Retake Assessment
                     </Button>
-                    <Button
-                      type="button"
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
-                      onClick={() => window.location.href = '/spiritual-assessment'}
-                    >
-                      <Target className="w-4 h-4 mr-2" />
-                      Take Full Assessment
-                    </Button>
+                    {(() => {
+                      const assessmentLength = formData.assessmentData?.responses?.length || 0;
+                      const isFullAssessment = assessmentLength >= 100;
+                      
+                      // Only show "Take Full Assessment" if they haven't taken it yet
+                      if (!isFullAssessment) {
+                        return (
+                          <Button
+                            type="button"
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            onClick={() => window.location.href = '/spiritual-assessment'}
+                          >
+                            <Target className="w-4 h-4 mr-2" />
+                            Take Full Assessment
+                          </Button>
+                        );
+                      }
+                      return null;
+                    })()}
                     <Button
                       type="button"
                       variant="outline"
