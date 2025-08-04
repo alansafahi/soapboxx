@@ -4758,12 +4758,17 @@ app.post('/api/invitations', async (req: any, res) => {
       if (!contentType || !originalContent || !violationReason) {
         const missing = [];
         if (!contentType) missing.push('contentType');
-        if (!originalContent) missing.push('originalContent');
+        if (!originalContent || originalContent.trim().length === 0) missing.push('originalContent');
         if (!violationReason) missing.push('violationReason');
         
         return res.status(400).json({ 
-          message: `Missing required fields: ${missing.join(', ')}`,
-          missingFields: missing
+          message: `Missing required fields for AI analysis: ${missing.join(', ')}`,
+          missingFields: missing,
+          debug: {
+            contentType: contentType || 'missing',
+            originalContentLength: originalContent ? originalContent.length : 0,
+            violationReason: violationReason || 'missing'
+          }
         });
       }
 

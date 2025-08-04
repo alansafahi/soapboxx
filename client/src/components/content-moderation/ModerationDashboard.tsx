@@ -158,14 +158,24 @@ export function ModerationDashboard() {
 
     setIsGeneratingAISuggestions(true);
     try {
+      // Extract content from different sources
+      const originalContent = report.originalContent || 
+                             report.contentDetails?.content || 
+                             report.contentDetails?.title || 
+                             report.contentMetadata?.content ||
+                             'Content not available';
+      
       const requestData = {
         contentType: report.contentType,
-        originalContent: report.originalContent,
+        originalContent: originalContent,
         violationReason: report.reason,
-        reportDescription: report.description,
+        reportDescription: report.description || 'No additional description provided',
       };
       
-
+      // Validate required fields before sending
+      if (!requestData.contentType || !requestData.originalContent || !requestData.violationReason) {
+        throw new Error('Missing required information for AI analysis');
+      }
       
       const response = await fetch('/api/ai/generate-edit-suggestions', {
         method: 'POST',
