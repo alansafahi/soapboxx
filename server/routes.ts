@@ -1891,7 +1891,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Bible verse lookup endpoint
   app.post('/api/bible/lookup', async (req, res) => {
     try {
-      const { reference } = req.body;
+      const { reference, version = 'NIV' } = req.body;
       
       if (!reference) {
         return res.status(400).json({ error: 'Reference is required' });
@@ -1899,7 +1899,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('Server: Looking up verse:', reference);
       const { lookupBibleVerse } = await import('./bible-api.js');
-      const verseResult = await lookupBibleVerse(reference);
+      const verseResult = await lookupBibleVerse(reference, version);
       console.log('Server: Verse result:', verseResult);
       
       if (verseResult) {

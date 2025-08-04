@@ -607,10 +607,14 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
 
     try {
 
+      const preferredTranslation = formData.preferredBibleTranslation || 'NIV';
       const response = await fetch('/api/bible/lookup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reference: trimmedVerse })
+        body: JSON.stringify({ 
+          reference: trimmedVerse,
+          version: preferredTranslation
+        })
       });
 
       
@@ -623,7 +627,7 @@ export default function EnhancedProfileEditor({ profile, onSave, isLoading }: En
             [index]: {
               text: verseData.text,
               reference: verseData.reference,
-              version: verseData.version || 'NIV'
+              version: verseData.version || preferredTranslation
             }
           }));
         }
