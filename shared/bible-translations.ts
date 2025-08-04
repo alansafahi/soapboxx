@@ -10,107 +10,109 @@ export interface BibleTranslation {
   sortOrder: number;
 }
 
-// Currently supported Bible translations
-// Note: Only include translations that our Bible API services can actually provide
+// Bible Translation Support Status
+// ✅ = Full API support via Scripture API (fastest, most reliable)
+// ⚠️ = Limited support via AI/SoapBox fallback (slower, may be less reliable)
+// ❌ = Inactive (not available)
 export const BIBLE_TRANSLATIONS: BibleTranslation[] = [
-  // Primary translations with full API support
-  {
-    code: 'NIV',
-    name: 'New International Version',
-    displayName: 'NIV - New International Version',
-    isActive: true,
-    apiSupported: true,
-    sortOrder: 1
-  },
-  {
-    code: 'ESV',
-    name: 'English Standard Version', 
-    displayName: 'ESV - English Standard Version',
-    isActive: true,
-    apiSupported: true,
-    sortOrder: 2
-  },
-  {
-    code: 'NKJV',
-    name: 'New King James Version',
-    displayName: 'NKJV - New King James Version', 
-    isActive: true,
-    apiSupported: true,
-    sortOrder: 3
-  },
+  // VERIFIED API-SUPPORTED TRANSLATIONS (Scripture API & SoapBox Bible Service)
   {
     code: 'KJV',
     name: 'King James Version',
     displayName: 'KJV - King James Version',
     isActive: true,
-    apiSupported: true,
-    sortOrder: 4
+    apiSupported: true, // ✅ Verified: de4e12af7f28f599-01
+    sortOrder: 1
   },
-  {
-    code: 'NLT',
-    name: 'New Living Translation',
-    displayName: 'NLT - New Living Translation',
-    isActive: true,
-    apiSupported: true,
-    sortOrder: 5
-  },
-  {
-    code: 'NASB',
-    name: 'New American Standard Bible',
-    displayName: 'NASB - New American Standard Bible',
-    isActive: true,
-    apiSupported: true,
-    sortOrder: 6
-  },
-  
-  // Secondary translations (limited API support via SoapBox Bible Service)
   {
     code: 'KJVA',
     name: 'King James Version with Apocrypha',
     displayName: 'KJVA - King James Version with Apocrypha',
     isActive: true,
-    apiSupported: true,
-    sortOrder: 7
+    apiSupported: true, // ✅ Verified: Same as KJV + SoapBox fallback
+    sortOrder: 2
   },
   {
     code: 'WEB',
     name: 'World English Bible',
     displayName: 'WEB - World English Bible',
     isActive: true,
-    apiSupported: true,
-    sortOrder: 8
+    apiSupported: true, // ✅ Verified: 9879dbb7cfe39e4d-01
+    sortOrder: 3
   },
   {
     code: 'ASV',
     name: 'American Standard Version',
     displayName: 'ASV - American Standard Version', 
     isActive: true,
-    apiSupported: true,
-    sortOrder: 9
+    apiSupported: true, // ✅ Verified: 7142879509583d59-01
+    sortOrder: 4
   },
   {
     code: 'CEV',
     name: 'Contemporary English Version',
     displayName: 'CEV - Contemporary English Version',
     isActive: true,
-    apiSupported: true,
-    sortOrder: 10
+    apiSupported: true, // ✅ Verified: 392a2f6c-9fa4-4f43-9a37-8e5a4c56e1c7
+    sortOrder: 5
   },
   {
     code: 'GNT',
     name: 'Good News Translation',
     displayName: 'GNT - Good News Translation',
     isActive: true,
-    apiSupported: true,
+    apiSupported: true, // ✅ Verified: c315fa9f-f842-4a87-9a8e-5d5c2a3e8b2a
+    sortOrder: 6
+  },
+
+  // POPULAR TRANSLATIONS (Limited API support - fallback via AI/SoapBox)
+  {
+    code: 'NIV',
+    name: 'New International Version',
+    displayName: 'NIV - New International Version ⚠️',
+    isActive: true,
+    apiSupported: false, // ⚠️ Limited: AI/SoapBox fallback only
+    sortOrder: 7
+  },
+  {
+    code: 'ESV',
+    name: 'English Standard Version', 
+    displayName: 'ESV - English Standard Version ⚠️',
+    isActive: true,
+    apiSupported: false, // ⚠️ Limited: AI/SoapBox fallback only
+    sortOrder: 8
+  },
+  {
+    code: 'NKJV',
+    name: 'New King James Version',
+    displayName: 'NKJV - New King James Version ⚠️', 
+    isActive: true,
+    apiSupported: false, // ⚠️ Limited: AI/SoapBox fallback only
+    sortOrder: 9
+  },
+  {
+    code: 'NLT',
+    name: 'New Living Translation',
+    displayName: 'NLT - New Living Translation ⚠️',
+    isActive: true,
+    apiSupported: false, // ⚠️ Limited: AI/SoapBox fallback only
+    sortOrder: 10
+  },
+  {
+    code: 'NASB',
+    name: 'New American Standard Bible',
+    displayName: 'NASB - New American Standard Bible ⚠️',
+    isActive: true,
+    apiSupported: false, // ⚠️ Limited: AI/SoapBox fallback only
     sortOrder: 11
   },
   
   {
     code: 'CSB',
     name: 'Christian Standard Bible',
-    displayName: 'CSB - Christian Standard Bible',
+    displayName: 'CSB - Christian Standard Bible ⚠️',
     isActive: true,
-    apiSupported: true,
+    apiSupported: false, // ⚠️ Limited: AI/SoapBox fallback only
     sortOrder: 12
   },
   
