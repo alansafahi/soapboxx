@@ -9395,6 +9395,7 @@ Return JSON with this exact structure:
         ageRange: req.body.ageRange,
         languagePreference: req.body.languagePreference,
         preferredBibleTranslation: req.body.preferredBibleTranslation,
+        smallGroup: req.body.smallGroup,
         
         // Privacy settings
         showBioPublicly: req.body.showBioPublicly,
