@@ -90,16 +90,14 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   // Fetch user profile to get Bible translation preference
   const { data: user } = useQuery({
     queryKey: ['/api/auth/user'],
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
   // Initialize selectedVersion from user's current dynamic preference
   useEffect(() => {
-    if (user?.bibleTranslationPreference) {
-      // Always use whatever translation the user currently has selected (dynamic XYZ value)
+    if (user && 'bibleTranslationPreference' in user && user.bibleTranslationPreference) {
       setSelectedVersion(user.bibleTranslationPreference);
-    } else if (user && !user.bibleTranslationPreference) {
-      // User profile loaded but no translation preference set - keep empty until they choose
+    } else if (user && !('bibleTranslationPreference' in user)) {
       setSelectedVersion('');
     }
   }, [user]);
@@ -108,7 +106,6 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
   useEffect(() => {
     if (entry?.moodTag) {
       const moodIds = entry.moodTag.split(', ').map(mood => {
-        // Find mood ID by label (for backwards compatibility)
         const foundMood = allMoods.find(m => m.label.toLowerCase() === mood.toLowerCase() || m.id === mood);
         return foundMood?.id || mood;
       }).filter(Boolean);
@@ -116,21 +113,18 @@ export function SoapEntryForm({ entry, onClose, onSuccess }: SoapEntryFormProps)
     }
   }, [entry?.moodTag]);
 
-  // Removed duplicate user query - already defined above
-
   const { data: churchAffiliation } = useQuery({
     queryKey: ['/api/user-profiles/church-affiliation'],
   });
 
-  // Fetch contextual information for AI enhancement
   const { data: worldEvents } = useQuery({
     queryKey: ['/api/context/world-events'],
-    staleTime: 6 * 60 * 60 * 1000, // 6 hours
+    staleTime: 6 * 60 * 60 * 1000,
   });
 
   const { data: liturgicalContext } = useQuery({
     queryKey: ['/api/context/liturgical'],
-    staleTime: 24 * 60 * 60 * 1000, // 24 hours
+    staleTime: 24 * 60 * 60 * 1000,
   });
 
   // Auto-detect mood from recent check-ins
