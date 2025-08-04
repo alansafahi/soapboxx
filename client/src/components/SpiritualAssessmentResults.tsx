@@ -22,6 +22,7 @@ interface SpiritualAssessmentResultsProps {
   welcomeContent: any;
   spiritualMaturityLevel: string;
   onContinue: () => void;
+  returnTo?: string;
 }
 
 export default function SpiritualAssessmentResults({
@@ -30,7 +31,8 @@ export default function SpiritualAssessmentResults({
   spiritualProfile,
   welcomeContent,
   spiritualMaturityLevel,
-  onContinue
+  onContinue,
+  returnTo
 }: SpiritualAssessmentResultsProps) {
   
   const getMaturityLevelColor = (level: string) => {
@@ -212,7 +214,7 @@ export default function SpiritualAssessmentResults({
                 className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
                 size="lg"
               >
-                Continue to Dashboard
+                {returnTo === 'profile' ? 'Return to Profile' : 'Continue to Dashboard'}
                 <ChevronRight className="h-4 w-4" />
               </Button>
               <Button 

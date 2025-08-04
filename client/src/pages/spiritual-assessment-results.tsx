@@ -100,6 +100,10 @@ export default function SpiritualAssessmentResultsPage() {
     );
   }
 
+  // Get returnTo parameter from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const returnTo = urlParams.get('returnTo');
+
   return (
     <SpiritualAssessmentResults
       assessmentData={data.assessmentData}
@@ -108,6 +112,7 @@ export default function SpiritualAssessmentResultsPage() {
       welcomeContent={data.welcomeContent}
       spiritualMaturityLevel={data.spiritualMaturityLevel || 'growing'}
       onContinue={handleContinue}
+      returnTo={returnTo || undefined}
     />
   );
 }
