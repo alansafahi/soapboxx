@@ -45,8 +45,15 @@ export default function SpiritualAssessmentPage() {
     }
   });
 
-  const handleAssessmentComplete = async (spiritualData: any) => {
-    await saveSpiritualDataMutation.mutateAsync(spiritualData);
+  const handleAssessmentComplete = () => {
+    // This will be called when the OnboardingSpiritualFlow completes
+    toast({
+      title: "Assessment Completed! 🎉",
+      description: "Your spiritual profile has been saved. Generating your welcome package...",
+    });
+    
+    // Show welcome content status immediately
+    setShowWelcomeStatus(true);
   };
 
   const handleWelcomeContentComplete = () => {

@@ -89,7 +89,6 @@ export default function OnboardingSpiritualFlow({ onComplete, onBack, userProfil
           onComplete={handleAssessmentComplete}
           onBack={handleBackFromAssessment}
           userRole={userProfile.role}
-          isFullAssessment={true} // Always full assessment for direct navigation
         />
       )}
       

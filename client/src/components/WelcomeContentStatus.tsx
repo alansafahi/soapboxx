@@ -45,7 +45,9 @@ export default function WelcomeContentStatus({ onComplete, onViewContent }: Welc
 
   const checkWelcomeContentStatus = async () => {
     try {
-      const response = await apiRequest('/api/users/welcome-content-status');
+      const response = await apiRequest('/api/users/welcome-content-status', {
+        method: 'GET'
+      });
       setStatus(response);
       
       if (response.isGenerated && response.hasContent) {
