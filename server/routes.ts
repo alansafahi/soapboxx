@@ -9583,14 +9583,17 @@ Return JSON with this exact structure:
       const row = result.rows[0] || {};
       const stats = {
         prayersOffered: parseInt(row.prayers_offered) || 0,
-        discussions: parseInt(row.discussions_created) || 0,
-        eventsAttended: parseInt(row.events_attended) || 0,
-        connections: parseInt(row.connections) || 0,
+        discussionCount: parseInt(row.discussions_created) || 0,
+        attendanceCount: parseInt(row.events_attended) || 0,
+        connectionCount: parseInt(row.connections) || 0,
         inspirationsRead: parseInt(row.soap_entries) || 0, // SOAP entries as inspirations
-        prayerRequests: parseInt(row.prayer_reactions) || 0, // Prayer reactions as requests
+        prayerCount: parseInt(row.prayer_reactions) || 0, // Prayer reactions as requests
         streakDays: parseInt(row.streak_days) || 0,
         totalPoints: parseInt(row.total_points) || 0,
         // Legacy fields for compatibility
+        discussions: parseInt(row.discussions_created) || 0,
+        eventsAttended: parseInt(row.events_attended) || 0,
+        connections: parseInt(row.connections) || 0,
         totalPosts: parseInt(row.discussions_created) || 0,
         totalLikes: parseInt(row.prayer_reactions) || 0,
         totalComments: parseInt(row.discussions_created) || 0,
