@@ -1,40 +1,5 @@
 // Service Worker for Push Notifications
-const CACHE_NAME = 'soapbox-v1';
-const STATIC_CACHE_URLS = [
-  '/',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-  '/icons/badge-72x72.png'
-];
-
-// Install event
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_CACHE_URLS);
-    })
-  );
-  self.skipWaiting();
-});
-
-// Activate event
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-  self.clients.claim();
-});
-
-// Push event
-self.addEventListener('push', (event) => {
+self.addEventListener('push', function(event) {
   if (!event.data) {
     return;
   }
@@ -42,134 +7,104 @@ self.addEventListener('push', (event) => {
   try {
     const data = event.data.json();
     const options = {
-      body: data.body,
+      body: data.body || data.message,
       icon: data.icon || '/icons/icon-192x192.png',
-      badge: data.badge || '/icons/badge-72x72.png',
-      image: data.image,
-      tag: data.tag || 'soapbox-notification',
-      data: data.data || {},
-      actions: data.actions || [],
+      badge: '/icons/icon-192x192.png',
+      vibrate: [100, 50, 100],
+      data: {
+        url: data.url || data.actionUrl || '/',
+        timestamp: Date.now(),
+        ...data.data
+      },
+      actions: data.actions || [
+        {
+          action: 'view',
+          title: 'View',
+          icon: '/icons/icon-192x192.png'
+        }
+      ],
       requireInteraction: data.requireInteraction || false,
-      silent: false,
-      vibrate: [200, 100, 200]
+      tag: data.tag || 'spiritual-notification'
     };
 
     event.waitUntil(
       self.registration.showNotification(data.title, options)
     );
   } catch (error) {
-    console.error('Error showing notification:', error);
+    console.error('Error handling push event:', error);
     
     // Fallback notification
     event.waitUntil(
-      self.registration.showNotification('SoapBox Super App', {
-        body: 'You have a new notification',
+      self.registration.showNotification('SoapBox Update', {
+        body: 'You have a new spiritual update!',
         icon: '/icons/icon-192x192.png',
-        badge: '/icons/badge-72x72.png'
+        data: { url: '/' }
       })
     );
   }
 });
 
-// Notification click event
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener('notificationclick', function(event) {
   event.notification.close();
 
-  const data = event.notification.data || {};
-  let url = data.url || '/';
-
-  // Handle action clicks
-  if (event.action) {
-    switch (event.action) {
-      case 'open-checkin':
-        url = '/weekly-checkin';
-        break;
-      case 'view-achievement':
-        url = '/achievements';
-        break;
-      case 'start-reading':
-        url = '/daily-bible';
-        break;
-      case 'open-prayers':
-        url = '/prayer-wall';
-        break;
-      case 'view-content':
-        url = data.url || '/';
-        break;
-      case 'remind-later':
-        // Schedule a reminder for later (could be handled via API)
-        return;
-      case 'share-achievement':
-        // Handle sharing (could open share dialog)
-        url = `/achievements?share=${data.milestoneId}`;
-        break;
-      default:
-        url = data.url || '/';
-    }
-  }
-
+  const urlToOpen = event.notification.data.url || '/';
+  
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then((clientList) => {
-      // Check if there's already a window/tab open
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
+      // Check if there's already a window/tab open with the target URL
       for (let i = 0; i < clientList.length; i++) {
         const client = clientList[i];
-        if (client.url.includes(url) && 'focus' in client) {
+        if (client.url === urlToOpen && 'focus' in client) {
           return client.focus();
         }
       }
       
-      // If no existing window, open a new one
+      // If no matching client is found, open a new window/tab
       if (clients.openWindow) {
-        return clients.openWindow(url);
+        return clients.openWindow(urlToOpen);
       }
     })
   );
 });
 
-// Notification close event
-self.addEventListener('notificationclose', (event) => {
-  const data = event.notification.data || {};
-  
-  // Log notification dismissal if needed
-  if (data.trackDismissal) {
-    fetch('/api/notifications/dismissed', {
+self.addEventListener('notificationclose', function(event) {
+  // Analytics or cleanup when notification is dismissed
+  console.log('Notification closed:', event.notification.tag);
+});
+
+// Background sync for offline support
+self.addEventListener('sync', function(event) {
+  if (event.tag === 'spiritual-checkin-sync') {
+    event.waitUntil(syncWeeklyCheckin());
+  }
+});
+
+async function syncWeeklyCheckin() {
+  // Sync any pending weekly check-ins when back online
+  try {
+    const response = await fetch('/api/weekly-checkin/sync', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        notificationId: data.notificationId,
-        type: data.type,
-        dismissedAt: new Date().toISOString()
-      })
-    }).catch(() => {
-      // Silent error handling
-    });
-  }
-});
-
-// Background sync for offline actions
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'background-sync') {
-    event.waitUntil(handleBackgroundSync());
-  }
-});
-
-async function handleBackgroundSync() {
-  try {
-    // Handle any queued actions when back online
-    const cache = await caches.open('soapbox-actions');
-    const requests = await cache.keys();
-    
-    for (const request of requests) {
-      try {
-        await fetch(request);
-        await cache.delete(request);
-      } catch (error) {
-        // Keep in cache for next sync attempt
       }
+    });
+    
+    if (response.ok) {
+      console.log('Weekly check-in synced successfully');
     }
   } catch (error) {
-    console.error('Background sync failed:', error);
+    console.error('Failed to sync weekly check-in:', error);
   }
 }
+
+// Install event
+self.addEventListener('install', function(event) {
+  console.log('Service Worker installing');
+  self.skipWaiting();
+});
+
+// Activate event
+self.addEventListener('activate', function(event) {
+  console.log('Service Worker activating');
+  event.waitUntil(clients.claim());
+});

@@ -16188,6 +16188,61 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Weekly check-in routes
+  app.get("/api/weekly-checkin/status", isAuthenticated, async (req: RequestWithSession, res) => {
+    try {
+      const { weeklyCheckinService } = await import('./weekly-checkin-service');
+      const hasCompleted = await weeklyCheckinService.hasCompletedThisWeek(req.session.userId!);
+      res.json({ hasCompleted });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to check weekly check-in status" });
+    }
+  });
+
+  app.get("/api/weekly-checkin/stats", isAuthenticated, async (req: RequestWithSession, res) => {
+    try {
+      const { weeklyCheckinService } = await import('./weekly-checkin-service');
+      const stats = await weeklyCheckinService.getUserCheckinStats(req.session.userId!);
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch weekly check-in stats" });
+    }
+  });
+
+  app.get("/api/weekly-checkin/history", isAuthenticated, async (req: RequestWithSession, res) => {
+    try {
+      const { weeklyCheckinService } = await import('./weekly-checkin-service');
+      const history = await weeklyCheckinService.getUserCheckinHistory(req.session.userId!, 12);
+      res.json(history);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch weekly check-in history" });
+    }
+  });
+
+  app.post("/api/weekly-checkin", isAuthenticated, async (req: RequestWithSession, res) => {
+    try {
+      const { weeklyCheckinService } = await import('./weekly-checkin-service');
+      
+      // Get current week
+      const now = new Date();
+      const year = now.getFullYear();
+      const week = Math.ceil(((now.getTime() - new Date(year, 0, 1).getTime()) / 86400000 + new Date(year, 0, 1).getDay() + 1) / 7);
+      const weekString = `${year}-W${week.toString().padStart(2, '0')}`;
+      
+      const checkinData = {
+        userId: req.session.userId!,
+        week: weekString,
+        ...req.body,
+        completedAt: new Date()
+      };
+
+      await weeklyCheckinService.submitWeeklyCheckin(checkinData);
+      res.json({ success: true, pointsEarned: 100 });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to submit weekly check-in" });
+    }
+  });
+
   // Simple health check endpoint
   app.get('/health', (req, res) => {
     res.json({ 

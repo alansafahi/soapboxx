@@ -7841,6 +7841,82 @@ export class DatabaseStorage implements IStorage {
       throw new Error('Failed to update notification preferences');
     }
   }
+
+  // Weekly check-in methods
+  async saveWeeklyCheckin(data: any): Promise<void> {
+    try {
+      await db
+        .insert(weeklyCheckins)
+        .values({
+          userId: data.userId,
+          week: data.week,
+          spiritualGrowth: data.spiritualGrowth,
+          prayerLife: data.prayerLife,
+          bibleReading: data.bibleReading,
+          communityConnection: data.communityConnection,
+          serviceOpportunities: data.serviceOpportunities,
+          emotionalWellbeing: data.emotionalWellbeing,
+          gratitude: data.gratitude,
+          struggles: data.struggles,
+          prayerRequests: data.prayerRequests,
+          goals: data.goals,
+          reflectionNotes: data.reflectionNotes,
+          completedAt: data.completedAt,
+          createdAt: new Date()
+        });
+    } catch (error) {
+      throw new Error('Failed to save weekly check-in');
+    }
+  }
+
+  async getUserWeeklyCheckins(userId: string, limit: number = 12): Promise<any[]> {
+    try {
+      const checkins = await db
+        .select()
+        .from(weeklyCheckins)
+        .where(eq(weeklyCheckins.userId, userId))
+        .orderBy(desc(weeklyCheckins.completedAt))
+        .limit(limit);
+      
+      return checkins;
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async getWeeklyCheckin(userId: string, week: string): Promise<any> {
+    try {
+      const checkin = await db
+        .select()
+        .from(weeklyCheckins)
+        .where(eq(weeklyCheckins.userId, userId))
+        .where(eq(weeklyCheckins.week, week))
+        .limit(1);
+      
+      return checkin[0] || null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async getActiveUsers(): Promise<any[]> {
+    try {
+      // Get users who have been active in the last 30 days
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const activeUsers = await db
+        .select({ id: users.id, firstName: users.firstName, email: users.email })
+        .from(users)
+        .innerJoin(userActivities, eq(users.id, userActivities.userId))
+        .where(gte(userActivities.createdAt, thirtyDaysAgo))
+        .groupBy(users.id, users.firstName, users.email);
+      
+      return activeUsers;
+    } catch (error) {
+      return [];
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

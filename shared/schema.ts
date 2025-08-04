@@ -411,6 +411,28 @@ export const pushSubscriptions = pgTable("push_subscriptions", {
   userEndpointUnique: unique().on(table.userId, table.endpoint),
 }));
 
+// Weekly Check-ins
+export const weeklyCheckins = pgTable("weekly_checkins", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  week: varchar("week").notNull(), // Format: 2024-W01
+  spiritualGrowth: integer("spiritual_growth").notNull(),
+  prayerLife: integer("prayer_life").notNull(),
+  bibleReading: integer("bible_reading").notNull(),
+  communityConnection: integer("community_connection").notNull(),
+  serviceOpportunities: integer("service_opportunities").notNull(),
+  emotionalWellbeing: integer("emotional_wellbeing").notNull(),
+  gratitude: text("gratitude").array(),
+  struggles: text("struggles").array(),
+  prayerRequests: text("prayer_requests").array(),
+  goals: text("goals").array(),
+  reflectionNotes: text("reflection_notes"),
+  completedAt: timestamp("completed_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userWeekUnique: unique().on(table.userId, table.week),
+}));
+
 // Offline Content Storage
 export const offlineContent = pgTable("offline_content", {
   id: serial("id").primaryKey(),

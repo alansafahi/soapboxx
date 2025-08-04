@@ -89,6 +89,8 @@ const CommunityAdministrationPage = lazy(() => import("./pages/community-adminis
 const AnalyticsDashboardPage = lazy(() => import("./pages/analytics-dashboard"));
 const ReadingPlansPage = lazy(() => import("./pages/reading-plans"));
 const EMIAdminPage = lazy(() => import("./pages/emi-admin"));
+const WeeklyCheckinPage = lazy(() => import("./pages/weekly-checkin"));
+const NotificationSettingsPage = lazy(() => import("./pages/notification-settings"));
 
 function AppRouter() {
     const { user, isAuthenticated, isLoading, logout } = useImmediateAuth();
@@ -198,6 +200,8 @@ function AppRouter() {
                                     <ProtectedRoute path="/people" component={PeoplePage} />
                                     <ProtectedRoute path="/profile" component={Profile} />
                                     <ProtectedRoute path="/settings" component={SettingsPage} />
+                                    <ProtectedRoute path="/weekly-checkin" component={WeeklyCheckinPage} />
+                                    <ProtectedRoute path="/notification-settings" component={NotificationSettingsPage} />
                                     <ProtectedRoute path="/spiritual-assessment" component={SpiritualAssessmentPage} />
                                     <ProtectedRoute path="/spiritual-assessment-results" component={SpiritualAssessmentResultsPage} />
                                     <ProtectedRoute path="/spiritual-assessment-results-demo" component={SpiritualAssessmentResultsDemo} />
