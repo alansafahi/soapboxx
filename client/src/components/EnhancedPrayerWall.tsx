@@ -76,6 +76,9 @@ const prayerCategories = [
   { id: 'natural_disasters', label: 'Natural Disasters', icon: '🌪️', count: 4, group: 'environmental' },
   { id: 'weather_conditions', label: 'Weather & Climate', icon: '🌦️', count: 3, group: 'environmental' },
   
+  // Global & Community Issues
+  { id: 'war_conflict', label: 'War & Conflicts', icon: '🕊️', count: 6, group: 'global' },
+  
   // General
   { id: 'general', label: 'General', icon: '🤲', count: 8, group: 'general' },
 ];
@@ -845,6 +848,19 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                                     Environmental & Disasters
                                   </div>
                                   {prayerCategories.filter(cat => cat.group === 'environmental').map((category) => (
+                                    <SelectItem key={category.id} value={category.id}>
+                                      <div className="flex items-center gap-2">
+                                        <span>{category.icon}</span>
+                                        {category.label}
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                  
+                                  {/* Global & Community Issues */}
+                                  <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 border-t">
+                                    Global & Community
+                                  </div>
+                                  {prayerCategories.filter(cat => cat.group === 'global').map((category) => (
                                     <SelectItem key={category.id} value={category.id}>
                                       <div className="flex items-center gap-2">
                                         <span>{category.icon}</span>
