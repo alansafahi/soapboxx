@@ -3652,16 +3652,18 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       const user = await storage.getUser(userId);
       console.log('User from storage:', { user: user, role: user?.role, communityId: user?.communityId }); // Debug log
       
-      if (!user?.communityId) {
-        console.log('User has no communityId'); // Debug log
-        return res.status(400).json({ message: 'User must be associated with a church to create QR codes' });
-      }
-
       // Check if user has admin permissions - expand role list to match sidebar permissions
       const allowedRoles = ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'];
       if (!allowedRoles.includes(user.role)) {
         console.log('User role not allowed:', user.role); // Debug log
         return res.status(403).json({ message: 'Insufficient permissions to create QR codes' });
+      }
+
+      // For SoapBox admins, allow QR code creation without church affiliation
+      // For regular users, require church association
+      if (!user?.communityId && !['soapbox_owner', 'system-admin', 'super-admin', 'platform-admin'].includes(user.role)) {
+        console.log('User has no communityId and is not a platform admin'); // Debug log
+        return res.status(400).json({ message: 'User must be associated with a church to create QR codes' });
       }
 
       const { 
@@ -3679,7 +3681,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       
       const qrCode = await storage.createQrCode({
         id: qrCodeId,
-        communityId: user.communityId,
+        communityId: user.communityId || 1, // Use default community for platform admins
         eventId: eventId || null,
         name,
         description,
