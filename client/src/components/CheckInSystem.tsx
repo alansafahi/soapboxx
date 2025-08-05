@@ -436,18 +436,19 @@ export default function CheckInSystem() {
           {canCheckInToday ? (
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <Dialog open={showCheckInDialog} onOpenChange={setShowCheckInDialog}>
-                  <DialogTrigger asChild>
-                    <Button 
-                      size="lg" 
-                      className="h-16 bg-blue-600 hover:bg-blue-700 text-white"
-                    >
-                      <div className="text-center">
-                        <CheckCircle className="w-6 h-6 mx-auto mb-1" />
-                        <div>Virtual Check-In</div>
-                      </div>
-                    </Button>
-                  </DialogTrigger>
+                <div className="space-y-2">
+                  <Dialog open={showCheckInDialog} onOpenChange={setShowCheckInDialog}>
+                    <DialogTrigger asChild>
+                      <Button 
+                        size="lg" 
+                        className="h-16 bg-blue-600 hover:bg-blue-700 text-white w-full"
+                      >
+                        <div className="text-center">
+                          <CheckCircle className="w-6 h-6 mx-auto mb-1" />
+                          <div>Virtual Check-In</div>
+                        </div>
+                      </Button>
+                    </DialogTrigger>
                   
                   <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
@@ -621,23 +622,28 @@ export default function CheckInSystem() {
                     </div>
                   </DialogContent>
                 </Dialog>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Check in once daily to build your spiritual journey streak
+                  </p>
+                </div>
 
-                <Button 
-                  variant="outline"
-                  size="lg"
-                  className="h-16"
-                  onClick={() => setShowQrScanner(true)}
-                >
-                  <div className="text-center">
-                    <QrCode className="w-6 h-6 mx-auto mb-1" />
-                    <div>QR Check-In</div>
-                  </div>
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    variant="outline"
+                    size="lg"
+                    className="h-16 w-full"
+                    onClick={() => setShowQrScanner(true)}
+                  >
+                    <div className="text-center">
+                      <QrCode className="w-6 h-6 mx-auto mb-1" />
+                      <div>QR Check-In</div>
+                    </div>
+                  </Button>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Scan QR code for in-person church or event attendance
+                  </p>
+                </div>
               </div>
-              
-              <p className="text-sm text-center text-muted-foreground">
-                Check in once daily to build your spiritual journey streak
-              </p>
             </div>
           ) : (
             <div className="space-y-4">
