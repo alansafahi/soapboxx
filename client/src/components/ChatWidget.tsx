@@ -281,7 +281,7 @@ export default function ChatWidget({ position = 'bottom-right' }: ChatWidgetProp
       if (msgLower.includes('demo') || msgLower.includes('trial')) {
         response = "I'd be happy to schedule a demo for you! You can book a time that works for you using our Calendly link, or I can connect you with our sales team. Which would you prefer?";
       } else if (msgLower.includes('price') || msgLower.includes('cost') || msgLower.includes('how much')) {
-        response = "SoapBox Super App pricing:\n• FREE (100 credits/month) - S.O.A.P. Journal, Prayer Wall, Community\n• Standard ($10/month, 500 credits) - Adds AI insights, priority support\n• Premium ($20/month, 1,000 credits) - Advanced analytics\n\nWould you like details on individual or church pricing?";
+        response = "SoapBox Super App pricing:\n• FREE (250 credits/month) - S.O.A.P. Journal, Prayer Wall, Community\n• Standard ($5/month, 500 credits) - Adds AI insights, priority support\n• Premium ($10/month, 1,000 credits) - Advanced analytics\n\nWould you like details on individual or church pricing?";
       } else if (msgLower.includes('human') || msgLower.includes('agent') || msgLower.includes('person')) {
         response = isBusinessHours 
           ? "I'll connect you with one of our team members right away. Someone will be with you shortly!"

@@ -5056,7 +5056,7 @@ Respond in JSON format with "feedback" and "suggestions" fields.`;
 
 Key SoapBox Super App information:
 - Faith-based platform for prayer networks, Bible study, church management
-- Pricing: FREE (100 credits), Standard ($10/month, 500 credits), Premium ($20/month, 1,000 credits)  
+- Pricing: FREE (250 credits), Standard ($5/month, 500 credits), Premium ($10/month, 1,000 credits)  
 - Features: S.O.A.P. Journal, Prayer Wall, Community Discussions, Event Management, AI-powered ministry tools
 - Target users: Churches of all sizes, pastors, church members, individual believers
 - Core mission: Unite faith communities through modern technology
