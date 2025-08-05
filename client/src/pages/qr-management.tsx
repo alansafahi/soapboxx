@@ -423,6 +423,15 @@ export default function QrManagement() {
                           type="datetime-local" 
                           {...field}
                           value={field.value || ""}
+                          onFocus={(e) => {
+                            if (!field.value) {
+                              // Set to today at 12:00 PM when focused
+                              const today = new Date();
+                              today.setHours(12, 0, 0, 0);
+                              const dateString = today.toISOString().slice(0, 16);
+                              field.onChange(dateString);
+                            }
+                          }}
                           className="flex-1"
                         />
                       </FormControl>
@@ -455,6 +464,15 @@ export default function QrManagement() {
                           type="datetime-local" 
                           {...field}
                           value={field.value || ""}
+                          onFocus={(e) => {
+                            if (!field.value) {
+                              // Set to today at 12:00 PM when focused
+                              const today = new Date();
+                              today.setHours(12, 0, 0, 0);
+                              const dateString = today.toISOString().slice(0, 16);
+                              field.onChange(dateString);
+                            }
+                          }}
                           className="flex-1"
                         />
                       </FormControl>
