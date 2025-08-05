@@ -3648,9 +3648,10 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      // Get user's church
+      // Get user and their church association
       const user = await storage.getUser(userId);
-      console.log('User from storage:', { user: user, role: user?.role, communityId: user?.communityId }); // Debug log
+      const userChurch = await storage.getUserChurch(userId);
+      console.log('User from storage:', { user: user, role: user?.role, userChurch: userChurch }); // Debug log
       
       // Check if user has admin permissions - expand role list to match sidebar permissions
       const allowedRoles = ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'];
@@ -3661,8 +3662,8 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
       // For SoapBox admins, allow QR code creation without church affiliation
       // For regular users, require church association
-      if (!user?.communityId && !['soapbox_owner', 'system-admin', 'super-admin', 'platform-admin'].includes(user.role)) {
-        console.log('User has no communityId and is not a platform admin'); // Debug log
+      if (!userChurch?.communityId && !['soapbox_owner', 'system-admin', 'super-admin', 'platform-admin'].includes(user.role)) {
+        console.log('User has no church association and is not a platform admin'); // Debug log
         return res.status(400).json({ message: 'User must be associated with a church to create QR codes' });
       }
 
@@ -3679,9 +3680,12 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       // Generate unique QR code ID
       const qrCodeId = crypto.randomUUID();
       
+      // Determine community ID - use user's church or fallback for platform admins
+      const communityId = userChurch?.communityId || 1;
+      
       console.log('Creating QR code with data:', {
         id: qrCodeId,
-        communityId: user.communityId || 1,
+        communityId: communityId,
         eventId: eventId || null,
         name,
         description,
@@ -3695,7 +3699,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
       const qrCode = await storage.createQrCode({
         id: qrCodeId,
-        communityId: user.communityId || 1, // Use default community for platform admins
+        communityId: communityId,
         eventId: eventId || null,
         name,
         description,
@@ -3727,6 +3731,9 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
         return res.status(404).json({ message: 'User not found' });
       }
 
+      // Get user's church association
+      const userChurch = await storage.getUserChurch(userId);
+
       // Check if user has admin permissions
       const allowedRoles = ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'];
       if (!allowedRoles.includes(user.role)) {
@@ -3739,9 +3746,9 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
         // Platform admins can see all QR codes
         const result = await db.execute(sql`SELECT * FROM qr_codes ORDER BY created_at DESC`);
         qrCodes = result.rows;
-      } else if (user.communityId) {
+      } else if (userChurch?.communityId) {
         // Church admins see their church's QR codes
-        qrCodes = await storage.getChurchQrCodes(user.communityId);
+        qrCodes = await storage.getChurchQrCodes(userChurch.communityId);
       } else {
         qrCodes = [];
       }
@@ -3771,7 +3778,8 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
       // Get user and verify church membership
       const user = await storage.getUser(userId);
-      if (!user?.communityId || existingQrCode.communityId !== user.communityId) {
+      const userChurch = await storage.getUserChurch(userId);
+      if (!userChurch?.communityId || existingQrCode.communityId !== userChurch.communityId) {
         return res.status(403).json({ message: 'Access denied to this QR code' });
       }
 
