@@ -806,11 +806,38 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                                   <Input 
                                     type="file" 
                                     accept="image/*,video/*"
-                                    onChange={(e) => {
+                                    onChange={async (e) => {
                                       const file = e.target.files?.[0];
                                       if (file) {
-                                        // For now, just show filename - full upload logic can be added later
-                                        field.onChange(file.name);
+                                        try {
+                                          // Upload file to server
+                                          const formData = new FormData();
+                                          formData.append('file', file);
+                                          
+                                          const response = await fetch('/api/upload', {
+                                            method: 'POST',
+                                            body: formData,
+                                            credentials: 'include'
+                                          });
+                                          
+                                          if (response.ok) {
+                                            const result = await response.json();
+                                            field.onChange(result.url || result.filename);
+                                            toast({
+                                              title: "File Uploaded",
+                                              description: "Your file has been uploaded successfully!",
+                                            });
+                                          } else {
+                                            throw new Error('Upload failed');
+                                          }
+                                        } catch (error) {
+                                          toast({
+                                            title: "Upload Error",
+                                            description: "Failed to upload file. Please try again.",
+                                            variant: "destructive"
+                                          });
+                                          field.onChange(''); // Clear the field on error
+                                        }
                                       }
                                     }}
                                     className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
