@@ -14,7 +14,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Switch } from './ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Heart, MessageCircle, Share2, Bookmark, Eye, ChevronDown, ChevronUp, MapPin, Users, Award, TrendingUp, Zap, Plus, Filter, Upload, AlertCircle, Church, Shield, CheckCircle, ExternalLink, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, Eye, ChevronDown, ChevronUp, MapPin, Users, Award, TrendingUp, Zap, Plus, Filter, Upload, AlertCircle, Church, Shield, CheckCircle, ExternalLink, Trash2, AlertTriangle } from 'lucide-react';
 import ExpirationSettings from './ExpirationSettings';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -223,6 +223,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
   const [showWhosPraying, setShowWhosPraying] = useState<Map<number, boolean>>(new Map());
   const [reactions, setReactions] = useState<Map<number, {praying: number, heart: number, fire: number, praise: number}>>(new Map());
   const [shareDialogOpen, setShareDialogOpen] = useState<{isOpen: boolean, prayer: PrayerRequest | null}>({isOpen: false, prayer: null});
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState<{isOpen: boolean, prayerId: number | null}>({isOpen: false, prayerId: null});
   
   // Expiration settings state
   const [expirationSettings, setExpirationSettings] = useState<{
@@ -659,8 +660,13 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
   };
 
   const handleDeletePrayer = (prayerId: number) => {
-    if (window.confirm('Are you sure you want to delete this prayer request? This action cannot be undone.')) {
-      deletePrayerMutation.mutate(prayerId);
+    setDeleteDialogOpen({isOpen: true, prayerId});
+  };
+
+  const confirmDeletePrayer = () => {
+    if (deleteDialogOpen.prayerId) {
+      deletePrayerMutation.mutate(deleteDialogOpen.prayerId);
+      setDeleteDialogOpen({isOpen: false, prayerId: null});
     }
   };
 
@@ -783,6 +789,35 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                                   ))}
                                 </SelectContent>
                               </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Upload Image/Video Field */}
+                        <FormField
+                          control={form.control}
+                          name="attachmentUrl"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Upload Prayer Image/Video (Optional)</FormLabel>
+                              <FormControl>
+                                <div className="flex items-center gap-2">
+                                  <Input 
+                                    type="file" 
+                                    accept="image/*,video/*"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        // For now, just show filename - full upload logic can be added later
+                                        field.onChange(file.name);
+                                      }
+                                    }}
+                                    className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                  />
+                                  <Upload className="w-4 h-4 text-gray-400" />
+                                </div>
+                              </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
@@ -939,60 +974,6 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="text-2xl">{getCategoryIcon(prayer.category || 'general')}</span>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => {
-                                // Create file input element
-                                const input = document.createElement('input');
-                                input.type = 'file';
-                                input.accept = 'image/*';
-                                input.onchange = async (e) => {
-                                  const file = (e.target as HTMLInputElement).files?.[0];
-                                  if (file) {
-                                    try {
-                                      const formData = new FormData();
-                                      formData.append('photo', file);
-                                      
-                                      const response = await fetch(`/api/prayers/${prayer.id}/upload`, {
-                                        method: 'POST',
-                                        body: formData,
-                                        credentials: 'include'
-                                      });
-                                      
-                                      if (response.ok) {
-                                        const result = await response.json();
-                                        // Invalidate cache to refresh prayer requests with new photo
-                                        queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
-                                        toast({
-                                          title: "Photo Uploaded",
-                                          description: "Your photo has been uploaded successfully!",
-                                        });
-                                      } else {
-                                        const error = await response.json();
-                                        toast({
-                                          title: "Upload Failed",
-                                          description: error.message || "Failed to upload photo",
-                                          variant: "destructive"
-                                        });
-                                      }
-                                    } catch (error) {
-
-                                      toast({
-                                        title: "Upload Error",
-                                        description: "An error occurred while uploading the photo",
-                                        variant: "destructive"
-                                      });
-                                    }
-                                  }
-                                };
-                                input.click();
-                              }}
-                              title="Attach photo to prayer request"
-                              className="text-green-600 hover:text-green-700"
-                            >
-                              <Upload className="w-4 h-4" />
-                            </Button>
                             <Button 
                               variant="ghost" 
                               size="sm"
@@ -1527,6 +1508,36 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
         content={shareDialogOpen.prayer ? `Prayer Request: ${shareDialogOpen.prayer.title || 'Community Prayer'}\n\n${shareDialogOpen.prayer.content}` : ''}
         url={window.location.href}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen.isOpen} onOpenChange={(open) => !open && setDeleteDialogOpen({isOpen: false, prayerId: null})}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-500" />
+              Delete Prayer Request
+            </DialogTitle>
+            <DialogDescription>
+              This action cannot be undone. Your prayer request will be permanently removed from the Prayer Wall.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-3 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => setDeleteDialogOpen({isOpen: false, prayerId: null})}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDeletePrayer}
+              disabled={deletePrayerMutation.isPending}
+            >
+              {deletePrayerMutation.isPending ? "Deleting..." : "Delete Prayer"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
