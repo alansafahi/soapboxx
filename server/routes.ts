@@ -3748,19 +3748,48 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
         // Platform admins can see all QR codes
         console.log('User is platform admin, fetching all QR codes'); // Debug log
         const result = await db.execute(sql`SELECT * FROM qr_codes ORDER BY created_at DESC`);
-        qrCodes = result.rows;
-        console.log('All QR codes fetched:', qrCodes.length, 'codes'); // Debug log
+        qrCodes = result.rows.map((row: any) => ({
+          id: row.id,
+          communityId: row.community_id,
+          eventId: row.event_id,
+          name: row.title,
+          description: row.description,
+          location: row.title, // Use title as location for now since location field doesn't exist
+          isActive: row.is_active,
+          maxUsesPerDay: row.max_uses,
+          validFrom: null, // Not stored in current schema
+          validUntil: row.expires_at,
+          createdBy: row.created_by,
+          createdAt: row.created_at,
+          updatedAt: row.updated_at
+        }));
+        console.log('All QR codes fetched and transformed:', qrCodes.length, 'codes'); // Debug log
       } else if (userChurch?.communityId) {
         // Church admins see their church's QR codes
         console.log('User is church admin, fetching QR codes for community:', userChurch.communityId); // Debug log
-        qrCodes = await storage.getChurchQrCodes(userChurch.communityId);
-        console.log('Church QR codes fetched:', qrCodes.length, 'codes'); // Debug log
+        const churchQrCodes = await storage.getChurchQrCodes(userChurch.communityId);
+        qrCodes = churchQrCodes.map((row: any) => ({
+          id: row.id,
+          communityId: row.community_id || row.communityId,
+          eventId: row.event_id || row.eventId,
+          name: row.title || row.name,
+          description: row.description,
+          location: row.title || row.location || row.name,
+          isActive: row.is_active !== undefined ? row.is_active : row.isActive,
+          maxUsesPerDay: row.max_uses || row.maxUsesPerDay,
+          validFrom: row.valid_from || row.validFrom,
+          validUntil: row.expires_at || row.validUntil,
+          createdBy: row.created_by || row.createdBy,
+          createdAt: row.created_at || row.createdAt,
+          updatedAt: row.updated_at || row.updatedAt
+        }));
+        console.log('Church QR codes fetched and transformed:', qrCodes.length, 'codes'); // Debug log
       } else {
         console.log('User has no QR code access'); // Debug log
         qrCodes = [];
       }
 
-      console.log('Returning QR codes:', qrCodes); // Debug log
+      console.log('Returning transformed QR codes:', qrCodes); // Debug log
       res.json(qrCodes);
     } catch (error) {
       console.error('Error fetching QR codes:', error);
