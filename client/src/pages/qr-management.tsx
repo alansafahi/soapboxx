@@ -90,7 +90,14 @@ export default function QrManagement() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/qr-codes'] });
       setIsCreateDialogOpen(false);
-      createForm.reset();
+      createForm.reset({
+        name: "",
+        description: "",
+        location: "",
+        maxUsesPerDay: undefined,
+        validFrom: "",
+        validUntil: "",
+      });
       toast({
         title: "QR Code Created",
         description: "The QR code has been created successfully.",
@@ -409,15 +416,28 @@ export default function QrManagement() {
                 name="validFrom"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Valid From (Optional)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="datetime-local" 
-                        {...field}
-                        value={field.value || ""}
-                        className="w-full"
-                      />
-                    </FormControl>
+                    <FormLabel>Valid From (Optional) - Leave empty for no restriction</FormLabel>
+                    <div className="flex gap-2">
+                      <FormControl>
+                        <Input 
+                          type="datetime-local" 
+                          {...field}
+                          value={field.value || ""}
+                          className="flex-1"
+                        />
+                      </FormControl>
+                      {field.value && (
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => field.onChange("")}
+                          className="px-2"
+                        >
+                          Clear
+                        </Button>
+                      )}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -428,15 +448,28 @@ export default function QrManagement() {
                 name="validUntil"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Valid Until (Optional)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="datetime-local" 
-                        {...field}
-                        value={field.value || ""}
-                        className="w-full"
-                      />
-                    </FormControl>
+                    <FormLabel>Valid Until (Optional) - Leave empty for no expiration</FormLabel>
+                    <div className="flex gap-2">
+                      <FormControl>
+                        <Input 
+                          type="datetime-local" 
+                          {...field}
+                          value={field.value || ""}
+                          className="flex-1"
+                        />
+                      </FormControl>
+                      {field.value && (
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => field.onChange("")}
+                          className="px-2"
+                        >
+                          Clear
+                        </Button>
+                      )}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
