@@ -66,7 +66,6 @@ export default function QrManagement() {
       });
       setQrCodeDataUrl(dataUrl);
     } catch (error) {
-      console.error('Error generating QR code:', error);
       toast({
         title: "Error",
         description: "Failed to generate QR code image",

@@ -2060,7 +2060,6 @@ export class DatabaseStorage implements IStorage {
         expiresAt: userChurch.expires_at
       };
     } catch (error) {
-      console.error('Error in getUserChurch:', error);
       return undefined;
     }
   }
@@ -8298,7 +8297,6 @@ export class DatabaseStorage implements IStorage {
 
       return result.rows[0] as QrCode;
     } catch (error) {
-      console.error('Error creating QR code:', error);
       throw new Error('Failed to create QR code');
     }
   }
@@ -8326,7 +8324,6 @@ export class DatabaseStorage implements IStorage {
         updatedAt: row.updated_at
       };
     } catch (error) {
-      console.error('Error getting QR code:', error);
       return undefined;
     }
   }
@@ -8336,7 +8333,6 @@ export class DatabaseStorage implements IStorage {
       const result = await db.select().from(qrCodes).where(eq(qrCodes.communityId, churchId));
       return result;
     } catch (error) {
-      console.error('Error getting church QR codes:', error);
       return [];
     }
   }
@@ -8381,7 +8377,6 @@ export class DatabaseStorage implements IStorage {
         updatedAt: row.updated_at
       };
     } catch (error) {
-      console.error('Error updating QR code:', error);
       throw new Error('Failed to update QR code');
     }
   }
@@ -8390,7 +8385,6 @@ export class DatabaseStorage implements IStorage {
     try {
       await db.delete(qrCodes).where(eq(qrCodes.id, id));
     } catch (error) {
-      console.error('Error deleting QR code:', error);
       throw new Error('Failed to delete QR code');
     }
   }
@@ -8413,7 +8407,6 @@ export class DatabaseStorage implements IStorage {
         qrCode: isActive && isValidTime ? qrCode : undefined
       };
     } catch (error) {
-      console.error('Error validating QR code:', error);
       return { valid: false };
     }
   }

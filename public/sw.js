@@ -31,8 +31,6 @@ self.addEventListener('push', function(event) {
       self.registration.showNotification(data.title, options)
     );
   } catch (error) {
-    console.error('Error handling push event:', error);
-    
     // Fallback notification
     event.waitUntil(
       self.registration.showNotification('SoapBox Update', {

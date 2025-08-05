@@ -3774,7 +3774,6 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
       res.json(qrCodes);
     } catch (error) {
-      console.error('Error fetching QR codes:', error);
       res.status(500).json({ message: 'Failed to fetch QR codes' });
     }
   });

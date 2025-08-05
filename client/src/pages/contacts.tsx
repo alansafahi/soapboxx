@@ -556,7 +556,7 @@ function ContactsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Total Contacts</p>
-                  <p className="text-3xl font-bold text-gray-900">{contacts.length}</p>
+                  <p className="text-3xl font-bold text-gray-900">{(contacts as any[])?.length || 0}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                   <Users className="h-6 w-6 text-white" />
@@ -570,7 +570,7 @@ function ContactsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Friends Invited</p>
-                  <p className="text-3xl font-bold text-gray-900">{referralStats?.successful || 0}</p>
+                  <p className="text-3xl font-bold text-gray-900">{(referralStats as any)?.successful || 0}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center">
                   <Gift className="h-6 w-6 text-white" />
@@ -587,7 +587,7 @@ function ContactsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Pending Invites</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{pendingInvites.length}</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{(pendingInvites as any[])?.length || 0}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
                   <Mail className="h-6 w-6 text-white" />
@@ -601,7 +601,7 @@ function ContactsPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600 dark:text-gray-300">SoapBox Points</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{userScore?.total_points || 0}</p>
+                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{(userScore as any)?.total_points || 0}</p>
                 </div>
                 <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center">
                   <Star className="h-6 w-6 text-white" />
@@ -641,7 +641,7 @@ function ContactsPage() {
                   <p className="text-gray-600">Loading your connections...</p>
                 </div>
               </div>
-            ) : contacts.length === 0 ? (
+            ) : (contacts as any[])?.length === 0 ? (
               <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardContent className="p-16 text-center">
                   <div className="space-y-6">
@@ -666,7 +666,7 @@ function ContactsPage() {
               </Card>
             ) : (
               <div className="grid gap-4">
-                {contacts.map((contact: any) => (
+                {((contacts as any[]) || []).map((contact: any) => (
                   <Card key={contact.id} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02]">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
@@ -843,7 +843,7 @@ function ContactsPage() {
 
           {/* Enhanced Pending Invites Tab */}
           <TabsContent value="pending" className="space-y-6">
-            {pendingInvites.length === 0 ? (
+            {((pendingInvites as any[]) || []).length === 0 ? (
               <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardContent className="p-16 text-center">
                   <div className="space-y-6">
@@ -868,7 +868,7 @@ function ContactsPage() {
               </Card>
             ) : (
               <div className="grid gap-4">
-                {pendingInvites.map((invite: any) => (
+                {((pendingInvites as any[]) || []).map((invite: any) => (
                   <Card key={invite.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-300">
                     <CardContent className="p-6">
                       <div className="flex items-center justify-between">
