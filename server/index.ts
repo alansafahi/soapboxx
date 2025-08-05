@@ -27,7 +27,7 @@ app.use((req, res, next) => {
 app.use(compression({
   level: 6, // Balanced compression
   threshold: 1024, // Only compress responses > 1KB
-  filter: (req, res) => {
+  filter: (req: Request, res: Response) => {
     // Don't compress responses with this request header
     if (req.headers['x-no-compression']) {
       return false;
