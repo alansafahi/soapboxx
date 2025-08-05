@@ -425,9 +425,9 @@ export default function QrManagement() {
                           value={field.value || ""}
                           onFocus={(e) => {
                             if (!field.value) {
-                              // Set to today at 12:00 PM when focused
+                              // Set to today at 9:00 AM when focused
                               const today = new Date();
-                              today.setHours(12, 0, 0, 0);
+                              today.setHours(9, 0, 0, 0);
                               const dateString = today.toISOString().slice(0, 16);
                               field.onChange(dateString);
                             }
@@ -466,9 +466,9 @@ export default function QrManagement() {
                           value={field.value || ""}
                           onFocus={(e) => {
                             if (!field.value) {
-                              // Set to today at 12:00 PM when focused
+                              // Set to today at 10:00 AM when focused
                               const today = new Date();
-                              today.setHours(12, 0, 0, 0);
+                              today.setHours(10, 0, 0, 0);
                               const dateString = today.toISOString().slice(0, 16);
                               field.onChange(dateString);
                             }
