@@ -331,7 +331,7 @@ export default function SimpleLanding() {
                 <div className="text-center mb-6">
                   <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Basic</h4>
                   <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">Free</div>
-                  <p className="text-gray-600 text-sm sm:text-base">100 credits/month</p>
+                  <p className="text-gray-600 text-sm sm:text-base">250 credits/month</p>
                 </div>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center gap-2">
@@ -348,7 +348,7 @@ export default function SimpleLanding() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">100 credits per referral</span>
+                    <span className="text-sm sm:text-base">500 credits per referral</span>
                   </li>
                 </ul>
                 <Button 
@@ -365,8 +365,8 @@ export default function SimpleLanding() {
                 </div>
                 <div className="text-center mb-6">
                   <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Standard</h4>
-                  <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-1">$10/mo</div>
-                  <p className="text-gray-600 text-sm">$100/year</p>
+                  <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-1">$5/mo</div>
+                  <p className="text-gray-600 text-sm">$50/year</p>
                   <p className="text-gray-600 text-sm sm:text-base">500 credits/month</p>
                 </div>
                 <ul className="space-y-3 mb-8">
@@ -384,7 +384,7 @@ export default function SimpleLanding() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">100 credits per referral</span>
+                    <span className="text-sm sm:text-base">500 credits per referral</span>
                   </li>
                 </ul>
                 <Button className="w-full bg-purple-600 hover:bg-purple-700 py-3 text-sm sm:text-base">Choose Standard</Button>
@@ -393,8 +393,8 @@ export default function SimpleLanding() {
               <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
                 <div className="text-center mb-6">
                   <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Premium</h4>
-                  <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">$20/mo</div>
-                  <p className="text-gray-600 text-sm">$200/year</p>
+                  <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">$10/mo</div>
+                  <p className="text-gray-600 text-sm">$100/year</p>
                   <p className="text-gray-600 text-sm sm:text-base">1,000 credits/month</p>
                 </div>
                 <ul className="space-y-3 mb-8">
@@ -412,7 +412,7 @@ export default function SimpleLanding() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">100 credits per referral</span>
+                    <span className="text-sm sm:text-base">500 credits per referral</span>
                   </li>
                 </ul>
                 <Button className="w-full bg-gray-900 hover:bg-gray-800 py-3 text-sm sm:text-base">Choose Premium</Button>
@@ -460,7 +460,7 @@ export default function SimpleLanding() {
                 <div className="text-center mb-6">
                   <h4 className="text-xl font-bold text-gray-900 mb-2">Church Standard</h4>
                   <div className="text-3xl font-bold text-purple-600 mb-2">$100/mo</div>
-                  <p className="text-gray-600">5,000 credits/month</p>
+                  <p className="text-gray-600">10,000 credits/month</p>
                 </div>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center gap-2">
