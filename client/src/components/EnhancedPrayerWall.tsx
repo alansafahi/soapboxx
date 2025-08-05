@@ -1094,6 +1094,13 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                               alt="Prayer request attachment"
                               className="rounded-lg max-w-full h-auto border border-gray-200 dark:border-gray-700"
                               style={{ maxHeight: '300px', objectFit: 'contain' }}
+                              onError={(e) => {
+                                console.error('Image failed to load:', prayer.attachmentUrl);
+                                e.currentTarget.style.display = 'none';
+                              }}
+                              onLoad={() => {
+                                console.log('Image loaded successfully:', prayer.attachmentUrl);
+                              }}
                             />
                           </div>
                         )}
