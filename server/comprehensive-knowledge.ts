@@ -349,7 +349,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     category: 'features',
     subcategory: 'credits',
     keywords: ['credits', 'what are credits', 'credit system', 'how credits work'],
-    content: 'Credits power AI-assisted features like sermon generation, biblical research, content creation, and analytics insights. Each plan includes monthly credits. Additional credits can be purchased through boost packs. Credits reset monthly and unused credits don\'t roll over.',
+    content: 'Credits power AI-assisted features like sermon generation, biblical research, content creation, and analytics insights. Each plan includes monthly credits. Additional credits can be purchased through boost packs: Small ($25 for 2,500 credits), Medium ($50 for 6,000 credits), Large ($100 for 12,500 credits). Credits reset monthly and unused credits don\'t roll over.',
     priority: 8,
     lastUpdated: '2025-07-17',
     source: 'website'

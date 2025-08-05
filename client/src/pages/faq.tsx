@@ -197,13 +197,13 @@ const faqs: FAQItem[] = [
   {
     id: 'individual-pricing-plans',
     question: 'What are the individual pricing plans?',
-    answer: 'FREE: 100 credits/month with core features. STANDARD: $10/month (500 credits) with AI insights and priority support. PREMIUM: $20/month (1,000 credits) with advanced analytics and custom integrations. All plans include S.O.A.P. journaling, prayer wall, and community features.',
+    answer: 'FREE: 250 credits/month with core features. STANDARD: $5/month (500 credits) with AI insights and priority support. PREMIUM: $10/month (1,000 credits) with advanced analytics and custom integrations. All plans include S.O.A.P. journaling, prayer wall, and community features.',
     category: 'pricing'
   },
   {
     id: 'credit-boost-packs',
     question: 'Can I purchase additional credits?',
-    answer: 'Yes! Credit boost packs are available: Small ($25 for 1,000 credits), Medium ($50 for 2,500 credits), Large ($100 for 5,000 credits). Perfect for high-usage periods or special ministry projects.',
+    answer: 'Yes! Credit boost packs are available: Small ($25 for 2,500 credits), Medium ($50 for 6,000 credits), Large ($100 for 12,500 credits). Perfect for high-usage periods or special ministry projects.',
     category: 'pricing'
   },
   {

@@ -520,19 +520,19 @@ export default function SimpleLanding() {
               <div className="text-center p-6 bg-gray-50 rounded-lg">
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">Boost Pack S</h4>
                 <div className="text-2xl font-bold text-blue-600 mb-2">$25</div>
-                <p className="text-gray-600">1,000 credits</p>
+                <p className="text-gray-600">2,500 credits</p>
               </div>
               
               <div className="text-center p-6 bg-purple-50 rounded-lg border-2 border-purple-200">
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">Boost Pack M</h4>
                 <div className="text-2xl font-bold text-purple-600 mb-2">$50</div>
-                <p className="text-gray-600">2,500 credits</p>
+                <p className="text-gray-600">6,000 credits</p>
               </div>
               
               <div className="text-center p-6 bg-gray-50 rounded-lg">
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">Boost Pack L</h4>
                 <div className="text-2xl font-bold text-gray-900 mb-2">$100</div>
-                <p className="text-gray-600">5,000 credits</p>
+                <p className="text-gray-600">12,500 credits</p>
               </div>
             </div>
             
