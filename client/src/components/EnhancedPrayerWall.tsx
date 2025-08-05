@@ -36,6 +36,7 @@ const prayerRequestSchema = z.object({
   isUrgent: z.boolean().default(false),
   expiresAt: z.date().optional(),
   allowsExpiration: z.boolean().default(false),
+  attachmentUrl: z.string().optional(),
 });
 
 type PrayerRequestFormData = z.infer<typeof prayerRequestSchema>;
@@ -276,6 +277,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
       isPublic: true,
       isUrgent: false,
       allowsExpiration: false,
+      attachmentUrl: "",
     },
   });
 
@@ -652,7 +654,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
 
   const getCategoryIcon = (category: string) => {
     const cat = prayerCategories.find(c => c.id === category);
-    return cat ? cat.icon : '🙏';
+    return cat ? cat.icon : '🤲'; // Changed from 🙏 to 🤲 to avoid confusion
   };
 
   const getInitials = (name: string) => {
@@ -1000,7 +1002,6 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className="text-2xl">{getCategoryIcon(prayer.category || 'general')}</span>
                             <Button 
                               variant="ghost" 
                               size="sm"
