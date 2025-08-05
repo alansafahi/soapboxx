@@ -65,6 +65,9 @@ export default function QrManagement() {
       name: "",
       description: "",
       location: "",
+      maxUsesPerDay: undefined,
+      validFrom: "",
+      validUntil: "",
     },
   });
 
@@ -75,13 +78,15 @@ export default function QrManagement() {
 
   // Create QR code mutation
   const createMutation = useMutation({
-    mutationFn: (data: QrCodeFormData) => 
-      apiRequest('POST', '/api/qr-codes', {
+    mutationFn: (data: QrCodeFormData) => {
+      console.log('Submitting QR Code data:', data); // Debug log
+      return apiRequest('POST', '/api/qr-codes', {
         ...data,
         maxUsesPerDay: data.maxUsesPerDay || null,
         validFrom: data.validFrom || null,
         validUntil: data.validUntil || null,
-      }),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/qr-codes'] });
       setIsCreateDialogOpen(false);
@@ -409,6 +414,7 @@ export default function QrManagement() {
                       <Input 
                         type="datetime-local" 
                         {...field}
+                        value={field.value || ""}
                         className="w-full"
                       />
                     </FormControl>
@@ -427,6 +433,7 @@ export default function QrManagement() {
                       <Input 
                         type="datetime-local" 
                         {...field}
+                        value={field.value || ""}
                         className="w-full"
                       />
                     </FormControl>
