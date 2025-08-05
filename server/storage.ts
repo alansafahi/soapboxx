@@ -6308,7 +6308,7 @@ export class DatabaseStorage implements IStorage {
           uc.community_id,
           uc.role,
           uc.is_verified
-        FROM user_communities uc
+        FROM user_churches uc
         WHERE uc.user_id = $1
       `;
       const userInfoResult = await pool.query(userInfoQuery, [userId]);
@@ -6365,7 +6365,7 @@ export class DatabaseStorage implements IStorage {
           
           -- Community prayers - only church members can see
           OR (pr.privacy_level = 'community' AND EXISTS (
-            SELECT 1 FROM user_communities uc2 
+            SELECT 1 FROM user_churches uc2 
             WHERE uc2.user_id = $1 AND uc2.community_id = pr.community_id
           ))
           
@@ -6380,7 +6380,7 @@ export class DatabaseStorage implements IStorage {
           
           -- Pastor only prayers - only church leadership can see
           OR (pr.privacy_level = 'pastor_only' AND EXISTS (
-            SELECT 1 FROM user_communities uc2 
+            SELECT 1 FROM user_churches uc2 
             WHERE uc2.user_id = $1 AND uc2.community_id = pr.community_id 
             AND uc2.role IN ('pastor', 'admin', 'owner')
           ))

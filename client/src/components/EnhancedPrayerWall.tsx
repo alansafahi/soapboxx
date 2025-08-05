@@ -30,10 +30,10 @@ const prayerRequestSchema = z.object({
   content: z.string().min(1, "Prayer request content is required"),
   isAnonymous: z.boolean().default(false),
   category: z.string().default("general"),
+  privacyLevel: z.string().default("public"),
   churchId: z.number().optional(),
   isPublic: z.boolean().default(true),
   isUrgent: z.boolean().default(false),
-  isSilent: z.boolean().default(false),
   expiresAt: z.date().optional(),
   allowsExpiration: z.boolean().default(false),
 });
@@ -271,9 +271,9 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
       content: "",
       isAnonymous: false,
       category: "general",
+      privacyLevel: "public",
       isPublic: true,
       isUrgent: false,
-      isSilent: false,
       allowsExpiration: false,
     },
   });
@@ -381,9 +381,17 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
       setIsCreateDialogOpen(false);
       form.reset();
       setExpirationSettings({ expiresAt: null, allowsExpiration: false });
+      // Dynamic message based on privacy level
+      const privacyMessages = {
+        public: "Your prayer request has been shared publicly with everyone.",
+        community: "Your prayer request has been shared with your church community.",
+        prayer_circle: "Your prayer request has been shared with your prayer circle/team.",
+        pastor_only: "Your prayer request has been shared privately with your pastor/priest."
+      };
+      
       toast({
         title: "Prayer Request Posted",
-        description: "Your prayer request has been shared with the community.",
+        description: privacyMessages[data.privacyLevel] || "Your prayer request has been posted.",
       });
     },
     onError: (error: any) => {
