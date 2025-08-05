@@ -45,9 +45,9 @@ import {
   MessageCircle,
   TrendingUp,
   Star,
-  Brain,
+
 } from "lucide-react";
-import MoodCheckIn from "./MoodCheckIn";
+
 import QrScanner from "qr-scanner";
 
 interface CheckIn {
@@ -100,7 +100,7 @@ export default function CheckInSystem() {
 
   const [showCheckInDialog, setShowCheckInDialog] = useState(false);
   const [showQrScanner, setShowQrScanner] = useState(false);
-  const [showMoodCheckIn, setShowMoodCheckIn] = useState(false);
+
   const [selectedType, setSelectedType] = useState("Spiritual Check-In");
   const [selectedMoods, setSelectedMoods] = useState<number[]>([]);
   const [notes, setNotes] = useState("");
@@ -633,18 +633,6 @@ export default function CheckInSystem() {
                     <div>QR Check-In</div>
                   </div>
                 </Button>
-
-                <Button 
-                  variant="outline"
-                  size="lg"
-                  className="h-16 border-purple-200 hover:bg-purple-50"
-                  onClick={() => setShowMoodCheckIn(true)}
-                >
-                  <div className="text-center">
-                    <Brain className="w-6 h-6 mx-auto mb-1 text-purple-600" />
-                    <div className="text-purple-700">AI Mood Check-In</div>
-                  </div>
-                </Button>
               </div>
               
               <p className="text-sm text-center text-muted-foreground">
@@ -677,24 +665,7 @@ export default function CheckInSystem() {
                 )}
               </div>
               
-              {/* AI Mood Check-In button always available */}
-              <div className="flex justify-center">
-                <Button 
-                  variant="outline"
-                  size="lg"
-                  className="h-16 border-purple-200 hover:bg-purple-50"
-                  onClick={() => setShowMoodCheckIn(true)}
-                >
-                  <div className="text-center">
-                    <Brain className="w-6 h-6 mx-auto mb-1 text-purple-600" />
-                    <div className="text-purple-700">AI Mood Check-In</div>
-                  </div>
-                </Button>
-              </div>
-              
-              <p className="text-sm text-center text-muted-foreground">
-                AI Mood Check-In is available anytime for personalized spiritual guidance
-              </p>
+
             </div>
           )}
         </CardContent>
@@ -863,29 +834,7 @@ export default function CheckInSystem() {
         </Dialog>
       )}
 
-      {/* AI Mood Check-In Modal */}
-      {showMoodCheckIn && (
-        <Dialog open={showMoodCheckIn} onOpenChange={setShowMoodCheckIn}>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>AI Mood Check-In</DialogTitle>
-              <DialogDescription>
-                Share how you're feeling to receive personalized spiritual guidance
-              </DialogDescription>
-            </DialogHeader>
-            <MoodCheckIn 
-              onComplete={() => {
-                setShowMoodCheckIn(false);
-                // Refresh data after mood check-in
-                queryClient.invalidateQueries({ queryKey: ["/api/checkins/today"] });
-                queryClient.invalidateQueries({ queryKey: ["/api/checkins/streak"] });
-                queryClient.invalidateQueries({ queryKey: ["/api/checkins/recent"] });
-                queryClient.invalidateQueries({ queryKey: ["/api/mood-checkins/recent"] });
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
+
     </div>
   );
 }

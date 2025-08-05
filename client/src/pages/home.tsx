@@ -20,7 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Users, User } from "lucide-react";
 import CheckInSystem from "../components/CheckInSystem";
 import FloatingPostButton from "../components/FloatingPostButton";
-import RecentCheckInsStrip from "../components/RecentCheckInsStrip";
+
 import { ReferralWelcome } from "../components/ReferralWelcome";
 import EditRequestBanner from "../components/EditRequestBanner";
 import EditRequestToast from "../components/EditRequestToast";
@@ -178,9 +178,6 @@ export default function Home({ referralCode }: HomeProps = {}) {
         <div className="mb-6" ref={composerRef}>
           <CompactPostComposer />
         </div>
-
-        {/* Recent Check-Ins Horizontal Strip */}
-        <RecentCheckInsStrip />
 
         {/* Main Feed Layout - Full Width */}
         <div className="w-full">
