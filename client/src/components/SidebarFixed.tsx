@@ -220,15 +220,27 @@ export default function SidebarFixed() {
     }
   ];
 
+  // DEBUG: Log user and navigation data
+  console.log('SIDEBAR DEBUG:', {
+    user: user,
+    isAuthenticated: !!user,
+    navigationGroups: navigationGroups.map(g => g.label),
+    userAdminCommunities,
+    hasCommunityAdminRole
+  });
+
   // Filter groups based on user permissions and admin access
   const visibleGroups = navigationGroups.filter(group => {
     if (group.label === 'ADMIN PORTAL') {
-      // Show admin portal for users with actual admin access to communities OR any logged-in user for now
-      return user && (userAdminCommunities?.hasAdminAccess || user?.role === 'soapbox_owner' || hasCommunityAdminRole || true);
+      console.log('ADMIN PORTAL CHECK:', { user: !!user });
+      // Always show ADMIN PORTAL for now
+      return true;
     }
     
     return true;
   });
+
+  console.log('VISIBLE GROUPS:', visibleGroups.map(g => g.label));
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {
