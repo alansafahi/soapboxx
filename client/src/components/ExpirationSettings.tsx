@@ -13,17 +13,21 @@ interface ExpirationSettingsProps {
   contentType: 'discussion' | 'prayer' | 'soap';
   initialExpiresAt?: Date | null;
   allowsExpiration?: boolean;
+  privacyLevel?: string;
   onSettingsChange: (settings: {
     expiresAt: Date | null;
     allowsExpiration: boolean;
   }) => void;
+  onPrivacyChange?: (privacyLevel: string) => void;
 }
 
 export default function ExpirationSettings({
   contentType,
   initialExpiresAt,
   allowsExpiration = false,
-  onSettingsChange
+  privacyLevel = "public",
+  onSettingsChange,
+  onPrivacyChange
 }: ExpirationSettingsProps) {
   const [isEnabled, setIsEnabled] = useState(allowsExpiration);
   const [selectedOption, setSelectedOption] = useState<string>("");
@@ -157,6 +161,58 @@ export default function ExpirationSettings({
       </CardHeader>
       
       <CardContent className="space-y-4">
+        {/* Privacy Level Selection */}
+        {contentType === 'prayer' && onPrivacyChange && (
+          <div className="space-y-2">
+            <span className="text-xs font-medium text-muted-foreground">
+              Who can see this prayer request?
+            </span>
+            <Select value={privacyLevel} onValueChange={onPrivacyChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Choose privacy level" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="public">
+                  <div className="flex items-center gap-2">
+                    <span>🌐</span>
+                    <div>
+                      <div className="font-medium">Public</div>
+                      <div className="text-xs text-muted-foreground">Visible to everyone in the community</div>
+                    </div>
+                  </div>
+                </SelectItem>
+                <SelectItem value="community">
+                  <div className="flex items-center gap-2">
+                    <span>⛪</span>
+                    <div>
+                      <div className="font-medium">My Community</div>
+                      <div className="text-xs text-muted-foreground">Only visible to your church members</div>
+                    </div>
+                  </div>
+                </SelectItem>
+                <SelectItem value="prayer_circle">
+                  <div className="flex items-center gap-2">
+                    <span>🔗</span>
+                    <div>
+                      <div className="font-medium">Prayer Circle/Team</div>
+                      <div className="text-xs text-muted-foreground">Only visible to prayer team members</div>
+                    </div>
+                  </div>
+                </SelectItem>
+                <SelectItem value="pastor_only">
+                  <div className="flex items-center gap-2">
+                    <span>✝️</span>
+                    <div>
+                      <div className="font-medium">My Pastor/Priest</div>
+                      <div className="text-xs text-muted-foreground">Only visible to church leadership</div>
+                    </div>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         {/* Enable/Disable Toggle */}
         <div 
           className="flex items-center space-x-2 cursor-pointer p-2 rounded hover:bg-muted/50 transition-colors"

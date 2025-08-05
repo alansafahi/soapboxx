@@ -789,62 +789,6 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                           )}
                         />
 
-                        <FormField
-                          control={form.control}
-                          name="privacyLevel"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Prayer Request Privacy</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value || "public"}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Choose who can see this prayer" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="public">
-                                    <div className="flex items-center gap-2">
-                                      <span>🌐</span>
-                                      <div>
-                                        <div className="font-medium">Public</div>
-                                        <div className="text-xs text-muted-foreground">Visible to everyone in the community</div>
-                                      </div>
-                                    </div>
-                                  </SelectItem>
-                                  <SelectItem value="community">
-                                    <div className="flex items-center gap-2">
-                                      <span>⛪</span>
-                                      <div>
-                                        <div className="font-medium">My Community</div>
-                                        <div className="text-xs text-muted-foreground">Only visible to your church members</div>
-                                      </div>
-                                    </div>
-                                  </SelectItem>
-                                  <SelectItem value="prayer_circle">
-                                    <div className="flex items-center gap-2">
-                                      <span>🔗</span>
-                                      <div>
-                                        <div className="font-medium">Prayer Circle/Team</div>
-                                        <div className="text-xs text-muted-foreground">Only visible to prayer team members</div>
-                                      </div>
-                                    </div>
-                                  </SelectItem>
-                                  <SelectItem value="pastor_only">
-                                    <div className="flex items-center gap-2">
-                                      <span>✝️</span>
-                                      <div>
-                                        <div className="font-medium">My Pastor/Priest</div>
-                                        <div className="text-xs text-muted-foreground">Only visible to church leadership</div>
-                                      </div>
-                                    </div>
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
                         <div className="space-y-3">
                           <FormField
                             control={form.control}
@@ -886,7 +830,9 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                           contentType="prayer"
                           allowsExpiration={expirationSettings.allowsExpiration}
                           initialExpiresAt={expirationSettings.expiresAt}
+                          privacyLevel={form.watch('privacyLevel')}
                           onSettingsChange={setExpirationSettings}
+                          onPrivacyChange={(value) => form.setValue('privacyLevel', value)}
                         />
 
                         <Button 

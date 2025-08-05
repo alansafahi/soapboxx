@@ -6317,7 +6317,7 @@ export class DatabaseStorage implements IStorage {
       const prayerCircleQuery = `
         SELECT pcm.prayer_circle_id
         FROM prayer_circle_members pcm
-        WHERE pcm.user_id = $1 AND pcm.status = 'approved'
+        WHERE pcm.user_id = $1
       `;
       const prayerCircleResult = await pool.query(prayerCircleQuery, [userId]);
       const userPrayerCircles = prayerCircleResult.rows.map(row => row.prayer_circle_id);
@@ -6371,7 +6371,7 @@ export class DatabaseStorage implements IStorage {
           -- Prayer circle prayers - only prayer circle members can see  
           OR (pr.privacy_level = 'prayer_circle' AND EXISTS (
             SELECT 1 FROM prayer_circle_members pcm 
-            WHERE pcm.user_id = $1 AND pcm.status = 'approved'
+            WHERE pcm.user_id = $1
             AND pcm.prayer_circle_id IN (
               SELECT pc.id FROM prayer_circles pc WHERE pc.community_id = pr.community_id
             )
