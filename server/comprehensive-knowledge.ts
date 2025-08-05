@@ -72,10 +72,32 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     id: 'pricing-overview',
     category: 'pricing',
     keywords: ['pricing', 'plans', 'cost', 'how much', 'price', 'subscription', 'plan options'],
-    content: 'SoapBox Super App Pricing: FREE (250 credits/month), Standard ($5/month, 500 credits), Premium ($10/month, 1,000 credits). All plans include S.O.A.P. Journal, Prayer Wall, Community Discussions, and 500 referral credits. Higher plans add AI insights, priority support, and advanced analytics.',
+    content: 'SoapBox Super App Pricing: Individual Plans - FREE (250 credits/month), Standard ($5/month, 500 credits), Premium ($10/month, 1,000 credits). Church Plans - Basic ($50/month, 5,000 credits), Standard ($100/month, 10,000 credits). All plans include S.O.A.P. Journal, Prayer Wall, Community Discussions, and referral credits.',
     helpLink: '/faq#pricing',
     priority: 10,
-    lastUpdated: '2025-07-17',
+    lastUpdated: '2025-08-05',
+    source: 'website'
+  },
+  {
+    id: 'pricing-church-basic',
+    category: 'pricing',
+    subcategory: 'church',
+    keywords: ['church basic', 'church plan', '$50', '5000 credits', 'church pricing', 'basic church'],
+    content: 'Church Basic Plan: $50/month with 5,000 credits/month. Includes member management, event planning, communication tools, and 1,000 loyalty credits every 6 months. Perfect for growing congregations.',
+    helpLink: '/faq#pricing',
+    priority: 9,
+    lastUpdated: '2025-08-05',
+    source: 'website'
+  },
+  {
+    id: 'pricing-church-standard',
+    category: 'pricing',
+    subcategory: 'church',
+    keywords: ['church standard', '$100', '10000 credits', 'church advanced', 'standard church'],
+    content: 'Church Standard Plan: $100/month with 10,000 credits/month. Includes everything in Basic plus advanced analytics, sermon studio, and 2,000 loyalty credits every 6 months. Recommended for most churches.',
+    helpLink: '/faq#pricing',
+    priority: 9,
+    lastUpdated: '2025-08-05',
     source: 'website'
   },
   {

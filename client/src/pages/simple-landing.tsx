@@ -430,7 +430,7 @@ export default function SimpleLanding() {
                 <div className="text-center mb-6">
                   <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Church Basic</h4>
                   <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">$50/mo</div>
-                  <p className="text-gray-600 text-sm sm:text-base">2,500 credits/month</p>
+                  <p className="text-gray-600 text-sm sm:text-base">5,000 credits/month</p>
                 </div>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center gap-2">
