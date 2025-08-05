@@ -10548,7 +10548,11 @@ Return JSON with this exact structure:
   app.get('/api/prayers', isAuthenticated, async (req: any, res) => {
     try {
       const { communityId } = req.query;
-      const prayers = await storage.getPrayerRequests(communityId ? parseInt(communityId) : undefined);
+      const userId = req.session.userId;
+      const prayers = await storage.getPrayerRequestsWithPrivacy(
+        userId,
+        communityId ? parseInt(communityId) : undefined
+      );
       res.json(prayers);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch prayer requests" });

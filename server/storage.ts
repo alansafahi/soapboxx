@@ -506,6 +506,7 @@ export interface IStorage {
   
   // Prayer request operations
   getPrayerRequests(churchId?: number): Promise<PrayerRequest[]>;
+  getPrayerRequestsWithPrivacy(userId: string, churchId?: number): Promise<PrayerRequest[]>;
   getPrayerRequest(id: number): Promise<PrayerRequest | undefined>;
   createPrayerRequest(prayer: InsertPrayerRequest): Promise<PrayerRequest>;
   deletePrayerRequest(prayerId: number, userId: string): Promise<void>;
@@ -6295,6 +6296,147 @@ export class DatabaseStorage implements IStorage {
       }));
     } catch (error) {
       
+      return [];
+    }
+  }
+
+  async getPrayerRequestsWithPrivacy(userId: string, churchId?: number): Promise<PrayerRequest[]> {
+    try {
+      // Get user's community membership and role for privacy filtering
+      const userInfoQuery = `
+        SELECT 
+          uc.community_id,
+          uc.role,
+          uc.is_verified
+        FROM user_communities uc
+        WHERE uc.user_id = $1
+      `;
+      const userInfoResult = await pool.query(userInfoQuery, [userId]);
+      const userCommunities = userInfoResult.rows;
+      
+      // Get user's prayer circle memberships
+      const prayerCircleQuery = `
+        SELECT pcm.prayer_circle_id
+        FROM prayer_circle_members pcm
+        WHERE pcm.user_id = $1 AND pcm.status = 'approved'
+      `;
+      const prayerCircleResult = await pool.query(prayerCircleQuery, [userId]);
+      const userPrayerCircles = prayerCircleResult.rows.map(row => row.prayer_circle_id);
+      
+      let query = `
+        SELECT 
+          pr.id,
+          pr.author_id,
+          pr.community_id,
+          pr.title,
+          pr.content,
+          pr.is_anonymous,
+          pr.is_answered,
+          pr.answered_at,
+          pr.prayer_count,
+          pr.is_public,
+          pr.privacy_level,
+          pr.category,
+          pr.status,
+          pr.moderation_notes,
+          pr.assigned_to,
+          pr.priority,
+          pr.follow_up_date,
+          pr.last_follow_up_at,
+          pr.is_urgent,
+          pr.tags,
+          pr.attachment_url,
+          pr.expires_at,
+          pr.expired_at,
+          pr.created_at,
+          pr.updated_at,
+          u.email as author_email,
+          u.first_name as author_first_name,
+          u.last_name as author_last_name,
+          u.profile_image_url as author_profile_image_url
+        FROM prayer_requests pr
+        LEFT JOIN users u ON pr.author_id = u.id
+        WHERE (pr.expires_at IS NULL OR pr.expires_at > NOW())
+        AND (pr.expired_at IS NULL)
+        AND (pr.is_hidden IS NULL OR pr.is_hidden = false)
+        AND (
+          -- Public prayers - everyone can see
+          pr.privacy_level = 'public'
+          
+          -- Community prayers - only church members can see
+          OR (pr.privacy_level = 'community' AND EXISTS (
+            SELECT 1 FROM user_communities uc2 
+            WHERE uc2.user_id = $1 AND uc2.community_id = pr.community_id
+          ))
+          
+          -- Prayer circle prayers - only prayer circle members can see  
+          OR (pr.privacy_level = 'prayer_circle' AND EXISTS (
+            SELECT 1 FROM prayer_circle_members pcm 
+            WHERE pcm.user_id = $1 AND pcm.status = 'approved'
+            AND pcm.prayer_circle_id IN (
+              SELECT pc.id FROM prayer_circles pc WHERE pc.community_id = pr.community_id
+            )
+          ))
+          
+          -- Pastor only prayers - only church leadership can see
+          OR (pr.privacy_level = 'pastor_only' AND EXISTS (
+            SELECT 1 FROM user_communities uc2 
+            WHERE uc2.user_id = $1 AND uc2.community_id = pr.community_id 
+            AND uc2.role IN ('pastor', 'admin', 'owner')
+          ))
+          
+          -- User's own prayers - always visible to author
+          OR pr.author_id = $1
+          
+          -- Legacy support for old is_public field
+          OR (pr.privacy_level IS NULL AND pr.is_public = true)
+        )
+      `;
+
+      const params: any[] = [userId];
+      
+      if (churchId && userCommunities.some(uc => uc.community_id === churchId)) {
+        query += ' AND pr.community_id = $2';
+        params.push(churchId);
+      }
+
+      query += ' ORDER BY pr.created_at DESC';
+
+      const result = await pool.query(query, params);
+
+      return result.rows.map(row => ({
+        id: row.id,
+        authorId: row.author_id,
+        communityId: row.community_id,
+        title: row.title,
+        content: row.content,
+        isAnonymous: row.is_anonymous,
+        isAnswered: row.is_answered,
+        answeredAt: row.answered_at,
+        prayerCount: row.prayer_count || 0,
+        isPublic: row.is_public,
+        privacyLevel: row.privacy_level,
+        category: row.category,
+        status: row.status,
+        moderationNotes: row.moderation_notes,
+        assignedTo: row.assigned_to,
+        priority: row.priority,
+        followUpDate: row.follow_up_date,
+        lastFollowUpAt: row.last_follow_up_at,
+        isUrgent: row.is_urgent,
+        tags: row.tags,
+        attachmentUrl: row.attachment_url,
+        expiresAt: row.expires_at,
+        expiredAt: row.expired_at,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        authorEmail: row.author_email,
+        authorFirstName: row.author_first_name,
+        authorLastName: row.author_last_name,
+        authorProfileImageUrl: row.author_profile_image_url
+      }));
+    } catch (error) {
+      console.error('Error fetching prayer requests with privacy:', error);
       return [];
     }
   }
