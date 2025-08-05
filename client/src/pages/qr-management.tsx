@@ -357,7 +357,7 @@ export default function QrManagement() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>Name *</FormLabel>
                     <FormControl>
                       <Input placeholder="Main Sanctuary" {...field} />
                     </FormControl>
@@ -371,7 +371,7 @@ export default function QrManagement() {
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>Location *</FormLabel>
                     <FormControl>
                       <Input placeholder="Building A, Room 101" {...field} />
                     </FormControl>

@@ -8260,26 +8260,29 @@ export class DatabaseStorage implements IStorage {
   // QR Code Management Methods
   async createQrCode(qrCode: InsertQrCode): Promise<QrCode> {
     try {
-      const [createdQrCode] = await db
-        .insert(qrCodes)
-        .values({
-          id: qrCode.id,
-          communityId: qrCode.communityId,
-          eventId: qrCode.eventId,
-          name: qrCode.name,
-          description: qrCode.description,
-          location: qrCode.location,
-          isActive: qrCode.isActive,
-          maxUsesPerDay: qrCode.maxUsesPerDay,
-          validFrom: qrCode.validFrom,
-          validUntil: qrCode.validUntil,
-          createdBy: qrCode.createdBy,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        })
-        .returning();
+      // Use raw SQL since the table structure doesn't match the schema
+      const result = await db.execute(sql`
+        INSERT INTO qr_codes (
+          id, community_id, event_id, code_type, title, description, 
+          is_active, max_uses, expires_at, created_by, created_at, updated_at
+        ) VALUES (
+          ${qrCode.id}, 
+          ${qrCode.communityId}, 
+          ${qrCode.eventId}, 
+          'location',
+          ${qrCode.name}, 
+          ${qrCode.description || ''}, 
+          ${qrCode.isActive}, 
+          ${qrCode.maxUsesPerDay}, 
+          ${qrCode.validUntil}, 
+          ${qrCode.createdBy}, 
+          NOW(), 
+          NOW()
+        )
+        RETURNING *
+      `);
 
-      return createdQrCode;
+      return result.rows[0] as QrCode;
     } catch (error) {
       console.error('Error creating QR code:', error);
       throw new Error('Failed to create QR code');
