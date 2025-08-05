@@ -10582,6 +10582,7 @@ Return JSON with this exact structure:
         allowsExpiration: req.body.allowsExpiration || false,
       };
       
+      // Debug: log prayer creation data
       console.log('Prayer creation data:', JSON.stringify(prayerData, null, 2));
       
 

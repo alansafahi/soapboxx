@@ -83,7 +83,7 @@ interface PrayerCircleCardProps {
 }
 
 function PrayerCircleCard({ circle, onJoin, onLeave, onDelete, isJoining, isLeaving, isDeleting, userCircles, currentUserId }: PrayerCircleCardProps) {
-  const isUserMember = userCircles.some((uc: any) => uc.id === circle.id);
+  const isUserMember = userCircles?.some((uc: any) => uc.id === circle.id) || false;
   const isCreator = circle.createdBy === currentUserId;
   const isFull = circle.memberLimit && circle.memberCount >= circle.memberLimit;
   
@@ -348,15 +348,15 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
   // Fetch prayer circles with error handling
   const { data: prayerCircles = [], isLoading: circlesLoading, error: circlesError } = useQuery({
     queryKey: ["/api/prayer-circles"],
-    retry: 3,
-    retryDelay: 1000,
+    retry: false, // Disable retries to reduce server load
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
   // Fetch user's prayer circles with error handling
   const { data: userPrayerCircles = [], isLoading: userCirclesLoading, error: userCirclesError } = useQuery({
     queryKey: ["/api/user/prayer-circles"],
-    retry: 3,
-    retryDelay: 1000,
+    retry: false, // Disable retries to reduce server load
+    staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
   });
 
   // Filter prayers by category
@@ -376,7 +376,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
       };
       return await apiRequest("POST", "/api/prayers", requestData);
     },
-    onSuccess: () => {
+    onSuccess: (result, variables) => {
       queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
       setIsCreateDialogOpen(false);
       form.reset();
@@ -389,21 +389,20 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
         pastor_only: "Your prayer request has been shared privately with your pastor/priest."
       };
       
+      const privacyLevel = variables.privacyLevel || "public";
       toast({
         title: "Prayer Request Posted",
-        description: privacyMessages[data.privacyLevel] || "Your prayer request has been posted.",
+        description: privacyMessages[privacyLevel] || "Your prayer request has been posted.",
       });
     },
     onError: (error: any) => {
-      // Prayer creation error - silent error handling
-      let errorMessage = "Failed to post prayer request. Please try again.";
+      let errorMessage = "Failed to post prayer request. Please check your connection and try again.";
       
       // Check for authentication errors
       if (error?.message?.includes('Authentication required') || 
           error?.message?.includes('Unauthorized') ||
           error?.status === 401) {
-        errorMessage = "You need to be logged in to post prayer requests. Please sign in and try again.";
-        // Redirect to login after showing error
+        errorMessage = "Please sign in to post prayer requests.";
         setTimeout(() => {
           window.location.href = "/login";
         }, 2000);
@@ -416,7 +415,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
       }
       
       toast({
-        title: "Error",
+        title: "Unable to Post Prayer",
         description: errorMessage,
         variant: "destructive",
       });
