@@ -3742,17 +3742,25 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
       // Get QR codes based on user role
       let qrCodes;
+      console.log('Getting QR codes for user role:', user.role, 'userChurch:', userChurch?.communityId); // Debug log
+      
       if (['soapbox_owner', 'system-admin', 'super-admin', 'platform-admin'].includes(user.role)) {
         // Platform admins can see all QR codes
+        console.log('User is platform admin, fetching all QR codes'); // Debug log
         const result = await db.execute(sql`SELECT * FROM qr_codes ORDER BY created_at DESC`);
         qrCodes = result.rows;
+        console.log('All QR codes fetched:', qrCodes.length, 'codes'); // Debug log
       } else if (userChurch?.communityId) {
         // Church admins see their church's QR codes
+        console.log('User is church admin, fetching QR codes for community:', userChurch.communityId); // Debug log
         qrCodes = await storage.getChurchQrCodes(userChurch.communityId);
+        console.log('Church QR codes fetched:', qrCodes.length, 'codes'); // Debug log
       } else {
+        console.log('User has no QR code access'); // Debug log
         qrCodes = [];
       }
 
+      console.log('Returning QR codes:', qrCodes); // Debug log
       res.json(qrCodes);
     } catch (error) {
       console.error('Error fetching QR codes:', error);
