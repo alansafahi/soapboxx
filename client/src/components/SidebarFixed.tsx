@@ -220,27 +220,16 @@ export default function SidebarFixed() {
     }
   ];
 
-  // DEBUG: Log user and navigation data
-  console.log('SIDEBAR DEBUG:', {
-    user: user,
-    isAuthenticated: !!user,
-    navigationGroups: navigationGroups.map(g => g.label),
-    userAdminCommunities,
-    hasCommunityAdminRole
-  });
-
   // Filter groups based on user permissions and admin access
   const visibleGroups = navigationGroups.filter(group => {
     if (group.label === 'ADMIN PORTAL') {
-      console.log('ADMIN PORTAL CHECK:', { user: !!user });
-      // Always show ADMIN PORTAL for now
+      // TEMPORARY: Always show ADMIN PORTAL to resolve authentication issue
+      // This will be fixed once proper authentication is restored
       return true;
     }
     
     return true;
   });
-
-  console.log('VISIBLE GROUPS:', visibleGroups.map(g => g.label));
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {
