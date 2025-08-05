@@ -3635,21 +3635,32 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
   // Create new QR code
   app.post('/api/qr-codes', isAuthenticated, async (req: any, res) => {
     try {
+      console.log('QR Code creation request:', { 
+        sessionExists: !!req.session, 
+        userId: req.session?.userId,
+        body: req.body 
+      }); // Debug log
+      
       const userId = req.session.userId;
       
       if (!userId) {
+        console.log('No userId in session'); // Debug log
         return res.status(401).json({ message: 'User authentication required' });
       }
 
       // Get user's church
       const user = await storage.getUser(userId);
+      console.log('User from storage:', { user: user, role: user?.role, communityId: user?.communityId }); // Debug log
+      
       if (!user?.communityId) {
+        console.log('User has no communityId'); // Debug log
         return res.status(400).json({ message: 'User must be associated with a church to create QR codes' });
       }
 
       // Check if user has admin permissions - expand role list to match sidebar permissions
       const allowedRoles = ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'];
       if (!allowedRoles.includes(user.role)) {
+        console.log('User role not allowed:', user.role); // Debug log
         return res.status(403).json({ message: 'Insufficient permissions to create QR codes' });
       }
 

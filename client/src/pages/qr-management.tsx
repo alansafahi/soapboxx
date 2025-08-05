@@ -104,9 +104,11 @@ export default function QrManagement() {
       });
     },
     onError: (error: any) => {
+      console.error('QR Code creation error:', error); // Debug log
+      const errorMessage = error.message || "Failed to create QR code";
       toast({
         title: "Error",
-        description: error.message || "Failed to create QR code",
+        description: errorMessage,
         variant: "destructive",
       });
     },
