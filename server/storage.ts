@@ -8257,6 +8257,102 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // QR Code Management Methods
+  async createQrCode(qrCode: InsertQrCode): Promise<QrCode> {
+    try {
+      const [createdQrCode] = await db
+        .insert(qrCodes)
+        .values({
+          id: qrCode.id,
+          communityId: qrCode.communityId,
+          eventId: qrCode.eventId,
+          name: qrCode.name,
+          description: qrCode.description,
+          location: qrCode.location,
+          isActive: qrCode.isActive,
+          maxUsesPerDay: qrCode.maxUsesPerDay,
+          validFrom: qrCode.validFrom,
+          validUntil: qrCode.validUntil,
+          createdBy: qrCode.createdBy,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+        .returning();
+
+      return createdQrCode;
+    } catch (error) {
+      console.error('Error creating QR code:', error);
+      throw new Error('Failed to create QR code');
+    }
+  }
+
+  async getQrCode(id: string): Promise<QrCode | undefined> {
+    try {
+      const result = await db.select().from(qrCodes).where(eq(qrCodes.id, id));
+      return result[0];
+    } catch (error) {
+      console.error('Error getting QR code:', error);
+      return undefined;
+    }
+  }
+
+  async getChurchQrCodes(churchId: number): Promise<QrCode[]> {
+    try {
+      const result = await db.select().from(qrCodes).where(eq(qrCodes.communityId, churchId));
+      return result;
+    } catch (error) {
+      console.error('Error getting church QR codes:', error);
+      return [];
+    }
+  }
+
+  async updateQrCode(id: string, updates: Partial<QrCode>): Promise<QrCode> {
+    try {
+      const [updatedQrCode] = await db
+        .update(qrCodes)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(qrCodes.id, id))
+        .returning();
+
+      return updatedQrCode;
+    } catch (error) {
+      console.error('Error updating QR code:', error);
+      throw new Error('Failed to update QR code');
+    }
+  }
+
+  async deleteQrCode(id: string): Promise<void> {
+    try {
+      await db.delete(qrCodes).where(eq(qrCodes.id, id));
+    } catch (error) {
+      console.error('Error deleting QR code:', error);
+      throw new Error('Failed to delete QR code');
+    }
+  }
+
+  async validateQrCode(id: string): Promise<{ valid: boolean; qrCode?: QrCode }> {
+    try {
+      const qrCode = await this.getQrCode(id);
+      
+      if (!qrCode) {
+        return { valid: false };
+      }
+
+      const now = new Date();
+      const isActive = qrCode.isActive;
+      const isValidTime = (!qrCode.validFrom || qrCode.validFrom <= now) && 
+                         (!qrCode.validUntil || qrCode.validUntil >= now);
+
+      return {
+        valid: isActive && isValidTime,
+        qrCode: isActive && isValidTime ? qrCode : undefined
+      };
+    } catch (error) {
+      console.error('Error validating QR code:', error);
+      return { valid: false };
+    }
+  }
+
   // User recommendations methods
   async saveUserRecommendations(userId: string, recommendations: any): Promise<void> {
     try {

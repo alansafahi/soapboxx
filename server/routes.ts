@@ -3679,6 +3679,20 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       // Generate unique QR code ID
       const qrCodeId = crypto.randomUUID();
       
+      console.log('Creating QR code with data:', {
+        id: qrCodeId,
+        communityId: user.communityId || 1,
+        eventId: eventId || null,
+        name,
+        description,
+        location,
+        isActive: true,
+        maxUsesPerDay: maxUsesPerDay || null,
+        validFrom: validFrom ? new Date(validFrom) : null,
+        validUntil: validUntil ? new Date(validUntil) : null,
+        createdBy: userId
+      }); // Debug log
+
       const qrCode = await storage.createQrCode({
         id: qrCodeId,
         communityId: user.communityId || 1, // Use default community for platform admins
