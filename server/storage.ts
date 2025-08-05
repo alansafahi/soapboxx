@@ -6435,7 +6435,6 @@ export class DatabaseStorage implements IStorage {
         authorProfileImageUrl: row.author_profile_image_url
       }));
     } catch (error) {
-      console.error('Error fetching prayer requests with privacy:', error);
       return [];
     }
   }

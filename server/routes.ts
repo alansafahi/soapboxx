@@ -10558,8 +10558,6 @@ Return JSON with this exact structure:
         );
         res.json(prayers);
       } catch (privacyError) {
-        console.error('Privacy filtering failed, using fallback:', privacyError);
-        console.error('User ID for privacy check:', userId);
         // Fallback to original method - but still filter by basic public/private
         const allPrayers = await storage.getPrayerRequests(communityId ? parseInt(communityId) : undefined);
         // Basic privacy filtering as fallback
@@ -10587,9 +10585,6 @@ Return JSON with this exact structure:
         expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : null,
         allowsExpiration: req.body.allowsExpiration || false,
       };
-      
-      // Debug: log prayer creation data
-      console.log('Prayer creation data:', JSON.stringify(prayerData, null, 2));
       
 
       const prayer = await storage.createPrayerRequest(prayerData);
