@@ -8339,13 +8339,50 @@ export class DatabaseStorage implements IStorage {
 
   async updateQrCode(id: string, updates: Partial<QrCode>): Promise<QrCode> {
     try {
-      const [updatedQrCode] = await db
-        .update(qrCodes)
-        .set({ ...updates, updatedAt: new Date() })
-        .where(eq(qrCodes.id, id))
-        .returning();
-
-      return updatedQrCode;
+      // Transform frontend field names to database column names
+      const dbUpdates: any = {};
+      if (updates.name !== undefined) dbUpdates.title = updates.name;
+      if (updates.description !== undefined) dbUpdates.description = updates.description;
+      if (updates.isActive !== undefined) dbUpdates.is_active = updates.isActive;
+      if (updates.maxUsesPerDay !== undefined) dbUpdates.max_uses = updates.maxUsesPerDay;
+      if (updates.validUntil !== undefined) dbUpdates.expires_at = updates.validUntil;
+      
+      // Always update the updated_at timestamp
+      dbUpdates.updated_at = new Date().toISOString();
+      
+      // Build the SET clause dynamically
+      const setClause = Object.keys(dbUpdates)
+        .map(key => `${key} = $${Object.keys(dbUpdates).indexOf(key) + 2}`)
+        .join(', ');
+      
+      const values = [id, ...Object.values(dbUpdates)];
+      
+      const result = await db.execute(sql.raw(`
+        UPDATE qr_codes 
+        SET ${setClause}
+        WHERE id = $1
+        RETURNING *
+      `, values));
+      
+      const row = result.rows[0];
+      if (!row) throw new Error('QR code not found');
+      
+      // Transform database response back to expected interface
+      return {
+        id: row.id,
+        communityId: row.community_id,
+        eventId: row.event_id,
+        name: row.title,
+        description: row.description,
+        location: row.title,
+        isActive: row.is_active,
+        maxUsesPerDay: row.max_uses,
+        validFrom: null,
+        validUntil: row.expires_at,
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      };
     } catch (error) {
       console.error('Error updating QR code:', error);
       throw new Error('Failed to update QR code');
