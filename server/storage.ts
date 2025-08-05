@@ -8350,20 +8350,13 @@ export class DatabaseStorage implements IStorage {
       // Always update the updated_at timestamp
       dbUpdates.updated_at = new Date().toISOString();
       
-      // Build the SET clause dynamically
-      const setClause = Object.keys(dbUpdates)
-        .map(key => `${key} = $${Object.keys(dbUpdates).indexOf(key) + 2}`)
-        .join(', ');
+      // Use separate SQL calls for each update to avoid parameter binding issues
+      for (const [column, value] of Object.entries(dbUpdates)) {
+        await db.execute(sql`UPDATE qr_codes SET ${sql.raw(column)} = ${value} WHERE id = ${id}`);
+      }
       
-      const values = [id, ...Object.values(dbUpdates)];
-      
-      const result = await db.execute(sql.raw(`
-        UPDATE qr_codes 
-        SET ${setClause}
-        WHERE id = $1
-        RETURNING *
-      `, values));
-      
+      // Get the updated record
+      const result = await db.execute(sql`SELECT * FROM qr_codes WHERE id = ${id}`);
       const row = result.rows[0];
       if (!row) throw new Error('QR code not found');
       
