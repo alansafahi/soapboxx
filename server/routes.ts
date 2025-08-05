@@ -3816,12 +3816,16 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       // Get user and verify church membership
       const user = await storage.getUser(userId);
       const userChurch = await storage.getUserChurch(userId);
-      if (!userChurch?.communityId || existingQrCode.communityId !== userChurch.communityId) {
-        return res.status(403).json({ message: 'Access denied to this QR code' });
+      
+      // Allow platform admins to update any QR code, otherwise check church membership
+      if (!['soapbox_owner', 'system-admin', 'super-admin', 'platform-admin'].includes(user.role)) {
+        if (!userChurch?.communityId || existingQrCode.communityId !== userChurch.communityId) {
+          return res.status(403).json({ message: 'Access denied to this QR code' });
+        }
       }
 
       // Check permissions
-      if (!['pastor', 'admin', 'owner', 'soapbox_owner'].includes(user.role)) {
+      if (!['pastor', 'admin', 'owner', 'soapbox_owner', 'system-admin', 'super-admin', 'platform-admin'].includes(user.role)) {
         return res.status(403).json({ message: 'Insufficient permissions to update QR codes' });
       }
 
