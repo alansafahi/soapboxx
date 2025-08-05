@@ -52,6 +52,45 @@ export default function QrManagement() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Generate QR code when viewingQrCode changes
+  const generateQrCode = async (qrCodeId: string) => {
+    try {
+      const checkInUrl = `${window.location.origin}/check-in/${qrCodeId}`;
+      const dataUrl = await QRCode.toDataURL(checkInUrl, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+      setQrCodeDataUrl(dataUrl);
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate QR code image",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle viewing QR code
+  const handleViewQrCode = (qrCode: QrCodeData) => {
+    setViewingQrCode(qrCode);
+    generateQrCode(qrCode.id);
+  };
+
+  // Download QR code
+  const downloadQrCode = () => {
+    if (!qrCodeDataUrl || !viewingQrCode) return;
+    
+    const link = document.createElement('a');
+    link.download = `qr-code-${viewingQrCode.name.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.png`;
+    link.href = qrCodeDataUrl;
+    link.click();
+  };
+
   // Fetch QR codes
   const { data: qrCodes = [], isLoading } = useQuery({
     queryKey: ['/api/qr-codes'],
@@ -338,6 +377,73 @@ export default function QrManagement() {
             </Button>
           </div>
         )}
+
+        {qrCodes.map((qrCode: any) => (
+          <Card key={qrCode.id} className="relative">
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between">
+                <div>
+                  <CardTitle className="text-lg">{qrCode.title || qrCode.name}</CardTitle>
+                  <CardDescription className="text-sm">
+                    {qrCode.description || 'QR code for check-in'}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  {qrCode.is_active ? (
+                    <div className="flex items-center gap-1 text-green-600 text-xs">
+                      <Eye className="w-3 h-3" />
+                      Active
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-gray-400 text-xs">
+                      <EyeOff className="w-3 h-3" />
+                      Inactive
+                    </div>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-2">
+                <div className="text-xs text-gray-600 dark:text-gray-400">
+                  <strong>ID:</strong> {qrCode.id}
+                </div>
+                {qrCode.expires_at && (
+                  <div className="flex items-center gap-1 text-xs text-orange-600">
+                    <Clock className="w-3 h-3" />
+                    Expires: {new Date(qrCode.expires_at).toLocaleDateString()}
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-2 mt-4">
+                <Button
+                  onClick={() => handleViewQrCode(qrCode)}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                >
+                  <QrCode className="w-4 h-4 mr-2" />
+                  View QR Code
+                </Button>
+                <Button
+                  onClick={() => setEditingQrCode(qrCode)}
+                  variant="outline"
+                  size="sm"
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  onClick={() => deleteMutation.mutate(qrCode.id)}
+                  variant="outline"
+                  size="sm"
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
       {/* Create QR Code Dialog */}
@@ -665,7 +771,7 @@ export default function QrManagement() {
                 Close
               </Button>
               <Button 
-                onClick={() => viewingQrCode && downloadQrCode(viewingQrCode, qrCodeDataUrl)}
+                onClick={downloadQrCode}
                 className="flex-1"
               >
                 <Download className="w-4 h-4 mr-2" />

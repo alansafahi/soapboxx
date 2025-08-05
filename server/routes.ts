@@ -3723,13 +3723,32 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       }
 
       const user = await storage.getUser(userId);
-      if (!user?.communityId) {
-        return res.status(400).json({ message: 'User must be associated with a church' });
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
       }
 
-      const qrCodes = await storage.getChurchQrCodes(user.communityId);
+      // Check if user has admin permissions
+      const allowedRoles = ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'];
+      if (!allowedRoles.includes(user.role)) {
+        return res.status(403).json({ message: 'Insufficient permissions to view QR codes' });
+      }
+
+      // Get QR codes based on user role
+      let qrCodes;
+      if (['soapbox_owner', 'system-admin', 'super-admin', 'platform-admin'].includes(user.role)) {
+        // Platform admins can see all QR codes
+        const result = await db.execute(sql`SELECT * FROM qr_codes ORDER BY created_at DESC`);
+        qrCodes = result.rows;
+      } else if (user.communityId) {
+        // Church admins see their church's QR codes
+        qrCodes = await storage.getChurchQrCodes(user.communityId);
+      } else {
+        qrCodes = [];
+      }
+
       res.json(qrCodes);
     } catch (error) {
+      console.error('Error fetching QR codes:', error);
       res.status(500).json({ message: 'Failed to fetch QR codes' });
     }
   });
