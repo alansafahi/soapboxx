@@ -50,14 +50,27 @@ interface PrayerCircleFormData {
 }
 
 const prayerCategories = [
-  { id: 'all', label: 'All Prayers', icon: '🙏', count: 47 },
-  { id: 'health', label: 'Health', icon: '💊', count: 12 },
-  { id: 'career', label: 'Career', icon: '💼', count: 8 },
-  { id: 'relationships', label: 'Relationships', icon: '❤️', count: 15 },
-  { id: 'spiritual', label: 'Spiritual Growth', icon: '✝️', count: 9 },
-  { id: 'family', label: 'Family', icon: '👨‍👩‍👧‍👦', count: 6 },
-  { id: 'urgent', label: 'Urgent', icon: '⚡', count: 3 },
-  { id: 'general', label: 'General', icon: '🤲', count: 8 },
+  { id: 'all', label: 'All Prayers', icon: '🙏', count: 47, group: 'filter' },
+  
+  // Core Life Areas
+  { id: 'health', label: 'Health', icon: '💊', count: 12, group: 'life' },
+  { id: 'family', label: 'Family', icon: '👨‍👩‍👧‍👦', count: 6, group: 'life' },
+  { id: 'relationships', label: 'Relationships', icon: '❤️', count: 15, group: 'life' },
+  { id: 'career', label: 'Career', icon: '💼', count: 8, group: 'life' },
+  
+  // Spiritual & Church
+  { id: 'spiritual', label: 'Spiritual Growth', icon: '✝️', count: 9, group: 'spiritual' },
+  { id: 'missions', label: 'Missions & Evangelism', icon: '🌍', count: 4, group: 'spiritual' },
+  
+  // Crisis & Support
+  { id: 'grief', label: 'Grief & Loss', icon: '🕊️', count: 7, group: 'crisis' },
+  { id: 'mental_health', label: 'Mental Health', icon: '🧠', count: 5, group: 'crisis' },
+  { id: 'financial', label: 'Financial Hardship', icon: '💰', count: 9, group: 'crisis' },
+  { id: 'parenting', label: 'Parenting', icon: '👶', count: 11, group: 'life' },
+  
+  // Priority & General
+  { id: 'urgent', label: 'Urgent', icon: '⚡', count: 3, group: 'priority' },
+  { id: 'general', label: 'General', icon: '🤲', count: 8, group: 'general' },
 ];
 
 const prayerFocusAreas = [
@@ -781,7 +794,50 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
-                                  {prayerCategories.filter(cat => cat.id !== 'all').map((category) => (
+                                  {/* Core Life Categories */}
+                                  <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                    Daily Life
+                                  </div>
+                                  {prayerCategories.filter(cat => cat.group === 'life').map((category) => (
+                                    <SelectItem key={category.id} value={category.id}>
+                                      <div className="flex items-center gap-2">
+                                        <span>{category.icon}</span>
+                                        {category.label}
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                  
+                                  {/* Spiritual Categories */}
+                                  <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 border-t">
+                                    Spiritual & Church
+                                  </div>
+                                  {prayerCategories.filter(cat => cat.group === 'spiritual').map((category) => (
+                                    <SelectItem key={category.id} value={category.id}>
+                                      <div className="flex items-center gap-2">
+                                        <span>{category.icon}</span>
+                                        {category.label}
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                  
+                                  {/* Crisis Support Categories */}
+                                  <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 border-t">
+                                    Crisis & Support
+                                  </div>
+                                  {prayerCategories.filter(cat => cat.group === 'crisis').map((category) => (
+                                    <SelectItem key={category.id} value={category.id}>
+                                      <div className="flex items-center gap-2">
+                                        <span>{category.icon}</span>
+                                        {category.label}
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                  
+                                  {/* Priority & General */}
+                                  <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 border-t">
+                                    Priority & General
+                                  </div>
+                                  {prayerCategories.filter(cat => ['priority', 'general'].includes(cat.group)).map((category) => (
                                     <SelectItem key={category.id} value={category.id}>
                                       <div className="flex items-center gap-2">
                                         <span>{category.icon}</span>
@@ -912,22 +968,54 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-2">
-                {prayerCategories.map((category) => (
-                  <Button
-                    key={category.id}
-                    variant={selectedCategory === category.id ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedCategory(category.id)}
-                    className="flex items-center gap-2"
-                  >
-                    <span>{category.icon}</span>
-                    {category.label}
-                    <Badge variant="secondary" className="ml-1">
-                      {category.count}
-                    </Badge>
-                  </Button>
-                ))}
+              <div className="space-y-3">
+                {/* Primary Categories - Most Used */}
+                <div className="flex flex-wrap gap-2">
+                  {prayerCategories.filter(cat => ['all', 'health', 'family', 'relationships', 'spiritual', 'urgent', 'general'].includes(cat.id)).map((category) => (
+                    <Button
+                      key={category.id}
+                      variant={selectedCategory === category.id ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setSelectedCategory(category.id)}
+                      className="flex items-center gap-2"
+                    >
+                      <span>{category.icon}</span>
+                      {category.label}
+                      <Badge variant="secondary" className="ml-1">
+                        {category.count}
+                      </Badge>
+                    </Button>
+                  ))}
+                </div>
+                
+                {/* Expandable Additional Categories */}
+                <details className="group">
+                  <summary className="cursor-pointer text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 list-none">
+                    <div className="flex items-center gap-2">
+                      <ChevronDown className="w-4 h-4 group-open:rotate-180 transition-transform" />
+                      More Categories
+                    </div>
+                  </summary>
+                  <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex flex-wrap gap-2">
+                      {prayerCategories.filter(cat => !['all', 'health', 'family', 'relationships', 'spiritual', 'urgent', 'general'].includes(cat.id)).map((category) => (
+                        <Button
+                          key={category.id}
+                          variant={selectedCategory === category.id ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setSelectedCategory(category.id)}
+                          className="flex items-center gap-2"
+                        >
+                          <span>{category.icon}</span>
+                          {category.label}
+                          <Badge variant="secondary" className="ml-1">
+                            {category.count}
+                          </Badge>
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                </details>
               </div>
             </CardContent>
           </Card>
