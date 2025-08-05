@@ -68,6 +68,10 @@ const prayerCategories = [
   { id: 'financial', label: 'Financial Hardship', icon: '💰', count: 9, group: 'crisis' },
   { id: 'parenting', label: 'Parenting', icon: '👶', count: 11, group: 'life' },
   
+  // Additional Life Areas
+  { id: 'education', label: 'Education & Studies', icon: '📚', count: 3, group: 'life' },
+  { id: 'travel_safety', label: 'Travel & Safety', icon: '✈️', count: 2, group: 'life' },
+  
   // General
   { id: 'general', label: 'General', icon: '🤲', count: 8, group: 'general' },
 ];
@@ -844,6 +848,11 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                                       </div>
                                     </SelectItem>
                                   ))}
+                                  
+                                  {/* Note about General category */}
+                                  <div className="px-2 py-1 text-xs text-gray-400 italic">
+                                    Use "General" for prayers that don't fit other categories
+                                  </div>
                                 </SelectContent>
                               </Select>
                               <FormMessage />
