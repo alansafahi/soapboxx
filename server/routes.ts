@@ -10559,9 +10559,15 @@ Return JSON with this exact structure:
         res.json(prayers);
       } catch (privacyError) {
         console.error('Privacy filtering failed, using fallback:', privacyError);
-        // Fallback to original method
-        const prayers = await storage.getPrayerRequests(communityId ? parseInt(communityId) : undefined);
-        res.json(prayers);
+        console.error('User ID for privacy check:', userId);
+        // Fallback to original method - but still filter by basic public/private
+        const allPrayers = await storage.getPrayerRequests(communityId ? parseInt(communityId) : undefined);
+        // Basic privacy filtering as fallback
+        const filteredPrayers = allPrayers.filter(prayer => {
+          // Only show public prayers if privacy filtering fails
+          return prayer.privacyLevel === 'public' || prayer.isPublic === true;
+        });
+        res.json(filteredPrayers);
       }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch prayer requests" });

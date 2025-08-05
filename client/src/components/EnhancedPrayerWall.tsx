@@ -1002,15 +1002,18 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                             >
                               <Bookmark className="w-4 h-4" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => setShareDialogOpen({isOpen: true, prayer})}
-                              title="Share this prayer"
-                              className="text-blue-600 hover:text-blue-700"
-                            >
-                              <Share2 className="w-4 h-4" />
-                            </Button>
+                            {/* Share Button - Only show for public prayers */}
+                            {prayer.privacyLevel === 'public' && (
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => setShareDialogOpen({isOpen: true, prayer})}
+                                title="Share this prayer"
+                                className="text-blue-600 hover:text-blue-700"
+                              >
+                                <Share2 className="w-4 h-4" />
+                              </Button>
+                            )}
                             
                             {/* Delete Button - Only show for prayer author */}
                             {user && prayer.authorEmail && (
