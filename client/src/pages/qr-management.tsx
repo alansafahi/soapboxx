@@ -96,8 +96,7 @@ export default function QrManagement() {
     queryKey: ['/api/qr-codes'],
     queryFn: async () => {
       console.log('Fetching QR codes from frontend...'); // Debug log
-      const response = await apiRequest('GET', '/api/qr-codes');
-      const data = await response.json();
+      const data = await apiRequest('GET', '/api/qr-codes');
       console.log('QR codes response:', data); // Debug log
       return data;
     },
