@@ -100,17 +100,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     lastUpdated: '2025-08-05',
     source: 'website'
   },
-  {
-    id: 'summer-pilot-special',
-    category: 'pricing',
-    subcategory: 'promotion',
-    keywords: ['summer special', 'pilot program', 'free months', 'promotion', 'discount', 'waived fees'],
-    content: '🎉 SUMMER PILOT SPECIAL: All fees waived for 6 months for churches signing up during our pilot phase this summer! This is a limited-time offer for early adopters.',
-    helpLink: '/faq#pricing',
-    priority: 10,
-    lastUpdated: '2025-07-17',
-    source: 'website'
-  },
+
 
   // APP FEATURES - PRAYER SYSTEM
   {

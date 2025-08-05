@@ -308,17 +308,7 @@ export default function SimpleLanding() {
             <p className="text-lg sm:text-xl text-gray-600 mb-8 px-4">
               Choose the perfect plan for your faith community
             </p>
-            
-            {/* Special Offer Banner */}
-            <div className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 py-4 rounded-lg shadow-lg max-w-4xl mx-auto mb-12">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Gift className="w-5 h-5" />
-                <span className="font-semibold text-lg">🎉 SUMMER PILOT SPECIAL</span>
-              </div>
-              <p className="text-lg">
-                <strong>All fees waived for 6 months</strong> for churches signing up during our pilot phase this summer!
-              </p>
-            </div>
+
           </div>
 
           {/* Member Plans */}
