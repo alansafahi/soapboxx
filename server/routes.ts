@@ -3647,8 +3647,9 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
         return res.status(400).json({ message: 'User must be associated with a church to create QR codes' });
       }
 
-      // Check if user has admin permissions (pastor, admin, or owner)
-      if (!['pastor', 'admin', 'owner', 'soapbox_owner'].includes(user.role)) {
+      // Check if user has admin permissions - expand role list to match sidebar permissions
+      const allowedRoles = ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'];
+      if (!allowedRoles.includes(user.role)) {
         return res.status(403).json({ message: 'Insufficient permissions to create QR codes' });
       }
 

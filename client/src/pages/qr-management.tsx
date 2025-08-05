@@ -399,35 +399,41 @@ export default function QrManagement() {
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={createForm.control}
-                  name="validFrom"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Valid From (Optional)</FormLabel>
-                      <FormControl>
-                        <Input type="datetime-local" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <FormField
+                control={createForm.control}
+                name="validFrom"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Valid From (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="datetime-local" 
+                        {...field}
+                        className="w-full"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={createForm.control}
-                  name="validUntil"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Valid Until (Optional)</FormLabel>
-                      <FormControl>
-                        <Input type="datetime-local" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={createForm.control}
+                name="validUntil"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Valid Until (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="datetime-local" 
+                        {...field}
+                        className="w-full"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="flex gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)} className="flex-1">
@@ -518,35 +524,41 @@ export default function QrManagement() {
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={editForm.control}
-                  name="validFrom"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Valid From (Optional)</FormLabel>
-                      <FormControl>
-                        <Input type="datetime-local" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+              <FormField
+                control={editForm.control}
+                name="validFrom"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Valid From (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="datetime-local" 
+                        {...field}
+                        className="w-full"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                <FormField
-                  control={editForm.control}
-                  name="validUntil"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Valid Until (Optional)</FormLabel>
-                      <FormControl>
-                        <Input type="datetime-local" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormField
+                control={editForm.control}
+                name="validUntil"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Valid Until (Optional)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="datetime-local" 
+                        {...field}
+                        className="w-full"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <div className="flex gap-2 pt-4">
                 <Button type="button" variant="outline" onClick={() => setEditingQrCode(null)} className="flex-1">
