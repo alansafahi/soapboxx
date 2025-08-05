@@ -839,6 +839,7 @@ export interface IStorage {
   getReferralRewardTiers(): Promise<ReferralReward[]>;
   checkReferralMilestones(userId: string): Promise<ReferralMilestone[]>;
   generateReferralCode(userId: string): Promise<string>;
+  trackFirstAIUsage(userId: string, feature: string): Promise<boolean>;
 
   // Daily Bible Feature
   getDailyVerse(date?: Date): Promise<DailyVerse | undefined>;
@@ -2555,7 +2556,7 @@ export class DatabaseStorage implements IStorage {
       userId: checkIn.userId,
       activityType: 'event_attendance',
       entityId: checkIn.eventId,
-      points: 20,
+      points: 25,
     });
     
     return newCheckIn;
@@ -3252,7 +3253,7 @@ export class DatabaseStorage implements IStorage {
       userId: discussion.authorId,
       activityType: 'discussion_post',
       entityId: newDiscussion.id,
-      points: 10,
+      points: 20,
     });
     
     return newDiscussion;
@@ -4018,7 +4019,7 @@ export class DatabaseStorage implements IStorage {
         userId: prayer.authorId,
         activityType: 'prayer_request',
         entityId: prayerRequest.id,
-        points: 15, // Points for creating prayer request
+        points: 25, // Points for creating prayer request
         createdAt: new Date(),
       });
 
@@ -4041,9 +4042,12 @@ export class DatabaseStorage implements IStorage {
         .returning();
 
       // Record user activity for engagement tracking
-      if (this.trackUserActivity) {
-        await this.trackUserActivity(entry.userId, 'soap_entry', soapEntry.id, 20);
-      }
+      await this.trackUserActivity({
+        userId: entry.userId,
+        activityType: 'soap_entry',
+        entityId: soapEntry.id,
+        points: 15,
+      });
 
       return soapEntry;
     } catch (error) {
@@ -5385,7 +5389,7 @@ export class DatabaseStorage implements IStorage {
         userId: response.userId,
         activityType: 'prayer_response',
         entityId: prayerResponse.id,
-        points: 10, // Points for praying for someone
+        points: 5, // Points for praying for someone
         createdAt: new Date(),
       });
 
@@ -8457,6 +8461,130 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
 
       return null;
+    }
+  }
+
+  // Implement missing processReferralReward function
+  async processReferralReward(referralId: number): Promise<{ referrerPoints: number; refereePoints: number }> {
+    try {
+      // Get referral details
+      const referral = await db
+        .select()
+        .from(referrals)
+        .where(eq(referrals.id, referralId))
+        .limit(1);
+
+      if (referral.length === 0) {
+        throw new Error('Referral not found');
+      }
+
+      const referralData = referral[0];
+      const referrerPoints = 500;
+      const refereePoints = 500;
+
+      // Award points to referrer
+      await this.trackUserActivity({
+        userId: referralData.referrerId,
+        activityType: 'referral_reward',
+        entityId: referralId,
+        points: referrerPoints,
+      });
+
+      // Award points to referee
+      await this.trackUserActivity({
+        userId: referralData.referredUserId,
+        activityType: 'referral_reward',
+        entityId: referralId,
+        points: refereePoints,
+      });
+
+      // Mark referral as processed
+      await db
+        .update(referrals)
+        .set({ 
+          status: 'completed',
+          completedAt: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(referrals.id, referralId));
+
+      return { referrerPoints, refereePoints };
+    } catch (error) {
+      throw new Error('Failed to process referral reward');
+    }
+  }
+
+  // Implement getReferralRewardTiers function
+  async getReferralRewardTiers(): Promise<ReferralReward[]> {
+    try {
+      // Updated reward tiers with new 500-point referral bonus
+      return [
+        {
+          id: 1,
+          name: 'Bronze Tier',
+          referralCount: 1,
+          pointsPerReferral: 500,
+          bonusPoints: 0,
+          description: 'Welcome bonus for your first referral'
+        },
+        {
+          id: 2,
+          name: 'Silver Tier',
+          referralCount: 5,
+          pointsPerReferral: 500,
+          bonusPoints: 1000,
+          description: 'Milestone bonus for 5 successful referrals'
+        },
+        {
+          id: 3,
+          name: 'Gold Tier',
+          referralCount: 10,
+          pointsPerReferral: 500,
+          bonusPoints: 2500,
+          description: 'Milestone bonus for 10 successful referrals'
+        },
+        {
+          id: 4,
+          name: 'Platinum Tier',
+          referralCount: 25,
+          pointsPerReferral: 500,
+          bonusPoints: 5000,
+          description: 'Elite bonus for 25 successful referrals'
+        }
+      ];
+    } catch (error) {
+      return [];
+    }
+  }
+
+  // Track first-time AI usage for SOAP entries
+  async trackFirstAIUsage(userId: string, feature: string): Promise<boolean> {
+    try {
+      // Check if user has already used AI for this feature
+      const existingUsage = await db
+        .select()
+        .from(userActivities)
+        .where(and(
+          eq(userActivities.userId, userId),
+          eq(userActivities.activityType, `first_ai_${feature}`)
+        ))
+        .limit(1);
+
+      if (existingUsage.length > 0) {
+        return false; // Already awarded
+      }
+
+      // Award 10 points for first AI usage
+      await this.trackUserActivity({
+        userId: userId,
+        activityType: `first_ai_${feature}`,
+        entityId: null,
+        points: 10,
+      });
+
+      return true; // Points awarded
+    } catch (error) {
+      return false;
     }
   }
 }

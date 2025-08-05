@@ -12148,6 +12148,9 @@ Return JSON with this exact structure:
         suggestions = await generateSoapSuggestions(scripture, scriptureReference, contextualInfo);
       }
 
+      // Track first-time AI usage for 10-point bonus
+      await storage.trackFirstAIUsage(userId, 'soap_suggestions');
+
       res.json(suggestions);
     } catch (error) {
       res.status(500).json({ message: (error as Error).message || 'Failed to generate AI suggestions' });
@@ -12163,6 +12166,11 @@ Return JSON with this exact structure:
       }
 
       const enhanced = await enhanceSoapEntry(scripture, scriptureReference, observation, application, prayer);
+      
+      // Track first-time AI usage for 10-point bonus
+      const userId = req.session.userId;
+      await storage.trackFirstAIUsage(userId, 'soap_enhance');
+      
       res.json(enhanced);
     } catch (error) {
       res.status(500).json({ message: (error as Error).message || 'Failed to enhance reflection' });
@@ -12178,6 +12186,11 @@ Return JSON with this exact structure:
       }
 
       const questions = await generateScriptureQuestions(scripture, scriptureReference);
+      
+      // Track first-time AI usage for 10-point bonus
+      const userId = req.session.userId;
+      await storage.trackFirstAIUsage(userId, 'soap_questions');
+      
       res.json({ questions });
     } catch (error) {
       res.status(500).json({ message: (error as Error).message || 'Failed to generate questions' });
@@ -12393,6 +12406,11 @@ Please provide suggestions for the missing or incomplete sections.`
       });
 
       const suggestions = JSON.parse(response.choices[0].message.content || '{}');
+      
+      // Track first-time AI usage for 10-point bonus
+      const userId = req.session.userId;
+      await storage.trackFirstAIUsage(userId, 'soap_assist');
+      
       res.json(suggestions);
     } catch (error) {
       res.status(500).json({ message: 'Failed to generate S.O.A.P. suggestions' });
