@@ -3635,35 +3635,29 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
   // Create new QR code
   app.post('/api/qr-codes', isAuthenticated, async (req: any, res) => {
     try {
-      console.log('QR Code creation request:', { 
-        sessionExists: !!req.session, 
-        userId: req.session?.userId,
-        body: req.body 
-      }); // Debug log
-      
       const userId = req.session.userId;
       
       if (!userId) {
-        console.log('No userId in session'); // Debug log
+
         return res.status(401).json({ message: 'User authentication required' });
       }
 
       // Get user and their church association
       const user = await storage.getUser(userId);
       const userChurch = await storage.getUserChurch(userId);
-      console.log('User from storage:', { user: user, role: user?.role, userChurch: userChurch }); // Debug log
+
       
       // Check if user has admin permissions - expand role list to match sidebar permissions
       const allowedRoles = ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'];
       if (!allowedRoles.includes(user.role)) {
-        console.log('User role not allowed:', user.role); // Debug log
+
         return res.status(403).json({ message: 'Insufficient permissions to create QR codes' });
       }
 
       // For SoapBox admins, allow QR code creation without church affiliation
       // For regular users, require church association
       if (!userChurch?.communityId && !['soapbox_owner', 'system-admin', 'super-admin', 'platform-admin'].includes(user.role)) {
-        console.log('User has no church association and is not a platform admin'); // Debug log
+
         return res.status(400).json({ message: 'User must be associated with a church to create QR codes' });
       }
 
@@ -3683,19 +3677,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
       // Determine community ID - use user's church or fallback for platform admins
       const communityId = userChurch?.communityId || 1;
       
-      console.log('Creating QR code with data:', {
-        id: qrCodeId,
-        communityId: communityId,
-        eventId: eventId || null,
-        name,
-        description,
-        location,
-        isActive: true,
-        maxUsesPerDay: maxUsesPerDay || null,
-        validFrom: validFrom ? new Date(validFrom) : null,
-        validUntil: validUntil ? new Date(validUntil) : null,
-        createdBy: userId
-      }); // Debug log
+
 
       const qrCode = await storage.createQrCode({
         id: qrCodeId,
@@ -3742,11 +3724,11 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
       // Get QR codes based on user role
       let qrCodes;
-      console.log('Getting QR codes for user role:', user.role, 'userChurch:', userChurch?.communityId); // Debug log
+
       
       if (['soapbox_owner', 'system-admin', 'super-admin', 'platform-admin'].includes(user.role)) {
         // Platform admins can see all QR codes
-        console.log('User is platform admin, fetching all QR codes'); // Debug log
+
         const result = await db.execute(sql`SELECT * FROM qr_codes ORDER BY created_at DESC`);
         qrCodes = result.rows.map((row: any) => ({
           id: row.id,
@@ -3763,10 +3745,10 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
           createdAt: row.created_at,
           updatedAt: row.updated_at
         }));
-        console.log('All QR codes fetched and transformed:', qrCodes.length, 'codes'); // Debug log
+
       } else if (userChurch?.communityId) {
         // Church admins see their church's QR codes
-        console.log('User is church admin, fetching QR codes for community:', userChurch.communityId); // Debug log
+
         const churchQrCodes = await storage.getChurchQrCodes(userChurch.communityId);
         qrCodes = churchQrCodes.map((row: any) => ({
           id: row.id,
@@ -3783,13 +3765,13 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
           createdAt: row.created_at || row.createdAt,
           updatedAt: row.updated_at || row.updatedAt
         }));
-        console.log('Church QR codes fetched and transformed:', qrCodes.length, 'codes'); // Debug log
+
       } else {
-        console.log('User has no QR code access'); // Debug log
+
         qrCodes = [];
       }
 
-      console.log('Returning transformed QR codes:', qrCodes); // Debug log
+
       res.json(qrCodes);
     } catch (error) {
       console.error('Error fetching QR codes:', error);

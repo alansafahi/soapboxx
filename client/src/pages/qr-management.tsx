@@ -95,15 +95,11 @@ export default function QrManagement() {
   const { data: qrCodes = [], isLoading, error } = useQuery({
     queryKey: ['/api/qr-codes'],
     queryFn: async () => {
-      console.log('Fetching QR codes from frontend...'); // Debug log
-      const data = await apiRequest('GET', '/api/qr-codes');
-      console.log('QR codes response:', data); // Debug log
-      return data;
+      return await apiRequest('GET', '/api/qr-codes');
     },
   });
 
-  // Debug logging to see what data we have
-  console.log('QR codes data in component:', qrCodes, 'isLoading:', isLoading, 'error:', error);
+
 
   // Create QR code form
   const createForm = useForm<QrCodeFormData>({
@@ -134,7 +130,7 @@ export default function QrManagement() {
   // Create QR code mutation
   const createMutation = useMutation({
     mutationFn: (data: QrCodeFormData) => {
-      console.log('Submitting QR Code data:', data); // Debug log
+
       return apiRequest('POST', '/api/qr-codes', {
         ...data,
         maxUsesPerDay: data.maxUsesPerDay || null,
@@ -159,7 +155,6 @@ export default function QrManagement() {
       });
     },
     onError: (error: any) => {
-      console.error('QR Code creation error:', error); // Debug log
       const errorMessage = error.message || "Failed to create QR code";
       toast({
         title: "Error",
