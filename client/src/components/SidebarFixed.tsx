@@ -224,7 +224,7 @@ export default function SidebarFixed() {
   const visibleGroups = navigationGroups.filter(group => {
     if (group.label === 'ADMIN PORTAL') {
       // Show admin portal for users with actual admin access to communities OR soapbox_owner
-      return user && (userAdminCommunities?.hasAdminAccess || user?.role === 'soapbox_owner' || hasCommunityAdminRole || user?.email === 'alan@safahi.com');
+      return user && (userAdminCommunities?.hasAdminAccess || user?.role === 'soapbox_owner' || hasCommunityAdminRole);
     }
     
     return true;

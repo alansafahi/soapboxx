@@ -3649,9 +3649,7 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
       // Check if user has admin permissions - expand role list to match sidebar permissions
       const allowedRoles = ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'];
-      const allowedEmails = ['alan@safahi.com']; // Specific override for church admin
-      
-      if (!allowedRoles.includes(user.role) && !allowedEmails.includes(user.email)) {
+      if (!allowedRoles.includes(user.role)) {
         return res.status(403).json({ message: 'Insufficient permissions to create QR codes' });
       }
 
