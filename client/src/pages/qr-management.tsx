@@ -30,7 +30,7 @@ type QrCodeFormData = z.infer<typeof qrCodeSchema>;
 
 interface QrCodeData {
   id: string;
-  churchId: number;
+  communityId: number;
   eventId?: number;
   name: string;
   description?: string;
@@ -113,6 +113,14 @@ export default function QrManagement() {
   // Edit QR code form
   const editForm = useForm<QrCodeFormData>({
     resolver: zodResolver(qrCodeSchema),
+    defaultValues: {
+      name: "",
+      description: "",
+      location: "",
+      maxUsesPerDay: undefined,
+      validFrom: "",
+      validUntil: "",
+    },
   });
 
   // Create QR code mutation
