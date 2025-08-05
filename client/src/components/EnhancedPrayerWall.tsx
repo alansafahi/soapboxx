@@ -29,7 +29,7 @@ const prayerRequestSchema = z.object({
   title: z.string().optional(),
   content: z.string().min(1, "Prayer request content is required"),
   isAnonymous: z.boolean().default(false),
-  category: z.string().default("general"),
+  category: z.string().min(1, "Please select a category"),
   privacyLevel: z.string().default("public"),
   churchId: z.number().optional(),
   isPublic: z.boolean().default(true),
@@ -285,7 +285,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
       title: "",
       content: "",
       isAnonymous: false,
-      category: "general",
+      category: "",
       privacyLevel: "public",
       isPublic: true,
       isUrgent: false,
@@ -787,10 +787,10 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Category</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <Select onValueChange={field.onChange} value={field.value}>
                                 <FormControl>
                                   <SelectTrigger>
-                                    <SelectValue placeholder="Select a category" />
+                                    <SelectValue placeholder="Choose a prayer category..." />
                                   </SelectTrigger>
                                 </FormControl>
                                 <SelectContent>
