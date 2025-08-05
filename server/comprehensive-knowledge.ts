@@ -83,7 +83,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     category: 'pricing',
     subcategory: 'church',
     keywords: ['church basic', 'church plan', '$50', '5000 credits', 'church pricing', 'basic church'],
-    content: 'Church Basic Plan: $50/month with 5,000 credits/month. Includes member management, event planning, communication tools, and 1,000 loyalty credits every 6 months. Perfect for growing congregations.',
+    content: 'Church Basic Plan: $50/month with 5,000 credits/month. Includes member management, event planning, communication tools, and 2,500 loyalty credits every 6 months. Perfect for growing congregations.',
     helpLink: '/faq#pricing',
     priority: 9,
     lastUpdated: '2025-08-05',
@@ -94,7 +94,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     category: 'pricing',
     subcategory: 'church',
     keywords: ['church standard', '$100', '10000 credits', 'church advanced', 'standard church'],
-    content: 'Church Standard Plan: $100/month with 10,000 credits/month. Includes everything in Basic plus advanced analytics, sermon studio, and 2,000 loyalty credits every 6 months. Recommended for most churches.',
+    content: 'Church Standard Plan: $100/month with 10,000 credits/month. Includes everything in Basic plus advanced analytics, sermon studio, and 5,000 loyalty credits every 6 months. Recommended for most churches.',
     helpLink: '/faq#pricing',
     priority: 9,
     lastUpdated: '2025-08-05',
@@ -239,7 +239,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     helpLink: '/faq#mobile-apps',
     priority: 8,
     lastUpdated: '2025-07-18',
-    source: 'faq'
+    source: 'website'
   },
   {
     id: 'offline-functionality',
@@ -250,7 +250,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     helpLink: '/faq#offline-features',
     priority: 7,
     lastUpdated: '2025-07-18',
-    source: 'faq'
+    source: 'website'
   },
   {
     id: 'international-access',
@@ -261,7 +261,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     helpLink: '/faq#international-use',
     priority: 9,
     lastUpdated: '2025-07-18',
-    source: 'faq'
+    source: 'website'
   },
   {
     id: 'language-support',
@@ -272,7 +272,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     helpLink: '/faq#language-support',
     priority: 6,
     lastUpdated: '2025-07-18',
-    source: 'faq'
+    source: 'website'
   },
   {
     id: 'church-customization',
@@ -283,7 +283,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     helpLink: '/faq#church-customization',
     priority: 8,
     lastUpdated: '2025-07-18',
-    source: 'faq'
+    source: 'website'
   },
   {
     id: 'youth-safety-features',
@@ -294,7 +294,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     helpLink: '/faq#youth-safety',
     priority: 9,
     lastUpdated: '2025-07-18',
-    source: 'faq'
+    source: 'website'
   },
   {
     id: 'earning-free-credits',
@@ -305,7 +305,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     helpLink: '/faq#earning-free-credits',
     priority: 8,
     lastUpdated: '2025-07-18',
-    source: 'faq'
+    source: 'website'
   },
   {
     id: 'vs-social-media',
@@ -316,7 +316,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     helpLink: '/faq#vs-social-media',
     priority: 8,
     lastUpdated: '2025-07-18',
-    source: 'faq'
+    source: 'website'
   },
   {
     id: 'data-export-options',
@@ -327,7 +327,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     helpLink: '/faq#data-export',
     priority: 7,
     lastUpdated: '2025-07-18',
-    source: 'faq'
+    source: 'website'
   },
 
   // TECHNICAL SUPPORT
@@ -381,7 +381,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     category: 'features',
     subcategory: 'rewards',
     keywords: ['loyalty', 'rewards', 'loyalty credits', 'referral credits', 'bonus credits'],
-    content: 'Loyalty Rewards System: Individual plans earn 500 credits per successful referral. Church plans receive 1,000-2,000 loyalty credits every 6 months based on plan level. Use loyalty credits for bonus AI features and premium content.',
+    content: 'Loyalty Rewards System: Individual plans earn 500 credits per successful referral. Church plans receive 2,500-5,000 loyalty credits every 6 months based on plan level. Use loyalty credits for bonus AI features and premium content.',
     priority: 7,
     lastUpdated: '2025-07-17',
     source: 'website'
@@ -462,7 +462,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     content: 'SoapBox Super App is owned and founded by Alan Safahi, an experienced entrepreneur passionate about strengthening faith communities through technology. Alan leads the vision and development of our comprehensive church management platform.',
     priority: 8,
     lastUpdated: '2025-07-18',
-    source: 'company'
+    source: 'website'
   },
   {
     id: 'company-mission',
@@ -472,7 +472,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     content: 'Our mission is to Unite Your Faith Community through innovative technology that strengthens spiritual connections, enhances ministry effectiveness, and builds stronger church communities in the digital age.',
     priority: 8,
     lastUpdated: '2025-07-18',
-    source: 'company'
+    source: 'website'
   },
 
   // ESCALATION TRIGGERS

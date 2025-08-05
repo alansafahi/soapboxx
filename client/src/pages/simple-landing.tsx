@@ -447,7 +447,7 @@ export default function SimpleLanding() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">1,000 loyalty credits/6 months</span>
+                    <span className="text-sm sm:text-base">2,500 loyalty credits/6 months</span>
                   </li>
                 </ul>
                 <Button className="w-full bg-blue-600 hover:bg-blue-700 py-3 text-sm sm:text-base">Start Church Basic</Button>
@@ -477,7 +477,7 @@ export default function SimpleLanding() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-5 h-5 text-green-500" />
-                    <span>2,000 loyalty credits/6 months</span>
+                    <span>5,000 loyalty credits/6 months</span>
                   </li>
                 </ul>
                 <Button className="w-full bg-purple-600 hover:bg-purple-700">Choose Standard</Button>

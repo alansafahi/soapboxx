@@ -129,7 +129,7 @@ const faqs: FAQItem[] = [
   {
     id: 'church-pricing',
     question: 'How much does SoapBox cost for churches?',
-    answer: 'Church Basic: $50/month (5,000 credits) with member management, event planning, and communication tools. Church Standard: $100/month (10,000 credits) with everything in Basic plus advanced analytics and sermon studio. Churches currently enjoy special pilot pricing with 6 months free when signing up during our summer program.',
+    answer: 'Church Basic: $50/month (5,000 credits) with member management, event planning, communication tools, and 2,500 loyalty credits every 6 months. Church Standard: $100/month (10,000 credits) with everything in Basic plus advanced analytics, sermon studio, and 5,000 loyalty credits every 6 months. Churches currently enjoy special pilot pricing with 6 months free when signing up during our summer program.',
     category: 'pricing'
   },
   {
