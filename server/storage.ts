@@ -6306,8 +6306,7 @@ export class DatabaseStorage implements IStorage {
       const userInfoQuery = `
         SELECT 
           uc.community_id,
-          uc.role,
-          uc.is_verified
+          uc.role
         FROM user_churches uc
         WHERE uc.user_id = $1
       `;

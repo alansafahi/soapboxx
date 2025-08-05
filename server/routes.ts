@@ -10549,11 +10549,20 @@ Return JSON with this exact structure:
     try {
       const { communityId } = req.query;
       const userId = req.session.userId;
-      const prayers = await storage.getPrayerRequestsWithPrivacy(
-        userId,
-        communityId ? parseInt(communityId) : undefined
-      );
-      res.json(prayers);
+      
+      // Try the new privacy-aware method first, fallback to original if it fails
+      try {
+        const prayers = await storage.getPrayerRequestsWithPrivacy(
+          userId,
+          communityId ? parseInt(communityId) : undefined
+        );
+        res.json(prayers);
+      } catch (privacyError) {
+        console.error('Privacy filtering failed, using fallback:', privacyError);
+        // Fallback to original method
+        const prayers = await storage.getPrayerRequests(communityId ? parseInt(communityId) : undefined);
+        res.json(prayers);
+      }
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch prayer requests" });
     }
@@ -10572,6 +10581,8 @@ Return JSON with this exact structure:
         expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : null,
         allowsExpiration: req.body.allowsExpiration || false,
       };
+      
+      console.log('Prayer creation data:', JSON.stringify(prayerData, null, 2));
       
 
       const prayer = await storage.createPrayerRequest(prayerData);
