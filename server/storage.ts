@@ -2011,47 +2011,57 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserChurch(userId: string): Promise<(UserChurch & { role: string }) | undefined> {
-    // First try to get primary church
-    const [primaryChurch] = await db
-      .select()
-      .from(userChurches)
-      .where(and(
-        eq(userChurches.userId, userId),
-        eq(userChurches.isActive, true),
-        sql`is_primary = true`
-      ))
-      .limit(1);
-    
-    // If no primary church set, fall back to first church joined
-    const [userChurch] = primaryChurch ? [primaryChurch] : await db
-      .select()
-      .from(userChurches)
-      .where(and(
-        eq(userChurches.userId, userId),
-        eq(userChurches.isActive, true)
-      ))
-      .orderBy(userChurches.joinedAt)
-      .limit(1);
-    
-    if (!userChurch) {
+    try {
+      // First try to get primary church using raw SQL since table name is user_churches not user_communities
+      const primaryResult = await db.execute(sql`
+        SELECT * FROM user_churches 
+        WHERE user_id = ${userId} 
+          AND is_active = true 
+          AND is_primary = true 
+        LIMIT 1
+      `);
+      
+      let userChurch = primaryResult.rows[0];
+      
+      // If no primary church set, fall back to first active church joined
+      if (!userChurch) {
+        const fallbackResult = await db.execute(sql`
+          SELECT * FROM user_churches 
+          WHERE user_id = ${userId} 
+            AND is_active = true 
+          ORDER BY joined_at ASC 
+          LIMIT 1
+        `);
+        userChurch = fallbackResult.rows[0];
+      }
+      
+      if (!userChurch) {
+        return undefined;
+      }
+      
+      return {
+        id: userChurch.id,
+        userId: userChurch.user_id,
+        communityId: userChurch.community_id,
+        role: userChurch.role || 'member',
+        roleId: userChurch.role_id,
+        title: userChurch.title,
+        department: userChurch.department,
+        bio: userChurch.bio,
+        additionalPermissions: userChurch.additional_permissions || [],
+        restrictedPermissions: userChurch.restricted_permissions || [],
+        assignedBy: userChurch.assigned_by,
+        assignedAt: userChurch.assigned_at,
+        joinedAt: userChurch.joined_at,
+        lastAccessedAt: userChurch.last_accessed_at,
+        isActive: userChurch.is_active,
+        isPrimary: userChurch.is_primary,
+        expiresAt: userChurch.expires_at
+      };
+    } catch (error) {
+      console.error('Error in getUserChurch:', error);
       return undefined;
     }
-    
-    // Use the role field directly from user_churches table, fall back to roles table if needed
-    let roleName = userChurch.role;
-    
-    if (!roleName && userChurch.roleId) {
-      const [role] = await db
-        .select()
-        .from(roles)
-        .where(eq(roles.id, userChurch.roleId));
-      roleName = role?.name;
-    }
-    
-    return {
-      ...userChurch,
-      role: roleName || 'member'
-    };
   }
 
   async getUserCommunityRole(userId: string, communityId: number): Promise<{ role: string; isActive: boolean } | undefined> {
