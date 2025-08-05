@@ -8301,8 +8301,26 @@ export class DatabaseStorage implements IStorage {
 
   async getQrCode(id: string): Promise<QrCode | undefined> {
     try {
-      const result = await db.select().from(qrCodes).where(eq(qrCodes.id, id));
-      return result[0];
+      const result = await db.execute(sql`SELECT * FROM qr_codes WHERE id = ${id}`);
+      const row = result.rows[0];
+      if (!row) return undefined;
+      
+      // Transform database columns to match expected interface
+      return {
+        id: row.id,
+        communityId: row.community_id,
+        eventId: row.event_id,
+        name: row.title,
+        description: row.description,
+        location: row.title, // Use title as location since location column doesn't exist
+        isActive: row.is_active,
+        maxUsesPerDay: row.max_uses,
+        validFrom: null, // Not stored in current schema
+        validUntil: row.expires_at,
+        createdBy: row.created_by,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      };
     } catch (error) {
       console.error('Error getting QR code:', error);
       return undefined;

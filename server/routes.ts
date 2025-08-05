@@ -3869,8 +3869,13 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
 
       // Get user and verify church membership
       const user = await storage.getUser(userId);
-      if (!user?.communityId || existingQrCode.communityId !== user.communityId) {
-        return res.status(403).json({ message: 'Access denied to this QR code' });
+      const userChurch = await storage.getUserChurch(userId);
+      
+      // Allow platform admins to delete any QR code, otherwise check church membership
+      if (!['soapbox_owner', 'system-admin', 'super-admin', 'platform-admin'].includes(user.role)) {
+        if (!userChurch?.communityId || existingQrCode.communityId !== userChurch.communityId) {
+          return res.status(403).json({ message: 'Access denied to this QR code' });
+        }
       }
 
       // Check permissions
