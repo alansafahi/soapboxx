@@ -68,8 +68,7 @@ const prayerCategories = [
   { id: 'financial', label: 'Financial Hardship', icon: '💰', count: 9, group: 'crisis' },
   { id: 'parenting', label: 'Parenting', icon: '👶', count: 11, group: 'life' },
   
-  // Priority & General
-  { id: 'urgent', label: 'Urgent', icon: '⚡', count: 3, group: 'priority' },
+  // General
   { id: 'general', label: 'General', icon: '🤲', count: 8, group: 'general' },
 ];
 
@@ -833,11 +832,11 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                                     </SelectItem>
                                   ))}
                                   
-                                  {/* Priority & General */}
+                                  {/* General */}
                                   <div className="px-2 py-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 border-t">
-                                    Priority & General
+                                    General
                                   </div>
-                                  {prayerCategories.filter(cat => ['priority', 'general'].includes(cat.group)).map((category) => (
+                                  {prayerCategories.filter(cat => cat.group === 'general').map((category) => (
                                     <SelectItem key={category.id} value={category.id}>
                                       <div className="flex items-center gap-2">
                                         <span>{category.icon}</span>
@@ -971,7 +970,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
               <div className="space-y-3">
                 {/* Primary Categories - Most Used */}
                 <div className="flex flex-wrap gap-2">
-                  {prayerCategories.filter(cat => ['all', 'health', 'family', 'relationships', 'spiritual', 'urgent', 'general'].includes(cat.id)).map((category) => (
+                  {prayerCategories.filter(cat => ['all', 'health', 'family', 'relationships', 'spiritual', 'general'].includes(cat.id)).map((category) => (
                     <Button
                       key={category.id}
                       variant={selectedCategory === category.id ? "default" : "outline"}
@@ -998,7 +997,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                   </summary>
                   <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex flex-wrap gap-2">
-                      {prayerCategories.filter(cat => !['all', 'health', 'family', 'relationships', 'spiritual', 'urgent', 'general'].includes(cat.id)).map((category) => (
+                      {prayerCategories.filter(cat => !['all', 'health', 'family', 'relationships', 'spiritual', 'general'].includes(cat.id)).map((category) => (
                         <Button
                           key={category.id}
                           variant={selectedCategory === category.id ? "default" : "outline"}
