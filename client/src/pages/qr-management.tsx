@@ -425,10 +425,12 @@ export default function QrManagement() {
                           value={field.value || ""}
                           onFocus={(e) => {
                             if (!field.value) {
-                              // Set to today at 9:00 AM when focused
+                              // Set to today at 9:00 AM when focused (avoid timezone issues)
                               const today = new Date();
-                              today.setHours(9, 0, 0, 0);
-                              const dateString = today.toISOString().slice(0, 16);
+                              const year = today.getFullYear();
+                              const month = String(today.getMonth() + 1).padStart(2, '0');
+                              const day = String(today.getDate()).padStart(2, '0');
+                              const dateString = `${year}-${month}-${day}T09:00`;
                               field.onChange(dateString);
                             }
                           }}
@@ -466,10 +468,12 @@ export default function QrManagement() {
                           value={field.value || ""}
                           onFocus={(e) => {
                             if (!field.value) {
-                              // Set to today at 10:00 AM when focused
+                              // Set to today at 10:00 AM when focused (avoid timezone issues)
                               const today = new Date();
-                              today.setHours(10, 0, 0, 0);
-                              const dateString = today.toISOString().slice(0, 16);
+                              const year = today.getFullYear();
+                              const month = String(today.getMonth() + 1).padStart(2, '0');
+                              const day = String(today.getDate()).padStart(2, '0');
+                              const dateString = `${year}-${month}-${day}T10:00`;
                               field.onChange(dateString);
                             }
                           }}
