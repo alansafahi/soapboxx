@@ -3813,20 +3813,20 @@ Scripture Reference: ${scriptureReference || 'Not provided'}`
         return res.status(404).json({ message: 'QR code not found' });
       }
 
-      // Get user and verify church membership
+      // Get user and verify permissions
       const user = await storage.getUser(userId);
       const userChurch = await storage.getUserChurch(userId);
       
-      // Allow platform admins to update any QR code, otherwise check church membership
+      // Check if user has required role for QR code management
+      if (!['pastor', 'admin', 'owner', 'soapbox_owner', 'system-admin', 'super-admin', 'platform-admin'].includes(user.role)) {
+        return res.status(403).json({ message: 'Insufficient permissions to update QR codes' });
+      }
+      
+      // Platform admins can update any QR code, church admins need church membership
       if (!['soapbox_owner', 'system-admin', 'super-admin', 'platform-admin'].includes(user.role)) {
         if (!userChurch?.communityId || existingQrCode.communityId !== userChurch.communityId) {
           return res.status(403).json({ message: 'Access denied to this QR code' });
         }
-      }
-
-      // Check permissions
-      if (!['pastor', 'admin', 'owner', 'soapbox_owner', 'system-admin', 'super-admin', 'platform-admin'].includes(user.role)) {
-        return res.status(403).json({ message: 'Insufficient permissions to update QR codes' });
       }
 
       const { 
