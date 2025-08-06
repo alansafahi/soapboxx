@@ -395,7 +395,7 @@ export default function SimpleLanding() {
                     <span className="text-sm sm:text-base">AI Engagement Analytics on personal content</span>
                   </li>
                 </ul>
-                <Button className="w-full bg-purple-600 hover:bg-purple-700 py-3 text-sm sm:text-base">Step Deeper</Button>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700 py-3 text-sm sm:text-base">Begin Your Journey</Button>
               </div>
 
               <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
@@ -432,7 +432,7 @@ export default function SimpleLanding() {
                     <span className="text-sm sm:text-base">Early access to new features</span>
                   </li>
                 </ul>
-                <Button className="w-full bg-gray-900 hover:bg-gray-800 py-3 text-sm sm:text-base">Begin Your Journey</Button>
+                <Button className="w-full bg-gray-900 hover:bg-gray-800 py-3 text-sm sm:text-base">Step Deeper</Button>
               </div>
             </div>
           </div>
