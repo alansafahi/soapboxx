@@ -442,38 +442,32 @@ export default function SimpleLanding() {
             <h3 className="text-2xl font-semibold text-center mb-2 text-gray-900">Church Plans</h3>
             <p className="text-center text-gray-600 mb-8">Goal: Engagement & Growth</p>
             
-            <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
+              {/* Shepherd Plan */}
               <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
                 <div className="text-center mb-6">
-                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Pastor Essential</h4>
-                  <p className="text-sm text-blue-600 font-medium mb-3">"Foundational ministry tools"</p>
+                  <div className="text-3xl mb-2">🐑</div>
+                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Shepherd Plan</h4>
+                  <p className="text-sm text-blue-600 font-medium mb-3">"Guide your flock with love and order"</p>
                   <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">$50/mo</div>
                   <p className="text-gray-600 text-sm sm:text-base">5,000 credits/month</p>
                 </div>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">Foundational Ministry Management Tools</span>
+                    <span className="text-sm sm:text-base">Member Management</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">Church Member Directory</span>
+                    <span className="text-sm sm:text-base">Event Planning</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">Event Planning & Management</span>
+                    <span className="text-sm sm:text-base">Church-Wide Communication Tools</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">Communication Hub</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">Prayer Request Management</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">Basic Volunteer Coordination</span>
+                    <span className="text-sm sm:text-base">Private Prayer Circle Coordination</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
@@ -483,40 +477,34 @@ export default function SimpleLanding() {
                 <Button className="w-full bg-blue-600 hover:bg-blue-700 py-3 text-sm sm:text-base">Strengthen Your Ministry</Button>
               </div>
 
+              {/* Beacon Plan */}
               <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border-2 border-purple-500 relative">
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-purple-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                  Most Popular
+                  Recommended
                 </div>
                 <div className="text-center mb-6">
-                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Shepherd Advanced</h4>
-                  <p className="text-sm text-purple-600 font-medium mb-3">"Comprehensive ministry platform"</p>
+                  <div className="text-3xl mb-2">🕯️</div>
+                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Beacon Plan</h4>
+                  <p className="text-sm text-purple-600 font-medium mb-3">"Shine brighter, reach farther"</p>
                   <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-2">$100/mo</div>
                   <p className="text-gray-600 text-sm sm:text-base">10,000 credits/month</p>
                 </div>
                 <ul className="space-y-3 mb-8">
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">Everything in Pastor Essential</span>
+                    <span className="text-sm sm:text-base">Everything in Shepherd Plan</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">AI-Powered Sermon Studio</span>
+                    <span className="text-sm sm:text-base">Advanced Analytics on Engagement</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">Advanced Analytics & Insights</span>
+                    <span className="text-sm sm:text-base">Sermon Studio for Content Sharing</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">Enhanced Volunteer Management</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">Multi-Campus Support</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">Priority Support</span>
+                    <span className="text-sm sm:text-base">Integration with SoapBox AI Tools</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
@@ -525,38 +513,47 @@ export default function SimpleLanding() {
                 </ul>
                 <Button className="w-full bg-purple-600 hover:bg-purple-700 py-3 text-sm sm:text-base">Expand Your Reach</Button>
               </div>
-            </div>
-            
-            {/* Enterprise Church Plan */}
-            <div className="mt-8 max-w-2xl mx-auto">
-              <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-lg p-8 text-white text-center">
-                <h4 className="text-2xl font-bold mb-2">Kingdom Enterprise</h4>
-                <p className="text-gray-300 text-sm font-medium mb-4">"Transform communities at scale"</p>
-                <div className="text-3xl font-bold mb-4">Custom Pricing</div>
-                <p className="text-gray-300 mb-6">Tailored solutions for large denominations and multi-site churches</p>
-                <ul className="text-left space-y-2 mb-8 max-w-md mx-auto">
+
+              {/* Kingdom Plan */}
+              <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
+                <div className="text-center mb-6">
+                  <div className="text-3xl mb-2">👑</div>
+                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Kingdom Plan</h4>
+                  <p className="text-sm text-yellow-600 font-medium mb-3">"Lead with vision, empower the body"</p>
+                  <div className="text-2xl sm:text-3xl font-bold text-yellow-600 mb-2">$250/mo</div>
+                  <p className="text-gray-600 text-sm sm:text-base">25,000 credits/month</p>
+                </div>
+                <ul className="space-y-3 mb-8">
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    <span className="text-sm">Everything in Shepherd Advanced</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Everything in Beacon Plan</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    <span className="text-sm">White-label customization</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">AI-Enhanced Content Creation</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    <span className="text-sm">Dedicated success manager</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Multi-Campus Management</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    <span className="text-sm">Custom integrations & API access</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Donor & Giving Analytics</span>
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
-                    <span className="text-sm">Unlimited credits & premium features</span>
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Livestream Integration & Media Hub</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Volunteer Management System</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Real-time Ministry Chat + CRM</span>
                   </li>
                 </ul>
-                <Button className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-3 font-semibold">Transform Your Calling</Button>
+                <Button className="w-full bg-yellow-600 hover:bg-yellow-700 py-3 text-sm sm:text-base text-white">Transform Your Calling</Button>
               </div>
             </div>
           </div>

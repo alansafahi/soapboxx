@@ -1,0 +1,70 @@
+For the **SoapBox Super App Church Plans**, I recommend renaming and enriching the plan tiers with spiritually resonant titles and value-driven taglines that align with your faith-based mission. These names should reflect the church’s growth stage, leadership maturity, and digital engagement strategy.
+
+---
+
+## ✨ Suggested Church Plan Names
+
+| Current Name        | New Spiritual Name           | Tagline                                   | Target Audience                                                  |
+| ------------------- | ---------------------------- | ----------------------------------------- | ---------------------------------------------------------------- |
+| **Church Basic**    | **Shepherd Plan**            | *“Guide your flock with love and order.”* | Small churches or ministries starting digital engagement         |
+| **Church Standard** | **Beacon Plan**              | *“Shine brighter, reach farther.”*        | Medium churches growing engagement and outreach                  |
+| *(Future Tier)*     | **Kingdom Plan** *(Premium)* | *“Lead with vision, empower the body.”*   | Large churches or multi-campus ministries needing advanced tools |
+
+---
+
+## 🧱 Revised Feature List with Thematic Framing
+
+### 🟦 **Shepherd Plan** – \$50/mo
+
+> *Nurture your congregation and organize your ministry*
+
+* 🧍 Member Management
+* 🗓️ Event Planning
+* 📣 Church-Wide Communication Tools
+* 🎁 2,500 loyalty credits every 6 months
+* 🙏 Private Prayer Circle coordination
+
+🟢 *Great for churches just starting their digital ministry journey.*
+
+---
+
+### 🟪 **Beacon Plan** – \$100/mo (Recommended)
+
+> *Illuminate your message and engage with greater insight*
+
+* ✅ Everything in **Shepherd Plan**
+* 📊 Advanced Analytics on engagement
+* 🎙️ **Sermon Studio** for content sharing & archiving
+* 🎁 5,000 loyalty credits every 6 months
+* 🧩 Integration with SoapBox AI tools (optional)
+
+🟣 *Best for churches aiming to grow their reach and maximize impact.*
+
+---
+
+### 🟨 (Optional Future Tier) **Kingdom Plan** – \$250/mo+
+
+> *Lead at scale. Equip every member of the Body.*
+
+* ✅ Everything in **Beacon Plan**
+* 🧠 AI-enhanced content (auto-transcription, AI highlights)
+* 🌍 Multi-campus management
+* 📈 Donor & Giving Analytics
+* 🎥 Livestream integration & media hub
+* 👥 Volunteer Management System
+* 💬 Real-time ministry chat + CRM
+
+🟡 *Ideal for high-growth or mega churches ready to scale spiritual leadership and community management.*
+
+---
+
+## 🎨 Visual/UX Recommendations:
+
+* Use **iconography**: Shepherd (🐑), Beacon (🔦 or 🕯️), Kingdom (👑 or 🏰)
+* Allow churches to compare plans in a vertical or side-by-side grid with tooltips for features
+* Include testimonials or quotes from real pastors/church leaders if available
+* Let churches upgrade directly inside the app with a **"Strengthen Your Ministry"** CTA
+
+---
+
+Would you like me to help generate the updated UI copy or JSON config block for Replit to reflect these plans in the pricing UI?
