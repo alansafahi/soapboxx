@@ -4714,3 +4714,118 @@ export type UserReadingProgress = typeof userReadingProgress.$inferSelect;
 export type InsertUserReadingProgress = z.infer<typeof insertUserReadingProgressSchema>;
 export type UserReadingPlanSubscription = typeof userReadingPlanSubscriptions.$inferSelect;
 export type InsertUserReadingPlanSubscription = z.infer<typeof insertUserReadingPlanSubscriptionSchema>;
+
+// Gamification - User Streaks System
+export const userStreaks = pgTable("user_streaks", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  streakType: varchar("streak_type", { length: 50 }).notNull(), // soap_journal, prayer_requests, daily_reading, etc.
+  currentStreak: integer("current_streak").default(0),
+  longestStreak: integer("longest_streak").default(0),
+  lastActivityDate: timestamp("last_activity_date"),
+  bonusAwarded: boolean("bonus_awarded").default(false), // Track if 7-day bonus was awarded
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userStreakUnique: unique().on(table.userId, table.streakType),
+}));
+
+// Gamification - Missions System
+export const missions = pgTable("missions", {
+  id: serial("id").primaryKey(),
+  missionType: varchar("mission_type", { length: 50 }).notNull(), // beginner_journey, prayer_warrior, community_builder
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description").notNull(),
+  requirements: jsonb("requirements").notNull(), // Array of required actions with counts
+  rewardType: varchar("reward_type", { length: 50 }).notNull(), // points, premium_access, badge
+  rewardValue: integer("reward_value"), // Points awarded or days of premium
+  rewardDescription: varchar("reward_description", { length: 200 }),
+  isActive: boolean("is_active").default(true),
+  difficultyLevel: integer("difficulty_level").default(1), // 1-5 scale
+  estimatedTimeHours: integer("estimated_time_hours"), // How long to complete
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Gamification - User Mission Progress
+export const userMissionProgress = pgTable("user_mission_progress", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  missionId: integer("mission_id").notNull().references(() => missions.id),
+  progressData: jsonb("progress_data").notNull(), // Track progress for each requirement
+  status: varchar("status", { length: 20 }).default("in_progress"), // in_progress, completed, abandoned
+  completedAt: timestamp("completed_at"),
+  rewardClaimed: boolean("reward_claimed").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userMissionUnique: unique().on(table.userId, table.missionId),
+}));
+
+// Gamification - Enhanced Badges System
+export const badges = pgTable("badges", {
+  id: serial("id").primaryKey(),
+  badgeType: varchar("badge_type", { length: 50 }).notNull(), // spiritual_growth, community_leader, prayer_warrior
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  iconPath: varchar("icon_path", { length: 200 }), // Path to badge icon
+  colorScheme: varchar("color_scheme", { length: 20 }).default("gold"), // gold, silver, bronze, platinum
+  unlockConditions: jsonb("unlock_conditions").notNull(), // Conditions to unlock badge
+  rarity: varchar("rarity", { length: 20 }).default("common"), // common, rare, epic, legendary
+  pointsAwarded: integer("points_awarded").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Gamification - User Badges Earned
+export const userBadges = pgTable("user_badges", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  badgeId: integer("badge_id").notNull().references(() => badges.id),
+  earnedAt: timestamp("earned_at").defaultNow(),
+  displayOnProfile: boolean("display_on_profile").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userBadgeUnique: unique().on(table.userId, table.badgeId),
+}));
+
+// Schema exports for gamification
+export const insertUserStreakSchema = createInsertSchema(userStreaks).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertMissionSchema = createInsertSchema(missions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserMissionProgressSchema = createInsertSchema(userMissionProgress).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertBadgeSchema = createInsertSchema(badges).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserBadgeSchema = createInsertSchema(userBadges).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Type exports for gamification
+export type UserStreak = typeof userStreaks.$inferSelect;
+export type InsertUserStreak = z.infer<typeof insertUserStreakSchema>;
+export type Mission = typeof missions.$inferSelect;
+export type InsertMission = z.infer<typeof insertMissionSchema>;
+export type UserMissionProgress = typeof userMissionProgress.$inferSelect;
+export type InsertUserMissionProgress = z.infer<typeof insertUserMissionProgressSchema>;
+export type Badge = typeof badges.$inferSelect;
+export type InsertBadge = z.infer<typeof insertBadgeSchema>;
+export type UserBadge = typeof userBadges.$inferSelect;
+export type InsertUserBadge = z.infer<typeof insertUserBadgeSchema>;

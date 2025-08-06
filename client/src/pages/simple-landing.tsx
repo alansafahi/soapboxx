@@ -377,12 +377,12 @@ export default function SimpleLanding() {
                     <span className="text-sm sm:text-base">500 credits per referral</span>
                   </li>
                 </ul>
-                <Button className="w-full bg-purple-600 hover:bg-purple-700 py-3 text-sm sm:text-base">Choose Standard</Button>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700 py-3 text-sm sm:text-base">Step Deeper</Button>
               </div>
 
               <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
                 <div className="text-center mb-6">
-                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Premium</h4>
+                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Journey Plan</h4>
                   <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">$10/mo</div>
                   <p className="text-gray-600 text-sm">$100/year</p>
                   <p className="text-gray-600 text-sm sm:text-base">1,000 credits/month</p>
@@ -405,7 +405,7 @@ export default function SimpleLanding() {
                     <span className="text-sm sm:text-base">500 credits per referral</span>
                   </li>
                 </ul>
-                <Button className="w-full bg-gray-900 hover:bg-gray-800 py-3 text-sm sm:text-base">Choose Premium</Button>
+                <Button className="w-full bg-gray-900 hover:bg-gray-800 py-3 text-sm sm:text-base">Begin Your Journey</Button>
               </div>
             </div>
           </div>
@@ -440,7 +440,7 @@ export default function SimpleLanding() {
                     <span className="text-sm sm:text-base">2,500 loyalty credits/6 months</span>
                   </li>
                 </ul>
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 py-3 text-sm sm:text-base">Start Church Basic</Button>
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 py-3 text-sm sm:text-base">Strengthen Your Ministry</Button>
               </div>
 
               <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-purple-500 relative">
@@ -470,12 +470,12 @@ export default function SimpleLanding() {
                     <span>5,000 loyalty credits/6 months</span>
                   </li>
                 </ul>
-                <Button className="w-full bg-purple-600 hover:bg-purple-700">Choose Standard</Button>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700">Expand Your Reach</Button>
               </div>
 
               <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
                 <div className="text-center mb-6">
-                  <h4 className="text-xl font-bold text-gray-900 mb-2">Church Premium</h4>
+                  <h4 className="text-xl font-bold text-gray-900 mb-2">Shepherd Plan</h4>
                   <div className="text-3xl font-bold text-gray-900 mb-2">Custom</div>
                   <p className="text-gray-600">Custom credits</p>
                 </div>
@@ -497,7 +497,7 @@ export default function SimpleLanding() {
                     <span>Custom loyalty rewards</span>
                   </li>
                 </ul>
-                <Button className="w-full bg-gray-900 hover:bg-gray-800">Contact Sales</Button>
+                <Button className="w-full bg-gray-900 hover:bg-gray-800">Transform Your Calling</Button>
               </div>
             </div>
           </div>

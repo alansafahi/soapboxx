@@ -59,6 +59,11 @@ import {
   dailyVerses,
   userBibleStreaks,
   userBibleReadings,
+  userStreaks,
+  missions,
+  userMissionProgress,
+  badges,
+  userBadges,
   // Bible cache tables eliminated
   volunteers,
   contacts,
@@ -636,6 +641,20 @@ export interface IStorage {
   }>;
   getUserAchievements(userId: string): Promise<UserAchievement[]>;
   trackUserActivity(activity: InsertUserActivity): Promise<void>;
+  
+  // Gamification - Streaks
+  updateUserStreak(userId: string, streakType: string): Promise<{ currentStreak: number; bonusAwarded: boolean }>;
+  getUserStreaks(userId: string): Promise<UserStreak[]>;
+  
+  // Gamification - Missions
+  getUserMissions(userId: string): Promise<Mission[]>;
+  updateMissionProgress(userId: string, missionId: number, progressUpdate: any): Promise<UserMissionProgress>;
+  completeMission(userId: string, missionId: number): Promise<{ pointsAwarded: number; reward: string }>;
+  
+  // Gamification - Badges
+  awardBadge(userId: string, badgeId: number): Promise<UserBadge>;
+  getUserBadges(userId: string): Promise<Badge[]>;
+  checkBadgeEligibility(userId: string): Promise<Badge[]>;
   
   // User church connections
   getUserChurches(userId: string): Promise<Church[]>;
