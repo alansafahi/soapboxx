@@ -142,7 +142,7 @@ class MilestoneService {
       }
     } catch (error) {
       // Reduced error logging for cleaner console
-      console.error('Milestone achievement error (non-critical):', error.message);
+      console.error('Milestone achievement error (non-critical):', (error as Error).message);
     }
   }
 

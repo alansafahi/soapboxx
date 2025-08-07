@@ -8818,11 +8818,11 @@ Return JSON with this exact structure:
         address: address?.trim(),
         city: city?.trim(),
         state: state?.trim(),
-        zip_code: zipCode?.trim(), // snake_case for database
-        phone: adminPhone?.trim(),
-        email: adminEmail?.trim(),
-        website: website?.trim(),
-        description: description?.trim(), // FIXED: Must be included
+        zip_code: zipCode?.trim() || null, // snake_case for database  
+        phone: adminPhone?.trim() || null,
+        email: adminEmail?.trim() || null,
+        website: website?.trim() || null,
+        description: description?.trim() || null, // FIXED: Must be included
         logo_url: finalLogoUrl, // snake_case for database
         admin_email: adminEmail?.trim(), // snake_case for database
         admin_phone: adminPhone?.trim(), // snake_case for database
@@ -8857,12 +8857,12 @@ Return JSON with this exact structure:
         message: 'Community created successfully',
         community: newCommunity
       });
-    } catch (error) {
-
+    } catch (error: any) {
+      console.error('Community creation error:', error);
       res.status(500).json({ 
         error: 'Failed to create community', 
-        details: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        details: error?.message || 'Unknown error occurred',
+        stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined
       });
     }
   });
