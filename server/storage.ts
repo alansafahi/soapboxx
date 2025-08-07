@@ -2891,10 +2891,10 @@ export class DatabaseStorage implements IStorage {
           VALUES (${userId}, ${discussionId}, ${new Date()})
         `);
         
-        // Award points using centralized function
+        // Award points using centralized function - Fixed: was 5, should be 1
         await this.addPointsToUser(
           userId,
-          5,
+          1,
           'discussion_like',
           discussionId
         );
@@ -3260,7 +3260,7 @@ export class DatabaseStorage implements IStorage {
   async createDiscussion(discussion: InsertDiscussion): Promise<Discussion> {
     const [newDiscussion] = await db.insert(discussions).values(discussion).returning();
     
-    // Award points using centralized function
+    // Award points using centralized function - Fixed: was 10, should be 20
     await this.addPointsToUser(
       discussion.authorId,
       20,
@@ -4059,6 +4059,15 @@ export class DatabaseStorage implements IStorage {
         'soap_entry',
         soapEntry.id
       );
+
+      // Check for S.O.A.P. streak bonus (asynchronously)
+      setImmediate(async () => {
+        try {
+          await this.checkSoapStreak(entry.userId);
+        } catch (error) {
+          // Silent error handling for streak checks
+        }
+      });
 
       return soapEntry;
     } catch (error) {
@@ -5971,10 +5980,10 @@ export class DatabaseStorage implements IStorage {
           WHERE id = ${commentId}
         `);
         
-        // Award points using centralized function
+        // Award points using centralized function - Fixed: was 3, should be 1
         await this.addPointsToUser(
           userId,
-          3,
+          1,
           'comment_like',
           commentId
         );
@@ -8547,6 +8556,148 @@ export class DatabaseStorage implements IStorage {
       return { referrerPoints, refereePoints };
     } catch (error) {
       throw new Error('Failed to process referral reward');
+    }
+  }
+
+  // Add missing reward functions according to comprehensive requirements
+
+  // Add Contact - 10 points
+  async addContact(userId: string, contactId: string): Promise<void> {
+    try {
+      // Create contact relationship
+      await db.insert(contacts).values({
+        userId: userId,
+        contactId: contactId,
+        status: 'pending',
+        createdAt: new Date()
+      });
+
+      // Award points using centralized function - 10 points for adding contact
+      await this.addPointsToUser(
+        userId,
+        10,
+        'contact_added',
+        parseInt(contactId) // Convert to number for entityId
+      );
+    } catch (error) {
+      throw new Error('Failed to add contact');
+    }
+  }
+
+  // First AI-Assisted S.O.A.P. Entry - 10 points
+  async trackFirstAIUsage(userId: string, feature: string): Promise<void> {
+    try {
+      // Check if user has used AI before
+      const existingUsage = await db.execute(sql`
+        SELECT id FROM point_transactions 
+        WHERE user_id = ${userId} AND reason = 'ai_first_use'
+        LIMIT 1
+      `);
+
+      if (existingUsage.rows.length === 0) {
+        // Award first-time AI usage bonus
+        await this.addPointsToUser(
+          userId,
+          10,
+          'ai_first_use',
+          null // No specific entity ID for AI usage
+        );
+      }
+    } catch (error) {
+      throw new Error('Failed to track first AI usage');
+    }
+  }
+
+  // Create Group/Ministry - 50 points
+  async createCommunityGroup(userId: string, groupName: string, communityId: number): Promise<any> {
+    try {
+      // Create the group/ministry
+      const [newGroup] = await db.insert(communityGroups).values({
+        name: groupName,
+        communityId: communityId,
+        creatorId: userId,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).returning();
+
+      // Award points using centralized function - 50 points for creating group
+      await this.addPointsToUser(
+        userId,
+        50,
+        'group_created',
+        newGroup.id
+      );
+
+      return newGroup;
+    } catch (error) {
+      throw new Error('Failed to create community group');
+    }
+  }
+
+  // Join Group/Ministry - 10 points
+  async joinCommunityGroup(userId: string, groupId: number): Promise<void> {
+    try {
+      // Add user to group
+      await db.insert(groupMembers).values({
+        userId: userId,
+        groupId: groupId,
+        role: 'member',
+        joinedAt: new Date(),
+        isActive: true
+      });
+
+      // Award points using centralized function - 10 points for joining group
+      await this.addPointsToUser(
+        userId,
+        10,
+        'group_joined',
+        groupId
+      );
+    } catch (error) {
+      throw new Error('Failed to join community group');
+    }
+  }
+
+  // S.O.A.P. Streak Bonus - 50 points for 7-day streak
+  async checkSoapStreak(userId: string): Promise<boolean> {
+    try {
+      // Get user's S.O.A.P. entries from the last 7 days
+      const streakEntries = await db.execute(sql`
+        SELECT created_at::date as entry_date
+        FROM soap_entries 
+        WHERE user_id = ${userId} 
+        AND created_at >= NOW() - INTERVAL '7 days'
+        ORDER BY created_at::date DESC
+      `);
+
+      // Check if user has entries for 7 consecutive days
+      const uniqueDates = [...new Set(streakEntries.rows.map(row => row.entry_date))];
+      
+      if (uniqueDates.length >= 7) {
+        // Check if user already received the streak bonus
+        const existingBonus = await db.execute(sql`
+          SELECT id FROM point_transactions 
+          WHERE user_id = ${userId} 
+          AND reason = 'soap_streak_7'
+          AND created_at >= NOW() - INTERVAL '7 days'
+          LIMIT 1
+        `);
+
+        if (existingBonus.rows.length === 0) {
+          // Award streak bonus - 50 points for 7-day S.O.A.P. streak
+          await this.addPointsToUser(
+            userId,
+            50,
+            'soap_streak_7',
+            null // No specific entity ID for streaks
+          );
+          return true;
+        }
+      }
+      return false;
+    } catch (error) {
+      throw new Error('Failed to check S.O.A.P. streak');
     }
   }
 
