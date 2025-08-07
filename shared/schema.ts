@@ -1523,7 +1523,7 @@ export const messages = pgTable("messages", {
 });
 
 // Leaderboard and gamification tables
-export const userScores = pgTable("user_scores", {
+export const userPoints = pgTable("user_points", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   totalPoints: integer("total_points").default(0),
@@ -1541,14 +1541,15 @@ export const userScores = pgTable("user_scores", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => ({
-  userScoreUnique: unique().on(table.userId),
+  userPointsUnique: unique().on(table.userId),
 }));
 
 export const pointTransactions = pgTable("point_transactions", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id),
   points: integer("points").notNull(),
-  activityType: varchar("activity_type", { length: 50 }).notNull(),
+  transactionType: varchar("transaction_type", { length: 50 }).notNull(), // Renamed from activityType for consistency
+  reason: varchar("reason", { length: 100 }).notNull(), // New field to log specific action
   entityId: integer("entity_id"),
   description: text("description"),
   multiplier: integer("multiplier").default(1),
@@ -4035,9 +4036,9 @@ export type InsertPrayerCircleReport = typeof prayerCircleReports.$inferInsert;
 export type PrayerAssignment = typeof prayerAssignments.$inferSelect;
 export type InsertPrayerAssignment = typeof prayerAssignments.$inferInsert;
 
-// Leaderboard type definitions
-export type UserScore = typeof userScores.$inferSelect;
-export type InsertUserScore = typeof userScores.$inferInsert;
+// Leaderboard type definitions  
+export type UserPoints = typeof userPoints.$inferSelect;
+export type InsertUserPoints = typeof userPoints.$inferInsert;
 
 export type PointTransaction = typeof pointTransactions.$inferSelect;
 export type InsertPointTransaction = typeof pointTransactions.$inferInsert;

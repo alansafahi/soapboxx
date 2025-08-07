@@ -1,0 +1,76 @@
+Action/Milestone	Reward Value (Points)	Aspirational Reward Title
+Growth Incentives		
+Successful Referral	500 points (to both referrer & referee)	Evangelist
+Adding a Contact	10 points	Connector
+First AI-Assisted S.O.A.P. Entry	10 points	Spiritual Explorer
+Community Engagement		
+New Discussion Post	20 points	Community Builder
+New Prayer Request	25 points	Prayer Warrior
+New Prayer Response/Support	5 points	Faithful Intercessor
+New Discussion Comment	5 points	Conversation Starter
+Liking a Discussion Post	1 point (per like)	Fellow Encourager
+New S.O.A.P. Comment	5 points	Insightful Responder
+Spiritual Habits		
+S.O.A.P. Entry Submitted	15 points	Reflective Disciple
+Completing a 7-day S.O.A.P. Streak	50 points	Disciplined Steward
+Completing Missions	Varies by mission	Mission Accomplished
+Attending an Event	25 points	Active Member
+Volunteerism & Leadership		
+Creating a Group/Ministry	50 points	Community Founder
+Joining a Group/Ministry	10 points	Team Member
+Volunteering for an Event	15 points	Servant Heart
+Checking in to an Event	25 points	Active Participant
+
+Export to Sheets
+Instructions for Replit to Implement Consolidation
+The goal is to centralize all point-awarding logic in a single function, addPointsToUser, and rename the user_scores table to user_points to better reflect its purpose.
+
+Refactor the Database Schema (shared/schema.ts):
+
+Rename the userScores table to userPoints for consistent naming.
+
+Add a reason field to the pointTransactions table to log the specific action that earned the points (e.g., 'referral_reward', 'discussion_post').
+
+Consolidate Point Logic in server/storage.ts:
+
+Create a new, universal addPointsToUser function that takes userId, points, and reason as arguments. This function should perform the following actions:
+
+Update the user's total, weekly, and monthly points in the new userPoints table.
+
+Create a record in the pointTransactions table.
+
+Update any relevant achievement or badge progress.
+
+Replace all existing point-awarding logic with calls to this new addPointsToUser function:
+
+processReferralReward: Call addPointsToUser with the reason 'referral_reward'.
+
+createDiscussion: Update to call addPointsToUser with the reason 'discussion_post'.
+
+createPrayerRequest: Update to call addPointsToUser with the reason 'prayer_request'.
+
+checkInToEvent: Update to call addPointsToUser with the reason 'event_attended'.
+
+createSoapEntry: A new call to addPointsToUser needs to be added here with the reason 'soap_entry'.
+
+createDiscussionComment: Update to call addPointsToUser with the reason 'discussion_comment'.
+
+createSoapComment: Update to call addPointsToUser with the reason 'soap_comment'.
+
+likeDiscussion: Update to call addPointsToUser with the reason 'discussion_like'.
+
+addEventVolunteer: Update to call addPointsToUser with the reason 'volunteering'.
+
+joinCommunityGroup: A new call to addPointsToUser needs to be added here with the reason 'group_joined'.
+
+createCommunityGroup: A new call to addPointsToUser needs to be added here with the reason 'group_created'.
+
+addContact: A new call to addPointsToUser needs to be added here with the reason 'contact_added'.
+
+All other point-awarding actions should be refactored to use this single function.
+
+Update server/routes.ts:
+
+Ensure all backend endpoints that award points are correctly calling the new addPointsToUser function with the appropriate points and reason.
+
+Update any endpoints that query user points to pull from the new, unified userPoints table.

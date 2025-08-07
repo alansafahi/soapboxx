@@ -3508,10 +3508,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: 'User authentication required' });
       }
 
-      // Get streak from user_scores table instead of storage method
+      // Get streak from user_points table instead of storage method
       const result = await db.execute(sql`
         SELECT current_streak, longest_streak 
-        FROM user_scores 
+        FROM user_points 
         WHERE user_id = ${userId}
       `);
       
@@ -9542,8 +9542,8 @@ Return JSON with this exact structure:
           (SELECT COUNT(*) FROM prayer_reactions WHERE user_id = ${userId}) as prayer_reactions,
           
           -- User score data
-          (SELECT current_streak FROM user_scores WHERE user_id = ${userId}) as streak_days,
-          (SELECT total_points FROM user_scores WHERE user_id = ${userId}) as total_points
+          (SELECT current_streak FROM user_points WHERE user_id = ${userId}) as streak_days,
+          (SELECT total_points FROM user_points WHERE user_id = ${userId}) as total_points
       `);
       
       const row = result.rows[0] || {};
@@ -13760,7 +13760,7 @@ Please provide suggestions for the missing or incomplete sections.`
           faithfulness_score,
           prayer_champion_points,
           service_hours
-        FROM user_scores 
+        FROM user_points 
         WHERE user_id = ${userId}
       `);
       
@@ -13769,7 +13769,7 @@ Please provide suggestions for the missing or incomplete sections.`
       } else {
         // Create default score record if none exists
         await db.execute(sql`
-          INSERT INTO user_scores (user_id, total_points, weekly_points, monthly_points, current_streak, longest_streak, faithfulness_score, prayer_champion_points, service_hours)
+          INSERT INTO user_points (user_id, total_points, weekly_points, monthly_points, current_streak, longest_streak, faithfulness_score, prayer_champion_points, service_hours)
           VALUES (${userId}, 0, 0, 0, 0, 0, 0, 0, 0)
         `);
         res.json({
@@ -15059,7 +15059,7 @@ Please provide suggestions for the missing or incomplete sections.`
             uc.role,
             COALESCE(us.total_points, 0) as score
           FROM users u
-          LEFT JOIN user_scores us ON u.id = us.user_id
+          LEFT JOIN user_points us ON u.id = us.user_id
           LEFT JOIN user_churches uc ON u.id = uc.user_id
           WHERE uc.is_active = true
         )

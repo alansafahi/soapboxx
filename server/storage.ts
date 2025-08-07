@@ -272,7 +272,7 @@ import {
   type UserJourneyPreferences,
   type InsertUserJourneyPreferences,
   type InsertUserInspirationHistory,
-  userScores,
+  userPoints,
   pointTransactions,
   achievements,
   leaderboards,
@@ -2488,13 +2488,13 @@ export class DatabaseStorage implements IStorage {
   async addEventVolunteer(volunteer: InsertEventVolunteer): Promise<EventVolunteer> {
     const [newVolunteer] = await db.insert(eventVolunteers).values(volunteer).returning();
     
-    // Track activity
-    await this.trackUserActivity({
-      userId: volunteer.userId,
-      activityType: 'event_volunteer',
-      entityId: volunteer.eventId,
-      points: 15,
-    });
+    // Award points using centralized function
+    await this.addPointsToUser(
+      volunteer.userId,
+      15,
+      'volunteering',
+      volunteer.eventId
+    );
     
     return newVolunteer;
   }
@@ -2569,13 +2569,13 @@ export class DatabaseStorage implements IStorage {
   async checkInToEvent(checkIn: InsertEventCheckIn): Promise<EventCheckIn> {
     const [newCheckIn] = await db.insert(eventCheckIns).values(checkIn).returning();
     
-    // Track activity
-    await this.trackUserActivity({
-      userId: checkIn.userId,
-      activityType: 'event_attendance',
-      entityId: checkIn.eventId,
-      points: 25,
-    });
+    // Award points using centralized function
+    await this.addPointsToUser(
+      checkIn.userId,
+      25,
+      'event_attended',
+      checkIn.eventId
+    );
     
     return newCheckIn;
   }
@@ -2881,13 +2881,7 @@ export class DatabaseStorage implements IStorage {
           WHERE user_id = ${userId} AND discussion_id = ${discussionId}
         `);
         
-        // Remove points for unliking
-        await this.trackUserActivity({
-          userId: userId,
-          activityType: 'unlike_discussion',
-          entityId: discussionId,
-          points: -5, // Remove 5 points for unliking
-        });
+        // Note: No negative points awarded for unliking in centralized system
         
         return { success: true, liked: false, message: 'Like removed' };
       } else {
@@ -2897,13 +2891,13 @@ export class DatabaseStorage implements IStorage {
           VALUES (${userId}, ${discussionId}, ${new Date()})
         `);
         
-        // Track user activity and award points
-        await this.trackUserActivity({
-          userId: userId,
-          activityType: 'like_discussion',
-          entityId: discussionId,
-          points: 5, // Award 5 points for liking
-        });
+        // Award points using centralized function
+        await this.addPointsToUser(
+          userId,
+          5,
+          'discussion_like',
+          discussionId
+        );
         
         return { success: true, liked: true, message: 'Like added' };
       }
@@ -3266,13 +3260,13 @@ export class DatabaseStorage implements IStorage {
   async createDiscussion(discussion: InsertDiscussion): Promise<Discussion> {
     const [newDiscussion] = await db.insert(discussions).values(discussion).returning();
     
-    // Track activity
-    await this.trackUserActivity({
-      userId: discussion.authorId,
-      activityType: 'discussion_post',
-      entityId: newDiscussion.id,
-      points: 20,
-    });
+    // Award points using centralized function
+    await this.addPointsToUser(
+      discussion.authorId,
+      20,
+      'discussion_post',
+      newDiscussion.id
+    );
     
     return newDiscussion;
   }
@@ -4032,14 +4026,13 @@ export class DatabaseStorage implements IStorage {
         })
         .returning();
 
-      // Record user activity for engagement tracking
-      await db.insert(userActivities).values({
-        userId: prayer.authorId,
-        activityType: 'prayer_request',
-        entityId: prayerRequest.id,
-        points: 25, // Points for creating prayer request
-        createdAt: new Date(),
-      });
+      // Award points using centralized function
+      await this.addPointsToUser(
+        prayer.authorId,
+        25,
+        'prayer_request',
+        prayerRequest.id
+      );
 
       return prayerRequest;
     } catch (error) {
@@ -4059,13 +4052,13 @@ export class DatabaseStorage implements IStorage {
         })
         .returning();
 
-      // Record user activity for engagement tracking
-      await this.trackUserActivity({
-        userId: entry.userId,
-        activityType: 'soap_entry',
-        entityId: soapEntry.id,
-        points: 15,
-      });
+      // Award points using centralized function
+      await this.addPointsToUser(
+        entry.userId,
+        15,
+        'soap_entry',
+        soapEntry.id
+      );
 
       return soapEntry;
     } catch (error) {
@@ -5635,15 +5628,14 @@ export class DatabaseStorage implements IStorage {
         .returning();
 
 
-      // Record user activity for engagement tracking
+      // Award points using centralized function
       try {
-        await db.insert(userActivities).values({
-          userId: comment.authorId,
-          activityType: 'discussion_comment',
-          entityId: newComment.id,
-          points: 5, // Points for adding comment
-          createdAt: new Date(),
-        });
+        await this.addPointsToUser(
+          comment.authorId,
+          5,
+          'discussion_comment',
+          newComment.id
+        );
       } catch (activityError) {
         // Continue even if activity recording fails
       }
@@ -5881,14 +5873,13 @@ export class DatabaseStorage implements IStorage {
         })
         .returning();
 
-      // Record user activity for engagement tracking
-      await db.insert(userActivities).values({
-        userId: comment.authorId,
-        activityType: 'soap_comment',
-        entityId: newComment.id,
-        points: 5, // Points for adding comment
-        createdAt: new Date(),
-      });
+      // Award points using centralized function
+      await this.addPointsToUser(
+        comment.authorId,
+        5,
+        'soap_comment',
+        newComment.id
+      );
 
       return newComment;
     } catch (error) {
@@ -5958,13 +5949,7 @@ export class DatabaseStorage implements IStorage {
           WHERE id = ${commentId}
         `);
         
-        // Remove points for unliking
-        await this.trackUserActivity({
-          userId: userId,
-          activityType: 'unlike_discussion_comment',
-          entityId: commentId,
-          points: -3,
-        });
+        // Note: No negative points awarded for unliking in centralized system
         
         // Get updated count
         const countResult = await db.execute(sql`
@@ -5986,13 +5971,13 @@ export class DatabaseStorage implements IStorage {
           WHERE id = ${commentId}
         `);
         
-        // Award points for liking
-        await this.trackUserActivity({
-          userId: userId,
-          activityType: 'like_discussion_comment',
-          entityId: commentId,
-          points: 3,
-        });
+        // Award points using centralized function
+        await this.addPointsToUser(
+          userId,
+          3,
+          'comment_like',
+          commentId
+        );
         
         // Get updated count
         const countResult = await db.execute(sql`
@@ -6007,48 +5992,51 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // Track user activity for rewards system
-  async trackUserActivity(activity: InsertUserActivity): Promise<void> {
+  // Universal function to add points to user with reason tracking
+  async addPointsToUser(userId: string, points: number, reason: string, entityId?: number): Promise<void> {
     try {
-      // Insert into user activities log
-      await db.insert(userActivities).values({
-        userId: activity.userId,
-        activityType: activity.activityType,
-        entityId: activity.entityId,
-        points: activity.points || 0,
+      // Only proceed if points are positive
+      if (points <= 0) return;
+
+      // Create point transaction
+      await db.insert(pointTransactions).values({
+        userId: userId,
+        points: points,
+        transactionType: reason,
+        reason: reason,
+        entityId: entityId,
+        description: `Points for ${reason}`,
         createdAt: new Date(),
       });
 
-      // Also create point transaction if points are awarded
-      if (activity.points && activity.points > 0) {
-        await db.insert(pointTransactions).values({
-          userId: activity.userId,
-          points: activity.points,
-          transactionType: activity.activityType,
-          description: `Points for ${activity.activityType}`,
-          createdAt: new Date(),
-        });
+      // Update user's total points in user_points table
+      await db.execute(sql`
+        INSERT INTO user_points (user_id, total_points, weekly_points, monthly_points, updated_at, created_at)
+        VALUES (${userId}, ${points}, ${points}, ${points}, NOW(), NOW())
+        ON CONFLICT (user_id) 
+        DO UPDATE SET 
+          total_points = user_points.total_points + ${points},
+          weekly_points = user_points.weekly_points + ${points},
+          monthly_points = user_points.monthly_points + ${points},
+          updated_at = NOW()
+      `);
 
-        // Update user's total points in user_scores
-        await db.execute(sql`
-          INSERT INTO user_scores (user_id, total_points, weekly_points, monthly_points, updated_at, created_at)
-          VALUES (${activity.userId}, ${activity.points}, ${activity.points}, ${activity.points}, NOW(), NOW())
-          ON CONFLICT (user_id) 
-          DO UPDATE SET 
-            total_points = user_scores.total_points + ${activity.points},
-            weekly_points = user_scores.weekly_points + ${activity.points},
-            monthly_points = user_scores.monthly_points + ${activity.points},
-            updated_at = NOW()
-        `);
-      }
+      // Log activity for tracking
+      await db.insert(userActivities).values({
+        userId: userId,
+        activityType: reason,
+        entityId: entityId,
+        points: points,
+        createdAt: new Date(),
+      });
 
       // Trigger milestone checking asynchronously (don't wait)
       setImmediate(async () => {
         try {
           const { milestoneService } = await import('./milestone-service');
-          await milestoneService.checkMilestones(activity.userId, activity.activityType, { 
-            entityId: activity.entityId,
-            points: activity.points 
+          await milestoneService.checkMilestones(userId, reason, { 
+            entityId: entityId,
+            points: points 
           });
         } catch (error) {
           // Silent error handling for milestone checks
@@ -6056,7 +6044,19 @@ export class DatabaseStorage implements IStorage {
       });
     } catch (error) {
       // Don't throw error to avoid breaking main functionality
+      console.error('Error adding points to user:', error);
     }
+  }
+
+  // Track user activity for rewards system (DEPRECATED - use addPointsToUser instead)
+  async trackUserActivity(activity: InsertUserActivity): Promise<void> {
+    // Redirect to new centralized function
+    await this.addPointsToUser(
+      activity.userId, 
+      activity.points || 0, 
+      activity.activityType, 
+      activity.entityId
+    );
   }
 
   // ============================================================================
@@ -8518,21 +8518,21 @@ export class DatabaseStorage implements IStorage {
       const referrerPoints = 500;
       const refereePoints = 500;
 
-      // Award points to referrer
-      await this.trackUserActivity({
-        userId: referralData.referrerId,
-        activityType: 'referral_reward',
-        entityId: referralId,
-        points: referrerPoints,
-      });
+      // Award points to referrer using centralized function
+      await this.addPointsToUser(
+        referralData.referrerId,
+        referrerPoints,
+        'referral_reward',
+        referralId
+      );
 
-      // Award points to referee
-      await this.trackUserActivity({
-        userId: referralData.referredUserId,
-        activityType: 'referral_reward',
-        entityId: referralId,
-        points: refereePoints,
-      });
+      // Award points to referee using centralized function
+      await this.addPointsToUser(
+        referralData.referredUserId,
+        refereePoints,
+        'referral_reward',
+        referralId
+      );
 
       // Mark referral as processed
       await db
