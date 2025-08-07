@@ -119,8 +119,8 @@ export default function LeaderboardPreview() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        {topUsers.map((user) => (
-          <div key={user.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/50 dark:hover:bg-purple-800/30 transition-colors">
+        {topUsers.map((user, index) => (
+          <div key={`leaderboard-${user.id}-${index}`} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/50 dark:hover:bg-purple-800/30 transition-colors">
             <div className="flex-shrink-0 relative">
               {getRankIcon(user.rank)}
             </div>

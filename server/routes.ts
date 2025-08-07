@@ -15244,6 +15244,7 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Use raw SQL query to avoid schema import issues - all table names verified
+      // GROUP BY to prevent duplicates from multiple church associations
       const leaderboardResult = await db.execute(sql`
         SELECT 
           u.id,
@@ -15252,11 +15253,12 @@ Please provide suggestions for the missing or incomplete sections.`
           u.profile_image_url,
           u.email_verified,
           u.phone_verified,
-          uc.role_id as role,
+          u.role,
           COALESCE(up.total_points, 0) as score
         FROM users u
         LEFT JOIN user_points up ON u.id = up.user_id
-        LEFT JOIN user_churches uc ON u.id = uc.user_id AND uc.is_active = true
+        WHERE COALESCE(up.total_points, 0) > 0
+        GROUP BY u.id, u.first_name, u.last_name, u.profile_image_url, u.email_verified, u.phone_verified, u.role, up.total_points
         ORDER BY COALESCE(up.total_points, 0) DESC, u.first_name ASC
         LIMIT 20
       `);

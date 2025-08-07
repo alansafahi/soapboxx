@@ -188,9 +188,9 @@ const Leaderboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-white/10">
-                    {leaderboard.map((entry) => (
+                    {leaderboard.map((entry, index) => (
                       <tr 
-                        key={entry.id} 
+                        key={`leaderboard-row-${entry.id}-${index}`} 
                         className="hover:bg-gray-50 dark:hover:bg-white/5 transition-colors duration-200 group"
                       >
                         <td className="px-6 py-4">
