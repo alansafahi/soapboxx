@@ -29,7 +29,7 @@ import {
   volunteerOpportunities
 } from "../shared/schema";
 import * as schema from "../shared/schema";
-import { eq, and, or, gte, lte, desc, asc, like, sql, count, sum, ilike, isNotNull, inArray, isNull } from "drizzle-orm";
+import { eq, and, or, gte, lte, desc, asc, like, sql, count, sum, ilike, isNotNull, inArray, isNull, lt } from "drizzle-orm";
 import { lookupBibleVerse } from './bible-api';
 import { analyzeUserSpiritualGifts } from './ai-spiritual-gifts';
 
@@ -15191,43 +15191,36 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(401).json({ message: 'Authentication required' });
       }
 
-      // Fixed query to avoid duplicates - use subquery to get unique users first
-      const result = await db.execute(sql`
-        WITH unique_users AS (
-          SELECT DISTINCT ON (u.id)
-            u.id,
-            u.first_name,
-            u.last_name,
-            u.profile_image_url,
-            u.email_verified,
-            u.phone_verified,
-            uc.role,
-            COALESCE(us.total_points, 0) as score
-          FROM users u
-          LEFT JOIN user_points us ON u.id = us.user_id
-          LEFT JOIN user_churches uc ON u.id = uc.user_id
-          WHERE uc.is_active = true
-        )
-        SELECT 
-          *,
-          ROW_NUMBER() OVER (ORDER BY score DESC, first_name ASC) as rank
-        FROM unique_users
-        WHERE score > 0 OR (SELECT COUNT(*) FROM unique_users WHERE score > 0) < 5
-        ORDER BY score DESC, first_name ASC
-        LIMIT 20
-      `);
+      // Fixed query to avoid duplicates - use Drizzle ORM with proper camelCase fields
+      const leaderboardResult = await db
+        .select({
+          id: users.id,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          emailVerified: users.emailVerified,
+          phoneVerified: users.phoneVerified,
+          role: userChurches.role,
+          score: coalesce(userPoints.totalPoints, 0)
+        })
+        .from(users)
+        .leftJoin(userPoints, eq(users.id, userPoints.userId))
+        .leftJoin(userChurches, eq(users.id, userChurches.userId))
+        .where(eq(userChurches.isActive, true))
+        .orderBy(desc(coalesce(userPoints.totalPoints, 0)), asc(users.firstName))
+        .limit(20);
       
-      const leaderboardData = result.rows.map((row: any) => ({
-        rank: row.rank,
+      const leaderboardData = leaderboardResult.map((row, index) => ({
+        rank: index + 1,
         id: row.id.toString(),
-        firstName: row.first_name,
-        lastName: row.last_name,
-        avatarUrl: row.profile_image_url,
-        profileImageUrl: row.profile_image_url,
-        emailVerified: row.email_verified,
-        phoneVerified: row.phone_verified,
+        firstName: row.firstName,
+        lastName: row.lastName,
+        avatarUrl: row.profileImageUrl,
+        profileImageUrl: row.profileImageUrl,
+        emailVerified: row.emailVerified,
+        phoneVerified: row.phoneVerified,
         role: row.role,
-        score: row.score
+        score: Number(row.score)
       }));
       
       res.json(leaderboardData);

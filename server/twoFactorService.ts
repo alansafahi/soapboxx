@@ -266,7 +266,7 @@ export class TwoFactorService {
   // Clean up expired tokens
   async cleanupExpiredTokens(): Promise<void> {
     await db.delete(twoFactorTokens)
-      .where(sql`expires_at < NOW()`);
+      .where(lt(twoFactorTokens.expiresAt, new Date()));
   }
 }
 

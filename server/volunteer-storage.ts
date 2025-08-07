@@ -76,20 +76,24 @@ export class VolunteerStorage {
 
   async getVolunteerOpportunities(churchId?: number): Promise<any[]> {
     try {
-      const result = await db.execute(sql`
-        SELECT vo.*, 
-               COALESCE(u.first_name || ' ' || u.last_name, u.email) as coordinator_name,
-               u.email as coordinator_email
-        FROM volunteer_opportunities vo
-        LEFT JOIN users u ON vo.coordinator_id = u.id
-        ${churchId ? sql`WHERE vo.church_id = ${churchId}` : sql``}
-        ORDER BY vo.created_at DESC
-      `);
+      const result = await db
+        .select({
+          opportunity: volunteerOpportunities,
+          coordinatorFirstName: users.firstName,
+          coordinatorLastName: users.lastName,
+          coordinatorEmail: users.email
+        })
+        .from(volunteerOpportunities)
+        .leftJoin(users, eq(volunteerOpportunities.coordinatorId, users.id))
+        .where(churchId ? eq(volunteerOpportunities.communityId, churchId) : undefined)
+        .orderBy(desc(volunteerOpportunities.createdAt));
       
-      return result.rows.map((row: any) => ({
-        ...row,
-        coordinatorName: row.coordinator_name,
-        coordinatorEmail: row.coordinator_email
+      return result.map((row) => ({
+        ...row.opportunity,
+        coordinatorName: row.coordinatorFirstName && row.coordinatorLastName 
+          ? `${row.coordinatorFirstName} ${row.coordinatorLastName}`
+          : row.coordinatorEmail,
+        coordinatorEmail: row.coordinatorEmail
       }));
     } catch (error) {
       // Error logged for internal tracking
@@ -433,7 +437,7 @@ export class VolunteerStorage {
       const [opportunity] = await db
         .insert(volunteerOpportunities)
         .values({
-          churchId: data.churchId,
+          communityId: data.churchId,
           title: data.title,
           ministry: data.ministry,
           category: data.category, // Field already mapped in route

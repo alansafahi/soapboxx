@@ -280,8 +280,7 @@ import {
   streaks,
   challenges,
   challengeParticipants,
-  type UserScore,
-  type InsertUserScore,
+  userPoints as userScores,
   type PointTransaction,
   type InsertPointTransaction,
   type Achievement,
@@ -2888,36 +2887,36 @@ export class DatabaseStorage implements IStorage {
         try {
           const soapLikeCountResult = await db
             .select({
-              entityId: reactions.entityId,
+              targetId: reactions.targetId,
               likeCount: count()
             })
             .from(reactions)
             .where(
               and(
-                eq(reactions.entityType, 'soap_entry'),
-                inArray(reactions.entityId, soapIds.map(String))
+                eq(reactions.targetType, 'soap_entry'),
+                inArray(reactions.targetId, soapIds)
               )
             )
-            .groupBy(reactions.entityId);
+            .groupBy(reactions.targetId);
           
           soapLikeCounts = soapLikeCountResult.reduce((acc: Record<number, number>, row) => {
-            acc[Number(row.entityId)] = Number(row.likeCount);
+            acc[Number(row.targetId)] = Number(row.likeCount);
             return acc;
           }, {});
           
           if (currentUserId) {
             const userSoapLikesResult = await db
-              .select({ entityId: reactions.entityId })
+              .select({ targetId: reactions.targetId })
               .from(reactions)
               .where(
                 and(
-                  eq(reactions.entityType, 'soap_entry'),
+                  eq(reactions.targetType, 'soap_entry'),
                   eq(reactions.userId, currentUserId),
-                  inArray(reactions.entityId, soapIds.map(String))
+                  inArray(reactions.targetId, soapIds)
                 )
               );
             
-            userLikedSoap = new Set(userSoapLikesResult.map(row => Number(row.entityId)));
+            userLikedSoap = new Set(userSoapLikesResult.map(row => Number(row.targetId)));
           }
         } catch (error) {
           // If reactions table query fails, just use empty counts
@@ -3040,16 +3039,22 @@ export class DatabaseStorage implements IStorage {
       const discussionIds = allDiscussions.map(row => row.discussions?.id).filter(Boolean);
       let discussionLikeStatus: Record<number, boolean> = {};
       if (currentUserId && discussionIds.length > 0) {
-        const discussionLikeResult = await db.execute(sql`
-          SELECT discussion_id, COUNT(*) as is_liked
-          FROM discussion_likes 
-          WHERE discussion_id IN (${sql.join(discussionIds, sql`, `)})
-          AND user_id = ${currentUserId}
-          GROUP BY discussion_id
-        `);
+        const discussionLikeResult = await db
+          .select({
+            discussionId: discussionLikes.discussionId,
+            isLiked: count()
+          })
+          .from(discussionLikes)
+          .where(
+            and(
+              inArray(discussionLikes.discussionId, discussionIds),
+              eq(discussionLikes.userId, currentUserId)
+            )
+          )
+          .groupBy(discussionLikes.discussionId);
         
-        discussionLikeStatus = discussionLikeResult.rows.reduce((acc: Record<number, boolean>, row: any) => {
-          acc[row.discussion_id] = Number(row.is_liked) > 0;
+        discussionLikeStatus = discussionLikeResult.reduce((acc: Record<number, boolean>, row) => {
+          acc[row.discussionId] = Number(row.isLiked) > 0;
           return acc;
         }, {});
       }
@@ -3068,15 +3073,17 @@ export class DatabaseStorage implements IStorage {
       let soapCommentCounts: Record<number, number> = {};
       
       if (soapIds.length > 0) {
-        const commentCountResult = await db.execute(sql`
-          SELECT soap_id, COUNT(*) as comment_count 
-          FROM soap_comments 
-          WHERE soap_id IN (${sql.join(soapIds, sql`, `)})
-          GROUP BY soap_id
-        `);
+        const commentCountResult = await db
+          .select({
+            soapId: soapComments.soapId,
+            commentCount: count()
+          })
+          .from(soapComments)
+          .where(inArray(soapComments.soapId, soapIds))
+          .groupBy(soapComments.soapId);
         
-        soapCommentCounts = commentCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
-          acc[row.soap_id] = Number(row.comment_count);
+        soapCommentCounts = commentCountResult.reduce((acc: Record<number, number>, row) => {
+          acc[row.soapId] = Number(row.commentCount);
           return acc;
         }, {});
       }
@@ -3084,16 +3091,23 @@ export class DatabaseStorage implements IStorage {
       // Get SOAP like status for current user if provided  
       let soapLikeStatus: Record<number, boolean> = {};
       if (currentUserId && soapIds.length > 0) {
-        const soapLikeResult = await db.execute(sql`
-          SELECT soap_id, COUNT(*) as is_liked
-          FROM soap_likes 
-          WHERE soap_id IN (${sql.join(soapIds, sql`, `)})
-          AND user_id = ${currentUserId}
-          GROUP BY soap_id
-        `);
+        const soapLikeResult = await db
+          .select({
+            targetId: reactions.targetId,
+            isLiked: count()
+          })
+          .from(reactions)
+          .where(
+            and(
+              eq(reactions.targetType, 'soap_entry'),
+              inArray(reactions.targetId, soapIds),
+              eq(reactions.userId, currentUserId)
+            )
+          )
+          .groupBy(reactions.targetId);
         
-        soapLikeStatus = soapLikeResult.rows.reduce((acc: Record<number, boolean>, row: any) => {
-          acc[row.soap_id] = Number(row.is_liked) > 0;
+        soapLikeStatus = soapLikeResult.reduce((acc: Record<number, boolean>, row) => {
+          acc[Number(row.targetId)] = Number(row.isLiked) > 0;
           return acc;
         }, {});
       }

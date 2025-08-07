@@ -52,7 +52,7 @@ export class MultiCampusService {
         .select()
         .from(campuses)
         .where(and(
-          eq(campuses.churchId, churchId),
+          eq(campuses.communityId, churchId),
           eq(campuses.isActive, true)
         ))
         .orderBy(asc(campuses.name));
@@ -327,7 +327,7 @@ export class MultiCampusService {
             .select({ count: sql`count(*)` })
             .from(volunteerOpportunities)
             .where(and(
-              eq(volunteerOpportunities.churchId, churchId),
+              eq(volunteerOpportunities.communityId, churchId),
               eq(volunteerOpportunities.status, "open")
             ));
 
@@ -482,7 +482,7 @@ export class MultiCampusService {
           const opportunityCount = await db
             .select({ count: sql`count(*)` })
             .from(volunteerOpportunities)
-            .where(eq(volunteerOpportunities.churchId, campus.churchId));
+            .where(eq(volunteerOpportunities.communityId, campus.communityId));
 
           return {
             campus: campus,
