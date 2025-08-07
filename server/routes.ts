@@ -14728,7 +14728,7 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
-  // Get reading plans by subscription tier
+  // Get reading plans by subscription tier with AI verification
   app.get("/api/reading-plans/tier/:tier", async (req, res) => {
     try {
       const { tier } = req.params;
@@ -14747,7 +14747,11 @@ Please provide suggestions for the missing or incomplete sections.`
                  WHEN rp.subscription_tier = 'disciple' THEN 'Disciple Plan'
                  WHEN rp.subscription_tier = 'servant' THEN 'Servant Plan'
                  WHEN rp.subscription_tier = 'torchbearer' THEN 'Torchbearer Plan'
-               END as tier_label
+               END as tier_label,
+               CASE 
+                 WHEN rp.is_ai_generated = true AND rp.ai_prompt IS NOT NULL THEN true
+                 ELSE false
+               END as verified_ai_curated
         FROM reading_plans rp 
         WHERE rp.is_active = true 
         AND (
@@ -14761,6 +14765,7 @@ Please provide suggestions for the missing or incomplete sections.`
             WHEN rp.subscription_tier = 'servant' THEN 2  
             WHEN rp.subscription_tier = 'torchbearer' THEN 3
           END,
+          rp.is_ai_generated DESC,
           rp.created_at DESC
       `;
       
@@ -14769,6 +14774,59 @@ Please provide suggestions for the missing or incomplete sections.`
     } catch (error) {
       console.error("Failed to fetch plans by tier:", error);
       res.status(500).json({ message: "Failed to fetch reading plans by tier" });
+    }
+  });
+
+  // Verify AI-curated plan endpoint
+  app.get("/api/reading-plans/:id/verify-ai", async (req, res) => {
+    try {
+      const planId = parseInt(req.params.id);
+      if (isNaN(planId)) {
+        return res.status(400).json({ message: "Invalid plan ID" });
+      }
+
+      const result = await db.execute(sql`
+        SELECT 
+          id,
+          name,
+          subscription_tier,
+          is_ai_generated,
+          ai_prompt,
+          CASE 
+            WHEN is_ai_generated = true 
+                 AND ai_prompt IS NOT NULL 
+                 AND subscription_tier IN ('servant', 'torchbearer') 
+            THEN true
+            ELSE false
+          END as is_verified_ai_plan
+        FROM reading_plans 
+        WHERE id = ${planId} AND is_active = true
+      `);
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ message: "Reading plan not found" });
+      }
+
+      const plan = result.rows[0];
+      res.json({
+        planId: plan.id,
+        name: plan.name,
+        tier: plan.subscription_tier,
+        isAiGenerated: plan.is_ai_generated,
+        hasAiPrompt: !!plan.ai_prompt,
+        isVerifiedAiPlan: plan.is_verified_ai_plan,
+        verification: {
+          criteria: [
+            { name: "AI Generated Flag", passed: plan.is_ai_generated },
+            { name: "AI Prompt Present", passed: !!plan.ai_prompt },
+            { name: "Appropriate Tier", passed: ['servant', 'torchbearer'].includes(plan.subscription_tier) }
+          ],
+          overall: plan.is_verified_ai_plan
+        }
+      });
+    } catch (error) {
+      console.error("Failed to verify AI plan:", error);
+      res.status(500).json({ message: "Failed to verify AI-curated plan" });
     }
   });
 

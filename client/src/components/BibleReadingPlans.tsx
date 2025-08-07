@@ -656,10 +656,14 @@ export default function BibleReadingPlans() {
                       <div className="absolute top-12 right-3 z-10">
                         <Badge 
                           variant="outline" 
-                          className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border-purple-200 dark:from-purple-900 dark:to-pink-900 dark:text-purple-200 dark:border-purple-700"
+                          className={`${
+                            plan.subscriptionTier === 'servant'
+                              ? "bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-blue-200 dark:from-blue-900 dark:to-indigo-900 dark:text-blue-200 dark:border-blue-700"
+                              : "bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border-purple-200 dark:from-purple-900 dark:to-pink-900 dark:text-purple-200 dark:border-purple-700"
+                          }`}
                         >
                           <Sparkles className="w-3 h-3 mr-1" />
-                          AI Curated
+                          {plan.subscriptionTier === 'servant' ? 'AI Enhanced' : 'AI Curated'}
                         </Badge>
                       </div>
                     )}
@@ -761,15 +765,22 @@ export default function BibleReadingPlans() {
                             <BookOpen className="w-4 h-4 mr-2" />
                             Continue Reading
                           </Button>
-                        ) : canAccess ? (
-                          <Button
-                            onClick={() => subscribeToPlanning.mutate(plan.id)}
-                            disabled={subscribeToPlanning.isPending}
-                            className="w-full"
-                          >
-                            <Play className="w-4 h-4 mr-2" />
-                            {subscribeToPlanning.isPending ? "Joining..." : "Start Plan"}
-                          </Button>
+                        ) : canAccess || (plan.subscriptionTier === 'servant' && plan.isAiGenerated) ? (
+                          <div className="space-y-2">
+                            <Button
+                              onClick={() => subscribeToPlanning.mutate(plan.id)}
+                              disabled={subscribeToPlanning.isPending}
+                              className="w-full"
+                            >
+                              <Play className="w-4 h-4 mr-2" />
+                              {subscribeToPlanning.isPending ? "Joining..." : "Start Plan"}
+                            </Button>
+                            {plan.subscriptionTier === 'servant' && plan.isAiGenerated && (
+                              <p className="text-xs text-center text-blue-600 dark:text-blue-400">
+                                AI-Curated Servant Plan
+                              </p>
+                            )}
+                          </div>
                         ) : (
                           <div className="space-y-2">
                             <Button
