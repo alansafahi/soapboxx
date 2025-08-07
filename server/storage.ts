@@ -6010,6 +6010,7 @@ export class DatabaseStorage implements IStorage {
   // Track user activity for rewards system
   async trackUserActivity(activity: InsertUserActivity): Promise<void> {
     try {
+      // Insert into user activities log
       await db.insert(userActivities).values({
         userId: activity.userId,
         activityType: activity.activityType,
@@ -6017,6 +6018,29 @@ export class DatabaseStorage implements IStorage {
         points: activity.points || 0,
         createdAt: new Date(),
       });
+
+      // Also create point transaction if points are awarded
+      if (activity.points && activity.points > 0) {
+        await db.insert(pointTransactions).values({
+          userId: activity.userId,
+          points: activity.points,
+          transactionType: activity.activityType,
+          description: `Points for ${activity.activityType}`,
+          createdAt: new Date(),
+        });
+
+        // Update user's total points in user_scores
+        await db.execute(sql`
+          INSERT INTO user_scores (user_id, total_points, weekly_points, monthly_points, updated_at, created_at)
+          VALUES (${activity.userId}, ${activity.points}, ${activity.points}, ${activity.points}, NOW(), NOW())
+          ON CONFLICT (user_id) 
+          DO UPDATE SET 
+            total_points = user_scores.total_points + ${activity.points},
+            weekly_points = user_scores.weekly_points + ${activity.points},
+            monthly_points = user_scores.monthly_points + ${activity.points},
+            updated_at = NOW()
+        `);
+      }
 
       // Trigger milestone checking asynchronously (don't wait)
       setImmediate(async () => {
