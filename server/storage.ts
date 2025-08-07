@@ -5998,11 +5998,16 @@ export class DatabaseStorage implements IStorage {
       // Only proceed if points are positive
       if (points <= 0) return;
 
-      // Create point transaction (excluding fields not in current database)
-      await db.execute(sql`
-        INSERT INTO point_transactions (user_id, points, transaction_type, reason, description, created_at)
-        VALUES (${userId}, ${points}, ${reason}, ${reason}, ${'Points for ' + reason}, NOW())
-      `);
+      // Create point transaction
+      await db.insert(pointTransactions).values({
+        userId: userId,
+        points: points,
+        transactionType: reason,
+        reason: reason,
+        entityId: entityId,
+        description: `Points for ${reason}`,
+        createdAt: new Date(),
+      });
 
       // Update user's total points in user_points table
       await db.execute(sql`
