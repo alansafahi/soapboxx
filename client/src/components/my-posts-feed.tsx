@@ -329,7 +329,7 @@ export default function MyPostsFeed() {
                   ) : (
                     <FormattedContent 
                       content={post.content} 
-                      attachedMedia={post.attachedMedia} 
+                      attachedMedia={typeof post.attachedMedia === 'string' ? JSON.parse(post.attachedMedia) : post.attachedMedia} 
                       className="text-gray-700 dark:text-gray-300 line-clamp-2"
                     />
                   )}

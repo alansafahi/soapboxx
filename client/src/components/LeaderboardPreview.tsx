@@ -27,6 +27,9 @@ export default function LeaderboardPreview() {
       try {
         const response = await fetch('/api/leaderboard', {
           credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
         if (response.ok) {
           const data: LeaderboardEntry[] = await response.json();
@@ -124,7 +127,6 @@ export default function LeaderboardPreview() {
             <ProfileVerificationRing
               emailVerified={user.emailVerified === true}
               phoneVerified={user.phoneVerified === true}
-              isLeadership={user.role === 'pastor' || user.role === 'admin' || user.role === 'owner'}
               size="xs"
             >
               <div className="flex-shrink-0 w-8 h-8 relative">
