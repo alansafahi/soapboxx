@@ -42,18 +42,18 @@ export class AIReadingPlanValidator {
         return null;
       }
 
-      const plan = result.rows[0];
+      const plan = result.rows[0] as any;
       
       const criteria = [
         { name: "AI Generated Flag", passed: Boolean(plan.is_ai_generated) },
         { name: "AI Prompt Present", passed: Boolean(plan.ai_prompt) },
-        { name: "Appropriate Tier", passed: ['servant', 'torchbearer'].includes(plan.subscription_tier) }
+        { name: "Appropriate Tier", passed: ['servant', 'torchbearer'].includes(plan.subscription_tier as string) }
       ];
 
       return {
-        planId: plan.id,
-        name: plan.name,
-        tier: plan.subscription_tier,
+        planId: plan.id as number,
+        name: plan.name as string,
+        tier: plan.subscription_tier as string,
         isAiGenerated: Boolean(plan.is_ai_generated),
         hasAiPrompt: Boolean(plan.ai_prompt),
         isVerifiedAiPlan: Boolean(plan.is_verified_ai_plan),
