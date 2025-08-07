@@ -1,6 +1,10 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import { initializeConsoleCleaner } from "./lib/console-cleaner";
+
+// Initialize console cleaning to reduce development noise
+initializeConsoleCleaner();
 
 // Suppress SSL errors from Replit development environment
 window.addEventListener('unhandledrejection', (event) => {

@@ -8,6 +8,12 @@ neonConfig.webSocketConstructor = ws;
 neonConfig.useSecureWebSocket = true;
 neonConfig.pipelineConnect = false;
 
+// Disable WebSocket for Replit environment to avoid connection errors
+if (process.env.REPLIT_DB_URL || process.env.REPL_ID) {
+  neonConfig.webSocketConstructor = undefined;
+  neonConfig.useSecureWebSocket = false;
+}
+
 if (!process.env.DATABASE_URL) {
   throw new Error(
     "DATABASE_URL must be set. Did you forget to provision a database?",
