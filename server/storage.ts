@@ -2654,39 +2654,102 @@ export class DatabaseStorage implements IStorage {
       
       // Combined query to get both discussions and SOAP entries using UNION
       // CRITICAL: Filter out hidden content for faith-based app protection
-      const combinedResult = await db.execute(sql`
-        (
-          SELECT 
-            d.id, 'discussion' as type, d.title, d.content, d.category, d.is_public, d.created_at, d.author_id::text as author_id,
-            u.id as user_id, u.email, u.first_name, u.last_name, u.profile_image_url, u.email_verified, u.phone_verified, u.role,
-            NULL::text as scripture, NULL::text as scripture_reference, NULL::text as observation, NULL::text as application, NULL::text as prayer, d.mood_tag
-          FROM discussions d
-          LEFT JOIN users u ON d.author_id = u.id
-          WHERE d.is_public = true 
-            AND (d.expires_at IS NULL OR d.expires_at > NOW())
-            AND (d.is_hidden IS NULL OR d.is_hidden = false)
+      // Use proper Drizzle queries instead of raw SQL to fix naming violations
+      const discussionResults = await db
+        .select({
+          id: discussions.id,
+          type: sql<string>`'discussion'`,
+          title: discussions.title,
+          content: discussions.content,
+          category: discussions.category,
+          isPublic: discussions.isPublic,
+          createdAt: discussions.createdAt,
+          authorId: discussions.authorId,
+          userId: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          emailVerified: users.emailVerified,
+          phoneVerified: users.phoneVerified,
+          role: users.role,
+          scripture: sql<string>`NULL`,
+          scriptureReference: sql<string>`NULL`,
+          observation: sql<string>`NULL`,
+          application: sql<string>`NULL`,
+          prayer: sql<string>`NULL`,
+          moodTag: discussions.moodTag
+        })
+        .from(discussions)
+        .leftJoin(users, eq(discussions.authorId, users.id))
+        .where(
+          and(
+            eq(discussions.isPublic, true),
+            or(
+              isNull(discussions.expiresAt),
+              gt(discussions.expiresAt, new Date())
+            ),
+            or(
+              isNull(discussions.isHidden),
+              eq(discussions.isHidden, false)
+            )
+          )
         )
-        UNION ALL
-        (
-          SELECT 
-            s.id, 'soap_reflection' as type, s.scripture_reference as title, s.scripture as content, 'reflection' as category, s.is_public, s.created_at, s.user_id as author_id,
-            u.id as user_id, u.email, u.first_name, u.last_name, u.profile_image_url, u.email_verified, u.phone_verified, u.role,
-            s.scripture, s.scripture_reference, s.observation, s.application, s.prayer, s.mood_tag
-          FROM soap_entries s
-          LEFT JOIN users u ON s.user_id = u.id
-          WHERE s.is_public = true
-            AND (s.is_hidden IS NULL OR s.is_hidden = false)
+        .orderBy(desc(discussions.createdAt))
+        .limit(limit || 50)
+        .offset(offset || 0);
+
+      const soapResults = await db
+        .select({
+          id: soapEntries.id,
+          type: sql<string>`'soap_reflection'`,
+          title: soapEntries.scriptureReference,
+          content: soapEntries.scripture,
+          category: sql<string>`'reflection'`,
+          isPublic: soapEntries.isPublic,
+          createdAt: soapEntries.createdAt,
+          authorId: soapEntries.userId,
+          userId: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          emailVerified: users.emailVerified,
+          phoneVerified: users.phoneVerified,
+          role: users.role,
+          scripture: soapEntries.scripture,
+          scriptureReference: soapEntries.scriptureReference,
+          observation: soapEntries.observation,
+          application: soapEntries.application,
+          prayer: soapEntries.prayer,
+          moodTag: soapEntries.moodTag
+        })
+        .from(soapEntries)
+        .leftJoin(users, eq(soapEntries.userId, users.id))
+        .where(
+          and(
+            eq(soapEntries.isPublic, true),
+            or(
+              isNull(soapEntries.isHidden),
+              eq(soapEntries.isHidden, false)
+            )
+          )
         )
-        ORDER BY created_at DESC
-        LIMIT ${limit || 50} OFFSET ${offset || 0}
-      `);
+        .orderBy(desc(soapEntries.createdAt))
+        .limit(limit || 50)
+        .offset(offset || 0);
+
+      // Combine and sort results
+      const combinedResults = [...discussionResults, ...soapResults]
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, limit || 50);
 
       
-      // Debug: Log first few raw rows to see what we're getting
-      if (combinedResult.rows.length > 0) {
+      // Debug: Log first few results to see what we're getting
+      if (combinedResults.length > 0) {
         
         // Check for SOAP entries specifically
-        const soapRows = combinedResult.rows.filter(row => row.type === 'soap_reflection');
+        const soapRows = combinedResults.filter(row => row.type === 'soap_reflection');
         if (soapRows.length > 0) {
         }
       }
@@ -2695,30 +2758,30 @@ export class DatabaseStorage implements IStorage {
 
       // Verification data processing complete
 
-      const discussions = combinedResult.rows.map((row: any) => {
+      const discussions = combinedResults.map((row: any) => {
         const mappedPost = {
           id: row.id,
           title: row.title,
           content: row.content,
           category: row.category,
-          isPublic: row.is_public,
-          createdAt: row.created_at,
-          authorId: row.author_id,
+          isPublic: row.isPublic,
+          createdAt: row.createdAt,
+          authorId: row.authorId,
           author: {
-            id: row.user_id,
+            id: row.userId,
             email: row.email,
-            firstName: row.first_name,
-            lastName: row.last_name,
-            profileImageUrl: row.profile_image_url,
-            emailVerified: row.email_verified,
-            phoneVerified: row.phone_verified,
+            firstName: row.firstName,
+            lastName: row.lastName,
+            profileImageUrl: row.profileImageUrl,
+            emailVerified: row.emailVerified,
+            phoneVerified: row.phoneVerified,
             role: row.role,
           },
           type: row.type,
-          mood: row.mood_tag,
+          mood: row.moodTag,
           soapData: row.type === 'soap_reflection' ? {
             scripture: row.scripture,
-            scriptureReference: row.scripture_reference,
+            scriptureReference: row.scriptureReference,
             observation: row.observation,
             application: row.application,
             prayer: row.prayer
@@ -2744,15 +2807,17 @@ export class DatabaseStorage implements IStorage {
       if (discussionPosts.length > 0) {
         try {
           const discussionIds = discussionPosts.map(d => d.id);
-          const commentCountResult = await db.execute(sql`
-            SELECT discussion_id, COUNT(*) as comment_count 
-            FROM discussion_comments 
-            WHERE discussion_id IN (${sql.join(discussionIds, sql`, `)})
-            GROUP BY discussion_id
-          `);
+          const commentCountResult = await db
+            .select({
+              discussionId: discussionComments.discussionId,
+              commentCount: count()
+            })
+            .from(discussionComments)
+            .where(inArray(discussionComments.discussionId, discussionIds))
+            .groupBy(discussionComments.discussionId);
           
-          discussionCommentCounts = commentCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
-            acc[row.discussion_id] = Number(row.comment_count);
+          discussionCommentCounts = commentCountResult.reduce((acc: Record<number, number>, row) => {
+            acc[row.discussionId] = Number(row.commentCount);
             return acc;
           }, {});
         } catch (error) {
@@ -2764,15 +2829,17 @@ export class DatabaseStorage implements IStorage {
       let soapCommentCounts: Record<number, number> = {};
       if (soapPosts.length > 0) {
         const soapIds = soapPosts.map(d => d.id);
-        const soapCommentCountResult = await db.execute(sql`
-          SELECT soap_id, COUNT(*) as comment_count 
-          FROM soap_comments 
-          WHERE soap_id IN (${sql.join(soapIds, sql`, `)})
-          GROUP BY soap_id
-        `);
+        const soapCommentCountResult = await db
+          .select({
+            soapId: soapComments.soapId,
+            commentCount: count()
+          })
+          .from(soapComments)
+          .where(inArray(soapComments.soapId, soapIds))
+          .groupBy(soapComments.soapId);
         
-        soapCommentCounts = soapCommentCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
-          acc[row.soap_id] = Number(row.comment_count);
+        soapCommentCounts = soapCommentCountResult.reduce((acc: Record<number, number>, row) => {
+          acc[row.soapId] = Number(row.commentCount);
           return acc;
         }, {});
       }
@@ -2783,26 +2850,32 @@ export class DatabaseStorage implements IStorage {
       
       if (discussionPosts.length > 0) {
         const discussionIds = discussionPosts.map(d => d.id);
-        const likeCountResult = await db.execute(sql`
-          SELECT discussion_id, COUNT(*) as like_count 
-          FROM discussion_likes 
-          WHERE discussion_id IN (${sql.join(discussionIds, sql`, `)})
-          GROUP BY discussion_id
-        `);
+        const likeCountResult = await db
+          .select({
+            discussionId: discussionLikes.discussionId,
+            likeCount: count()
+          })
+          .from(discussionLikes)
+          .where(inArray(discussionLikes.discussionId, discussionIds))
+          .groupBy(discussionLikes.discussionId);
         
-        discussionLikeCounts = likeCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
-          acc[row.discussion_id] = Number(row.like_count);
+        discussionLikeCounts = likeCountResult.reduce((acc: Record<number, number>, row) => {
+          acc[row.discussionId] = Number(row.likeCount);
           return acc;
         }, {});
         
         if (currentUserId) {
-          const userLikesResult = await db.execute(sql`
-            SELECT discussion_id 
-            FROM discussion_likes 
-            WHERE user_id = ${currentUserId} AND discussion_id IN (${sql.join(discussionIds, sql`, `)})
-          `);
+          const userLikesResult = await db
+            .select({ discussionId: discussionLikes.discussionId })
+            .from(discussionLikes)
+            .where(
+              and(
+                eq(discussionLikes.userId, currentUserId),
+                inArray(discussionLikes.discussionId, discussionIds)
+              )
+            );
           
-          userLikedDiscussions = new Set(userLikesResult.rows.map((row: any) => row.discussion_id));
+          userLikedDiscussions = new Set(userLikesResult.map(row => row.discussionId));
         }
       }
 
@@ -2813,26 +2886,38 @@ export class DatabaseStorage implements IStorage {
       if (soapPosts.length > 0) {
         const soapIds = soapPosts.map(d => d.id);
         try {
-          const soapLikeCountResult = await db.execute(sql`
-            SELECT entity_id, COUNT(*) as like_count 
-            FROM reactions 
-            WHERE entity_type = 'soap_entry' AND entity_id IN (${sql.join(soapIds, sql`, `)})
-            GROUP BY entity_id
-          `);
+          const soapLikeCountResult = await db
+            .select({
+              entityId: reactions.entityId,
+              likeCount: count()
+            })
+            .from(reactions)
+            .where(
+              and(
+                eq(reactions.entityType, 'soap_entry'),
+                inArray(reactions.entityId, soapIds.map(String))
+              )
+            )
+            .groupBy(reactions.entityId);
           
-          soapLikeCounts = soapLikeCountResult.rows.reduce((acc: Record<number, number>, row: any) => {
-            acc[row.entity_id] = Number(row.like_count);
+          soapLikeCounts = soapLikeCountResult.reduce((acc: Record<number, number>, row) => {
+            acc[Number(row.entityId)] = Number(row.likeCount);
             return acc;
           }, {});
           
           if (currentUserId) {
-            const userSoapLikesResult = await db.execute(sql`
-              SELECT entity_id 
-              FROM reactions 
-              WHERE entity_type = 'soap_entry' AND user_id = ${currentUserId} AND entity_id IN (${sql.join(soapIds, sql`, `)})
-            `);
+            const userSoapLikesResult = await db
+              .select({ entityId: reactions.entityId })
+              .from(reactions)
+              .where(
+                and(
+                  eq(reactions.entityType, 'soap_entry'),
+                  eq(reactions.userId, currentUserId),
+                  inArray(reactions.entityId, soapIds.map(String))
+                )
+              );
             
-            userLikedSoap = new Set(userSoapLikesResult.rows.map((row: any) => row.entity_id));
+            userLikedSoap = new Set(userSoapLikesResult.map(row => Number(row.entityId)));
           }
         } catch (error) {
           // If reactions table query fails, just use empty counts
@@ -2869,17 +2954,25 @@ export class DatabaseStorage implements IStorage {
   async toggleDiscussionLike(userId: string, discussionId: number): Promise<any> {
     try {
       // Check if user already liked this discussion
-      const existingLike = await db.execute(sql`
-        SELECT * FROM discussion_likes 
-        WHERE user_id = ${userId} AND discussion_id = ${discussionId}
-      `);
+      const existingLike = await db
+        .select()
+        .from(discussionLikes)
+        .where(
+          and(
+            eq(discussionLikes.userId, userId),
+            eq(discussionLikes.discussionId, discussionId)
+          )
+        );
 
-      if (existingLike.rows.length > 0) {
+      if (existingLike.length > 0) {
         // Unlike - remove the like
-        await db.execute(sql`
-          DELETE FROM discussion_likes 
-          WHERE user_id = ${userId} AND discussion_id = ${discussionId}
-        `);
+        await db.delete(discussionLikes)
+          .where(
+            and(
+              eq(discussionLikes.userId, userId),
+              eq(discussionLikes.discussionId, discussionId)
+            )
+          );
         
         // Deduct points for removing like - subtract 1 point
         await this.addPointsToUser(
@@ -2892,10 +2985,12 @@ export class DatabaseStorage implements IStorage {
         return { success: true, liked: false, message: 'Like removed' };
       } else {
         // Like - add the like
-        await db.execute(sql`
-          INSERT INTO discussion_likes (user_id, discussion_id, created_at)
-          VALUES (${userId}, ${discussionId}, ${new Date()})
-        `);
+        await db.insert(discussionLikes)
+          .values({
+            userId,
+            discussionId,
+            createdAt: new Date()
+          });
         
         // Award points using centralized function - Fixed: was 5, should be 1
         await this.addPointsToUser(
