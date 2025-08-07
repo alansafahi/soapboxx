@@ -50,6 +50,7 @@ import { AIPersonalizationService } from "./ai-personalization";
 import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, generateScriptureQuestions } from "./ai-pastoral";
 import { LearningIntegration } from "./learning-integration.js";
 import { milestoneService } from "./milestone-service";
+import { generateThematicPlan, saveGeneratedPlan, generatePersonalizedAudioPlan, type ThematicPlanRequest } from "./ai-reading-plans";
 
 import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";
 import enhancedRoutes from "./enhanced-routes";
@@ -14458,9 +14459,60 @@ Please provide suggestions for the missing or incomplete sections.`
   // Reading Plans API Routes
   app.get("/api/reading-plans", async (req, res) => {
     try {
-      const plans = await storage.getReadingPlans();
-      res.json(plans);
+      const { tier } = req.query;
+      
+      // Direct SQL query to get reading plans with subscription tier filtering
+      let query = sql`
+        SELECT rp.*, 
+               COALESCE(
+                 (SELECT COUNT(*) FROM reading_plan_days rpd WHERE rpd.plan_id = rp.id), 
+                 rp.duration
+               ) as total_days
+        FROM reading_plans rp 
+        WHERE rp.is_active = true
+      `;
+      
+      if (tier) {
+        query = sql`
+          SELECT rp.*, 
+                 COALESCE(
+                   (SELECT COUNT(*) FROM reading_plan_days rpd WHERE rpd.plan_id = rp.id), 
+                   rp.duration
+                 ) as total_days
+          FROM reading_plans rp 
+          WHERE rp.is_active = true 
+          AND (rp.subscription_tier = ${tier} OR rp.subscription_tier = 'free')
+          ORDER BY 
+            CASE 
+              WHEN rp.subscription_tier = 'free' THEN 1
+              WHEN rp.subscription_tier = 'standard' THEN 2  
+              WHEN rp.subscription_tier = 'premium' THEN 3
+            END,
+            rp.created_at DESC
+        `;
+      } else {
+        query = sql`
+          SELECT rp.*, 
+                 COALESCE(
+                   (SELECT COUNT(*) FROM reading_plan_days rpd WHERE rpd.plan_id = rp.id), 
+                   rp.duration
+                 ) as total_days
+          FROM reading_plans rp 
+          WHERE rp.is_active = true
+          ORDER BY 
+            CASE 
+              WHEN rp.subscription_tier = 'free' THEN 1
+              WHEN rp.subscription_tier = 'standard' THEN 2  
+              WHEN rp.subscription_tier = 'premium' THEN 3
+            END,
+            rp.created_at DESC
+        `;
+      }
+      
+      const plans = await db.execute(query);
+      res.json(plans.rows);
     } catch (error) {
+      console.error("Failed to fetch reading plans:", error);
       res.status(500).json({ message: "Failed to fetch reading plans" });
     }
   });
@@ -14572,6 +14624,151 @@ Please provide suggestions for the missing or incomplete sections.`
       res.json(progress);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch reading progress" });
+    }
+  });
+
+  // AI-powered thematic plan generation (Premium tier)
+  app.post("/api/reading-plans/generate/thematic", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      // Check user's subscription tier (would need to implement subscription checking)
+      // For now, allow all authenticated users to test
+      
+      const { topic, duration, difficulty, userContext } = req.body;
+      
+      if (!topic || !duration) {
+        return res.status(400).json({ message: "Topic and duration are required" });
+      }
+
+      const request: ThematicPlanRequest = {
+        topic,
+        duration: parseInt(duration),
+        difficulty: difficulty || 'beginner',
+        userContext
+      };
+
+      // Generate the AI plan
+      const generatedPlan = await generateThematicPlan(request);
+      
+      // Save to database
+      const planId = await saveGeneratedPlan(generatedPlan, request, userId);
+      
+      res.json({ 
+        success: true, 
+        planId, 
+        plan: generatedPlan,
+        message: "AI-powered reading plan generated successfully!"
+      });
+    } catch (error) {
+      console.error("Failed to generate thematic plan:", error);
+      res.status(500).json({ 
+        message: "Failed to generate AI-powered reading plan",
+        error: error.message 
+      });
+    }
+  });
+
+  // AI-powered audio plan generation (Premium tier)
+  app.post("/api/reading-plans/generate/audio", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub || req.user?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const { topic, duration, timeOfDay, sessionLength } = req.body;
+      
+      if (!topic || !duration || !timeOfDay || !sessionLength) {
+        return res.status(400).json({ 
+          message: "Topic, duration, time of day, and session length are required" 
+        });
+      }
+
+      const userPreferences = {
+        timeOfDay,
+        sessionLength: parseInt(sessionLength)
+      };
+
+      // Generate the AI audio plan
+      const generatedPlan = await generatePersonalizedAudioPlan(topic, parseInt(duration), userPreferences);
+      
+      // Save to database with audio type
+      const request: ThematicPlanRequest = {
+        topic,
+        duration: parseInt(duration),
+        difficulty: 'beginner',
+        userContext: `Audio plan for ${timeOfDay}, ${sessionLength} minutes`
+      };
+
+      const planId = await saveGeneratedPlan(generatedPlan, request, userId);
+      
+      // Update plan type to audio
+      await db.execute(sql`
+        UPDATE reading_plans 
+        SET type = 'audio', category = ${topic.toLowerCase()}
+        WHERE id = ${planId}
+      `);
+      
+      res.json({ 
+        success: true, 
+        planId, 
+        plan: generatedPlan,
+        message: "AI-powered audio reading plan generated successfully!"
+      });
+    } catch (error) {
+      console.error("Failed to generate audio plan:", error);
+      res.status(500).json({ 
+        message: "Failed to generate AI-powered audio plan",
+        error: error.message 
+      });
+    }
+  });
+
+  // Get reading plans by subscription tier
+  app.get("/api/reading-plans/tier/:tier", async (req, res) => {
+    try {
+      const { tier } = req.params;
+      
+      if (!['free', 'standard', 'premium'].includes(tier)) {
+        return res.status(400).json({ message: "Invalid subscription tier" });
+      }
+
+      const query = sql`
+        SELECT rp.*, 
+               COALESCE(
+                 (SELECT COUNT(*) FROM reading_plan_days rpd WHERE rpd.plan_id = rp.id), 
+                 rp.duration
+               ) as total_days,
+               CASE 
+                 WHEN rp.subscription_tier = 'free' THEN 'Free Access'
+                 WHEN rp.subscription_tier = 'standard' THEN 'Standard Plan'
+                 WHEN rp.subscription_tier = 'premium' THEN 'Premium Plan'
+               END as tier_label
+        FROM reading_plans rp 
+        WHERE rp.is_active = true 
+        AND (
+          rp.subscription_tier = ${tier} 
+          OR (${tier} = 'premium' AND rp.subscription_tier IN ('free', 'standard'))
+          OR (${tier} = 'standard' AND rp.subscription_tier = 'free')
+        )
+        ORDER BY 
+          CASE 
+            WHEN rp.subscription_tier = 'free' THEN 1
+            WHEN rp.subscription_tier = 'standard' THEN 2  
+            WHEN rp.subscription_tier = 'premium' THEN 3
+          END,
+          rp.created_at DESC
+      `;
+      
+      const plans = await db.execute(query);
+      res.json(plans.rows);
+    } catch (error) {
+      console.error("Failed to fetch plans by tier:", error);
+      res.status(500).json({ message: "Failed to fetch reading plans by tier" });
     }
   });
 

@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight } from "lucide-react";
+import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, Lock, Crown, Sparkles, Headphones, User } from "lucide-react";
 import type { ReadingPlan, ReadingPlanDay, UserReadingPlanSubscription, UserReadingProgress } from "@shared/schema";
 
 interface ReadingPlanWithProgress extends ReadingPlan {
@@ -369,7 +369,43 @@ export default function BibleReadingPlans() {
       case "chronological": return <Calendar className="w-4 h-4" />;
       case "book_study": return <BookOpen className="w-4 h-4" />;
       case "devotional": return <Heart className="w-4 h-4" />;
+      case "character_study": return <User className="w-4 h-4" />;
+      case "thematic": return <Sparkles className="w-4 h-4" />;
+      case "audio": return <Headphones className="w-4 h-4" />;
       default: return <Book className="w-4 h-4" />;
+    }
+  };
+
+  const getSubscriptionTierInfo = (tier: string) => {
+    switch (tier) {
+      case "free":
+        return {
+          label: "Free Access",
+          icon: <Book className="w-4 h-4" />,
+          color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
+          description: "Available to all users"
+        };
+      case "standard":
+        return {
+          label: "Standard Plan",
+          icon: <Star className="w-4 h-4" />,
+          color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+          description: "Focused studies & character journeys"
+        };
+      case "premium":
+        return {
+          label: "Premium Plan",
+          icon: <Crown className="w-4 h-4" />,
+          color: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+          description: "AI-powered & advanced features"
+        };
+      default:
+        return {
+          label: "Unknown",
+          icon: <Book className="w-4 h-4" />,
+          color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
+          description: ""
+        };
     }
   };
 
@@ -587,54 +623,290 @@ export default function BibleReadingPlans() {
 
             {/* Plans Grid */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredPlans.map((plan) => (
-                <Card 
-                  key={plan.id} 
-                  className="cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]"
-                  onClick={() => setSelectedPlan(plan)}
-                >
-                  <CardHeader>
-                    <div className="flex items-center gap-2 mb-3">
-                      {getTypeIcon(plan.type)}
-                      <Badge className={getDifficultyColor(plan.difficulty)} size="sm">
-                        {plan.difficulty}
-                      </Badge>
-                      <Badge variant="outline" size="sm">
-                        <Clock className="w-3 h-3 mr-1" />
-                        {plan.duration} days
+              {filteredPlans.map((plan) => {
+                const tierInfo = getSubscriptionTierInfo(plan.subscriptionTier || 'free');
+                const isSubscribed = !!plan.subscription?.isActive;
+                const canAccess = plan.subscriptionTier === 'free'; // For now, allow access to all plans
+                
+                return (
+                  <Card 
+                    key={plan.id} 
+                    className={`relative transition-all hover:shadow-lg ${
+                      isSubscribed ? 'ring-2 ring-blue-500' : ''
+                    } ${!canAccess ? 'opacity-75' : ''}`}
+                  >
+                    {/* Subscription Tier Badge */}
+                    <div className="absolute top-3 right-3 z-10">
+                      <Badge 
+                        variant="outline" 
+                        className={`${tierInfo.color} border-0 shadow-sm`}
+                      >
+                        <span className="flex items-center gap-1">
+                          {tierInfo.icon}
+                          {tierInfo.label}
+                        </span>
                       </Badge>
                     </div>
-                    
-                    <CardTitle className="text-xl leading-tight">
-                      {plan.name}
-                    </CardTitle>
-                    
-                    {plan.description && (
-                      <CardDescription className="line-clamp-3">
-                        {plan.description}
-                      </CardDescription>
+
+                    {/* AI Generated Badge */}
+                    {plan.isAiGenerated && (
+                      <div className="absolute top-12 right-3 z-10">
+                        <Badge 
+                          variant="outline" 
+                          className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 border-purple-200 dark:from-purple-900 dark:to-pink-900 dark:text-purple-200 dark:border-purple-700"
+                        >
+                          <Sparkles className="w-3 h-3 mr-1" />
+                          AI Curated
+                        </Badge>
+                      </div>
                     )}
-                  </CardHeader>
-                  
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <Users className="w-4 h-4 mr-1" />
-                        <span>Join thousands reading</span>
+
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-2">
+                          {getTypeIcon(plan.type)}
+                          <Badge 
+                            variant="outline" 
+                            className={getDifficultyColor(plan.difficulty)}
+                          >
+                            {plan.difficulty}
+                          </Badge>
+                        </div>
+                        {isSubscribed && (
+                          <Badge variant="default" className="bg-blue-600">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Joined
+                          </Badge>
+                        )}
                       </div>
                       
-                      {plan.subscription ? (
-                        <Badge variant="default" className="bg-blue-600">
-                          <Star className="w-3 h-3 mr-1" />
-                          Joined
-                        </Badge>
-                      ) : (
-                        <ChevronRight className="w-5 h-5 text-gray-400" />
+                      <CardTitle className="text-xl mb-2 leading-tight pr-8">
+                        {plan.name}
+                      </CardTitle>
+                      
+                      <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {plan.duration} days
+                        </div>
+                        {plan.totalDays && plan.totalDays !== plan.duration && (
+                          <div className="flex items-center gap-1">
+                            <BookOpen className="w-4 h-4" />
+                            {plan.totalDays} readings
+                          </div>
+                        )}
+                      </div>
+                    </CardHeader>
+
+                    <CardContent className="flex-1">
+                      {plan.description && (
+                        <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mb-4">
+                          {plan.description}
+                        </p>
                       )}
+
+                      {/* Progress Bar for Subscribed Plans */}
+                      {isSubscribed && plan.progressPercentage !== undefined && (
+                        <div className="mb-4">
+                          <div className="flex items-center justify-between text-sm mb-1">
+                            <span className="text-gray-600 dark:text-gray-400">Progress</span>
+                            <span className="font-medium">{plan.progressPercentage}%</span>
+                          </div>
+                          <Progress value={plan.progressPercentage} className="h-2" />
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {plan.daysCompleted} of {plan.duration} days completed
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Plan Features */}
+                      <div className="space-y-2 mb-4">
+                        {plan.type === 'audio' && (
+                          <div className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400">
+                            <Headphones className="w-4 h-4" />
+                            <span>Audio-optimized content</span>
+                          </div>
+                        )}
+                        {plan.type === 'thematic' && plan.isAiGenerated && (
+                          <div className="flex items-center gap-2 text-sm text-purple-600 dark:text-purple-400">
+                            <Sparkles className="w-4 h-4" />
+                            <span>AI-personalized selections</span>
+                          </div>
+                        )}
+                        {plan.type === 'chronological' && (
+                          <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+                            <Calendar className="w-4 h-4" />
+                            <span>Historical sequence</span>
+                          </div>
+                        )}
+                        {plan.type === 'character_study' && (
+                          <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                            <User className="w-4 h-4" />
+                            <span>Character-focused journey</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Action Button */}
+                      <div className="mt-auto">
+                        {isSubscribed ? (
+                          <Button
+                            onClick={() => setSelectedPlan(plan)}
+                            variant="outline"
+                            className="w-full"
+                          >
+                            <BookOpen className="w-4 h-4 mr-2" />
+                            Continue Reading
+                          </Button>
+                        ) : canAccess ? (
+                          <Button
+                            onClick={() => subscribeToPlanning.mutate(plan.id)}
+                            disabled={subscribeToPlanning.isPending}
+                            className="w-full"
+                          >
+                            <Play className="w-4 h-4 mr-2" />
+                            {subscribeToPlanning.isPending ? "Joining..." : "Start Plan"}
+                          </Button>
+                        ) : (
+                          <div className="space-y-2">
+                            <Button
+                              variant="outline"
+                              className="w-full"
+                              disabled
+                            >
+                              <Lock className="w-4 h-4 mr-2" />
+                              {tierInfo.label} Required
+                            </Button>
+                            <p className="text-xs text-center text-gray-500 dark:text-gray-400">
+                              {tierInfo.description}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {/* AI Plan Generation Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 text-purple-800 dark:text-purple-200 px-4 py-2 rounded-full mb-4">
+                  <Crown className="w-5 h-5" />
+                  <span className="font-semibold">Premium Feature</span>
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                  Generate AI-Powered Reading Plans
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                  Create personalized Bible reading plans powered by AI technology. Choose your topic and let our system craft a unique spiritual journey tailored to your needs.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Thematic Plan Generator */}
+                <div className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                      <Sparkles className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        Thematic Journey
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        AI-curated scripture around a specific theme
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>Personalized verse selection</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>AI-generated reflections</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>Adaptive difficulty levels</span>
+                    </div>
+                  </div>
+
+                  <Button 
+                    className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                    disabled
+                  >
+                    <Lock className="w-4 h-4 mr-2" />
+                    Premium Plan Required
+                  </Button>
+                </div>
+
+                {/* Audio Plan Generator */}
+                <div className="border rounded-lg p-6 hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                      <Headphones className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        Audio Experience
+                      </h4>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Plans optimized for listening and meditation
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>Time-based sessions</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>Meditation-focused content</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                      <CheckCircle className="w-4 h-4 text-green-500" />
+                      <span>Commute-friendly format</span>
+                    </div>
+                  </div>
+
+                  <Button 
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                    disabled
+                  >
+                    <Lock className="w-4 h-4 mr-2" />
+                    Premium Plan Required
+                  </Button>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                <div className="flex items-start gap-3">
+                  <Crown className="w-5 h-5 text-purple-600 dark:text-purple-400 mt-0.5" />
+                  <div>
+                    <h5 className="font-semibold text-purple-900 dark:text-purple-100 mb-1">
+                      Upgrade to Premium for AI-Powered Plans
+                    </h5>
+                    <p className="text-sm text-purple-700 dark:text-purple-300 mb-3">
+                      Unlock personalized Bible reading experiences with advanced AI technology. Create custom thematic journeys and audio-optimized plans tailored to your spiritual growth needs.
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300 dark:hover:bg-purple-900/50"
+                    >
+                      <Crown className="w-4 h-4 mr-2" />
+                      Learn About Premium
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           </TabsContent>
 

@@ -1153,14 +1153,17 @@ export const readingPlans = pgTable("reading_plans", {
   id: serial("id").primaryKey(),
   name: varchar("name", { length: 200 }).notNull(),
   description: text("description"),
-  type: varchar("type", { length: 50 }).notNull(), // topical, chronological, book_study, devotional
+  type: varchar("type", { length: 50 }).notNull(), // topical, chronological, book_study, devotional, audio, thematic, character_study
   duration: integer("duration").notNull(), // days
   difficulty: varchar("difficulty", { length: 20 }).default("beginner"), // beginner, intermediate, advanced
-  category: varchar("category", { length: 50 }).notNull(), // peace, anxiety, purpose, new_testament, etc.
+  category: varchar("category", { length: 50 }).notNull(), // peace, anxiety, purpose, new_testament, old_testament, gospels, etc.
   imageUrl: varchar("image_url"),
   isPublic: boolean("is_public").default(true),
   isActive: boolean("is_active").default(true),
   authorId: varchar("author_id").references(() => users.id),
+  subscriptionTier: varchar("subscription_tier", { length: 20 }).default("free"), // free, standard, premium
+  isAiGenerated: boolean("is_ai_generated").default(false),
+  aiPrompt: text("ai_prompt"), // Store the original AI prompt for regeneration
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1178,6 +1181,9 @@ export const readingPlanDays = pgTable("reading_plan_days", {
   additionalVerses: text("additional_verses").array(), // Array of additional verse references
   tags: text("tags").array(),
   isOptional: boolean("is_optional").default(false),
+  audioUrl: varchar("audio_url"), // For audio Bible plans
+  estimatedReadingTime: integer("estimated_reading_time"), // in minutes
+  character: varchar("character", { length: 100 }), // for character studies
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   planDayUnique: unique().on(table.planId, table.dayNumber),
