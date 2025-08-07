@@ -1120,6 +1120,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Auth routes with secure authentication check
+  // Real-time user points API endpoint
+  app.get('/api/user/points/realtime', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const userPoints = await storage.getUserPoints(userId);
+      const recentTransactions = await db
+        .select()
+        .from(schema.pointTransactions)
+        .where(eq(schema.pointTransactions.userId, userId))
+        .orderBy(desc(schema.pointTransactions.createdAt))
+        .limit(5);
+
+      res.json({
+        totalPoints: userPoints?.totalPoints || 0,
+        weeklyPoints: userPoints?.weeklyPoints || 0,
+        monthlyPoints: userPoints?.monthlyPoints || 0,
+        recentTransactions: recentTransactions.map(t => ({
+          points: t.points,
+          reason: t.reason,
+          createdAt: t.createdAt
+        }))
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch user points' });
+    }
+  });
+
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       // Use session data for user retrieval
@@ -3497,6 +3529,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(todayCheckIn);
     } catch (error) {
       res.status(500).json({ message: 'Failed to fetch today check-in' });
+    }
+  });
+
+  // NEW: Daily Check-in API endpoint - 5 points
+  app.post('/api/checkins/daily', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const result = await storage.dailyCheckIn(userId);
+      
+      if (result.success) {
+        // Get updated user points for real-time display
+        const userPoints = await storage.getUserPoints(userId);
+        res.json({
+          success: true,
+          message: result.message,
+          pointsAwarded: result.points,
+          totalPoints: userPoints?.totalPoints || 0,
+          celebration: {
+            points: result.points,
+            reason: 'daily_checkin'
+          }
+        });
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to process daily check-in' });
+    }
+  });
+
+  // NEW: QR Check-in API endpoint - 5 points
+  app.post('/api/checkins/qr', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const { qrCode } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      if (!qrCode) {
+        return res.status(400).json({ message: 'QR code is required' });
+      }
+
+      const result = await storage.qrCheckIn(userId, qrCode);
+      
+      if (result.success) {
+        // Get updated user points for real-time display
+        const userPoints = await storage.getUserPoints(userId);
+        res.json({
+          success: true,
+          message: result.message,
+          pointsAwarded: result.points,
+          totalPoints: userPoints?.totalPoints || 0,
+          celebration: {
+            points: result.points,
+            reason: 'qr_checkin'
+          }
+        });
+      } else {
+        res.status(400).json(result);
+      }
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to process QR check-in' });
     }
   });
 
@@ -10466,6 +10567,9 @@ Return JSON with this exact structure:
 
       const prayer = await storage.createPrayerRequest(prayerData);
 
+      // Get updated user points for real-time display
+      const userPoints = await storage.getUserPoints(userId);
+
       // Real-time AI content monitoring for prayer requests (1-3 seconds)
       setTimeout(async () => {
         try {
@@ -10516,7 +10620,16 @@ Return JSON with this exact structure:
       // Prayer requests automatically appear in social feed via getDiscussions UNION query
       // No need to create duplicate discussion entries
       
-      res.status(201).json(prayer);
+      res.status(201).json({
+        ...prayer,
+        celebration: {
+          points: 10,
+          reason: 'prayer_request'
+        },
+        userPoints: {
+          totalPoints: userPoints?.totalPoints || 0
+        }
+      });
     } catch (error) {
       res.status(500).json({ 
         message: "Failed to create prayer request", 

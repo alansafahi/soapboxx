@@ -2881,7 +2881,13 @@ export class DatabaseStorage implements IStorage {
           WHERE user_id = ${userId} AND discussion_id = ${discussionId}
         `);
         
-        // Note: No negative points awarded for unliking in centralized system
+        // Deduct points for removing like - subtract 1 point
+        await this.addPointsToUser(
+          userId,
+          -1,
+          'discussion_unlike',
+          discussionId
+        );
         
         return { success: true, liked: false, message: 'Like removed' };
       } else {
@@ -4026,10 +4032,10 @@ export class DatabaseStorage implements IStorage {
         })
         .returning();
 
-      // Award points using centralized function
+      // Award points using centralized function - Updated: reduced from 25 to 10 points
       await this.addPointsToUser(
         prayer.authorId,
-        25,
+        10,
         'prayer_request',
         prayerRequest.id
       );
@@ -4052,10 +4058,10 @@ export class DatabaseStorage implements IStorage {
         })
         .returning();
 
-      // Award points using centralized function
+      // Award points using centralized function - Updated: increased from 15 to 25 points
       await this.addPointsToUser(
         entry.userId,
-        15,
+        25,
         'soap_entry',
         soapEntry.id
       );
@@ -5958,7 +5964,13 @@ export class DatabaseStorage implements IStorage {
           WHERE id = ${commentId}
         `);
         
-        // Note: No negative points awarded for unliking in centralized system
+        // Deduct points for removing comment like - subtract 1 point
+        await this.addPointsToUser(
+          userId,
+          -1,
+          'comment_unlike',
+          commentId
+        );
         
         // Get updated count
         const countResult = await db.execute(sql`
@@ -6004,8 +6016,8 @@ export class DatabaseStorage implements IStorage {
   // Universal function to add points to user with reason tracking
   async addPointsToUser(userId: string, points: number, reason: string, entityId?: number): Promise<void> {
     try {
-      // Only proceed if points are positive
-      if (points <= 0) return;
+      // Allow negative points for deductions (like removing likes)
+      if (points === 0) return;
 
       // Create point transaction
       await db.insert(pointTransactions).values({
@@ -8698,6 +8710,59 @@ export class DatabaseStorage implements IStorage {
       return false;
     } catch (error) {
       throw new Error('Failed to check S.O.A.P. streak');
+    }
+  }
+
+  // Daily Check-in - 5 points
+  async dailyCheckIn(userId: string): Promise<{ success: boolean; points?: number; message: string }> {
+    try {
+      // Check if user has already checked in today
+      const today = new Date().toDateString();
+      const existingCheckIn = await db.execute(sql`
+        SELECT id FROM point_transactions 
+        WHERE user_id = ${userId} 
+        AND reason = 'daily_checkin'
+        AND DATE(created_at) = CURRENT_DATE
+        LIMIT 1
+      `);
+
+      if (existingCheckIn.rows.length > 0) {
+        return { success: false, message: 'Already checked in today' };
+      }
+
+      // Award daily check-in points
+      await this.addPointsToUser(
+        userId,
+        5,
+        'daily_checkin',
+        null
+      );
+
+      return { success: true, points: 5, message: 'Daily check-in completed!' };
+    } catch (error) {
+      throw new Error('Failed to process daily check-in');
+    }
+  }
+
+  // QR Check-in - 5 points  
+  async qrCheckIn(userId: string, qrCode: string): Promise<{ success: boolean; points?: number; message: string }> {
+    try {
+      // Validate QR code and location (simplified for now)
+      if (!qrCode || qrCode.length < 5) {
+        return { success: false, message: 'Invalid QR code' };
+      }
+
+      // Award QR check-in points
+      await this.addPointsToUser(
+        userId,
+        5,
+        'qr_checkin',
+        null
+      );
+
+      return { success: true, points: 5, message: 'QR check-in successful!' };
+    } catch (error) {
+      throw new Error('Failed to process QR check-in');
     }
   }
 
