@@ -144,9 +144,9 @@ const Leaderboard: React.FC = () => {
               Community Engagement Board
             </h1>
           </div>
-          <p className="text-sm text-gray-700 dark:text-blue-200 max-w-2xl mx-auto">
-            Celebrating our most active community members! Points are earned through 
-            discussions (20pts), SOAP entries (15pts), prayer requests (25pts), and events attended (25pts).
+          <p className="text-sm text-gray-700 dark:text-blue-200 max-w-3xl mx-auto">
+            Celebrating our most active community members! Points are earned through community engagement, 
+            spiritual habits, growth initiatives, and leadership activities with aspirational reward titles.
           </p>
         </div>
 
@@ -252,28 +252,99 @@ const Leaderboard: React.FC = () => {
             </div>
 
             <div className="mt-6 text-center">
-              <div className="bg-white/90 dark:bg-white/10 backdrop-blur-md rounded-lg p-4 border border-gray-200 dark:border-white/20">
-                <h3 className="text-sm font-semibold mb-3 text-gray-900 dark:text-yellow-400">How to Earn Points</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
-                  <div className="text-center">
-                    <div className="text-lg mb-1">💬</div>
-                    <div className="font-medium text-gray-900 dark:text-white">Discussions</div>
-                    <div className="text-gray-600 dark:text-blue-200">20 points</div>
+              <div className="bg-white/90 dark:bg-white/10 backdrop-blur-md rounded-lg p-6 border border-gray-200 dark:border-white/20">
+                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-yellow-400">How to Earn Points</h3>
+                
+                {/* Community Engagement */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold mb-3 text-gray-800 dark:text-blue-200">Community Engagement</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div className="text-center">
+                      <div className="text-lg mb-1">💬</div>
+                      <div className="font-medium text-gray-900 dark:text-white">Discussion Post</div>
+                      <div className="text-gray-600 dark:text-blue-200">20 points</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Community Builder</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg mb-1">🙏</div>
+                      <div className="font-medium text-gray-900 dark:text-white">Prayer Request</div>
+                      <div className="text-gray-600 dark:text-blue-200">25 points</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Prayer Warrior</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg mb-1">🤝</div>
+                      <div className="font-medium text-gray-900 dark:text-white">Prayer Response</div>
+                      <div className="text-gray-600 dark:text-blue-200">5 points</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Faithful Intercessor</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg mb-1">💝</div>
+                      <div className="font-medium text-gray-900 dark:text-white">Comment/Like</div>
+                      <div className="text-gray-600 dark:text-blue-200">1-5 points</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Fellow Encourager</div>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-lg mb-1">🙏</div>
-                    <div className="font-medium text-gray-900 dark:text-white">Prayer Requests</div>
-                    <div className="text-gray-600 dark:text-blue-200">25 points</div>
+                </div>
+
+                {/* Spiritual Habits */}
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold mb-3 text-gray-800 dark:text-blue-200">Spiritual Habits</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div className="text-center">
+                      <div className="text-lg mb-1">📖</div>
+                      <div className="font-medium text-gray-900 dark:text-white">S.O.A.P. Entry</div>
+                      <div className="text-gray-600 dark:text-blue-200">15 points</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Reflective Disciple</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg mb-1">🔥</div>
+                      <div className="font-medium text-gray-900 dark:text-white">7-Day Streak</div>
+                      <div className="text-gray-600 dark:text-blue-200">50 points</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Disciplined Steward</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg mb-1">🎯</div>
+                      <div className="font-medium text-gray-900 dark:text-white">Event Attendance</div>
+                      <div className="text-gray-600 dark:text-blue-200">25 points</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Active Member</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg mb-1">🤖</div>
+                      <div className="font-medium text-gray-900 dark:text-white">AI S.O.A.P. (First)</div>
+                      <div className="text-gray-600 dark:text-blue-200">10 points</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Spiritual Explorer</div>
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-lg mb-1">📖</div>
-                    <div className="font-medium text-gray-900 dark:text-white">SOAP Entries</div>
-                    <div className="text-gray-600 dark:text-blue-200">15 points</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-lg mb-1">🎯</div>
-                    <div className="font-medium text-gray-900 dark:text-white">Events Attended</div>
-                    <div className="text-gray-600 dark:text-blue-200">25 points</div>
+                </div>
+
+                {/* Growth & Leadership */}
+                <div className="mb-4">
+                  <h4 className="text-sm font-semibold mb-3 text-gray-800 dark:text-blue-200">Growth & Leadership</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div className="text-center">
+                      <div className="text-lg mb-1">🌟</div>
+                      <div className="font-medium text-gray-900 dark:text-white">Successful Referral</div>
+                      <div className="text-gray-600 dark:text-blue-200">500 points</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Evangelist</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg mb-1">🏗️</div>
+                      <div className="font-medium text-gray-900 dark:text-white">Create Ministry</div>
+                      <div className="text-gray-600 dark:text-blue-200">50 points</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Community Founder</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg mb-1">❤️</div>
+                      <div className="font-medium text-gray-900 dark:text-white">Volunteer Event</div>
+                      <div className="text-gray-600 dark:text-blue-200">15 points</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Servant Heart</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-lg mb-1">🔗</div>
+                      <div className="font-medium text-gray-900 dark:text-white">Add Contact</div>
+                      <div className="text-gray-600 dark:text-blue-200">10 points</div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Connector</div>
+                    </div>
                   </div>
                 </div>
               </div>
