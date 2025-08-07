@@ -72,7 +72,7 @@ export const comprehensiveKnowledge: KnowledgeEntry[] = [
     id: 'pricing-overview',
     category: 'pricing',
     keywords: ['pricing', 'plans', 'cost', 'how much', 'price', 'subscription', 'plan options'],
-    content: 'SoapBox Super App Pricing: Individual Plans - Disciple Plan (FREE, 250 credits/month), Servant Plan ($5/month, 500 credits), Kingdom Builder Plan ($10/month, 1,000 credits). Church Plans - Shepherd Plan ($50/month, 5,000 credits), Beacon Plan ($100/month, 10,000 credits), Kingdom Plan ($250/month, 25,000 credits). All plans include spiritual growth tools with biblical inspiration and ministry-focused features.',
+    content: 'SoapBox Super App Pricing: Individual Plans - Disciple Plan (FREE, 250 credits/month), Servant Plan ($5/month, 500 credits), Torchbearer Plan ($10/month, 1,000 credits). Church Plans - Shepherd Plan ($50/month, 5,000 credits), Beacon Plan ($100/month, 10,000 credits), Kingdom Plan ($250/month, 25,000 credits). All plans include spiritual growth tools with biblical inspiration and ministry-focused features.',
     helpLink: '/faq#pricing',
     priority: 10,
     lastUpdated: '2025-08-05',

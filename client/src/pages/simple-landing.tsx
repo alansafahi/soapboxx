@@ -400,8 +400,8 @@ export default function SimpleLanding() {
 
               <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 border border-gray-200">
                 <div className="text-center mb-6">
-                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Kingdom Builder Plan</h4>
-                  <p className="text-sm text-gray-600 font-medium mb-3">"Lead others. Build God's Kingdom."</p>
+                  <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">Torchbearer Plan</h4>
+                  <p className="text-sm text-gray-600 font-medium mb-3">"Shine your light further."</p>
                   <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">$10/mo</div>
                   <p className="text-gray-600 text-sm">$100/year</p>
                   <p className="text-gray-600 text-sm sm:text-base">1,000 credits/month</p>
