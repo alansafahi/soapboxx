@@ -115,9 +115,10 @@ function MembersPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="admin-portal">Admin Portal</TabsTrigger>
+            <TabsTrigger value="ai-controls">AI Controls</TabsTrigger>
             <TabsTrigger value="campuses">Campuses</TabsTrigger>
             <TabsTrigger value="media" className="hidden lg:block">Media</TabsTrigger>
             <TabsTrigger value="analytics" className="hidden lg:block">Analytics</TabsTrigger>
@@ -148,6 +149,42 @@ function MembersPage() {
                 </CardHeader>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="ai-controls" className="space-y-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Settings className="h-6 w-6" />
+                GPT-5 AI System Controls
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                Manage advanced AI features, model routing, and cost optimization for the SoapBox platform
+              </p>
+            </div>
+            
+            <Card>
+              <CardContent className="p-6">
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+                    <Settings className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold mb-2">AI Controls Panel Loading...</h3>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    The GPT-5 intelligent routing system with advanced controls is being initialized.
+                  </p>
+                  <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <h4 className="font-medium text-blue-900 dark:text-blue-100">Features Available:</h4>
+                    <ul className="text-sm text-blue-800 dark:text-blue-200 mt-2 space-y-1">
+                      <li>• Intelligent model routing (GPT-5 ↔ GPT-5-mini)</li>
+                      <li>• Per-route timeout configuration (15s-60s)</li>
+                      <li>• Automatic fallback mechanisms</li>
+                      <li>• Cost optimization toggle</li>
+                      <li>• Streaming support for long responses</li>
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="overview" className="space-y-6">

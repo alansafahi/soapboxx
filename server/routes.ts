@@ -58,6 +58,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import OpenAI from "openai";
+import { aiService } from './ai-service';
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
@@ -188,23 +189,12 @@ For each selected verse, provide:
 
 Respond in JSON format with an array of objects containing these fields.`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        {
-          role: "system",
-          content: "You are a compassionate spiritual guide helping people find relevant Bible verses for their current emotional state. Select verses that provide genuine comfort, hope, and biblical truth."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 1000
-    });
+    const responseText = await aiService.simpleCompletion(
+      `${prompt}\n\nRespond in JSON format with an array of objects containing reference, text, and encouragement fields.`,
+      1000
+    );
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const result = JSON.parse(responseText || '{}');
     return result.verses || verses.slice(0, 3);
   } catch (error) {
     // Fallback to basic verses from database
@@ -216,31 +206,24 @@ Respond in JSON format with an array of objects containing these fields.`;
 
 async function categorizePost(content: string): Promise<{ type: 'discussion' | 'prayer' | 'announcement' | 'share', title?: string }> {
   try {
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-      messages: [
-        {
-          role: "system", 
-          content: "You are a spiritual community content analyzer. Categorize posts into one of these types based on content: 'prayer' (prayer requests, asking for prayers), 'announcement' (church events, important news), 'discussion' (questions, conversations, Bible study), or 'share' (testimonies, photos, inspiration, general sharing). Also generate an appropriate title if it's an announcement. Respond with JSON."
-        },
-        {
-          role: "user",
-          content: `Categorize this post: "${content}"`
-        }
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 150
-    });
-
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const prompt = `Analyze this post content and categorize it. Content: "${content}"
     
+    Categories:
+    - prayer: requests for prayer, prayer needs, asking for spiritual support
+    - discussion: questions, topics for community discussion, sharing thoughts
+    - announcement: events, news, important community updates
+    - share: testimonies, praise reports, sharing experiences or blessings
+    
+    Also suggest a concise title (max 50 characters) that captures the essence.
+    
+    Respond in JSON format with: {"type": "category", "title": "suggested title"}`;
+
+    const responseText = await aiService.simpleCompletion(prompt, 300);
+    
+    const result = JSON.parse(responseText || '{"type": "discussion", "title": ""}');
     return {
-      type: result.type || 'share',
-      title: result.title || undefined
+      type: result.type || 'discussion',
+      title: result.title || ''
     };
   } catch (error) {
     // Fallback to simple keyword detection
@@ -2484,23 +2467,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         "practicalApplications": ["application1", "application2", "application3"]
       }`;
 
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are a biblical scholar with deep theological knowledge. Provide accurate, doctrinally sound research for sermon preparation. Always maintain biblical accuracy and provide practical, applicable insights."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        response_format: { type: "json_object" },
-        max_tokens: 2000
-      });
-
-      const research = JSON.parse(response.choices[0].message.content || '{}');
+      const systemPrompt = "You are a biblical scholar with deep theological knowledge. Provide accurate, doctrinally sound research for sermon preparation. Always maintain biblical accuracy and provide practical, applicable insights.";
+      
+      const responseText = await aiService.complexReasoning(prompt, systemPrompt, 2000);
+      const research = JSON.parse(responseText || '{}');
       
       res.json({
         commentary: research.commentary || "Biblical commentary unavailable",
@@ -11557,6 +11527,68 @@ Return JSON with this exact structure:
   // Demo API endpoints for isolated demo environment
   app.get('/api/health', async (req, res) => {
     res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+  });
+
+  // GPT-5 Admin Controls
+  app.post('/api/admin/ai/toggle-gpt5-mini', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const { enabled } = req.body;
+      
+      // Check for global admin permissions
+      const userRole = await storage.getUserRole(userId);
+      if (!GLOBAL_ADMIN_ROLES.includes(userRole)) {
+        return res.status(403).json({ message: 'Global admin access required' });
+      }
+      
+      aiService.setGPT5MiniMode(Boolean(enabled));
+      
+      res.json({
+        success: true,
+        message: `GPT-5-mini mode ${enabled ? 'enabled' : 'disabled'}`,
+        gpt5MiniEnabled: Boolean(enabled)
+      });
+      
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to toggle GPT-5-mini mode' });
+    }
+  });
+
+  app.get('/api/admin/ai/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      
+      // Check for admin permissions
+      const userRole = await storage.getUserRole(userId);
+      if (!ADMIN_ROLES.includes(userRole) && !GLOBAL_ADMIN_ROLES.includes(userRole)) {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+      
+      res.json({
+        aiService: 'GPT-5 with intelligent routing',
+        models: {
+          primary: 'gpt-5',
+          costEffective: 'gpt-5-mini',
+          fallback: 'gpt-5-mini'
+        },
+        features: [
+          'Intelligent model selection based on task complexity',
+          'Per-route timeout configuration',
+          'Automatic fallback to GPT-5-mini on errors',
+          'Streaming support for long responses',
+          'Cost optimization toggle'
+        ],
+        routeTimeouts: {
+          simple: '15 seconds',
+          complex: '45 seconds', 
+          creative: '60 seconds',
+          default: '30 seconds'
+        }
+      });
+      
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to get AI status' });
+    }
   });
 
   app.get('/api/demo/stats', async (req, res) => {

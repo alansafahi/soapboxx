@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { aiService } from './ai-service';
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY 
@@ -75,24 +76,10 @@ Respond with JSON in this format:
   "prayer": "Your contextually-sensitive prayer here"
 }`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-      messages: [
-        {
-          role: "system",
-          content: "You are a wise, caring pastoral assistant who helps people connect deeply with Scripture. Provide thoughtful, biblically sound, and personally meaningful spiritual guidance that is sensitive to current circumstances, liturgical seasons, and world events. Tailor your responses to the user's emotional state and the broader context of their life and world."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 1000,
-      temperature: 0.7
-    });
-
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const systemPrompt = "You are a wise, caring pastoral assistant who helps people connect deeply with Scripture. Provide thoughtful, biblically sound, and personally meaningful spiritual guidance that is sensitive to current circumstances, liturgical seasons, and world events. Tailor your responses to the user's emotional state and the broader context of their life and world.";
+    
+    const responseText = await aiService.complexReasoning(prompt, systemPrompt, 1000);
+    const result = JSON.parse(responseText || '{}');
     
 
     return {
@@ -356,24 +343,10 @@ Please provide enhanced versions that are more detailed, spiritually rich, and p
   "enhancedPrayer": "Enhanced prayer here"
 }`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-      messages: [
-        {
-          role: "system",
-          content: "You are a wise pastoral assistant who helps deepen spiritual reflections. Enhance the user's thoughts while maintaining their personal voice and intent."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 1000,
-      temperature: 0.6
-    });
-
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const systemPrompt = "You are a wise pastoral assistant who helps deepen spiritual reflections. Enhance the user's thoughts while maintaining their personal voice and intent.";
+    
+    const responseText = await aiService.complexReasoning(prompt, systemPrompt, 1000);
+    const result = JSON.parse(responseText || '{}');
     
     return {
       enhancedObservation: result.enhancedObservation || observation,
@@ -406,24 +379,10 @@ Respond with a JSON array of question strings:
   "questions": ["Question 1", "Question 2", "Question 3"]
 }`;
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-      messages: [
-        {
-          role: "system",
-          content: "You are a pastoral assistant who creates meaningful Bible study questions that encourage deep spiritual reflection."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      response_format: { type: "json_object" },
-      max_tokens: 500,
-      temperature: 0.7
-    });
-
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const systemPrompt = "You are a pastoral assistant who creates meaningful Bible study questions that encourage deep spiritual reflection.";
+    
+    const responseText = await aiService.simpleCompletion(prompt, 500);
+    const result = JSON.parse(responseText || '{}');
     return result.questions || [];
   } catch (error) {
     return [];
