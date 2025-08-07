@@ -14481,12 +14481,12 @@ Please provide suggestions for the missing or incomplete sections.`
                  ) as total_days
           FROM reading_plans rp 
           WHERE rp.is_active = true 
-          AND (rp.subscription_tier = ${tier} OR rp.subscription_tier = 'free')
+          AND (rp.subscription_tier = ${tier} OR rp.subscription_tier = 'disciple')
           ORDER BY 
             CASE 
-              WHEN rp.subscription_tier = 'free' THEN 1
-              WHEN rp.subscription_tier = 'standard' THEN 2  
-              WHEN rp.subscription_tier = 'premium' THEN 3
+              WHEN rp.subscription_tier = 'disciple' THEN 1
+              WHEN rp.subscription_tier = 'servant' THEN 2  
+              WHEN rp.subscription_tier = 'torchbearer' THEN 3
             END,
             rp.created_at DESC
         `;
@@ -14501,9 +14501,9 @@ Please provide suggestions for the missing or incomplete sections.`
           WHERE rp.is_active = true
           ORDER BY 
             CASE 
-              WHEN rp.subscription_tier = 'free' THEN 1
-              WHEN rp.subscription_tier = 'standard' THEN 2  
-              WHEN rp.subscription_tier = 'premium' THEN 3
+              WHEN rp.subscription_tier = 'disciple' THEN 1
+              WHEN rp.subscription_tier = 'servant' THEN 2  
+              WHEN rp.subscription_tier = 'torchbearer' THEN 3
             END,
             rp.created_at DESC
         `;
@@ -14733,7 +14733,7 @@ Please provide suggestions for the missing or incomplete sections.`
     try {
       const { tier } = req.params;
       
-      if (!['free', 'standard', 'premium'].includes(tier)) {
+      if (!['disciple', 'servant', 'torchbearer'].includes(tier)) {
         return res.status(400).json({ message: "Invalid subscription tier" });
       }
 
@@ -14744,22 +14744,22 @@ Please provide suggestions for the missing or incomplete sections.`
                  rp.duration
                ) as total_days,
                CASE 
-                 WHEN rp.subscription_tier = 'free' THEN 'Free Access'
-                 WHEN rp.subscription_tier = 'standard' THEN 'Standard Plan'
-                 WHEN rp.subscription_tier = 'premium' THEN 'Premium Plan'
+                 WHEN rp.subscription_tier = 'disciple' THEN 'Disciple Plan'
+                 WHEN rp.subscription_tier = 'servant' THEN 'Servant Plan'
+                 WHEN rp.subscription_tier = 'torchbearer' THEN 'Torchbearer Plan'
                END as tier_label
         FROM reading_plans rp 
         WHERE rp.is_active = true 
         AND (
           rp.subscription_tier = ${tier} 
-          OR (${tier} = 'premium' AND rp.subscription_tier IN ('free', 'standard'))
-          OR (${tier} = 'standard' AND rp.subscription_tier = 'free')
+          OR (${tier} = 'torchbearer' AND rp.subscription_tier IN ('disciple', 'servant'))
+          OR (${tier} = 'servant' AND rp.subscription_tier = 'disciple')
         )
         ORDER BY 
           CASE 
-            WHEN rp.subscription_tier = 'free' THEN 1
-            WHEN rp.subscription_tier = 'standard' THEN 2  
-            WHEN rp.subscription_tier = 'premium' THEN 3
+            WHEN rp.subscription_tier = 'disciple' THEN 1
+            WHEN rp.subscription_tier = 'servant' THEN 2  
+            WHEN rp.subscription_tier = 'torchbearer' THEN 3
           END,
           rp.created_at DESC
       `;

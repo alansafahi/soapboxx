@@ -378,26 +378,29 @@ export default function BibleReadingPlans() {
 
   const getSubscriptionTierInfo = (tier: string) => {
     switch (tier) {
+      case "disciple":
       case "free":
         return {
-          label: "Free Access",
+          label: "Disciple Plan",
           icon: <Book className="w-4 h-4" />,
           color: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
-          description: "Available to all users"
+          description: "Walk with Christ each day"
         };
+      case "servant":
       case "standard":
         return {
-          label: "Standard Plan",
+          label: "Servant Plan", 
           icon: <Star className="w-4 h-4" />,
           color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-          description: "Focused studies & character journeys"
+          description: "Serve faithfully and grow deeply"
         };
+      case "torchbearer":
       case "premium":
         return {
-          label: "Premium Plan",
+          label: "Torchbearer Plan",
           icon: <Crown className="w-4 h-4" />,
           color: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-          description: "AI-powered & advanced features"
+          description: "Shine your light further"
         };
       default:
         return {
@@ -626,7 +629,7 @@ export default function BibleReadingPlans() {
               {filteredPlans.map((plan) => {
                 const tierInfo = getSubscriptionTierInfo(plan.subscriptionTier || 'free');
                 const isSubscribed = !!plan.subscription?.isActive;
-                const canAccess = plan.subscriptionTier === 'free'; // For now, allow access to all plans
+                const canAccess = ['disciple', 'free'].includes(plan.subscriptionTier || 'disciple'); // For now, allow access to all plans
                 
                 return (
                   <Card 
@@ -794,7 +797,7 @@ export default function BibleReadingPlans() {
               <div className="text-center mb-6">
                 <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 text-purple-800 dark:text-purple-200 px-4 py-2 rounded-full mb-4">
                   <Crown className="w-5 h-5" />
-                  <span className="font-semibold">Premium Feature</span>
+                  <span className="font-semibold">Torchbearer Feature</span>
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                   Generate AI-Powered Reading Plans
@@ -841,7 +844,7 @@ export default function BibleReadingPlans() {
                     disabled
                   >
                     <Lock className="w-4 h-4 mr-2" />
-                    Premium Plan Required
+                    Torchbearer Plan Required
                   </Button>
                 </div>
 
@@ -881,7 +884,7 @@ export default function BibleReadingPlans() {
                     disabled
                   >
                     <Lock className="w-4 h-4 mr-2" />
-                    Premium Plan Required
+                    Torchbearer Plan Required
                   </Button>
                 </div>
               </div>
@@ -891,7 +894,7 @@ export default function BibleReadingPlans() {
                   <Crown className="w-5 h-5 text-purple-600 dark:text-purple-400 mt-0.5" />
                   <div>
                     <h5 className="font-semibold text-purple-900 dark:text-purple-100 mb-1">
-                      Upgrade to Premium for AI-Powered Plans
+                      Upgrade to Torchbearer for AI-Powered Plans
                     </h5>
                     <p className="text-sm text-purple-700 dark:text-purple-300 mb-3">
                       Unlock personalized Bible reading experiences with advanced AI technology. Create custom thematic journeys and audio-optimized plans tailored to your spiritual growth needs.
@@ -902,7 +905,7 @@ export default function BibleReadingPlans() {
                       className="border-purple-300 text-purple-700 hover:bg-purple-50 dark:border-purple-600 dark:text-purple-300 dark:hover:bg-purple-900/50"
                     >
                       <Crown className="w-4 h-4 mr-2" />
-                      Learn About Premium
+                      Begin Your Journey
                     </Button>
                   </div>
                 </div>
