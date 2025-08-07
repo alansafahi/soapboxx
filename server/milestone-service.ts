@@ -127,27 +127,46 @@ class MilestoneService {
       `);
 
       if (existing.rows.length === 0) {
-        // Award the achievement
+        // Award the achievement with points bonus
+        const pointsBonus = achievement.pointsRequired ? Math.floor(achievement.pointsRequired / 10) : 25;
+        
         await db.execute(sql`
-          INSERT INTO user_achievements (user_id, achievement_key, name, description, category, earned_at)
-          VALUES (${userId}, ${achievementKey}, ${achievement.name}, ${achievement.description}, ${achievement.category}, NOW())
+          INSERT INTO user_achievements (user_id, achievement_key, name, description, category, points_awarded, earned_at)
+          VALUES (${userId}, ${achievementKey}, ${achievement.name}, ${achievement.description}, ${achievement.category}, ${pointsBonus}, NOW())
         `);
 
-        // Optionally create a notification about the achievement
-        await db.execute(sql`
-          INSERT INTO notifications (user_id, title, message, type, created_at)
-          VALUES (
-            ${userId}, 
-            'Achievement Unlocked!', 
-            ${'Congratulations! You earned: ' + achievement.name}, 
-            'achievement', 
-            NOW()
-          )
-        `);
+        // Award achievement bonus points through the centralized system
+        if (pointsBonus > 0) {
+          await this.addPointsToUser(parseInt(userId), pointsBonus, `achievement_${achievementKey}`);
+        }
       }
     } catch (error) {
-      // Silent error handling
-      console.error('Error awarding milestone achievement:', error);
+      // Reduced error logging for cleaner console
+      console.error('Milestone achievement error (non-critical):', error.message);
+    }
+  }
+
+  private async addPointsToUser(userId: number, points: number, reason: string): Promise<void> {
+    try {
+      // Update user points
+      await db.execute(sql`
+        INSERT INTO user_points (user_id, total_points, weekly_points, monthly_points, last_updated)
+        VALUES (${userId}, ${points}, ${points}, ${points}, NOW())
+        ON CONFLICT (user_id) 
+        DO UPDATE SET 
+          total_points = user_points.total_points + ${points},
+          weekly_points = user_points.weekly_points + ${points},
+          monthly_points = user_points.monthly_points + ${points},
+          last_updated = NOW()
+      `);
+
+      // Log the transaction
+      await db.execute(sql`
+        INSERT INTO point_transactions (user_id, points, reason, created_at)
+        VALUES (${userId}, ${points}, ${reason}, NOW())
+      `);
+    } catch (error) {
+      // Silent handling for milestone points
     }
   }
 }
