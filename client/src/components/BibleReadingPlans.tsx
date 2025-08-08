@@ -346,7 +346,7 @@ export default function BibleReadingPlans() {
       const subscription = subscriptions.find(sub => sub.planId === plan.id);
       const progress = userProgress.filter(p => p.planId === plan.id);
       const completedDays = subscription?.totalDaysCompleted || (subscription?.currentDay ? subscription.currentDay - 1 : 0);
-      const progressPercentage = subscription 
+      const progressPercentage = subscription && plan.duration > 0
         ? Math.round((completedDays / plan.duration) * 100)
         : 0;
       
@@ -485,8 +485,9 @@ export default function BibleReadingPlans() {
   if (selectedPlan) {
     const subscription = subscriptions.find(sub => sub.planId === selectedPlan.id);
     const progress = userProgress.filter(p => p.planId === selectedPlan.id);
-    const progressPercentage = subscription 
-      ? Math.round((subscription.totalDaysCompleted / selectedPlan.duration) * 100)
+    const completedDays = subscription?.totalDaysCompleted || 0;
+    const progressPercentage = subscription && selectedPlan.duration > 0
+      ? Math.round((completedDays / selectedPlan.duration) * 100)
       : 0;
 
     return (
@@ -531,8 +532,8 @@ export default function BibleReadingPlans() {
                     <div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">Progress</p>
                       <div className="flex items-center gap-2">
-                        <Progress value={progressPercentage} className="w-32" />
-                        <span className="text-sm font-medium">{progressPercentage}%</span>
+                        <Progress value={isNaN(progressPercentage) ? 0 : progressPercentage} className="w-32" />
+                        <span className="text-sm font-medium">{isNaN(progressPercentage) ? 0 : progressPercentage}%</span>
                       </div>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -765,9 +766,9 @@ export default function BibleReadingPlans() {
                         <div className="mb-4">
                           <div className="flex items-center justify-between text-sm mb-1">
                             <span className="text-gray-600 dark:text-gray-400">Progress</span>
-                            <span className="font-medium">{plan.progressPercentage}%</span>
+                            <span className="font-medium">{isNaN(plan.progressPercentage) ? 0 : plan.progressPercentage}%</span>
                           </div>
-                          <Progress value={plan.progressPercentage} className="h-2" />
+                          <Progress value={isNaN(plan.progressPercentage) ? 0 : plan.progressPercentage} className="h-2" />
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                             {plan.daysCompleted} of {plan.duration} days completed
                           </p>
