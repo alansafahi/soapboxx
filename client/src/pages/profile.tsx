@@ -872,14 +872,8 @@ export default function ProfilePage() {
                     </Card>
 
                     {/* Torchbearer Plan */}
-                    <Card className={`relative ${(profile?.subscriptionTier || 'torchbearer') === 'torchbearer' ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/10' : 'hover:shadow-lg transition-shadow'}`}>
-                      {(profile?.subscriptionTier || 'torchbearer') === 'torchbearer' && (
-                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                          <Badge className="bg-purple-500 text-white px-4 py-1 text-sm font-semibold shadow-md">
-                            ✓ Current Plan
-                          </Badge>
-                        </div>
-                      )}
+                    <div className="relative">
+                      <Card className={`${(profile?.subscriptionTier || 'torchbearer') === 'torchbearer' ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/10' : 'hover:shadow-lg transition-shadow'}`}>
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -912,6 +906,14 @@ export default function ProfilePage() {
                         )}
                       </CardContent>
                     </Card>
+                    {(profile?.subscriptionTier || 'torchbearer') === 'torchbearer' && (
+                      <div className="flex justify-center mt-2">
+                        <Badge className="bg-purple-500 text-white px-4 py-1 text-sm font-semibold shadow-md">
+                          ✓ Current Plan
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
                   </div>
 
                   {/* Billing Information */}
