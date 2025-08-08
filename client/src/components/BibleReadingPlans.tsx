@@ -252,6 +252,7 @@ export default function BibleReadingPlans() {
   const [selectedPlan, setSelectedPlan] = useState<ReadingPlan | null>(null);
   const [selectedDay, setSelectedDay] = useState<ReadingPlanDay | null>(null);
   const [activeTab, setActiveTab] = useState("discover");
+  const [previousTab, setPreviousTab] = useState("discover");
   const [categoryFilter, setCategoryFilter] = useState("all");
   
 
@@ -518,7 +519,10 @@ export default function BibleReadingPlans() {
           <div className="mb-6">
             <Button 
               variant="outline" 
-              onClick={() => setSelectedPlan(null)}
+              onClick={() => {
+                setSelectedPlan(null);
+                setActiveTab(previousTab);
+              }}
               className="mb-4"
             >
               ← Back to All Plans
@@ -829,7 +833,10 @@ export default function BibleReadingPlans() {
                       <div className="mt-auto">
                         {isSubscribed ? (
                           <Button
-                            onClick={() => setSelectedPlan(plan)}
+                            onClick={() => {
+                              setPreviousTab(activeTab);
+                              setSelectedPlan(plan);
+                            }}
                             variant="outline"
                             className="w-full"
                           >
@@ -839,7 +846,10 @@ export default function BibleReadingPlans() {
                         ) : canAccess || (plan.subscriptionTier === 'servant' && plan.isAiGenerated) ? (
                           <div className="space-y-2">
                             <Button
-                              onClick={() => setSelectedPlan(plan)}
+                              onClick={() => {
+                                setPreviousTab(activeTab);
+                                setSelectedPlan(plan);
+                              }}
                               variant="outline"
                               className="w-full"
                             >
