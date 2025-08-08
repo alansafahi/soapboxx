@@ -53,6 +53,7 @@ interface UserProfile {
   bio: string | null;
   mobileNumber: string | null;
   address: string | null;
+  subscriptionTier?: 'disciple' | 'servant' | 'torchbearer' | null;
   city: string | null;
   state: string | null;
   zipCode: string | null;
@@ -783,8 +784,8 @@ export default function ProfilePage() {
                   {/* Plan Features */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {/* Disciple Plan */}
-                    <Card className={`relative ${profile?.subscriptionTier === 'disciple' ? 'ring-2 ring-green-500 bg-green-50 dark:bg-green-900/10' : 'hover:shadow-lg transition-shadow'}`}>
-                      {profile?.subscriptionTier === 'disciple' && (
+                    <Card className={`relative ${(profile?.subscriptionTier || 'torchbearer') === 'disciple' ? 'ring-2 ring-green-500 bg-green-50 dark:bg-green-900/10' : 'hover:shadow-lg transition-shadow'}`}>
+                      {(profile?.subscriptionTier || 'torchbearer') === 'disciple' && (
                         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                           <Badge className="bg-green-500 text-white px-4 py-1 text-sm font-semibold shadow-md">
                             ✓ Current Plan
@@ -812,7 +813,7 @@ export default function ProfilePage() {
                             <li>✓ Daily inspirations</li>
                           </ul>
                         </div>
-                        {profile?.subscriptionTier === 'disciple' ? (
+                        {(profile?.subscriptionTier || 'torchbearer') === 'disciple' ? (
                           <Button variant="outline" className="w-full" disabled>
                             Your Current Calling
                           </Button>
@@ -825,8 +826,8 @@ export default function ProfilePage() {
                     </Card>
 
                     {/* Servant Plan */}
-                    <Card className={`relative ${profile?.subscriptionTier === 'servant' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/10' : 'hover:shadow-lg transition-shadow'}`}>
-                      {profile?.subscriptionTier === 'servant' && (
+                    <Card className={`relative ${(profile?.subscriptionTier || 'torchbearer') === 'servant' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/10' : 'hover:shadow-lg transition-shadow'}`}>
+                      {(profile?.subscriptionTier || 'torchbearer') === 'servant' && (
                         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                           <Badge className="bg-blue-500 text-white px-4 py-1 text-sm font-semibold shadow-md">
                             ✓ Current Plan
@@ -854,11 +855,11 @@ export default function ProfilePage() {
                             <li>✓ Advanced insights</li>
                           </ul>
                         </div>
-                        {profile?.subscriptionTier === 'disciple' ? (
+                        {(profile?.subscriptionTier || 'torchbearer') === 'disciple' ? (
                           <Button className="w-full bg-blue-600 hover:bg-blue-700">
                             Step Deeper in Service
                           </Button>
-                        ) : profile?.subscriptionTier === 'servant' ? (
+                        ) : (profile?.subscriptionTier || 'torchbearer') === 'servant' ? (
                           <Button variant="outline" className="w-full" disabled>
                             Your Current Calling
                           </Button>
@@ -871,8 +872,8 @@ export default function ProfilePage() {
                     </Card>
 
                     {/* Torchbearer Plan */}
-                    <Card className={`relative ${profile?.subscriptionTier === 'torchbearer' ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/10' : 'hover:shadow-lg transition-shadow'}`}>
-                      {profile?.subscriptionTier === 'torchbearer' && (
+                    <Card className={`relative ${(profile?.subscriptionTier || 'torchbearer') === 'torchbearer' ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/10' : 'hover:shadow-lg transition-shadow'}`}>
+                      {(profile?.subscriptionTier || 'torchbearer') === 'torchbearer' && (
                         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                           <Badge className="bg-purple-500 text-white px-4 py-1 text-sm font-semibold shadow-md">
                             ✓ Current Plan
@@ -900,7 +901,7 @@ export default function ProfilePage() {
                             <li>✓ Leadership content</li>
                           </ul>
                         </div>
-                        {profile?.subscriptionTier !== 'torchbearer' ? (
+                        {(profile?.subscriptionTier || 'torchbearer') !== 'torchbearer' ? (
                           <Button className="w-full bg-purple-600 hover:bg-purple-700">
                             Shine Your Light Further
                           </Button>

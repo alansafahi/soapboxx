@@ -686,40 +686,40 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {/* Show placeholder cards since we don't have servant tier plans yet */}
-                  {[1, 2, 3, 4, 5, 6].map((i) => {
+                  {filteredPlans.filter(plan => plan.subscriptionTier === 'servant').slice(0, 6).map((plan) => {
                     const canAccess = userTier === 'servant' || userTier === 'torchbearer';
 
                     return (
                       <Card 
-                        key={`servant-${i}`} 
+                        key={plan.id} 
                         className={`relative transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/50 ${
                           !canAccess ? 'opacity-75' : ''
                         }`}
                       >
-
                         
                         <CardHeader className="pb-4">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center gap-2">
                               <Heart className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                              <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-800/30 dark:text-yellow-400">
-                                Intermediate
+                              <Badge className={getDifficultyColor(plan.difficulty)}>
+                                {plan.difficulty || 'Intermediate'}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
                               <Calendar className="w-4 h-4" />
-                              <span>30d</span>
+                              <span>{plan.duration}d</span>
                             </div>
                           </div>
                           
                           <CardTitle className="text-xl leading-tight hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                            Servant Leadership Study {i}
+                            {plan.name}
                           </CardTitle>
                           
-                          <CardDescription className="text-sm">
-                            Deepen your understanding of biblical servant leadership through character studies and practical applications.
-                          </CardDescription>
+                          {plan.description && (
+                            <CardDescription className="text-sm">
+                              {plan.description}
+                            </CardDescription>
+                          )}
                         </CardHeader>
                         
                         <CardContent className="pt-0">
@@ -739,7 +739,7 @@ export default function BibleReadingPlansFixed() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => setSelectedPlan({})} // Allow viewing without restriction
+                                onClick={() => setSelectedPlan(plan)}
                                 className="flex-1"
                               >
                                 <Eye className="w-4 h-4 mr-2" />
@@ -747,7 +747,7 @@ export default function BibleReadingPlansFixed() {
                               </Button>
                               <Button 
                                 size="sm" 
-                                onClick={() => triggerLockedFeature('Servant Plan Features')}
+                                onClick={() => canAccess ? handleStartPlan(plan) : triggerLockedFeature('Servant Plan Features')}
                                 className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                               >
                                 {canAccess ? (
