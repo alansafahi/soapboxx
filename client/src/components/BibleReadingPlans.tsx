@@ -13,7 +13,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, Lock, Crown, Sparkles, Headphones, User } from "lucide-react";
-import type { ReadingPlan, ReadingPlanDay, UserReadingPlanSubscription, UserReadingProgress } from "@shared/schema";
+import type { ReadingPlan, ReadingPlanDay, UserReadingPlanSubscription, UserReadingProgress, EnhancedMoodIndicator } from "@shared/schema";
+import EnhancedMoodIndicatorManager from "@/components/emi/EnhancedMoodIndicatorManager";
 
 interface ReadingPlanWithProgress extends ReadingPlan {
   subscription?: UserReadingPlanSubscription;
@@ -34,16 +35,22 @@ const DayReader = ({ plan, day, userProgress, onComplete }: DayReaderProps) => {
   const [emotionalReaction, setEmotionalReaction] = useState(userProgress?.emotionalReaction || "");
   const [personalInsights, setPersonalInsights] = useState(userProgress?.personalInsights || "");
   const [readingTimeMinutes, setReadingTimeMinutes] = useState(userProgress?.readingTimeMinutes || 0);
+  const [selectedMood, setSelectedMood] = useState<EnhancedMoodIndicator | null>(null);
 
   const handleComplete = () => {
     const progressData = {
       reflectionText,
       prayerText,
-      emotionalReaction,
+      emotionalReaction: selectedMood?.name || emotionalReaction,
       personalInsights,
       readingTimeMinutes
     };
     onComplete(day.dayNumber, progressData);
+  };
+
+  const handleMoodSelect = (mood: EnhancedMoodIndicator) => {
+    setSelectedMood(mood);
+    setEmotionalReaction(mood.name);
   };
 
   const isCompleted = !!userProgress?.completedAt;
@@ -174,44 +181,35 @@ const DayReader = ({ plan, day, userProgress, onComplete }: DayReaderProps) => {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="emotion" className="text-sm font-medium">
-                How do you feel after reading?
-              </Label>
-              <Select value={emotionalReaction} onValueChange={setEmotionalReaction}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select your emotional response" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="peaceful">Peaceful</SelectItem>
-                  <SelectItem value="encouraged">Encouraged</SelectItem>
-                  <SelectItem value="challenged">Challenged</SelectItem>
-                  <SelectItem value="grateful">Grateful</SelectItem>
-                  <SelectItem value="hopeful">Hopeful</SelectItem>
-                  <SelectItem value="convicted">Convicted</SelectItem>
-                  <SelectItem value="inspired">Inspired</SelectItem>
-                  <SelectItem value="confused">Confused</SelectItem>
-                  <SelectItem value="sad">Sad</SelectItem>
-                  <SelectItem value="joyful">Joyful</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div>
+            <Label className="text-sm font-medium mb-3 block">
+              How do you feel after reading?
+            </Label>
+            <EnhancedMoodIndicatorManager 
+              onMoodSelect={handleMoodSelect}
+              showAdminControls={false}
+            />
+            {selectedMood && (
+              <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                Selected: {selectedMood.emoji} {selectedMood.name}
+              </div>
+            )}
+          </div>
 
-            <div>
-              <Label htmlFor="readingTime" className="text-sm font-medium">
-                Reading Time (minutes)
-              </Label>
-              <Input
-                id="readingTime"
-                type="number"
-                min="1"
-                max="120"
-                value={readingTimeMinutes}
-                onChange={(e) => setReadingTimeMinutes(parseInt(e.target.value) || 0)}
-                placeholder="15"
-              />
-            </div>
+          <div>
+            <Label htmlFor="readingTime" className="text-sm font-medium">
+              Reading Time (minutes)
+            </Label>
+            <Input
+              id="readingTime"
+              type="number"
+              min="1"
+              max="120"
+              value={readingTimeMinutes}
+              onChange={(e) => setReadingTimeMinutes(parseInt(e.target.value) || 0)}
+              placeholder="15"
+              className="mt-1"
+            />
           </div>
         </CardContent>
       </Card>
