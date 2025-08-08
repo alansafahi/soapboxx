@@ -188,10 +188,29 @@ export default function EnhancedMoodIndicatorManager({
     }
   };
 
+  // Define preferred category order
+  const categoryOrder = [
+    "Spiritual States",
+    "Life Circumstances", 
+    "Emotional Well-being",
+    "Seeking Support",
+    "Faith & Worship",
+    "Growth & Transformation"
+  ];
+  
   const categories = Object.keys(moodsByCategory);
+  
+  // Sort categories according to the preferred order
+  const sortedCategories = categoryOrder.filter(cat => categories.includes(cat))
+    .concat(categories.filter(cat => !categoryOrder.includes(cat)));
+  
+  const sortedMoodsByCategory = Object.fromEntries(
+    sortedCategories.map(cat => [cat, moodsByCategory[cat]])
+  );
+  
   const filteredCategories = selectedCategory && selectedCategory !== "all"
     ? { [selectedCategory]: moodsByCategory[selectedCategory] } 
-    : moodsByCategory;
+    : sortedMoodsByCategory;
 
   if (isLoading) {
     return (
@@ -388,7 +407,7 @@ export default function EnhancedMoodIndicatorManager({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All categories</SelectItem>
-              {categories.map((cat) => (
+              {sortedCategories.map((cat) => (
                 <SelectItem key={cat} value={cat}>
                   {cat}
                 </SelectItem>
