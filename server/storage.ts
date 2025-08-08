@@ -6942,6 +6942,38 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getAllUserReadingProgress(userId: string): Promise<UserReadingProgress[]> {
+    try {
+      const result = await pool.query(`
+        SELECT 
+          id, user_id, plan_id, day_number, completed_at, reflection_text, 
+          prayer_text, emotional_reaction, personal_insights, soap_entry_id, 
+          reading_time_minutes, created_at
+        FROM user_reading_progress
+        WHERE user_id = $1
+        ORDER BY plan_id, day_number ASC
+      `, [userId]);
+
+      return result.rows.map(row => ({
+        id: row.id,
+        userId: row.user_id,
+        planId: row.plan_id,
+        dayNumber: row.day_number,
+        completedAt: row.completed_at,
+        reflectionText: row.reflection_text,
+        prayerText: row.prayer_text,
+        emotionalReaction: row.emotional_reaction,
+        personalInsights: row.personal_insights,
+        soapEntryId: row.soap_entry_id,
+        readingTimeMinutes: row.reading_time_minutes,
+        createdAt: row.created_at,
+      }));
+    } catch (error) {
+      
+      throw new Error('Failed to fetch all user reading progress');
+    }
+  }
+
   // Staff Management Operations
   async getStaffMembers(communityId: number): Promise<any[]> {
     try {

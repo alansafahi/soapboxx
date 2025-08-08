@@ -14622,6 +14622,38 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Get all user progress for all plans (for card listings)
+  app.get("/api/reading-plans/user/progress/all", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const progress = await storage.getAllUserReadingProgress(userId);
+      res.json(progress);
+    } catch (error) {
+      console.error("Failed to fetch all reading progress:", error);
+      res.status(500).json({ message: "Failed to fetch all reading progress" });
+    }
+  });
+
+  // Get all user progress for all plans (for card listings)
+  app.get("/api/reading-plans/user/progress/all", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      const progress = await storage.getAllUserReadingProgress(userId);
+      res.json(progress);
+    } catch (error) {
+      console.error("Failed to fetch all reading progress:", error);
+      res.status(500).json({ message: "Failed to fetch all reading progress" });
+    }
+  });
+
   // AI-powered thematic plan generation (Premium tier)
   app.post("/api/reading-plans/generate/thematic", isAuthenticated, async (req: any, res) => {
     try {

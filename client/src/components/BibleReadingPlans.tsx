@@ -296,6 +296,12 @@ export default function BibleReadingPlans() {
   
 
 
+  // Fetch all user progress for card listings
+  const { data: allUserProgress = [] } = useQuery<UserReadingProgress[]>({
+    queryKey: ["/api/reading-plans/user/progress/all"],
+    staleTime: 2 * 60 * 1000, // Cache for 2 minutes
+  });
+
   // Fetch user progress for selected plan
   const { data: userProgress = [] } = useQuery<UserReadingProgress[]>({
     queryKey: ["/api/reading-plans", selectedPlan?.id, "progress"],
@@ -336,6 +342,7 @@ export default function BibleReadingPlans() {
         description: "Great job completing today's reading! You earned 10 SoapBox Points.",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/reading-plans", selectedPlan?.id, "progress"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reading-plans/user/progress/all"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reading-plans/user/subscriptions"] });
       setSelectedDay(null);
     },
@@ -352,7 +359,7 @@ export default function BibleReadingPlans() {
   const plansWithProgress: ReadingPlanWithProgress[] = useMemo(() => {
     return plans.map(plan => {
       const subscription = subscriptions.find(sub => sub.planId === plan.id);
-      const progress = userProgress.filter(p => p.planId === plan.id);
+      const progress = allUserProgress.filter(p => p.planId === plan.id);
       const completedDays = progress.filter(p => p.completedAt).length;
       const progressPercentage = plan.duration > 0
         ? Math.round((completedDays / plan.duration) * 100)
@@ -365,7 +372,7 @@ export default function BibleReadingPlans() {
         daysCompleted: completedDays,
       };
     });
-  }, [plans, subscriptions, userProgress]);
+  }, [plans, subscriptions, allUserProgress]);
 
   // Filter plans by category
   const filteredPlans = useMemo(() => {
