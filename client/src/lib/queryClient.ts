@@ -131,16 +131,21 @@ export const getQueryFn: <T>(options: {
     const fullUrl = url.startsWith('/') ? url : `/${url}`;
 
     try {
+      console.log("DEBUG - QueryFn fetch URL:", fullUrl);
       const res = await fetch(fullUrl, {
         credentials: "include",
       });
+      console.log("DEBUG - QueryFn response status:", res.status);
 
       if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        console.log("DEBUG - QueryFn returning null for 401");
         return null;
       }
 
       await throwIfResNotOk(res);
-      return await res.json();
+      const data = await res.json();
+      console.log("DEBUG - QueryFn data:", data);
+      return data;
     } catch (error) {
       // Enhanced error handling for production stability
       if (error instanceof TypeError && error.message.includes('fetch')) {

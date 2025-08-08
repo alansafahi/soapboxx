@@ -14771,8 +14771,12 @@ Please provide suggestions for the missing or incomplete sections.`
   app.get("/api/reading-plans/user/subscriptions", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
+      console.log("DEBUG - Subscriptions endpoint userId:", userId);
+      console.log("DEBUG - Session:", req.session);
+      console.log("DEBUG - User claims:", req.user?.claims);
 
       if (!userId) {
+        console.log("DEBUG - No userId found, returning 401");
         return res.status(401).json({ message: "User authentication required" });
       }
 
@@ -14799,6 +14803,8 @@ Please provide suggestions for the missing or incomplete sections.`
         ORDER BY rps.started_at DESC
       `);
 
+      console.log("DEBUG - Found subscriptions:", subscriptions.rows.length);
+      console.log("DEBUG - Subscriptions data:", subscriptions.rows);
       res.json(subscriptions.rows);
     } catch (error) {
       console.error("Failed to fetch user subscriptions:", error);
