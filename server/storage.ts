@@ -6882,14 +6882,9 @@ export class DatabaseStorage implements IStorage {
 
       // Update subscription progress
       await pool.query(`
-        UPDATE user_reading_plan_subscriptions 
+        UPDATE reading_plan_subscriptions 
         SET 
           current_day = CASE WHEN $3 >= current_day THEN $3 + 1 ELSE current_day END,
-          total_days_completed = (
-            SELECT COUNT(*) FROM user_reading_progress 
-            WHERE user_id = $1 AND plan_id = $2
-          ),
-          last_read_at = NOW(),
           updated_at = NOW()
         WHERE user_id = $1 AND plan_id = $2
       `, [userId, planId, dayNumber]);

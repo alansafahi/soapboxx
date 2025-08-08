@@ -343,7 +343,7 @@ export default function BibleReadingPlans() {
     return plans.map(plan => {
       const subscription = subscriptions.find(sub => sub.planId === plan.id);
       const progress = userProgress.filter(p => p.planId === plan.id);
-      const completedDays = subscription?.totalDaysCompleted || (subscription?.currentDay ? subscription.currentDay - 1 : 0);
+      const completedDays = progress.filter(p => p.completedAt).length;
       const progressPercentage = subscription && plan.duration > 0
         ? Math.round((completedDays / plan.duration) * 100)
         : 0;
@@ -483,7 +483,7 @@ export default function BibleReadingPlans() {
   if (selectedPlan) {
     const subscription = subscriptions.find(sub => sub.planId === selectedPlan.id);
     const progress = userProgress.filter(p => p.planId === selectedPlan.id);
-    const completedDays = subscription?.totalDaysCompleted || 0;
+    const completedDays = progress.filter(p => p.completedAt).length;
     const progressPercentage = subscription && selectedPlan.duration > 0
       ? Math.round((completedDays / selectedPlan.duration) * 100)
       : 0;
