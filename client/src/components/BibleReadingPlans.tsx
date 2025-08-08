@@ -246,23 +246,7 @@ export default function BibleReadingPlans() {
   const [activeTab, setActiveTab] = useState("discover");
   const [categoryFilter, setCategoryFilter] = useState("all");
   
-  console.log("=== BibleReadingPlans COMPONENT LOADED ===");
-  console.log("DEBUG - Current route: ", window.location.pathname);
-  
-  // Manual test button for debugging subscriptions
-  const testSubscriptionsAPI = async () => {
-    console.log("DEBUG - Manual API test starting...");
-    try {
-      const response = await fetch("/api/reading-plans/user/subscriptions", {
-        credentials: "include"
-      });
-      console.log("DEBUG - Manual test response status:", response.status);
-      const data = await response.json();
-      console.log("DEBUG - Manual test data:", data);
-    } catch (error) {
-      console.log("DEBUG - Manual test error:", error);
-    }
-  };
+
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -274,7 +258,7 @@ export default function BibleReadingPlans() {
     cacheTime: 0, // Disable caching temporarily
   });
 
-  // Fetch user's subscriptions - use custom queryFn
+  // Fetch user's subscriptions
   const { 
     data: subscriptions = [], 
     error: subscriptionsError, 
@@ -282,34 +266,11 @@ export default function BibleReadingPlans() {
     refetch: refetchSubscriptions 
   } = useQuery<UserReadingPlanSubscription[]>({
     queryKey: ["/api/reading-plans/user/subscriptions"],
-    queryFn: async () => {
-      console.log("DEBUG - Custom queryFn for subscriptions called");
-      const response = await fetch("/api/reading-plans/user/subscriptions", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      console.log("DEBUG - Custom queryFn subscriptions data:", data);
-      return data;
-    },
-    staleTime: 0,
-    cacheTime: 0,
-    enabled: true,
+    staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnMount: true,
   });
   
-  console.log("DEBUG - Subscriptions query error:", subscriptionsError);
-  console.log("DEBUG - Subscriptions loading:", subscriptionsLoading);
-  console.log("DEBUG - Subscriptions final data:", subscriptions);
-  console.log("DEBUG - Subscriptions length:", subscriptions.length);
+
 
   // Fetch plan days when a plan is selected
   const { data: planDays = [] } = useQuery<ReadingPlanDay[]>({
@@ -371,29 +332,19 @@ export default function BibleReadingPlans() {
 
   // Create plans with progress information
   const plansWithProgress: ReadingPlanWithProgress[] = useMemo(() => {
-    console.log("DEBUG - Building plansWithProgress, subscriptions available:", subscriptions.length);
     return plans.map(plan => {
-      const subscription = subscriptions.find(sub => {
-        console.log(`DEBUG - Checking subscription match: planId ${sub.planId} === plan.id ${plan.id}?`, sub.planId === plan.id);
-        return sub.planId === plan.id;
-      });
+      const subscription = subscriptions.find(sub => sub.planId === plan.id);
       const progress = userProgress.filter(p => p.planId === plan.id);
       const progressPercentage = subscription 
         ? Math.round(((subscription.totalDaysCompleted || subscription.currentDay - 1) / plan.duration) * 100)
         : 0;
       
-      const result = {
+      return {
         ...plan,
         subscription,
         progressPercentage,
         daysCompleted: subscription?.totalDaysCompleted || subscription?.currentDay - 1 || 0,
       };
-      
-      if (subscription) {
-        console.log(`DEBUG - Plan ${plan.id} (${plan.name}) matched with subscription:`, subscription);
-      }
-      
-      return result;
     });
   }, [plans, subscriptions, userProgress]);
 
@@ -406,11 +357,7 @@ export default function BibleReadingPlans() {
   // Get subscribed plans
   const subscribedPlans = plansWithProgress.filter(plan => plan.subscription?.isActive);
   
-  // Debug logging
-  console.log("Debug - Plans loaded:", plans.length);
-  console.log("DEBUG - Subscriptions loaded:", subscriptions.length, subscriptions);
-  console.log("DEBUG - PlansWithProgress:", plansWithProgress.length);
-  console.log("DEBUG - SubscribedPlans computed:", subscribedPlans.length, subscribedPlans.map(p => ({id: p.id, name: p.name, hasSubscription: !!p.subscription, isActive: p.subscription?.isActive})));
+
 
   // Get categories for filter
   const categories = useMemo(() => {
@@ -648,10 +595,7 @@ export default function BibleReadingPlans() {
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Grow in your faith with structured Bible reading plans designed to deepen your relationship with God.
           </p>
-          {/* Debug info */}
-          <div className="mt-4 text-sm text-gray-500">
-            Plans: {plans.length} | Subscriptions: {subscriptions.length} | My Plans: {subscribedPlans.length}
-          </div>
+
         </div>
 
         {/* Tabs */}
