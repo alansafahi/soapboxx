@@ -204,19 +204,19 @@ export default function EnhancedMoodIndicatorManager({
   return (
     <div className="space-y-6">
       {/* Header with Controls */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Palette className="w-6 h-6 text-blue-600" />
-            Enhanced Mood Indicators
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            Manage centralized mood indicators used across Reading Plans, Social Feed, and Daily Checkins
-          </p>
-        </div>
+      {showAdminControls && (
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Palette className="w-6 h-6 text-blue-600" />
+              Enhanced Mood Indicators
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Manage centralized mood indicators used across Reading Plans, Social Feed, and Daily Checkins
+            </p>
+          </div>
 
-        {showAdminControls && (
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
               <Button onClick={() => setEditingMood(null)}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -376,8 +376,8 @@ export default function EnhancedMoodIndicatorManager({
               </Form>
             </DialogContent>
           </Dialog>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Category Filter */}
       {!category && (
@@ -426,11 +426,6 @@ export default function EnhancedMoodIndicatorManager({
                     {mood.subcategory && (
                       <div className="text-xs text-muted-foreground">{mood.subcategory}</div>
                     )}
-                    <div className="flex justify-center mt-1">
-                      <Badge variant="outline" className="text-xs">
-                        {mood.moodScore}/5
-                      </Badge>
-                    </div>
 
                     {showAdminControls && (
                       <div className="flex justify-center space-x-1 mt-2">
