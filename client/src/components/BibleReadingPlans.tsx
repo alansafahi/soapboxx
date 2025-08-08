@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, Lock, Crown, Sparkles, Headphones, User } from "lucide-react";
+import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, Lock, Crown, Sparkles, Headphones, User, Eye } from "lucide-react";
 import type { ReadingPlan, ReadingPlanDay, UserReadingPlanSubscription, UserReadingProgress, EnhancedMoodIndicator } from "@shared/schema";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EnhancedMoodIndicatorManager from "@/components/emi/EnhancedMoodIndicatorManager";
@@ -839,12 +839,12 @@ export default function BibleReadingPlans() {
                         ) : canAccess || (plan.subscriptionTier === 'servant' && plan.isAiGenerated) ? (
                           <div className="space-y-2">
                             <Button
-                              onClick={() => subscribeToPlanning.mutate(plan.id)}
-                              disabled={subscribeToPlanning.isPending}
+                              onClick={() => setSelectedPlan(plan)}
+                              variant="outline"
                               className="w-full"
                             >
-                              <Play className="w-4 h-4 mr-2" />
-                              {subscribeToPlanning.isPending ? "Joining..." : "Start Plan"}
+                              <Eye className="w-4 h-4 mr-2" />
+                              View Plan
                             </Button>
                             {plan.subscriptionTier === 'servant' && plan.isAiGenerated && (
                               <p className="text-xs text-center text-blue-600 dark:text-blue-400">
