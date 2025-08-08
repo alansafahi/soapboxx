@@ -335,15 +335,16 @@ export default function BibleReadingPlans() {
     return plans.map(plan => {
       const subscription = subscriptions.find(sub => sub.planId === plan.id);
       const progress = userProgress.filter(p => p.planId === plan.id);
+      const completedDays = subscription?.totalDaysCompleted || (subscription?.currentDay ? subscription.currentDay - 1 : 0);
       const progressPercentage = subscription 
-        ? Math.round(((subscription.totalDaysCompleted || subscription.currentDay - 1) / plan.duration) * 100)
+        ? Math.round((completedDays / plan.duration) * 100)
         : 0;
       
       return {
         ...plan,
         subscription,
         progressPercentage,
-        daysCompleted: subscription?.totalDaysCompleted || subscription?.currentDay - 1 || 0,
+        daysCompleted: completedDays,
       };
     });
   }, [plans, subscriptions, userProgress]);
