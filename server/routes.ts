@@ -14779,6 +14779,104 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Get user's reading plan subscriptions
+  app.get("/api/reading-plans/user/subscriptions", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub;
+
+      if (!userId) {
+        return res.status(401).json({ message: "User authentication required" });
+      }
+
+      const subscriptions = await db.execute(sql`
+        SELECT 
+          rps.id,
+          rps.user_id as "userId",
+          rps.plan_id as "planId",
+          rps.current_day as "currentDay",
+          rps.is_active as "isActive",
+          rps.started_at as "startedAt",
+          rps.completed_at as "completedAt",
+          rps.created_at as "createdAt",
+          rps.updated_at as "updatedAt",
+          rp.name as "planName",
+          rp.description,
+          rp.duration,
+          rp.difficulty,
+          rp.subscription_tier as "subscriptionTier",
+          rp.category
+        FROM reading_plan_subscriptions rps
+        JOIN reading_plans rp ON rps.plan_id = rp.id
+        WHERE rps.user_id = ${userId} AND rps.is_active = true
+        ORDER BY rps.started_at DESC
+      `);
+
+      res.json(subscriptions.rows);
+    } catch (error) {
+      console.error("Failed to fetch user subscriptions:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch reading plan subscriptions", 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
+  // Subscribe to reading plan endpoint
+  app.post("/api/reading-plans/:planId/subscribe", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      const planId = parseInt(req.params.planId);
+
+      if (!userId) {
+        return res.status(401).json({ message: "User authentication required" });
+      }
+
+      if (!planId || isNaN(planId)) {
+        return res.status(400).json({ message: "Valid plan ID is required" });
+      }
+
+      // Check if plan exists and is active
+      const planResult = await db.execute(sql`
+        SELECT id, name, subscription_tier 
+        FROM reading_plans 
+        WHERE id = ${planId} AND is_active = true
+      `);
+
+      if (planResult.rows.length === 0) {
+        return res.status(404).json({ message: "Reading plan not found" });
+      }
+
+      // Check if user is already subscribed to this plan
+      const existingSubscription = await db.execute(sql`
+        SELECT id FROM reading_plan_subscriptions 
+        WHERE user_id = ${userId} AND plan_id = ${planId} AND is_active = true
+      `);
+
+      if (existingSubscription.rows.length > 0) {
+        return res.status(400).json({ message: "Already subscribed to this plan" });
+      }
+
+      // Create subscription
+      const subscriptionResult = await db.execute(sql`
+        INSERT INTO reading_plan_subscriptions (user_id, plan_id, current_day, is_active, started_at, created_at, updated_at)
+        VALUES (${userId}, ${planId}, 1, true, NOW(), NOW(), NOW())
+        RETURNING id
+      `);
+
+      res.json({
+        message: "Successfully subscribed to reading plan",
+        subscriptionId: subscriptionResult.rows[0].id,
+        planId: planId
+      });
+    } catch (error) {
+      console.error("Failed to subscribe to reading plan:", error);
+      res.status(500).json({ 
+        message: "Failed to subscribe to reading plan", 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   // Verify AI-curated plan endpoint
   app.get("/api/reading-plans/:id/verify-ai", async (req, res) => {
     try {
