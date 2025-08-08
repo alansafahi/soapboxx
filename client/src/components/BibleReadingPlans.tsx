@@ -255,7 +255,7 @@ export default function BibleReadingPlans() {
   const { data: plans = [], isLoading: plansLoading } = useQuery<ReadingPlan[]>({
     queryKey: ["/api/reading-plans"],
     staleTime: 0, // Force fresh data
-    cacheTime: 0, // Disable caching temporarily
+    gcTime: 0, // Disable caching temporarily (updated from cacheTime)
   });
 
   // Fetch user's subscriptions
@@ -280,13 +280,7 @@ export default function BibleReadingPlans() {
   
 
   
-  // Auto-select single subscribed plan when on my-plans tab
-  React.useEffect(() => {
-    if (activeTab === "my-plans" && subscribedPlans.length === 1 && !selectedPlan && subscribedPlans[0]) {
-      console.log("DEBUG - Auto-selecting single plan:", subscribedPlans[0].name);
-      setSelectedPlan(subscribedPlans[0]);
-    }
-  }, [activeTab, subscribedPlans, selectedPlan]);
+
 
   // Fetch user progress for selected plan
   const { data: userProgress = [] } = useQuery<UserReadingProgress[]>({
@@ -390,6 +384,14 @@ export default function BibleReadingPlans() {
 
   // Get subscribed plans
   const subscribedPlans = plansWithProgress.filter(plan => plan.subscription?.isActive);
+
+  // Auto-select single subscribed plan when on my-plans tab
+  React.useEffect(() => {
+    if (activeTab === "my-plans" && subscribedPlans.length === 1 && !selectedPlan && subscribedPlans[0]) {
+      console.log("DEBUG - Auto-selecting single plan:", subscribedPlans[0].name);
+      setSelectedPlan(subscribedPlans[0]);
+    }
+  }, [activeTab, subscribedPlans, selectedPlan]);
 
   // Get categories for filter
   const categories = useMemo(() => {
