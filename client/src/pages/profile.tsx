@@ -775,59 +775,28 @@ export default function ProfilePage() {
               <CardContent>
                 <div className="space-y-6">
                   {/* Current Plan Status */}
-                  <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
-                    <div className="flex items-center gap-3">
-                      {profile?.subscriptionTier === 'disciple' && (
-                        <>
-                          <Shield className="h-6 w-6 text-green-600" />
-                          <div>
-                            <h3 className="font-semibold text-green-800 dark:text-green-200">Disciple Plan</h3>
-                            <p className="text-sm text-green-600 dark:text-green-300">"Walk with Christ each day"</p>
-                          </div>
-                        </>
-                      )}
-                      {profile?.subscriptionTier === 'servant' && (
-                        <>
-                          <Heart className="h-6 w-6 text-blue-600" />
-                          <div>
-                            <h3 className="font-semibold text-blue-800 dark:text-blue-200">Servant Plan</h3>
-                            <p className="text-sm text-blue-600 dark:text-blue-300">"Serve faithfully and grow deeply"</p>
-                          </div>
-                        </>
-                      )}
-                      {profile?.subscriptionTier === 'torchbearer' && (
-                        <>
-                          <Crown className="h-6 w-6 text-purple-600" />
-                          <div>
-                            <h3 className="font-semibold text-purple-800 dark:text-purple-200">Torchbearer Plan</h3>
-                            <p className="text-sm text-purple-600 dark:text-purple-300">"Shine your light further"</p>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    <Badge className={
-                      profile?.subscriptionTier === 'disciple' ? "bg-green-100 text-green-800 border-green-200" :
-                      profile?.subscriptionTier === 'servant' ? "bg-blue-100 text-blue-800 border-blue-200" :
-                      "bg-purple-100 text-purple-800 border-purple-200"
-                    }>
-                      {profile?.subscriptionTier === 'disciple' ? 'FREE' : 
-                       profile?.subscriptionTier === 'servant' ? '$5/month' : '$10/month'}
-                    </Badge>
+                  <div className="text-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">Your Subscription Plans</h2>
+                    <p className="text-gray-600 dark:text-gray-400">Choose the plan that best fits your spiritual journey</p>
                   </div>
 
                   {/* Plan Features */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {/* Disciple Plan */}
-                    <Card className={`${profile?.subscriptionTier === 'disciple' ? 'ring-2 ring-green-200 bg-green-50 dark:bg-green-900/10' : ''}`}>
+                    <Card className={`relative ${profile?.subscriptionTier === 'disciple' ? 'ring-2 ring-green-500 bg-green-50 dark:bg-green-900/10' : 'hover:shadow-lg transition-shadow'}`}>
+                      {profile?.subscriptionTier === 'disciple' && (
+                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                          <Badge className="bg-green-500 text-white px-4 py-1 text-sm font-semibold shadow-md">
+                            ✓ Current Plan
+                          </Badge>
+                        </div>
+                      )}
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Shield className="h-5 w-5 text-green-600" />
                             <CardTitle className="text-lg">Disciple</CardTitle>
                           </div>
-                          {profile?.subscriptionTier === 'disciple' && (
-                            <Badge className="bg-green-100 text-green-800 border-green-200">Current</Badge>
-                          )}
                         </div>
                         <CardDescription className="font-medium text-green-700 dark:text-green-300">
                           "Walk with Christ each day"
@@ -835,7 +804,7 @@ export default function ProfilePage() {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-2 mb-4">
-                          <p className="text-lg font-bold">FREE</p>
+                          <p className="text-2xl font-bold text-green-600">FREE</p>
                           <ul className="text-sm space-y-1 text-gray-600 dark:text-gray-400">
                             <li>✓ Basic reading plans</li>
                             <li>✓ Community discussions</li>
@@ -856,16 +825,20 @@ export default function ProfilePage() {
                     </Card>
 
                     {/* Servant Plan */}
-                    <Card className={`${profile?.subscriptionTier === 'servant' ? 'ring-2 ring-blue-200 bg-blue-50 dark:bg-blue-900/10' : ''}`}>
+                    <Card className={`relative ${profile?.subscriptionTier === 'servant' ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/10' : 'hover:shadow-lg transition-shadow'}`}>
+                      {profile?.subscriptionTier === 'servant' && (
+                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                          <Badge className="bg-blue-500 text-white px-4 py-1 text-sm font-semibold shadow-md">
+                            ✓ Current Plan
+                          </Badge>
+                        </div>
+                      )}
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Heart className="h-5 w-5 text-blue-600" />
                             <CardTitle className="text-lg">Servant</CardTitle>
                           </div>
-                          {profile?.subscriptionTier === 'servant' && (
-                            <Badge className="bg-blue-100 text-blue-800 border-blue-200">Current</Badge>
-                          )}
                         </div>
                         <CardDescription className="font-medium text-blue-700 dark:text-blue-300">
                           "Serve faithfully and grow deeply"
@@ -873,7 +846,7 @@ export default function ProfilePage() {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-2 mb-4">
-                          <p className="text-lg font-bold">$5/month</p>
+                          <p className="text-2xl font-bold text-blue-600">$5/month</p>
                           <ul className="text-sm space-y-1 text-gray-600 dark:text-gray-400">
                             <li>✓ Everything in Disciple</li>
                             <li>✓ Character studies</li>
@@ -898,16 +871,20 @@ export default function ProfilePage() {
                     </Card>
 
                     {/* Torchbearer Plan */}
-                    <Card className={`${profile?.subscriptionTier === 'torchbearer' ? 'ring-2 ring-purple-200 bg-purple-50 dark:bg-purple-900/10' : ''}`}>
+                    <Card className={`relative ${profile?.subscriptionTier === 'torchbearer' ? 'ring-2 ring-purple-500 bg-purple-50 dark:bg-purple-900/10' : 'hover:shadow-lg transition-shadow'}`}>
+                      {profile?.subscriptionTier === 'torchbearer' && (
+                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                          <Badge className="bg-purple-500 text-white px-4 py-1 text-sm font-semibold shadow-md">
+                            ✓ Current Plan
+                          </Badge>
+                        </div>
+                      )}
                       <CardHeader>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Crown className="h-5 w-5 text-purple-600" />
                             <CardTitle className="text-lg">Torchbearer</CardTitle>
                           </div>
-                          {profile?.subscriptionTier === 'torchbearer' && (
-                            <Badge className="bg-purple-100 text-purple-800 border-purple-200">Current</Badge>
-                          )}
                         </div>
                         <CardDescription className="font-medium text-purple-700 dark:text-purple-300">
                           "Shine your light further"
@@ -915,7 +892,7 @@ export default function ProfilePage() {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-2 mb-4">
-                          <p className="text-lg font-bold">$10/month</p>
+                          <p className="text-2xl font-bold text-purple-600">$10/month</p>
                           <ul className="text-sm space-y-1 text-gray-600 dark:text-gray-400">
                             <li>✓ Everything in Servant</li>
                             <li>✓ AI-powered personalization</li>
