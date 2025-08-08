@@ -276,7 +276,13 @@ export default function BibleReadingPlans() {
   const { data: planDays = [], isLoading: planDaysLoading } = useQuery<ReadingPlanDay[]>({
     queryKey: ["/api/reading-plans", selectedPlan?.id, "days"],
     enabled: !!selectedPlan?.id,
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
+  
+  console.log("DEBUG - Selected plan ID:", selectedPlan?.id);
+  console.log("DEBUG - Plan days query enabled:", !!selectedPlan?.id);
+  console.log("DEBUG - Plan days loading:", planDaysLoading);
+  console.log("DEBUG - Plan days count:", planDays.length);
   
 
   
@@ -385,13 +391,19 @@ export default function BibleReadingPlans() {
   // Get subscribed plans
   const subscribedPlans = plansWithProgress.filter(plan => plan.subscription?.isActive);
 
-  // Auto-select single subscribed plan when on my-plans tab
+  // Auto-select single subscribed plan when on my-plans tab (only once)
+  const [hasAutoSelected, setHasAutoSelected] = React.useState(false);
   React.useEffect(() => {
-    if (activeTab === "my-plans" && subscribedPlans.length === 1 && !selectedPlan && subscribedPlans[0]) {
+    if (activeTab === "my-plans" && subscribedPlans.length === 1 && !selectedPlan && subscribedPlans[0] && !hasAutoSelected) {
       console.log("DEBUG - Auto-selecting single plan:", subscribedPlans[0].name);
       setSelectedPlan(subscribedPlans[0]);
+      setHasAutoSelected(true);
     }
-  }, [activeTab, subscribedPlans, selectedPlan]);
+    // Reset auto-selection flag when leaving my-plans tab
+    if (activeTab !== "my-plans") {
+      setHasAutoSelected(false);
+    }
+  }, [activeTab, subscribedPlans, selectedPlan, hasAutoSelected]);
 
   // Get categories for filter
   const categories = useMemo(() => {
@@ -545,8 +557,19 @@ export default function BibleReadingPlans() {
           </div>
 
           {/* Plan Days */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {planDays.map((day) => {
+          {planDaysLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">Loading daily content...</p>
+            </div>
+          ) : planDays.length === 0 ? (
+            <div className="text-center py-8">
+              <BookOpen className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+              <p className="text-gray-600 dark:text-gray-400">No daily content available for this plan</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {planDays.map((day) => {
               const dayProgress = progress.find(p => p.dayNumber === day.dayNumber);
               const isCompleted = !!dayProgress?.completedAt;
               const isAccessible = !subscription || day.dayNumber <= subscription.currentDay;
@@ -588,9 +611,10 @@ export default function BibleReadingPlans() {
                     )}
                   </CardContent>
                 </Card>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     );
