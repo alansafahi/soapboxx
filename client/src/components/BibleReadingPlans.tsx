@@ -313,14 +313,20 @@ export default function BibleReadingPlans() {
     mutationFn: async (planId: number) => {
       return apiRequest("POST", `/api/reading-plans/${planId}/subscribe`);
     },
-    onSuccess: () => {
+    onSuccess: (data, planId) => {
       toast({
         title: "Subscribed Successfully!",
         description: "You've joined this reading plan. Start reading today!",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/reading-plans/user/subscriptions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/reading-plans"] });
-      setActiveTab("my-plans");
+      
+      // Find the newly subscribed plan and select it directly
+      const newPlan = plans.find(p => p.id === planId);
+      if (newPlan) {
+        setSelectedPlan(newPlan);
+        setActiveTab("my-plans");
+      }
     },
     onError: () => {
       toast({
@@ -406,9 +412,10 @@ export default function BibleReadingPlans() {
   // Get subscribed plans
   const subscribedPlans = plansWithProgress.filter(plan => plan.subscription?.isActive);
 
-  // Auto-select single subscribed plan when on my-plans tab (only once)
+  // Auto-select single subscribed plan when on my-plans tab (only once) - but only if no plan is explicitly selected
   const [hasAutoSelected, setHasAutoSelected] = React.useState(false);
   React.useEffect(() => {
+    // Only auto-select if user hasn't explicitly selected a plan and there's exactly one subscribed plan
     if (activeTab === "my-plans" && subscribedPlans.length === 1 && !selectedPlan && subscribedPlans[0] && !hasAutoSelected) {
       console.log("DEBUG - Auto-selecting single plan:", subscribedPlans[0].name);
       setSelectedPlan(subscribedPlans[0]);
