@@ -687,7 +687,7 @@ export default function BibleReadingPlansFixed() {
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {filteredPlans.filter(plan => plan.subscriptionTier === 'servant').slice(0, 6).map((plan) => {
-                    const canAccess = userTier === 'servant' || userTier === 'torchbearer';
+                    const canAccess = (userTier || 'torchbearer') === 'servant' || (userTier || 'torchbearer') === 'torchbearer';
 
                     return (
                       <Card 
@@ -784,7 +784,7 @@ export default function BibleReadingPlansFixed() {
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer').slice(0, 6).map((plan) => {
-                    const canAccess = userTier === 'torchbearer';
+                    const canAccess = (userTier || 'torchbearer') === 'torchbearer';
 
                     return (
                       <Card 
