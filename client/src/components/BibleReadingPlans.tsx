@@ -274,9 +274,7 @@ export default function BibleReadingPlans() {
   // Subscribe to plan mutation
   const subscribeToPlanning = useMutation({
     mutationFn: async (planId: number) => {
-      return apiRequest(`/api/reading-plans/${planId}/subscribe`, {
-        method: "POST",
-      });
+      return apiRequest("POST", `/api/reading-plans/${planId}/subscribe`);
     },
     onSuccess: () => {
       toast({
@@ -298,10 +296,7 @@ export default function BibleReadingPlans() {
   // Record progress mutation
   const recordProgress = useMutation({
     mutationFn: async ({ planId, dayNumber, progressData }: { planId: number; dayNumber: number; progressData: any }) => {
-      return apiRequest(`/api/reading-plans/${planId}/progress/${dayNumber}`, {
-        method: "POST",
-        body: JSON.stringify(progressData),
-      });
+      return apiRequest("POST", `/api/reading-plans/${planId}/progress/${dayNumber}`, progressData);
     },
     onSuccess: () => {
       toast({

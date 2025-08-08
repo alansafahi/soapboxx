@@ -14853,7 +14853,12 @@ Please provide suggestions for the missing or incomplete sections.`
       `);
 
       if (existingSubscription.rows.length > 0) {
-        return res.status(400).json({ message: "Already subscribed to this plan" });
+        return res.status(200).json({ 
+          message: "Already subscribed to this plan",
+          subscriptionId: existingSubscription.rows[0].id,
+          planId: planId,
+          alreadySubscribed: true
+        });
       }
 
       // Create subscription
