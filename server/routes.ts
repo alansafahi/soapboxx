@@ -14551,19 +14551,7 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
-  app.get("/api/reading-plans/user/subscriptions", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user?.claims?.sub || req.user?.id;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const subscriptions = await storage.getUserReadingPlanSubscriptions(userId);
-      res.json(subscriptions);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch user reading plan subscriptions" });
-    }
-  });
+  // Removed duplicate endpoint - using the one at line 14783 that includes direct SQL
 
   app.post("/api/reading-plans/:id/subscribe", isAuthenticated, async (req: any, res) => {
     try {
