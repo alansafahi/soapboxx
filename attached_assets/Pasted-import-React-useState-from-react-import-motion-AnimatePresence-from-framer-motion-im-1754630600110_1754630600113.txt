@@ -1,0 +1,218 @@
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, Star, Lock, Crown, BookOpenText, ArrowRight, BadgeCheck, Users, Sparkles, PlayCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+
+/**
+ * SoapBox Super App – Upgrade Path Flow (Mock UI)
+ * Screens included:
+ * 1) PlanCompletionCelebrate – shown after finishing a Disciple plan
+ * 2) MidPlanNudge – shown around 50% completion
+ * 3) LockedFeatureModal – when tapping a locked premium feature
+ * 4) PastorInviteUpgrade – when a church leader recommends a higher-tier plan
+ * 5) UpgradeCheckout – trial/upgrade confirmation screen
+ *
+ * Notes:
+ * - TailwindCSS + shadcn/ui components
+ * - Motion transitions with Framer Motion
+ * - Replace placeholders with live data (userName, planName, stats, etc.)
+ */
+
+const ScreenWrapper: React.FC<{ children: React.ReactNode; keyId: string }>= ({ children, keyId }) => (
+  <AnimatePresence mode="wait">
+    <motion.div
+      key={keyId}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -16 }}
+      transition={{ duration: 0.25 }}
+      className="mx-auto max-w-2xl p-4 flex flex-col gap-4"
+    >
+      {children}
+    </motion.div>
+  </AnimatePresence>
+);
+
+const FeatureRow: React.FC<{ icon: React.ReactNode; title: string; desc: string }>= ({ icon, title, desc }) => (
+  <div className="flex items-start gap-3">
+    <div className="mt-1 shrink-0">{icon}</div>
+    <div>
+      <p className="font-medium leading-tight">{title}</p>
+      <p className="text-sm text-muted-foreground leading-snug">{desc}</p>
+    </div>
+  </div>
+);
+
+function PlanCompletionCelebrate({ onNext }: { onNext: () => void }) {
+  return (
+    <ScreenWrapper keyId="complete">
+      <Card className="rounded-2xl shadow-md">
+        <CardHeader className="text-center">
+          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+            <BadgeCheck className="h-6 w-6" />
+          </div>
+          <CardTitle className="text-2xl">Well done, Alex!</CardTitle>
+          <CardDescription>
+            You just completed <span className="font-medium">“Psalms & Proverbs in 90 Days.”</span>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Star className="h-4 w-4" />
+            <p className="text-sm">You’ve kept a 28‑day SOAP streak. Keep the momentum going!</p>
+          </div>
+          <div className="grid gap-3 rounded-xl bg-muted/40 p-4">
+            <p className="text-sm font-semibold">Next step: Go deeper with the <span className="text-primary">Servant Plan</span></p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <FeatureRow icon={<BookOpenText className="h-4 w-4" />} title="Character Studies" desc="Journey of Paul, Story of David, and more." />
+              <FeatureRow icon={<Users className="h-4 w-4" />} title="Group Plan Sync" desc="Read the same plan with your small group." />
+              <FeatureRow icon={<Sparkles className="h-4 w-4" />} title="AI Life Application" desc="Daily prompts to live out the Word." />
+              <FeatureRow icon={<PlayCircle className="h-4 w-4" />} title="Guided Sessions" desc="Weekly recaps and application questions." />
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <Button className="flex-1" onClick={onNext}>
+              Start “Gospels in 40 Days” <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+            <Button variant="outline" className="flex-1">Browse Servant Plans</Button>
+          </div>
+          <p className="text-xs text-muted-foreground text-center">7‑day Servant trial included. Cancel anytime.</p>
+        </CardContent>
+      </Card>
+    </ScreenWrapper>
+  );
+}
+
+function MidPlanNudge({ onNext }: { onNext: () => void }) {
+  return (
+    <ScreenWrapper keyId="mid">
+      <Card className="rounded-2xl shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><BookOpenText className="h-5 w-5" /> Halfway There!</CardTitle>
+          <CardDescription>You’re 50% through “Daily Devotions with the Gospels.” Here’s how to go deeper next.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Progress value={50} />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <FeatureRow icon={<Sparkles className="h-4 w-4" />} title="AI Application Prompts" desc="Turn today’s reading into practical steps." />
+            <FeatureRow icon={<Users className="h-4 w-4" />} title="Read With Your Group" desc="Sync your plan with your small group." />
+          </div>
+          <div className="flex gap-3">
+            <Button className="flex-1" onClick={onNext}>Try Servant Plan Free</Button>
+            <Button variant="outline" className="flex-1">Not Now</Button>
+          </div>
+        </CardContent>
+      </Card>
+    </ScreenWrapper>
+  );
+}
+
+function LockedFeatureModal({ onUpgrade, onClose }: { onUpgrade: () => void; onClose: () => void }) {
+  return (
+    <ScreenWrapper keyId="locked">
+      <Card className="rounded-2xl shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Lock className="h-5 w-5" /> Feature Locked</CardTitle>
+          <CardDescription>Parallel Bible + historical insights are available on Torchbearer.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-3">
+            <FeatureRow icon={<Crown className="h-4 w-4" />} title="Scholar Mode" desc="Timelines, maps, and context at a glance." />
+            <FeatureRow icon={<PlayCircle className="h-4 w-4" />} title="AI Audio Bible" desc="Listen to Scripture on your commute." />
+          </div>
+          <div className="flex gap-3">
+            <Button className="flex-1" onClick={onUpgrade}>Start Torchbearer Trial</Button>
+            <Button variant="outline" className="flex-1" onClick={onClose}>Keep Reading</Button>
+          </div>
+        </CardContent>
+      </Card>
+    </ScreenWrapper>
+  );
+}
+
+function PastorInviteUpgrade({ onAccept, onDecline }: { onAccept: () => void; onDecline: () => void }) {
+  return (
+    <ScreenWrapper keyId="pastor">
+      <Card className="rounded-2xl shadow-md">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> Your Pastor Invited You</CardTitle>
+          <CardDescription>
+            NorthPoint Church is reading <span className="font-medium">“Journey of Paul.”</span> Join with a 7‑day Servant trial.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <FeatureRow icon={<Check className="h-4 w-4" />} title="Auto-Sync" desc="We’ll align your plan with the church schedule." />
+          <FeatureRow icon={<Check className="h-4 w-4" />} title="Community Prompts" desc="Weekly reflections from your leaders." />
+          <div className="flex gap-3">
+            <Button className="flex-1" onClick={onAccept}>Join the Plan</Button>
+            <Button variant="outline" className="flex-1" onClick={onDecline}>Maybe Later</Button>
+          </div>
+        </CardContent>
+      </Card>
+    </ScreenWrapper>
+  );
+}
+
+function UpgradeCheckout({ onFinish }: { onFinish: () => void }) {
+  return (
+    <ScreenWrapper keyId="checkout">
+      <Card className="rounded-2xl shadow-md">
+        <CardHeader>
+          <CardTitle>Servant Plan – 7‑Day Free Trial</CardTitle>
+          <CardDescription>Upgrade now. Cancel anytime during the trial.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-2">
+            <div className="flex items-center justify-between text-sm"><span>Monthly</span><span className="font-semibold">$5.00</span></div>
+            <div className="flex items-center justify-between text-sm text-muted-foreground"><span>Trial</span><span>7 days free</span></div>
+          </div>
+          <div className="rounded-xl bg-muted/40 p-4 space-y-2">
+            <FeatureRow icon={<Sparkles className="h-4 w-4" />} title="AI Life Application" desc="Tailored prompts tied to your reading." />
+            <FeatureRow icon={<Users className="h-4 w-4" />} title="Group Plan Sync" desc="Read with your small group or church." />
+            <FeatureRow icon={<BookOpenText className="h-4 w-4" />} title="Character & Topical Studies" desc="Paul, David, Forgiveness, Joy, and more." />
+          </div>
+          <Button className="w-full" onClick={onFinish}>Start Free Trial</Button>
+          <p className="text-xs text-muted-foreground text-center">By starting a trial, you agree to the Terms and Privacy Policy.</p>
+        </CardContent>
+      </Card>
+    </ScreenWrapper>
+  );
+}
+
+export default function UpgradePathMock() {
+  const [step, setStep] = useState<"complete" | "mid" | "locked" | "pastor" | "checkout" | "done">("complete");
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+      {step === "complete" && <PlanCompletionCelebrate onNext={() => setStep("checkout")} />}
+      {step === "mid" && <MidPlanNudge onNext={() => setStep("checkout")} />}
+      {step === "locked" && <LockedFeatureModal onUpgrade={() => setStep("checkout")} onClose={() => setStep("done")} />}
+      {step === "pastor" && <PastorInviteUpgrade onAccept={() => setStep("checkout")} onDecline={() => setStep("done")} />}
+      {step === "checkout" && <UpgradeCheckout onFinish={() => setStep("done")} />}
+
+      {step === "done" && (
+        <ScreenWrapper keyId="done">
+          <Card className="rounded-2xl shadow-md">
+            <CardHeader>
+              <CardTitle>All set! 🎉</CardTitle>
+              <CardDescription>Your next plan is queued. Keep your SOAP streak going.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button onClick={() => setStep("complete")} className="w-full">Replay Demo</Button>
+            </CardContent>
+          </Card>
+        </ScreenWrapper>
+      )}
+
+      {/* Quick nav to preview different triggers */}
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 flex gap-2 bg-white/80 backdrop-blur rounded-full shadow px-3 py-2">
+        <Button size="sm" variant={step==="complete"?"default":"outline"} onClick={() => setStep("complete")}>Plan Complete</Button>
+        <Button size="sm" variant={step==="mid"?"default":"outline"} onClick={() => setStep("mid")}>Mid-Plan</Button>
+        <Button size="sm" variant={step==="locked"?"default":"outline"} onClick={() => setStep("locked")}>Locked Feature</Button>
+        <Button size="sm" variant={step==="pastor"?"default":"outline"} onClick={() => setStep("pastor")}>Pastor Invite</Button>
+      </div>
+    </div>
+  );
+}

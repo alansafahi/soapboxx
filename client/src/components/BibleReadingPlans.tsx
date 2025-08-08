@@ -16,6 +16,8 @@ import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Targe
 import type { ReadingPlan, ReadingPlanDay, UserReadingPlanSubscription, UserReadingProgress, EnhancedMoodIndicator } from "@shared/schema";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EnhancedMoodIndicatorManager from "@/components/emi/EnhancedMoodIndicatorManager";
+import { useUpgradeFlow } from "@/hooks/useUpgradeFlow";
+import UpgradePathManager from "@/components/upgrade-flow/UpgradePathManager";
 
 interface ReadingPlanWithProgress extends ReadingPlan {
   subscription?: UserReadingPlanSubscription;
@@ -259,6 +261,17 @@ export default function BibleReadingPlans() {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Initialize upgrade flow
+  const {
+    showUpgradeFlow,
+    trigger,
+    planData,
+    triggerLockedFeature,
+    closeUpgradeFlow,
+    handleUpgradeSuccess,
+    userTier
+  } = useUpgradeFlow(selectedPlan?.id);
 
   // Fetch all available reading plans
   const { data: plans = [], isLoading: plansLoading } = useQuery<ReadingPlan[]>({
@@ -1079,6 +1092,15 @@ export default function BibleReadingPlans() {
             )}
           </TabsContent>
         </Tabs>
+
+        {/* Upgrade Flow Manager */}
+        <UpgradePathManager 
+          isVisible={showUpgradeFlow}
+          trigger={trigger}
+          planData={planData}
+          onClose={closeUpgradeFlow}
+          onUpgrade={handleUpgradeSuccess}
+        />
       </div>
     </div>
   );

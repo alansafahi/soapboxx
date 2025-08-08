@@ -1,0 +1,153 @@
+Here’s how I’d map your existing SoapBox Super App reading plans into a tiered, upgrade-enticing structure that encourages users to grow spiritually and move up the subscription ladder.
+
+1. Disciple Plan (Free – Foundational)
+Positioning: “Walk daily with Christ — start your journey here.”
+Goal: Build a daily reading habit, introduce variety, and give users a taste of themed studies.
+
+Current Plans (Keep as is):
+
+Full-Year Structured:
+
+New Testament in a Year (KJV & NIV)
+
+Old Testament in a Year (KJV & NIV)
+
+Focused Collections:
+
+Psalms & Proverbs in 90 Days
+
+Daily Devotions with the Gospels
+
+Book Studies:
+
+The Book of John Study
+
+The Book of Romans Study
+
+Thematic:
+
+The Life of Jesus
+
+A Plan for New Believers
+
+Sectional Reads:
+
+Genesis to Deuteronomy
+
+The Prophets
+
+Monetization Angle:
+
+Include light AI commentary for 1 key verse per day.
+
+Lock advanced study tools (parallel translations, maps, timelines) for higher tiers.
+
+Surface “Next Step” prompts after plan completion that recommend Servant-level plans.
+
+2. Servant Plan (Standard – Enhanced)
+Positioning: “Go deeper, live faithfully, and apply God’s Word daily.”
+Goal: Offer richer, thematic journeys that build on foundational habits.
+
+Current Plans (Keep):
+
+Fast Track Gospels:
+
+Gospels in 40 Days
+
+Character Studies:
+
+The Journey of Paul
+
+The Story of David
+
+Life Application Themes:
+
+Peace in Anxiety
+
+Joy & Gratitude
+
+Forgiveness
+
+Topical Deep Dives:
+
+The Holy Spirit
+
+Stewardship
+
+Focused Book Studies:
+
+The Parables of Jesus
+
+The Sermon on the Mount
+
+Book of Acts Study
+
+The Revelation of John
+
+Enhancements for Servant Tier:
+
+AI-powered daily life application prompts.
+
+Group Plan Sync – join the same plan with your church or small group.
+
+Weekly “Big Picture” recap with scripture cross-references.
+
+Upsell Hooks:
+
+After completing a Servant Plan, highlight related Torchbearer Plans with advanced commentary or full-Bible timelines.
+
+3. Torchbearer Plan (Premium – Advanced)
+Positioning: “Carry the light — immerse yourself in the full counsel of God.”
+Goal: Deliver comprehensive, scholarly, and immersive experiences.
+
+Current Plans (Keep):
+
+Full-Bible Coverage:
+
+The Bible in Chronological Order
+
+As It Happened (Bible.com Timeline)
+
+AI Audio Bible Experiences:
+
+Commute with the Gospels
+
+Bedtime Psalms
+
+Wisdom & Literature:
+
+The Wisdom of Proverbs & Ecclesiastes
+
+Expanded Canon:
+
+The Apocrypha Explained
+
+Advanced Studies:
+
+Reading the Pentateuch
+
+The Minor Prophets in Order
+
+Enhancements for Torchbearer Tier:
+
+Parallel Bible versions with original Greek/Hebrew word study.
+
+AI-summarized theological commentary from trusted sources.
+
+Offline access + audio for all plans.
+
+“Scholar Mode” – timelines, maps, and historical context.
+
+Retention Hook:
+
+Release exclusive new Torchbearer plans every quarter so premium users never want to downgrade.
+
+How This Structure Drives Upgrades
+Clear Step-Up Value: Each tier adds tools and depth that the previous one can’t match.
+
+Church Integration: Pastors can assign plans across all tiers, but advanced plans only work for members with matching subscriptions.
+
+Gamified Progression: Completing a Disciple plan unlocks badges that hint at Servant/Torchbearer benefits.
+
+Thematic Storytelling: “Disciple → Servant → Torchbearer” feels like a spiritual growth journey, not just a payment plan.
+

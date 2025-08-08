@@ -56,6 +56,7 @@ import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-even
 import enhancedRoutes from "./enhanced-routes";
 import MappingService from "./mapping-service";
 import { uploadRoutes } from "./routes/upload";
+import subscriptionRoutes from "./routes/subscription";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -16858,6 +16859,9 @@ Please provide suggestions for the missing or incomplete sections.`
       res.status(500).json({ message: "Failed to submit weekly check-in" });
     }
   });
+
+  // Subscription management routes  
+  app.use('/api/subscription', subscriptionRoutes);
 
   // Simple health check endpoint
   app.get('/health', (req, res) => {

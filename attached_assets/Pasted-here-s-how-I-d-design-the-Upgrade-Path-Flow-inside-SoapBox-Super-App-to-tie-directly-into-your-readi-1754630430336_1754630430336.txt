@@ -1,0 +1,54 @@
+here’s how I’d design the Upgrade Path Flow inside SoapBox Super App to tie directly into your reading plans and make users feel like they’re naturally “graduating” to the next tier.
+
+Upgrade Path Flow for Reading Plans
+1. Trigger Moments
+We don’t just show “Upgrade” buttons — we catch users at moments of spiritual momentum:
+
+Plan Completion Screen: After finishing a Disciple plan, show a celebratory screen with a badge + invitation to start a Servant plan.
+
+Mid-Plan Peak Engagement: At 50% completion of a plan, show “Next Steps” recommendations from the next tier.
+
+Feature Curiosity: If a user taps a locked feature (parallel Bible, AI commentary, audio), show an upgrade preview.
+
+2. Visual Structure
+Top Section — Celebration
+
+Confetti animation + “Well Done, [First Name]!”
+
+Highlight the spiritual achievement: “You’ve just completed Psalms & Proverbs in 90 Days.”
+
+Middle Section — Unlock Vision
+
+Title: “It’s time to go deeper.”
+
+Show the next-tier benefits in context:
+
+For Disciple → Servant: “Add life application themes, character studies, and group sync.”
+
+For Servant → Torchbearer: “Unlock full-Bible timelines, AI audio, and historical insights.”
+
+Bottom Section — Easy Next Step
+
+One-click Start Your Next Plan button (includes free trial of next tier).
+
+Subtext: “Continue your journey today — first 7 days on us.”
+
+3. Psychological Drivers
+Progression Language: Use terms like “Next Step,” “Level Up,” and “Go Deeper” instead of “Upgrade.”
+
+Narrative Growth: Link tier names to spiritual growth stages (Disciple → Servant → Torchbearer).
+
+Social Proof: Show a quote or stat — “3,482 members completed the Journey of Paul and loved it!”
+
+Loss Aversion: “Don’t miss next week’s AI-led thematic deep dive — only available in Servant Plan.”
+
+4. Cross-Tier Features for Pull
+From Tier	Teaser Feature	Why It Works
+Disciple → Servant	Group Plan Sync	“Join your small group in studying Paul’s letters together.”
+Servant → Torchbearer	AI Audio Bible + Timelines	“Experience the Gospels during your commute with historical context.”
+
+5. Integration with Churches
+If a pastor recommends a plan in Servant or Torchbearer tiers, show a “Your Pastor Invited You” banner with an upgrade trial link.
+
+This makes it relational instead of transactional.
+
