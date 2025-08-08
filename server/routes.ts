@@ -26,7 +26,9 @@ import {
   prayerCircleMembers,
   prayerCircleReports,
   prayerCircleUpdates,
-  volunteerOpportunities
+  volunteerOpportunities,
+  readingPlans,
+  readingPlanDays
 } from "../shared/schema";
 import * as schema from "../shared/schema";
 const { userPoints } = schema;
@@ -51,6 +53,7 @@ import { generateSoapSuggestions, generateCompleteSoapEntry, enhanceSoapEntry, g
 import { LearningIntegration } from "./learning-integration.js";
 import { milestoneService } from "./milestone-service";
 import { generateThematicPlan, saveGeneratedPlan, generatePersonalizedAudioPlan, type ThematicPlanRequest } from "./ai-reading-plans";
+import { bulkGenerateContentForEmptyPlans, generateContentForSpecificPlan } from "./utils/contentGeneration";
 
 import { getCachedWorldEvents, getSpiritualResponseToEvents } from "./world-events";
 import enhancedRoutes from "./enhanced-routes";
@@ -16862,6 +16865,90 @@ Please provide suggestions for the missing or incomplete sections.`
 
   // Subscription management routes  
   app.use('/api/subscription', subscriptionRoutes);
+
+  // Reading Plan Content Generation Routes
+  // Bulk generate content for all empty plans (Admin only)
+  app.post('/api/reading-plans/generate-content/bulk', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      // Only allow admin users to bulk generate content
+      const user = await storage.getUser(userId);
+      if (!user || !['soapbox_owner', 'system_admin'].includes(user.role)) {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+
+      // Start bulk generation (this is a long-running process)
+      bulkGenerateContentForEmptyPlans()
+        .then(() => console.log('Bulk content generation completed'))
+        .catch(error => console.error('Bulk content generation failed:', error));
+
+      res.json({ 
+        message: 'Bulk content generation started. This may take several minutes.',
+        status: 'started'
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to start bulk content generation' });
+    }
+  });
+
+  // Generate content for specific plan
+  app.post('/api/reading-plans/:planId/generate-content', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      const planId = parseInt(req.params.planId);
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      // Allow plan generation for authenticated users (they can regenerate their subscribed plans)
+      const generatedContent = await generateContentForSpecificPlan(planId);
+      
+      res.json({ 
+        message: `Generated ${generatedContent.length} days of content`,
+        contentGenerated: generatedContent.length,
+        planId
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        message: 'Failed to generate content for plan',
+        error: error.message 
+      });
+    }
+  });
+
+  // Get content generation status
+  app.get('/api/reading-plans/content-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session.userId;
+      if (!userId) {
+        return res.status(401).json({ message: 'Authentication required' });
+      }
+
+      // Get current content status
+      const totalPlansResult = await db.select({ count: sql`count(*)` }).from(readingPlans).where(eq(readingPlans.isActive, true));
+      const plansWithContentResult = await db.select({ count: sql`count(distinct plan_id)` }).from(readingPlanDays);
+      const totalDaysResult = await db.select({ count: sql`count(*)` }).from(readingPlanDays);
+
+      const totalPlans = Number(totalPlansResult[0]?.count || 0);
+      const plansWithContent = Number(plansWithContentResult[0]?.count || 0);
+      const totalDays = Number(totalDaysResult[0]?.count || 0);
+
+      res.json({
+        totalPlans,
+        plansWithContent,
+        plansWithoutContent: totalPlans - plansWithContent,
+        totalDays,
+        completionPercentage: totalPlans > 0 ? Math.round((plansWithContent / totalPlans) * 100) : 0
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to get content status' });
+    }
+  });
 
   // Simple health check endpoint
   app.get('/health', (req, res) => {
