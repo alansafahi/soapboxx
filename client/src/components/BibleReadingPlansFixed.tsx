@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2 } from "lucide-react";
+import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, ChevronDown, ChevronUp, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2 } from "lucide-react";
 import type { ReadingPlan, ReadingPlanDay, UserReadingPlanSubscription, UserReadingProgress, EnhancedMoodIndicator } from "@shared/schema";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EnhancedMoodIndicatorManager from "@/components/emi/EnhancedMoodIndicatorManager";
@@ -221,6 +221,11 @@ export default function BibleReadingPlansFixed() {
   const [selectedDay, setSelectedDay] = useState<ReadingPlanDay | null>(null);
   const [activeTab, setActiveTab] = useState("discover");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  
+  // Collapsible state for each tier
+  const [discipleExpanded, setDiscipleExpanded] = useState(false);
+  const [servantExpanded, setServantExpanded] = useState(false);
+  const [torchbearerExpanded, setTorchbearerExpanded] = useState(false);
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -586,7 +591,7 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredPlans.filter(plan => ['disciple', 'free', null, undefined].includes(plan.subscriptionTier) || ['disciple', 'free', null, undefined].includes(plan.subscription_tier)).slice(0, 9).map((plan) => {
+                  {filteredPlans.filter(plan => ['disciple', 'free', null, undefined].includes(plan.subscriptionTier || plan.subscription_tier)).slice(0, discipleExpanded ? undefined : 6).map((plan) => {
                     const isSubscribed = !!plan.subscription?.isActive;
 
                     return (
@@ -672,6 +677,29 @@ export default function BibleReadingPlansFixed() {
                     );
                   })}
                 </div>
+                
+                {/* Show More Button for Disciple Plans */}
+                {filteredPlans.filter(plan => ['disciple', 'free', null, undefined].includes(plan.subscriptionTier || plan.subscription_tier)).length > 6 && (
+                  <div className="text-center">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setDiscipleExpanded(!discipleExpanded)}
+                      className="px-6 py-2 border-green-200 text-green-600 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/20"
+                    >
+                      {discipleExpanded ? (
+                        <>
+                          Show Less
+                          <ChevronUp className="w-4 h-4 ml-2" />
+                        </>
+                      ) : (
+                        <>
+                          Show More ({filteredPlans.filter(plan => ['disciple', 'free', null, undefined].includes(plan.subscriptionTier || plan.subscription_tier)).length - 6} more)
+                          <ChevronDown className="w-4 h-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* Servant Plan (Standard) */}
@@ -686,7 +714,7 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredPlans.filter(plan => plan.subscriptionTier === 'servant' || plan.subscription_tier === 'servant').slice(0, 6).map((plan) => {
+                  {filteredPlans.filter(plan => plan.subscriptionTier === 'servant' || plan.subscription_tier === 'servant').slice(0, servantExpanded ? undefined : 6).map((plan) => {
                     const canAccess = (userTier || 'torchbearer') === 'servant' || (userTier || 'torchbearer') === 'torchbearer';
 
                     return (
@@ -769,6 +797,29 @@ export default function BibleReadingPlansFixed() {
                     );
                   })}
                 </div>
+                
+                {/* Show More Button for Servant Plans */}
+                {filteredPlans.filter(plan => plan.subscriptionTier === 'servant' || plan.subscription_tier === 'servant').length > 6 && (
+                  <div className="text-center">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setServantExpanded(!servantExpanded)}
+                      className="px-6 py-2 border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                    >
+                      {servantExpanded ? (
+                        <>
+                          Show Less
+                          <ChevronUp className="w-4 h-4 ml-2" />
+                        </>
+                      ) : (
+                        <>
+                          Show More ({filteredPlans.filter(plan => plan.subscriptionTier === 'servant' || plan.subscription_tier === 'servant').length - 6} more)
+                          <ChevronDown className="w-4 h-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* Torchbearer Plan (Premium) */}
@@ -783,7 +834,7 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer' || plan.subscription_tier === 'torchbearer').slice(0, 6).map((plan) => {
+                  {filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer' || plan.subscription_tier === 'torchbearer').slice(0, torchbearerExpanded ? undefined : 6).map((plan) => {
                     const canAccess = (userTier || 'torchbearer') === 'torchbearer';
 
                     return (
@@ -880,6 +931,29 @@ export default function BibleReadingPlansFixed() {
                     );
                   })}
                 </div>
+                
+                {/* Show More Button for Torchbearer Plans */}
+                {filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer' || plan.subscription_tier === 'torchbearer').length > 6 && (
+                  <div className="text-center">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setTorchbearerExpanded(!torchbearerExpanded)}
+                      className="px-6 py-2 border-purple-200 text-purple-600 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-400 dark:hover:bg-purple-900/20"
+                    >
+                      {torchbearerExpanded ? (
+                        <>
+                          Show Less
+                          <ChevronUp className="w-4 h-4 ml-2" />
+                        </>
+                      ) : (
+                        <>
+                          Show More ({filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer' || plan.subscription_tier === 'torchbearer').length - 6} more)
+                          <ChevronDown className="w-4 h-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
