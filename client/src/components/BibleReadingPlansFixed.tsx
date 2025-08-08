@@ -227,6 +227,25 @@ export default function BibleReadingPlansFixed() {
   const [servantExpanded, setServantExpanded] = useState(false);
   const [torchbearerExpanded, setTorchbearerExpanded] = useState(false);
   
+  // Helper function to maintain scroll position when collapsing
+  const handleToggleExpanded = (currentState: boolean, setter: (value: boolean) => void, sectionId: string) => {
+    if (currentState) {
+      // When collapsing, scroll to the section header to maintain context
+      const sectionElement = document.getElementById(sectionId);
+      if (sectionElement) {
+        setter(!currentState);
+        setTimeout(() => {
+          sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      } else {
+        setter(!currentState);
+      }
+    } else {
+      // When expanding, just toggle without scrolling
+      setter(!currentState);
+    }
+  };
+  
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -581,7 +600,7 @@ export default function BibleReadingPlansFixed() {
             <div className="space-y-12">
               {/* Disciple Plan (Free) */}
               <div className="space-y-6">
-                <div className="text-center">
+                <div id="disciple-section" className="text-center">
                   <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-full shadow-lg">
                     <Shield className="w-6 h-6" />
                     <span className="font-bold text-xl">Disciple Plan</span>
@@ -683,7 +702,7 @@ export default function BibleReadingPlansFixed() {
                   <div className="text-center">
                     <Button 
                       variant="outline" 
-                      onClick={() => setDiscipleExpanded(!discipleExpanded)}
+                      onClick={() => handleToggleExpanded(discipleExpanded, setDiscipleExpanded, 'disciple-section')}
                       className="px-6 py-2 border-green-200 text-green-600 hover:bg-green-50 dark:border-green-800 dark:text-green-400 dark:hover:bg-green-900/20"
                     >
                       {discipleExpanded ? (
@@ -704,7 +723,7 @@ export default function BibleReadingPlansFixed() {
 
               {/* Servant Plan (Standard) */}
               <div className="space-y-6">
-                <div className="text-center">
+                <div id="servant-section" className="text-center">
                   <div className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-full shadow-lg">
                     <Heart className="w-6 h-6" />
                     <span className="font-bold text-xl">Servant Plan</span>
@@ -803,7 +822,7 @@ export default function BibleReadingPlansFixed() {
                   <div className="text-center">
                     <Button 
                       variant="outline" 
-                      onClick={() => setServantExpanded(!servantExpanded)}
+                      onClick={() => handleToggleExpanded(servantExpanded, setServantExpanded, 'servant-section')}
                       className="px-6 py-2 border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-900/20"
                     >
                       {servantExpanded ? (
@@ -824,7 +843,7 @@ export default function BibleReadingPlansFixed() {
 
               {/* Torchbearer Plan (Premium) */}
               <div className="space-y-6">
-                <div className="text-center">
+                <div id="torchbearer-section" className="text-center">
                   <div className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-full shadow-lg">
                     <Crown className="w-6 h-6" />
                     <span className="font-bold text-xl">Torchbearer Plan</span>
@@ -937,7 +956,7 @@ export default function BibleReadingPlansFixed() {
                   <div className="text-center">
                     <Button 
                       variant="outline" 
-                      onClick={() => setTorchbearerExpanded(!torchbearerExpanded)}
+                      onClick={() => handleToggleExpanded(torchbearerExpanded, setTorchbearerExpanded, 'torchbearer-section')}
                       className="px-6 py-2 border-purple-200 text-purple-600 hover:bg-purple-50 dark:border-purple-800 dark:text-purple-400 dark:hover:bg-purple-900/20"
                     >
                       {torchbearerExpanded ? (
