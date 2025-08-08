@@ -816,7 +816,7 @@ export default function ProfilePage() {
                   </div>
 
                   {/* Plan Features */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {/* Disciple Plan */}
                     <Card className={`${profile?.subscriptionTier === 'disciple' ? 'ring-2 ring-green-200 bg-green-50 dark:bg-green-900/10' : ''}`}>
                       <CardHeader>
@@ -843,9 +843,13 @@ export default function ProfilePage() {
                             <li>✓ Daily inspirations</li>
                           </ul>
                         </div>
-                        {profile?.subscriptionTier !== 'disciple' && (
+                        {profile?.subscriptionTier === 'disciple' ? (
                           <Button variant="outline" className="w-full" disabled>
-                            Downgrade
+                            Your Current Calling
+                          </Button>
+                        ) : (
+                          <Button variant="outline" className="w-full">
+                            Walk Humbly with Christ
                           </Button>
                         )}
                       </CardContent>
@@ -879,15 +883,15 @@ export default function ProfilePage() {
                         </div>
                         {profile?.subscriptionTier === 'disciple' ? (
                           <Button className="w-full bg-blue-600 hover:bg-blue-700">
-                            Upgrade to Servant
+                            Step Deeper in Service
                           </Button>
                         ) : profile?.subscriptionTier === 'servant' ? (
                           <Button variant="outline" className="w-full" disabled>
-                            Current Plan
+                            Your Current Calling
                           </Button>
                         ) : (
                           <Button variant="outline" className="w-full">
-                            Downgrade to Servant
+                            Return to Service
                           </Button>
                         )}
                       </CardContent>
@@ -921,11 +925,11 @@ export default function ProfilePage() {
                         </div>
                         {profile?.subscriptionTier !== 'torchbearer' ? (
                           <Button className="w-full bg-purple-600 hover:bg-purple-700">
-                            Upgrade to Torchbearer
+                            Shine Your Light Further
                           </Button>
                         ) : (
                           <Button variant="outline" className="w-full" disabled>
-                            Current Plan
+                            Your Current Calling
                           </Button>
                         )}
                       </CardContent>

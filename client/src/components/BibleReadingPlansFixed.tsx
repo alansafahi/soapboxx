@@ -508,18 +508,18 @@ export default function BibleReadingPlansFixed() {
 
   // Main reading plans view with subscription tiers
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20 py-8">
-      <div className="container mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20 py-6 sm:py-8">
+      <div className="container mx-auto px-4 sm:px-6">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full mb-6">
             <BookOpen className="w-6 h-6" />
             <span className="font-semibold text-lg">Bible Reading Plans</span>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+          <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
             Deepen Your Faith Journey
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Transform your spiritual life with structured Bible reading plans designed to strengthen your relationship with God.
           </p>
         </div>
@@ -585,7 +585,7 @@ export default function BibleReadingPlansFixed() {
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">Essential reading plans to begin your spiritual journey</p>
                 </div>
                 
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {filteredPlans.filter(plan => ['disciple', 'free', null, undefined].includes(plan.subscriptionTier)).slice(0, 9).map((plan) => {
                     const isSubscribed = !!plan.subscription?.isActive;
 
@@ -685,7 +685,7 @@ export default function BibleReadingPlansFixed() {
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">Character studies, focused themes, and deeper spiritual growth</p>
                 </div>
                 
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {/* Show placeholder cards since we don't have servant tier plans yet */}
                   {[1, 2, 3, 4, 5, 6].map((i) => {
                     const canAccess = userTier === 'servant' || userTier === 'torchbearer';
@@ -782,7 +782,7 @@ export default function BibleReadingPlansFixed() {
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">AI-powered personalization, advanced features, and leadership content</p>
                 </div>
                 
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {/* Show placeholder cards since we don't have torchbearer tier plans yet */}
                   {[1, 2, 3, 4, 5, 6].map((i) => {
                     const canAccess = userTier === 'torchbearer';
@@ -890,7 +890,7 @@ export default function BibleReadingPlansFixed() {
                 </Button>
               </div>
             ) : (
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {subscribedPlans.map((plan) => (
                   <Card 
                     key={plan.id}
