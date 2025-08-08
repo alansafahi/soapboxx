@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, Lock, Crown, Sparkles, Headphones, User, Eye, Shield } from "lucide-react";
+import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2 } from "lucide-react";
 import type { ReadingPlan, ReadingPlanDay, UserReadingPlanSubscription, UserReadingProgress, EnhancedMoodIndicator } from "@shared/schema";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EnhancedMoodIndicatorManager from "@/components/emi/EnhancedMoodIndicatorManager";
@@ -586,7 +586,7 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredPlans.filter(plan => ['disciple', 'free', null, undefined].includes(plan.subscriptionTier)).slice(0, 9).map((plan) => {
+                  {filteredPlans.filter(plan => ['disciple', 'free', null, undefined].includes(plan.subscriptionTier) || ['disciple', 'free', null, undefined].includes(plan.subscription_tier)).slice(0, 9).map((plan) => {
                     const isSubscribed = !!plan.subscription?.isActive;
 
                     return (
@@ -686,7 +686,7 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredPlans.filter(plan => plan.subscriptionTier === 'servant').slice(0, 6).map((plan) => {
+                  {filteredPlans.filter(plan => plan.subscriptionTier === 'servant' || plan.subscription_tier === 'servant').slice(0, 6).map((plan) => {
                     const canAccess = (userTier || 'torchbearer') === 'servant' || (userTier || 'torchbearer') === 'torchbearer';
 
                     return (
@@ -783,7 +783,7 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer').slice(0, 6).map((plan) => {
+                  {filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer' || plan.subscription_tier === 'torchbearer').slice(0, 6).map((plan) => {
                     const canAccess = (userTier || 'torchbearer') === 'torchbearer';
 
                     return (
