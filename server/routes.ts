@@ -51,32 +51,174 @@ interface RequestWithSession extends express.Request {
 import { AIPersonalizationService } from "./ai-personalization";
 // Import AI pastoral functions
 async function generateSoapSuggestions(scripture: string, scriptureReference: string, contextualInfo: any) {
-  // Simple fallback implementation
-  return {
-    observation: "What do you observe in this passage?",
-    application: "How can you apply this to your daily life?",
-    prayer: "Take a moment to pray about what you've learned."
-  };
+  try {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('AI service not configured');
+    }
+
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    
+    // Build context for the AI
+    let contextPrompt = '';
+    if (contextualInfo?.userMood) {
+      contextPrompt += `User's current mood: ${contextualInfo.userMood}\n`;
+    }
+    
+    const prompt = `As a pastoral AI assistant, provide meaningful spiritual reflections for this Scripture passage:
+
+Scripture: ${scripture}
+Reference: ${scriptureReference}
+
+${contextPrompt}
+
+Please provide thoughtful suggestions for each S.O.A.P. component that are specific to this passage and meaningful for spiritual growth.
+
+Respond with JSON in this format:
+{
+  "observation": "Your specific observation about this passage",
+  "application": "Your practical application for daily life", 
+  "prayer": "Your suggested prayer response"
+}`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+      max_tokens: 800,
+      temperature: 0.7
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    return {
+      observation: result.observation || "What do you observe in this passage?",
+      application: result.application || "How can you apply this to your daily life?",
+      prayer: result.prayer || "Take a moment to pray about what you've learned."
+    };
+  } catch (error) {
+    console.error('AI suggestion error:', error);
+    // Fallback to basic questions if AI fails
+    return {
+      observation: "What specific truths or insights do you see in this passage?",
+      application: "How can you apply this Scripture to your life today?",
+      prayer: "What would you like to say to God about this passage?"
+    };
+  }
 }
 
 async function generateCompleteSoapEntry(contextualInfo: any, userId: string, recentScriptures: string[]) {
-  // Simple fallback implementation
-  return {
-    scripture: "Be still, and know that I am God.",
-    scriptureReference: "Psalm 46:10",
-    observation: "God calls us to be still and recognize His sovereignty.",
-    application: "Take time for quiet reflection today.",
-    prayer: "Help me to trust in Your sovereignty, Lord."
-  };
+  try {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('AI service not configured');
+    }
+
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    
+    // Build context for the AI
+    let contextPrompt = '';
+    if (contextualInfo?.userMood) {
+      contextPrompt += `User's current mood: ${contextualInfo.userMood}\n`;
+    }
+    if (recentScriptures && recentScriptures.length > 0) {
+      contextPrompt += `Recent scriptures to avoid: ${recentScriptures.join(', ')}\n`;
+    }
+    
+    const prompt = `As a pastoral AI assistant, generate a complete S.O.A.P. devotional entry with a relevant Scripture passage:
+
+${contextPrompt}
+
+Please provide:
+1. An appropriate Scripture verse (avoid recent ones if listed)
+2. A thoughtful observation about the passage
+3. A practical application for daily life
+4. A meaningful prayer
+
+Respond with JSON in this format:
+{
+  "scripture": "The Scripture text",
+  "scriptureReference": "Book Chapter:Verse",
+  "observation": "Your observation about this passage",
+  "application": "Your practical application", 
+  "prayer": "Your suggested prayer"
+}`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+      max_tokens: 1000,
+      temperature: 0.7
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    return {
+      scripture: result.scripture || "Be still, and know that I am God.",
+      scriptureReference: result.scriptureReference || "Psalm 46:10",
+      observation: result.observation || "God calls us to be still and recognize His sovereignty.",
+      application: result.application || "Take time for quiet reflection today.",
+      prayer: result.prayer || "Help me to trust in Your sovereignty, Lord."
+    };
+  } catch (error) {
+    console.error('Complete SOAP generation error:', error);
+    // Fallback entry if AI fails
+    return {
+      scripture: "Be still, and know that I am God.",
+      scriptureReference: "Psalm 46:10",
+      observation: "God calls us to be still and recognize His sovereignty.",
+      application: "Take time for quiet reflection today.",
+      prayer: "Help me to trust in Your sovereignty, Lord."
+    };
+  }
 }
 
 async function enhanceSoapEntry(scripture: string, scriptureReference: string, observation: string, application: string, prayer: string) {
-  // Simple fallback implementation
-  return {
-    enhancedObservation: observation + " (Consider the deeper meaning of this passage.)",
-    enhancedApplication: application + " (Think of specific ways to implement this today.)",
-    enhancedPrayer: prayer + " Amen."
-  };
+  try {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('AI service not configured');
+    }
+
+    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    
+    const prompt = `As a pastoral AI assistant, enhance this S.O.A.P. devotional entry with deeper insights:
+
+Scripture: ${scripture}
+Reference: ${scriptureReference}
+
+Current Observation: ${observation}
+Current Application: ${application}
+Current Prayer: ${prayer}
+
+Please enhance each component with deeper theological insights, more specific applications, and richer prayer language.
+
+Respond with JSON in this format:
+{
+  "enhancedObservation": "Enhanced observation with deeper insights",
+  "enhancedApplication": "Enhanced application with specific steps",
+  "enhancedPrayer": "Enhanced prayer with richer language"
+}`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" },
+      max_tokens: 1000,
+      temperature: 0.7
+    });
+
+    const result = JSON.parse(response.choices[0].message.content || '{}');
+    return {
+      enhancedObservation: result.enhancedObservation || observation + " (Consider the deeper meaning of this passage.)",
+      enhancedApplication: result.enhancedApplication || application + " (Think of specific ways to implement this today.)",
+      enhancedPrayer: result.enhancedPrayer || prayer + " Amen."
+    };
+  } catch (error) {
+    console.error('SOAP enhancement error:', error);
+    // Fallback to simple enhancement if AI fails
+    return {
+      enhancedObservation: observation + " (Consider the deeper meaning of this passage.)",
+      enhancedApplication: application + " (Think of specific ways to implement this today.)",
+      enhancedPrayer: prayer + " Amen."
+    };
+  }
 }
 
 import { LearningIntegration } from "./learning-integration.js";
