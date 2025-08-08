@@ -11490,8 +11490,8 @@ Return JSON with this exact structure:
       // Check if user has church affiliation
       const userChurches = await db
         .select()
-        .from(userCommunities)
-        .where(eq(userCommunities.userId, userId))
+        .from(userChurches)
+        .where(eq(userChurches.userId, userId))
         .limit(1);
 
       // Calculate profile completeness
