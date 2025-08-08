@@ -458,7 +458,7 @@ export default function BibleReadingPlansFixed() {
               {planDays.map((day) => {
                 const dayProgress = progress.find(p => p.dayNumber === day.dayNumber);
                 const isCompleted = !!dayProgress?.completedAt;
-                const isAccessible = !subscription || day.dayNumber <= (subscription.currentDay ?? 1);
+                const isAccessible = !subscription || day.dayNumber <= (subscription.currentDay || 1);
 
                 return (
                   <Card 
@@ -783,13 +783,12 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {/* Show placeholder cards since we don't have torchbearer tier plans yet */}
-                  {[1, 2, 3, 4, 5, 6].map((i) => {
+                  {filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer').slice(0, 6).map((plan) => {
                     const canAccess = userTier === 'torchbearer';
 
                     return (
                       <Card 
-                        key={`torchbearer-${i}`} 
+                        key={plan.id} 
                         className={`relative transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/50 ${
                           !canAccess ? 'opacity-75' : ''
                         }`}
@@ -800,69 +799,80 @@ export default function BibleReadingPlansFixed() {
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex items-center gap-2">
                               <Crown className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                              <Badge className="bg-red-100 text-red-800 dark:bg-red-800/30 dark:text-red-400">
-                                Advanced
+                              <Badge className={getDifficultyColor(plan.difficulty)}>
+                                {plan.difficulty || 'Advanced'}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
                               <Calendar className="w-4 h-4" />
-                              <span>60d</span>
+                              <span>{plan.duration}d</span>
                             </div>
                           </div>
                           
                           <CardTitle className="text-xl leading-tight hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-                            AI-Personalized Journey {i}
+                            {plan.name}
                           </CardTitle>
                           
-                          <CardDescription className="text-sm">
-                            Experience personalized spiritual growth with AI-curated content, audio narration, and advanced leadership training.
-                          </CardDescription>
+                          {plan.description && (
+                            <CardDescription className="text-sm">
+                              {plan.description}
+                            </CardDescription>
+                          )}
                         </CardHeader>
                         
                         <CardContent className="pt-0">
                           <div className="space-y-4">
                             <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
-                              <div className="flex items-center gap-1">
-                                <Sparkles className="w-4 h-4" />
-                                <span>Personalized</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Headphones className="w-4 h-4" />
-                                <span>Audio</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Target className="w-4 h-4" />
-                                <span>Leadership</span>
-                              </div>
+                              {plan.isAiGenerated && (
+                                <div className="flex items-center gap-1">
+                                  <Sparkles className="w-4 h-4" />
+                                  <span>Personalized</span>
+                                </div>
+                              )}
+                              {(plan.name.includes('Audio') || plan.name.includes('Commute') || plan.name.includes('Quiet Mind')) && (
+                                <div className="flex items-center gap-1">
+                                  <Volume2 className="w-4 h-4" />
+                                  <span>Audio</span>
+                                </div>
+                              )}
+                              {(plan.difficulty === 'advanced' || plan.name.includes('Leadership') || plan.name.includes('Chronological')) && (
+                                <div className="flex items-center gap-1">
+                                  <Target className="w-4 h-4" />
+                                  <span>Leadership</span>
+                                </div>
+                              )}
                             </div>
                             
                             <div className="flex gap-2">
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => setSelectedPlan({})} // Allow viewing without restriction
+                                onClick={() => setSelectedPlan(plan)}
                                 className="flex-1"
                               >
                                 <Eye className="w-4 h-4 mr-2" />
                                 View Plan
                               </Button>
-                              <Button 
-                                size="sm" 
-                                onClick={() => triggerLockedFeature('Torchbearer Plan Features')}
-                                className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                              >
-                                {canAccess ? (
-                                  <>
-                                    <Crown className="w-4 h-4 mr-2" />
-                                    Shine Further
-                                  </>
-                                ) : (
-                                  <>
-                                    <Crown className="w-4 h-4 mr-2" />
-                                    Embrace Your Purpose
-                                  </>
-                                )}
-                              </Button>
+                              {canAccess ? (
+                                <Button 
+                                  size="sm"
+                                  onClick={() => subscribeToPlanning.mutate(plan.id)}
+                                  disabled={subscribeToPlanning.isPending}
+                                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                                >
+                                  <Crown className="w-4 h-4 mr-2" />
+                                  Shine Further
+                                </Button>
+                              ) : (
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => triggerLockedFeature('Torchbearer Plan Features')}
+                                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                                >
+                                  <Crown className="w-4 h-4 mr-2" />
+                                  Embrace Your Purpose
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </CardContent>
