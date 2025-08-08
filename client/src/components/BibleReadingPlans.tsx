@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, Lock, Crown, Sparkles, Headphones, User } from "lucide-react";
 import type { ReadingPlan, ReadingPlanDay, UserReadingPlanSubscription, UserReadingProgress, EnhancedMoodIndicator } from "@shared/schema";
-import EnhancedMoodIndicatorManager from "@/components/emi/EnhancedMoodIndicatorManager";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ReadingPlanWithProgress extends ReadingPlan {
   subscription?: UserReadingPlanSubscription;
@@ -28,6 +28,60 @@ interface DayReaderProps {
   userProgress?: UserReadingProgress;
   onComplete: (dayNumber: number, progressData: any) => void;
 }
+
+// Simple EMI Component with Virtual Check-In style
+const ReadingPlanEMI = ({ selectedMood, onMoodSelect }: { 
+  selectedMood: EnhancedMoodIndicator | null; 
+  onMoodSelect: (mood: EnhancedMoodIndicator) => void; 
+}) => {
+  const { data: moodsByCategory = {}, isLoading } = useQuery<Record<string, EnhancedMoodIndicator[]>>({
+    queryKey: ["/api/enhanced-mood-indicators/by-category"],
+  });
+
+  const spiritualMoods = moodsByCategory["Spiritual States"] || [];
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <ScrollArea className="h-32 w-full rounded-md border p-3">
+        <div className="grid grid-cols-2 gap-2">
+          {spiritualMoods.map((mood) => (
+            <div
+              key={mood.id}
+              className={`p-3 border-2 rounded-lg cursor-pointer transition-all text-center ${
+                selectedMood?.id === mood.id
+                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 shadow-md'
+                  : 'border-gray-200 hover:border-gray-300 dark:border-gray-700'
+              }`}
+              onClick={() => onMoodSelect(mood)}
+            >
+              <div className="text-lg mb-1">{mood.emoji}</div>
+              <div className="text-xs font-medium">{mood.name}</div>
+            </div>
+          ))}
+        </div>
+      </ScrollArea>
+      
+      {selectedMood && (
+        <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{selectedMood.emoji}</span>
+            <span className="text-sm font-medium text-purple-800 dark:text-purple-200">
+              {selectedMood.name}
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const DayReader = ({ plan, day, userProgress, onComplete }: DayReaderProps) => {
   const [reflectionText, setReflectionText] = useState(userProgress?.reflectionText || "");
@@ -185,17 +239,10 @@ const DayReader = ({ plan, day, userProgress, onComplete }: DayReaderProps) => {
             <Label className="text-sm font-medium mb-2 block">
               How do you feel after reading?
             </Label>
-            <div className="compact-emi">
-              <EnhancedMoodIndicatorManager 
-                onMoodSelect={handleMoodSelect}
-                showAdminControls={false}
-              />
-            </div>
-            {selectedMood && (
-              <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-sm text-gray-700 dark:text-gray-300">
-                Selected: {selectedMood.emoji} {selectedMood.name}
-              </div>
-            )}
+            <ReadingPlanEMI
+              selectedMood={selectedMood}
+              onMoodSelect={handleMoodSelect}
+            />
           </div>
 
           <div>
