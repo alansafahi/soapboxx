@@ -11488,10 +11488,10 @@ Return JSON with this exact structure:
       }
 
       // Check if user has church affiliation
-      const userChurch = await db
+      const userChurches = await db
         .select()
-        .from(userChurches)
-        .where(eq(userChurches.userId, userId))
+        .from(userCommunities)
+        .where(eq(userCommunities.userId, userId))
         .limit(1);
 
       // Calculate profile completeness
@@ -11513,10 +11513,10 @@ Return JSON with this exact structure:
 
       const circleLimit = user.independentCircleLimit || 2;
       const independentCirclesCount = independentCircles.length;
-      const canCreateMore = userRole.length > 0 || independentCirclesCount < circleLimit;
+      const canCreateMore = userChurches.length > 0 || independentCirclesCount < circleLimit;
 
       return res.json({
-        hasChurch: userRole.length > 0,
+        hasChurch: userChurches.length > 0,
         profileComplete,
         circleLimit,
         independentCirclesCount,
@@ -11532,7 +11532,8 @@ Return JSON with this exact structure:
         ].filter(Boolean)
       });
     } catch (error) {
-      return res.status(500).json({ message: 'Failed to get church status' });
+      console.error('Church status error:', error);
+      return res.status(500).json({ message: 'Failed to get church status', error: error instanceof Error ? error.message : String(error) });
     }
   });
 
