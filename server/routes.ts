@@ -9992,7 +9992,9 @@ Return JSON with this exact structure:
           u.email_verified as "emailVerified",
           u.phone_verified as "phoneVerified",
           u.role,
-          d.mood_tag as "moodTag"
+          d.mood_tag as "moodTag",
+          d.comment_count as "commentCount",
+          d.like_count as "likeCount"
         FROM discussions d
         LEFT JOIN users u ON d.author_id = u.id
         WHERE d.is_public = true 
@@ -10022,8 +10024,8 @@ Return JSON with this exact structure:
         },
         type: 'discussion',
         mood: row.moodTag,
-        commentCount: 0,
-        likeCount: 0,
+        commentCount: row.commentCount || 0,
+        likeCount: row.likeCount || 0,
         isLiked: false
       }));
 
