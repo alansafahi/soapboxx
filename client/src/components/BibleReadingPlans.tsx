@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -278,18 +278,15 @@ export default function BibleReadingPlans() {
     enabled: !!selectedPlan?.id,
   });
   
-  console.log("DEBUG - Selected plan:", selectedPlan?.id, selectedPlan?.name);
-  console.log("DEBUG - Plan days loaded:", planDays.length);
-  console.log("DEBUG - Active tab:", activeTab);
-  console.log("DEBUG - Subscribed plans:", subscribedPlans.length, subscribedPlans.map(p => p.name));
+
   
   // Auto-select single subscribed plan when on my-plans tab
   React.useEffect(() => {
-    if (activeTab === "my-plans" && subscribedPlans.length === 1 && !selectedPlan) {
+    if (activeTab === "my-plans" && subscribedPlans.length === 1 && !selectedPlan && subscribedPlans[0]) {
       console.log("DEBUG - Auto-selecting single plan:", subscribedPlans[0].name);
       setSelectedPlan(subscribedPlans[0]);
     }
-  }, [activeTab, subscribedPlans.length, selectedPlan]);
+  }, [activeTab, subscribedPlans, selectedPlan]);
 
   // Fetch user progress for selected plan
   const { data: userProgress = [] } = useQuery<UserReadingProgress[]>({
@@ -368,17 +365,7 @@ export default function BibleReadingPlans() {
     return plansWithProgress.filter(plan => plan.category === categoryFilter);
   }, [plansWithProgress, categoryFilter]);
 
-  // Get subscribed plans
-  const subscribedPlans = plansWithProgress.filter(plan => plan.subscription?.isActive);
-  
-
-
-  // Get categories for filter
-  const categories = useMemo(() => {
-    const cats = [...new Set(plans.map(plan => plan.category))];
-    return cats.sort();
-  }, [plans]);
-
+  // Helper functions - defined before use
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "beginner": return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
@@ -400,6 +387,15 @@ export default function BibleReadingPlans() {
       default: return <Book className="w-4 h-4" />;
     }
   };
+
+  // Get subscribed plans
+  const subscribedPlans = plansWithProgress.filter(plan => plan.subscription?.isActive);
+
+  // Get categories for filter
+  const categories = useMemo(() => {
+    const cats = [...new Set(plans.map(plan => plan.category))];
+    return cats.sort();
+  }, [plans]);
 
   const getSubscriptionTierInfo = (tier: string) => {
     switch (tier) {
