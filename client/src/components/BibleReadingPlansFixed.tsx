@@ -579,7 +579,7 @@ export default function BibleReadingPlansFixed() {
                 <div className="text-center">
                   <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-full shadow-lg">
                     <Shield className="w-6 h-6" />
-                    <span className="font-bold text-xl">Disciple Plan (Free)</span>
+                    <span className="font-bold text-xl">Disciple Plan</span>
                   </div>
                   <p className="text-lg text-gray-600 dark:text-gray-400 mt-3 font-medium">"Walk with Christ each day"</p>
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">Essential reading plans to begin your spiritual journey</p>
@@ -594,12 +594,7 @@ export default function BibleReadingPlansFixed() {
                         key={plan.id} 
                         className="relative transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/50"
                       >
-                        <div className="absolute top-3 right-3">
-                          <Badge className="bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700">
-                            <Shield className="w-3 h-3 mr-1" />
-                            Disciple
-                          </Badge>
-                        </div>
+
                         
                         <CardHeader className="pb-4">
                           <div className="flex items-start justify-between mb-3">
@@ -684,7 +679,7 @@ export default function BibleReadingPlansFixed() {
                 <div className="text-center">
                   <div className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-4 rounded-full shadow-lg">
                     <Heart className="w-6 h-6" />
-                    <span className="font-bold text-xl">Servant Plan (Standard)</span>
+                    <span className="font-bold text-xl">Servant Plan</span>
                   </div>
                   <p className="text-lg text-gray-600 dark:text-gray-400 mt-3 font-medium">"Serve faithfully and grow deeply"</p>
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">Character studies, focused themes, and deeper spiritual growth</p>
@@ -702,12 +697,7 @@ export default function BibleReadingPlansFixed() {
                           !canAccess ? 'opacity-75' : ''
                         }`}
                       >
-                        <div className="absolute top-3 right-3">
-                          <Badge className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-700">
-                            <Heart className="w-3 h-3 mr-1" />
-                            Servant
-                          </Badge>
-                        </div>
+
                         
                         <CardHeader className="pb-4">
                           <div className="flex items-start justify-between mb-3">
@@ -768,7 +758,7 @@ export default function BibleReadingPlansFixed() {
                                 ) : (
                                   <>
                                     <Lock className="w-4 h-4 mr-2" />
-                                    Upgrade to Access
+                                    Unlock Your Calling
                                   </>
                                 )}
                               </Button>
@@ -786,7 +776,7 @@ export default function BibleReadingPlansFixed() {
                 <div className="text-center">
                   <div className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-full shadow-lg">
                     <Crown className="w-6 h-6" />
-                    <span className="font-bold text-xl">Torchbearer Plan (Premium)</span>
+                    <span className="font-bold text-xl">Torchbearer Plan</span>
                   </div>
                   <p className="text-lg text-gray-600 dark:text-gray-400 mt-3 font-medium">"Shine your light further"</p>
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">AI-powered personalization, advanced features, and leadership content</p>
@@ -804,18 +794,7 @@ export default function BibleReadingPlansFixed() {
                           !canAccess ? 'opacity-75' : ''
                         }`}
                       >
-                        <div className="absolute top-3 right-3 flex items-center gap-2">
-                          <Badge className="bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/50 dark:text-purple-300 dark:border-purple-700">
-                            <Crown className="w-3 h-3 mr-1" />
-                            Torchbearer
-                          </Badge>
-                          {/* AI badge for premium plans */}
-                          <Badge className="bg-gradient-to-r from-pink-500 to-purple-600 text-white border-0">
-                            <Sparkles className="w-3 h-3 mr-1" />
-                            AI
-                          </Badge>
 
-                        </div>
                         
                         <CardHeader className="pb-4">
                           <div className="flex items-start justify-between mb-3">
@@ -845,7 +824,7 @@ export default function BibleReadingPlansFixed() {
                             <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                               <div className="flex items-center gap-1">
                                 <Sparkles className="w-4 h-4" />
-                                <span>AI-Powered</span>
+                                <span>Personalized</span>
                               </div>
                               <div className="flex items-center gap-1">
                                 <Headphones className="w-4 h-4" />
@@ -880,7 +859,7 @@ export default function BibleReadingPlansFixed() {
                                 ) : (
                                   <>
                                     <Crown className="w-4 h-4 mr-2" />
-                                    Upgrade for Access
+                                    Embrace Your Purpose
                                   </>
                                 )}
                               </Button>
