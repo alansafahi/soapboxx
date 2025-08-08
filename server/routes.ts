@@ -11669,14 +11669,10 @@ Return JSON with this exact structure:
         user.phoneVerified
       );
 
-      // Count independent circles created by user
-      const independentCircles = await db
-        .select()
-        .from(prayerCircles)
-        .where(and(
-          eq(prayerCircles.createdBy, userId),
-          isNull(prayerCircles.communityId)
-        ));
+      // Count independent circles created by user using storage layer
+      const independentCircles = await storage.getUserPrayerCircles(userId).then(circles => 
+        circles.filter(circle => !circle.communityId)
+      );
 
       const circleLimit = user.independentCircleLimit || 2;
       const independentCirclesCount = independentCircles.length;
