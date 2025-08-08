@@ -252,11 +252,15 @@ export default function BibleReadingPlans() {
   // Fetch all available reading plans
   const { data: plans = [], isLoading: plansLoading } = useQuery<ReadingPlan[]>({
     queryKey: ["/api/reading-plans"],
+    staleTime: 0, // Force fresh data
+    cacheTime: 0, // Disable caching temporarily
   });
 
   // Fetch user's subscriptions
   const { data: subscriptions = [] } = useQuery<UserReadingPlanSubscription[]>({
     queryKey: ["/api/reading-plans/user/subscriptions"],
+    staleTime: 0, // Force fresh data
+    cacheTime: 0, // Disable caching temporarily
   });
 
   // Fetch plan days when a plan is selected
@@ -282,6 +286,7 @@ export default function BibleReadingPlans() {
         description: "You've joined this reading plan. Start reading today!",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/reading-plans/user/subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reading-plans"] });
       setActiveTab("my-plans");
     },
     onError: () => {
