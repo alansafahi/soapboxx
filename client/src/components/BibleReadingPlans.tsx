@@ -570,9 +570,9 @@ export default function BibleReadingPlans() {
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {planDays.map((day) => {
-              const dayProgress = progress.find(p => p.dayNumber === day.dayNumber);
-              const isCompleted = !!dayProgress?.completedAt;
-              const isAccessible = !subscription || day.dayNumber <= subscription.currentDay;
+                const dayProgress = progress.find(p => p.dayNumber === day.dayNumber);
+                const isCompleted = !!dayProgress?.completedAt;
+                const isAccessible = !subscription || day.dayNumber <= (subscription.currentDay || 1);
 
               return (
                 <Card 

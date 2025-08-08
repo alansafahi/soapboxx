@@ -120,6 +120,16 @@ export const getQueryFn: <T>(options: {
       const conversationId = queryKey[1];
       url = `/api/conversations/${conversationId}/messages`;
     }
+    // Handle reading plan days URLs: ["/api/reading-plans", planId, "days"]
+    else if (queryKey.length === 3 && queryKey[2] === "days" && queryKey[0] === "/api/reading-plans") {
+      const planId = queryKey[1];
+      url = `/api/reading-plans/${planId}/days`;
+    }
+    // Handle reading plan progress URLs: ["/api/reading-plans", planId, "progress"]
+    else if (queryKey.length === 3 && queryKey[2] === "progress" && queryKey[0] === "/api/reading-plans") {
+      const planId = queryKey[1];
+      url = `/api/reading-plans/${planId}/progress`;
+    }
     // Handle search queries with parameters
     else if (queryKey.length > 1 && url.includes('/search')) {
       const searchTerm = queryKey[1] as string;
