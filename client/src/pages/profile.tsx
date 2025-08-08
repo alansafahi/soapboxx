@@ -33,7 +33,9 @@ import {
   CheckCircle,
   Shield,
   Globe,
-  Sparkles
+  Sparkles,
+  CreditCard,
+  Crown
 } from "lucide-react";
 import { format } from "date-fns";
 import EnhancedProfileEditor from "../components/EnhancedProfileEditor";
@@ -403,8 +405,9 @@ export default function ProfilePage() {
             setIsEditing(false);
           }
         }}>
-          <TabsList className="grid w-full grid-cols-3 h-auto">
+          <TabsList className="grid w-full grid-cols-4 h-auto">
             <TabsTrigger value="profile" className="text-xs sm:text-sm py-2 px-2">Profile</TabsTrigger>
+            <TabsTrigger value="subscription" className="text-xs sm:text-sm py-2 px-2">Subscription</TabsTrigger>
             <TabsTrigger value="stats" className="text-xs sm:text-sm py-2 px-2">Statistics</TabsTrigger>
             <TabsTrigger value="achievements" className="text-xs sm:text-sm py-2 px-2">Achievements</TabsTrigger>
           </TabsList>
@@ -756,6 +759,197 @@ export default function ProfilePage() {
                 />
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="subscription" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Crown className="h-5 w-5 text-purple-500" />
+                  Subscription Management
+                </CardTitle>
+                <CardDescription>
+                  Manage your subscription plan and access to premium features
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {/* Current Plan Status */}
+                  <div className="flex items-center justify-between p-4 border rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
+                    <div className="flex items-center gap-3">
+                      {profile?.subscriptionTier === 'disciple' && (
+                        <>
+                          <Shield className="h-6 w-6 text-green-600" />
+                          <div>
+                            <h3 className="font-semibold text-green-800 dark:text-green-200">Disciple Plan</h3>
+                            <p className="text-sm text-green-600 dark:text-green-300">"Walk with Christ each day"</p>
+                          </div>
+                        </>
+                      )}
+                      {profile?.subscriptionTier === 'servant' && (
+                        <>
+                          <Heart className="h-6 w-6 text-blue-600" />
+                          <div>
+                            <h3 className="font-semibold text-blue-800 dark:text-blue-200">Servant Plan</h3>
+                            <p className="text-sm text-blue-600 dark:text-blue-300">"Serve faithfully and grow deeply"</p>
+                          </div>
+                        </>
+                      )}
+                      {profile?.subscriptionTier === 'torchbearer' && (
+                        <>
+                          <Crown className="h-6 w-6 text-purple-600" />
+                          <div>
+                            <h3 className="font-semibold text-purple-800 dark:text-purple-200">Torchbearer Plan</h3>
+                            <p className="text-sm text-purple-600 dark:text-purple-300">"Shine your light further"</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <Badge className={
+                      profile?.subscriptionTier === 'disciple' ? "bg-green-100 text-green-800 border-green-200" :
+                      profile?.subscriptionTier === 'servant' ? "bg-blue-100 text-blue-800 border-blue-200" :
+                      "bg-purple-100 text-purple-800 border-purple-200"
+                    }>
+                      {profile?.subscriptionTier === 'disciple' ? 'FREE' : 
+                       profile?.subscriptionTier === 'servant' ? '$5/month' : '$10/month'}
+                    </Badge>
+                  </div>
+
+                  {/* Plan Features */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Disciple Plan */}
+                    <Card className={`${profile?.subscriptionTier === 'disciple' ? 'ring-2 ring-green-200 bg-green-50 dark:bg-green-900/10' : ''}`}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Shield className="h-5 w-5 text-green-600" />
+                            <CardTitle className="text-lg">Disciple</CardTitle>
+                          </div>
+                          {profile?.subscriptionTier === 'disciple' && (
+                            <Badge className="bg-green-100 text-green-800 border-green-200">Current</Badge>
+                          )}
+                        </div>
+                        <CardDescription className="font-medium text-green-700 dark:text-green-300">
+                          "Walk with Christ each day"
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 mb-4">
+                          <p className="text-lg font-bold">FREE</p>
+                          <ul className="text-sm space-y-1 text-gray-600 dark:text-gray-400">
+                            <li>✓ Basic reading plans</li>
+                            <li>✓ Community discussions</li>
+                            <li>✓ Prayer wall</li>
+                            <li>✓ Daily inspirations</li>
+                          </ul>
+                        </div>
+                        {profile?.subscriptionTier !== 'disciple' && (
+                          <Button variant="outline" className="w-full" disabled>
+                            Downgrade
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Servant Plan */}
+                    <Card className={`${profile?.subscriptionTier === 'servant' ? 'ring-2 ring-blue-200 bg-blue-50 dark:bg-blue-900/10' : ''}`}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Heart className="h-5 w-5 text-blue-600" />
+                            <CardTitle className="text-lg">Servant</CardTitle>
+                          </div>
+                          {profile?.subscriptionTier === 'servant' && (
+                            <Badge className="bg-blue-100 text-blue-800 border-blue-200">Current</Badge>
+                          )}
+                        </div>
+                        <CardDescription className="font-medium text-blue-700 dark:text-blue-300">
+                          "Serve faithfully and grow deeply"
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 mb-4">
+                          <p className="text-lg font-bold">$5/month</p>
+                          <ul className="text-sm space-y-1 text-gray-600 dark:text-gray-400">
+                            <li>✓ Everything in Disciple</li>
+                            <li>✓ Character studies</li>
+                            <li>✓ Group reading plans</li>
+                            <li>✓ Advanced insights</li>
+                          </ul>
+                        </div>
+                        {profile?.subscriptionTier === 'disciple' ? (
+                          <Button className="w-full bg-blue-600 hover:bg-blue-700">
+                            Upgrade to Servant
+                          </Button>
+                        ) : profile?.subscriptionTier === 'servant' ? (
+                          <Button variant="outline" className="w-full" disabled>
+                            Current Plan
+                          </Button>
+                        ) : (
+                          <Button variant="outline" className="w-full">
+                            Downgrade to Servant
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    {/* Torchbearer Plan */}
+                    <Card className={`${profile?.subscriptionTier === 'torchbearer' ? 'ring-2 ring-purple-200 bg-purple-50 dark:bg-purple-900/10' : ''}`}>
+                      <CardHeader>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Crown className="h-5 w-5 text-purple-600" />
+                            <CardTitle className="text-lg">Torchbearer</CardTitle>
+                          </div>
+                          {profile?.subscriptionTier === 'torchbearer' && (
+                            <Badge className="bg-purple-100 text-purple-800 border-purple-200">Current</Badge>
+                          )}
+                        </div>
+                        <CardDescription className="font-medium text-purple-700 dark:text-purple-300">
+                          "Shine your light further"
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-2 mb-4">
+                          <p className="text-lg font-bold">$10/month</p>
+                          <ul className="text-sm space-y-1 text-gray-600 dark:text-gray-400">
+                            <li>✓ Everything in Servant</li>
+                            <li>✓ AI-powered personalization</li>
+                            <li>✓ Audio narration</li>
+                            <li>✓ Leadership content</li>
+                          </ul>
+                        </div>
+                        {profile?.subscriptionTier !== 'torchbearer' ? (
+                          <Button className="w-full bg-purple-600 hover:bg-purple-700">
+                            Upgrade to Torchbearer
+                          </Button>
+                        ) : (
+                          <Button variant="outline" className="w-full" disabled>
+                            Current Plan
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Billing Information */}
+                  <div className="border-t pt-6">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                      <CreditCard className="h-5 w-5" />
+                      Billing Information
+                    </h3>
+                    <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                        Payment integration with Stripe will be available soon. 
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        You'll be able to manage your payment method, view billing history, and update subscription settings here.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="stats" className="space-y-6">

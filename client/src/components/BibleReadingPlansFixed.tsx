@@ -331,7 +331,7 @@ export default function BibleReadingPlansFixed() {
   const plansWithSubscriptions = useMemo(() => {
     return plans.map(plan => {
       const subscription = subscriptions.find(sub => sub.planId === plan.id && sub.isActive);
-      const progressPercentage = subscription ? Math.round((subscription.currentDay / plan.duration) * 100) : 0;
+      const progressPercentage = subscription ? Math.round(((subscription.currentDay || 1) / plan.duration) * 100) : 0;
       const daysCompleted = subscription?.currentDay || 0;
       
       return {
@@ -458,7 +458,7 @@ export default function BibleReadingPlansFixed() {
               {planDays.map((day) => {
                 const dayProgress = progress.find(p => p.dayNumber === day.dayNumber);
                 const isCompleted = !!dayProgress?.completedAt;
-                const isAccessible = !subscription || day.dayNumber <= (subscription.currentDay || 1);
+                const isAccessible = !subscription || day.dayNumber <= (subscription.currentDay ?? 1);
 
                 return (
                   <Card 
@@ -596,7 +596,8 @@ export default function BibleReadingPlansFixed() {
                       >
                         <div className="absolute top-3 right-3">
                           <Badge className="bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700">
-                            FREE
+                            <Shield className="w-3 h-3 mr-1" />
+                            Disciple
                           </Badge>
                         </div>
                         
@@ -703,18 +704,10 @@ export default function BibleReadingPlansFixed() {
                       >
                         <div className="absolute top-3 right-3">
                           <Badge className="bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-700">
-                            STANDARD
+                            <Heart className="w-3 h-3 mr-1" />
+                            Servant
                           </Badge>
                         </div>
-                        
-                        {!canAccess && (
-                          <div className="absolute inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-[1px] rounded-lg flex items-center justify-center z-10">
-                            <div className="text-center text-white">
-                              <Lock className="w-8 h-8 mx-auto mb-2" />
-                              <p className="text-sm font-medium">Servant Plan Required</p>
-                            </div>
-                          </div>
-                        )}
                         
                         <CardHeader className="pb-4">
                           <div className="flex items-start justify-between mb-3">
@@ -756,7 +749,7 @@ export default function BibleReadingPlansFixed() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => canAccess ? {} : triggerLockedFeature('Servant Plan Features')}
+                                onClick={() => setSelectedPlan({})} // Allow viewing without restriction
                                 className="flex-1"
                               >
                                 <Eye className="w-4 h-4 mr-2" />
@@ -813,22 +806,16 @@ export default function BibleReadingPlansFixed() {
                       >
                         <div className="absolute top-3 right-3 flex items-center gap-2">
                           <Badge className="bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/50 dark:text-purple-300 dark:border-purple-700">
-                            PREMIUM
+                            <Crown className="w-3 h-3 mr-1" />
+                            Torchbearer
                           </Badge>
+                          {/* AI badge for premium plans */}
                           <Badge className="bg-gradient-to-r from-pink-500 to-purple-600 text-white border-0">
                             <Sparkles className="w-3 h-3 mr-1" />
                             AI
                           </Badge>
+
                         </div>
-                        
-                        {!canAccess && (
-                          <div className="absolute inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-[1px] rounded-lg flex items-center justify-center z-10">
-                            <div className="text-center text-white">
-                              <Crown className="w-8 h-8 mx-auto mb-2" />
-                              <p className="text-sm font-medium">Torchbearer Plan Required</p>
-                            </div>
-                          </div>
-                        )}
                         
                         <CardHeader className="pb-4">
                           <div className="flex items-start justify-between mb-3">
@@ -874,7 +861,7 @@ export default function BibleReadingPlansFixed() {
                               <Button 
                                 variant="outline" 
                                 size="sm" 
-                                onClick={() => canAccess ? {} : triggerLockedFeature('Torchbearer Plan Features')}
+                                onClick={() => setSelectedPlan({})} // Allow viewing without restriction
                                 className="flex-1"
                               >
                                 <Eye className="w-4 h-4 mr-2" />
@@ -893,7 +880,7 @@ export default function BibleReadingPlansFixed() {
                                 ) : (
                                   <>
                                     <Crown className="w-4 h-4 mr-2" />
-                                    Upgrade to Access
+                                    Upgrade for Access
                                   </>
                                 )}
                               </Button>
@@ -971,13 +958,14 @@ export default function BibleReadingPlansFixed() {
         </Tabs>
 
         {/* Upgrade Flow Manager */}
-        <UpgradePathManager 
-          show={showUpgradeFlow}
-          trigger={trigger}
-          planData={planData}
-          onClose={closeUpgradeFlow}
-          onUpgrade={handleUpgradeSuccess}
-        />
+        {showUpgradeFlow && (
+          <UpgradePathManager 
+            trigger={trigger}
+            planData={planData}
+            onClose={closeUpgradeFlow}
+            onUpgrade={handleUpgradeSuccess}
+          />
+        )}
       </div>
 
       {/* Day Detail Modal */}
