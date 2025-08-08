@@ -648,29 +648,42 @@ export default function BibleReadingPlans() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20 py-8">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            Bible Reading Plans
+          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full mb-6">
+            <BookOpen className="w-6 h-6" />
+            <span className="font-semibold text-lg">Bible Reading Plans</span>
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+            Deepen Your Faith Journey
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Grow in your faith with structured Bible reading plans designed to deepen your relationship with God.
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            Transform your spiritual life with structured Bible reading plans designed to strengthen your relationship with God.
           </p>
-
         </div>
 
-        {/* Tabs */}
+        {/* Enhanced Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 mb-8">
-            <TabsTrigger value="discover">Discover Plans</TabsTrigger>
-            <TabsTrigger value="my-plans">My Reading Plans ({subscribedPlans.length})</TabsTrigger>
+          <TabsList className="grid w-full max-w-lg mx-auto grid-cols-2 mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-1 rounded-xl shadow-lg border border-white/20 dark:border-gray-700/50">
+            <TabsTrigger 
+              value="discover" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-lg px-6 py-3 font-medium transition-all duration-200"
+            >
+              All Reading Plans
+            </TabsTrigger>
+            <TabsTrigger 
+              value="my-plans" 
+              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white data-[state=active]:shadow-lg rounded-lg px-6 py-3 font-medium transition-all duration-200"
+            >
+              My Plans ({subscribedPlans.length})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="discover" className="space-y-6">
-            {/* Filters */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+            {/* Enhanced Filters */}
+            <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 dark:border-gray-700/50">
               <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
                 <div>
                   <Label htmlFor="category" className="text-sm font-medium">
@@ -709,8 +722,8 @@ export default function BibleReadingPlans() {
                 return (
                   <Card 
                     key={plan.id} 
-                    className={`relative transition-all hover:shadow-lg ${
-                      isSubscribed ? 'ring-2 ring-blue-500' : ''
+                    className={`relative transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-white/20 dark:border-gray-700/50 ${
+                      isSubscribed ? 'ring-2 ring-gradient-to-r from-blue-500 to-purple-500 shadow-lg' : ''
                     } ${!canAccess ? 'opacity-75' : ''}`}
                   >
                     {/* Subscription Tier Badge */}
@@ -884,17 +897,17 @@ export default function BibleReadingPlans() {
               })}
             </div>
 
-            {/* AI Plan Generation Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
-              <div className="text-center mb-6">
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900 dark:to-pink-900 text-purple-800 dark:text-purple-200 px-4 py-2 rounded-full mb-4">
-                  <Crown className="w-5 h-5" />
-                  <span className="font-semibold">Torchbearer Feature</span>
+            {/* Enhanced AI Plan Generation Section */}
+            <div className="bg-gradient-to-br from-purple-50/80 via-pink-50/80 to-indigo-50/80 dark:from-purple-900/20 dark:via-pink-900/20 dark:to-indigo-900/20 backdrop-blur-sm rounded-xl p-8 shadow-xl border border-white/30 dark:border-gray-700/30">
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 text-white px-6 py-3 rounded-full mb-6 shadow-lg">
+                  <Crown className="w-6 h-6" />
+                  <span className="font-semibold text-lg">Torchbearer Feature</span>
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+                <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent mb-4">
                   Generate AI-Powered Reading Plans
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
                   Create personalized Bible reading plans powered by AI technology. Choose your topic and let our system craft a unique spiritual journey tailored to your needs.
                 </p>
               </div>
