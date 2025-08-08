@@ -188,12 +188,10 @@ const DayReader = ({ plan, day, userProgress, onComplete }: DayReaderProps) => {
             <Label className="text-sm font-medium mb-2 block">
               How do you feel after reading?
             </Label>
-            <div className="reading-plan-emi-wrapper">
-              <EnhancedMoodIndicatorManager 
-                onMoodSelect={handleMoodSelect}
-                showAdminControls={false}
-              />
-            </div>
+            <EnhancedMoodIndicatorManager 
+              onMoodSelect={handleMoodSelect}
+              showAdminControls={false}
+            />
             {selectedMood && (
               <div className="mt-2 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
                 <div className="flex items-center gap-2">

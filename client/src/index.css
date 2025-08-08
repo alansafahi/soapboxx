@@ -2,66 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Reading Plan EMI Wrapper - Virtual Check-In style */
-.reading-plan-emi-wrapper {
-  max-height: 200px;
-  overflow-y: auto;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 8px;
-}
 
-.reading-plan-emi-wrapper .space-y-6 {
-  @apply space-y-2;
-}
-
-.reading-plan-emi-wrapper h2 {
-  @apply hidden;
-}
-
-.reading-plan-emi-wrapper p {
-  @apply hidden;
-}
-
-.reading-plan-emi-wrapper .CardHeader {
-  @apply hidden;
-}
-
-.reading-plan-emi-wrapper .CardTitle {
-  @apply hidden;
-}
-
-.reading-plan-emi-wrapper [class*="grid-cols-2"] {
-  @apply grid-cols-2;
-}
-
-.reading-plan-emi-wrapper [class*="md:grid-cols-3"] {
-  @apply md:grid-cols-2;
-}
-
-.reading-plan-emi-wrapper [class*="lg:grid-cols-4"] {
-  @apply lg:grid-cols-2;
-}
-
-.reading-plan-emi-wrapper [class*="xl:grid-cols-6"] {
-  @apply xl:grid-cols-2;
-}
-
-.reading-plan-emi-wrapper [class*="p-3"] {
-  @apply p-2;
-}
-
-.reading-plan-emi-wrapper [class*="text-2xl"] {
-  font-size: 1rem;
-}
-
-.reading-plan-emi-wrapper [class*="text-sm"]:not([class*="text-xs"]) {
-  font-size: 0.75rem;
-}
-
-.reading-plan-emi-wrapper .gap-3 {
-  @apply gap-2;
-}
 
 /* Custom Uppy Styling for SoapBox */
 .uppy-DashboardModal {
