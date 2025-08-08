@@ -5,9 +5,9 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// GPT-5 model configurations
-const GPT_5_MINI = 'gpt-5-mini';  // Cost-effective for simple tasks
-const GPT_5 = 'gpt-5';            // Premium model for complex tasks
+// GPT-4o model configurations (the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user)
+const GPT_4O_MINI = 'gpt-4o-mini';  // Cost-effective for simple tasks
+const GPT_4O = 'gpt-4o';            // Premium model for complex tasks
 
 // Model selection criteria
 interface TaskComplexity {
@@ -39,26 +39,26 @@ export class AIService {
     return AIService.instance;
   }
 
-  // Toggle GPT-5-mini mode for cost savings
-  setGPT5MiniMode(enabled: boolean): void {
+  // Toggle GPT-4o-mini mode for cost savings
+  setGPT4oMiniMode(enabled: boolean): void {
     this.useGPT5Mini = enabled;
-    console.log(`GPT-5-mini mode ${enabled ? 'enabled' : 'disabled'}`);
+    console.log(`GPT-4o-mini mode ${enabled ? 'enabled' : 'disabled'}`);
   }
 
   // Intelligent model selection based on task complexity
   private selectModel(complexity: TaskComplexity): string {
-    // Force GPT-5-mini if toggle is enabled and task is suitable
+    // Force GPT-4o-mini if toggle is enabled and task is suitable
     if (this.useGPT5Mini && (complexity.isSimple || complexity.maxTokens < 1000)) {
-      return GPT_5_MINI;
+      return GPT_4O_MINI;
     }
 
-    // Use GPT-5 for complex reasoning, creative tasks, or large outputs
+    // Use GPT-4o for complex reasoning, creative tasks, or large outputs
     if (complexity.requiresReasoning || complexity.isCreative || complexity.maxTokens > 2000) {
-      return GPT_5;
+      return GPT_4O;
     }
 
-    // Default to GPT-5-mini for simple tasks
-    return complexity.isSimple ? GPT_5_MINI : GPT_5;
+    // Default to GPT-4o-mini for simple tasks
+    return complexity.isSimple ? GPT_4O_MINI : GPT_4O;
   }
 
   // Get timeout for specific route type
@@ -94,7 +94,7 @@ export class AIService {
 
     // Select appropriate model
     const primaryModel = this.selectModel(complexity);
-    const fallbackModel = primaryModel === GPT_5 ? GPT_5_MINI : GPT_5_MINI;
+    const fallbackModel = primaryModel === GPT_4O ? GPT_4O_MINI : GPT_4O_MINI;
     
     const timeout = this.getTimeout(routeType);
 

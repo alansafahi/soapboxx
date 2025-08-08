@@ -10581,7 +10581,7 @@ Return JSON with this exact structure:
 
   app.post('/api/prayers', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.session.userId;
+      const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ message: 'User authentication required' });
       }
@@ -12327,7 +12327,7 @@ Return JSON with this exact structure:
   app.post('/api/soap/ai/suggestions', isAuthenticated, async (req: any, res) => {
     try {
       const { scripture, scriptureReference, userMood, currentEvents, personalContext, generateComplete } = req.body;
-      const userId = req.session.userId;
+      const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
 
       const contextualInfo = {
         userMood,
@@ -12371,7 +12371,7 @@ Return JSON with this exact structure:
       const enhanced = await enhanceSoapEntry(scripture, scriptureReference, observation, application, prayer);
       
       // Track first-time AI usage for 10-point bonus
-      const userId = req.session.userId;
+      const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
       await storage.trackFirstAIUsage(userId, 'soap_enhance');
       
       res.json(enhanced);
@@ -12391,7 +12391,7 @@ Return JSON with this exact structure:
       const questions = await generateScriptureQuestions(scripture, scriptureReference);
       
       // Track first-time AI usage for 10-point bonus
-      const userId = req.session.userId;
+      const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
       await storage.trackFirstAIUsage(userId, 'soap_questions');
       
       res.json({ questions });
