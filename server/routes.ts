@@ -11487,12 +11487,8 @@ Return JSON with this exact structure:
         return res.status(404).json({ message: 'User not found' });
       }
 
-      // Check if user has church affiliation  
-      const userChurchRelations = await db
-        .select()
-        .from(userChurches)
-        .where(eq(userChurches.userId, userId))
-        .limit(1);
+      // Check if user has church affiliation using storage layer
+      const userChurchRelations = await storage.getUserChurches(userId);
 
       // Calculate profile completeness
       const profileComplete = !!(
