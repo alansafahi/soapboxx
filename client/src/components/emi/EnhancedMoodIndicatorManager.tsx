@@ -189,7 +189,7 @@ export default function EnhancedMoodIndicatorManager({
   };
 
   const categories = Object.keys(moodsByCategory);
-  const filteredCategories = selectedCategory 
+  const filteredCategories = selectedCategory && selectedCategory !== "all"
     ? { [selectedCategory]: moodsByCategory[selectedCategory] } 
     : moodsByCategory;
 
@@ -387,7 +387,7 @@ export default function EnhancedMoodIndicatorManager({
               <SelectValue placeholder="All categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All categories</SelectItem>
+              <SelectItem value="all">All categories</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat} value={cat}>
                   {cat}
