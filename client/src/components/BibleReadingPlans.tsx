@@ -273,10 +273,23 @@ export default function BibleReadingPlans() {
 
 
   // Fetch plan days when a plan is selected
-  const { data: planDays = [] } = useQuery<ReadingPlanDay[]>({
+  const { data: planDays = [], isLoading: planDaysLoading } = useQuery<ReadingPlanDay[]>({
     queryKey: ["/api/reading-plans", selectedPlan?.id, "days"],
     enabled: !!selectedPlan?.id,
   });
+  
+  console.log("DEBUG - Selected plan:", selectedPlan?.id, selectedPlan?.name);
+  console.log("DEBUG - Plan days loaded:", planDays.length);
+  console.log("DEBUG - Active tab:", activeTab);
+  console.log("DEBUG - Subscribed plans:", subscribedPlans.length, subscribedPlans.map(p => p.name));
+  
+  // Auto-select single subscribed plan when on my-plans tab
+  React.useEffect(() => {
+    if (activeTab === "my-plans" && subscribedPlans.length === 1 && !selectedPlan) {
+      console.log("DEBUG - Auto-selecting single plan:", subscribedPlans[0].name);
+      setSelectedPlan(subscribedPlans[0]);
+    }
+  }, [activeTab, subscribedPlans.length, selectedPlan]);
 
   // Fetch user progress for selected plan
   const { data: userProgress = [] } = useQuery<UserReadingProgress[]>({
