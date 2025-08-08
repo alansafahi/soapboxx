@@ -11487,8 +11487,8 @@ Return JSON with this exact structure:
         return res.status(404).json({ message: 'User not found' });
       }
 
-      // Check if user has church affiliation
-      const userChurches = await db
+      // Check if user has church affiliation  
+      const userChurchRelations = await db
         .select()
         .from(userChurches)
         .where(eq(userChurches.userId, userId))
@@ -11513,10 +11513,10 @@ Return JSON with this exact structure:
 
       const circleLimit = user.independentCircleLimit || 2;
       const independentCirclesCount = independentCircles.length;
-      const canCreateMore = userChurches.length > 0 || independentCirclesCount < circleLimit;
+      const canCreateMore = userChurchRelations.length > 0 || independentCirclesCount < circleLimit;
 
       return res.json({
-        hasChurch: userChurches.length > 0,
+        hasChurch: userChurchRelations.length > 0,
         profileComplete,
         circleLimit,
         independentCirclesCount,
