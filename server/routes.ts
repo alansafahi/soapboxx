@@ -14576,7 +14576,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
   app.post("/api/reading-plans/:id/progress/:day", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user?.claims?.sub || req.user?.id;
+      const userId = req.session?.userId || req.user?.claims?.sub;
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
@@ -14596,14 +14596,18 @@ Please provide suggestions for the missing or incomplete sections.`
       
       res.json(progress);
     } catch (error) {
-      
+      console.error("Failed to record reading progress:", error);
       res.status(500).json({ message: "Failed to record reading progress" });
     }
   });
 
   app.get("/api/reading-plans/:id/progress", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
       const planId = parseInt(req.params.id);
       
       if (isNaN(planId)) {
@@ -14613,6 +14617,7 @@ Please provide suggestions for the missing or incomplete sections.`
       const progress = await storage.getUserReadingProgress(userId, planId);
       res.json(progress);
     } catch (error) {
+      console.error("Failed to fetch reading progress:", error);
       res.status(500).json({ message: "Failed to fetch reading progress" });
     }
   });
