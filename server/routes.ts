@@ -10757,9 +10757,11 @@ Return JSON with this exact structure:
         return res.status(401).json({ message: 'User authentication required' });
       }
       
+      // Default communityId to null for users without church affiliation
       const prayerData = {
         ...req.body,
         authorId: userId,
+        communityId: req.body.communityId || null, // Allow null for independent prayers
         expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : null,
         allowsExpiration: req.body.allowsExpiration || false,
       };
