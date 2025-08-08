@@ -3,9 +3,12 @@
 @tailwind utilities;
 
 /* Smaller category headlines in reading plan EMI */
-.max-h-64 .CardTitle {
-  font-size: 1rem !important;
-  font-weight: 600 !important;
+.max-h-64 h3,
+.max-h-64 .CardTitle,
+.max-h-64 [class*="text-xl"],
+.max-h-64 [class*="text-2xl"] {
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
 }
 
 

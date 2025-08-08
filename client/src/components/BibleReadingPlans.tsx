@@ -354,7 +354,7 @@ export default function BibleReadingPlans() {
       const subscription = subscriptions.find(sub => sub.planId === plan.id);
       const progress = userProgress.filter(p => p.planId === plan.id);
       const completedDays = progress.filter(p => p.completedAt).length;
-      const progressPercentage = subscription && plan.duration > 0
+      const progressPercentage = plan.duration > 0
         ? Math.round((completedDays / plan.duration) * 100)
         : 0;
       
@@ -494,7 +494,7 @@ export default function BibleReadingPlans() {
     const subscription = subscriptions.find(sub => sub.planId === selectedPlan.id);
     const progress = userProgress.filter(p => p.planId === selectedPlan.id);
     const completedDays = progress.filter(p => p.completedAt).length;
-    const progressPercentage = subscription && selectedPlan.duration > 0
+    const progressPercentage = selectedPlan.duration > 0
       ? Math.round((completedDays / selectedPlan.duration) * 100)
       : 0;
 
@@ -548,7 +548,7 @@ export default function BibleReadingPlans() {
                       Day {subscription.currentDay} of {selectedPlan.duration}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {subscription.totalDaysCompleted} days completed
+                      {completedDays} days completed
                     </p>
                   </div>
                 ) : (
