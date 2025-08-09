@@ -99,6 +99,7 @@ export function useImmediateAuth() {
 
   const logout = async () => {
     try {
+      console.log('Starting logout process...');
       
       // Clear state immediately
       const newState = {
@@ -111,17 +112,28 @@ export function useImmediateAuth() {
       // Clear storage
       localStorage.clear();
       sessionStorage.clear();
+      console.log('Cleared local storage');
       
       // Call logout endpoint
-      fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include'
-      }).catch(() => {});
+      try {
+        const response = await fetch('/api/auth/logout', {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        console.log('Logout API response:', response.status);
+      } catch (apiError) {
+        console.error('Logout API failed:', apiError);
+      }
       
-      // Redirect
-      window.location.href = '/';
+      // Force redirect
+      console.log('Redirecting to home...');
+      window.location.replace('/');
     } catch (error) {
-      window.location.href = '/';
+      console.error('Logout error:', error);
+      window.location.replace('/');
     }
   };
 
