@@ -35,6 +35,7 @@ const { userPoints } = schema;
 import { eq, and, or, gte, lte, desc, asc, like, sql, count, sum, ilike, isNotNull, inArray, isNull, lt } from "drizzle-orm";
 import { lookupBibleVerse } from './bible-api';
 import { analyzeUserSpiritualGifts } from './ai-spiritual-gifts';
+import { bulkGenerateContentForEmptyPlans, generateContentForSpecificPlan } from './utils/contentGeneration';
 
 // Extend session data interface to include userId
 declare module 'express-session' {
@@ -17044,6 +17045,33 @@ Please provide suggestions for the missing or incomplete sections.`
   app.use('/api/subscription', subscriptionRoutes);
 
   // Reading Plan Content Generation Routes
+  // Temporary endpoint for content generation (no auth required for development)
+  app.post('/api/reading-plans/generate-missing-content', async (req: any, res) => {
+    try {
+      console.log('🚀 Starting content generation for empty reading plans...');
+      
+      // Start bulk generation (this is a long-running process)
+      bulkGenerateContentForEmptyPlans()
+        .then(() => {
+          console.log('✅ Bulk content generation completed successfully!');
+        })
+        .catch(error => {
+          console.error('❌ Bulk content generation failed:', error);
+        });
+
+      res.json({ 
+        message: 'Content generation started. Check console for progress.',
+        status: 'started'
+      });
+    } catch (error) {
+      console.error('❌ Failed to start content generation:', error);
+      res.status(500).json({ 
+        message: 'Failed to start content generation',
+        error: error.message 
+      });
+    }
+  });
+  
   // Bulk generate content for all empty plans (Admin only)
   app.post('/api/reading-plans/generate-content/bulk', isAuthenticated, async (req: any, res) => {
     try {
