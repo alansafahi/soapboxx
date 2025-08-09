@@ -4825,6 +4825,33 @@ export const insertUserBadgeSchema = createInsertSchema(userBadges).omit({
   createdAt: true,
 });
 
+// Gamification - User Scoring System
+export const userScores = pgTable("user_scores", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  totalPoints: integer("total_points").default(0),
+  weeklyPoints: integer("weekly_points").default(0),
+  monthlyPoints: integer("monthly_points").default(0),
+  level: integer("level").default(1),
+  experiencePoints: integer("experience_points").default(0),
+  rank: integer("rank").default(0),
+  lastUpdated: timestamp("last_updated").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userScoreUnique: unique().on(table.userId),
+}));
+
+
+
+
+
+// Schema exports for scoring and gamification
+export const insertUserScoreSchema = createInsertSchema(userScores).omit({
+  id: true,
+  createdAt: true,
+  lastUpdated: true,
+});
+
 // Type exports for gamification
 export type UserStreak = typeof userStreaks.$inferSelect;
 export type InsertUserStreak = z.infer<typeof insertUserStreakSchema>;
@@ -4836,3 +4863,23 @@ export type Badge = typeof badges.$inferSelect;
 export type InsertBadge = z.infer<typeof insertBadgeSchema>;
 export type UserBadge = typeof userBadges.$inferSelect;
 export type InsertUserBadge = z.infer<typeof insertUserBadgeSchema>;
+
+// Additional type exports for scoring system
+export type UserScore = typeof userScores.$inferSelect;
+export type InsertUserScore = z.infer<typeof insertUserScoreSchema>;
+export type PointTransaction = typeof pointTransactions.$inferSelect;
+export type InsertPointTransaction = typeof pointTransactions.$inferInsert;
+export type Leaderboard = typeof leaderboards.$inferSelect;
+export type InsertLeaderboard = typeof leaderboards.$inferInsert;
+export type LeaderboardEntry = typeof leaderboardEntries.$inferSelect;
+export type InsertLeaderboardEntry = typeof leaderboardEntries.$inferInsert;
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = typeof achievements.$inferInsert;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = typeof userAchievements.$inferInsert;
+export type Streak = typeof streaks.$inferSelect;
+export type InsertStreak = typeof streaks.$inferInsert;
+export type Challenge = typeof challenges.$inferSelect;
+export type InsertChallenge = typeof challenges.$inferInsert;
+export type ChallengeParticipant = typeof challengeParticipants.$inferSelect;
+export type InsertChallengeParticipant = typeof challengeParticipants.$inferInsert;

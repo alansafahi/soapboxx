@@ -1032,7 +1032,6 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                     </Form>
                   </DialogContent>
                 </Dialog>
-                  </div>
                   
                   <Button className="flex items-center gap-2 w-full" onClick={() => setIsCreateDialogOpen(true)}>
                     <Plus className="w-4 h-4" />
