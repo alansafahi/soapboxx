@@ -275,13 +275,13 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
     }
 
     // Check profile verification requirements
-    if (!userChurchStatus?.profileComplete) {
+    if (!(userChurchStatus as any)?.profileComplete) {
       setShowProfileVerificationDialog(true);
       return;
     }
 
     // If user has no church, show smart church connection prompt
-    if (!userChurchStatus?.hasChurch) {
+    if (!(userChurchStatus as any)?.hasChurch) {
       setShowChurchPromptDialog(true);
       return;
     }
@@ -409,7 +409,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
       form.reset();
       setExpirationSettings({ expiresAt: null, allowsExpiration: false });
       // Dynamic message based on privacy level
-      const privacyMessages = {
+      const privacyMessages: Record<string, string> = {
         public: "Your prayer request has been shared publicly with everyone.",
         community: "Your prayer request has been shared with your church community.",
         prayer_circle: "Your prayer request has been shared with your prayer circle/team.",
@@ -1116,7 +1116,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                     : (prayer as any).authorEmail 
                       ? (prayer as any).authorEmail.split('@')[0]
                       : 'Community Member';
-                const churchName = prayer.churchId ? 'Local Church' : 'Community Prayer';
+                const churchName = prayer.communityId ? 'Local Church' : 'Community Prayer';
 
                 return (
                   <motion.div
@@ -1189,8 +1189,8 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                             )}
                             
                             {/* Delete Button - Only show for prayer author */}
-                            {user && prayer.authorEmail && (
-                              (String(user.id) === String(prayer.authorId) || user.email === prayer.authorEmail) && (
+                            {user && prayer.authorId && (
+                              String(user.id) === String(prayer.authorId) && (
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
@@ -1367,7 +1367,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                 <CardContent>
                   <div className="space-y-4">
                     <AnimatePresence>
-                      {prayerRequests.filter(prayer => prayer.authorEmail === user?.email).map((prayer) => {
+                      {prayerRequests.filter(prayer => prayer.authorId === user?.id).map((prayer) => {
                         const isExpanded = expandedCards.has(prayer.id);
                         const currentReactions = reactions.get(prayer.id) || { praying: prayer.prayerCount || 0, heart: 0, fire: 0, praise: 0 };
                         const showingWhosPraying = showWhosPraying.get(prayer.id) || false;
@@ -1395,24 +1395,24 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.3 }}
-                            className={`${highlightId == prayer.id ? 'ring-2 ring-blue-500' : ''}`}
+                            className={`${Number(highlightId) === prayer.id ? 'ring-2 ring-blue-500' : ''}`}
                           >
                             <Card className="hover:shadow-lg transition-all duration-200">
                               <CardHeader>
                                 <div className="flex items-start justify-between">
                                   <div className="flex items-start gap-3 flex-1">
                                     <Avatar className="w-10 h-10">
-                                      {prayer.authorProfileImageUrl ? (
-                                        <AvatarImage src={prayer.authorProfileImageUrl} alt="Profile" />
+                                      {(prayer as any).authorProfileImageUrl ? (
+                                        <AvatarImage src={(prayer as any).authorProfileImageUrl} alt="Profile" />
                                       ) : null}
                                       <AvatarFallback>
-                                        {prayer.isAnonymous ? "🙏" : (prayer.authorFirstName?.[0] || "U")}
+                                        {prayer.isAnonymous ? "🙏" : ((prayer as any).authorFirstName?.[0] || "U")}
                                       </AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1">
                                       <div className="flex items-center gap-2 flex-wrap">
                                         <h4 className="font-semibold">
-                                          {prayer.isAnonymous ? "Anonymous Prayer Request" : `${prayer.authorFirstName} ${prayer.authorLastName}`}
+                                          {prayer.isAnonymous ? "Anonymous Prayer Request" : `${(prayer as any).authorFirstName || ''} ${(prayer as any).authorLastName || ''}`}
                                         </h4>
                                         <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
                                           Prayer Request
@@ -1429,7 +1429,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                                         )}
                                       </div>
                                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                                        {formatDistanceToNow(new Date(prayer.createdAt))} ago
+                                        {prayer.createdAt ? formatDistanceToNow(new Date(prayer.createdAt)) : ''} ago
                                       </p>
                                       
                                       {prayer.title && (
@@ -1464,10 +1464,12 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                                           <Share2 className="w-4 h-4 mr-2" />
                                           Share Prayer
                                         </DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setDeleteDialogOpen({isOpen: true, prayerId: prayer.id})}>
-                                          <Trash2 className="w-4 h-4 mr-2" />
-                                          Delete Prayer
-                                        </DropdownMenuItem>
+                                        {user && prayer.authorId && String(user.id) === String(prayer.authorId) && (
+                                          <DropdownMenuItem onClick={() => setDeleteDialogOpen({isOpen: true, prayerId: prayer.id})}>
+                                            <Trash2 className="w-4 h-4 mr-2" />
+                                            Delete Prayer
+                                          </DropdownMenuItem>
+                                        )}
                                       </DropdownMenuContent>
                                     </DropdownMenu>
                                   </div>
@@ -1574,7 +1576,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                       })}
                     </AnimatePresence>
                     
-                    {prayerRequests.filter(prayer => prayer.authorEmail === user?.email).length === 0 && (
+                    {prayerRequests.filter(prayer => prayer.authorId === user?.id).length === 0 && (
                       <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                         You haven't posted any prayer requests yet.
                         <div className="mt-2">
@@ -1604,8 +1606,8 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                 Join private or public prayer groups for deeper fellowship and focused prayer.
               </p>
               <div className="space-y-3">
-                {prayerCircles.length > 0 ? (
-                  prayerCircles.map((circle: any) => (
+                {(prayerCircles as any[]).length > 0 ? (
+                  (prayerCircles as any[]).map((circle: any) => (
                     <PrayerCircleCard 
                       key={circle.id} 
                       circle={circle}
@@ -1615,7 +1617,7 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                       isJoining={joinCircleMutation.isPending}
                       isLeaving={leaveCircleMutation.isPending}
                       isDeleting={deleteCircleMutation.isPending}
-                      userCircles={userPrayerCircles}
+                      userCircles={userPrayerCircles as any[]}
                       currentUserId={user?.id || ''}
                     />
                   ))
