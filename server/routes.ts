@@ -10822,7 +10822,7 @@ Return JSON with this exact structure:
       // Prayer requests automatically appear in social feed via getDiscussions UNION query
       // No need to create duplicate discussion entries
       
-      res.status(201).json({
+      return res.status(201).json({
         ...prayer,
         celebration: {
           points: 10,
@@ -10833,6 +10833,7 @@ Return JSON with this exact structure:
         }
       });
     } catch (error) {
+      console.error('Prayer creation error:', error);
       res.status(500).json({ 
         message: "Failed to create prayer request", 
         error: error instanceof Error ? error.message : String(error)
