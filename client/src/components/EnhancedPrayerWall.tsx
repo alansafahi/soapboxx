@@ -735,15 +735,41 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
         </TabsList>
 
         <TabsContent value="prayers" className="space-y-6">
-          {/* Category Filters */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <Filter className="w-5 h-5" />
-                  Prayer Categories
-                </h3>
-                <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          {/* Prayer Sub-tabs */}
+          <Tabs defaultValue="latest" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="latest">Latest Prayers</TabsTrigger>
+              <TabsTrigger value="my">My Prayers</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="latest" className="space-y-6">
+              {/* Category Filters */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <Filter className="w-5 h-5" />
+                      Prayer Categories
+                    </h3>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {prayerCategories.map((category) => (
+                      <Button
+                        key={category.id}
+                        variant={selectedCategory === category.id ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedCategory(category.id)}
+                        className="flex items-center gap-2"
+                      >
+                        <span>{category.icon}</span>
+                        {category.label}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                   <DialogTrigger asChild>
                     <Button className="flex items-center gap-2">
                       <Plus className="w-4 h-4" />
@@ -1006,9 +1032,18 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                     </Form>
                   </DialogContent>
                 </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent>
+                  </div>
+                  
+                  <Button className="flex items-center gap-2 w-full" onClick={() => setIsCreateDialogOpen(true)}>
+                    <Plus className="w-4 h-4" />
+                    New Prayer Request
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Prayer Requests Feed */}
+              <Card>
+                <CardContent>
               <div className="space-y-3">
                 {/* Primary Categories - Most Used */}
                 <div className="flex flex-wrap gap-2">
@@ -1314,8 +1349,246 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
                   </motion.div>
                 );
               })}
-            </AnimatePresence>
-          </div>
+              </AnimatePresence>
+              </div>
+              </CardContent>
+            </Card>
+            </TabsContent>
+
+            <TabsContent value="my" className="space-y-6">
+              {/* My Prayers */}
+              <Card>
+                <CardHeader>
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    My Prayer Requests
+                  </h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <AnimatePresence>
+                      {prayerRequests.filter(prayer => prayer.authorEmail === user?.email).map((prayer) => {
+                        const isExpanded = expandedCards.has(prayer.id);
+                        const currentReactions = reactions.get(prayer.id) || { praying: prayer.prayerCount || 0, heart: 0, fire: 0, praise: 0 };
+                        const showingWhosPraying = showWhosPraying.get(prayer.id) || false;
+                        
+                        const toggleCard = () => {
+                          setExpandedCards(prev => {
+                            const newSet = new Set(prev);
+                            if (newSet.has(prayer.id)) {
+                              newSet.delete(prayer.id);
+                            } else {
+                              newSet.add(prayer.id);
+                            }
+                            return newSet;
+                          });
+                        };
+
+                        const toggleWhosPraying = (prayerId: number) => {
+                          setShowWhosPraying(prev => new Map(prev).set(prayerId, !prev.get(prayerId)));
+                        };
+
+                        return (
+                          <motion.div
+                            key={prayer.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.3 }}
+                            className={`${highlightId == prayer.id ? 'ring-2 ring-blue-500' : ''}`}
+                          >
+                            <Card className="hover:shadow-lg transition-all duration-200">
+                              <CardHeader>
+                                <div className="flex items-start justify-between">
+                                  <div className="flex items-start gap-3 flex-1">
+                                    <Avatar className="w-10 h-10">
+                                      {prayer.authorProfileImageUrl ? (
+                                        <AvatarImage src={prayer.authorProfileImageUrl} alt="Profile" />
+                                      ) : null}
+                                      <AvatarFallback>
+                                        {prayer.isAnonymous ? "🙏" : (prayer.authorFirstName?.[0] || "U")}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                      <div className="flex items-center gap-2 flex-wrap">
+                                        <h4 className="font-semibold">
+                                          {prayer.isAnonymous ? "Anonymous Prayer Request" : `${prayer.authorFirstName} ${prayer.authorLastName}`}
+                                        </h4>
+                                        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                          Prayer Request
+                                        </Badge>
+                                        {prayer.category && (
+                                          <Badge variant="secondary">
+                                            {prayerCategories.find(cat => cat.id === prayer.category)?.label || prayer.category}
+                                          </Badge>
+                                        )}
+                                        {prayer.isUrgent && (
+                                          <Badge variant="destructive" className="animate-pulse">
+                                            Urgent
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                                        {formatDistanceToNow(new Date(prayer.createdAt))} ago
+                                      </p>
+                                      
+                                      {prayer.title && (
+                                        <h5 className="font-medium text-gray-900 dark:text-white mt-2">
+                                          {prayer.title}
+                                        </h5>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={toggleCard}
+                                      className="text-gray-500 hover:text-gray-700"
+                                    >
+                                      {isExpanded ? (
+                                        <ChevronUp className="w-4 h-4" />
+                                      ) : (
+                                        <ChevronDown className="w-4 h-4" />
+                                      )}
+                                    </Button>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="sm">
+                                          <MoreVertical className="w-4 h-4" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => setShareDialogOpen({isOpen: true, prayer})}>
+                                          <Share2 className="w-4 h-4 mr-2" />
+                                          Share Prayer
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setDeleteDialogOpen({isOpen: true, prayerId: prayer.id})}>
+                                          <Trash2 className="w-4 h-4 mr-2" />
+                                          Delete Prayer
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  </div>
+                                </div>
+                              </CardHeader>
+                              <CardContent>
+                                <div className={`text-gray-700 dark:text-gray-300 ${isExpanded ? '' : 'line-clamp-2'}`}>
+                                  {prayer.content}
+                                </div>
+                                
+                                {prayer.attachmentUrl && (
+                                  <div className="mt-4">
+                                    <img 
+                                      src={prayer.attachmentUrl} 
+                                      alt="Prayer request attachment"
+                                      className="rounded-lg max-w-full h-auto border border-gray-200 dark:border-gray-700"
+                                      style={{ maxHeight: '300px', objectFit: 'contain' }}
+                                      onError={(e) => {
+                                        e.currentTarget.style.display = 'none';
+                                      }}
+                                    />
+                                  </div>
+                                )}
+
+                                <div className="flex items-center justify-between pt-2 border-t dark:border-gray-700">
+                                  <div className="flex items-center gap-4">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className={`flex items-center gap-2 ${prayedRequests.has(prayer.id) ? 'text-blue-600' : ''}`}
+                                      onClick={() => prayForRequestMutation.mutate(prayer.id)}
+                                      disabled={prayedRequests.has(prayer.id)}
+                                      title="Pray for this request"
+                                    >
+                                      🙏 <span className="font-semibold">{currentReactions.praying}</span>
+                                      <span className="text-sm">Praying</span>
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="flex items-center gap-2 hover:text-red-500"
+                                      onClick={() => reactToPrayerMutation.mutate({ prayerId: prayer.id, reaction: 'heart' })}
+                                      title="Show love and support"
+                                    >
+                                      ❤️ <span>{currentReactions.heart}</span>
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="flex items-center gap-2 hover:text-orange-500"
+                                      onClick={() => reactToPrayerMutation.mutate({ prayerId: prayer.id, reaction: 'fire' })}
+                                      title="This is powerful!"
+                                    >
+                                      🔥 <span>{currentReactions.fire}</span>
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="flex items-center gap-2 hover:text-yellow-500"
+                                      onClick={() => reactToPrayerMutation.mutate({ prayerId: prayer.id, reaction: 'praise' })}
+                                      title="Praise God!"
+                                    >
+                                      🙌 <span>{currentReactions.praise}</span>
+                                    </Button>
+                                  </div>
+                                  
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="flex items-center gap-2 text-gray-600"
+                                    onClick={() => toggleWhosPraying(prayer.id)}
+                                  >
+                                    <Users className="w-4 h-4" />
+                                    <Eye className="w-4 h-4" />
+                                    Who's Praying
+                                  </Button>
+                                </div>
+
+                                {showingWhosPraying && (
+                                  <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3"
+                                  >
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <Users className="w-4 h-4 text-blue-600" />
+                                      <span className="text-sm font-semibold text-blue-800 dark:text-blue-200">
+                                        {currentReactions.praying} people praying
+                                      </span>
+                                    </div>
+                                    <div className="text-sm text-blue-700 dark:text-blue-300">
+                                      {currentReactions.praying > 0 
+                                        ? `${currentReactions.praying} people are praying for this request` 
+                                        : "Be the first to pray for this request"
+                                      }
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                    
+                    {prayerRequests.filter(prayer => prayer.authorEmail === user?.email).length === 0 && (
+                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                        You haven't posted any prayer requests yet.
+                        <div className="mt-2">
+                          <Button onClick={() => setIsCreateDialogOpen(true)} variant="outline">
+                            Share Your First Prayer Request
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="circles" className="space-y-6">
