@@ -11671,13 +11671,23 @@ Return JSON with this exact structure:
         user.phoneVerified
       );
 
-      // Count independent circles created by user using storage layer
-      const independentCircles = await storage.getUserPrayerCircles(userId).then(circles => 
-        circles.filter(circle => !circle.communityId)
-      );
+      // Count independent circles created by user
+      let independentCirclesCount = 0;
+      try {
+        const userCircles = await db
+          .select()
+          .from(prayerCircles)
+          .where(and(
+            eq(prayerCircles.createdBy, userId),
+            isNull(prayerCircles.communityId)
+          ));
+        independentCirclesCount = userCircles.length;
+      } catch (error) {
+        // Fallback to 0 if query fails
+        independentCirclesCount = 0;
+      }
 
       const circleLimit = user.independentCircleLimit || 2;
-      const independentCirclesCount = independentCircles.length;
       const canCreateMore = userChurchRelations.length > 0 || independentCirclesCount < circleLimit;
 
       return res.json({
