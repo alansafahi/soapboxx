@@ -610,10 +610,7 @@ export default function TopHeader() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => {
-              console.log('Logout clicked');
-              logout();
-            }}>
+            <DropdownMenuItem onClick={logout}>
               <LogOut className="mr-2 h-4 w-4" />
               Sign out
             </DropdownMenuItem>

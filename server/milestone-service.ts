@@ -42,7 +42,7 @@ class MilestoneService {
       
     } catch (error) {
       // Silent error handling - milestones shouldn't break main functionality
-      console.error('Milestone check error:', error);
+      // Error logging removed for production
     }
   }
 

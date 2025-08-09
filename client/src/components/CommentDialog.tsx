@@ -82,7 +82,6 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
         
         return await response.json();
       } catch (error) {
-        
         throw error;
       }
     },
@@ -128,7 +127,6 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
 
         return await response.json();
       } catch (error) {
-        
         throw error;
       }
     },
@@ -163,7 +161,6 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
       });
     },
     onError: (error: any) => {
-      
       toast({
         title: "Unable to post comment",
         description: error.message || "Please try again in a moment",
@@ -190,7 +187,6 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
           break;
       }
 
-      
       const response = await fetch(likeEndpoint, {
         method: 'POST',
         headers: {
@@ -234,7 +230,6 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
       });
     },
     onError: (error: any) => {
-      
       toast({
         title: "Error",
         description: "Failed to like comment",

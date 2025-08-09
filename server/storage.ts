@@ -8771,29 +8771,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  // First AI-Assisted S.O.A.P. Entry - 10 points
-  async trackFirstAIUsage(userId: string, feature: string): Promise<void> {
-    try {
-      // Check if user has used AI before
-      const existingUsage = await db.execute(sql`
-        SELECT id FROM point_transactions 
-        WHERE user_id = ${userId} AND reason = 'ai_first_use'
-        LIMIT 1
-      `);
 
-      if (existingUsage.rows.length === 0) {
-        // Award first-time AI usage bonus
-        await this.addPointsToUser(
-          userId,
-          10,
-          'ai_first_use',
-          null // No specific entity ID for AI usage
-        );
-      }
-    } catch (error) {
-      throw new Error('Failed to track first AI usage');
-    }
-  }
 
   // Create Group/Ministry - 50 points
   async createCommunityGroup(userId: string, groupName: string, communityId: number): Promise<any> {
