@@ -10770,7 +10770,7 @@ Return JSON with this exact structure:
       const prayer = await storage.createPrayerRequest(prayerData);
 
       // Get updated user points for real-time display
-      const userPoints = await storage.getUserPoints(userId);
+      const userPoints = await storage.getUserById(userId);
 
       // Real-time AI content monitoring for prayer requests (1-3 seconds)
       setTimeout(async () => {
@@ -10829,7 +10829,7 @@ Return JSON with this exact structure:
           reason: 'prayer_request'
         },
         userPoints: {
-          totalPoints: userPoints?.totalPoints || 0
+          totalPoints: userPoints?.points || 0
         }
       });
     } catch (error) {
