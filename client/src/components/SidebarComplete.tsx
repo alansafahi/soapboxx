@@ -242,8 +242,29 @@ export default function SidebarComplete() {
     });
   };
 
-  const logout = () => {
-    window.location.href = '/login';
+  const logout = async () => {
+    try {
+      // Call the logout API endpoint to clear server session
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      // Clear local storage and session storage
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Redirect to login page
+      window.location.href = '/login';
+    } catch (error) {
+      // Even if API call fails, clear local data and redirect
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = '/login';
+    }
   };
 
   return (
