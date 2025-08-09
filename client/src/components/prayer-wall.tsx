@@ -179,7 +179,7 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
       return response.json();
     },
     onSuccess: (data, prayerRequestId) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/prayers"] });
+      // Update local state for immediate visual feedback
       setLikedRequests(prev => {
         const newSet = new Set(prev);
         if (data.liked) {
@@ -189,6 +189,24 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
         }
         return newSet;
       });
+
+      // Update the prayer data in the cache directly for immediate count update
+      queryClient.setQueryData(["/api/prayers"], (oldData: any) => {
+        if (!oldData) return oldData;
+        
+        return oldData.map((prayer: PrayerRequestWithAuthor) => {
+          if (prayer.id === prayerRequestId) {
+            return {
+              ...prayer,
+              likeCount: data.liked 
+                ? (prayer.likeCount || 0) + 1 
+                : Math.max((prayer.likeCount || 0) - 1, 0)
+            };
+          }
+          return prayer;
+        });
+      });
+
       toast({
         title: data.liked ? "Liked" : "Unliked",
         description: data.liked ? "Prayer request liked" : "Prayer request unliked",

@@ -136,6 +136,24 @@ export function CommentDialog({ isOpen, onClose, postId, postType }: CommentDial
       queryClient.invalidateQueries({ queryKey: [apiEndpoint] });
       queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
+      
+      // Update prayer comment count if this is a prayer comment
+      if (postType === 'prayer') {
+        queryClient.setQueryData(["/api/prayers"], (oldData: any) => {
+          if (!oldData) return oldData;
+          
+          return oldData.map((prayer: any) => {
+            if (prayer.id === postId) {
+              return {
+                ...prayer,
+                commentCount: (prayer.commentCount || 0) + 1
+              };
+            }
+            return prayer;
+          });
+        });
+      }
+      
       setCommentText("");
       setReplyText("");
       setReplyingTo(null);
