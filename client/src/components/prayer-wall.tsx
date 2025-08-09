@@ -473,6 +473,256 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
         </Button>
       </div>
 
+      {/* Prayer Tabs */}
+      <Tabs defaultValue="latest" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="latest">Latest Prayers</TabsTrigger>
+          <TabsTrigger value="my">My Prayers</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="latest" className="space-y-4 mt-6">
+          {/* Latest Prayer Requests */}
+          <div className="space-y-4">
+            <AnimatePresence>
+              {prayerRequests.map((prayer) => (
+                <motion.div
+                  key={prayer.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Card className="hover:shadow-md transition-shadow duration-200 border-l-4 border-l-purple-500">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        {/* Header */}
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3">
+                            <Avatar className="w-10 h-10">
+                              <AvatarImage src={prayer.isAnonymous ? undefined : prayer.authorProfileImageUrl} />
+                              <AvatarFallback className="bg-purple-100 text-purple-600">
+                                {prayer.isAnonymous 
+                                  ? "?" 
+                                  : prayer.authorFirstName 
+                                    ? prayer.authorFirstName[0].toUpperCase()
+                                    : prayer.authorEmail 
+                                      ? prayer.authorEmail[0].toUpperCase()
+                                      : "U"
+                                }
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-semibold text-gray-900 dark:text-white">
+                                {prayer.isAnonymous 
+                                  ? "Anonymous" 
+                                  : (prayer.authorFirstName && prayer.authorLastName) 
+                                    ? `${prayer.authorFirstName} ${prayer.authorLastName}`
+                                    : prayer.authorEmail 
+                                      ? prayer.authorEmail.split('@')[0]
+                                      : "Community Member"
+                                }
+                              </div>
+                              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                                <Clock className="w-3 h-3" />
+                                <span>{formatTimeAgo(prayer.createdAt?.toString() || new Date().toISOString())}</span>
+                                {prayer.isAnswered && (
+                                  <Badge className="bg-green-100 text-green-800 ml-2">
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    Answered
+                                  </Badge>
+                                )}
+                                {prayer.privacyLevel && (
+                                  <Badge variant="outline" className="ml-2 text-xs">
+                                    {prayer.privacyLevel === 'public' ? 'Public' :
+                                     prayer.privacyLevel === 'community' ? 'My Community' :
+                                     prayer.privacyLevel === 'prayer_circle' ? 'Prayer Circle' :
+                                     prayer.privacyLevel === 'pastoral' ? 'Pastor Only' :
+                                     'Private'}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Content */}
+                        {prayer.title && (
+                          <h4 className="font-semibold text-lg text-gray-900 dark:text-white">{prayer.title}</h4>
+                        )}
+                        
+                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                          {prayer.content}
+                        </p>
+                        
+                        {/* Action Buttons */}
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+                          <div className="flex space-x-4">
+                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handlePrayForRequest(prayer.id)}
+                                disabled={prayForRequestMutation.isPending}
+                                className={`text-sm transition-all duration-300 ${
+                                  prayedRequests.has(prayer.id)
+                                    ? 'text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100'
+                                    : prayer.isAnswered 
+                                      ? 'text-green-500 hover:text-green-600 hover:bg-green-50' 
+                                      : 'text-purple-500 hover:text-purple-600 hover:bg-purple-50'
+                                }`}
+                              >
+                                <Hand className="w-4 h-4 mr-1" />
+                                {prayer.isAnswered 
+                                  ? `${(prayer.prayerCount || 0) + (prayedRequests.has(prayer.id) ? 1 : 0)} prayed` 
+                                  : `${(prayer.prayerCount || 0) + (prayedRequests.has(prayer.id) ? 1 : 0)} praying`
+                                }
+                              </Button>
+                            </motion.div>
+                            
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleLikePrayer(prayer.id)}
+                              disabled={likePrayerMutation.isPending}
+                              className={`text-sm ${
+                                likedRequests.has(prayer.id)
+                                  ? 'text-red-500 hover:text-red-600'
+                                  : 'text-gray-500 hover:text-red-500'
+                              }`}
+                            >
+                              <Heart className={`w-4 h-4 mr-1 ${likedRequests.has(prayer.id) ? 'fill-current' : ''}`} />
+                              {prayer.likeCount || 0}
+                            </Button>
+                            
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => openCommentDialog(prayer.id)}
+                              className="text-gray-500 hover:text-blue-500"
+                            >
+                              <MessageCircle className="w-4 h-4 mr-1" />
+                              {prayer.commentCount || 0}
+                            </Button>
+                          </div>
+                          
+                          <div className="flex space-x-2">
+                            {user && prayer.authorId === user.id && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeletePrayer(prayer.id)}
+                                className="text-gray-500 hover:text-red-500"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="my" className="space-y-4 mt-6">
+          {/* My Prayer Requests */}
+          <div className="space-y-4">
+            <AnimatePresence>
+              {prayerRequests.filter(prayer => prayer.authorId === user?.id).map((prayer) => (
+                <motion.div
+                  key={prayer.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Card className="hover:shadow-md transition-shadow duration-200 border-l-4 border-l-blue-500">
+                    <CardContent className="p-6">
+                      <div className="space-y-4">
+                        {/* Header */}
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3">
+                            <Avatar className="w-10 h-10">
+                              <AvatarImage src={prayer.isAnonymous ? undefined : prayer.authorProfileImageUrl} />
+                              <AvatarFallback className="bg-blue-100 text-blue-600">
+                                {prayer.isAnonymous ? "?" : (user?.firstName?.[0] || "U")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="font-semibold text-gray-900 dark:text-white">
+                                {prayer.isAnonymous ? "Your Anonymous Prayer" : "Your Prayer Request"}
+                              </div>
+                              <div className="flex items-center space-x-2 text-sm text-gray-500">
+                                <Clock className="w-3 h-3" />
+                                <span>{formatTimeAgo(prayer.createdAt?.toString() || new Date().toISOString())}</span>
+                                {prayer.isAnswered && (
+                                  <Badge className="bg-green-100 text-green-800 ml-2">
+                                    <CheckCircle className="w-3 h-3 mr-1" />
+                                    Answered
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Content */}
+                        {prayer.title && (
+                          <h4 className="font-semibold text-lg text-gray-900 dark:text-white">{prayer.title}</h4>
+                        )}
+                        
+                        <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                          {prayer.content}
+                        </p>
+                        
+                        {/* Stats and Actions */}
+                        <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
+                          <div className="flex space-x-4">
+                            <div className="flex items-center space-x-1 text-sm text-gray-500">
+                              <Hand className="w-4 h-4" />
+                              <span>{prayer.prayerCount || 0} people praying</span>
+                            </div>
+                            <div className="flex items-center space-x-1 text-sm text-gray-500">
+                              <Heart className="w-4 h-4" />
+                              <span>{prayer.likeCount || 0} hearts</span>
+                            </div>
+                            <div className="flex items-center space-x-1 text-sm text-gray-500">
+                              <MessageCircle className="w-4 h-4" />
+                              <span>{prayer.commentCount || 0} comments</span>
+                            </div>
+                          </div>
+                          
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeletePrayer(prayer.id)}
+                            className="text-gray-500 hover:text-red-500"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+              
+              {prayerRequests.filter(prayer => prayer.authorId === user?.id).length === 0 && (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <p className="text-lg mb-2">You haven't posted any prayer requests yet.</p>
+                  <Button onClick={() => setIsCreateDialogOpen(true)} variant="outline">
+                    Share Your First Prayer Request
+                  </Button>
+                </div>
+              )}
+            </AnimatePresence>
+          </div>
+        </TabsContent>
+      </Tabs>
+
       {/* Create Prayer Request Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-md">
@@ -722,224 +972,7 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
         </DialogContent>
       </Dialog>
 
-      {/* Prayer Requests */}
-      <div className="space-y-4">
-        <AnimatePresence>
-          {prayerRequests.map((prayer) => (
-            <motion.div
-              key={prayer.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <Card className="hover:shadow-md transition-shadow duration-200 border-l-4 border-l-purple-500">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    {/* Header */}
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage src={prayer.isAnonymous ? undefined : prayer.authorProfileImageUrl} />
-                          <AvatarFallback className="bg-purple-100 text-purple-600">
-                            {prayer.isAnonymous 
-                              ? "?" 
-                              : prayer.authorFirstName 
-                                ? prayer.authorFirstName[0].toUpperCase()
-                                : prayer.authorEmail 
-                                  ? prayer.authorEmail[0].toUpperCase()
-                                  : "U"
-                            }
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-semibold text-gray-900 dark:text-white">
-                            {prayer.isAnonymous 
-                              ? "Anonymous" 
-                              : (prayer.authorFirstName && prayer.authorLastName) 
-                                ? `${prayer.authorFirstName} ${prayer.authorLastName}`
-                                : prayer.authorEmail 
-                                  ? prayer.authorEmail.split('@')[0]
-                                  : "Community Member"
-                            }
-                          </div>
-                          <div className="flex items-center space-x-2 text-sm text-gray-500">
-                            <Clock className="w-3 h-3" />
-                            <span>{formatTimeAgo(prayer.createdAt?.toString() || new Date().toISOString())}</span>
-                            {prayer.isAnswered && (
-                              <Badge className="bg-green-100 text-green-800 ml-2">
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Answered
-                              </Badge>
-                            )}
-                            {/* Privacy Level Indicator */}
-                            {prayer.privacyLevel && (
-                              <Badge 
-                                variant="outline" 
-                                className={`ml-2 text-xs ${
-                                  prayer.privacyLevel === 'public' ? 'border-blue-200 text-blue-700 bg-blue-50' :
-                                  prayer.privacyLevel === 'community' ? 'border-green-200 text-green-700 bg-green-50' :
-                                  prayer.privacyLevel === 'prayer_circle' ? 'border-orange-200 text-orange-700 bg-orange-50' :
-                                  prayer.privacyLevel === 'pastoral' ? 'border-purple-200 text-purple-700 bg-purple-50' :
-                                  'border-gray-200 text-gray-700 bg-gray-50'
-                                }`}
-                              >
-                                {prayer.privacyLevel === 'public' ? 'Public' :
-                                 prayer.privacyLevel === 'community' ? 'My Community' :
-                                 prayer.privacyLevel === 'prayer_circle' ? 'Prayer Circle' :
-                                 prayer.privacyLevel === 'pastoral' ? 'Pastor Only' :
-                                 'Private'}
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {/* Content */}
-                    {prayer.title && (
-                      <h4 className="font-semibold text-lg text-gray-900 dark:text-white">{prayer.title}</h4>
-                    )}
-                    
-                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                      {prayer.content}
-                    </p>
-                    
-                    {/* Display attached photo if present */}
-                    {prayer.attachmentUrl && (
-                      <div className="mt-4">
-                        <img 
-                          src={prayer.attachmentUrl} 
-                          alt="Prayer request attachment"
-                          className="rounded-lg max-w-full h-auto border border-gray-200 dark:border-gray-700"
-                          style={{ maxHeight: '300px', objectFit: 'contain' }}
-                        />
-                      </div>
-                    )}
-                    
-                    {/* Action Buttons */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
-                      <div className="flex space-x-4">
-                        {/* Pray Button (Prayer Counter) */}
-                        <motion.div
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                        >
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handlePrayForRequest(prayer.id)}
-                            disabled={prayForRequestMutation.isPending}
-                            className={`text-sm transition-all duration-300 ${
-                              prayedRequests.has(prayer.id)
-                                ? 'text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100'
-                                : prayer.isAnswered 
-                                  ? 'text-green-500 hover:text-green-600 hover:bg-green-50' 
-                                  : 'text-purple-500 hover:text-purple-600 hover:bg-purple-50'
-                            }`}
-                          >
-                            <motion.div
-                              animate={animatingButtons.has(prayer.id) ? {
-                                scale: [1, 1.4, 1],
-                                rotate: [0, 10, -10, 0]
-                              } : {}}
-                              transition={{ duration: 0.4 }}
-                            >
-                              <Hand className="w-4 h-4 mr-1" />
-                            </motion.div>
-                            <motion.span
-                              animate={animatingButtons.has(prayer.id) ? {
-                                scale: [1, 1.1, 1]
-                              } : {}}
-                              transition={{ duration: 0.4 }}
-                            >
-                              {prayer.isAnswered 
-                                ? `${(prayer.prayerCount || 0) + (prayedRequests.has(prayer.id) ? 1 : 0)} prayed` 
-                                : `${(prayer.prayerCount || 0) + (prayedRequests.has(prayer.id) ? 1 : 0)} praying`
-                              }
-                            </motion.span>
-                          </Button>
-                        </motion.div>
-                        
-                        {/* Like Button (Separate from prayer counter) */}
-                        <motion.div
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                        >
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleLikePrayer(prayer.id)}
-                            disabled={likePrayerMutation.isPending}
-                            className={`transition-all duration-300 ${
-                              likedRequests.has(prayer.id) 
-                                ? 'text-red-600 hover:text-red-700' 
-                                : 'text-gray-500 hover:text-red-500'
-                            }`}
-                          >
-                            <Heart className={`w-4 h-4 ${likedRequests.has(prayer.id) ? 'fill-current' : ''}`} />
-                          </Button>
-                        </motion.div>
 
-                        {/* Comments Button */}
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => openCommentDialog(prayer.id)}
-                          className="text-gray-500 hover:text-blue-500 transition-colors"
-                        >
-                          <MessageCircle className="w-4 h-4 mr-1" />
-                          <span className="text-sm">Comments</span>
-                        </Button>
-                      </div>
-                      
-                      {/* Delete Button - Only show for prayer author */}
-                      {user && prayer.authorEmail && (
-                        (String(user.id) === String(prayer.authorId) || user.email === prayer.authorEmail) && (
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleDeletePrayer(prayer.id)}
-                            className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
-                            title="Delete prayer request"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        )
-                      )}
-                    </div>
-
-
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {prayerRequests.length === 0 && (
-          <Card className="text-center py-12">
-            <CardContent>
-              <Hand className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                No Prayer Requests Yet
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400 mb-6">
-                Be the first to share a prayer request with the community.
-              </p>
-              <Button
-                onClick={() => setIsCreateDialogOpen(true)}
-                className="bg-purple-600 hover:bg-purple-700"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add First Prayer Request
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-      </div>
 
       {/* Comment Dialog */}
       {commentDialogPrayerId && (
