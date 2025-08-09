@@ -33,6 +33,8 @@ interface PrayerRequestWithAuthor extends PrayerRequest {
   authorFirstName?: string;
   authorLastName?: string;
   authorEmail?: string;
+  likeCount?: number;
+  commentCount?: number;
 }
 
 const prayerRequestSchema = z.object({
@@ -678,21 +680,55 @@ export default function PrayerWall({ highlightId }: PrayerWallProps = {}) {
                           {prayer.content}
                         </p>
                         
-                        {/* Stats and Actions */}
+                        {/* Action Buttons */}
                         <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
                           <div className="flex space-x-4">
-                            <div className="flex items-center space-x-1 text-sm text-gray-500">
-                              <Hand className="w-4 h-4" />
-                              <span>{prayer.prayerCount || 0} people praying</span>
-                            </div>
-                            <div className="flex items-center space-x-1 text-sm text-gray-500">
-                              <Heart className="w-4 h-4" />
-                              <span>{prayer.likeCount || 0} hearts</span>
-                            </div>
-                            <div className="flex items-center space-x-1 text-sm text-gray-500">
-                              <MessageCircle className="w-4 h-4" />
-                              <span>{prayer.commentCount || 0} comments</span>
-                            </div>
+                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handlePrayForRequest(prayer.id)}
+                                disabled={prayForRequestMutation.isPending}
+                                className={`text-sm transition-all duration-300 ${
+                                  prayedRequests.has(prayer.id)
+                                    ? 'text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100'
+                                    : prayer.isAnswered 
+                                      ? 'text-green-500 hover:text-green-600 hover:bg-green-50' 
+                                      : 'text-purple-500 hover:text-purple-600 hover:bg-purple-50'
+                                }`}
+                              >
+                                <Hand className="w-4 h-4 mr-1" />
+                                {prayer.isAnswered 
+                                  ? `${(prayer.prayerCount || 0) + (prayedRequests.has(prayer.id) ? 1 : 0)} prayed` 
+                                  : `${(prayer.prayerCount || 0) + (prayedRequests.has(prayer.id) ? 1 : 0)} praying`
+                                }
+                              </Button>
+                            </motion.div>
+                            
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleLikePrayer(prayer.id)}
+                              disabled={likePrayerMutation.isPending}
+                              className={`text-sm ${
+                                likedRequests.has(prayer.id)
+                                  ? 'text-red-500 hover:text-red-600'
+                                  : 'text-gray-500 hover:text-red-500'
+                              }`}
+                            >
+                              <Heart className={`w-4 h-4 mr-1 ${likedRequests.has(prayer.id) ? 'fill-current' : ''}`} />
+                              {prayer.likeCount || 0}
+                            </Button>
+                            
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => openCommentDialog(prayer.id)}
+                              className="text-gray-500 hover:text-blue-500"
+                            >
+                              <MessageCircle className="w-4 h-4 mr-1" />
+                              {prayer.commentCount || 0}
+                            </Button>
                           </div>
                           
                           <Button
