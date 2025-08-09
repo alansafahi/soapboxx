@@ -1355,48 +1355,48 @@ export default function EnhancedPrayerWall({ highlightId }: EnhancedPrayerWallPr
       </Card>
     </TabsContent>
 
-    <TabsContent value="my" className="space-y-6">
-      {/* My Prayers */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            My Prayer Requests
-          </h3>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <AnimatePresence>
-              {prayerRequests.filter(prayer => prayer.authorId === user?.id).map((prayer) => {
-                const isExpanded = expandedCards.has(prayer.id);
-                const currentReactions = reactions.get(prayer.id) || { praying: prayer.prayerCount || 0, heart: 0, fire: 0, praise: 0 };
-                const showingWhosPraying = showWhosPraying.get(prayer.id) || false;
-                
-                const toggleCard = () => {
-                  setExpandedCards(prev => {
-                    const newSet = new Set(prev);
-                    if (newSet.has(prayer.id)) {
-                      newSet.delete(prayer.id);
-                    } else {
-                      newSet.add(prayer.id);
-                    }
-                    return newSet;
-                  });
-                };
+            <TabsContent value="my" className="space-y-6">
+              {/* My Prayers */}
+              <Card>
+                <CardHeader>
+                  <h3 className="text-lg font-semibold flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    My Prayer Requests
+                  </h3>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <AnimatePresence>
+                      {prayerRequests.filter(prayer => prayer.authorId === user?.id).map((prayer) => {
+                        const isExpanded = expandedCards.has(prayer.id);
+                        const currentReactions = reactions.get(prayer.id) || { praying: prayer.prayerCount || 0, heart: 0, fire: 0, praise: 0 };
+                        const showingWhosPraying = showWhosPraying.get(prayer.id) || false;
+                        
+                        const toggleCard = () => {
+                          setExpandedCards(prev => {
+                            const newSet = new Set(prev);
+                            if (newSet.has(prayer.id)) {
+                              newSet.delete(prayer.id);
+                            } else {
+                              newSet.add(prayer.id);
+                            }
+                            return newSet;
+                          });
+                        };
 
-                const toggleWhosPraying = (prayerId: number) => {
-                  setShowWhosPraying(prev => new Map(prev).set(prayerId, !prev.get(prayerId)));
-                };
+                        const toggleWhosPraying = (prayerId: number) => {
+                          setShowWhosPraying(prev => new Map(prev).set(prayerId, !prev.get(prayerId)));
+                        };
 
-                return (
-                  <motion.div
-                    key={prayer.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                    className={`${Number(highlightId) === prayer.id ? 'ring-2 ring-blue-500' : ''}`}
-                  >
+                        return (
+                          <motion.div
+                            key={prayer.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.3 }}
+                            className={`${Number(highlightId) === prayer.id ? 'ring-2 ring-blue-500' : ''}`}
+                          >
                             <Card className="hover:shadow-lg transition-all duration-200">
                               <CardHeader>
                                 <div className="flex items-start justify-between">

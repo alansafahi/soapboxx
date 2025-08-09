@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../hooks/use-toast";
-import EnhancedPrayerWall from "../components/EnhancedPrayerWall";
+import PrayerWall from "../components/prayer-wall";
 import MobileNav from "../components/mobile-nav";
 
 export default function PrayerPage() {
@@ -56,7 +56,7 @@ export default function PrayerPage() {
         </div>
       )}
       <div className="max-w-4xl mx-auto px-4 py-6">
-        <EnhancedPrayerWall highlightId={highlightId} />
+        <PrayerWall highlightId={highlightId} />
       </div>
 
       <MobileNav />
