@@ -35,7 +35,7 @@ const { userPoints } = schema;
 import { eq, and, or, gte, lte, desc, asc, like, sql, count, sum, ilike, isNotNull, inArray, isNull, lt } from "drizzle-orm";
 import { lookupBibleVerse } from './bible-api';
 import { analyzeUserSpiritualGifts } from './ai-spiritual-gifts';
-import { bulkGenerateContentForEmptyPlans, generateContentForSpecificPlan } from './utils/contentGeneration';
+
 
 // Extend session data interface to include userId
 declare module 'express-session' {
@@ -5960,11 +5960,12 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const { maxDailyRequests = 800 } = req.body;
 
       // Import the function dynamically to avoid startup dependencies
-      const { import1000PopularVerses } = await import('./import-1000-verses-fixed.js');
+      // const { import1000PopularVerses } = await import('./import-1000-verses-fixed.js');
+      console.log('Bible verse import temporarily disabled - missing file');
       
       // Run import in background and return immediate response
-      import1000PopularVerses(maxDailyRequests).catch(error => {
-      });
+      // import1000PopularVerses(maxDailyRequests).catch(error => {
+      // });
 
       res.json({ 
         success: true, 
