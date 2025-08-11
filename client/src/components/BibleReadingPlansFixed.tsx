@@ -326,6 +326,10 @@ export default function BibleReadingPlansFixed() {
     }
   };
 
+  const handleStartPlan = (plan: ReadingPlan) => {
+    subscribeToPlanning.mutate(plan.id);
+  };
+
   // Helper functions
   const getSubscriptionTierInfo = (tier: string) => {
     const tierInfo = {
@@ -360,6 +364,8 @@ export default function BibleReadingPlansFixed() {
       
       return {
         ...plan,
+        // Handle both camelCase and snake_case field naming from API
+        subscriptionTier: plan.subscriptionTier || (plan as any).subscription_tier || 'disciple',
         subscription,
         progressPercentage,
         daysCompleted
@@ -446,7 +452,7 @@ export default function BibleReadingPlansFixed() {
                 {subscription && (
                   <div className="text-center">
                     <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {Math.round((subscription.currentDay / selectedPlan.duration) * 100)}%
+                      {Math.round(((subscription.currentDay || 1) / selectedPlan.duration) * 100)}%
                     </div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">Complete</div>
                   </div>
@@ -610,7 +616,7 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredPlans.filter(plan => ['disciple', 'free', null, undefined].includes(plan.subscriptionTier || plan.subscription_tier)).slice(0, discipleExpanded ? undefined : 6).map((plan) => {
+                  {filteredPlans.filter(plan => ['disciple', 'free', null, undefined].includes(plan.subscriptionTier)).slice(0, discipleExpanded ? undefined : 6).map((plan) => {
                     const isSubscribed = !!plan.subscription?.isActive;
 
                     return (
@@ -698,7 +704,7 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 {/* Show More Button for Disciple Plans */}
-                {filteredPlans.filter(plan => ['disciple', 'free', null, undefined].includes(plan.subscriptionTier || plan.subscription_tier)).length > 6 && (
+                {filteredPlans.filter(plan => ['disciple', 'free', null, undefined].includes(plan.subscriptionTier)).length > 6 && (
                   <div className="text-center">
                     <Button 
                       variant="outline" 
@@ -712,7 +718,7 @@ export default function BibleReadingPlansFixed() {
                         </>
                       ) : (
                         <>
-                          Show More ({filteredPlans.filter(plan => ['disciple', 'free', null, undefined].includes(plan.subscriptionTier || plan.subscription_tier)).length - 6} more)
+                          Show More ({filteredPlans.filter(plan => ['disciple', 'free', null, undefined].includes(plan.subscriptionTier)).length - 6} more)
                           <ChevronDown className="w-4 h-4 ml-2" />
                         </>
                       )}
@@ -733,7 +739,7 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredPlans.filter(plan => plan.subscriptionTier === 'servant' || plan.subscription_tier === 'servant').slice(0, servantExpanded ? undefined : 6).map((plan) => {
+                  {filteredPlans.filter(plan => plan.subscriptionTier === 'servant').slice(0, servantExpanded ? undefined : 6).map((plan) => {
                     const canAccess = (userTier || 'torchbearer') === 'servant' || (userTier || 'torchbearer') === 'torchbearer';
 
                     return (
@@ -818,7 +824,7 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 {/* Show More Button for Servant Plans */}
-                {filteredPlans.filter(plan => plan.subscriptionTier === 'servant' || plan.subscription_tier === 'servant').length > 6 && (
+                {filteredPlans.filter(plan => plan.subscriptionTier === 'servant').length > 6 && (
                   <div className="text-center">
                     <Button 
                       variant="outline" 
@@ -832,7 +838,7 @@ export default function BibleReadingPlansFixed() {
                         </>
                       ) : (
                         <>
-                          Show More ({filteredPlans.filter(plan => plan.subscriptionTier === 'servant' || plan.subscription_tier === 'servant').length - 6} more)
+                          Show More ({filteredPlans.filter(plan => plan.subscriptionTier === 'servant').length - 6} more)
                           <ChevronDown className="w-4 h-4 ml-2" />
                         </>
                       )}
@@ -853,7 +859,7 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                  {filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer' || plan.subscription_tier === 'torchbearer').slice(0, torchbearerExpanded ? undefined : 6).map((plan) => {
+                  {filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer').slice(0, torchbearerExpanded ? undefined : 6).map((plan) => {
                     const canAccess = (userTier || 'torchbearer') === 'torchbearer';
 
                     return (
@@ -952,7 +958,7 @@ export default function BibleReadingPlansFixed() {
                 </div>
                 
                 {/* Show More Button for Torchbearer Plans */}
-                {filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer' || plan.subscription_tier === 'torchbearer').length > 6 && (
+                {filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer').length > 6 && (
                   <div className="text-center">
                     <Button 
                       variant="outline" 
@@ -966,7 +972,7 @@ export default function BibleReadingPlansFixed() {
                         </>
                       ) : (
                         <>
-                          Show More ({filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer' || plan.subscription_tier === 'torchbearer').length - 6} more)
+                          Show More ({filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer').length - 6} more)
                           <ChevronDown className="w-4 h-4 ml-2" />
                         </>
                       )}
