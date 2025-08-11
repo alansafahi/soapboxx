@@ -57,11 +57,11 @@ async function populateRemainingScripture() {
             messages: [
               {
                 role: 'system',
-                content: 'You are a Bible verse lookup assistant. Provide ONLY the exact verse text from the NIV translation without any commentary, explanations, or additional text.'
+                content: 'Return ONLY the pure Bible verse text with verse numbers. No commentary, no introduction phrases like "Here is" or "Certainly", no version labels. Just the raw scripture text exactly as it appears in the NIV Bible.'
               },
               {
                 role: 'user',
-                content: `Please provide the exact text of ${day.scripture_reference} from the NIV Bible translation.`
+                content: `${day.scripture_reference} NIV text only:`
               }
             ],
             temperature: 0.1,
@@ -74,10 +74,20 @@ async function populateRemainingScripture() {
           const content = data.choices?.[0]?.message?.content;
           
           if (content && content.trim()) {
-            // Update database with real scripture content
+            // Clean the content of any remaining conversational prefixes
+            let cleanedContent = content.trim()
+              .replace(/^Certainly!\s*Here\s+is\s+[^:]+:\s*/i, '')
+              .replace(/^Sure,?\s*here\s+is\s+[^:]+:\s*/i, '')
+              .replace(/^Here\s+is\s+[^:]+:\s*/i, '')
+              .replace(/^[1-3]?\s*[A-Za-z]+\s+\d+(?::\d+)?(?:-\d+)?\s+from\s+the\s+[^:]+:\s*/i, '')
+              .replace(/^[1-3]?\s*[A-Za-z]+\s+\d+(?::\d+)?(?:-\d+)?\s*\([^)]+\):\s*/i, '')
+              .replace(/^[-:]\s*/, '')
+              .trim();
+            
+            // Update database with cleaned scripture content
             await pool.query(
               'UPDATE reading_plan_days SET scripture_text = $1 WHERE id = $2',
-              [content.trim(), day.id]
+              [cleanedContent, day.id]
             );
             successCount++;
             console.log(`✅ Updated: ${day.scripture_reference}`);
