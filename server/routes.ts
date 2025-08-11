@@ -15111,6 +15111,15 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Import filtering routes
+  const { getFilteredReadingPlans, getFilterOptions } = await import('./routes/reading-plans-filtered.js');
+  
+  // Filtered reading plans endpoint
+  app.get("/api/reading-plans/filtered", getFilteredReadingPlans);
+  
+  // Get filter options endpoint  
+  app.get("/api/reading-plans/filter-options", getFilterOptions);
+
   // Get reading plans by subscription tier with AI verification
   app.get("/api/reading-plans/tier/:tier", async (req, res) => {
     try {

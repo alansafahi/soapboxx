@@ -12,7 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, ChevronDown, ChevronUp, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2, Brain } from "lucide-react";
+import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, ChevronDown, ChevronUp, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2, Brain, Filter } from "lucide-react";
+import FilterBar, { ReadingPlanFilters } from '@/components/reading-plans/FilterBar';
+import { usePlanFilters } from '@/hooks/usePlanFilters';
 import { AIIndicator } from "@/components/AIIndicator";
 import { AIPersonalizationModal } from "@/components/AIPersonalizationModal";
 import type { ReadingPlan, ReadingPlanDay, UserReadingPlanSubscription, UserReadingProgress, EnhancedMoodIndicator } from "@shared/schema";
@@ -225,6 +227,10 @@ export default function BibleReadingPlansFixed() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [showAIModal, setShowAIModal] = useState(false);
   const [aiPersonalizationEnabled, setAIPersonalizationEnabled] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Initialize plan filters hook
+  const { filters, debouncedFilters, updateFilters, clearFilters } = usePlanFilters();
   
   // Collapsible state for each tier
   const [discipleExpanded, setDiscipleExpanded] = useState(false);
@@ -264,9 +270,32 @@ export default function BibleReadingPlansFixed() {
     userTier
   } = useUpgradeFlow(selectedPlan?.id);
 
-  // Fetch all available reading plans
+  // Fetch all available reading plans - use filtered endpoint when filters are active
+  const hasActiveFilters = Object.values(debouncedFilters).some(val => 
+    Array.isArray(val) ? val.length > 0 : val
+  );
+
   const { data: plans = [], isLoading: plansLoading } = useQuery<ReadingPlan[]>({
-    queryKey: ["/api/reading-plans"],
+    queryKey: hasActiveFilters 
+      ? ["/api/reading-plans/filtered", debouncedFilters] 
+      : ["/api/reading-plans"],
+    queryFn: hasActiveFilters 
+      ? async () => {
+          const params = new URLSearchParams();
+          Object.entries(debouncedFilters).forEach(([key, value]) => {
+            if (Array.isArray(value) && value.length > 0) {
+              params.set(key, value.join(','));
+            } else if (typeof value === 'string' && value) {
+              params.set(key, value);
+            }
+          });
+          
+          const response = await fetch(`/api/reading-plans/filtered?${params}`);
+          if (!response.ok) throw new Error('Failed to fetch filtered plans');
+          const data = await response.json();
+          return data.items || data;
+        }
+      : undefined,
     staleTime: 0,
     gcTime: 0,
   });
@@ -390,13 +419,17 @@ export default function BibleReadingPlansFixed() {
     });
   }, [plans, subscriptions]);
 
-  // Filter plans based on category
+  // Filter plans based on category (legacy filter for backward compatibility)
   const filteredPlans = useMemo(() => {
-    return plansWithSubscriptions.filter(plan => {
-      if (categoryFilter === "all") return true;
-      return plan.category === categoryFilter;
-    });
-  }, [plansWithSubscriptions, categoryFilter]);
+    let filtered = plansWithSubscriptions;
+    
+    // Apply legacy category filter if no modern filters are active
+    if (!hasActiveFilters && categoryFilter !== "all") {
+      filtered = filtered.filter(plan => plan.category === categoryFilter);
+    }
+    
+    return filtered;
+  }, [plansWithSubscriptions, categoryFilter, hasActiveFilters]);
 
   // Get subscribed plans for "My Plans" tab
   const subscribedPlans = plansWithSubscriptions.filter(plan => plan.subscription?.isActive);
@@ -589,35 +622,37 @@ export default function BibleReadingPlansFixed() {
           </TabsList>
 
           <TabsContent value="discover" className="space-y-6">
-            {/* Enhanced Filters */}
-            <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 dark:border-gray-700/50">
-              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-                <div>
-                  <Label htmlFor="category" className="text-sm font-medium">
-                    Filter by Category
-                  </Label>
-                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger className="w-[200px] mt-1">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category.split('_').map(word => 
-                            word.charAt(0).toUpperCase() + word.slice(1)
-                          ).join(' ')}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {filteredPlans.length} reading plans available
-                </div>
-              </div>
+            {/* Enhanced Filter Toggle */}
+            <div className="flex items-center justify-between">
+              <Button
+                variant="outline"
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2"
+              >
+                <Filter className="w-4 h-4" />
+                {showFilters ? 'Hide' : 'Show'} Filters
+                {hasActiveFilters && (
+                  <Badge variant="secondary" className="ml-1">
+                    Active
+                  </Badge>
+                )}
+              </Button>
+              
+              {hasActiveFilters && (
+                <Button variant="ghost" size="sm" onClick={clearFilters}>
+                  Clear All Filters
+                </Button>
+              )}
             </div>
+
+            {/* Comprehensive Filter Bar */}
+            {showFilters && (
+              <FilterBar 
+                filters={filters} 
+                onChange={updateFilters} 
+                planCount={filteredPlans.length} 
+              />
+            )}
 
             {/* Subscription Tiers Section */}
             <div className="space-y-12">

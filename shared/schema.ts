@@ -1164,6 +1164,17 @@ export const readingPlans = pgTable("reading_plans", {
   subscriptionTier: varchar("subscription_tier", { length: 20 }).default("free"), // free, standard, premium
   isAiGenerated: boolean("is_ai_generated").default(false),
   aiPrompt: text("ai_prompt"), // Store the original AI prompt for regeneration
+  // New filtering fields
+  testament: varchar("testament", { length: 10 }), // OT, NT, Both
+  orderType: varchar("order_type", { length: 20 }), // Chronological, Historical, Canonical
+  durationDays: integer("duration_days"), // computed from duration for filtering
+  dailyMinutes: integer("daily_minutes"), // average daily reading time
+  translation: varchar("translation", { length: 10 }).default("NIV"),
+  formatTypes: text("format_types").array(), // Reading, Reflection, Prayer, Audio, Video
+  audienceTypes: text("audience_types").array(), // Solo, Group, Family, Church
+  themes: text("themes").array(), // peace-in-anxiety, joy-gratitude, etc.
+  seasons: text("seasons").array(), // advent, lent, easter, new-year
+  books: text("books").array(), // ROM, PSA, JOH, etc.
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

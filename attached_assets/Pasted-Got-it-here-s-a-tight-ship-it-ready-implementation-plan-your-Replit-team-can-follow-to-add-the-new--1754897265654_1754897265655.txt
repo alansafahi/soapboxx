@@ -1,0 +1,433 @@
+Got it—here’s a tight, ship-it-ready implementation plan your Replit team can follow to add the new Reading Plan filters. I’m assuming: React + Tailwind on the front-end, Astro/Next-style routes (or a simple Express handler) for the API, and Supabase Postgres for data. Adjust naming to match your repo.
+
+# 0) Scope & Success Criteria
+
+* Users can filter plans by: Duration, Daily Time, Testament, Order (Chronological / Historical / Canonical), Book(s), Theme/Season, Translation, Difficulty, Format/Media, Audience (Solo/Group/Family/Church), and “Plan Tier” (Disciple/Servant/etc. if relevant).
+* Multi-select supported for most facets.
+* Filters persist in URL (shareable) and in user prefs (Saved Filters).
+* Results update without full-page reload; fast (<200ms backend time for typical queries).
+* Accessible (keyboard + screen reader), mobile friendly, and has empty states.
+
+# 1) Data Model (Supabase / Postgres)
+
+Add columns (or bridging tables) to `reading_plans`. If some exist, just verify types and indexing.
+
+```sql
+-- Core facets
+ALTER TABLE reading_plans
+  ADD COLUMN IF NOT EXISTS testament TEXT CHECK (testament IN ('OT','NT','Both')),
+  ADD COLUMN IF NOT EXISTS order_type TEXT CHECK (order_type IN ('Chronological','Historical','Canonical')),
+  ADD COLUMN IF NOT EXISTS duration_days INT,             -- total plan length
+  ADD COLUMN IF NOT EXISTS daily_minutes INT,             -- avg daily time
+  ADD COLUMN IF NOT EXISTS difficulty TEXT,               -- 'Beginner','Intermediate','Advanced'
+  ADD COLUMN IF NOT EXISTS format TEXT[],                 -- e.g. {'Reading','Reflection','Prayer','Audio','Video'}
+  ADD COLUMN IF NOT EXISTS audience TEXT[],               -- e.g. {'Solo','Group','Family','Church'}
+  ADD COLUMN IF NOT EXISTS translation TEXT,              -- 'KJV','NIV','ESV', etc.
+  ADD COLUMN IF NOT EXISTS tier TEXT;                     -- 'Disciple','Servant', etc.
+
+-- Many-to-many relationships
+CREATE TABLE IF NOT EXISTS plan_books (
+  plan_id uuid REFERENCES reading_plans(id) ON DELETE CASCADE,
+  book_code TEXT,                 -- e.g. 'GEN','PSA','ROM'
+  PRIMARY KEY (plan_id, book_code)
+);
+
+CREATE TABLE IF NOT EXISTS plan_themes (
+  plan_id uuid REFERENCES reading_plans(id) ON DELETE CASCADE,
+  theme_slug TEXT,                -- e.g. 'peace-in-anxiety', 'joy-gratitude'
+  PRIMARY KEY (plan_id, theme_slug)
+);
+
+CREATE TABLE IF NOT EXISTS plan_seasons (
+  plan_id uuid REFERENCES reading_plans(id) ON DELETE CASCADE,
+  season_slug TEXT,               -- e.g. 'advent','lent','easter','new-year'
+  PRIMARY KEY (plan_id, season_slug)
+);
+```
+
+### Indexing (crucial for snappy filters)
+
+```sql
+CREATE INDEX IF NOT EXISTS idx_plans_testament ON reading_plans(testament);
+CREATE INDEX IF NOT EXISTS idx_plans_order_type ON reading_plans(order_type);
+CREATE INDEX IF NOT EXISTS idx_plans_duration ON reading_plans(duration_days);
+CREATE INDEX IF NOT EXISTS idx_plans_daily_minutes ON reading_plans(daily_minutes);
+CREATE INDEX IF NOT EXISTS idx_plans_difficulty ON reading_plans(difficulty);
+CREATE INDEX IF NOT EXISTS idx_plans_translation ON reading_plans(translation);
+CREATE INDEX IF NOT EXISTS idx_plans_tier ON reading_plans(tier);
+
+CREATE INDEX IF NOT EXISTS idx_plan_books_book ON plan_books(book_code);
+CREATE INDEX IF NOT EXISTS idx_plan_themes_theme ON plan_themes(theme_slug);
+CREATE INDEX IF NOT EXISTS idx_plan_seasons_season ON plan_seasons(season_slug);
+```
+
+# 2) API Contract
+
+Endpoint: `GET /api/reading-plans`
+
+### Query params (multi-select allowed where noted)
+
+* `testament=OT|NT|Both` (multi)
+* `order=Chronological|Historical|Canonical` (multi)
+* `books=ROM,PSA,JOH` (CSV, multi)
+* `themes=peace-in-anxiety,joy-gratitude` (CSV, multi)
+* `seasons=advent,lent` (CSV, multi)
+* `translation=NIV` (single; expand to multi if needed)
+* `difficulty=Beginner,Intermediate,Advanced` (CSV)
+* `format=Reading,Reflection,Prayer,Audio,Video` (CSV)
+* `audience=Solo,Group,Family,Church` (CSV)
+* `duration=lt30|1to3m|4to6m|7to12m|gt12m`  → server translates to day ranges
+* `daily=lt10|10to20|gt20` → minutes ranges
+* `tier=Disciple,Servant` (CSV)
+* `q=` free-text search (optional)
+* `sort=popularity|new|duration_asc|duration_desc`
+* `page=1&limit=20`
+
+### Response
+
+```json
+{
+  "items": [ /* array of plans */ ],
+  "total": 56,
+  "page": 1,
+  "limit": 20
+}
+```
+
+# 3) API Implementation (Express/Node example)
+
+*Place under `server/routes/readingPlans.ts` or equivalent.*
+
+```ts
+// server/routes/readingPlans.ts
+import type { Request, Response } from "express";
+import { supabase } from "../supabaseClient";
+import { sql } from "@supabase/postgrest-js"; // or use pg w/ parameterized SQL
+
+const DUR_MAP = {
+  lt30: [0, 30],
+  "1to3m": [31, 92],
+  "4to6m": [93, 183],
+  "7to12m": [184, 366],
+  gt12m: [367, 5000]
+} as const;
+
+const DAILY_MAP = {
+  lt10: [0, 10],
+  "10to20": [10, 20],
+  gt20: [21, 999]
+} as const;
+
+export async function listReadingPlans(req: Request, res: Response) {
+  try {
+    const {
+      testament, order, books, themes, seasons, translation, difficulty,
+      format, audience, duration, daily, tier, q, sort = "popularity",
+      page = "1", limit = "20"
+    } = req.query as Record<string, string>;
+
+    const p = Math.max(parseInt(page) || 1, 1);
+    const l = Math.min(Math.max(parseInt(limit) || 20, 1), 60);
+    const offset = (p - 1) * l;
+
+    // Build WHERE clauses
+    const where: string[] = [];
+    const params: any[] = [];
+    let idx = 1;
+    const push = (clause: string, value?: any) => {
+      where.push(clause.replace("?", `$${idx}`));
+      if (value !== undefined) params.push(value);
+      idx++;
+    };
+
+    const csvToArr = (s?: string) => s ? s.split(",").map(v => v.trim()).filter(Boolean) : [];
+
+    const testamentArr = csvToArr(testament);
+    if (testamentArr.length) push(`testament = ANY(?)`, testamentArr);
+
+    const orderArr = csvToArr(order);
+    if (orderArr.length) push(`order_type = ANY(?)`, orderArr);
+
+    if (translation) push(`translation = ?`, translation);
+
+    const difficultyArr = csvToArr(difficulty);
+    if (difficultyArr.length) push(`difficulty = ANY(?)`, difficultyArr);
+
+    const tierArr = csvToArr(tier);
+    if (tierArr.length) push(`tier = ANY(?)`, tierArr);
+
+    // Duration ranges
+    const durArr = csvToArr(duration).map(d => DUR_MAP[d as keyof typeof DUR_MAP]).filter(Boolean);
+    if (durArr.length) {
+      const ors = durArr.map(([min, max], i) => `(duration_days BETWEEN $${idx + i*2} AND $${idx + i*2 + 1})`);
+      where.push(`(${ors.join(" OR ")})`);
+      durArr.flat().forEach(v => params.push(v)); idx += durArr.length * 2;
+    }
+
+    // Daily minutes
+    const dailyArr = csvToArr(daily).map(d => DAILY_MAP[d as keyof typeof DAILY_MAP]).filter(Boolean);
+    if (dailyArr.length) {
+      const ors = dailyArr.map(([min, max], i) => `(daily_minutes BETWEEN $${idx + i*2} AND $${idx + i*2 + 1})`);
+      where.push(`(${ors.join(" OR ")})`);
+      dailyArr.flat().forEach(v => params.push(v)); idx += dailyArr.length * 2;
+    }
+
+    // Array columns (format/audience) using overlap
+    const formatArr = csvToArr(format);
+    if (formatArr.length) push(`format && ?::text[]`, formatArr);
+
+    const audienceArr = csvToArr(audience);
+    if (audienceArr.length) push(`audience && ?::text[]`, audienceArr);
+
+    // M2M facets
+    const booksArr = csvToArr(books);
+    const themesArr = csvToArr(themes);
+    const seasonsArr = csvToArr(seasons);
+
+    // Base query
+    let query = `
+      SELECT rp.*
+      FROM reading_plans rp
+      ${booksArr.length ? `JOIN plan_books pb ON pb.plan_id = rp.id` : ""}
+      ${themesArr.length ? `JOIN plan_themes pt ON pt.plan_id = rp.id` : ""}
+      ${seasonsArr.length ? `JOIN plan_seasons ps ON ps.plan_id = rp.id` : ""}
+      WHERE 1=1
+      ${where.length ? `AND ${where.join(" AND ")}` : ""}
+      ${booksArr.length ? `AND pb.book_code = ANY($${params.push(booksArr)})` : ""}
+      ${themesArr.length ? `AND pt.theme_slug = ANY($${params.push(themesArr)})` : ""}
+      ${seasonsArr.length ? `AND ps.season_slug = ANY($${params.push(seasonsArr)})` : ""}
+      ${q ? `AND (rp.title ILIKE $${params.push('%' + q + '%')} OR rp.subtitle ILIKE $${params.push('%' + q + '%')})` : ""}
+    `;
+
+    const sortSql = {
+      popularity: `ORDER BY rp.popularity DESC NULLS LAST`,
+      new: `ORDER BY rp.created_at DESC`,
+      duration_asc: `ORDER BY rp.duration_days ASC`,
+      duration_desc: `ORDER BY rp.duration_days DESC`
+    }[sort] || `ORDER BY rp.popularity DESC NULLS LAST`;
+
+    const paged = `${query} ${sortSql} LIMIT $${params.push(l)} OFFSET $${params.push(offset)}`;
+
+    const { data, error } = await supabase.rpc('exec_sql', { q: paged, params }); // or use `pg` client directly
+    if (error) throw error;
+
+    // Total (quick estimate; exact count if needed)
+    const countQuery = `
+      SELECT COUNT(DISTINCT rp.id) AS c
+      FROM reading_plans rp
+      ${booksArr.length ? `JOIN plan_books pb ON pb.plan_id = rp.id` : ""}
+      ${themesArr.length ? `JOIN plan_themes pt ON pt.plan_id = rp.id` : ""}
+      ${seasonsArr.length ? `JOIN plan_seasons ps ON ps.plan_id = rp.id` : ""}
+      WHERE 1=1
+      ${where.length ? `AND ${where.join(" AND ")}` : ""}
+      ${booksArr.length ? `AND pb.book_code = ANY($${params.length + 1})` : ""}
+      ${themesArr.length ? `AND pt.theme_slug = ANY($${params.length + (booksArr.length?2:1)})` : ""}
+      ${seasonsArr.length ? `AND ps.season_slug = ANY($${params.length + (booksArr.length?2:1) + (themesArr.length?1:0)})` : ""}
+    `;
+    // You can run a second call for count or maintain a materialized view for popularity/fast counts.
+
+    res.json({ items: data ?? [], total: /* fill with count or -1 */, page: p, limit: l });
+  } catch (e:any) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+}
+```
+
+> If you don’t have a generic `exec_sql` RPC, use a standard `pg` client from the server; Supabase JS PostgREST alone is clunky for this many dynamic joins.
+
+# 4) Front-End: Component Structure
+
+```
+/components/reading-plans/
+  FilterBar.tsx
+  FilterChip.tsx
+  PlanCard.tsx
+  PlanGrid.tsx
+  usePlanFilters.ts (state + URL sync)
+  fetchPlans.ts (client fetcher with cancellation)
+  SavedFilterModal.tsx
+```
+
+## `usePlanFilters.ts` (URL <-> state)
+
+* Parse `window.location.search` on mount ⇒ initial state.
+* On change, push state back to URL (use `replaceState` to avoid history spam).
+* Debounce fetch (250ms).
+
+## `FilterBar.tsx` (Tailwind)
+
+* Top row: “All Plans” + Dropdowns: **Plan**, **Theme**, **Translation**, **More** (More opens a sheet with advanced facets).
+* Each facet supports multi-select; selected items appear as removable chips beneath.
+* “Reset” + “Save Filter” buttons.
+
+```tsx
+// FilterBar.tsx (excerpt)
+export default function FilterBar(props:{ value: Filters; onChange:(f:Filters)=>void; onSave:()=>void }) {
+  const { value, onChange, onSave } = props;
+
+  return (
+    <div className="w-full bg-white/70 backdrop-blur rounded-2xl p-3 md:p-4 shadow-sm border">
+      <div className="flex flex-wrap items-center gap-2">
+        <Dropdown label="Plan">
+          <MultiGroup
+            sections={[
+              { label: "Testament", options: ["OT","NT","Both"], key: "testament" },
+              { label: "Order", options: ["Chronological","Historical","Canonical"], key: "order" },
+              { label: "Books", options: BOOK_OPTIONS, key: "books", searchable: true }
+            ]}
+            value={value}
+            onChange={onChange}
+          />
+        </Dropdown>
+
+        <Dropdown label="Theme">
+          <Multi
+            keyName="themes"
+            options={THEME_OPTIONS}
+            value={value}
+            onChange={onChange}
+            searchable
+          />
+          <Multi keyName="seasons" options={SEASON_OPTIONS} value={value} onChange={onChange} />
+        </Dropdown>
+
+        <Dropdown label="Translation">
+          <Single keyName="translation" options={TRANSLATION_OPTIONS} value={value} onChange={onChange} />
+        </Dropdown>
+
+        <Dropdown label="More">
+          <Range keyName="duration" label="Duration" presets={[
+            {id:"lt30", label:"< 30 days"},
+            {id:"1to3m", label:"1–3 months"},
+            {id:"4to6m", label:"4–6 months"},
+            {id:"7to12m", label:"7–12 months"},
+            {id:"gt12m", label:"> 12 months"}
+          ]} value={value} onChange={onChange} />
+          <Range keyName="daily" label="Daily Time" presets={[
+            {id:"lt10", label:"< 10 min"},
+            {id:"10to20", label:"10–20 min"},
+            {id:"gt20", label:"> 20 min"}
+          ]} value={value} onChange={onChange} />
+          <Multi keyName="difficulty" options={["Beginner","Intermediate","Advanced"]} value={value} onChange={onChange}/>
+          <Multi keyName="format" options={["Reading","Reflection","Prayer","Audio","Video"]} value={value} onChange={onChange}/>
+          <Multi keyName="audience" options={["Solo","Group","Family","Church"]} value={value} onChange={onChange}/>
+          <Multi keyName="tier" options={["Disciple","Servant","Leader"]} value={value} onChange={onChange}/>
+        </Dropdown>
+
+        <div className="ml-auto flex gap-2">
+          <button onClick={() => onChange(DEFAULT_FILTERS)} className="btn-secondary">Reset</button>
+          <button onClick={onSave} className="btn-primary">Save Filter</button>
+        </div>
+      </div>
+
+      {/* Selected chips */}
+      <div className="mt-2 flex flex-wrap gap-2">
+        {renderChips(value, onChange)}
+      </div>
+    </div>
+  );
+}
+```
+
+### Styling helpers
+
+Tailwind utility classes for `.btn-primary` / `.btn-secondary` in your global CSS to match your current look (rounded-2xl, shadow, hover states).
+
+## Fetch + Grid
+
+```ts
+// usePlanFilters.ts
+export type Filters = {
+  testament: string[]; order: string[]; books: string[]; themes: string[];
+  seasons: string[]; translation?: string; difficulty: string[];
+  format: string[]; audience: string[]; duration: string[]; daily: string[];
+  tier: string[]; q?: string; sort?: string; page?: number;
+};
+
+export const DEFAULT_FILTERS: Filters = {
+  testament: [], order: [], books: [], themes: [], seasons: [],
+  translation: undefined, difficulty: [], format: [], audience: [],
+  duration: [], daily: [], tier: [], q: "", sort: "popularity", page: 1
+};
+```
+
+```ts
+// fetchPlans.ts
+export async function fetchPlans(filters: Filters, signal?: AbortSignal) {
+  const params = new URLSearchParams();
+  const addCSV = (k: keyof Filters) => {
+    const v = filters[k];
+    if (Array.isArray(v) && v.length) params.set(String(k), v.join(","));
+  };
+  addCSV("testament"); addCSV("order"); addCSV("books"); addCSV("themes");
+  addCSV("seasons"); addCSV("difficulty"); addCSV("format"); addCSV("audience");
+  addCSV("duration"); addCSV("daily"); addCSV("tier");
+
+  if (filters.translation) params.set("translation", filters.translation);
+  if (filters.q) params.set("q", filters.q);
+  if (filters.sort) params.set("sort", filters.sort);
+  if (filters.page) params.set("page", String(filters.page));
+
+  const res = await fetch(`/api/reading-plans?${params.toString()}`, { signal });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json() as Promise<{ items:any[]; total:number; page:number; limit:number }>;
+}
+```
+
+# 5) Saved Filters (User Personalization)
+
+* Table `user_saved_filters(user_id uuid, name text, params jsonb, PRIMARY KEY(user_id,name))`.
+* On “Save Filter”: store `params` as the current URLSearchParams.
+* On page load (if logged in), preload last-used filter or show shortcuts.
+
+```sql
+CREATE TABLE IF NOT EXISTS user_saved_filters (
+  user_id uuid NOT NULL,
+  name TEXT NOT NULL,
+  params JSONB NOT NULL,
+  created_at TIMESTAMP DEFAULT now(),
+  PRIMARY KEY (user_id, name)
+);
+CREATE INDEX IF NOT EXISTS idx_user_saved_filters_user ON user_saved_filters(user_id);
+```
+
+# 6) Performance & Caching
+
+* **Server-level caching**: Cache identical query strings for 60s (in-memory or Redis) to absorb bursts.
+* **Client pagination**: 20 per page; infinite scroll optional.
+* **Pre-compute popularity** nightly in a materialized view if needed for sorting.
+
+# 7) Analytics & A/B
+
+* Track: facet selections, saved filter usage, zero-result rates, plan-detail clicks.
+* Event keys: `rp_filter_change`, `rp_saved_filter_create`, `rp_results_empty`, `rp_plan_open`.
+* Optional feature flag for “Advanced Filters” rollout.
+
+# 8) Accessibility & UX Details
+
+* Keyboard nav: Tab/Shift+Tab through dropdowns, Esc to close.
+* ARIA roles for menus, `aria-expanded`, `aria-controls`.
+* Focus ring visible, minimum 44x44 touch targets.
+* Empty state with suggestions: “Try removing ‘Advanced’ difficulty” + `Reset` CTA.
+
+# 9) QA Checklist
+
+* Multi-select interactions (select/unselect + chips) on mobile/desktop.
+* URL sync: copy/paste link reproduces state.
+* No results edge case.
+* Pagination with filters.
+* Translation filter only shows plans that actually have that translation.
+* Performance: P95 server response < 250ms on 10k-plan dataset (with indexes).
+* Security: Validate/whitelist query params; cap `limit`.
+
+# 10) Replit Setup Notes
+
+* Environment variables for Supabase URL/Key already set.
+* Add route to server (e.g., `app.get('/api/reading-plans', listReadingPlans)`).
+* Hot reload is fine; ensure CORS if preview domain differs.
+* Run migration SQL in Supabase dashboard or through a migration script checked into repo.
+
+---
+
+If you paste these files as-is, you’ll have a working filters pipeline end-to-end. Want me to tailor the exact React components to your existing design system (icons, button classes, and your Disciple/Servant tiers), or wire it into Astro pages if you’re routing through Astro instead of Express?
