@@ -35,6 +35,7 @@ const { userPoints } = schema;
 import { eq, and, or, gte, lte, desc, asc, like, sql, count, sum, ilike, isNotNull, inArray, isNull, lt } from "drizzle-orm";
 import { lookupBibleVerse } from './bible-api';
 import { analyzeUserSpiritualGifts } from './ai-spiritual-gifts';
+import OpenAI from "openai";
 
 
 // Extend session data interface to include userId
@@ -14802,6 +14803,178 @@ Please provide suggestions for the missing or incomplete sections.`
     } catch (error) {
       console.error("Failed to fetch reading progress:", error);
       res.status(500).json({ message: "Failed to fetch reading progress" });
+    }
+  });
+
+  // AI Personalization endpoints for Torchbearer plans
+  app.post("/api/reading-plans/:id/personalize", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const planId = parseInt(req.params.id);
+      const { currentMood, currentStruggle, focusArea } = req.body;
+      
+      if (isNaN(planId)) {
+        return res.status(400).json({ message: "Invalid plan ID" });
+      }
+
+      // Check if this is a Torchbearer AI plan
+      const plan = await db.select().from(readingPlans)
+        .where(and(eq(readingPlans.id, planId), eq(readingPlans.subscriptionTier, 'torchbearer')))
+        .limit(1);
+        
+      if (!plan.length) {
+        return res.status(403).json({ message: "AI personalization only available for Torchbearer plans" });
+      }
+
+      // Import AI personalization functions
+      const { getUserContext, generatePersonalizedContent } = await import('./utils/aiPersonalization.js');
+      
+      const userContext = await getUserContext(userId);
+      const moodInput = [currentMood, currentStruggle, focusArea].filter(Boolean).join(', ');
+      
+      // Store personalization preferences for this session
+      req.session.aiPersonalization = {
+        planId,
+        mood: moodInput,
+        timestamp: Date.now()
+      };
+      
+      res.json({ 
+        success: true, 
+        message: "Personalization preferences saved",
+        context: {
+          mood: moodInput,
+          spiritualMaturity: userContext.spiritualMaturity
+        }
+      });
+    } catch (error) {
+      console.error("Failed to set personalization:", error);
+      res.status(500).json({ message: "Failed to set personalization preferences" });
+    }
+  });
+
+  app.get("/api/reading-plans/:id/days/:dayNumber/personalized", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      const planId = parseInt(req.params.id);
+      const dayNumber = parseInt(req.params.dayNumber);
+      
+      if (isNaN(planId) || isNaN(dayNumber)) {
+        return res.status(400).json({ message: "Invalid plan ID or day number" });
+      }
+
+      // Check if this is a Torchbearer AI plan
+      const plan = await db.select().from(readingPlans)
+        .where(and(eq(readingPlans.id, planId), eq(readingPlans.subscriptionTier, 'torchbearer')))
+        .limit(1);
+        
+      if (!plan.length) {
+        return res.status(403).json({ message: "AI personalization only available for Torchbearer plans" });
+      }
+
+      // Get the base day content
+      const dayContent = await db.select().from(readingPlanDays)
+        .where(and(eq(readingPlanDays.planId, planId), eq(readingPlanDays.dayNumber, dayNumber)))
+        .limit(1);
+        
+      if (!dayContent.length) {
+        return res.status(404).json({ message: "Day content not found" });
+      }
+
+      const day = dayContent[0];
+      
+      // Check for cached personalized content (valid for 24 hours)
+      const cacheKey = `personalized_${userId}_${planId}_${dayNumber}`;
+      const cached = req.session.personalizedContent?.[cacheKey];
+      const isValid = cached && (Date.now() - cached.timestamp < 24 * 60 * 60 * 1000);
+      
+      if (isValid) {
+        return res.json({
+          ...day,
+          personalized: cached.content,
+          isPersonalized: true
+        });
+      }
+
+      // Generate new personalized content
+      const { getUserContext, generatePersonalizedContent } = await import('./utils/aiPersonalization.js');
+      
+      const userContext = await getUserContext(userId);
+      const currentMood = req.session.aiPersonalization?.mood || '';
+      
+      const personalizedContent = await generatePersonalizedContent(
+        day.scriptureReference,
+        day.scriptureText || '',
+        day.devotionalContent || '',
+        userContext,
+        currentMood
+      );
+
+      // Cache the result
+      if (!req.session.personalizedContent) {
+        req.session.personalizedContent = {};
+      }
+      req.session.personalizedContent[cacheKey] = {
+        content: personalizedContent,
+        timestamp: Date.now()
+      };
+
+      res.json({
+        ...day,
+        personalized: personalizedContent,
+        isPersonalized: true
+      });
+    } catch (error) {
+      console.error("Failed to get personalized content:", error);
+      
+      // Fallback to regular content
+      const dayContent = await db.select().from(readingPlanDays)
+        .where(and(eq(readingPlanDays.planId, planId), eq(readingPlanDays.dayNumber, dayNumber)))
+        .limit(1);
+        
+      if (dayContent.length) {
+        res.json({
+          ...dayContent[0],
+          isPersonalized: false
+        });
+      } else {
+        res.status(500).json({ message: "Failed to get content" });
+      }
+    }
+  });
+
+  app.get("/api/reading-plans/:id/emi-prompts", isAuthenticated, async (req: any, res) => {
+    try {
+      const planId = parseInt(req.params.id);
+      
+      if (isNaN(planId)) {
+        return res.status(400).json({ message: "Invalid plan ID" });
+      }
+
+      // Get plan details
+      const plan = await db.select().from(readingPlans)
+        .where(and(eq(readingPlans.id, planId), eq(readingPlans.subscriptionTier, 'torchbearer')))
+        .limit(1);
+        
+      if (!plan.length) {
+        return res.status(403).json({ message: "AI personalization only available for Torchbearer plans" });
+      }
+
+      const { createEMIPromptForAIPlan } = await import('./utils/aiPersonalization.js');
+      const prompts = await createEMIPromptForAIPlan(plan[0].name);
+      
+      res.json({ prompts });
+    } catch (error) {
+      console.error("Failed to get EMI prompts:", error);
+      res.status(500).json({ message: "Failed to get personalization prompts" });
     }
   });
 

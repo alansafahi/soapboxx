@@ -12,7 +12,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, ChevronDown, ChevronUp, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2 } from "lucide-react";
+import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, ChevronDown, ChevronUp, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2, Brain } from "lucide-react";
+import { AIIndicator } from "@/components/AIIndicator";
+import { AIPersonalizationModal } from "@/components/AIPersonalizationModal";
 import type { ReadingPlan, ReadingPlanDay, UserReadingPlanSubscription, UserReadingProgress, EnhancedMoodIndicator } from "@shared/schema";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import EnhancedMoodIndicatorManager from "@/components/emi/EnhancedMoodIndicatorManager";
@@ -221,6 +223,8 @@ export default function BibleReadingPlansFixed() {
   const [selectedDay, setSelectedDay] = useState<ReadingPlanDay | null>(null);
   const [activeTab, setActiveTab] = useState("discover");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [aiPersonalizationEnabled, setAIPersonalizationEnabled] = useState(false);
   
   // Collapsible state for each tier
   const [discipleExpanded, setDiscipleExpanded] = useState(false);
@@ -327,7 +331,20 @@ export default function BibleReadingPlansFixed() {
   };
 
   const handleStartPlan = (plan: ReadingPlan) => {
-    subscribeToPlanning.mutate(plan.id);
+    // For Torchbearer AI plans, show personalization modal first
+    if (plan.subscriptionTier === 'torchbearer' && plan.isAiGenerated) {
+      setSelectedPlan(plan);
+      setShowAIModal(true);
+    } else {
+      subscribeToPlanning.mutate(plan.id);
+    }
+  };
+
+  const handleAIPersonalized = () => {
+    setAIPersonalizationEnabled(true);
+    if (selectedPlan) {
+      subscribeToPlanning.mutate(selectedPlan.id);
+    }
   };
 
   // Helper functions
@@ -885,9 +902,14 @@ export default function BibleReadingPlansFixed() {
                             </div>
                           </div>
                           
-                          <CardTitle className="text-xl leading-tight hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-                            {plan.name}
-                          </CardTitle>
+                          <div className="flex items-start justify-between gap-2">
+                            <CardTitle className="text-xl leading-tight hover:text-purple-600 dark:hover:text-purple-400 transition-colors flex-1">
+                              {plan.name}
+                            </CardTitle>
+                            {plan.isAiGenerated && (
+                              <AIIndicator variant="badge" className="shrink-0" />
+                            )}
+                          </div>
                           
                           {plan.description && (
                             <CardDescription className="text-sm">
@@ -932,12 +954,21 @@ export default function BibleReadingPlansFixed() {
                               {canAccess ? (
                                 <Button 
                                   size="sm"
-                                  onClick={() => subscribeToPlanning.mutate(plan.id)}
+                                  onClick={() => handleStartPlan(plan)}
                                   disabled={subscribeToPlanning.isPending}
                                   className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                                 >
-                                  <Crown className="w-4 h-4 mr-2" />
-                                  Shine Further
+                                  {plan.isAiGenerated ? (
+                                    <>
+                                      <Brain className="w-4 h-4 mr-2" />
+                                      Start AI Journey
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Crown className="w-4 h-4 mr-2" />
+                                      Shine Further
+                                    </>
+                                  )}
                                 </Button>
                               ) : (
                                 <Button 
@@ -1055,6 +1086,20 @@ export default function BibleReadingPlansFixed() {
           />
         )}
       </div>
+
+      {/* AI Personalization Modal */}
+      {selectedPlan && (
+        <AIPersonalizationModal
+          isOpen={showAIModal}
+          onClose={() => {
+            setShowAIModal(false);
+            setSelectedPlan(null);
+          }}
+          planId={selectedPlan.id}
+          planName={selectedPlan.name}
+          onPersonalized={handleAIPersonalized}
+        />
+      )}
 
       {/* Day Detail Modal */}
       <Dialog open={!!selectedDay} onOpenChange={() => setSelectedDay(null)}>
