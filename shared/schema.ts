@@ -3545,8 +3545,37 @@ export const insertReferralMilestoneSchema = createInsertSchema(referralMileston
 });
 export type InsertReferralMilestoneForm = z.infer<typeof insertReferralMilestoneSchema>;
 
+// Saved Reading Plan Searches
+export const savedReadingPlanSearches = pgTable("saved_reading_plan_searches", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  searchCriteria: jsonb("search_criteria").notNull(), // Store filter values
+  isDefault: boolean("is_default").default(false),
+  useCount: integer("use_count").default(0),
+  lastUsed: timestamp("last_used"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => ({
+  userSearchUnique: unique().on(table.userId, table.name),
+}));
+
 export type ScriptureSchedule = typeof scriptureSchedules.$inferSelect;
 export type InsertScriptureSchedule = typeof scriptureSchedules.$inferInsert;
+
+// Saved Reading Plan Search types
+export type SavedReadingPlanSearch = typeof savedReadingPlanSearches.$inferSelect;
+export type InsertSavedReadingPlanSearch = typeof savedReadingPlanSearches.$inferInsert;
+
+export const insertSavedReadingPlanSearchSchema = createInsertSchema(savedReadingPlanSearches).omit({
+  id: true,
+  useCount: true,
+  lastUsed: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSavedSearchForm = z.infer<typeof insertSavedReadingPlanSearchSchema>;
 
 // Enhanced Social & Community Feature Types (duplicates removed)
 

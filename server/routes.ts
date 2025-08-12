@@ -3576,6 +3576,122 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Saved Reading Plan Search routes
+  app.get('/api/saved-searches', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const searches = await storage.getSavedReadingPlanSearches(userId);
+      res.json(searches);
+    } catch (error) {
+      console.error('Error fetching saved searches:', error);
+      res.status(500).json({ 
+        message: 'Failed to fetch saved searches',
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  app.post('/api/saved-searches', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
+      
+      if (!userId) {
+        return res.status(401).json({ message: 'User authentication required' });
+      }
+
+      const { name, description, searchCriteria, isDefault } = req.body;
+      
+      if (!name || !searchCriteria) {
+        return res.status(400).json({ message: 'Name and search criteria are required' });
+      }
+
+      const newSearch = await storage.createSavedReadingPlanSearch({
+        userId,
+        name,
+        description,
+        searchCriteria,
+        isDefault: isDefault || false
+      });
+
+      res.status(201).json(newSearch);
+    } catch (error) {
+      console.error('Error creating saved search:', error);
+      res.status(500).json({ 
+        message: 'Failed to save search',
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  app.put('/api/saved-searches/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
+      const searchId = parseInt(req.params.id);
+      
+      if (!userId || isNaN(searchId)) {
+        return res.status(400).json({ message: 'Invalid request parameters' });
+      }
+
+      const updates = req.body;
+      delete updates.id; // Don't allow updating ID
+      delete updates.userId; // Don't allow changing ownership
+      delete updates.createdAt; // Don't allow updating creation date
+
+      const updatedSearch = await storage.updateSavedReadingPlanSearch(searchId, updates);
+      res.json(updatedSearch);
+    } catch (error) {
+      console.error('Error updating saved search:', error);
+      res.status(500).json({ 
+        message: 'Failed to update search',
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  app.delete('/api/saved-searches/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
+      const searchId = parseInt(req.params.id);
+      
+      if (!userId || isNaN(searchId)) {
+        return res.status(400).json({ message: 'Invalid request parameters' });
+      }
+
+      await storage.deleteSavedReadingPlanSearch(searchId, userId);
+      res.json({ message: 'Search deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting saved search:', error);
+      res.status(500).json({ 
+        message: 'Failed to delete search',
+        error: (error as Error).message 
+      });
+    }
+  });
+
+  app.post('/api/saved-searches/:id/use', isAuthenticated, async (req: any, res) => {
+    try {
+      const searchId = parseInt(req.params.id);
+      
+      if (isNaN(searchId)) {
+        return res.status(400).json({ message: 'Invalid search ID' });
+      }
+
+      await storage.incrementSavedSearchUsage(searchId);
+      res.json({ message: 'Search usage recorded' });
+    } catch (error) {
+      console.error('Error recording search usage:', error);
+      res.status(500).json({ 
+        message: 'Failed to record search usage',
+        error: (error as Error).message 
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   
   // REST-only messaging - no WebSocket dependencies

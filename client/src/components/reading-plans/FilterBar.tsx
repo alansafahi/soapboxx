@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { X, ChevronDown, Filter, RotateCcw } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { SavedSearches } from './SavedSearches';
 
 export interface ReadingPlanFilters {
   testament: string[];
@@ -322,6 +323,11 @@ export default function FilterBar({ filters, onChange, planCount }: FilterBarPro
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <SavedSearches
+          currentFilters={filters}
+          onApplySearch={(searchCriteria) => onChange({...filters, ...searchCriteria})}
+        />
 
         {hasActiveFilters && (
           <Button variant="ghost" size="sm" onClick={clearFilters}>

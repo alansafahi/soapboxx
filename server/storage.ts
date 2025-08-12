@@ -91,12 +91,15 @@ import {
   memberCommunications,
   churchFeatureSettings,
   defaultFeatureSettings,
+  savedReadingPlanSearches,
   type User,
   type UpsertUser,
   type ChurchFeatureSetting,
   type InsertChurchFeatureSetting,
   type DefaultFeatureSetting,
   type InsertDefaultFeatureSetting,
+  type SavedReadingPlanSearch,
+  type InsertSavedReadingPlanSearch,
   type DailyVerse,
   type InsertDailyVerse,
   type UserBibleStreak,
@@ -1029,6 +1032,13 @@ export interface IStorage {
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
   getChatMessages(sessionId: string): Promise<ChatMessage[]>;
   markChatMessagesAsRead(sessionId: string, sender: string): Promise<void>;
+  
+  // Saved reading plan search operations
+  getSavedReadingPlanSearches(userId: string): Promise<SavedReadingPlanSearch[]>;
+  createSavedReadingPlanSearch(search: InsertSavedReadingPlanSearch): Promise<SavedReadingPlanSearch>;
+  updateSavedReadingPlanSearch(searchId: number, updates: Partial<SavedReadingPlanSearch>): Promise<SavedReadingPlanSearch>;
+  deleteSavedReadingPlanSearch(searchId: number, userId: string): Promise<void>;
+  incrementSavedSearchUsage(searchId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -9426,6 +9436,79 @@ export class DatabaseStorage implements IStorage {
       return result;
     } catch (error) {
       return [];
+    }
+  }
+
+  // Saved Reading Plan Search operations
+  async getSavedReadingPlanSearches(userId: string): Promise<SavedReadingPlanSearch[]> {
+    try {
+      const searches = await db
+        .select()
+        .from(savedReadingPlanSearches)
+        .where(eq(savedReadingPlanSearches.userId, userId))
+        .orderBy(desc(savedReadingPlanSearches.lastUsed), desc(savedReadingPlanSearches.createdAt));
+      
+      return searches;
+    } catch (error) {
+      console.error('Error fetching saved searches:', error);
+      return [];
+    }
+  }
+
+  async createSavedReadingPlanSearch(search: InsertSavedReadingPlanSearch): Promise<SavedReadingPlanSearch> {
+    try {
+      const [newSearch] = await db
+        .insert(savedReadingPlanSearches)
+        .values(search)
+        .returning();
+      
+      return newSearch;
+    } catch (error) {
+      console.error('Error creating saved search:', error);
+      throw new Error('Failed to save search');
+    }
+  }
+
+  async updateSavedReadingPlanSearch(searchId: number, updates: Partial<SavedReadingPlanSearch>): Promise<SavedReadingPlanSearch> {
+    try {
+      const [updatedSearch] = await db
+        .update(savedReadingPlanSearches)
+        .set({ ...updates, updatedAt: new Date() })
+        .where(eq(savedReadingPlanSearches.id, searchId))
+        .returning();
+      
+      return updatedSearch;
+    } catch (error) {
+      console.error('Error updating saved search:', error);
+      throw new Error('Failed to update search');
+    }
+  }
+
+  async deleteSavedReadingPlanSearch(searchId: number, userId: string): Promise<void> {
+    try {
+      await db
+        .delete(savedReadingPlanSearches)
+        .where(and(
+          eq(savedReadingPlanSearches.id, searchId),
+          eq(savedReadingPlanSearches.userId, userId)
+        ));
+    } catch (error) {
+      console.error('Error deleting saved search:', error);
+      throw new Error('Failed to delete search');
+    }
+  }
+
+  async incrementSavedSearchUsage(searchId: number): Promise<void> {
+    try {
+      await db
+        .update(savedReadingPlanSearches)
+        .set({ 
+          useCount: sql`${savedReadingPlanSearches.useCount} + 1`,
+          lastUsed: new Date()
+        })
+        .where(eq(savedReadingPlanSearches.id, searchId));
+    } catch (error) {
+      console.error('Error incrementing search usage:', error);
     }
   }
 }
