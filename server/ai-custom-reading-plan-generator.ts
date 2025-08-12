@@ -94,47 +94,165 @@ export class AICustomReadingPlanGenerator {
 
       console.log('AI Custom Plan Generator - Generating with OpenAI...');
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are an AI spiritual director specializing in creating personalized Bible reading plans. You create entirely new, custom reading plans tailored to individual spiritual and emotional needs, not modifications of existing plans. Your plans include carefully selected scripture passages, original devotional content, and personalized reflection questions."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.8,
-        max_tokens: 4000
-      });
-
-      const aiResponse = JSON.parse(completion.choices[0]?.message?.content || '{}');
-      console.log('AI Custom Plan Generator - AI Response received');
-
-      if (!aiResponse.plan) {
-        throw new Error('AI did not return a valid plan structure');
-      }
-
-      const customPlan: CustomReadingPlan = {
-        name: aiResponse.plan.name,
-        description: aiResponse.plan.description,
-        difficulty: 'advanced',
-        duration: planDuration,
-        category: this.categorizePlan(focusAreas),
-        subscriptionTier: 'torchbearer',
-        isAiGenerated: true,
-        aiPersonalizationReason: aiResponse.plan.personalizationReason || `Customized for your current spiritual and emotional state: ${moodNames.slice(0, 3).join(', ')}`,
-        days: aiResponse.plan.days || []
-      };
-
+      // For longer plans (>21 days), generate in chunks to avoid token limits
+      const customPlan = planDuration > 21 
+        ? await this.generateLongPlanInChunks(
+            selectedMoods, moodCategories, moodNames, avgMoodScore, 
+            userSpritualGifts, planDuration, studyStyle, focusAreas, 
+            testament, order, translation, difficulty, dailyTime
+          )
+        : await this.generateShortPlan(prompt);
+      
       // Cache the result
       this.generatedPlansCache.set(cacheKey, customPlan);
       console.log('AI Custom Plan Generator - Custom plan generated successfully');
 
       return { customPlan };
+
+  }
+
+  private async generateShortPlan(prompt: string): Promise<CustomReadingPlan> {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are an AI spiritual director specializing in creating personalized Bible reading plans. You create entirely new, custom reading plans tailored to individual spiritual and emotional needs, not modifications of existing plans. Your plans include carefully selected scripture passages, original devotional content, and personalized reflection questions."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.8,
+      max_tokens: 4000
+    });
+
+    const aiResponse = JSON.parse(completion.choices[0]?.message?.content || '{}');
+    console.log('AI Custom Plan Generator - AI Response received');
+
+    if (!aiResponse.plan) {
+      throw new Error('AI did not return a valid plan structure');
+    }
+
+    const customPlan: CustomReadingPlan = {
+      name: aiResponse.plan.name,
+      description: aiResponse.plan.description,
+      difficulty: 'advanced',
+      duration: aiResponse.plan.days?.length || 21,
+      category: 'personal',
+      subscriptionTier: 'torchbearer',
+      isAiGenerated: true,
+      aiPersonalizationReason: aiResponse.plan.personalizationReason || 'Customized for your current spiritual and emotional state',
+      days: aiResponse.plan.days || []
+    };
+
+    return customPlan;
+  }
+
+  private async generateLongPlanInChunks(
+    selectedMoods: any[],
+    moodCategories: string[],
+    moodNames: string[],
+    avgMoodScore: number,
+    spiritualGifts: string[],
+    duration: number,
+    studyStyle: string,
+    focusAreas: string[],
+    testament: string,
+    order: string,
+    translation: string,
+    difficulty: string,
+    dailyTime: string
+  ): Promise<CustomReadingPlan> {
+    console.log(`AI Custom Plan Generator - Generating ${duration}-day plan in chunks`);
+    
+    // First, generate plan overview and first 10 days
+    const initialPrompt = this.buildInitialChunkPrompt(
+      selectedMoods, moodCategories, moodNames, avgMoodScore, spiritualGifts,
+      duration, studyStyle, focusAreas, testament, order, translation, difficulty, dailyTime
+    );
+
+    const initialCompletion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: "You are an AI spiritual director creating the foundation and first part of a personalized Bible reading plan. Focus on establishing the plan structure and first 10 days with high-quality content."
+        },
+        {
+          role: "user",
+          content: initialPrompt
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.8,
+      max_tokens: 4000
+    });
+
+    const initialResponse = JSON.parse(initialCompletion.choices[0]?.message?.content || '{}');
+    const allDays = [...(initialResponse.plan?.days || [])];
+
+    // Generate remaining days in chunks of 10
+    const remainingDays = duration - 10;
+    const chunks = Math.ceil(remainingDays / 10);
+    
+    for (let chunk = 0; chunk < chunks; chunk++) {
+      const startDay = 11 + (chunk * 10);
+      const endDay = Math.min(startDay + 9, duration);
+      
+      const chunkPrompt = this.buildContinuationChunkPrompt(
+        initialResponse.plan?.name || 'Personalized Journey',
+        moodNames, focusAreas, startDay, endDay, testament, order, translation, difficulty
+      );
+
+      try {
+        const chunkCompletion = await openai.chat.completions.create({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are continuing a personalized Bible reading plan. Generate the next set of days maintaining thematic consistency and progressive spiritual growth."
+            },
+            {
+              role: "user",
+              content: chunkPrompt
+            }
+          ],
+          response_format: { type: "json_object" },
+          temperature: 0.8,
+          max_tokens: 4000
+        });
+
+        const chunkResponse = JSON.parse(chunkCompletion.choices[0]?.message?.content || '{}');
+        if (chunkResponse.days) {
+          allDays.push(...chunkResponse.days);
+        }
+        console.log(`AI Custom Plan Generator - Generated days ${startDay}-${endDay}`);
+      } catch (error) {
+        console.error(`Error generating chunk ${chunk + 1}:`, error);
+        // Generate fallback days for this chunk
+        for (let day = startDay; day <= endDay; day++) {
+          allDays.push(this.generateFallbackDay(day, moodNames, focusAreas));
+        }
+      }
+    }
+
+    const customPlan: CustomReadingPlan = {
+      name: initialResponse.plan?.name || `Personalized ${duration}-Day Journey`,
+      description: initialResponse.plan?.description || `A custom ${duration}-day reading plan tailored to your spiritual and emotional needs.`,
+      difficulty: 'advanced',
+      duration: duration,
+      category: this.categorizePlan(focusAreas),
+      subscriptionTier: 'torchbearer',
+      isAiGenerated: true,
+      aiPersonalizationReason: initialResponse.plan?.personalizationReason || `Customized for your current state: ${moodNames.slice(0, 3).join(', ')}`,
+      days: allDays
+    };
+
+    console.log(`AI Custom Plan Generator - Completed ${duration}-day plan with ${allDays.length} days`);
+    return customPlan;
 
     } catch (error) {
       console.error('AI Custom Plan Generation error:', error);
@@ -318,6 +436,110 @@ Return your response in this JSON format:
     }
 
     return days;
+  }
+
+  private buildInitialChunkPrompt(
+    selectedMoods: any[],
+    moodCategories: string[],
+    moodNames: string[],
+    avgMoodScore: number,
+    spiritualGifts: string[],
+    duration: number,
+    studyStyle: string,
+    focusAreas: string[],
+    testament: string,
+    order: string,
+    translation: string,
+    difficulty: string,
+    dailyTime: string
+  ): string {
+    return `Create the foundation and first 10 days of a completely new, personalized ${duration}-day Bible reading plan:
+
+EMOTIONAL & SPIRITUAL STATE:
+- Current moods: ${moodNames.join(', ')}
+- Mood categories: ${moodCategories.join(', ')}
+- Average mood intensity: ${avgMoodScore}/5
+
+PLAN REQUIREMENTS:
+- Duration: ${duration} days (you're creating days 1-10 now)
+- Testament focus: ${testament === 'both' ? 'Both Old and New Testament' : testament === 'old' ? 'Old Testament only' : 'New Testament only'}
+- Reading order: ${order}
+- Bible translation: ${translation === 'all' ? 'Flexible' : translation}
+- Difficulty level: ${difficulty}
+- Daily time: ${dailyTime} minutes
+
+INSTRUCTIONS:
+1. Create an entirely NEW reading plan with unique name and description
+2. Generate ONLY the first 10 days with high-quality content
+3. Ensure each day has 100-150 word devotional content
+4. Create progression that can continue for ${duration} total days
+
+Return JSON format:
+{
+  "plan": {
+    "name": "Unique plan name",
+    "description": "Personalized description",
+    "personalizationReason": "Why this fits their needs",
+    "days": [
+      // ... days 1-10 only
+    ]
+  }
+}`;
+  }
+
+  private buildContinuationChunkPrompt(
+    planName: string,
+    moodNames: string[],
+    focusAreas: string[],
+    startDay: number,
+    endDay: number,
+    testament: string,
+    order: string,
+    translation: string,
+    difficulty: string
+  ): string {
+    return `Continue the "${planName}" reading plan with days ${startDay}-${endDay}:
+
+CONTEXT:
+- Plan focuses on: ${focusAreas.join(', ')}
+- User moods: ${moodNames.join(', ')}
+- Testament: ${testament}
+- Order: ${order}
+- Translation: ${translation}
+- Difficulty: ${difficulty}
+
+INSTRUCTIONS:
+1. Maintain thematic consistency with the plan
+2. Show spiritual progression from previous days
+3. Create 100-150 word devotionals for each day
+4. Include relevant reflection questions and prayer prompts
+
+Return JSON format:
+{
+  "days": [
+    // ... days ${startDay}-${endDay}
+  ]
+}`;
+  }
+
+  private generateFallbackDay(dayNumber: number, moodNames: string[], focusAreas: string[]): CustomReadingPlanDay {
+    const scriptureReferences = [
+      'Psalm 23:1-6', 'Isaiah 41:10', 'Romans 8:28', 'Jeremiah 29:11',
+      'Philippians 4:13', '2 Timothy 1:7', 'Joshua 1:9', 'Proverbs 3:5-6'
+    ];
+    
+    const scriptureRef = scriptureReferences[dayNumber % scriptureReferences.length];
+    
+    return {
+      dayNumber,
+      title: `Day ${dayNumber}: Personal Growth`,
+      scriptureReference: scriptureRef,
+      devotionalContent: `Today's reading provides guidance for your spiritual journey. As you reflect on this passage, consider how God is working in your current circumstances. Your journey of ${moodNames[0]?.toLowerCase() || 'faith'} is part of His greater plan for your life.`,
+      reflectionQuestion: `How does today's scripture speak to your current situation of ${moodNames[0]?.toLowerCase() || 'spiritual growth'}?`,
+      prayerPrompt: `Ask God for wisdom and strength as you continue growing in faith.`,
+      additionalVerses: ['2 Corinthians 1:3-4', 'Romans 15:13'],
+      tags: ['personal', 'growth', focusAreas[0] || 'faith']
+    };
   }
 
   private createCacheKey(request: CustomPlanRequest, categories: string[]): string {
