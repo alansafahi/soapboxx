@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
-import { db } from "../db";
-import { readingPlans } from "../../shared/schema";
+import { db } from "../db.js";
+import { readingPlans } from "../../shared/schema.js";
 import { and, or, eq, like, ilike, inArray, between, sql, desc, asc } from "drizzle-orm";
 
 const DURATION_MAP = {
@@ -188,14 +188,8 @@ export async function getFilteredReadingPlans(req: Request, res: Response) {
       .limit(limit)
       .offset(offset);
     
-    // Add ordering - handle both single order and multiple orders
-    if (Array.isArray(orderBy)) {
-      query = query.orderBy(...orderBy);
-    } else {
-      query = query.orderBy(orderBy);
-    }
-    
-    const plans = await query;
+    // Execute the query with proper ordering
+    const plans = await query.orderBy(orderBy);
 
     // Get total count for pagination
     const totalResult = await db

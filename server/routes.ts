@@ -15111,14 +15111,20 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
-  // Import filtering routes
-  const { getFilteredReadingPlans, getFilterOptions } = await import('./routes/reading-plans-filtered.js');
-  
-  // Filtered reading plans endpoint
-  app.get("/api/reading-plans/filtered", getFilteredReadingPlans);
-  
-  // Get filter options endpoint  
-  app.get("/api/reading-plans/filter-options", getFilterOptions);
+  // Import and add filtering routes
+  try {
+    const filterRoutes = await import('./routes/reading-plans-filtered.js');
+    
+    // Filtered reading plans endpoint
+    app.get("/api/reading-plans/filtered", filterRoutes.getFilteredReadingPlans);
+    
+    // Get filter options endpoint  
+    app.get("/api/reading-plans/filter-options", filterRoutes.getFilterOptions);
+    
+    console.log("✓ Filter routes loaded successfully");
+  } catch (error) {
+    console.error("Failed to load filter routes:", error);
+  }
 
   // Get reading plans by subscription tier with AI verification
   app.get("/api/reading-plans/tier/:tier", async (req, res) => {
