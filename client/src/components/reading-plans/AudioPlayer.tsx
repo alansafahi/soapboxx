@@ -38,11 +38,10 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ day, planName }) => {
       });
 
       if (response.ok) {
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
+        const audioData = await response.json();
         
-        if (audioRef.current) {
-          audioRef.current.src = audioUrl;
+        if (audioRef.current && audioData.audioUrl) {
+          audioRef.current.src = audioData.audioUrl;
           audioRef.current.load();
         }
         
@@ -51,7 +50,8 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ day, planName }) => {
           description: "Scripture audio has been generated successfully."
         });
       } else {
-        throw new Error('Failed to generate audio');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate audio');
       }
     } catch (error) {
       setAudioError('Unable to generate audio. Please try again.');

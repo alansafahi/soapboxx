@@ -6753,18 +6753,29 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
 
   app.post('/api/audio/bible/generate', isAuthenticated, async (req, res) => {
     try {
-      const { verseId, voice = 'warm-female', musicBed } = req.body;
+      const { verseId, verseText, voice = 'warm-female', musicBed } = req.body;
       
-      if (!verseId) {
-        return res.status(400).json({ error: 'Verse ID is required' });
+      let audioText: string;
+      let verseInfo: any = null;
+      
+      // Handle both verseId (from Bible verse lookup) and verseText (from reading plans)
+      if (verseId) {
+        const verse = await storage.getBibleVerse(verseId);
+        if (!verse) {
+          return res.status(404).json({ error: 'Bible verse not found' });
+        }
+        audioText = `${makeTTSFriendlyReferenceLocal(verse.reference)}. ${verse.text}`;
+        verseInfo = {
+          id: verse.id,
+          reference: verse.reference,
+          text: verse.text
+        };
+      } else if (verseText) {
+        // For reading plans - text already includes reference and scripture
+        audioText = verseText;
+      } else {
+        return res.status(400).json({ error: 'Either verseId or verseText is required' });
       }
-
-      const verse = await storage.getBibleVerse(verseId);
-      if (!verse) {
-        return res.status(404).json({ error: 'Bible verse not found' });
-      }
-
-      const verseText = `${makeTTSFriendlyReferenceLocal(verse.reference)}. ${verse.text}`;
       
       // Generate audio using OpenAI TTS
       const openai = new OpenAI({
@@ -6792,16 +6803,12 @@ Respond in JSON format with these keys: reflectionQuestions (array), practicalAp
       const audioDataUrl = `data:audio/mpeg;base64,${audioBuffer.toString('base64')}`;
 
       res.json({
-        verseId,
+        verseId: verseId || null,
         audioUrl: audioDataUrl,
         voice,
         musicBed,
-        duration: Math.ceil(verseText.length / 10), // Rough estimate
-        verse: {
-          id: verse.id,
-          reference: verse.reference,
-          text: verse.text
-        }
+        duration: Math.ceil(audioText.length / 10), // Rough estimate
+        verse: verseInfo
       });
 
     } catch (error) {
