@@ -324,7 +324,8 @@ export default function BibleReadingPlansFixed() {
   const { data: planDays = [], isLoading: planDaysLoading } = useQuery<ReadingPlanDay[]>({
     queryKey: ["/api/reading-plans", selectedPlan?.id, "days"],
     enabled: !!selectedPlan?.id,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0, // Force fresh data to ensure reflections show up
+    gcTime: 0,
   });
 
   // Fetch user progress for selected plan
