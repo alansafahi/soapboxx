@@ -130,7 +130,13 @@ const DayReader = ({ plan, day, userProgress, onComplete }: DayReaderProps) => {
         <Card>
           <CardHeader>
             <CardTitle>Personal Reflection</CardTitle>
-            <CardDescription>{day.reflectionQuestion}</CardDescription>
+            {day.reflectionQuestion && (
+              <div className="mt-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p className="text-sm font-medium text-blue-900 dark:text-blue-100">
+                  {day.reflectionQuestion}
+                </p>
+              </div>
+            )}
           </CardHeader>
           <CardContent className="space-y-4">
             <Textarea
