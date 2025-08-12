@@ -15056,6 +15056,9 @@ Please provide suggestions for the missing or incomplete sections.`
       const progressData = req.body;
       const progress = await storage.recordReadingProgress(userId, planId, dayNumber, progressData);
       
+      // Update user's current day in subscription to advance to next day
+      await storage.updateUserSubscriptionCurrentDay(userId, planId, dayNumber + 1);
+      
       // Award SoapBox Points for completing reading
       await storage.trackUserActivity(userId, 'reading_plan_progress', planId, 10);
       

@@ -363,6 +363,7 @@ export default function BibleReadingPlansFixed() {
           : "Congratulations on completing this reading plan!",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/reading-plans", selectedPlan?.id, "progress"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reading-plans/user/subscriptions"] });
       setSelectedDay(null);
       
       // Auto-advance to next day if available
@@ -372,7 +373,7 @@ export default function BibleReadingPlansFixed() {
           if (nextDayData) {
             setSelectedDay(nextDayData);
           }
-        }, 1000);
+        }, 1500);
       }
     },
   });
@@ -959,18 +960,19 @@ export default function BibleReadingPlansFixed() {
                   <p className="text-lg text-gray-600 dark:text-gray-400 mt-3 font-medium">"Shine your light further"</p>
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">AI-powered personalization, advanced features, and leadership content</p>
                   
-                  {/* Plan Selection Button for Torchbearer */}
-                  {(userTier || 'torchbearer') === 'torchbearer' && (
-                    <div className="mt-4">
-                      <Button
-                        onClick={() => setShowPlanSelectionModal(true)}
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2"
-                      >
-                        <Sparkles className="w-4 h-4 mr-2" />
-                        Choose Your Journey
-                      </Button>
-                    </div>
-                  )}
+                  {/* Plan Selection Button for Torchbearer - Always show for testing */}
+                  <div className="mt-4">
+                    <Button
+                      onClick={() => setShowPlanSelectionModal(true)}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 shadow-lg"
+                    >
+                      <Sparkles className="w-4 h-4 mr-2" />
+                      Choose Your Journey
+                    </Button>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      Select existing plans or create AI-personalized reading plans
+                    </p>
+                  </div>
                 </div>
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">

@@ -6879,6 +6879,19 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async updateUserSubscriptionCurrentDay(userId: string, planId: number, newCurrentDay: number): Promise<void> {
+    try {
+      await pool.query(`
+        UPDATE user_reading_plan_subscriptions
+        SET current_day = $3, last_read_at = NOW(), updated_at = NOW()
+        WHERE user_id = $1 AND plan_id = $2 AND is_active = true
+      `, [userId, planId, newCurrentDay]);
+    } catch (error) {
+      console.error('Failed to update user subscription current day:', error);
+      // Don't throw error to avoid breaking the progress recording
+    }
+  }
+
   async subscribeToReadingPlan(userId: string, planId: number): Promise<UserReadingPlanSubscription> {
     try {
       const result = await pool.query(`
