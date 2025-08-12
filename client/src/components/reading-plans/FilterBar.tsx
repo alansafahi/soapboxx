@@ -43,7 +43,7 @@ const ORDER_OPTIONS = ['Chronological', 'Historical', 'Canonical'];
 const DIFFICULTY_OPTIONS = ['Beginner', 'Intermediate', 'Advanced'];
 const FORMAT_OPTIONS = ['Reading', 'Reflection', 'Prayer', 'Audio', 'Video'];
 const AUDIENCE_OPTIONS = ['Solo', 'Group', 'Family', 'Church'];
-const TRANSLATION_OPTIONS = ['All', 'NIV', 'ESV', 'NLT', 'NASB', 'KJV', 'CSB', 'NKJV'];
+const TRANSLATION_OPTIONS = ['All', 'NIV', 'KJV', 'ESV', 'NASB', 'NLT', 'CSB', 'NKJV'];
 const TIER_OPTIONS = ['free', 'standard', 'premium'];
 
 const DURATION_OPTIONS = [

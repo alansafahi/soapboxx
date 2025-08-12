@@ -14891,13 +14891,28 @@ Please provide suggestions for the missing or incomplete sections.`
   app.get("/api/reading-plans/:id/days", async (req, res) => {
     try {
       const planId = parseInt(req.params.id);
+      const translation = req.query.translation as string;
+      
       if (isNaN(planId)) {
         return res.status(400).json({ message: "Invalid plan ID" });
       }
 
       const days = await storage.getReadingPlanDays(planId);
-      res.json(days);
+      
+      // If translation is specified and different from plan's default, translate on-the-fly
+      if (translation && translation !== 'NIV') {
+        const { translateReadingPlanDay } = await import('./utils/bibleTranslation.js');
+        
+        const translatedDays = await Promise.all(
+          days.map(day => translateReadingPlanDay(day, translation))
+        );
+        
+        res.json(translatedDays);
+      } else {
+        res.json(days);
+      }
     } catch (error) {
+      console.error("Error fetching reading plan days:", error);
       res.status(500).json({ message: "Failed to fetch reading plan days" });
     }
   });
