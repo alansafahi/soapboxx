@@ -14642,7 +14642,173 @@ Please provide suggestions for the missing or incomplete sections.`
   });
 
   // Get import status for all versions
-  // Reading Plans API Routes
+  // Reading Plans API Routes - Filter routes must come first
+  app.get("/api/reading-plans/filtered", async (req, res) => {
+    try {
+      const { 
+        testament, 
+        difficulty, 
+        orderType, 
+        duration, 
+        dailyTime, 
+        translation, 
+        formatTypes, 
+        audienceTypes, 
+        themes, 
+        seasons, 
+        books, 
+        tier,
+        search 
+      } = req.query;
+
+      let whereConditions: any[] = [eq(readingPlans.isActive, true)];
+
+      if (testament && testament !== 'All') {
+        const testamentArray = typeof testament === 'string' ? testament.split(',') : [testament];
+        whereConditions.push(inArray(readingPlans.testament, testamentArray));
+      }
+
+      if (difficulty && difficulty !== 'All') {
+        const difficultyArray = typeof difficulty === 'string' ? difficulty.split(',') : [difficulty];
+        whereConditions.push(inArray(readingPlans.difficulty, difficultyArray));
+      }
+
+      if (orderType && orderType !== 'All') {
+        const orderArray = typeof orderType === 'string' ? orderType.split(',') : [orderType];
+        whereConditions.push(inArray(readingPlans.orderType, orderArray));
+      }
+
+      if (translation && translation !== 'All') {
+        whereConditions.push(eq(readingPlans.translation, translation));
+      }
+
+      if (tier && tier !== 'All') {
+        const tierArray = typeof tier === 'string' ? tier.split(',') : [tier];
+        whereConditions.push(inArray(readingPlans.subscriptionTier, tierArray));
+      }
+
+      if (duration && duration !== 'All') {
+        const durationFilters = typeof duration === 'string' ? duration.split(',') : [duration];
+        const durationConditions = durationFilters.map(d => {
+          switch (d) {
+            case 'lt30': return lte(readingPlans.durationDays, 30);
+            case '1to3m': return and(gte(readingPlans.durationDays, 31), lte(readingPlans.durationDays, 90));
+            case '4to6m': return and(gte(readingPlans.durationDays, 91), lte(readingPlans.durationDays, 180));
+            case '7to12m': return and(gte(readingPlans.durationDays, 181), lte(readingPlans.durationDays, 365));
+            case 'gt12m': return gte(readingPlans.durationDays, 366);
+            default: return sql`1=1`;
+          }
+        });
+        if (durationConditions.length > 0) {
+          whereConditions.push(or(...durationConditions));
+        }
+      }
+
+      if (dailyTime && dailyTime !== 'All') {
+        const timeFilters = typeof dailyTime === 'string' ? dailyTime.split(',') : [dailyTime];
+        const timeConditions = timeFilters.map(t => {
+          switch (t) {
+            case 'lt10': return lte(readingPlans.dailyMinutes, 10);
+            case '10to20': return and(gte(readingPlans.dailyMinutes, 11), lte(readingPlans.dailyMinutes, 20));
+            case 'gt20': return gte(readingPlans.dailyMinutes, 21);
+            default: return sql`1=1`;
+          }
+        });
+        if (timeConditions.length > 0) {
+          whereConditions.push(or(...timeConditions));
+        }
+      }
+
+      if (search) {
+        const searchTerm = `%${search}%`;
+        whereConditions.push(
+          or(
+            ilike(readingPlans.name, searchTerm),
+            ilike(readingPlans.description, searchTerm),
+            ilike(readingPlans.category, searchTerm)
+          )
+        );
+      }
+
+      const plans = await db.select({
+        id: readingPlans.id,
+        name: readingPlans.name,
+        description: readingPlans.description,
+        type: readingPlans.type,
+        duration: readingPlans.duration,
+        difficulty: readingPlans.difficulty,
+        category: readingPlans.category,
+        imageUrl: readingPlans.imageUrl,
+        isPublic: readingPlans.isPublic,
+        isActive: readingPlans.isActive,
+        authorId: readingPlans.authorId,
+        subscriptionTier: readingPlans.subscriptionTier,
+        isAiGenerated: readingPlans.isAiGenerated,
+        testament: readingPlans.testament,
+        orderType: readingPlans.orderType,
+        durationDays: readingPlans.durationDays,
+        dailyMinutes: readingPlans.dailyMinutes,
+        translation: readingPlans.translation,
+        formatTypes: readingPlans.formatTypes,
+        audienceTypes: readingPlans.audienceTypes,
+        themes: readingPlans.themes,
+        seasons: readingPlans.seasons,
+        books: readingPlans.books,
+        createdAt: readingPlans.createdAt,
+        updatedAt: readingPlans.updatedAt
+      })
+      .from(readingPlans)
+      .where(and(...whereConditions))
+      .orderBy(desc(readingPlans.createdAt));
+
+      res.json({
+        items: plans,
+        total: plans.length,
+        filters: { testament, difficulty, orderType, duration, dailyTime, translation, formatTypes, audienceTypes, themes, seasons, books, tier, search }
+      });
+    } catch (error) {
+      console.error("Filter query error:", error);
+      res.status(500).json({ message: "Failed to fetch filtered reading plans" });
+    }
+  });
+
+  app.get("/api/reading-plans/filter-options", async (req, res) => {
+    try {
+      const options = await db.select({
+        testament: readingPlans.testament,
+        orderType: readingPlans.orderType,
+        difficulty: readingPlans.difficulty,
+        translation: readingPlans.translation,
+        subscriptionTier: readingPlans.subscriptionTier,
+        formatTypes: readingPlans.formatTypes,
+        audienceTypes: readingPlans.audienceTypes,
+        themes: readingPlans.themes,
+        seasons: readingPlans.seasons,
+        books: readingPlans.books
+      })
+      .from(readingPlans)
+      .where(eq(readingPlans.isActive, true));
+
+      const uniqueOptions = {
+        testament: [...new Set(options.map(o => o.testament).filter(Boolean))],
+        orderType: [...new Set(options.map(o => o.orderType).filter(Boolean))],
+        difficulty: [...new Set(options.map(o => o.difficulty).filter(Boolean))],
+        translation: [...new Set(options.map(o => o.translation).filter(Boolean))],
+        subscriptionTier: [...new Set(options.map(o => o.subscriptionTier).filter(Boolean))],
+        formatTypes: [...new Set(options.flatMap(o => o.formatTypes || []))],
+        audienceTypes: [...new Set(options.flatMap(o => o.audienceTypes || []))],
+        themes: [...new Set(options.flatMap(o => o.themes || []))],
+        seasons: [...new Set(options.flatMap(o => o.seasons || []))],
+        books: [...new Set(options.flatMap(o => o.books || []))]
+      };
+
+      res.json(uniqueOptions);
+    } catch (error) {
+      console.error("Filter options error:", error);
+      res.status(500).json({ message: "Failed to fetch filter options" });
+    }
+  });
+
   app.get("/api/reading-plans", async (req, res) => {
     try {
       const { tier } = req.query;
@@ -14735,7 +14901,7 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
-  // Removed duplicate endpoint - using the one at line 14783 that includes direct SQL
+  // Removed duplicate filter endpoints - moved above for proper route ordering
 
   app.post("/api/reading-plans/:id/subscribe", isAuthenticated, async (req: any, res) => {
     try {

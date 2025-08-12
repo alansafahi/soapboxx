@@ -276,7 +276,34 @@ export default function BibleReadingPlansFixed() {
   );
 
   const { data: plans = [], isLoading: plansLoading } = useQuery<ReadingPlan[]>({
-    queryKey: ["/api/reading-plans"],
+    queryKey: hasActiveFilters 
+      ? ["/api/reading-plans/filtered", debouncedFilters] 
+      : ["/api/reading-plans"],
+    queryFn: async () => {
+      if (hasActiveFilters) {
+        const params = new URLSearchParams();
+        Object.entries(debouncedFilters).forEach(([key, value]) => {
+          if (Array.isArray(value) && value.length > 0) {
+            params.set(key, value.join(','));
+          } else if (typeof value === 'string' && value) {
+            params.set(key, value);
+          }
+        });
+        
+        const response = await fetch(`/api/reading-plans/filtered?${params}`);
+        if (!response.ok) {
+          console.warn('Filtered API failed, falling back to all plans');
+          const fallbackResponse = await fetch('/api/reading-plans');
+          return fallbackResponse.json();
+        }
+        const data = await response.json();
+        return data.items || data;
+      } else {
+        const response = await fetch('/api/reading-plans');
+        if (!response.ok) throw new Error('Failed to fetch plans');
+        return response.json();
+      }
+    },
     staleTime: 0,
     gcTime: 0,
   });
@@ -628,12 +655,11 @@ export default function BibleReadingPlansFixed() {
 
             {/* Comprehensive Filter Bar */}
             {showFilters && (
-              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/20 dark:border-gray-700/50">
-                <div className="text-center text-gray-600 dark:text-gray-400">
-                  <p className="text-sm">Advanced filtering coming soon! Currently showing all available plans.</p>
-                  <p className="text-xs mt-1">Filter by: Testament, Difficulty, Duration, Themes, and more</p>
-                </div>
-              </div>
+              <FilterBar 
+                filters={filters} 
+                onChange={updateFilters} 
+                planCount={filteredPlans.length} 
+              />
             )}
 
             {/* Subscription Tiers Section */}
