@@ -172,11 +172,16 @@ export default function FilterBar({ filters, onChange, planCount }: FilterBarPro
       ? normalizedOptions.filter(opt => opt.label.toLowerCase().includes(search.toLowerCase()))
       : normalizedOptions;
 
+    const hasSelections = values.length > 0;
+
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-9">
-            {label}
+          <Button 
+            variant={hasSelections ? "default" : "outline"} 
+            className={`h-9 ${hasSelections ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}`}
+          >
+            {label} {hasSelections && `(${values.length})`}
             <ChevronDown className="ml-1 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
@@ -231,7 +236,10 @@ export default function FilterBar({ filters, onChange, planCount }: FilterBarPro
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="h-9">
+            <Button 
+              variant={filters.testament.length > 0 ? "default" : "outline"} 
+              className={`h-9 ${filters.testament.length > 0 ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}`}
+            >
               Testament {filters.testament.length > 0 && `(${filters.testament[0]})`}
               <ChevronDown className="ml-1 h-4 w-4" />
             </Button>
@@ -261,7 +269,10 @@ export default function FilterBar({ filters, onChange, planCount }: FilterBarPro
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="h-9">
+            <Button 
+              variant={filters.translation && filters.translation !== "All" ? "default" : "outline"} 
+              className={`h-9 ${filters.translation && filters.translation !== "All" ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}`}
+            >
               Translation {filters.translation && `(${filters.translation})`}
               <ChevronDown className="ml-1 h-4 w-4" />
             </Button>
@@ -290,8 +301,11 @@ export default function FilterBar({ filters, onChange, planCount }: FilterBarPro
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="h-9">
-              More Filters
+            <Button 
+              variant={filters.duration.length > 0 || filters.dailyTime.length > 0 ? "default" : "outline"} 
+              className={`h-9 ${filters.duration.length > 0 || filters.dailyTime.length > 0 ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}`}
+            >
+              More Filters {(filters.duration.length > 0 || filters.dailyTime.length > 0) && `(${filters.duration.length + filters.dailyTime.length})`}
               <Filter className="ml-1 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
