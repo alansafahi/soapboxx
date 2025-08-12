@@ -995,13 +995,10 @@ export default function BibleReadingPlansFixed() {
                         <Button 
                           className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                           onClick={() => {
-                            // Scroll down to show the Torchbearer plans grid below
-                            const torchbearerGrid = document.querySelector('.grid.gap-4.sm\\:gap-6.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3');
-                            if (torchbearerGrid) {
-                              torchbearerGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            } else {
-                              // Fallback: scroll down by a reasonable amount
-                              window.scrollBy({ top: 600, behavior: 'smooth' });
+                            // Scroll directly to the Torchbearer plans grid, skipping the journey options
+                            const torchbearerPlansGrid = document.getElementById('torchbearer-plans-grid');
+                            if (torchbearerPlansGrid) {
+                              torchbearerPlansGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             }
                           }}
                         >
@@ -1045,7 +1042,7 @@ export default function BibleReadingPlansFixed() {
                   </div>
                 </div>
                 
-                <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                <div id="torchbearer-plans-grid" className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                   {filteredPlans.filter(plan => plan.subscriptionTier === 'torchbearer').slice(0, torchbearerExpanded ? undefined : 6).map((plan) => {
                     const canAccess = (userTier || 'torchbearer') === 'torchbearer';
 
