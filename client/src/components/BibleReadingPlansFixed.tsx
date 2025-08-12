@@ -15,7 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, ChevronDown, ChevronUp, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2, Brain, Filter, TrendingUp } from "lucide-react";
 import FilterBar, { ReadingPlanFilters } from '@/components/reading-plans/FilterBar';
 import EMIPreSelectionModal from '@/components/reading-plans/EMIPreSelectionModal';
-import PlanSelectionModal from '@/components/reading-plans/PlanSelectionModal';
+
 import { usePlanFilters } from '@/hooks/usePlanFilters';
 import { AIIndicator } from "@/components/AIIndicator";
 import { AIPersonalizationModal } from "@/components/AIPersonalizationModal";
@@ -1262,20 +1262,7 @@ export default function BibleReadingPlansFixed() {
         onClose={handleEMIModalClose}
       />
 
-      {/* Plan Selection Modal for Advanced/Torchbearer Users */}
-      <PlanSelectionModal
-        isOpen={showPlanSelectionModal}
-        onClose={() => setShowPlanSelectionModal(false)}
-        userTier={userTier || 'torchbearer'}
-        onSelectExisting={() => {
-          setShowPlanSelectionModal(false);
-          // Keep current view to browse existing plans
-        }}
-        onCreateCustom={() => {
-          setShowPlanSelectionModal(false);
-          setShowEMIModal(true);
-        }}
-      />
+
 
       {/* AI Personalization Modal */}
       {selectedPlan && (
