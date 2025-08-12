@@ -6915,10 +6915,16 @@ export class DatabaseStorage implements IStorage {
       const planId = planResult.rows[0].id;
 
       // Insert daily content
+      console.log(`DEBUG - Creating plan ${planId} with ${customPlanData.days?.length || 0} days`);
+      
       if (customPlanData.days && customPlanData.days.length > 0) {
+        console.log(`DEBUG - First day structure:`, JSON.stringify(customPlanData.days[0], null, 2));
+        
         for (let i = 0; i < customPlanData.days.length; i++) {
           const day = customPlanData.days[i];
           const dayNumber = day.dayNumber || (i + 1); // Fallback to index + 1 if dayNumber is missing
+          
+          console.log(`DEBUG - Inserting day ${dayNumber} with title: ${day.title}`);
           
           await pool.query(`
             INSERT INTO reading_plan_days (
@@ -6938,6 +6944,9 @@ export class DatabaseStorage implements IStorage {
             day.tags || null
           ]);
         }
+        console.log(`DEBUG - Successfully inserted ${customPlanData.days.length} days for plan ${planId}`);
+      } else {
+        console.log(`DEBUG - No days data provided for plan ${planId}`);
       }
 
       return { planId };
