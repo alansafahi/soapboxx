@@ -3762,6 +3762,16 @@ export class DatabaseStorage implements IStorage {
   }
   
   // Enhanced Mood Indicators (EMI) operations
+  async getActiveEMIMoods() {
+    return await db.select().from(enhancedMoodIndicators)
+      .where(eq(enhancedMoodIndicators.isActive, true))
+      .orderBy(enhancedMoodIndicators.sortOrder, enhancedMoodIndicators.name);
+  }
+
+  async getEMIMoodsByIds(moodIds: number[]) {
+    return await db.select().from(enhancedMoodIndicators)
+      .where(inArray(enhancedMoodIndicators.id, moodIds));
+  }
   async createEnhancedMoodIndicator(emiData: InsertEnhancedMoodIndicator): Promise<EnhancedMoodIndicator> {
     try {
       const [emi] = await db

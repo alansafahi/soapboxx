@@ -439,8 +439,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Helper function to check admin permissions
   const hasAdminPermission = (userRole: string): boolean => ADMIN_ROLES.includes(userRole);
   
-  // Initialize AI personalization service
+  // Initialize AI services
   const aiPersonalizationService = new AIPersonalizationService();
+  const { aiCurator } = await import('./ai-reading-plan-curator.js');
 
   // AUTHENTICATION SETUP FIRST - This must come before all other routes
   setupAuth(app);
@@ -17621,6 +17622,36 @@ Please provide suggestions for the missing or incomplete sections.`
       });
     } catch (error) {
       res.status(500).json({ message: 'Failed to get content status' });
+    }
+  });
+
+  // AI Reading Plan Curation endpoint
+  app.post('/api/reading-plans/ai-curated', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
+      const { selectedMoods, planType, requestType } = req.body;
+
+      if (!selectedMoods || !Array.isArray(selectedMoods)) {
+        return res.status(400).json({ message: "Selected moods are required" });
+      }
+
+      if (!planType || !['advanced', 'torchbearer'].includes(planType)) {
+        return res.status(400).json({ message: "Valid plan type is required" });
+      }
+
+      const curationRequest = {
+        selectedMoods,
+        planType,
+        requestType: requestType || 'pre-selection-curation',
+        userId
+      };
+
+      const result = await aiCurator.generateCuratedPlans(curationRequest);
+      res.json(result);
+
+    } catch (error) {
+      console.error('AI curation endpoint error:', error);
+      res.status(500).json({ message: "Failed to generate curated plans" });
     }
   });
 

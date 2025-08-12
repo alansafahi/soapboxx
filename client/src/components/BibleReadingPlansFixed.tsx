@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, ChevronDown, ChevronUp, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2, Brain, Filter } from "lucide-react";
 import FilterBar, { ReadingPlanFilters } from '@/components/reading-plans/FilterBar';
+import EMIPreSelectionModal from '@/components/reading-plans/EMIPreSelectionModal';
 import { usePlanFilters } from '@/hooks/usePlanFilters';
 import { AIIndicator } from "@/components/AIIndicator";
 import { AIPersonalizationModal } from "@/components/AIPersonalizationModal";
@@ -300,6 +301,8 @@ export default function BibleReadingPlansFixed() {
   const [showAIModal, setShowAIModal] = useState(false);
   const [aiPersonalizationEnabled, setAIPersonalizationEnabled] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [showEMIModal, setShowEMIModal] = useState(false);
+  const [selectedPlanForEMI, setSelectedPlanForEMI] = useState<ReadingPlan | null>(null);
   
   // Initialize plan filters hook
   const { filters, debouncedFilters, updateFilters, clearFilters } = usePlanFilters();
@@ -440,6 +443,14 @@ export default function BibleReadingPlansFixed() {
   };
 
   const handleStartPlan = (plan: ReadingPlan) => {
+    // Check if this is an Advanced plan that should trigger EMI pre-selection curation
+    if ((plan.difficulty === 'advanced' || plan.subscriptionTier === 'torchbearer') && 
+        !plan.isAiGenerated) {
+      setSelectedPlanForEMI(plan);
+      setShowEMIModal(true);
+      return;
+    }
+    
     // For Torchbearer AI plans, show personalization modal first
     if (plan.subscriptionTier === 'torchbearer' && plan.isAiGenerated) {
       setSelectedPlan(plan);
@@ -454,6 +465,28 @@ export default function BibleReadingPlansFixed() {
     if (selectedPlan) {
       subscribeToPlanning.mutate(selectedPlan.id);
     }
+  };
+
+  const handleEMICurationComplete = (curatedPlans?: any[]) => {
+    setShowEMIModal(false);
+    if (curatedPlans && curatedPlans.length > 0) {
+      // Display curated plans or proceed with top recommendation
+      toast({
+        title: "AI Curation Complete!",
+        description: `Found ${curatedPlans.length} personalized reading plan recommendations for you.`,
+      });
+      // For now, subscribe to the original plan, but in future we could show curated results
+    }
+    
+    if (selectedPlanForEMI) {
+      subscribeToPlanning.mutate(selectedPlanForEMI.id);
+      setSelectedPlanForEMI(null);
+    }
+  };
+
+  const handleEMIModalClose = () => {
+    setShowEMIModal(false);
+    setSelectedPlanForEMI(null);
   };
 
   // Helper functions
@@ -1201,6 +1234,15 @@ export default function BibleReadingPlansFixed() {
           />
         )}
       </div>
+
+      {/* EMI Pre-Selection Modal for Advanced Plans */}
+      <EMIPreSelectionModal
+        isOpen={showEMIModal}
+        planName={selectedPlanForEMI?.name || ''}
+        planType={selectedPlanForEMI?.subscriptionTier === 'torchbearer' ? 'torchbearer' : 'advanced'}
+        onComplete={handleEMICurationComplete}
+        onClose={handleEMIModalClose}
+      />
 
       {/* AI Personalization Modal */}
       {selectedPlan && (
