@@ -6916,7 +6916,10 @@ export class DatabaseStorage implements IStorage {
 
       // Insert daily content
       if (customPlanData.days && customPlanData.days.length > 0) {
-        for (const day of customPlanData.days) {
+        for (let i = 0; i < customPlanData.days.length; i++) {
+          const day = customPlanData.days[i];
+          const dayNumber = day.dayNumber || (i + 1); // Fallback to index + 1 if dayNumber is missing
+          
           await pool.query(`
             INSERT INTO reading_plan_days (
               plan_id, day_number, title, scripture_reference, 
@@ -6925,12 +6928,12 @@ export class DatabaseStorage implements IStorage {
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
           `, [
             planId,
-            day.dayNumber,
-            day.title,
-            day.scriptureReference,
-            day.devotionalContent,
-            day.reflectionQuestion,
-            day.prayerPrompt,
+            dayNumber,
+            day.title || `Day ${dayNumber}`,
+            day.scriptureReference || 'Psalm 1:1',
+            day.devotionalContent || 'A moment for reflection and prayer.',
+            day.reflectionQuestion || 'How can you apply today\'s reading to your life?',
+            day.prayerPrompt || 'Take time to pray and connect with God.',
             day.additionalVerses || null,
             day.tags || null
           ]);
