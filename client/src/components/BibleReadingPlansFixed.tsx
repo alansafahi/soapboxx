@@ -15,6 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, ChevronDown, ChevronUp, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2, Brain, Filter } from "lucide-react";
 import FilterBar, { ReadingPlanFilters } from '@/components/reading-plans/FilterBar';
 import EMIPreSelectionModal from '@/components/reading-plans/EMIPreSelectionModal';
+import PlanSelectionModal from '@/components/reading-plans/PlanSelectionModal';
 import { usePlanFilters } from '@/hooks/usePlanFilters';
 import { AIIndicator } from "@/components/AIIndicator";
 import { AIPersonalizationModal } from "@/components/AIPersonalizationModal";
@@ -302,6 +303,7 @@ export default function BibleReadingPlansFixed() {
   const [aiPersonalizationEnabled, setAIPersonalizationEnabled] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showEMIModal, setShowEMIModal] = useState(false);
+  const [showPlanSelectionModal, setShowPlanSelectionModal] = useState(false);
   const [selectedPlanForEMI, setSelectedPlanForEMI] = useState<ReadingPlan | null>(null);
   
   // Initialize plan filters hook
@@ -420,7 +422,7 @@ export default function BibleReadingPlansFixed() {
   // Complete day mutation
   const completeDayMutation = useMutation({
     mutationFn: async (data: { planId: number; dayNumber: number; progressData: any }) => {
-      return apiRequest("POST", `/api/reading-plans/${data.planId}/progress`, data);
+      return apiRequest("POST", `/api/reading-plans/${data.planId}/progress/${data.dayNumber}`, data.progressData);
     },
     onSuccess: () => {
       toast({
@@ -1013,6 +1015,19 @@ export default function BibleReadingPlansFixed() {
                   </div>
                   <p className="text-lg text-gray-600 dark:text-gray-400 mt-3 font-medium">"Shine your light further"</p>
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">AI-powered personalization, advanced features, and leadership content</p>
+                  
+                  {/* Plan Selection Button for Torchbearer */}
+                  {(userTier || 'torchbearer') === 'torchbearer' && (
+                    <div className="mt-4">
+                      <Button
+                        onClick={() => setShowPlanSelectionModal(true)}
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2"
+                      >
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Choose Your Journey
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -1227,13 +1242,26 @@ export default function BibleReadingPlansFixed() {
         )}
       </div>
 
-      {/* EMI Pre-Selection Modal for Advanced Plans */}
+      {/* EMI Pre-Selection Modal for Custom Plans */}
       <EMIPreSelectionModal
         isOpen={showEMIModal}
-        planName={selectedPlanForEMI?.name || ''}
-        planType={selectedPlanForEMI?.subscriptionTier === 'torchbearer' ? 'torchbearer' : 'advanced'}
         onComplete={handleEMICurationComplete}
         onClose={handleEMIModalClose}
+      />
+
+      {/* Plan Selection Modal for Advanced/Torchbearer Users */}
+      <PlanSelectionModal
+        isOpen={showPlanSelectionModal}
+        onClose={() => setShowPlanSelectionModal(false)}
+        userTier={userTier || 'torchbearer'}
+        onSelectExisting={() => {
+          setShowPlanSelectionModal(false);
+          // Keep current view to browse existing plans
+        }}
+        onCreateCustom={() => {
+          setShowPlanSelectionModal(false);
+          setShowEMIModal(true);
+        }}
       />
 
       {/* AI Personalization Modal */}
