@@ -596,15 +596,15 @@ export default function BibleReadingPlansFixed() {
               {planDays.map((day) => {
                 const dayProgress = progress.find(p => p.dayNumber === day.dayNumber);
                 const isCompleted = !!dayProgress?.completedAt;
-                // Allow preview access to all days regardless of subscription progress
-                const isAccessible = true;
+                // Allow preview of all days until subscribed, then enforce sequential progression
+                const isAccessible = !subscription || day.dayNumber <= (subscription.currentDay || 1);
 
                 return (
                   <Card 
                     key={day.id} 
-                    className={`cursor-pointer transition-all hover:shadow-lg ${
+                    className={`transition-all hover:shadow-lg ${
                       isCompleted ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' : ''
-                    } ${!isAccessible ? 'opacity-50' : ''}`}
+                    } ${!isAccessible ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                     onClick={() => isAccessible && setSelectedDay(day)}
                   >
                     <CardHeader className="pb-3">
@@ -616,8 +616,10 @@ export default function BibleReadingPlansFixed() {
                           {isCompleted && (
                             <CheckCircle className="w-5 h-5 text-green-600" />
                           )}
-                          {isAccessible && (
+                          {isAccessible ? (
                             <ChevronRight className="w-4 h-4 text-gray-400" />
+                          ) : subscription && (
+                            <Lock className="w-4 h-4 text-gray-400" />
                           )}
                         </div>
                       </div>
@@ -633,6 +635,12 @@ export default function BibleReadingPlansFixed() {
                         <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3">
                           {day.devotionalContent}
                         </p>
+                      )}
+                      {!isAccessible && subscription && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 flex items-center gap-1">
+                          <Lock className="w-3 h-3" />
+                          Complete previous days to unlock
+                        </div>
                       )}
                     </CardContent>
                   </Card>
