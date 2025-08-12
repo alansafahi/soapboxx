@@ -40,7 +40,11 @@ const TESTAMENT_OPTIONS = [
   { id: 'Both', label: 'Both Testaments' }
 ];
 const ORDER_OPTIONS = ['Chronological', 'Historical', 'Canonical'];
-const DIFFICULTY_OPTIONS = ['Beginner', 'Intermediate', 'Advanced'];
+const DIFFICULTY_OPTIONS = [
+  { id: 'beginner', label: 'Beginner' },
+  { id: 'intermediate', label: 'Intermediate' },
+  { id: 'advanced', label: 'Advanced' }
+];
 const FORMAT_OPTIONS = ['Reading', 'Reflection', 'Prayer', 'Audio', 'Video'];
 const AUDIENCE_OPTIONS = ['Solo', 'Group', 'Family', 'Church'];
 const TRANSLATION_OPTIONS = ['All', 'NIV', 'KJV', 'ESV', 'NASB', 'NLT', 'CSB', 'NKJV'];
@@ -171,7 +175,7 @@ export default function FilterBar({ filters, onChange, planCount }: FilterBarPro
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" className="h-9">
-            {label} {values.length > 0 && `(${values.length})`}
+            {label}
             <ChevronDown className="ml-1 h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
