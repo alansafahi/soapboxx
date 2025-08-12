@@ -6892,6 +6892,59 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async createCustomReadingPlan(customPlanData: any): Promise<{ planId: number }> {
+    try {
+      // Insert the reading plan
+      const planResult = await pool.query(`
+        INSERT INTO reading_plans (
+          name, description, duration, difficulty, subscription_tier, category, 
+          is_featured, is_ai_generated, created_by_user_id, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
+        RETURNING id
+      `, [
+        customPlanData.name,
+        customPlanData.description,
+        customPlanData.duration,
+        customPlanData.difficulty || 'advanced',
+        'torchbearer', // Custom AI plans are Torchbearer level
+        customPlanData.category || 'custom',
+        false, // Not featured
+        true, // AI generated
+        customPlanData.createdByUserId || null
+      ]);
+
+      const planId = planResult.rows[0].id;
+
+      // Insert daily content
+      if (customPlanData.days && customPlanData.days.length > 0) {
+        for (const day of customPlanData.days) {
+          await pool.query(`
+            INSERT INTO reading_plan_days (
+              plan_id, day_number, title, scripture_reference, 
+              devotional_text, reflection_questions, prayer_focus, 
+              additional_verses, tags, created_at, updated_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
+          `, [
+            planId,
+            day.dayNumber,
+            day.title,
+            day.scriptureReference,
+            day.devotionalText,
+            day.reflectionQuestions ? JSON.stringify(day.reflectionQuestions) : null,
+            day.prayerFocus,
+            day.additionalVerses ? JSON.stringify(day.additionalVerses) : null,
+            day.tags ? JSON.stringify(day.tags) : null
+          ]);
+        }
+      }
+
+      return { planId };
+    } catch (error) {
+      console.error('Failed to create custom reading plan:', error);
+      throw new Error('Failed to create custom reading plan');
+    }
+  }
+
   async subscribeToReadingPlan(userId: string, planId: number): Promise<UserReadingPlanSubscription> {
     try {
       const result = await pool.query(`

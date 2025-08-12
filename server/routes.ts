@@ -17701,20 +17701,26 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(400).json({ message: "Custom plan data is required" });
       }
 
-      // For now, just return success without creating a subscription since we don't have storage methods
-      // In a full implementation, you would add createReadingPlan and createReadingPlanDay methods to storage
-      const tempPlanId = Math.floor(Math.random() * 10000) + 90000; // Temporary high ID to avoid conflicts
+      // Create the custom reading plan in the database
+      const { planId } = await storage.createCustomReadingPlan({
+        ...customPlanData,
+        createdByUserId: userId
+      });
+
+      // Subscribe the user to the new plan
+      const subscription = await storage.subscribeToReadingPlan(userId, planId);
 
       res.json({ 
         success: true, 
         plan: {
-          id: tempPlanId,
+          id: planId,
           name: customPlanData.name,
           description: customPlanData.description,
           duration: customPlanData.duration,
           isAiGenerated: true
         }, 
-        message: "Custom reading plan generated successfully! You can now explore your personalized daily content." 
+        subscription,
+        message: "Custom reading plan created and saved to your reading plans!" 
       });
 
     } catch (error) {

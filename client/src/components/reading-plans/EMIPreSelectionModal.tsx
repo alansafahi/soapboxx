@@ -98,7 +98,7 @@ export default function EMIPreSelectionModal({
     onSuccess: (data) => {
       toast({
         title: "Success!",
-        description: "Your custom reading plan has been created and you're now subscribed to it.",
+        description: "Your custom reading plan has been saved to 'My Reading Plans' and you can now access it daily!",
         variant: "default",
       });
       // Invalidate reading plans cache to refresh the UI
