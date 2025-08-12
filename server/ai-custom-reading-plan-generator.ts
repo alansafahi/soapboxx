@@ -257,11 +257,6 @@ export class AICustomReadingPlanGenerator {
 
     console.log(`AI Custom Plan Generator - Completed ${duration}-day plan with ${allDays.length} days`);
     return customPlan;
-
-    } catch (error) {
-      console.error('AI Custom Plan Generation error:', error);
-      return this.generateFallbackCustomPlan(request);
-    }
   }
 
 
