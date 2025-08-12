@@ -44,6 +44,25 @@ const DayReader = ({ plan, day, userProgress, onComplete }: DayReaderProps) => {
   const [readingTimeMinutes, setReadingTimeMinutes] = useState(userProgress?.readingTimeMinutes || 0);
   const [selectedMood, setSelectedMood] = useState<EnhancedMoodIndicator | null>(null);
 
+  // Check if plan supports AI personalization (Torchbearer tier only)
+  const supportsAIPersonalization = plan.subscriptionTier === 'torchbearer';
+
+  // Fetch recent check-ins to check for existing EMI data
+  const { data: recentCheckins } = useQuery({
+    queryKey: ['/api/checkins/recent'],
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Check if user has recent EMI data (within last 24 hours)
+  const hasRecentEMIData = recentCheckins?.some((checkin: any) => {
+    const checkinDate = new Date(checkin.createdAt);
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    return checkinDate > twentyFourHoursAgo && checkin.mood;
+  }) || false;
+
+  // Only show EMI if plan supports AI personalization AND no recent EMI data exists
+  const shouldShowEMI = supportsAIPersonalization && !hasRecentEMIData;
+
   const handleComplete = () => {
     const progressData = {
       reflectionText,
@@ -148,16 +167,60 @@ const DayReader = ({ plan, day, userProgress, onComplete }: DayReaderProps) => {
         </Card>
       </div>
 
-      {/* Mood Selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle>How are you feeling?</CardTitle>
-          <CardDescription>Select your current emotional state</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <EnhancedMoodIndicatorManager onMoodSelect={handleMoodSelect} />
-        </CardContent>
-      </Card>
+      {/* Conditional Mood Selection - Only for Torchbearer plans without recent EMI data */}
+      {shouldShowEMI && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              How are you feeling?
+              <Badge variant="secondary" className="text-xs">
+                <Crown className="w-3 h-3 mr-1" />
+                AI Personalization
+              </Badge>
+            </CardTitle>
+            <CardDescription>
+              Select your current emotional state to receive AI-personalized content recommendations
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <EnhancedMoodIndicatorManager onMoodSelect={handleMoodSelect} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Show message for non-Torchbearer users */}
+      {!supportsAIPersonalization && (
+        <Card className="border-dashed border-2 border-gray-200 dark:border-gray-700">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-2">
+              <Crown className="w-8 h-8 text-purple-500 mx-auto" />
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                <strong>AI Personalization</strong> available with Torchbearer subscription
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-500">
+                Get personalized content based on your emotional state and spiritual needs
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Show message when recent EMI data exists */}
+      {supportsAIPersonalization && hasRecentEMIData && (
+        <Card className="bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700">
+          <CardContent className="pt-6">
+            <div className="text-center space-y-2">
+              <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400 mx-auto" />
+              <p className="text-sm text-green-700 dark:text-green-300">
+                <strong>Using your recent emotional context</strong>
+              </p>
+              <p className="text-xs text-green-600 dark:text-green-400">
+                AI personalization is active based on your recent check-in data
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Additional Insights */}
       <Card>

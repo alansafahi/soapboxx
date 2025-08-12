@@ -27,6 +27,12 @@ Code quality emphasis: No hardcoded values in production - all user preferences,
 - **Authentication**: Session-based with secure cookies
 - **AI Integration**: OpenAI GPT-4o
 
+### EMI (Enhanced Mood Indicators) Logic
+- **Conditional Display**: EMI appears only when user has Torchbearer subscription AND no recent EMI data (within 24 hours)
+- **Smart Context Awareness**: Leverages existing EMI data from recent check-ins rather than always prompting
+- **Subscription Tier Alignment**: EMI collection only occurs when AI personalization is available, preventing user confusion
+- **User Experience**: Clear messaging explains when EMI is active, when recent data is being used, or when upgrade is needed
+
 ### Database
 - **ORM**: Drizzle with Neon PostgreSQL
 - **Schema Management**: Migration-based with drizzle-kit
