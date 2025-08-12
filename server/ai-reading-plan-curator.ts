@@ -29,11 +29,11 @@ export class AIReadingPlanCurator {
   async generateCuratedPlans(request: CurationRequest): Promise<{ curatedPlans: CuratedPlan[] }> {
     try {
       // Get all available plans for the requested difficulty level
-      const allPlans = await storage.getAllReadingPlans();
+      const allPlans = await storage.getReadingPlans();
       const filteredPlans = allPlans.filter(plan => 
-        request.planType === 'advanced' 
-          ? plan.difficulty === 'advanced'
-          : ['advanced', 'intermediate'].includes(plan.difficulty)
+        request.planType === 'torchbearer' 
+          ? plan.subscriptionTier === 'torchbearer'
+          : plan.subscriptionTier === 'advanced'
       ).slice(0, 100);
 
       // Get EMI mood details
@@ -195,8 +195,8 @@ Focus on quality over quantity - select only the most impactful plans for their 
       const encouragingKeywords = ['comfort', 'hope', 'peace', 'grace', 'love', 'psalms'];
       fallbackPlans = allPlans.filter(plan => 
         encouragingKeywords.some(keyword => 
-          plan.title.toLowerCase().includes(keyword) || 
-          plan.description.toLowerCase().includes(keyword)
+          plan.name.toLowerCase().includes(keyword) || 
+          (plan.description && plan.description.toLowerCase().includes(keyword))
         )
       );
     }
@@ -206,17 +206,17 @@ Focus on quality over quantity - select only the most impactful plans for their 
       const growthKeywords = ['leadership', 'discipleship', 'wisdom', 'purpose', 'calling'];
       fallbackPlans = allPlans.filter(plan => 
         growthKeywords.some(keyword => 
-          plan.title.toLowerCase().includes(keyword) || 
-          plan.description.toLowerCase().includes(keyword)
+          plan.name.toLowerCase().includes(keyword) || 
+          (plan.description && plan.description.toLowerCase().includes(keyword))
         )
       );
     }
 
     return fallbackPlans.slice(0, 5).map((plan, index) => ({
       id: plan.id,
-      title: plan.title,
-      description: plan.description,
-      difficulty: plan.difficulty,
+      title: plan.name,
+      description: plan.description || '',
+      difficulty: plan.difficulty || 'advanced',
       duration: plan.duration,
       aiReason: this.getSimpleRecommendationReason(moodCategories, avgMoodScore),
       relevanceScore: 0.7 - (index * 0.1),
@@ -245,11 +245,11 @@ Focus on quality over quantity - select only the most impactful plans for their 
 
   private async generateFallbackCuration(request: CurationRequest): Promise<{ curatedPlans: CuratedPlan[] }> {
     try {
-      const allPlans = await storage.getAllReadingPlans();
+      const allPlans = await storage.getReadingPlans();
       const filteredPlans = allPlans.filter(plan => 
-        request.planType === 'advanced' 
-          ? plan.difficulty === 'advanced'
-          : ['advanced', 'intermediate'].includes(plan.difficulty)
+        request.planType === 'torchbearer' 
+          ? plan.subscriptionTier === 'torchbearer'
+          : plan.subscriptionTier === 'advanced'
       ).slice(0, 10);
 
       const selectedMoods = await storage.getEMIMoodsByIds(request.selectedMoods);
