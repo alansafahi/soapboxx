@@ -196,7 +196,20 @@ export class AICustomReadingPlanGenerator {
     });
 
     const initialResponse = JSON.parse(initialCompletion.choices[0]?.message?.content || '{}');
-    const allDays = [...(initialResponse.plan?.days || [])];
+    
+    // Normalize the initial days data structure
+    const initialDays = (initialResponse.plan?.days || []).map((day: any, index: number) => ({
+      dayNumber: day.dayNumber || day.day || (index + 1),
+      title: day.title || `Day ${index + 1}`,
+      scriptureReference: day.scriptureReference || day.scriptures?.[0] || 'Psalm 1:1',
+      devotionalContent: day.devotionalContent || day.devotional || 'A moment for reflection and prayer.',
+      reflectionQuestion: day.reflectionQuestion || day.reflection || 'How can you apply today\'s reading to your life?',
+      prayerPrompt: day.prayerPrompt || day.prayer || 'Take time to pray and connect with God.',
+      additionalVerses: day.additionalVerses || day.scriptures?.slice(1) || [],
+      tags: day.tags || []
+    }));
+    
+    const allDays = [...initialDays];
 
     // Generate remaining days in chunks of 10
     const remainingDays = duration - 10;
@@ -231,7 +244,18 @@ export class AICustomReadingPlanGenerator {
 
         const chunkResponse = JSON.parse(chunkCompletion.choices[0]?.message?.content || '{}');
         if (chunkResponse.days) {
-          allDays.push(...chunkResponse.days);
+          // Normalize the chunk data structure to ensure consistency
+          const normalizedDays = chunkResponse.days.map((day: any, index: number) => ({
+            dayNumber: day.dayNumber || day.day || (startDay + index),
+            title: day.title || `Day ${startDay + index}`,
+            scriptureReference: day.scriptureReference || day.scriptures?.[0] || 'Psalm 1:1',
+            devotionalContent: day.devotionalContent || day.devotional || 'A moment for reflection and prayer.',
+            reflectionQuestion: day.reflectionQuestion || day.reflection || 'How can you apply today\'s reading to your life?',
+            prayerPrompt: day.prayerPrompt || day.prayer || 'Take time to pray and connect with God.',
+            additionalVerses: day.additionalVerses || day.scriptures?.slice(1) || [],
+            tags: day.tags || []
+          }));
+          allDays.push(...normalizedDays);
         }
         console.log(`AI Custom Plan Generator - Generated days ${startDay}-${endDay}`);
       } catch (error) {
