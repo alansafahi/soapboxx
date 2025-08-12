@@ -14913,26 +14913,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
   // Removed duplicate filter endpoints - moved above for proper route ordering
 
-  app.post("/api/reading-plans/:id/subscribe", isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user?.claims?.sub || req.user?.id;
-      if (!userId) {
-        return res.status(401).json({ message: "User not authenticated" });
-      }
-      
-      const planId = parseInt(req.params.id);
-      
-      if (isNaN(planId)) {
-        return res.status(400).json({ message: "Invalid plan ID" });
-      }
 
-      const subscription = await storage.subscribeToReadingPlan(userId, planId);
-      res.json(subscription);
-    } catch (error) {
-      
-      res.status(500).json({ message: "Failed to subscribe to reading plan" });
-    }
-  });
 
   app.post("/api/reading-plans/:id/progress/:day", isAuthenticated, async (req: any, res) => {
     try {
