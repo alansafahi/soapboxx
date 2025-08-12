@@ -443,14 +443,6 @@ export default function BibleReadingPlansFixed() {
   };
 
   const handleStartPlan = (plan: ReadingPlan) => {
-    // Check if this is an Advanced plan that should trigger EMI pre-selection curation
-    if ((plan.difficulty === 'advanced' || plan.subscriptionTier === 'torchbearer') && 
-        !plan.isAiGenerated) {
-      setSelectedPlanForEMI(plan);
-      setShowEMIModal(true);
-      return;
-    }
-    
     // For Torchbearer AI plans, show personalization modal first
     if (plan.subscriptionTier === 'torchbearer' && plan.isAiGenerated) {
       setSelectedPlan(plan);
@@ -467,26 +459,26 @@ export default function BibleReadingPlansFixed() {
     }
   };
 
+  // Handle creating a custom AI plan based on EMI
+  const handleCreateCustomPlan = () => {
+    setShowEMIModal(true);
+  };
+
   const handleEMICurationComplete = (curatedPlans?: any[]) => {
     setShowEMIModal(false);
     if (curatedPlans && curatedPlans.length > 0) {
-      // Display curated plans or proceed with top recommendation
       toast({
-        title: "AI Curation Complete!",
-        description: `Found ${curatedPlans.length} personalized reading plan recommendations for you.`,
+        title: "Custom AI Plan Created!",
+        description: `Your personalized reading plan has been generated based on your spiritual state.`,
       });
-      // For now, subscribe to the original plan, but in future we could show curated results
-    }
-    
-    if (selectedPlanForEMI) {
-      subscribeToPlanning.mutate(selectedPlanForEMI.id);
-      setSelectedPlanForEMI(null);
+      // Refresh plans to show the new AI-generated plan
+      queryClient.invalidateQueries({ queryKey: ["/api/reading-plans"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reading-plans/user/subscriptions"] });
     }
   };
 
   const handleEMIModalClose = () => {
     setShowEMIModal(false);
-    setSelectedPlanForEMI(null);
   };
 
   // Helper functions
