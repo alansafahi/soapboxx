@@ -138,7 +138,7 @@ function PlanCompletionCelebrate({
                   />
                   <FeatureRow 
                     icon={<PlayCircle className="h-4 w-4" />} 
-                    title="AI Audio Bible" 
+                    title="Audio Bible" 
                     desc="Listen to Scripture with commentary on your commute." 
                   />
                   <FeatureRow 
@@ -305,7 +305,7 @@ function LockedFeatureModal({
                   />
                   <FeatureRow 
                     icon={<PlayCircle className="h-4 w-4" />} 
-                    title="AI Audio Bible" 
+                    title="Audio Bible" 
                     desc="Listen with commentary and context." 
                   />
                 </>

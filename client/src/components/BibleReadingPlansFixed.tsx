@@ -22,6 +22,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import EnhancedMoodIndicatorManager from "@/components/emi/EnhancedMoodIndicatorManager";
 import { useUpgradeFlow } from "@/hooks/useUpgradeFlow";
 import UpgradePathManager from "@/components/upgrade-flow/UpgradePathManager";
+import AudioPlayer from "@/components/reading-plans/AudioPlayer";
 
 interface ReadingPlanWithProgress extends ReadingPlan {
   subscription?: UserReadingPlanSubscription;
@@ -54,11 +55,11 @@ const DayReader = ({ plan, day, userProgress, onComplete }: DayReaderProps) => {
   });
 
   // Check if user has recent EMI data (within last 24 hours)
-  const hasRecentEMIData = recentCheckins?.some((checkin: any) => {
+  const hasRecentEMIData = Array.isArray(recentCheckins) ? recentCheckins.some((checkin: any) => {
     const checkinDate = new Date(checkin.createdAt);
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     return checkinDate > twentyFourHoursAgo && checkin.mood;
-  }) || false;
+  }) : false;
 
   // Only show EMI if plan supports AI personalization AND no recent EMI data exists
   const shouldShowEMI = supportsAIPersonalization && !hasRecentEMIData;
@@ -80,6 +81,9 @@ const DayReader = ({ plan, day, userProgress, onComplete }: DayReaderProps) => {
   };
 
   const isCompleted = !!userProgress?.completedAt;
+  
+  // Check if this is an audio reading plan
+  const isAudioPlan = plan.name.includes('Audio') || plan.name.includes('Commute') || plan.name.includes('Quiet Mind') || plan.type === 'audio';
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -114,6 +118,11 @@ const DayReader = ({ plan, day, userProgress, onComplete }: DayReaderProps) => {
           </p>
         </CardContent>
       </Card>
+
+      {/* Audio Player for Audio Reading Plans */}
+      {isAudioPlan && (
+        <AudioPlayer day={day} planName={plan.name} />
+      )}
 
       {/* Devotional Content */}
       {day.devotionalContent && (
