@@ -35,9 +35,6 @@ const { userPoints } = schema;
 import { eq, and, or, gte, lte, desc, asc, like, sql, count, sum, ilike, isNotNull, inArray, isNull, lt } from "drizzle-orm";
 import { lookupBibleVerse } from './bible-api';
 import { analyzeUserSpiritualGifts } from './ai-spiritual-gifts';
-import OpenAI from "openai";
-
-
 // Extend session data interface to include userId
 declare module 'express-session' {
   interface SessionData {
@@ -58,6 +55,7 @@ async function generateSoapSuggestions(scripture: string, scriptureReference: st
       throw new Error('AI service not configured');
     }
 
+    const OpenAI = (await import("openai")).default;
     const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     
     // Build context for the AI
@@ -236,8 +234,8 @@ import subscriptionRoutes from "./routes/subscription";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import OpenAI from "openai";
 import { aiService } from './ai-service';
+import OpenAI from "openai";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
@@ -308,16 +306,12 @@ const getFileType = (mimeType: string): string => {
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
-// Import moved to main schema imports above
 
 
 // AI-powered post categorization
 // Generate mood-based Bible verse suggestions
 async function generateMoodBasedVerses(moodId: string) {
   try {
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
 
     // Map mood to spiritual themes for verse selection
     const moodToThemes = {
