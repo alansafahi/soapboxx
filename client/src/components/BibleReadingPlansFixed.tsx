@@ -352,13 +352,28 @@ export default function BibleReadingPlansFixed() {
     mutationFn: async (data: { planId: number; dayNumber: number; progressData: any }) => {
       return apiRequest("POST", `/api/reading-plans/${data.planId}/progress/${data.dayNumber}`, data.progressData);
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      const nextDay = variables.dayNumber + 1;
+      const hasNextDay = planDays.some(day => day.dayNumber === nextDay);
+      
       toast({
         title: "Day Completed!",
-        description: "Great job on completing today's reading!",
+        description: hasNextDay 
+          ? `Great job! Day ${nextDay} is now available.`
+          : "Congratulations on completing this reading plan!",
       });
       queryClient.invalidateQueries({ queryKey: ["/api/reading-plans", selectedPlan?.id, "progress"] });
       setSelectedDay(null);
+      
+      // Auto-advance to next day if available
+      if (hasNextDay) {
+        setTimeout(() => {
+          const nextDayData = planDays.find(day => day.dayNumber === nextDay);
+          if (nextDayData) {
+            setSelectedDay(nextDayData);
+          }
+        }, 1000);
+      }
     },
   });
 
