@@ -6897,13 +6897,14 @@ export class DatabaseStorage implements IStorage {
       // Insert the reading plan
       const planResult = await pool.query(`
         INSERT INTO reading_plans (
-          name, description, duration, difficulty, subscription_tier, category, 
+          name, description, type, duration, difficulty, subscription_tier, category, 
           is_ai_generated, created_at, updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
         RETURNING id
       `, [
         customPlanData.name,
         customPlanData.description,
+        'devotional', // Type is required - use 'devotional' for AI-generated plans
         customPlanData.duration,
         customPlanData.difficulty || 'advanced',
         'torchbearer', // Custom AI plans are Torchbearer level
