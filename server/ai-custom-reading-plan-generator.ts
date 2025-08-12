@@ -198,16 +198,19 @@ export class AICustomReadingPlanGenerator {
     const initialResponse = JSON.parse(initialCompletion.choices[0]?.message?.content || '{}');
     
     // Normalize the initial days data structure
-    const initialDays = (initialResponse.plan?.days || []).map((day: any, index: number) => ({
-      dayNumber: day.dayNumber || day.day || (index + 1),
-      title: day.title || `Day ${index + 1}`,
-      scriptureReference: day.scriptureReference || day.scriptures?.[0] || 'Psalm 1:1',
-      devotionalContent: day.devotionalContent || day.devotional || 'A moment for reflection and prayer.',
-      reflectionQuestion: day.reflectionQuestion || day.reflection || 'How can you apply today\'s reading to your life?',
-      prayerPrompt: day.prayerPrompt || day.prayer || 'Take time to pray and connect with God.',
-      additionalVerses: day.additionalVerses || day.scriptures?.slice(1) || [],
-      tags: day.tags || []
-    }));
+    const initialDays = (initialResponse.plan?.days || []).map((day: any, index: number) => {
+      const dayNum = index + 1;
+      return {
+        dayNumber: day.dayNumber || day.day || dayNum,
+        title: day.title || `Spiritual Journey Day ${dayNum}`,
+        scriptureReference: day.scriptureReference || day.scriptures?.[0] || day.scripture || this.getFallbackScripture(dayNum),
+        devotionalContent: day.devotionalContent || day.devotional || day.content || `Day ${dayNum}: Begin your spiritual journey with reflection and prayer, opening your heart to God's guidance.`,
+        reflectionQuestion: day.reflectionQuestion || day.reflection || day.question || `On day ${dayNum}, how can you draw closer to God through today's reading?`,
+        prayerPrompt: day.prayerPrompt || day.prayer || day.prayerResponse || `Take time to pray and connect with God about today's reading.`,
+        additionalVerses: day.additionalVerses || day.scriptures?.slice(1) || [],
+        tags: day.tags || []
+      };
+    });
     
     const allDays = [...initialDays];
 
@@ -245,16 +248,19 @@ export class AICustomReadingPlanGenerator {
         const chunkResponse = JSON.parse(chunkCompletion.choices[0]?.message?.content || '{}');
         if (chunkResponse.days) {
           // Normalize the chunk data structure to ensure consistency
-          const normalizedDays = chunkResponse.days.map((day: any, index: number) => ({
-            dayNumber: day.dayNumber || day.day || (startDay + index),
-            title: day.title || `Day ${startDay + index}`,
-            scriptureReference: day.scriptureReference || day.scriptures?.[0] || 'Psalm 1:1',
-            devotionalContent: day.devotionalContent || day.devotional || 'A moment for reflection and prayer.',
-            reflectionQuestion: day.reflectionQuestion || day.reflection || 'How can you apply today\'s reading to your life?',
-            prayerPrompt: day.prayerPrompt || day.prayer || 'Take time to pray and connect with God.',
-            additionalVerses: day.additionalVerses || day.scriptures?.slice(1) || [],
-            tags: day.tags || []
-          }));
+          const normalizedDays = chunkResponse.days.map((day: any, index: number) => {
+            const dayNum = startDay + index;
+            return {
+              dayNumber: day.dayNumber || day.day || dayNum,
+              title: day.title || `Spiritual Growth Day ${dayNum}`,
+              scriptureReference: day.scriptureReference || day.scriptures?.[0] || day.scripture || this.getFallbackScripture(dayNum),
+              devotionalContent: day.devotionalContent || day.devotional || day.content || `Day ${dayNum}: Continue your spiritual journey with reflection and prayer, focusing on God's presence in your daily walk.`,
+              reflectionQuestion: day.reflectionQuestion || day.reflection || day.question || `On day ${dayNum}, how is God calling you to grow in your faith journey?`,
+              prayerPrompt: day.prayerPrompt || day.prayer || day.prayerResponse || `Take time to pray about today's reading and ask God to guide your steps.`,
+              additionalVerses: day.additionalVerses || day.scriptures?.slice(1) || [],
+              tags: day.tags || []
+            };
+          });
           allDays.push(...normalizedDays);
         }
         console.log(`AI Custom Plan Generator - Generated days ${startDay}-${endDay}`);
@@ -321,6 +327,18 @@ export class AICustomReadingPlanGenerator {
     }
 
     return Array.from(new Set(areas)).slice(0, 4); // Limit to 4 focus areas
+  }
+
+  private getFallbackScripture(dayNumber: number): string {
+    const scriptures = [
+      'Psalm 1:1-3', 'John 3:16', 'Romans 8:28', 'Philippians 4:13', 'Isaiah 40:31',
+      'Matthew 5:14-16', '1 Corinthians 13:4-7', 'Ephesians 2:8-9', 'Jeremiah 29:11', 'Psalm 23:1-6',
+      'Romans 12:1-2', 'Galatians 5:22-23', 'James 1:2-4', '2 Timothy 3:16-17', 'Hebrews 11:1',
+      'Matthew 6:25-26', '1 Peter 5:7', 'Proverbs 3:5-6', 'Romans 5:8', 'Psalm 139:13-14',
+      'Colossians 3:23-24', 'Joshua 1:9', 'Isaiah 55:8-9', 'Romans 10:9-10', 'Psalm 46:10',
+      '1 John 4:19', 'Matthew 11:28-30', 'Ephesians 6:10-11', 'Psalm 119:105', 'John 14:6'
+    ];
+    return scriptures[(dayNumber - 1) % scriptures.length];
   }
 
   private categorizePlan(focusAreas: string[]): string {
