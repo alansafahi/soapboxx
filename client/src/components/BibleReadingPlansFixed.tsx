@@ -995,11 +995,13 @@ export default function BibleReadingPlansFixed() {
                         <Button 
                           className="w-full bg-blue-600 hover:bg-blue-700 text-white"
                           onClick={() => {
-                            const torchbearerSection = document.getElementById('torchbearer-section');
-                            if (torchbearerSection) {
-                              const rect = torchbearerSection.getBoundingClientRect();
-                              const offset = rect.bottom + window.scrollY + 50;
-                              window.scrollTo({ top: offset, behavior: 'smooth' });
+                            // Scroll down to show the Torchbearer plans grid below
+                            const torchbearerGrid = document.querySelector('.grid.gap-4.sm\\:gap-6.grid-cols-1.sm\\:grid-cols-2.lg\\:grid-cols-3');
+                            if (torchbearerGrid) {
+                              torchbearerGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            } else {
+                              // Fallback: scroll down by a reasonable amount
+                              window.scrollBy({ top: 600, behavior: 'smooth' });
                             }
                           }}
                         >
@@ -1260,6 +1262,7 @@ export default function BibleReadingPlansFixed() {
         isOpen={showEMIModal}
         onComplete={handleEMICurationComplete}
         onClose={handleEMIModalClose}
+        planType="torchbearer"
       />
 
 

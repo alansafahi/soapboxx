@@ -17649,6 +17649,7 @@ Please provide suggestions for the missing or incomplete sections.`
         userId
       };
 
+      const { aiCurator } = await import('./ai-reading-plan-curator.js');
       const result = await aiCurator.generateCuratedPlans(curationRequest);
       res.json(result);
 
