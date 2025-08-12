@@ -596,7 +596,8 @@ export default function BibleReadingPlansFixed() {
               {planDays.map((day) => {
                 const dayProgress = progress.find(p => p.dayNumber === day.dayNumber);
                 const isCompleted = !!dayProgress?.completedAt;
-                const isAccessible = !subscription || day.dayNumber <= (subscription.currentDay || 1);
+                // Allow preview access to all days regardless of subscription progress
+                const isAccessible = true;
 
                 return (
                   <Card 
