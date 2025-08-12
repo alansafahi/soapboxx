@@ -28,13 +28,20 @@ export class AIReadingPlanCurator {
 
   async generateCuratedPlans(request: CurationRequest): Promise<{ curatedPlans: CuratedPlan[] }> {
     try {
+      console.log('AI Curation Debug - Request:', request);
+      
       // Get all available plans for the requested difficulty level
       const allPlans = await storage.getReadingPlans();
+      console.log('AI Curation Debug - Total plans from storage:', allPlans.length);
+      
       const filteredPlans = allPlans.filter(plan => 
         request.planType === 'torchbearer' 
           ? plan.subscriptionTier === 'torchbearer'
           : plan.subscriptionTier === 'advanced'
       ).slice(0, 100);
+      
+      console.log('AI Curation Debug - Filtered plans:', filteredPlans.length);
+      console.log('AI Curation Debug - First filtered plan:', filteredPlans[0]);
 
       // Get EMI mood details
       const selectedMoods = await storage.getEMIMoodsByIds(request.selectedMoods);
