@@ -6931,8 +6931,8 @@ export class DatabaseStorage implements IStorage {
             day.devotionalContent,
             day.reflectionQuestion,
             day.prayerPrompt,
-            day.additionalVerses ? JSON.stringify(day.additionalVerses) : null,
-            day.tags ? JSON.stringify(day.tags) : null
+            day.additionalVerses || null,
+            day.tags || null
           ]);
         }
       }
