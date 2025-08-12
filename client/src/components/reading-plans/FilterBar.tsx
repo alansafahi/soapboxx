@@ -34,7 +34,11 @@ interface FilterBarProps {
   planCount: number;
 }
 
-const TESTAMENT_OPTIONS = ['OT', 'NT', 'Both'];
+const TESTAMENT_OPTIONS = [
+  { id: 'OT', label: 'Old Testament' },
+  { id: 'NT', label: 'New Testament' },
+  { id: 'Both', label: 'Both Testaments' }
+];
 const ORDER_OPTIONS = ['Chronological', 'Historical', 'Canonical'];
 const DIFFICULTY_OPTIONS = ['Beginner', 'Intermediate', 'Advanced'];
 const FORMAT_OPTIONS = ['Reading', 'Reflection', 'Prayer', 'Audio', 'Video'];
@@ -147,15 +151,21 @@ export default function FilterBar({ filters, onChange, planCount }: FilterBarPro
     searchable = false 
   }: {
     label: string;
-    options: string[];
+    options: string[] | Array<{id: string, label: string}>;
     values: string[];
     onToggle: (value: string) => void;
     searchable?: boolean;
   }) => {
     const [search, setSearch] = useState('');
+    
+    // Normalize options to a consistent format
+    const normalizedOptions = options.map(opt => 
+      typeof opt === 'string' ? { id: opt, label: opt } : opt
+    );
+    
     const filteredOptions = searchable 
-      ? options.filter(opt => opt.toLowerCase().includes(search.toLowerCase()))
-      : options;
+      ? normalizedOptions.filter(opt => opt.label.toLowerCase().includes(search.toLowerCase()))
+      : normalizedOptions;
 
     return (
       <DropdownMenu>
@@ -181,12 +191,12 @@ export default function FilterBar({ filters, onChange, planCount }: FilterBarPro
           )}
           <div className="p-1">
             {filteredOptions.map(option => (
-              <div key={option} className="flex items-center space-x-2 p-2 hover:bg-accent rounded">
+              <div key={option.id} className="flex items-center space-x-2 p-2 hover:bg-accent rounded">
                 <Checkbox
-                  checked={values.includes(option)}
-                  onCheckedChange={() => onToggle(option)}
+                  checked={values.includes(option.id)}
+                  onCheckedChange={() => onToggle(option.id)}
                 />
-                <span className="text-sm">{option}</span>
+                <span className="text-sm">{option.label}</span>
               </div>
             ))}
           </div>

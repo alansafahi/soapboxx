@@ -14665,6 +14665,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       if (testament && testament !== 'All') {
         const testamentArray = typeof testament === 'string' ? testament.split(',') : [testament];
+        // Handle testament filtering properly - "Both" means plans that cover both testaments
         whereConditions.push(inArray(readingPlans.testament, testamentArray));
       }
 
