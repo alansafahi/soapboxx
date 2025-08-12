@@ -6920,17 +6920,17 @@ export class DatabaseStorage implements IStorage {
           await pool.query(`
             INSERT INTO reading_plan_days (
               plan_id, day_number, title, scripture_reference, 
-              devotional_text, reflection_questions, prayer_focus, 
-              additional_verses, tags, created_at, updated_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW(), NOW())
+              devotional_content, reflection_question, prayer_prompt, 
+              additional_verses, tags
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
           `, [
             planId,
             day.dayNumber,
             day.title,
             day.scriptureReference,
-            day.devotionalText,
-            day.reflectionQuestions ? JSON.stringify(day.reflectionQuestions) : null,
-            day.prayerFocus,
+            day.devotionalContent,
+            day.reflectionQuestion,
+            day.prayerPrompt,
             day.additionalVerses ? JSON.stringify(day.additionalVerses) : null,
             day.tags ? JSON.stringify(day.tags) : null
           ]);
