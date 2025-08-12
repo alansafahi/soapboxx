@@ -81,6 +81,33 @@ export default function EMIPreSelectionModal({
     },
   });
 
+  const createCustomPlan = useMutation({
+    mutationFn: async (customPlanData: any) => {
+      return await apiRequest('POST', '/api/reading-plans/create-custom', {
+        customPlanData
+      });
+    },
+    onSuccess: (data) => {
+      toast({
+        title: "Success!",
+        description: "Your custom reading plan has been created and you're now subscribed to it.",
+        variant: "default",
+      });
+      // Invalidate reading plans cache to refresh the UI
+      queryClient.invalidateQueries({ queryKey: ['/api/reading-plans'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/reading-plans/user/subscriptions'] });
+      onClose();
+    },
+    onError: (error) => {
+      console.error('Error creating custom plan:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create your custom reading plan. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleMoodToggle = (moodId: number) => {
     setSelectedMoods(prev => 
       prev.includes(moodId) 
@@ -111,6 +138,12 @@ export default function EMIPreSelectionModal({
   const handleSkip = () => {
     onComplete([], []);
     onClose();
+  };
+
+  const handleCreateCustomPlan = (plan: any) => {
+    if (plan.customPlanData) {
+      createCustomPlan.mutate(plan.customPlanData);
+    }
   };
 
   return (
@@ -262,9 +295,17 @@ export default function EMIPreSelectionModal({
                               </>
                             )}
                           </div>
+                          {plan.isCustomPlan && (
+                            <Button 
+                              className="mt-3 bg-purple-600 hover:bg-purple-700 text-white"
+                              onClick={() => handleCreateCustomPlan(plan)}
+                            >
+                              Start This Custom Plan
+                            </Button>
+                          )}
                         </div>
-                        <Badge className="bg-green-100 text-green-800">
-                          Recommended
+                        <Badge className={plan.isCustomPlan ? "bg-purple-100 text-purple-800" : "bg-green-100 text-green-800"}>
+                          {plan.isCustomPlan ? "AI Generated" : "Recommended"}
                         </Badge>
                       </div>
                     </div>
