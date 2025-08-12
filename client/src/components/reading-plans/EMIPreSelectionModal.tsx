@@ -44,9 +44,9 @@ export default function EMIPreSelectionModal({
   const queryClient = useQueryClient();
 
   // Fetch EMI moods
-  const { data: emiMoods = [] } = useQuery<EMIMood[]>({
-    queryKey: ['/api/checkins/emi-moods'],
-    enabled: isOpen && step === 'selection',
+  const { data: emiMoods = [], isLoading: moodsLoading } = useQuery<EMIMood[]>({
+    queryKey: ['/api/enhanced-mood-indicators'],
+    enabled: isOpen,
   });
 
   // Group moods by category
@@ -60,14 +60,10 @@ export default function EMIPreSelectionModal({
 
   const generateCuratedPlans = useMutation({
     mutationFn: async (emiData: { selectedMoods: number[] }) => {
-      return await apiRequest('/api/reading-plans/ai-curated', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...emiData,
-          planType,
-          requestType: 'pre-selection-curation'
-        }),
+      return await apiRequest('POST', '/api/reading-plans/ai-curated', {
+        ...emiData,
+        planType,
+        requestType: 'pre-selection-curation'
       });
     },
     onSuccess: (data) => {
@@ -158,6 +154,18 @@ export default function EMIPreSelectionModal({
             </DialogHeader>
 
             <div className="mt-6 space-y-6">
+              {moodsLoading && (
+                <div className="text-center py-8 text-gray-500">
+                  Loading moods...
+                </div>
+              )}
+              
+              {!moodsLoading && emiMoods.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  No moods available
+                </div>
+              )}
+              
               {Object.entries(moodsByCategory).map(([category, moods]) => {
                 const IconComponent = categoryIcons[category] || Heart;
                 const categorySelectionCount = moods.filter(mood => selectedMoods.includes(mood.id)).length;
