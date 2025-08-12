@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, ChevronDown, ChevronUp, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2, Brain, Filter } from "lucide-react";
+import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, ChevronDown, ChevronUp, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2, Brain, Filter, TrendingUp } from "lucide-react";
 import FilterBar, { ReadingPlanFilters } from '@/components/reading-plans/FilterBar';
 import EMIPreSelectionModal from '@/components/reading-plans/EMIPreSelectionModal';
 import PlanSelectionModal from '@/components/reading-plans/PlanSelectionModal';
@@ -231,7 +231,7 @@ export default function BibleReadingPlansFixed() {
   const [aiPersonalizationEnabled, setAIPersonalizationEnabled] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showEMIModal, setShowEMIModal] = useState(false);
-  const [showPlanSelectionModal, setShowPlanSelectionModal] = useState(false);
+
   const [selectedPlanForEMI, setSelectedPlanForEMI] = useState<ReadingPlan | null>(null);
   
   // Initialize plan filters hook
@@ -960,18 +960,86 @@ export default function BibleReadingPlansFixed() {
                   <p className="text-lg text-gray-600 dark:text-gray-400 mt-3 font-medium">"Shine your light further"</p>
                   <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">AI-powered personalization, advanced features, and leadership content</p>
                   
-                  {/* Plan Selection Button for Torchbearer - Always show for testing */}
-                  <div className="mt-4">
-                    <Button
-                      onClick={() => setShowPlanSelectionModal(true)}
-                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-2 shadow-lg"
-                    >
-                      <Sparkles className="w-4 h-4 mr-2" />
-                      Choose Your Journey
-                    </Button>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                      Select existing plans or create AI-personalized reading plans
-                    </p>
+                  {/* Direct Journey Options for Torchbearer */}
+                  <div className="mt-6 max-w-4xl mx-auto">
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4 text-center">
+                      Choose how you'd like to begin your spiritual growth journey
+                    </h3>
+                    
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {/* Select Existing Reading Plan */}
+                      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-purple-200 dark:border-purple-800 rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300">
+                        <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <BookOpen className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <h4 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                          Select Existing Reading Plan
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                          Browse our curated collection of intermediate reading plans designed for deeper spiritual growth.
+                        </p>
+                        <div className="space-y-2 mb-4">
+                          <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                            <Users className="w-4 h-4" />
+                            Community-tested plans
+                          </div>
+                          <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                            <TrendingUp className="w-4 h-4" />
+                            Structured spiritual growth
+                          </div>
+                          <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                            <Play className="w-4 h-4" />
+                            Immediate start
+                          </div>
+                        </div>
+                        <Button 
+                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          onClick={() => {
+                            const torchbearerSection = document.getElementById('torchbearer-section');
+                            if (torchbearerSection) {
+                              const rect = torchbearerSection.getBoundingClientRect();
+                              const offset = rect.bottom + window.scrollY + 50;
+                              window.scrollTo({ top: offset, behavior: 'smooth' });
+                            }
+                          }}
+                        >
+                          Browse Reading Plans
+                        </Button>
+                      </div>
+
+                      {/* Create Custom AI Reading Plan */}
+                      <div className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300">
+                        <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/50 dark:to-pink-900/50 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Sparkles className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <h4 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+                          Create Custom AI Reading Plan
+                        </h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                          Let AI create a personalized reading plan based on your current spiritual and emotional state.
+                        </p>
+                        <div className="space-y-2 mb-4">
+                          <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                            <Brain className="w-4 h-4" />
+                            AI-powered personalization
+                          </div>
+                          <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                            <Heart className="w-4 h-4" />
+                            Emotional state aware
+                          </div>
+                          <div className="flex items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                            <Target className="w-4 h-4" />
+                            Tailored to your needs
+                          </div>
+                        </div>
+                        <Button 
+                          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                          onClick={() => setShowEMIModal(true)}
+                        >
+                          Create My Plan
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
