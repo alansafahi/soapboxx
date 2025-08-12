@@ -109,6 +109,10 @@ export class AICustomReadingPlanGenerator {
 
       return { customPlan };
 
+    } catch (error) {
+      console.error('AI Custom Plan Generation error:', error);
+      return this.generateFallbackCustomPlan(request);
+    }
   }
 
   private async generateShortPlan(prompt: string): Promise<CustomReadingPlan> {
