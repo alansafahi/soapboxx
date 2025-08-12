@@ -43,7 +43,7 @@ const ORDER_OPTIONS = ['Chronological', 'Historical', 'Canonical'];
 const DIFFICULTY_OPTIONS = ['Beginner', 'Intermediate', 'Advanced'];
 const FORMAT_OPTIONS = ['Reading', 'Reflection', 'Prayer', 'Audio', 'Video'];
 const AUDIENCE_OPTIONS = ['Solo', 'Group', 'Family', 'Church'];
-const TRANSLATION_OPTIONS = ['NIV', 'ESV', 'NLT', 'NASB', 'KJV', 'CSB', 'NKJV'];
+const TRANSLATION_OPTIONS = ['All', 'NIV', 'ESV', 'NLT', 'NASB', 'KJV', 'CSB', 'NKJV'];
 const TIER_OPTIONS = ['free', 'standard', 'premium'];
 
 const DURATION_OPTIONS = [
@@ -124,7 +124,7 @@ export default function FilterBar({ filters, onChange, planCount }: FilterBarPro
     const chips: { key: string; value: string; onRemove: () => void }[] = [];
     
     filters.testament.forEach(val => 
-      chips.push({ key: 'testament', value: val, onRemove: () => toggleArrayValue('testament', val) })
+      chips.push({ key: 'testament', value: val, onRemove: () => updateFilter('testament', []) })
     );
     filters.orderType.forEach(val => 
       chips.push({ key: 'order', value: val, onRemove: () => toggleArrayValue('orderType', val) })
@@ -224,12 +224,28 @@ export default function FilterBar({ filters, onChange, planCount }: FilterBarPro
 
       {/* Filter Buttons */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
-        <MultiSelectDropdown
-          label="Testament"
-          options={TESTAMENT_OPTIONS}
-          values={filters.testament}
-          onToggle={(val) => toggleArrayValue('testament', val)}
-        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="h-9">
+              Testament {filters.testament.length > 0 && `(${filters.testament[0]})`}
+              <ChevronDown className="ml-1 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <div className="p-1">
+              {TESTAMENT_OPTIONS.map(option => (
+                <div 
+                  key={option.id} 
+                  className="flex items-center space-x-2 p-2 hover:bg-accent rounded cursor-pointer"
+                  onClick={() => updateFilter('testament', filters.testament.includes(option.id) ? [] : [option.id])}
+                >
+                  <span className="text-sm">{option.label}</span>
+                  {filters.testament.includes(option.id) && <span className="ml-auto">✓</span>}
+                </div>
+              ))}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
         
         <MultiSelectDropdown
           label="Order"

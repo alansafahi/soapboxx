@@ -14664,9 +14664,9 @@ Please provide suggestions for the missing or incomplete sections.`
       let whereConditions: any[] = [eq(readingPlans.isActive, true)];
 
       if (testament && testament !== 'All') {
-        const testamentArray = typeof testament === 'string' ? testament.split(',') : [testament];
-        // Handle testament filtering properly - "Both" means plans that cover both testaments
-        whereConditions.push(inArray(readingPlans.testament, testamentArray));
+        const testamentValue = typeof testament === 'string' ? testament : testament[0];
+        // Handle testament filtering - single selection (OT, NT, or Both)
+        whereConditions.push(eq(readingPlans.testament, testamentValue));
       }
 
       if (difficulty && difficulty !== 'All') {
