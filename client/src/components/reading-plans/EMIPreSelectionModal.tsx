@@ -38,8 +38,16 @@ export default function EMIPreSelectionModal({
   planType 
 }: EMIPreSelectionModalProps) {
   const [selectedMoods, setSelectedMoods] = useState<number[]>([]);
-  const [step, setStep] = useState<'intro' | 'selection' | 'loading' | 'results'>('intro');
+  const [step, setStep] = useState<'intro' | 'selection' | 'preferences' | 'loading' | 'results'>('intro');
   const [curatedPlans, setCuratedPlans] = useState<any[]>([]);
+  const [preferences, setPreferences] = useState({
+    testament: 'both',
+    order: 'canonical',
+    translation: 'all',
+    difficulty: 'advanced',
+    duration: 21,
+    dailyTime: '15-30'
+  });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -59,7 +67,7 @@ export default function EMIPreSelectionModal({
   }, {} as Record<string, EMIMood[]>);
 
   const generateCuratedPlans = useMutation({
-    mutationFn: async (emiData: { selectedMoods: number[] }) => {
+    mutationFn: async (emiData: { selectedMoods: number[]; preferences: any }) => {
       return await apiRequest('POST', '/api/reading-plans/ai-curated', {
         ...emiData,
         planType,
@@ -116,7 +124,7 @@ export default function EMIPreSelectionModal({
     );
   };
 
-  const handleGenerateRecommendations = () => {
+  const handleContinueToPreferences = () => {
     if (selectedMoods.length === 0) {
       toast({
         title: "Selection Required",
@@ -125,9 +133,12 @@ export default function EMIPreSelectionModal({
       });
       return;
     }
-    
+    setStep('preferences');
+  };
+
+  const handleGenerateRecommendations = () => {
     setStep('loading');
-    generateCuratedPlans.mutate({ selectedMoods });
+    generateCuratedPlans.mutate({ selectedMoods, preferences });
   };
 
   const handleComplete = () => {
@@ -244,11 +255,142 @@ export default function EMIPreSelectionModal({
                   Skip This Step
                 </Button>
                 <Button 
-                  onClick={handleGenerateRecommendations}
+                  onClick={handleContinueToPreferences}
                   disabled={selectedMoods.length === 0}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
-                  Get My Recommendations
+                  Continue to Preferences
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {step === 'preferences' && (
+          <div>
+            <DialogHeader>
+              <DialogTitle>Customize Your Reading Plan Preferences</DialogTitle>
+              <DialogDescription>
+                Help us create the perfect reading plan by sharing your preferences for scripture study.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="mt-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Testament Focus
+                  </label>
+                  <select 
+                    value={preferences.testament} 
+                    onChange={(e) => setPreferences({...preferences, testament: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="both">Both Old & New Testament</option>
+                    <option value="old">Old Testament</option>
+                    <option value="new">New Testament</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Reading Order
+                  </label>
+                  <select 
+                    value={preferences.order} 
+                    onChange={(e) => setPreferences({...preferences, order: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="canonical">Canonical (Biblical order)</option>
+                    <option value="chronological">Chronological (Historical order)</option>
+                    <option value="thematic">Thematic (Topic-based)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Bible Translation
+                  </label>
+                  <select 
+                    value={preferences.translation} 
+                    onChange={(e) => setPreferences({...preferences, translation: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="all">All translations</option>
+                    <option value="NIV">NIV (New International Version)</option>
+                    <option value="KJV">KJV (King James Version)</option>
+                    <option value="ESV">ESV (English Standard Version)</option>
+                    <option value="NLT">NLT (New Living Translation)</option>
+                    <option value="NASB">NASB (New American Standard Bible)</option>
+                    <option value="CSB">CSB (Christian Standard Bible)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Plan Duration
+                  </label>
+                  <select 
+                    value={preferences.duration} 
+                    onChange={(e) => setPreferences({...preferences, duration: parseInt(e.target.value)})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="14">14 days (2 weeks)</option>
+                    <option value="21">21 days (3 weeks)</option>
+                    <option value="30">30 days (1 month)</option>
+                    <option value="60">60 days (2 months)</option>
+                    <option value="90">90 days (3 months)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Daily Reading Time
+                  </label>
+                  <select 
+                    value={preferences.dailyTime} 
+                    onChange={(e) => setPreferences({...preferences, dailyTime: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="5-10">5-10 minutes</option>
+                    <option value="10-15">10-15 minutes</option>
+                    <option value="15-30">15-30 minutes</option>
+                    <option value="30-45">30-45 minutes</option>
+                    <option value="45+">45+ minutes</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Study Depth
+                  </label>
+                  <select 
+                    value={preferences.difficulty} 
+                    onChange={(e) => setPreferences({...preferences, difficulty: e.target.value})}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="beginner">Beginner (Simple devotions)</option>
+                    <option value="intermediate">Intermediate (Balanced study)</option>
+                    <option value="advanced">Advanced (Deep theological study)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center mt-8 pt-6 border-t">
+              <Button variant="outline" onClick={() => setStep('selection')}>
+                Back to Mood Selection
+              </Button>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={handleSkip}>
+                  Skip & Use Defaults
+                </Button>
+                <Button 
+                  onClick={handleGenerateRecommendations}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Generate My Custom Plan
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </div>

@@ -32,7 +32,11 @@ export interface CustomPlanRequest {
   preferences?: {
     duration?: number;
     focusAreas?: string[];
-    bibleTranslation?: string;
+    testament?: 'old' | 'new' | 'both';
+    order?: 'canonical' | 'chronological' | 'thematic';
+    translation?: string;
+    difficulty?: 'beginner' | 'intermediate' | 'advanced';
+    dailyTime?: string;
     studyStyle?: 'devotional' | 'expository' | 'thematic' | 'chronological';
   };
 }
@@ -61,10 +65,15 @@ export class AICustomReadingPlanGenerator {
         return { customPlan: this.generatedPlansCache.get(cacheKey)! };
       }
 
-      // Determine plan characteristics based on EMI
+      // Determine plan characteristics based on EMI and user preferences
       const planDuration = request.preferences?.duration || this.determineDuration(avgMoodScore, moodCategories);
       const studyStyle = request.preferences?.studyStyle || this.determineStudyStyle(moodCategories, avgMoodScore);
       const focusAreas = request.preferences?.focusAreas || this.determineFocusAreas(moodCategories, selectedMoods);
+      const testament = request.preferences?.testament || 'both';
+      const order = request.preferences?.order || 'canonical';
+      const translation = request.preferences?.translation || 'all';
+      const difficulty = request.preferences?.difficulty || 'advanced';
+      const dailyTime = request.preferences?.dailyTime || '15-30';
 
       // Generate the custom reading plan using AI
       const prompt = this.buildCustomPlanPrompt(
@@ -75,7 +84,12 @@ export class AICustomReadingPlanGenerator {
         userSpritualGifts,
         planDuration,
         studyStyle,
-        focusAreas
+        focusAreas,
+        testament,
+        order,
+        translation,
+        difficulty,
+        dailyTime
       );
 
       console.log('AI Custom Plan Generator - Generating with OpenAI...');
@@ -184,7 +198,12 @@ export class AICustomReadingPlanGenerator {
     spiritualGifts: string[],
     duration: number,
     studyStyle: string,
-    focusAreas: string[]
+    focusAreas: string[],
+    testament: string,
+    order: string,
+    translation: string,
+    difficulty: string,
+    dailyTime: string
   ): string {
     return `Create a completely new, personalized ${duration}-day Bible reading plan based on the following profile:
 
@@ -198,6 +217,11 @@ PLAN REQUIREMENTS:
 - Study style: ${studyStyle}
 - Focus areas: ${focusAreas.join(', ')}
 - Duration: ${duration} days
+- Testament focus: ${testament === 'both' ? 'Both Old and New Testament' : testament === 'old' ? 'Old Testament only' : 'New Testament only'}
+- Reading order: ${order}
+- Bible translation: ${translation === 'all' ? 'Flexible (mention verse references without specific translation)' : translation}
+- Difficulty level: ${difficulty}
+- Daily time commitment: ${dailyTime} minutes
 - Target audience: Spiritually mature believers (Torchbearer level)
 
 INSTRUCTIONS:

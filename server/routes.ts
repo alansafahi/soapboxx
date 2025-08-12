@@ -17654,9 +17654,14 @@ Please provide suggestions for the missing or incomplete sections.`
       const customPlanRequest = {
         selectedMoods,
         userId,
-        preferences: {
-          duration: 21, // Default 3 weeks
-          studyStyle: 'devotional' as const
+        preferences: req.body.preferences || {
+          duration: 21,
+          studyStyle: 'devotional' as const,
+          testament: 'both',
+          order: 'canonical',
+          translation: 'all',
+          difficulty: 'advanced',
+          dailyTime: '15-30'
         }
       };
       
@@ -17696,12 +17701,9 @@ Please provide suggestions for the missing or incomplete sections.`
         return res.status(400).json({ message: "Custom plan data is required" });
       }
 
-      // For now, just simulate saving and subscribe the user to a temporary plan
+      // For now, just return success without creating a subscription since we don't have storage methods
       // In a full implementation, you would add createReadingPlan and createReadingPlanDay methods to storage
       const tempPlanId = Math.floor(Math.random() * 10000) + 90000; // Temporary high ID to avoid conflicts
-      
-      // Subscribe the user to indicate they have a custom plan
-      const subscription = await storage.subscribeToReadingPlan(userId, tempPlanId);
 
       res.json({ 
         success: true, 
@@ -17712,8 +17714,7 @@ Please provide suggestions for the missing or incomplete sections.`
           duration: customPlanData.duration,
           isAiGenerated: true
         }, 
-        subscription,
-        message: "Custom reading plan created successfully!" 
+        message: "Custom reading plan generated successfully! You can now explore your personalized daily content." 
       });
 
     } catch (error) {
