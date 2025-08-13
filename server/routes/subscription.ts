@@ -20,7 +20,7 @@ router.post('/upgrade', requireAuth, async (req, res) => {
     const userId = req.user!.id;
     const { tier, planId } = req.body;
 
-    console.log('DEBUG - Subscription upgrade request:', { userId, tier, planId });
+
 
     // Validate tier
     const validTiers = ['disciple', 'servant', 'torchbearer'];
@@ -79,7 +79,7 @@ router.post('/upgrade', requireAuth, async (req, res) => {
       }
     }
 
-    console.log('DEBUG - Subscription upgrade completed:', { userId, tier, planId });
+
 
     res.json({ 
       success: true, 

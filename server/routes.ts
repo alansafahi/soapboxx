@@ -15464,13 +15464,7 @@ Please provide suggestions for the missing or incomplete sections.`
     try {
       const userId = req.session?.userId || req.user?.claims?.sub;
       
-      console.log("DEBUG - Subscription endpoint called");
-      console.log("DEBUG - Session userId:", req.session?.userId);
-      console.log("DEBUG - User claims sub:", req.user?.claims?.sub);
-      console.log("DEBUG - Final userId:", userId);
-
       if (!userId) {
-        console.log("DEBUG - No userId found, returning 401");
         return res.status(401).json({ message: "User authentication required" });
       }
 
