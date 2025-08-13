@@ -15585,7 +15585,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Check if user has an active subscription to this plan
       const existingSubscription = await db.execute(sql`
-        SELECT id FROM user_reading_plan_subscriptions 
+        SELECT id FROM reading_plan_subscriptions 
         WHERE user_id = ${userId} AND plan_id = ${planId} AND is_active = true
       `);
 
@@ -15595,7 +15595,7 @@ Please provide suggestions for the missing or incomplete sections.`
 
       // Deactivate the subscription instead of deleting it (preserve progress history)
       await db.execute(sql`
-        UPDATE user_reading_plan_subscriptions 
+        UPDATE reading_plan_subscriptions 
         SET is_active = false, updated_at = NOW()
         WHERE user_id = ${userId} AND plan_id = ${planId} AND is_active = true
       `);
