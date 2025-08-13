@@ -12,7 +12,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, ChevronDown, ChevronUp, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2, Brain, Filter, TrendingUp } from "lucide-react";
+import { Book, Calendar, Clock, Heart, Play, CheckCircle, Users, BookOpen, Target, Star, ChevronRight, ChevronDown, ChevronUp, Lock, Crown, Sparkles, Headphones, User, Eye, Shield, Volume2, Brain, Filter, TrendingUp, X, AlertTriangle } from "lucide-react";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import FilterBar, { ReadingPlanFilters } from '@/components/reading-plans/FilterBar';
 import EMIPreSelectionModal from '@/components/reading-plans/EMIPreSelectionModal';
 
@@ -352,6 +363,28 @@ export default function BibleReadingPlansFixed() {
       });
       queryClient.invalidateQueries({ queryKey: ["/api/reading-plans/user/subscriptions"] });
     },
+  });
+
+  // Leave plan mutation
+  const leavePlanMutation = useMutation({
+    mutationFn: async (planId: number) => {
+      return apiRequest("DELETE", `/api/reading-plans/${planId}/subscription`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Left Reading Plan",
+        description: "You've successfully left the reading plan. Your progress has been saved.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/reading-plans/user/subscriptions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/reading-plans"] });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error", 
+        description: "Failed to leave reading plan. Please try again.",
+        variant: "destructive"
+      });
+    }
   });
 
   // Complete day mutation
@@ -1246,11 +1279,56 @@ export default function BibleReadingPlansFixed() {
                       </div>
                     </CardHeader>
                     
-                    <CardContent>
-                      <Button className="w-full" variant="outline">
+                    <CardContent className="space-y-2">
+                      <Button 
+                        className="w-full" 
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedPlan(plan);
+                        }}
+                      >
                         <Play className="w-4 h-4 mr-2" />
                         Continue Reading
                       </Button>
+                      
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <X className="w-4 h-4 mr-2" />
+                            Leave Plan
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="flex items-center gap-2">
+                              <AlertTriangle className="w-5 h-5 text-red-500" />
+                              Leave Reading Plan
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Are you sure you want to leave "{plan.name}"? 
+                              <br /><br />
+                              Your progress will be saved, but the plan will be removed from your active reading plans. 
+                              You can rejoin this plan later if you change your mind.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => leavePlanMutation.mutate(plan.id)}
+                              disabled={leavePlanMutation.isPending}
+                              className="bg-red-600 hover:bg-red-700"
+                            >
+                              {leavePlanMutation.isPending ? "Leaving..." : "Yes, Leave Plan"}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </CardContent>
                   </Card>
                 ))}

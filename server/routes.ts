@@ -15569,6 +15569,50 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Cancel/Leave a reading plan subscription
+  app.delete("/api/reading-plans/:id/subscription", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      const planId = parseInt(req.params.id);
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User authentication required" });
+      }
+
+      if (!planId || isNaN(planId)) {
+        return res.status(400).json({ message: "Invalid plan ID" });
+      }
+
+      // Check if user has an active subscription to this plan
+      const existingSubscription = await db.execute(sql`
+        SELECT id FROM user_reading_plan_subscriptions 
+        WHERE user_id = ${userId} AND plan_id = ${planId} AND is_active = true
+      `);
+
+      if (existingSubscription.rows.length === 0) {
+        return res.status(404).json({ message: "No active subscription found for this plan" });
+      }
+
+      // Deactivate the subscription instead of deleting it (preserve progress history)
+      await db.execute(sql`
+        UPDATE user_reading_plan_subscriptions 
+        SET is_active = false, updated_at = NOW()
+        WHERE user_id = ${userId} AND plan_id = ${planId} AND is_active = true
+      `);
+
+      res.json({ 
+        message: "Successfully left reading plan",
+        success: true 
+      });
+    } catch (error) {
+      console.error("Failed to cancel reading plan subscription:", error);
+      res.status(500).json({ 
+        message: "Failed to leave reading plan", 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      });
+    }
+  });
+
   // Verify AI-curated plan endpoint
   app.get("/api/reading-plans/:id/verify-ai", async (req, res) => {
     try {
