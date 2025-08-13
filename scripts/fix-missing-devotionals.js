@@ -5,15 +5,17 @@ import { eq, and, isNull } from 'drizzle-orm';
 async function fixMissingDevotionals() {
   console.log('🔧 Fixing days with missing devotional content...');
   
-  // Get days with missing devotional content
-  const missingDays = await db
+  // Get days with missing devotional content (null or empty)
+  const allDays = await db
     .select()
     .from(readingPlanDays)
-    .where(and(
-      eq(readingPlanDays.planId, 23),
-      isNull(readingPlanDays.devotionalContent)
-    ))
+    .where(eq(readingPlanDays.planId, 23))
     .orderBy(readingPlanDays.dayNumber);
+  
+  const missingDays = allDays.filter(day => 
+    !day.devotionalContent || 
+    day.devotionalContent.trim().length === 0
+  );
 
   console.log(`📖 Found ${missingDays.length} days with missing devotional content`);
 

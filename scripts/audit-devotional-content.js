@@ -31,8 +31,8 @@ async function auditDevotionalContent() {
       issues.shortDevotional.push(day);
     }
 
-    // Check for missing reflection questions
-    if (!day.reflectionQuestions || day.reflectionQuestions.length < 100) {
+    // Check for missing reflection questions (correct field name)
+    if (!day.reflectionQuestion || day.reflectionQuestion.length < 100) {
       issues.missingReflection.push(day);
     }
 
@@ -77,7 +77,7 @@ async function auditDevotionalContent() {
   if (issues.missingReflection.length > 0) {
     console.log(`❌ Missing or short reflection questions: ${issues.missingReflection.length} days`);
     issues.missingReflection.slice(0, 15).forEach(day => {
-      console.log(`   - Day ${day.dayNumber}: ${day.title} (${day.reflectionQuestions?.length || 0} chars)`);
+      console.log(`   - Day ${day.dayNumber}: ${day.title} (${day.reflectionQuestion?.length || 0} chars)`);
     });
     if (issues.missingReflection.length > 15) {
       console.log(`   ... and ${issues.missingReflection.length - 15} more days`);
