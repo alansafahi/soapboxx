@@ -374,6 +374,14 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
     setCommentDialogOpen(postId);
   };
 
+  // Debug reaction data for the first post
+  useEffect(() => {
+    if (posts.length > 0) {
+      console.log('First post reactions data:', posts[0].reactions);
+      console.log('Full post data sample:', posts[0]);
+    }
+  }, [posts]);
+
   const handleShare = (post: EnhancedPost) => {
     setSharePost(post);
     setShareDialogOpen(true);
@@ -715,7 +723,7 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                                     className={`text-xs sm:text-sm px-2 sm:px-3 ${isActive ? 'bg-blue-100 text-blue-600' : ''}`}
                                   >
                                     <span className="mr-1">{reactionType.emoji}</span>
-                                    {count > 0 && <span className="text-xs">{count}</span>}
+                                    <span className="text-xs">{count}</span>
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
