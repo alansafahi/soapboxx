@@ -593,7 +593,7 @@ export default function SimpleLanding() {
               <h3 className="text-xl sm:text-2xl font-bold">Large Church or Multi-Campus Ministry?</h3>
             </div>
             <p className="text-lg sm:text-xl mb-6 opacity-90">
-              Need custom features, enhanced analytics, comprehensive staff and member management tools for your growing ministry?
+              Need custom features, enhanced analytics, or comprehensive staff and member management tools for your growing ministry?
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button 
@@ -602,9 +602,6 @@ export default function SimpleLanding() {
               >
                 Contact Us for Custom Solutions
               </Button>
-              <span className="text-sm opacity-75">
-                ✨ Enterprise pricing • Dedicated account manager
-              </span>
             </div>
           </div>
 
