@@ -197,6 +197,7 @@ export default function EnterpriseContact() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
                   <option value="">Select size</option>
+                  <option value="250-500">250-500 members</option>
                   <option value="500-1000">500-1,000 members</option>
                   <option value="1000-2500">1,000-2,500 members</option>
                   <option value="2500-5000">2,500-5,000 members</option>
