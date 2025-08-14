@@ -370,6 +370,7 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
   };
 
   const handleComment = (postId: number) => {
+    console.log('Opening comment dialog for post ID:', postId);
     setCommentDialogOpen(postId);
   };
 
@@ -935,13 +936,13 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
       {commentDialogOpen && (
         <CommentDialog
           isOpen={true}
-          onClose={() => setCommentDialogOpen(null)}
-          targetType="discussion"
-          targetId={commentDialogOpen}
-          onCommentAdded={() => {
-            refetch();
+          onClose={() => {
             setCommentDialogOpen(null);
+            // Refetch discussions to update comment counts
+            refetch();
           }}
+          postId={commentDialogOpen}
+          postType="discussion"
         />
       )}
       </div>
