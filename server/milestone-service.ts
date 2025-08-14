@@ -120,10 +120,10 @@ class MilestoneService {
     }
   ): Promise<void> {
     try {
-      // Check if user already has this achievement
+      // Check if user already has this achievement (using achievementType instead of achievement_key)
       const existing = await db.execute(sql`
         SELECT id FROM user_achievements 
-        WHERE user_id = ${userId} AND achievement_key = ${achievementKey}
+        WHERE user_id = ${userId} AND achievement_type = ${achievementKey}
       `);
 
       if (existing.rows.length === 0) {
@@ -131,8 +131,8 @@ class MilestoneService {
         const pointsBonus = achievement.pointsRequired ? Math.floor(achievement.pointsRequired / 10) : 25;
         
         await db.execute(sql`
-          INSERT INTO user_achievements (user_id, achievement_key, name, description, category, points_awarded, earned_at)
-          VALUES (${userId}, ${achievementKey}, ${achievement.name}, ${achievement.description}, ${achievement.category}, ${pointsBonus}, NOW())
+          INSERT INTO user_achievements (user_id, achievement_type, achievement_level, progress, max_progress, is_unlocked, unlocked_at)
+          VALUES (${userId}, ${achievementKey}, 1, 100, 100, true, NOW())
         `);
 
         // Award achievement bonus points through the centralized system
