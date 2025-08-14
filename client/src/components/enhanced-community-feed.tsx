@@ -703,6 +703,7 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                           {REACTION_TYPES.slice(0, 4).map((reactionType) => {
                             const postReaction = post.reactions?.find(r => r.type === reactionType.type);
                             const isActive = postReaction?.userReacted;
+                            const count = postReaction?.count || 0;
                             
                             return (
                               <Tooltip key={reactionType.type}>
@@ -713,7 +714,8 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                                     onClick={() => handleReaction(post, reactionType.type)}
                                     className={`text-xs sm:text-sm px-2 sm:px-3 ${isActive ? 'bg-blue-100 text-blue-600' : ''}`}
                                   >
-                                    <span>{reactionType.emoji}</span>
+                                    <span className="mr-1">{reactionType.emoji}</span>
+                                    {count > 0 && <span className="text-xs">{count}</span>}
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
@@ -741,7 +743,7 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                             onClick={() => handleShare(post)}
                           >
                             <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                            <span className="hidden sm:inline">Share</span>
+                            <span>{post.shareCount || 0}</span>
                           </Button>
 
                           {/* Flag Button - Only show for other users' posts */}
