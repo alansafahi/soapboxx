@@ -689,30 +689,6 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
 
                     {/* Enhanced Reactions */}
                     <div className="space-y-3 border-t pt-4">
-                      {/* Reaction Summary */}
-                      {post.reactions && post.reactions.length > 0 && (
-                        <div className="flex items-center space-x-2 text-sm text-gray-700 dark:text-gray-300">
-                          <div className="flex -space-x-1">
-                            {(post.reactions || []).slice(0, 3).map((reaction, index) => (
-                              <span 
-                                key={index}
-                                className="text-lg z-10 bg-white rounded-full border px-1"
-                                style={{ zIndex: 3 - index }}
-                              >
-                                {reaction.emoji}
-                              </span>
-                            ))}
-                          </div>
-
-                          {post.commentCount > 0 && (
-                            <>
-                              <span>•</span>
-                              <span>{post.commentCount} comments</span>
-                            </>
-                          )}
-                        </div>
-                      )}
-
                       {/* Reaction Buttons */}
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                         <div className="flex items-center flex-wrap gap-1">
