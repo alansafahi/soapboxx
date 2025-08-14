@@ -128,10 +128,10 @@ export default function EnterpriseContact() {
           <Button
             variant="ghost"
             className="mb-6 text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors"
-            onClick={() => setLocation('/#pricing')}
+            onClick={() => setLocation('/')}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Pricing
+            Back to Home
           </Button>
           <div className="text-center">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full mb-4 shadow-lg">
