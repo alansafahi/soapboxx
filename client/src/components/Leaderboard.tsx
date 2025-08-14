@@ -144,62 +144,10 @@ const Leaderboard: React.FC = () => {
               Community Engagement Board
             </h1>
           </div>
-          <p className="text-sm text-gray-700 dark:text-blue-200 max-w-3xl mx-auto mb-6">
+          <p className="text-sm text-gray-700 dark:text-blue-200 max-w-3xl mx-auto">
             Celebrating our most active community members! Points are earned through community engagement, 
             spiritual habits, growth initiatives, and leadership activities with aspirational reward titles.
           </p>
-          
-          {/* Points System Guide */}
-          <div className="bg-white border border-gray-200 dark:bg-white/10 dark:backdrop-blur-md rounded-xl p-6 dark:border-white/20 max-w-4xl mx-auto mb-8">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-yellow-400 text-center">SoapBox Points System</h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="text-md font-semibold mb-3 text-gray-800 dark:text-blue-300">Community Reactions</h4>
-                <div className="space-y-2 text-sm text-gray-700 dark:text-blue-200">
-                  <div className="flex justify-between">
-                    <span>🙏 Prayer Reaction</span>
-                    <span className="font-bold text-green-600 dark:text-green-400">+5 points</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>🙌 Amen Reaction</span>
-                    <span className="font-bold text-green-600 dark:text-green-400">+3 points</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>🔥 Fire Reaction</span>
-                    <span className="font-bold text-green-600 dark:text-green-400">+2 points</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>❤️ Heart Reaction</span>
-                    <span className="font-bold text-green-600 dark:text-green-400">+1 point</span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h4 className="text-md font-semibold mb-3 text-gray-800 dark:text-blue-300">Community Activities</h4>
-                <div className="space-y-2 text-sm text-gray-700 dark:text-blue-200">
-                  <div className="flex justify-between">
-                    <span>Create Event</span>
-                    <span className="font-bold text-green-600 dark:text-green-400">+10 points</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>First AI Usage</span>
-                    <span className="font-bold text-green-600 dark:text-green-400">+10 points</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Event RSVP</span>
-                    <span className="font-bold text-green-600 dark:text-green-400">+5 points</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Like Prayer Comment</span>
-                    <span className="font-bold text-green-600 dark:text-green-400">+5 points</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <p className="text-xs text-gray-600 dark:text-blue-300 text-center mt-4">
-              Points encourage meaningful spiritual engagement and community participation
-            </p>
-          </div>
         </div>
 
         {leaderboard.length === 0 ? (
