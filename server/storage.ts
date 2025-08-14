@@ -7988,15 +7988,25 @@ export class DatabaseStorage implements IStorage {
             eq(reactions.reactionType, reactionType)
           ));
 
+        // Deduct the same points that were awarded for this reaction type
+        const pointsMap: { [key: string]: number } = {
+          'pray': 5,      // Prayer reactions are most spiritually meaningful
+          'amen': 3,      // Amen shows spiritual agreement
+          'fire': 2,      // Fire shows spiritual enthusiasm  
+          'heart': 1,     // Heart is basic appreciation
+        };
+        
+        const points = -(pointsMap[reactionType] || 1);
+
         // Deduct points for removing reaction
         await this.trackUserActivity({
           userId: userId,
           activityType: 'reaction_removed',
           entityId: targetId,
-          points: -1,
+          points: points,
         });
         
-        return { success: true, action: 'removed', pointsAwarded: -1 };
+        return { success: true, action: 'removed', pointsAwarded: points };
       } else {
         // Add new reaction
         const [newReaction] = await db
@@ -8012,15 +8022,25 @@ export class DatabaseStorage implements IStorage {
           })
           .returning();
 
+        // Award different points based on reaction type
+        const pointsMap: { [key: string]: number } = {
+          'pray': 5,      // Prayer reactions are most spiritually meaningful
+          'amen': 3,      // Amen shows spiritual agreement
+          'fire': 2,      // Fire shows spiritual enthusiasm  
+          'heart': 1,     // Heart is basic appreciation
+        };
+        
+        const points = pointsMap[reactionType] || 1;
+
         // Track user activity for engagement
         await this.trackUserActivity({
           userId: userId,
           activityType: 'reaction',
           entityId: targetId,
-          points: 1,
+          points: points,
         });
 
-        return { success: true, action: 'added', reaction: newReaction, pointsAwarded: 1 };
+        return { success: true, action: 'added', reaction: newReaction, pointsAwarded: points };
       }
     } catch (error) {
       throw new Error('Failed to add reaction');
