@@ -289,7 +289,7 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
       });
     },
     onSuccess: (data) => {
-      console.log('Reaction added successfully:', data);
+
       
       // Force refetch discussions to get updated counts
       refetch();
@@ -386,17 +386,10 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
   };
 
   const handleComment = (postId: number) => {
-    console.log('Opening comment dialog for post ID:', postId);
     setCommentDialogOpen(postId);
   };
 
-  // Debug reaction data for the first post
-  useEffect(() => {
-    if (posts.length > 0) {
-      console.log('First post reactions data:', posts[0].reactions);
-      console.log('Full post data sample:', posts[0]);
-    }
-  }, [posts]);
+
 
   const handleShare = (post: EnhancedPost) => {
     setSharePost(post);
@@ -702,7 +695,7 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                             const postReaction = post.reactions?.find(r => r.type === reactionType.type);
                             const isActive = postReaction?.userReacted;
                             const count = postReaction?.count || 0;
-                            const isOwnPost = user && post.author && (String(user.id) === String(post.authorId) || user.email === post.author.email);
+                            const isOwnPost = user && post.author && String(user.id) === String(post.authorId);
                             
                             return (
                               <Tooltip key={reactionType.type}>
@@ -743,11 +736,11 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                             onClick={() => handleShare(post)}
                           >
                             <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                            <span>{post.shareCount || 0}</span>
+                            <span>0</span>
                           </Button>
 
                           {/* Flag Button - Only show for other users' posts */}
-                          {user && post.author && (String(user.id) !== String(post.authorId) && user.email !== post.author.email) && (
+                          {user && post.author && String(user.id) !== String(post.authorId) && (
                             <FlagContentDialog
                               contentType="discussion"
                               contentId={post.id}
@@ -766,7 +759,7 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                           )}
 
                           {/* Edit Button - Only show for flagged content when user is author */}
-                          {user && post.author && (String(user.id) === String(post.authorId) || user.email === post.author.email) && 
+                          {user && post.author && String(user.id) === String(post.authorId) && 
                            highlightId && post.id.toString() === highlightId && (
                             <Dialog>
                               <DialogTrigger asChild>
@@ -796,7 +789,7 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                           )}
 
                           {/* Delete Button - Only show for post author (when not flagged content) */}
-                          {user && post.author && (String(user.id) === String(post.authorId) || user.email === post.author.email) && 
+                          {user && post.author && String(user.id) === String(post.authorId) && 
                            !(highlightId && post.id.toString() === highlightId) && (
                             <Button 
                               variant="ghost" 

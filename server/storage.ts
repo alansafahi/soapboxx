@@ -2716,7 +2716,7 @@ export class DatabaseStorage implements IStorage {
       // Combined query to get both discussions and SOAP entries using UNION
       // CRITICAL: Filter out hidden content for faith-based app protection
       // Use proper Drizzle queries instead of raw SQL to fix naming violations
-      console.log('Getting discussions with filters: isPublic=true, not expired, not hidden');
+
       
       const discussionResults = await db
         .select({
@@ -2762,7 +2762,7 @@ export class DatabaseStorage implements IStorage {
         .limit(limit || 50)
         .offset(offset || 0);
       
-      console.log(`Raw discussions query returned ${discussionResults.length} results`);
+
 
       const soapResults = await db
         .select({
@@ -2995,7 +2995,7 @@ export class DatabaseStorage implements IStorage {
       let postReactions: Record<number, any[]> = {};
       if (processedDiscussions.length > 0) {
         const postIds = processedDiscussions.map(d => d.id);
-        console.log('Fetching reactions for post IDs:', postIds);
+
         try {
           const reactionsResult = await db
             .select({
@@ -3012,7 +3012,7 @@ export class DatabaseStorage implements IStorage {
               )
             );
             
-          console.log('Raw reactions result:', reactionsResult);
+
 
           // Process reactions into the format expected by frontend
           const reactionSummary: Record<string, { type: string; emoji: string; count: number; userReacted: boolean }> = {};
@@ -3045,7 +3045,7 @@ export class DatabaseStorage implements IStorage {
             postReactions[postId].push(reactionData);
           }
           
-          console.log('Final processed post reactions:', postReactions);
+
         } catch (error) {
           console.error('Error fetching reactions:', error);
           postReactions = {};
