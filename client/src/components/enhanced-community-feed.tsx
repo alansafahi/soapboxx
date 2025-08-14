@@ -42,6 +42,8 @@ import {
 import { FlagContentDialog } from './content-moderation/FlagContentDialog';
 import { ContentModerationStatus, HiddenContentPlaceholder } from './content-moderation/ContentModerationStatus';
 import FormattedContent from '../utils/FormattedContent';
+import ShareDialog from './ShareDialog';
+import { CommentDialog } from './CommentDialog';
 
 interface EnhancedPost {
   id: number;
@@ -226,6 +228,9 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
   const [selectedReaction, setSelectedReaction] = useState<{ postId: number; reactionType: string } | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [sharePost, setSharePost] = useState<EnhancedPost | null>(null);
+  const [commentDialogOpen, setCommentDialogOpen] = useState<number | null>(null);
 
   // Fetch discussions
   const { data: posts = [], isLoading, refetch } = useQuery<EnhancedPost[]>({
@@ -365,34 +370,12 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
   };
 
   const handleComment = (postId: number) => {
-    toast({
-      title: "Comment Feature",
-      description: "Comment functionality will be available soon!",
-    });
+    setCommentDialogOpen(postId);
   };
 
   const handleShare = (post: EnhancedPost) => {
-    if (navigator.share) {
-      navigator.share({
-        title: post.title,
-        text: post.content,
-        url: `${window.location.origin}/discussions?highlight=${post.id}`,
-      }).catch(() => {
-        // Fallback to copying to clipboard
-        navigator.clipboard.writeText(`${window.location.origin}/discussions?highlight=${post.id}`);
-        toast({
-          title: "Link copied",
-          description: "Discussion link copied to clipboard!",
-        });
-      });
-    } else {
-      // Fallback for browsers without Web Share API
-      navigator.clipboard.writeText(`${window.location.origin}/discussions?highlight=${post.id}`);
-      toast({
-        title: "Link copied",
-        description: "Discussion link copied to clipboard!",
-      });
-    }
+    setSharePost(post);
+    setShareDialogOpen(true);
   };
 
   const updateFilter = (key: keyof FilterOptions, value: any) => {
@@ -933,6 +916,34 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Share Dialog */}
+      {sharePost && (
+        <ShareDialog
+          isOpen={shareDialogOpen}
+          onClose={() => {
+            setShareDialogOpen(false);
+            setSharePost(null);
+          }}
+          title={`Share "${sharePost.title}"`}
+          content={sharePost.content}
+          url={`${window.location.origin}/discussions?highlight=${sharePost.id}`}
+        />
+      )}
+
+      {/* Comment Dialog */}
+      {commentDialogOpen && (
+        <CommentDialog
+          isOpen={true}
+          onClose={() => setCommentDialogOpen(null)}
+          targetType="discussion"
+          targetId={commentDialogOpen}
+          onCommentAdded={() => {
+            refetch();
+            setCommentDialogOpen(null);
+          }}
+        />
+      )}
       </div>
     </TooltipProvider>
   );
