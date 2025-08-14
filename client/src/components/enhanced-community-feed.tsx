@@ -732,7 +732,7 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                             onClick={() => handleComment(post.id)}
                           >
                             <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                            <span className="hidden sm:inline">Comment</span>
+                            <span>{post.commentCount || 0}</span>
                           </Button>
                           <Button 
                             variant="ghost" 
