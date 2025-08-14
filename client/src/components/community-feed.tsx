@@ -341,15 +341,15 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
   };
 
   const handleCommentClick = (discussionId: number) => {
-
+    console.log('Comment clicked for discussion:', discussionId);
     setCommentDialogOpen(discussionId);
   };
 
   const handleShareDiscussion = (discussionId: number) => {
-
+    console.log('Share clicked for discussion:', discussionId);
     const discussion = discussions.find(d => d.id === discussionId);
     if (!discussion) {
-
+      console.log('Discussion not found');
       return;
     }
 
