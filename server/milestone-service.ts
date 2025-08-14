@@ -137,7 +137,7 @@ class MilestoneService {
 
         // Award achievement bonus points through the centralized system
         if (pointsBonus > 0) {
-          await this.addPointsToUser(parseInt(userId), pointsBonus, `achievement_${achievementKey}`);
+          await this.addPointsToUser(Number(userId), pointsBonus, `achievement_${achievementKey}`);
         }
       }
     } catch (error) {
