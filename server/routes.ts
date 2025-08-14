@@ -2311,6 +2311,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all discussions (main endpoint for community feed)
+  app.get('/api/discussions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
+      const { limit = 50, offset = 0, highlight } = req.query;
+      
+      const discussions = await storage.getDiscussions(
+        parseInt(limit as string),
+        parseInt(offset as string),
+        undefined, // churchId
+        userId // currentUserId for reaction data
+      );
+      
+      res.json(discussions);
+    } catch (error) {
+      console.error('Error fetching discussions:', error);
+      res.status(500).json({ message: "Failed to fetch discussions" });
+    }
+  });
+
   // Pin/Unpin posts for pastors and church admins
   app.post('/api/discussions/:id/pin', isAuthenticated, async (req: any, res) => {
     try {
