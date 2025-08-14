@@ -516,7 +516,7 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
               <div 
                 key={discussion.id} 
                 id={`post-${discussion.id}`}
-                className={`py-6 first:pt-0 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer rounded-lg px-4 -mx-4 ${
+                className={`py-6 first:pt-0 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors rounded-lg px-4 -mx-4 ${
                   highlightId && discussion.id.toString() === highlightId 
                     ? 'ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10' 
                     : ''
@@ -542,7 +542,7 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
                         attachedMedia={discussion.attachedMedia}
                       />
                     </div>
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-4 relative z-10">
                       {/* Reaction Emojis */}
                       <div className="flex items-center space-x-1">
                         {['🙏', '✝️', '🕊️', '❤️'].map((emoji) => (
@@ -612,7 +612,7 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-
+                            console.log('Button clicked!', discussion.id);
                             handleCommentClick(discussion.id);
                           }}
                           className="text-gray-500 hover:text-blue-500 hover:bg-blue-50 transition-all duration-300"
@@ -638,7 +638,7 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-
+                            console.log('Share button clicked!', discussion.id);
                             handleShareDiscussion(discussion.id);
                           }}
                           className="text-gray-500 hover:text-green-500 hover:bg-green-50 transition-all duration-300"
