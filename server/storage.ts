@@ -7891,6 +7891,64 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Add general reaction to discussions and other content
+  async addReaction(reactionData: any): Promise<any> {
+    try {
+      const { userId, targetType, targetId, reactionType, emoji, intensity = 1 } = reactionData;
+
+      // Check if user already reacted with this type to avoid duplicates
+      const existingReaction = await db
+        .select()
+        .from(reactions)
+        .where(and(
+          eq(reactions.userId, userId),
+          eq(reactions.targetType, targetType),
+          eq(reactions.targetId, targetId),
+          eq(reactions.reactionType, reactionType)
+        ));
+
+      if (existingReaction.length > 0) {
+        // Remove existing reaction (toggle behavior)
+        await db
+          .delete(reactions)
+          .where(and(
+            eq(reactions.userId, userId),
+            eq(reactions.targetType, targetType),
+            eq(reactions.targetId, targetId),
+            eq(reactions.reactionType, reactionType)
+          ));
+        
+        return { success: true, action: 'removed' };
+      } else {
+        // Add new reaction
+        const [newReaction] = await db
+          .insert(reactions)
+          .values({
+            userId,
+            targetType,
+            targetId,
+            reactionType,
+            emoji,
+            intensity,
+            createdAt: new Date()
+          })
+          .returning();
+
+        // Track user activity for engagement
+        await this.trackUserActivity({
+          userId: userId,
+          activityType: 'reaction',
+          entityId: targetId,
+          points: 1,
+        });
+
+        return { success: true, action: 'added', reaction: newReaction };
+      }
+    } catch (error) {
+      throw new Error('Failed to add reaction');
+    }
+  }
+
   // Implementation of getFeedPosts - use the same query as getDiscussions
   async getFeedPosts(userId: string): Promise<any[]> {
     try {
