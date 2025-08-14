@@ -364,6 +364,37 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
     }
   };
 
+  const handleComment = (postId: number) => {
+    toast({
+      title: "Comment Feature",
+      description: "Comment functionality will be available soon!",
+    });
+  };
+
+  const handleShare = (post: EnhancedPost) => {
+    if (navigator.share) {
+      navigator.share({
+        title: post.title,
+        text: post.content,
+        url: `${window.location.origin}/discussions?highlight=${post.id}`,
+      }).catch(() => {
+        // Fallback to copying to clipboard
+        navigator.clipboard.writeText(`${window.location.origin}/discussions?highlight=${post.id}`);
+        toast({
+          title: "Link copied",
+          description: "Discussion link copied to clipboard!",
+        });
+      });
+    } else {
+      // Fallback for browsers without Web Share API
+      navigator.clipboard.writeText(`${window.location.origin}/discussions?highlight=${post.id}`);
+      toast({
+        title: "Link copied",
+        description: "Discussion link copied to clipboard!",
+      });
+    }
+  };
+
   const updateFilter = (key: keyof FilterOptions, value: any) => {
     setFilters(prev => ({ ...prev, [key]: value }));
   };
@@ -710,11 +741,21 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                         </div>
 
                         <div className="flex items-center space-x-1 sm:space-x-2">
-                          <Button variant="ghost" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-xs sm:text-sm px-2 sm:px-3"
+                            onClick={() => handleComment(post.id)}
+                          >
                             <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             <span className="hidden sm:inline">Comment</span>
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-xs sm:text-sm px-2 sm:px-3">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-xs sm:text-sm px-2 sm:px-3"
+                            onClick={() => handleShare(post)}
+                          >
                             <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             <span className="hidden sm:inline">Share</span>
                           </Button>
