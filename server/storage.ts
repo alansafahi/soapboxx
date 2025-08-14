@@ -7987,8 +7987,16 @@ export class DatabaseStorage implements IStorage {
             eq(reactions.targetId, targetId),
             eq(reactions.reactionType, reactionType)
           ));
+
+        // Deduct points for removing reaction
+        await this.trackUserActivity({
+          userId: userId,
+          activityType: 'reaction_removed',
+          entityId: targetId,
+          points: -1,
+        });
         
-        return { success: true, action: 'removed' };
+        return { success: true, action: 'removed', pointsAwarded: -1 };
       } else {
         // Add new reaction
         const [newReaction] = await db
@@ -8012,7 +8020,7 @@ export class DatabaseStorage implements IStorage {
           points: 1,
         });
 
-        return { success: true, action: 'added', reaction: newReaction };
+        return { success: true, action: 'added', reaction: newReaction, pointsAwarded: 1 };
       }
     } catch (error) {
       throw new Error('Failed to add reaction');

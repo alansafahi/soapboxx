@@ -302,7 +302,20 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
         }
       });
       
-      // Don't show success toast for reactions - they should be immediate and subtle
+      // Show points notification if points were awarded/deducted
+      if (data?.data?.pointsAwarded) {
+        const points = data.data.pointsAwarded;
+        const action = data.data.action;
+        
+        toast({
+          title: `${points > 0 ? '+' : ''}${points} SoapBox Points`,
+          description: points > 0 
+            ? "Thank you for engaging with the community!" 
+            : "Points deducted for removing reaction",
+          variant: points > 0 ? "default" : "destructive",
+          duration: 3000,
+        });
+      }
     },
     onError: (error: any) => {
       const errorMessage = error.message || "Failed to add reaction. Please try again.";
