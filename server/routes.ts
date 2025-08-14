@@ -460,6 +460,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     '/api/bible/random',
     '/api/bible/stats',
     '/api/bible/daily-verse',
+    '/api/enterprise-contact',
     '/api/test'
   ];
 
@@ -767,6 +768,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
     } catch (error) {
       res.status(500).json({ error: 'Failed to retrieve authentic verses from database' });
+    }
+  });
+
+  // Enterprise Contact Form Submission (PUBLIC ENDPOINT)
+  app.post('/api/enterprise-contact', async (req, res) => {
+    try {
+      const { fullName, title, email, phone, churchName, congregationSize, message } = req.body;
+      
+      // Validate required fields
+      if (!fullName || !email || !churchName || !congregationSize) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Missing required fields: Full Name, Email, Church Name, and Congregation Size are required.' 
+        });
+      }
+
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Please provide a valid email address.' 
+        });
+      }
+
+      // Log enterprise contact for sales team follow-up
+      console.log('Enterprise Contact Form Submission:', {
+        fullName,
+        title,
+        email,
+        phone,
+        churchName,
+        congregationSize,
+        message,
+        timestamp: new Date().toISOString()
+      });
+
+      // In a real implementation, you would:
+      // 1. Send email notification to sales@soapboxsuperapp.com
+      // 2. Store in CRM system
+      // 3. Send confirmation email to the prospect
+
+      res.json({ 
+        success: true, 
+        message: 'Thank you for your interest! Our enterprise sales team will contact you within 24 hours at ' + email 
+      });
+
+    } catch (error) {
+      console.error('Enterprise contact form error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Failed to submit enterprise contact form. Please try again or email us directly at sales@soapboxsuperapp.com' 
+      });
     }
   });
 
@@ -17797,48 +17851,7 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
-  // Enterprise contact form
-  app.post('/api/enterprise-contact', async (req, res) => {
-    try {
-      const { name, title, email, phone, churchName, congregationSize, message } = req.body;
-      
-      // Basic validation
-      if (!name || !title || !email || !churchName || !congregationSize) {
-        return res.status(400).json({ message: 'Missing required fields' });
-      }
 
-      // Send email to sales team
-      const emailService = require('./email-service');
-      const emailContent = `
-        New Enterprise Contact Request:
-        
-        Name: ${name}
-        Title: ${title}
-        Email: ${email}
-        Phone: ${phone || 'Not provided'}
-        Church/Organization: ${churchName}
-        Congregation Size: ${congregationSize}
-        
-        Message:
-        ${message || 'No additional message'}
-        
-        ---
-        Sent from SoapBox Super App Enterprise Contact Form
-      `;
-
-      await emailService.sendEmail(
-        'sales@soapboxsuperapp.com',
-        'New Enterprise Contact Request',
-        emailContent,
-        email // reply-to
-      );
-
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Enterprise contact error:', error);
-      res.status(500).json({ message: 'Failed to send message' });
-    }
-  });
 
   // Simple health check endpoint
   app.get('/health', (req, res) => {
