@@ -638,60 +638,7 @@ export default function SimpleLanding() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-16 sm:py-24 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Trusted by Faith Communities
-            </h2>
-            <p className="text-lg sm:text-xl text-gray-600 px-4">
-              See how churches are growing and connecting with SoapBox Super App
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-              <div className="flex mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                ))}
-              </div>
-              <p className="text-gray-600 mb-6">
-                "SoapBox Super App transformed how our congregation connects. Prayer requests are answered faster, and our community feels more united than ever."
-              </p>
-              <div className="font-semibold text-gray-900">Pastor Michael Johnson</div>
-              <div className="text-gray-500">Grace Community Church</div>
-            </div>
-            
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-              <div className="flex mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                ))}
-              </div>
-              <p className="text-gray-600 mb-6">
-                "The volunteer coordination features saved us hours each week. Now we can focus more on ministry and less on administration."
-              </p>
-              <div className="font-semibold text-gray-900">Sarah Williams</div>
-              <div className="text-gray-500">Community Outreach Director</div>
-            </div>
-            
-            <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-              <div className="flex mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
-                ))}
-              </div>
-              <p className="text-gray-600 mb-6">
-                "Our small group Bible studies have never been more engaging. The discussion tools help everyone participate meaningfully."
-              </p>
-              <div className="font-semibold text-gray-900">David Chen</div>
-              <div className="text-gray-500">Small Groups Pastor</div>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
 
 
