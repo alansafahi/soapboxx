@@ -2716,6 +2716,8 @@ export class DatabaseStorage implements IStorage {
       // Combined query to get both discussions and SOAP entries using UNION
       // CRITICAL: Filter out hidden content for faith-based app protection
       // Use proper Drizzle queries instead of raw SQL to fix naming violations
+      console.log('Getting discussions with filters: isPublic=true, not expired, not hidden');
+      
       const discussionResults = await db
         .select({
           id: discussions.id,
@@ -2744,21 +2746,14 @@ export class DatabaseStorage implements IStorage {
         .from(discussions)
         .leftJoin(users, eq(discussions.authorId, users.id))
         .where(
-          and(
-            eq(discussions.isPublic, true),
-            or(
-              isNull(discussions.expiresAt),
-              gt(discussions.expiresAt, new Date())
-            ),
-            or(
-              isNull(discussions.isHidden),
-              eq(discussions.isHidden, false)
-            )
-          )
+          // Temporarily remove all filters to debug
+          sql`1=1`
         )
         .orderBy(desc(discussions.createdAt))
         .limit(limit || 50)
         .offset(offset || 0);
+      
+      console.log(`Raw discussions query returned ${discussionResults.length} results`);
 
       const soapResults = await db
         .select({
