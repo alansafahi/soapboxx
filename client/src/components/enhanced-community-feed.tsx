@@ -288,9 +288,19 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
         intensity: 1
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Reaction added successfully:', data);
+      
       // Force refetch discussions to get updated counts
       refetch();
+      
+      // Also invalidate all discussion queries to ensure fresh data
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return Array.isArray(query.queryKey) && 
+                 query.queryKey[0] === '/api/discussions';
+        }
+      });
       
       toast({
         title: "Reaction added",
