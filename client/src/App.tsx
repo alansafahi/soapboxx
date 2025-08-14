@@ -25,6 +25,7 @@ const CommunityChatFeaturePage = lazy(() => import("./pages/community-chat-featu
 const VolunteerHubFeaturePage = lazy(() => import("./pages/volunteer-hub-feature"));
 const AboutUsPage = lazy(() => import("./pages/about-us"));
 const ContactUsPage = lazy(() => import("./pages/contact-us"));
+const EnterpriseContactPage = lazy(() => import("./pages/enterprise-contact"));
 const SupportPage = lazy(() => import("./pages/support"));
 const HelpDocsPage = lazy(() => import("./pages/help-docs"));
 const LoginPage = lazy(() => import("./pages/login"));
@@ -242,6 +243,7 @@ function AppRouter() {
                                     <Route path="/features/volunteer-hub" component={VolunteerHubFeaturePage} />
                                     <Route path="/about-us" component={AboutUsPage} />
                                     <Route path="/contact-us" component={ContactUsPage} />
+                                    <Route path="/enterprise-contact" component={EnterpriseContactPage} />
                                     <Route path="/contact" component={ContactUsPage} />
                                     <Route path="/support" component={SupportPage} />
                                     <Route path="/help-docs" component={HelpDocsPage} />

@@ -17797,6 +17797,49 @@ Please provide suggestions for the missing or incomplete sections.`
     }
   });
 
+  // Enterprise contact form
+  app.post('/api/enterprise-contact', async (req, res) => {
+    try {
+      const { name, title, email, phone, churchName, congregationSize, message } = req.body;
+      
+      // Basic validation
+      if (!name || !title || !email || !churchName || !congregationSize) {
+        return res.status(400).json({ message: 'Missing required fields' });
+      }
+
+      // Send email to sales team
+      const emailService = require('./email-service');
+      const emailContent = `
+        New Enterprise Contact Request:
+        
+        Name: ${name}
+        Title: ${title}
+        Email: ${email}
+        Phone: ${phone || 'Not provided'}
+        Church/Organization: ${churchName}
+        Congregation Size: ${congregationSize}
+        
+        Message:
+        ${message || 'No additional message'}
+        
+        ---
+        Sent from SoapBox Super App Enterprise Contact Form
+      `;
+
+      await emailService.sendEmail(
+        'sales@soapboxsuperapp.com',
+        'New Enterprise Contact Request',
+        emailContent,
+        email // reply-to
+      );
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Enterprise contact error:', error);
+      res.status(500).json({ message: 'Failed to send message' });
+    }
+  });
+
   // Simple health check endpoint
   app.get('/health', (req, res) => {
     res.json({ 
