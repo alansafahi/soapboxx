@@ -2991,6 +2991,7 @@ export class DatabaseStorage implements IStorage {
       let postReactions: Record<number, any[]> = {};
       if (discussions.length > 0) {
         const postIds = discussions.map(d => d.id);
+        console.log('Fetching reactions for post IDs:', postIds);
         try {
           const reactionsResult = await db
             .select({
@@ -3006,6 +3007,8 @@ export class DatabaseStorage implements IStorage {
                 inArray(reactions.targetId, postIds)
               )
             );
+            
+          console.log('Raw reactions result:', reactionsResult);
 
           // Process reactions into the format expected by frontend
           const reactionSummary: Record<string, { type: string; emoji: string; count: number; userReacted: boolean }> = {};
@@ -3037,6 +3040,8 @@ export class DatabaseStorage implements IStorage {
             }
             postReactions[postId].push(reactionData);
           }
+          
+          console.log('Final processed post reactions:', postReactions);
         } catch (error) {
           console.error('Error fetching reactions:', error);
           postReactions = {};
