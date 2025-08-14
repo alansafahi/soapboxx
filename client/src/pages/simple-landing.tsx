@@ -1,5 +1,5 @@
 import { Button } from "../components/ui/button";
-import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe, Check, Gift, Cross, Sparkles, Facebook, Twitter, Linkedin } from "lucide-react";
+import { Heart, Users, Calendar, MessageCircle, Star, ChevronRight, Play, Shield, Zap, Globe, Check, Gift, Cross, Sparkles, Facebook, Twitter, Linkedin, Crown } from "lucide-react";
 import soapboxLogo from "../assets/soapbox-logo.jpeg";
 import { useEffect } from "react";
 
@@ -583,6 +583,28 @@ export default function SimpleLanding() {
                 </ul>
                 <Button className="w-full bg-yellow-600 hover:bg-yellow-700 py-3 text-sm sm:text-base text-white">Transform Your Calling</Button>
               </div>
+            </div>
+          </div>
+
+          {/* Enterprise CTA */}
+          <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-6 sm:p-8 text-white text-center max-w-4xl mx-auto mb-16">
+            <div className="flex items-center justify-center mb-4">
+              <div className="w-8 h-8 text-yellow-300 mr-3 text-2xl">👑</div>
+              <h3 className="text-xl sm:text-2xl font-bold">Large Church or Multi-Campus Ministry?</h3>
+            </div>
+            <p className="text-lg sm:text-xl mb-6 opacity-90">
+              Need custom features, enterprise security, or dedicated support for your growing ministry?
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-3 text-lg font-semibold shadow-lg"
+                onClick={() => window.location.href = '/contact-us'}
+              >
+                Contact Us for Custom Solutions
+              </Button>
+              <span className="text-sm opacity-75">
+                ✨ Enterprise pricing • White-label options • Dedicated account manager
+              </span>
             </div>
           </div>
 
