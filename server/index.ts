@@ -71,10 +71,15 @@ app.use('/api/cross-campus-members', async (req, res, next) => {
 // PUBLIC ENTERPRISE CONTACT ENDPOINT - No authentication required
 app.post('/api/enterprise-contact', async (req, res) => {
   try {
-    const { name, title, email, phone, churchName, congregationSize, message } = req.body;
+    console.log('Enterprise form submission received (from index.ts):', req.body);
+    const { fullName, name, title, email, phone, churchName, congregationSize, message } = req.body;
+    
+    // Use fullName if provided, otherwise fallback to name for backward compatibility
+    const actualName = fullName || name;
     
     // Basic validation
-    if (!name || !title || !email || !churchName || !congregationSize) {
+    if (!actualName || !title || !email || !churchName || !congregationSize) {
+      console.log('Missing fields - actualName:', actualName, 'title:', title, 'email:', email, 'churchName:', churchName, 'congregationSize:', congregationSize);
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -83,7 +88,7 @@ app.post('/api/enterprise-contact', async (req, res) => {
     const emailContent = `
       <h2>New Enterprise Contact Request</h2>
       
-      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Name:</strong> ${actualName}</p>
       <p><strong>Title:</strong> ${title}</p>
       <p><strong>Email:</strong> ${email}</p>
       <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
@@ -99,7 +104,7 @@ app.post('/api/enterprise-contact', async (req, res) => {
 
     const result = await sendEmail({
       to: 'sales@soapboxsuperapp.com',
-      subject: `New Enterprise Contact Request from ${name}`,
+      subject: `New Enterprise Contact Request from ${actualName}`,
       html: emailContent
     });
 
