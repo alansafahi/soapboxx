@@ -338,14 +338,14 @@ export default function EnterpriseContact() {
                       id="message"
                       name="message"
                       rows={6}
-                      maxLength={1000}
+                      maxLength={1500}
                       value={formData.message}
                       onChange={handleInputChange}
                       className="w-full px-4 py-4 pb-8 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white hover:border-gray-300 resize-none"
                       placeholder="Share your specific needs, timeline, current challenges, or questions about how SoapBox can transform your ministry. Include any technical requirements, integration needs, or special considerations for your congregation..."
                     />
                     <div className="absolute bottom-2 right-3 text-xs text-gray-500">
-                      {formData.message.length}/1000
+                      {formData.message.length}/1500
                     </div>
                   </div>
                 </div>
