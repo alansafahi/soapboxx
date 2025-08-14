@@ -302,10 +302,7 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
         }
       });
       
-      toast({
-        title: "Reaction added",
-        description: "Your reaction has been shared with the community",
-      });
+      // Don't show success toast for reactions - they should be immediate and subtle
     },
     onError: (error: any) => {
       const errorMessage = error.message || "Failed to add reaction. Please try again.";
@@ -331,17 +328,12 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
     const reaction = REACTION_TYPES.find(r => r.type === reactionType);
     if (!reaction) return;
 
-    const existingReaction = post.reactions?.find(r => r.type === reactionType);
-    
-    if (existingReaction?.userReacted) {
-      removeReactionMutation.mutate({ postId: post.id, reactionType });
-    } else {
-      addReactionMutation.mutate({ 
-        postId: post.id, 
-        reactionType, 
-        emoji: reaction.emoji 
-      });
-    }
+    // Always use the unified add reaction endpoint which handles toggle automatically
+    addReactionMutation.mutate({ 
+      postId: post.id, 
+      reactionType, 
+      emoji: reaction.emoji 
+    });
   };
 
   // Delete post mutation
