@@ -245,26 +245,26 @@ export default function EnterpriseContact() {
                 </div>
                 
                 <div className="space-y-6">
-                  <div>
-                    <label htmlFor="churchName" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                      <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
-                        <Building2 className="w-4 h-4 text-indigo-600" />
-                      </div>
-                      Church/Organization Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="churchName"
-                      name="churchName"
-                      required
-                      value={formData.churchName}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white hover:border-gray-300"
-                      placeholder="First Baptist Church, Grace Community, etc."
-                    />
-                  </div>
-
                   <div className="grid md:grid-cols-2 gap-8">
+                    <div>
+                      <label htmlFor="churchName" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                        <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
+                          <Building2 className="w-4 h-4 text-indigo-600" />
+                        </div>
+                        Church/Organization Name *
+                      </label>
+                      <input
+                        type="text"
+                        id="churchName"
+                        name="churchName"
+                        required
+                        value={formData.churchName}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white hover:border-gray-300"
+                        placeholder="First Baptist Church, Grace Community, etc."
+                      />
+                    </div>
+
                     <div>
                       <label htmlFor="cityState" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
                         <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
@@ -283,7 +283,9 @@ export default function EnterpriseContact() {
                         placeholder="Dallas, TX or Los Angeles, CA"
                       />
                     </div>
-                    
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-8">
                     <div>
                       <label htmlFor="numberOfCampuses" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
                         <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center mr-3">
@@ -310,30 +312,30 @@ export default function EnterpriseContact() {
                         <option value="21+">21+ Campuses</option>
                       </select>
                     </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="congregationSize" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
-                      <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center mr-3">
-                        <Users className="w-4 h-4 text-teal-600" />
-                      </div>
-                      Total Congregation Size *
-                    </label>
-                    <select
-                      id="congregationSize"
-                      name="congregationSize"
-                      required
-                      value={formData.congregationSize}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white hover:border-gray-300"
-                    >
-                      <option value="">Select total congregation size</option>
-                      <option value="250-500">250-500 members</option>
-                      <option value="500-1000">500-1,000 members</option>
-                      <option value="1000-2500">1,000-2,500 members</option>
-                      <option value="2500-5000">2,500-5,000 members</option>
-                      <option value="5000+">5,000+ members</option>
-                    </select>
+                    
+                    <div>
+                      <label htmlFor="congregationSize" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                        <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center mr-3">
+                          <Users className="w-4 h-4 text-teal-600" />
+                        </div>
+                        Total Congregation Size *
+                      </label>
+                      <select
+                        id="congregationSize"
+                        name="congregationSize"
+                        required
+                        value={formData.congregationSize}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white hover:border-gray-300"
+                      >
+                        <option value="">Select total congregation size</option>
+                        <option value="250-500">250-500 members</option>
+                        <option value="500-1000">500-1,000 members</option>
+                        <option value="1000-2500">1,000-2,500 members</option>
+                        <option value="2500-5000">2,500-5,000 members</option>
+                        <option value="5000+">5,000+ members</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
 
