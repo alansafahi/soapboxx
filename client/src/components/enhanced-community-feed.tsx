@@ -938,8 +938,10 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
           isOpen={true}
           onClose={() => {
             setCommentDialogOpen(null);
-            // Refetch discussions to update comment counts
-            refetch();
+            // Force refetch to ensure comment counts are updated
+            setTimeout(() => {
+              refetch();
+            }, 100);
           }}
           postId={commentDialogOpen}
           postType="discussion"
