@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Button } from "../components/ui/button";
 import { ArrowLeft, Building2, Users, Mail, Phone, MessageSquare, User, Briefcase, Star, Sparkles, MapPin } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
+import { useLocation } from "wouter";
 
 export default function EnterpriseContact() {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [formData, setFormData] = useState({
     name: "",
     title: "",
@@ -126,7 +128,7 @@ export default function EnterpriseContact() {
           <Button
             variant="ghost"
             className="mb-6 text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors"
-            onClick={() => window.history.back()}
+            onClick={() => setLocation('/pricing')}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Pricing
