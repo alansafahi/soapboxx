@@ -347,6 +347,10 @@ export default function SimpleLanding() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base"><strong>28 Reading Plans</strong> included</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
                     <span className="text-sm sm:text-base">Ad-free experience for everyone</span>
                   </li>
                 </ul>
@@ -388,6 +392,10 @@ export default function SimpleLanding() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base"><strong>53 Reading Plans</strong> (28 Disciple + 25 Servant plans)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
                     <span className="text-sm sm:text-base">Enhanced Volunteer opportunity matching</span>
                   </li>
                   <li className="flex items-center gap-2">
@@ -417,6 +425,14 @@ export default function SimpleLanding() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base"><strong>All 69 Reading Plans</strong> (Complete library access)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base"><strong>DIVINE Volunteer Management</strong> - AI-powered matching & coordination</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
                     <span className="text-sm sm:text-base">AI-Powered Audio Bible</span>
                   </li>
                   <li className="flex items-center gap-2">
@@ -425,7 +441,15 @@ export default function SimpleLanding() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Custom Reading Plan Generator (EMI-powered)</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
                     <span className="text-sm sm:text-base">Unlimited offline content access</span>
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
+                    <span className="text-sm sm:text-base">Priority customer support</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />

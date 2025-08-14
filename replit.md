@@ -12,6 +12,7 @@ The SoapBox Super App is a comprehensive faith community platform designed to co
 - **Faith-Based Gamification System**: Complete SoapBox Points reward system with spiritually meaningful values (Prayer: 5pts, Amen: 3pts, Fire: 2pts, Heart: 1pt)
 - **Community Engagement Features**: Enhanced discussion reactions, popup notifications, and leaderboard integration for community building
 - **Production-Ready Codebase**: All TypeScript errors resolved (638 → 0), debug logging removed, authentication patterns standardized, ready for deployment
+- **Enhanced Pricing Strategy**: Updated pricing page with actual reading plan counts (Disciple: 28, Servant: 53, Torchbearer: 69) and premium Torchbearer features including DIVINE volunteer management tools to drive subscription upgrades
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
