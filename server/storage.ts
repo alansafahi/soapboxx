@@ -2987,7 +2987,63 @@ export class DatabaseStorage implements IStorage {
         }
       }
 
-      // Add comment counts, like counts, and like status to all posts
+      // Get reaction data for all posts
+      let postReactions: Record<number, any[]> = {};
+      if (discussions.length > 0) {
+        const postIds = discussions.map(d => d.id);
+        try {
+          const reactionsResult = await db
+            .select({
+              targetId: reactions.targetId,
+              reactionType: reactions.reactionType,
+              emoji: reactions.emoji,
+              userId: reactions.userId
+            })
+            .from(reactions)
+            .where(
+              and(
+                eq(reactions.targetType, 'post'),
+                inArray(reactions.targetId, postIds)
+              )
+            );
+
+          // Process reactions into the format expected by frontend
+          const reactionSummary: Record<string, { type: string; emoji: string; count: number; userReacted: boolean }> = {};
+          
+          for (const reaction of reactionsResult) {
+            const postId = Number(reaction.targetId);
+            const key = `${postId}_${reaction.reactionType}`;
+            
+            if (!reactionSummary[key]) {
+              reactionSummary[key] = {
+                type: reaction.reactionType,
+                emoji: reaction.emoji,
+                count: 0,
+                userReacted: false
+              };
+            }
+            
+            reactionSummary[key].count += 1;
+            if (currentUserId && reaction.userId === currentUserId) {
+              reactionSummary[key].userReacted = true;
+            }
+          }
+          
+          // Group reactions by post ID
+          for (const [key, reactionData] of Object.entries(reactionSummary)) {
+            const postId = Number(key.split('_')[0]);
+            if (!postReactions[postId]) {
+              postReactions[postId] = [];
+            }
+            postReactions[postId].push(reactionData);
+          }
+        } catch (error) {
+          console.error('Error fetching reactions:', error);
+          postReactions = {};
+        }
+      }
+
+      // Add comment counts, like counts, like status, and reactions to all posts
       const discussionsWithCounts = discussions.map(discussion => ({
         ...discussion,
         commentCount: discussion.type === 'discussion' 
@@ -2998,7 +3054,8 @@ export class DatabaseStorage implements IStorage {
           : (soapLikeCounts[discussion.id] || 0),
         isLiked: discussion.type === 'discussion'
           ? userLikedDiscussions.has(discussion.id)
-          : userLikedSoap.has(discussion.id)
+          : userLikedSoap.has(discussion.id),
+        reactions: postReactions[discussion.id] || []
       }));
 
       if (discussionsWithCounts.length > 0) {
