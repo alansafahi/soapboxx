@@ -39,6 +39,30 @@ export default function EnterpriseContact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Frontend validation
+    if (!formData.name.trim() || !formData.title.trim() || !formData.email.trim() || 
+        !formData.churchName.trim() || !formData.cityState.trim() || 
+        !formData.numberOfCampuses || !formData.congregationSize) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email.trim())) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
