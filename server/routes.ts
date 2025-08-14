@@ -2314,9 +2314,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all discussions (main endpoint for community feed)
   app.get('/api/discussions', isAuthenticated, async (req: any, res) => {
     try {
+      console.log('Discussions endpoint called with user:', req.user?.claims?.sub || req.session?.userId);
       const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
       const { limit = 50, offset = 0, highlight } = req.query;
       
+      console.log('Calling storage.getDiscussions with userId:', userId);
       const discussions = await storage.getDiscussions(
         parseInt(limit as string),
         parseInt(offset as string),
@@ -2324,10 +2326,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId // currentUserId for reaction data
       );
       
+      console.log(`Found ${discussions.length} discussions`);
       res.json(discussions);
     } catch (error) {
       console.error('Error fetching discussions:', error);
-      res.status(500).json({ message: "Failed to fetch discussions" });
+      res.status(500).json({ message: "Failed to fetch discussions", error: error.message });
     }
   });
 

@@ -502,7 +502,7 @@ export interface IStorage {
   createNotification(notification: InsertNotification): Promise<Notification>;
   
   // Discussion operations
-  getDiscussions(churchId?: number): Promise<Discussion[]>;
+  getDiscussions(limit?: number, offset?: number, churchId?: number, currentUserId?: string, includeFlagged?: boolean): Promise<Discussion[]>;
   getDiscussion(id: number): Promise<Discussion | undefined>;
   createDiscussion(discussion: InsertDiscussion): Promise<Discussion>;
   updateDiscussion(id: number, updates: Partial<Discussion>): Promise<Discussion>;
