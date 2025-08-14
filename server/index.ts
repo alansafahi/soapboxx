@@ -72,14 +72,14 @@ app.use('/api/cross-campus-members', async (req, res, next) => {
 app.post('/api/enterprise-contact', async (req, res) => {
   try {
     console.log('Enterprise form submission received (from index.ts):', req.body);
-    const { fullName, name, title, email, phone, churchName, congregationSize, message } = req.body;
+    const { fullName, name, title, email, phone, churchName, cityState, numberOfCampuses, congregationSize, message } = req.body;
     
     // Use fullName if provided, otherwise fallback to name for backward compatibility
     const actualName = fullName || name;
     
     // Basic validation
-    if (!actualName || !title || !email || !churchName || !congregationSize) {
-      console.log('Missing fields - actualName:', actualName, 'title:', title, 'email:', email, 'churchName:', churchName, 'congregationSize:', congregationSize);
+    if (!actualName || !title || !email || !churchName || !cityState || !numberOfCampuses || !congregationSize) {
+      console.log('Missing fields - actualName:', actualName, 'title:', title, 'email:', email, 'churchName:', churchName, 'cityState:', cityState, 'numberOfCampuses:', numberOfCampuses, 'congregationSize:', congregationSize);
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -93,7 +93,9 @@ app.post('/api/enterprise-contact', async (req, res) => {
       <p><strong>Email:</strong> ${email}</p>
       <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
       <p><strong>Church/Organization:</strong> ${churchName}</p>
-      <p><strong>Congregation Size:</strong> ${congregationSize}</p>
+      <p><strong>City, State:</strong> ${cityState}</p>
+      <p><strong>Number of Campuses:</strong> ${numberOfCampuses}</p>
+      <p><strong>Total Congregation Size:</strong> ${congregationSize}</p>
       
       <h3>Message:</h3>
       <p>${message || 'No additional message'}</p>

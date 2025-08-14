@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "../components/ui/button";
-import { ArrowLeft, Building2, Users, Mail, Phone, MessageSquare, User, Briefcase, Star, Sparkles } from "lucide-react";
+import { ArrowLeft, Building2, Users, Mail, Phone, MessageSquare, User, Briefcase, Star, Sparkles, MapPin } from "lucide-react";
 import { useToast } from "../hooks/use-toast";
 
 export default function EnterpriseContact() {
@@ -11,6 +11,8 @@ export default function EnterpriseContact() {
     email: "",
     phone: "",
     churchName: "",
+    cityState: "",
+    numberOfCampuses: "",
     congregationSize: "",
     message: ""
   });
@@ -40,6 +42,8 @@ export default function EnterpriseContact() {
           email: formData.email,
           phone: formData.phone,
           churchName: formData.churchName,
+          cityState: formData.cityState,
+          numberOfCampuses: formData.numberOfCampuses,
           congregationSize: formData.congregationSize,
           message: formData.message
         })
@@ -60,6 +64,8 @@ export default function EnterpriseContact() {
           email: "",
           phone: "",
           churchName: "",
+          cityState: "",
+          numberOfCampuses: "",
           congregationSize: "",
           message: ""
         });
@@ -227,7 +233,7 @@ export default function EnterpriseContact() {
                   <h3 className="text-xl font-bold text-gray-900">Ministry Information</h3>
                 </div>
                 
-                <div className="grid md:grid-cols-2 gap-8">
+                <div className="space-y-6">
                   <div>
                     <label htmlFor="churchName" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
                       <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center mr-3">
@@ -246,13 +252,61 @@ export default function EnterpriseContact() {
                       placeholder="First Baptist Church, Grace Community, etc."
                     />
                   </div>
-                  
+
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div>
+                      <label htmlFor="cityState" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                        <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
+                          <MapPin className="w-4 h-4 text-emerald-600" />
+                        </div>
+                        City, State *
+                      </label>
+                      <input
+                        type="text"
+                        id="cityState"
+                        name="cityState"
+                        required
+                        value={formData.cityState}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white hover:border-gray-300"
+                        placeholder="Dallas, TX or Los Angeles, CA"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="numberOfCampuses" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
+                        <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center mr-3">
+                          <Building2 className="w-4 h-4 text-violet-600" />
+                        </div>
+                        Number of Campuses *
+                      </label>
+                      <select
+                        id="numberOfCampuses"
+                        name="numberOfCampuses"
+                        required
+                        value={formData.numberOfCampuses}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white hover:border-gray-300"
+                      >
+                        <option value="">Select number of campuses</option>
+                        <option value="1">1 Campus (Single Location)</option>
+                        <option value="2">2 Campuses</option>
+                        <option value="3">3 Campuses</option>
+                        <option value="4">4 Campuses</option>
+                        <option value="5">5 Campuses</option>
+                        <option value="6-10">6-10 Campuses</option>
+                        <option value="11-20">11-20 Campuses</option>
+                        <option value="21+">21+ Campuses</option>
+                      </select>
+                    </div>
+                  </div>
+
                   <div>
                     <label htmlFor="congregationSize" className="flex items-center text-sm font-semibold text-gray-700 mb-3">
                       <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center mr-3">
                         <Users className="w-4 h-4 text-teal-600" />
                       </div>
-                      Congregation Size *
+                      Total Congregation Size *
                     </label>
                     <select
                       id="congregationSize"
@@ -262,13 +316,12 @@ export default function EnterpriseContact() {
                       onChange={handleInputChange}
                       className="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200 bg-gray-50 focus:bg-white hover:border-gray-300"
                     >
-                      <option value="">Select congregation size</option>
+                      <option value="">Select total congregation size</option>
                       <option value="250-500">250-500 members</option>
                       <option value="500-1000">500-1,000 members</option>
                       <option value="1000-2500">1,000-2,500 members</option>
                       <option value="2500-5000">2,500-5,000 members</option>
                       <option value="5000+">5,000+ members</option>
-                      <option value="multi-campus">Multi-campus ministry</option>
                     </select>
                   </div>
                 </div>
