@@ -606,25 +606,19 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
                         whileTap={{ scale: 0.95 }}
                         transition={{ type: "spring", stiffness: 400, damping: 17 }}
                       >
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <button 
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            console.log('Button clicked!', discussion.id);
+                            console.log('COMMENT BUTTON CLICKED!', discussion.id);
+                            alert('Comment button clicked for discussion ' + discussion.id);
                             handleCommentClick(discussion.id);
                           }}
-                          className="text-gray-500 hover:text-blue-500 hover:bg-blue-50 transition-all duration-300"
+                          className="flex items-center space-x-1 px-3 py-1 text-gray-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-all duration-300"
                         >
-                          <motion.div
-                            whileHover={{ rotate: [0, -10, 10, 0] }}
-                            transition={{ duration: 0.5 }}
-                          >
-                            <MessageCircle className="w-4 h-4 mr-1" />
-                          </motion.div>
-                          {discussion.commentCount || 0}
-                        </Button>
+                          <MessageCircle className="w-4 h-4" />
+                          <span>{discussion.commentCount || 0}</span>
+                        </button>
                       </motion.div>
                       
                       <motion.div
