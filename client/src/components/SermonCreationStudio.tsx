@@ -826,11 +826,11 @@ export default function SermonCreationStudio() {
                     <p className="text-orange-800 text-sm leading-relaxed">{currentOutline.callToAction}</p>
                   </div>
                   
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 dark:text-gray-300 mb-2">Scripture References</h4>
+                  <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Scripture References</h4>
                     <div className="flex flex-wrap gap-2">
                       {currentOutline.scriptureReferences.map((ref, idx) => (
-                        <Badge key={idx} variant="outline">{ref}</Badge>
+                        <Badge key={idx} variant="outline" className="bg-white dark:bg-gray-600 border-gray-300 dark:border-gray-500 text-gray-700 dark:text-gray-200">{ref}</Badge>
                       ))}
                     </div>
                   </div>
