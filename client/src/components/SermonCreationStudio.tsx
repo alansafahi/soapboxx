@@ -880,7 +880,7 @@ export default function SermonCreationStudio() {
               {illustrations.length > 0 ? (
                 <div className="space-y-4">
                   {/* Selection Controls */}
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-600">
                     <div className="flex items-center space-x-4">
                       <label className="flex items-center space-x-2">
                         <input
@@ -895,20 +895,20 @@ export default function SermonCreationStudio() {
                           }}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
-                        <span className="text-sm font-medium text-gray-700">Select All Stories</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Select All Stories</span>
                       </label>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
                         {selectedStories.size} of {illustrations.length} selected
                       </span>
                     </div>
                     {selectedStories.size > 0 && (
-                      <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      <span className="text-xs bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-200 px-2 py-1 rounded">
                         These stories will be included in enhancement
                       </span>
                     )}
                   </div>
                   {illustrations.map((illustration, idx) => (
-                    <Card key={idx} className="border border-gray-200">
+                    <Card key={idx} className="border border-gray-200 dark:border-gray-700">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-start space-x-3">
@@ -928,7 +928,7 @@ export default function SermonCreationStudio() {
                               className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                             />
                             <div>
-                              <h4 className="font-semibold text-gray-900">{illustration.title}</h4>
+                              <h4 className="font-semibold text-gray-900 dark:text-gray-100">{illustration.title}</h4>
                             </div>
                           </div>
                           <Badge 
@@ -938,15 +938,15 @@ export default function SermonCreationStudio() {
                             {Math.round(illustration.relevanceScore * 100)}% match
                           </Badge>
                         </div>
-                        <p className="text-sm text-gray-700 mb-3 leading-relaxed">{illustration.story}</p>
-                        <div className="bg-blue-50 p-3 rounded-md mb-3">
-                          <p className="text-sm text-blue-800"><strong>Application:</strong> {illustration.application}</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">{illustration.story}</p>
+                        <div className="bg-blue-50 dark:bg-blue-900 p-3 rounded-md mb-3">
+                          <p className="text-sm text-blue-800 dark:text-blue-200"><strong>Application:</strong> {illustration.application}</p>
                         </div>
                         
                         {/* Visual Elements Section */}
                         {illustration.visualElements && (
-                          <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-3">
-                            <h5 className="font-semibold text-purple-900 mb-2 flex items-center">
+                          <div className="bg-purple-50 dark:bg-purple-900 border border-purple-200 dark:border-purple-700 rounded-lg p-4 mb-3">
+                            <h5 className="font-semibold text-purple-900 dark:text-purple-200 mb-2 flex items-center">
                               <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
                               </svg>
@@ -954,25 +954,25 @@ export default function SermonCreationStudio() {
                             </h5>
                             <div className="space-y-3 text-sm">
                               <div>
-                                <span className="font-medium text-purple-800">Slide Title:</span>
-                                <span className="ml-2 text-gray-700">{illustration.visualElements.slideTitle}</span>
+                                <span className="font-medium text-purple-800 dark:text-purple-300">Slide Title:</span>
+                                <span className="ml-2 text-gray-700 dark:text-gray-300">{illustration.visualElements.slideTitle}</span>
                               </div>
                               
                               {/* Presentation Style Information */}
                               {(illustration.visualElements.audienceStyle || illustration.visualElements.themeStyle) && (
                                 <div className="space-y-3">
-                                  <span className="font-medium text-purple-800">Presentation Style Guide:</span>
-                                  <div className="bg-purple-50 p-3 rounded-lg border border-purple-100">
-                                    <div className="grid grid-cols-1 gap-2 text-xs text-gray-600">
+                                  <span className="font-medium text-purple-800 dark:text-purple-300">Presentation Style Guide:</span>
+                                  <div className="bg-purple-50 dark:bg-purple-800 p-3 rounded-lg border border-purple-100 dark:border-purple-600">
+                                    <div className="grid grid-cols-1 gap-2 text-xs text-gray-600 dark:text-gray-300">
                                       {illustration.visualElements.audienceStyle && (
                                         <div>
-                                          <span className="font-medium text-purple-600">Audience Style:</span>
+                                          <span className="font-medium text-purple-600 dark:text-purple-300">Audience Style:</span>
                                           <span className="ml-1 capitalize">{illustration.visualElements.audienceStyle}</span>
                                         </div>
                                       )}
                                       {illustration.visualElements.themeStyle && (
                                         <div>
-                                          <span className="font-medium text-purple-600">Theme Elements:</span>
+                                          <span className="font-medium text-purple-600 dark:text-purple-300">Theme Elements:</span>
                                           <span className="ml-1">{illustration.visualElements.themeStyle}</span>
                                         </div>
                                       )}
@@ -982,13 +982,13 @@ export default function SermonCreationStudio() {
                               )}
                               
                               <div>
-                                <span className="font-medium text-purple-800">Visual Description:</span>
-                                <span className="ml-2 text-gray-700">{illustration.visualElements.keyImage}</span>
+                                <span className="font-medium text-purple-800 dark:text-purple-300">Visual Description:</span>
+                                <span className="ml-2 text-gray-700 dark:text-gray-300">{illustration.visualElements.keyImage}</span>
                               </div>
                               {illustration.visualElements.bulletPoints && (
                                 <div>
-                                  <span className="font-medium text-purple-800">Key Points:</span>
-                                  <ul className="ml-4 mt-1 text-gray-700">
+                                  <span className="font-medium text-purple-800 dark:text-purple-300">Key Points:</span>
+                                  <ul className="ml-4 mt-1 text-gray-700 dark:text-gray-300">
                                     {illustration.visualElements.bulletPoints.map((point, idx) => (
                                       <li key={idx} className="list-disc">{point}</li>
                                     ))}
@@ -997,8 +997,8 @@ export default function SermonCreationStudio() {
                               )}
                               {illustration.visualElements.scriptureConnection && (
                                 <div>
-                                  <span className="font-medium text-purple-800">Scripture:</span>
-                                  <span className="ml-2 text-gray-700 italic">{illustration.visualElements.scriptureConnection}</span>
+                                  <span className="font-medium text-purple-800 dark:text-purple-300">Scripture:</span>
+                                  <span className="ml-2 text-gray-700 dark:text-gray-300 italic">{illustration.visualElements.scriptureConnection}</span>
                                 </div>
                               )}
                             </div>
@@ -1007,14 +1007,14 @@ export default function SermonCreationStudio() {
 
                         {/* Presentation Tips */}
                         {illustration.presentationTips && (
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-2">
-                            <h5 className="font-semibold text-green-900 mb-2 flex items-center text-sm">
+                          <div className="bg-green-50 dark:bg-green-900 border border-green-200 dark:border-green-700 rounded-lg p-3 mb-2">
+                            <h5 className="font-semibold text-green-900 dark:text-green-200 mb-2 flex items-center text-sm">
                               <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                               </svg>
                               Delivery Tips
                             </h5>
-                            <div className="text-xs text-green-800 space-y-1">
+                            <div className="text-xs text-green-800 dark:text-green-200 space-y-1">
                               {illustration.presentationTips.timing && (
                                 <div><strong>Timing:</strong> {illustration.presentationTips.timing}</div>
                               )}
@@ -1028,7 +1028,7 @@ export default function SermonCreationStudio() {
                           </div>
                         )}
                         
-                        <p className="text-xs text-gray-500">Source: {illustration.source}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Source: {illustration.source}</p>
                       </CardContent>
                     </Card>
                   ))}
