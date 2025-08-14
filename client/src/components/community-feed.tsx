@@ -388,9 +388,9 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
     onError: (error) => {
       // Share API error handled
       // Fallback to clipboard sharing
-      const discussion = discussions.find(d => d.id === discussionId);
+      const discussion = discussions.find(d => d.id === error.discussionId);
       if (discussion) {
-        const shareUrl = `${window.location.origin}/discussions/${discussionId}`;
+        const shareUrl = `${window.location.origin}/discussions/${error.discussionId}`;
         const shareText = `Check out this discussion: "${discussion.title}"`;
         
         if (navigator.clipboard) {
@@ -626,27 +626,19 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
                         whileTap={{ scale: 0.95 }}
                         transition={{ type: "spring", stiffness: 400, damping: 17 }}
                       >
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <button 
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            console.log('Share button clicked!', discussion.id);
+                            console.log('SHARE BUTTON CLICKED!', discussion.id);
+                            alert('Share button clicked for discussion ' + discussion.id);
                             handleShareDiscussion(discussion.id);
                           }}
-                          className="text-gray-500 hover:text-green-500 hover:bg-green-50 transition-all duration-300"
+                          className="flex items-center space-x-1 px-3 py-1 text-gray-500 hover:text-green-500 hover:bg-green-50 rounded transition-all duration-300"
                         >
-                          <motion.div
-                            whileHover={{ 
-                              rotate: [0, 15, -15, 0],
-                              scale: [1, 1.1, 1]
-                            }}
-                            transition={{ duration: 0.4 }}
-                          >
-                            <Share className="w-4 h-4" />
-                          </motion.div>
-                        </Button>
+                          <Share className="w-4 h-4" />
+                          <span>Share</span>
+                        </button>
                       </motion.div>
                       
                       {/* Flag Button - Only show for other users' posts */}
