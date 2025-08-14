@@ -128,7 +128,7 @@ export default function EnterpriseContact() {
           <Button
             variant="ghost"
             className="mb-6 text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors"
-            onClick={() => setLocation('/pricing')}
+            onClick={() => setLocation('/#pricing')}
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Pricing
