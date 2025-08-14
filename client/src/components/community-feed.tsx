@@ -542,7 +542,15 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
                         attachedMedia={discussion.attachedMedia}
                       />
                     </div>
-                    <div className="flex items-center space-x-4 relative z-10">
+                    <div className="flex items-center space-x-4 relative z-10" style={{pointerEvents: 'auto'}}>
+                      {/* Simple test button */}
+                      <button 
+                        onClick={() => alert('TEST BUTTON WORKS!')}
+                        className="bg-red-500 text-white px-4 py-2 rounded"
+                      >
+                        TEST
+                      </button>
+                      
                       {/* Reaction Emojis */}
                       <div className="flex items-center space-x-1">
                         {['🙏', '✝️', '🕊️', '❤️'].map((emoji) => (
