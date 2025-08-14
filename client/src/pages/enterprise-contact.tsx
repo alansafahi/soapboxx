@@ -20,6 +20,17 @@ export default function EnterpriseContact() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    
+    // Phone number validation - only allow digits, spaces, hyphens, parentheses, and plus
+    if (name === 'phone') {
+      const cleanedPhone = value.replace(/[^\d\s\-\(\)\+]/g, '');
+      setFormData(prev => ({
+        ...prev,
+        [name]: cleanedPhone
+      }));
+      return;
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: value

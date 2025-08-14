@@ -83,6 +83,11 @@ app.post('/api/enterprise-contact', async (req, res) => {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
+    // Phone number validation (if provided)
+    if (phone && !/^[\d\s\-\(\)\+]+$/.test(phone)) {
+      return res.status(400).json({ message: 'Phone number can only contain digits, spaces, hyphens, parentheses, and plus signs' });
+    }
+
     // Send email to sales team
     const { sendEmail } = await import('./email-service');
     const emailContent = `
