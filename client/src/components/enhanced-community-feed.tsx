@@ -703,9 +703,7 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                               </span>
                             ))}
                           </div>
-                          <span>
-                            {post.reactions?.reduce((sum, r) => sum + Number(r.count || 0), 0) || 0} reactions
-                          </span>
+
                           {post.commentCount > 0 && (
                             <>
                               <span>•</span>
