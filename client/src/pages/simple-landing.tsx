@@ -347,7 +347,7 @@ export default function SimpleLanding() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base"><strong>28 Beginner Reading Plans</strong> included</span>
+                    <span className="text-sm sm:text-base">28 Beginner Reading Plans included</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
@@ -392,7 +392,7 @@ export default function SimpleLanding() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base"><strong>53 Reading Plans</strong> (28 Beginner + 25 Intermediate plans)</span>
+                    <span className="text-sm sm:text-base">53 Reading Plans (28 Beginner + 25 Intermediate plans)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
@@ -429,15 +429,15 @@ export default function SimpleLanding() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base"><strong>All 69 Reading Plans</strong> (Complete library access: Beginner, Intermediate and Advanced)</span>
+                    <span className="text-sm sm:text-base">All 69 Reading Plans (Complete library access: Beginner, Intermediate and Advanced)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base"><strong>Custom Reading Plan Generator</strong> (AI powered)</span>
+                    <span className="text-sm sm:text-base">Custom Reading Plan Generator (AI powered)</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base"><strong>Ministry creation and management</strong></span>
+                    <span className="text-sm sm:text-base">Ministry creation and management</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
