@@ -10594,6 +10594,17 @@ Return JSON with this exact structure:
           message: 'Missing required fields: targetType, targetId, reactionType, emoji' 
         });
       }
+
+      // Check if user is trying to react to their own post
+      if (targetType === 'post') {
+        const discussion = await storage.getDiscussionById(parseInt(targetId));
+        if (discussion && discussion.authorId === userId) {
+          return res.status(403).json({
+            success: false,
+            message: 'You cannot react to your own post'
+          });
+        }
+      }
       
       const reactionData = {
         userId,

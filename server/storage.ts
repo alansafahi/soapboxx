@@ -3337,6 +3337,10 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async getDiscussionById(discussionId: number): Promise<Discussion | undefined> {
+    return this.getDiscussion(discussionId);
+  }
+
   async getUserRole(userId: string): Promise<string> {
     try {
       // First check global role

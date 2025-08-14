@@ -307,10 +307,11 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
         description: "Your reaction has been shared with the community",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      const errorMessage = error.message || "Failed to add reaction. Please try again.";
       toast({
-        title: "Error",
-        description: "Failed to add reaction. Please try again.",
+        title: "Unable to react",
+        description: errorMessage.includes("own post") ? "You cannot react to your own posts" : errorMessage,
         variant: "destructive",
       });
     },
@@ -696,22 +697,24 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                             const postReaction = post.reactions?.find(r => r.type === reactionType.type);
                             const isActive = postReaction?.userReacted;
                             const count = postReaction?.count || 0;
+                            const isOwnPost = user && post.author && (String(user.id) === String(post.authorId) || user.email === post.author.email);
                             
                             return (
                               <Tooltip key={reactionType.type}>
                                 <TooltipTrigger asChild>
                                   <Button
-                                    variant={isActive ? "default" : "ghost"}
+                                    variant="ghost"
                                     size="sm"
-                                    onClick={() => handleReaction(post, reactionType.type)}
-                                    className={`text-xs sm:text-sm px-2 sm:px-3 ${isActive ? 'bg-blue-100 text-blue-600' : ''}`}
+                                    onClick={() => !isOwnPost && handleReaction(post, reactionType.type)}
+                                    disabled={isOwnPost}
+                                    className={`text-xs sm:text-sm px-2 sm:px-3 ${isActive ? 'text-gray-700 dark:text-gray-200' : 'text-gray-600 dark:text-gray-400'} ${isOwnPost ? 'opacity-50 cursor-not-allowed' : 'hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700'}`}
                                   >
                                     <span className="mr-1">{reactionType.emoji}</span>
                                     <span className="text-xs">{count}</span>
                                   </Button>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>{reactionType.tooltip}</p>
+                                  <p>{isOwnPost ? "You cannot react to your own post" : reactionType.tooltip}</p>
                                 </TooltipContent>
                               </Tooltip>
                             );
