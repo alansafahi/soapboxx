@@ -774,13 +774,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Enterprise Contact Form Submission (PUBLIC ENDPOINT)
   app.post('/api/enterprise-contact', async (req, res) => {
     try {
+      console.log('Enterprise form submission received:', req.body);
       const { fullName, title, email, phone, churchName, congregationSize, message } = req.body;
       
-      // Validate required fields
-      if (!fullName || !email || !churchName || !congregationSize) {
+      // Validate required fields with detailed logging
+      const missingFields = [];
+      if (!fullName) missingFields.push('Full Name');
+      if (!title) missingFields.push('Title');
+      if (!email) missingFields.push('Email');
+      if (!churchName) missingFields.push('Church Name');
+      if (!congregationSize) missingFields.push('Congregation Size');
+      
+      if (missingFields.length > 0) {
+        console.log('Missing fields:', missingFields);
         return res.status(400).json({ 
           success: false, 
-          message: 'Missing required fields: Full Name, Email, Church Name, and Congregation Size are required.' 
+          message: `Missing required fields: ${missingFields.join(', ')}` 
         });
       }
 
