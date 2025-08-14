@@ -2746,8 +2746,17 @@ export class DatabaseStorage implements IStorage {
         .from(discussions)
         .leftJoin(users, eq(discussions.authorId, users.id))
         .where(
-          // Temporarily remove all filters to debug
-          sql`1=1`
+          and(
+            eq(discussions.isPublic, true),
+            or(
+              isNull(discussions.expiresAt),
+              gt(discussions.expiresAt, new Date())
+            ),
+            or(
+              isNull(discussions.isHidden),
+              eq(discussions.isHidden, false)
+            )
+          )
         )
         .orderBy(desc(discussions.createdAt))
         .limit(limit || 50)
@@ -2814,7 +2823,7 @@ export class DatabaseStorage implements IStorage {
 
       // Verification data processing complete
 
-      const discussions = combinedResults.map((row: any) => {
+      const processedDiscussions = combinedResults.map((row: any) => {
         const mappedPost = {
           id: row.id,
           title: row.title,
@@ -2850,12 +2859,12 @@ export class DatabaseStorage implements IStorage {
         return mappedPost;
       });
 
-      if (discussions.length > 0) {
+      if (processedDiscussions.length > 0) {
       }
 
       // Separate discussions and SOAP entries
-      const discussionPosts = discussions.filter(d => d.type === 'discussion');
-      const soapPosts = discussions.filter(d => d.type === 'soap_reflection');
+      const discussionPosts = processedDiscussions.filter(d => d.type === 'discussion');
+      const soapPosts = processedDiscussions.filter(d => d.type === 'soap_reflection');
       
       
       // Get comment counts for discussions
@@ -2984,8 +2993,8 @@ export class DatabaseStorage implements IStorage {
 
       // Get reaction data for all posts
       let postReactions: Record<number, any[]> = {};
-      if (discussions.length > 0) {
-        const postIds = discussions.map(d => d.id);
+      if (processedDiscussions.length > 0) {
+        const postIds = processedDiscussions.map(d => d.id);
         console.log('Fetching reactions for post IDs:', postIds);
         try {
           const reactionsResult = await db
@@ -3044,7 +3053,7 @@ export class DatabaseStorage implements IStorage {
       }
 
       // Add comment counts, like counts, like status, and reactions to all posts
-      const discussionsWithCounts = discussions.map(discussion => ({
+      const discussionsWithCounts = processedDiscussions.map(discussion => ({
         ...discussion,
         commentCount: discussion.type === 'discussion' 
           ? (discussionCommentCounts[discussion.id] || 0)
