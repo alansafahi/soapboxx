@@ -63,14 +63,16 @@ export default function ContentDistributionHub() {
     }
   }, [credentials]);
 
-  // Check for sermon data from completed sermons
+  // Check for content data from completed sermons/lessons
   useEffect(() => {
     const sermonData = sessionStorage.getItem('sermonForDistribution');
+    const lessonData = sessionStorage.getItem('lessonForDistribution');
+    
     if (sermonData) {
       try {
         const parsedData = JSON.parse(sermonData);
         setSermonTitle(parsedData.title || "");
-        setSermonSummary(parsedData.outline?.theme || "");
+        setSermonSummary(parsedData.outline?.theme || parsedData.outline?.bigIdea || "");
         setKeyPoints(parsedData.mainPoints || []);
         
         // Clear the session storage after loading
@@ -81,10 +83,29 @@ export default function ContentDistributionHub() {
           title: "Sermon Loaded",
           description: `"${parsedData.title}" is ready for content distribution.`
         });
-        
-        // Don't auto-generate to avoid timeout issues
-        // User can manually click generate when ready
       } catch (error) {
+        console.error('Error loading sermon data:', error);
+      }
+    } else if (lessonData) {
+      try {
+        const parsedData = JSON.parse(lessonData);
+        setSermonTitle(parsedData.title || "");
+        setSermonSummary(parsedData.outline?.bigIdea || parsedData.outline?.theme || "");
+        setKeyPoints(parsedData.mainPoints || []);
+        
+        // For Sunday School lessons, set appropriate audiences
+        setTargetAudiences(['Sunday School Teachers', 'Children\'s Ministry', 'Parents']);
+        
+        // Clear the session storage after loading
+        sessionStorage.removeItem('lessonForDistribution');
+        
+        // Show notification
+        toast({
+          title: "Sunday School Lesson Loaded",
+          description: `"${parsedData.title}" is ready for content distribution with age-appropriate messaging.`
+        });
+      } catch (error) {
+        console.error('Error loading lesson data:', error);
       }
     }
   }, []);

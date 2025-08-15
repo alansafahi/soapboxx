@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 
 // Helper function to render formatted text with HTML
-const renderFormattedText = (text: string) => {
+const renderFormattedText = (text: string | any) => {
   if (!text) return null;
   
   // Handle object format with title/content structure
@@ -195,7 +195,7 @@ export default function SermonCreationStudio() {
     // Use correct activities array based on content type
     if (contentType === "sermon" ? illustrations.length > 0 : sundaySchoolActivities.length > 0) completed++;
     if (enhancedOutline) completed++;
-    return { completed, total: 4 };
+    return { completed, total: contentType === "sunday-school" ? 5 : 4 }; // Sunday School has extra "Lesson" step
   };
 
   const getNextStep = () => {
@@ -203,7 +203,9 @@ export default function SermonCreationStudio() {
       return {
         tab: 'research',
         title: 'Generate Biblical Research',
-        description: 'Start with biblical commentary and context for your sermon'
+        description: contentType === "sermon" 
+          ? 'Start with biblical commentary and context for your sermon'
+          : 'Start with biblical research and child-friendly applications'
       };
     }
     if (!currentOutline) {
@@ -221,7 +223,7 @@ export default function SermonCreationStudio() {
         title: contentType === "sermon" ? 'Add Stories & Content' : 'Add Activities & Games',
         description: contentType === "sermon" 
           ? 'Find compelling illustrations and stories for your sermon'
-          : 'Create fun activities and games for your lesson'
+          : 'Create detailed activities with instructions and materials needed'
       };
     }
     if (!enhancedOutline) {
@@ -806,7 +808,7 @@ export default function SermonCreationStudio() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1">
+        <TabsList className={contentType === "sunday-school" ? "grid w-full grid-cols-3 sm:grid-cols-7 gap-1" : "grid w-full grid-cols-3 sm:grid-cols-6 gap-1"}>
           <TabsTrigger value="research" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
             <Search className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
             <span className="hidden sm:inline">Research</span>
@@ -823,6 +825,12 @@ export default function SermonCreationStudio() {
             )}
             <span className="hidden sm:inline">{contentType === "sermon" ? "Stories" : "Activities"}</span>
           </TabsTrigger>
+          {contentType === "sunday-school" && (
+            <TabsTrigger value="lesson" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
+              <FileText className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Lesson</span>
+            </TabsTrigger>
+          )}
           <TabsTrigger value="enhance" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
             <Star className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
             <span className="hidden sm:inline">Enhance</span>
@@ -853,7 +861,7 @@ export default function SermonCreationStudio() {
               style={{ width: `${(getProgressSteps().completed / getProgressSteps().total) * 100}%` }}
             ></div>
           </div>
-          <div className="flex justify-between mt-2">
+          <div className={contentType === "sunday-school" ? "flex justify-between mt-2 space-x-1" : "flex justify-between mt-2"}>
             <div className={`text-xs ${currentResearch ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
               ✓ Research
             </div>
@@ -863,6 +871,11 @@ export default function SermonCreationStudio() {
             <div className={`text-xs ${(contentType === "sermon" ? illustrations.length > 0 : sundaySchoolActivities.length > 0) ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
               ✓ {contentType === "sermon" ? "Stories" : "Activities"}
             </div>
+            {contentType === "sunday-school" && (
+              <div className={`text-xs ${(currentOutline && sundaySchoolActivities.length > 0) ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+                ✓ Lesson
+              </div>
+            )}
             <div className={`text-xs ${enhancedOutline ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
               ✓ Enhanced
             </div>
@@ -1284,19 +1297,41 @@ export default function SermonCreationStudio() {
                           <div className="space-y-3">
                             {illustration.instructions && (
                               <div className="bg-green-50 p-3 rounded-md">
-                                <p className="text-sm font-medium text-green-900 mb-1">Instructions:</p>
-                                <p className="text-sm text-green-800 leading-relaxed">{illustration.instructions}</p>
+                                <p className="text-sm font-medium text-green-900 mb-2 flex items-center">
+                                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clipRule="evenodd"/>
+                                  </svg>
+                                  Step-by-Step Instructions:
+                                </p>
+                                <div className="text-sm text-green-800 leading-relaxed space-y-2">
+                                  {illustration.instructions.split('\n').map((step: string, idx: number) => (
+                                    <div key={idx} className="flex items-start">
+                                      <span className="bg-green-200 text-green-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5 flex-shrink-0">
+                                        {idx + 1}
+                                      </span>
+                                      <span>{step.trim()}</span>
+                                    </div>
+                                  ))}
+                                </div>
                               </div>
                             )}
                             
                             {illustration.materials && (
                               <div className="bg-blue-50 p-3 rounded-md">
-                                <p className="text-sm font-medium text-blue-900 mb-1">Materials Needed:</p>
-                                <ul className="text-sm text-blue-800 list-disc list-inside">
-                                  {illustration.materials.map((material, idx) => (
-                                    <li key={idx}>{material}</li>
+                                <p className="text-sm font-medium text-blue-900 mb-2 flex items-center">
+                                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                                  </svg>
+                                  Materials & Tools Needed:
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  {illustration.materials.map((material: any, idx: number) => (
+                                    <div key={idx} className="flex items-center text-sm text-blue-800 bg-blue-100 p-2 rounded">
+                                      <span className="w-2 h-2 bg-blue-600 rounded-full mr-2 flex-shrink-0"></span>
+                                      <span className="font-medium">{material}</span>
+                                    </div>
                                   ))}
-                                </ul>
+                                </div>
                               </div>
                             )}
                             
@@ -1316,8 +1351,45 @@ export default function SermonCreationStudio() {
                             
                             {illustration.application && (
                               <div className="bg-orange-50 p-3 rounded-md">
-                                <p className="text-sm font-medium text-orange-900 mb-1">Application:</p>
-                                <p className="text-sm text-orange-800 leading-relaxed">{illustration.application}</p>
+                                <p className="text-sm font-medium text-orange-900 mb-2 flex items-center">
+                                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                                  </svg>
+                                  How This Connects to the Lesson:
+                                </p>
+                                <p className="text-sm text-orange-800 leading-relaxed bg-orange-100 p-2 rounded italic">{illustration.application}</p>
+                              </div>
+                            )}
+                            
+                            {/* Add Duration and Setup Time if available */}
+                            {illustration.duration && (
+                              <div className="bg-gray-50 p-3 rounded-md">
+                                <div className="flex items-center justify-between text-sm">
+                                  <div className="flex items-center text-gray-700">
+                                    <Clock className="w-4 h-4 mr-1" />
+                                    <span className="font-medium">Duration:</span>
+                                    <span className="ml-1">{illustration.duration}</span>
+                                  </div>
+                                  {illustration.setupTime && (
+                                    <div className="flex items-center text-gray-700">
+                                      <span className="font-medium">Setup:</span>
+                                      <span className="ml-1">{illustration.setupTime}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Add Safety Notes if available */}
+                            {illustration.safetyNotes && (
+                              <div className="bg-red-50 p-3 rounded-md border border-red-200">
+                                <p className="text-sm font-medium text-red-900 mb-1 flex items-center">
+                                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                                  </svg>
+                                  Safety Considerations:
+                                </p>
+                                <p className="text-sm text-red-800">{illustration.safetyNotes}</p>
                               </div>
                             )}
                           </div>
@@ -1438,6 +1510,179 @@ export default function SermonCreationStudio() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* Lesson Tab - Sunday School Only */}
+        {contentType === "sunday-school" && (
+          <TabsContent value="lesson" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="w-5 h-5 mr-2" />
+                  Complete Lesson Draft
+                </CardTitle>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Review your complete lesson plan with research, activities, and materials before AI enhancement
+                </p>
+              </CardHeader>
+              <CardContent>
+                {currentOutline && currentResearch && sundaySchoolActivities.length > 0 ? (
+                  <div className="space-y-6">
+                    {/* Lesson Overview */}
+                    <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-900 p-6 rounded-lg border">
+                      <h3 className="text-2xl font-bold text-purple-900 dark:text-purple-200 mb-2">{currentOutline.title}</h3>
+                      <p className="text-purple-700 dark:text-purple-300 text-lg mb-3">{currentOutline.bigIdea}</p>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="font-medium text-purple-800 dark:text-purple-300">Age Group:</span>
+                          <span className="ml-2 text-purple-700 dark:text-purple-300 capitalize">{ageGroup.replace('-', ' ')}</span>
+                        </div>
+                        <div>
+                          <span className="font-medium text-purple-800 dark:text-purple-300">Duration:</span>
+                          <span className="ml-2 text-purple-700 dark:text-purple-300">
+                            {sermonLength === "short" ? "20-30 minutes" : sermonLength === "medium" ? "35-45 minutes" : "50-60 minutes"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Scripture & Memory Verse */}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg">
+                        <h4 className="font-semibold text-yellow-900 dark:text-yellow-200 mb-2">Scripture References</h4>
+                        <div className="space-y-1">
+                          {currentOutline.scriptureReferences.map((ref, idx) => (
+                            <Badge key={idx} variant="outline" className="mr-2 mb-1 bg-white dark:bg-yellow-800 border-yellow-300 dark:border-yellow-600 text-yellow-800 dark:text-yellow-200">
+                              {ref}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      {currentResearch.memoryVerse && (
+                        <div className="bg-indigo-50 dark:bg-indigo-900 p-4 rounded-lg">
+                          <h4 className="font-semibold text-indigo-900 dark:text-indigo-200 mb-2">Memory Verse</h4>
+                          <p className="text-indigo-800 dark:text-indigo-300 italic text-sm leading-relaxed">{currentResearch.memoryVerse}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Lesson Structure */}
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border dark:border-gray-600">
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 text-lg">Lesson Structure</h4>
+                      
+                      {/* Opening Activity */}
+                      {currentOutline.openingActivity && (
+                        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900 rounded-lg border-l-4 border-green-400">
+                          <h5 className="font-medium text-green-900 dark:text-green-200 mb-2">1. Opening Activity (5 minutes)</h5>
+                          <p className="text-green-800 dark:text-green-300 text-sm">{currentOutline.openingActivity}</p>
+                        </div>
+                      )}
+
+                      {/* Bible Story Method */}
+                      {currentOutline.bibleStoryMethod && (
+                        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg border-l-4 border-blue-400">
+                          <h5 className="font-medium text-blue-900 dark:text-blue-200 mb-2">2. Bible Story Presentation (10-15 minutes)</h5>
+                          <p className="text-blue-800 dark:text-blue-300 text-sm">{currentOutline.bibleStoryMethod}</p>
+                        </div>
+                      )}
+
+                      {/* Main Points */}
+                      <div className="mb-6 p-4 bg-purple-50 dark:bg-purple-900 rounded-lg border-l-4 border-purple-400">
+                        <h5 className="font-medium text-purple-900 dark:text-purple-200 mb-3">3. Key Learning Points (10 minutes)</h5>
+                        <div className="space-y-2">
+                          {currentOutline.mainPoints.map((point: any, idx: number) => (
+                            <div key={idx} className="flex items-start">
+                              <span className="w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3 mt-0.5">
+                                {idx + 1}
+                              </span>
+                              <div className="text-purple-800 dark:text-purple-300 text-sm leading-relaxed">
+                                {renderFormattedText(typeof point === 'string' ? point : point.point || point.details || JSON.stringify(point))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Memory Verse Activity */}
+                      {currentOutline.memoryVerseActivity && (
+                        <div className="mb-6 p-4 bg-pink-50 dark:bg-pink-900 rounded-lg border-l-4 border-pink-400">
+                          <h5 className="font-medium text-pink-900 dark:text-pink-200 mb-2">4. Memory Verse Activity (5 minutes)</h5>
+                          <p className="text-pink-800 dark:text-pink-300 text-sm">{currentOutline.memoryVerseActivity}</p>
+                        </div>
+                      )}
+
+                      {/* Closing Activity */}
+                      {currentOutline.closingActivity && (
+                        <div className="mb-6 p-4 bg-teal-50 dark:bg-teal-900 rounded-lg border-l-4 border-teal-400">
+                          <h5 className="font-medium text-teal-900 dark:text-teal-200 mb-2">5. Closing & Prayer (5 minutes)</h5>
+                          <p className="text-teal-800 dark:text-teal-300 text-sm">{currentOutline.closingActivity}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Activities Summary */}
+                    <div className="bg-orange-50 dark:bg-orange-900 p-6 rounded-lg border dark:border-orange-700">
+                      <h4 className="font-semibold text-orange-900 dark:text-orange-200 mb-4 text-lg">Activities & Materials Summary</h4>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <h5 className="font-medium text-orange-800 dark:text-orange-300 mb-2">Activities Included:</h5>
+                          <ul className="space-y-1 text-sm">
+                            {sundaySchoolActivities.map((activity, idx) => (
+                              <li key={idx} className="flex items-center text-orange-700 dark:text-orange-300">
+                                <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                                {activity.title || activity.name}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        <div>
+                          <h5 className="font-medium text-orange-800 dark:text-orange-300 mb-2">Materials Needed:</h5>
+                          <div className="space-y-1 text-sm text-orange-700 dark:text-orange-300">
+                            {Array.from(new Set(sundaySchoolActivities.flatMap((activity: any) => activity.materials || []))).slice(0, 8).map((material: any, idx: number) => (
+                              <div key={idx} className="flex items-center">
+                                <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                                {material}
+                              </div>
+                            ))}
+                            {Array.from(new Set(sundaySchoolActivities.flatMap(activity => activity.materials || []))).length > 8 && (
+                              <div className="text-orange-600 dark:text-orange-400 italic">...and more</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Take Home */}
+                    {currentOutline.takeHome && (
+                      <div className="bg-cyan-50 dark:bg-cyan-900 p-4 rounded-lg">
+                        <h4 className="font-semibold text-cyan-900 dark:text-cyan-200 mb-2">Take Home Activity</h4>
+                        <p className="text-cyan-800 dark:text-cyan-300 text-sm">{currentOutline.takeHome}</p>
+                      </div>
+                    )}
+
+                    {/* Ready for Enhancement Notice */}
+                    <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                      <div className="flex items-center">
+                        <CheckCircle className="w-6 h-6 text-blue-600 dark:text-blue-400 mr-3" />
+                        <div>
+                          <h4 className="font-medium text-blue-900 dark:text-blue-200">Lesson Draft Complete</h4>
+                          <p className="text-blue-700 dark:text-blue-300 text-sm">
+                            Your lesson is ready to teach as-is, or proceed to the Enhancement tab to improve it with AI recommendations.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-gray-500">
+                    <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <h3 className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">Complete All Previous Steps</h3>
+                    <p className="text-gray-500">Generate research, create lesson plan, and add activities to view your complete lesson draft.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
         {/* Enhancement Tab */}
         <TabsContent value="enhance" className="space-y-4">
@@ -1906,15 +2151,21 @@ export default function SermonCreationStudio() {
                                   if (parsedContent.outline) setCurrentOutline(parsedContent.outline);
                                   if (parsedContent.research) setCurrentResearch(parsedContent.research);
                                   if (parsedContent.illustrations) setIllustrations(parsedContent.illustrations);
+                                  if (parsedContent.sundaySchoolActivities) setSundaySchoolActivities(parsedContent.sundaySchoolActivities);
                                   if (parsedContent.enhancement) {
                                     setEnhancedOutline(parsedContent.enhancement.enhancedOutline);
                                     setEnhancementRecommendations(parsedContent.enhancement.recommendations || []);
                                   }
-                                  setSermonTopic(sermon.title);
-                                  setActiveTab('enhance');
+                                  setSermonTopic(sermon.title || "");
+                                  // Navigate to the appropriate view tab based on content type
+                                  if (contentType === "sunday-school") {
+                                    setActiveTab('lesson');
+                                  } else {
+                                    setActiveTab('outline');
+                                  }
                                   toast({
-                                    title: "Sermon Loaded",
-                                    description: "Completed sermon has been loaded for viewing."
+                                    title: contentType === "sunday-school" ? "Lesson Loaded" : "Sermon Loaded",
+                                    description: `Completed ${contentType === "sunday-school" ? "lesson" : "sermon"} has been loaded for viewing.`
                                   });
                                 }}
                               >
@@ -1964,7 +2215,7 @@ export default function SermonCreationStudio() {
                                     if (parsedContent.research) setCurrentResearch(parsedContent.research);
                                     if (parsedContent.illustrations) setIllustrations(parsedContent.illustrations);
                                     if (parsedContent.enhancement) setEnhancedOutline(parsedContent.enhancement.enhancedOutline);
-                                    setSermonTopic(sermon.title);
+                                    setSermonTopic(sermon.title || "");
                                     handleExport('docx');
                                   }}>
                                     <FileText className="w-4 h-4 mr-2" />
@@ -1976,7 +2227,7 @@ export default function SermonCreationStudio() {
                                     if (parsedContent.research) setCurrentResearch(parsedContent.research);
                                     if (parsedContent.illustrations) setIllustrations(parsedContent.illustrations);
                                     if (parsedContent.enhancement) setEnhancedOutline(parsedContent.enhancement.enhancedOutline);
-                                    setSermonTopic(sermon.title);
+                                    setSermonTopic(sermon.title || "");
                                     handleExport('pdf');
                                   }}>
                                     <FileImage className="w-4 h-4 mr-2" />
