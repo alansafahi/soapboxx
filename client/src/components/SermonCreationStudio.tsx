@@ -2213,21 +2213,35 @@ export default function SermonCreationStudio() {
                 <Star className="w-5 h-5 mr-2" />
                 {contentType === "sermon" ? "Sermon Content Enhancer" : "Lesson Content Enhancer"}
               </CardTitle>
-              <Button 
-                onClick={handleEnhanceSermon}
-                disabled={enhanceMutation.isPending || sundaySchoolEnhanceMutation.isPending || !currentOutline || !currentResearch}
-                className="bg-yellow-600 hover:bg-yellow-700"
-              >
-                {(enhanceMutation.isPending || sundaySchoolEnhanceMutation.isPending) ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Star className="w-4 h-4 mr-2" />
-                )}
-{enhancedOutline ? 
-                  (contentType === "sermon" ? "Sermon Enhanced With AI" : "Lesson Enhanced With AI") :
-                  (contentType === "sermon" ? "Enhance Sermon" : "Enhance Lesson")
-                }
-              </Button>
+              {!enhancedOutline && (
+                <Button 
+                  onClick={handleEnhanceSermon}
+                  disabled={enhanceMutation.isPending || sundaySchoolEnhanceMutation.isPending || !currentOutline || !currentResearch}
+                  className="bg-yellow-600 hover:bg-yellow-700"
+                >
+                  {(enhanceMutation.isPending || sundaySchoolEnhanceMutation.isPending) ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Star className="w-4 h-4 mr-2" />
+                  )}
+                  {contentType === "sermon" ? "Enhance Sermon" : "Enhance Lesson"}
+                </Button>
+              )}
+              {enhancedOutline && (
+                <Button 
+                  onClick={handleEnhanceSermon}
+                  disabled={enhanceMutation.isPending || sundaySchoolEnhanceMutation.isPending}
+                  variant="outline"
+                  className="border-yellow-600 text-yellow-600 hover:bg-yellow-50"
+                >
+                  {(enhanceMutation.isPending || sundaySchoolEnhanceMutation.isPending) ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Star className="w-4 h-4 mr-2" />
+                  )}
+                  {contentType === "sermon" ? "Enhance Sermon Again" : "Enhance Lesson Again"}
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
