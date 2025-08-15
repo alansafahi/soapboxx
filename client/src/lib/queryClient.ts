@@ -87,21 +87,57 @@ export async function apiRequest(
     const res = await fetch(validUrl, fetchOptions);
     
     if (!res.ok) {
+      let errorMessage = res.statusText;
+      
+      // Check if response is JSON or HTML
+      const contentType = res.headers.get('content-type');
+      
       try {
-        const errorData = await res.json();
-        const error = new Error(errorData.message || res.statusText);
-        (error as any).status = res.status;
-        (error as any).response = errorData;
-        throw error;
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await res.json();
+          errorMessage = errorData.message || errorMessage;
+          const error = new Error(errorMessage);
+          (error as any).status = res.status;
+          (error as any).response = errorData;
+          throw error;
+        } else {
+          // HTML response - likely an error page
+          if (res.status === 401) {
+            errorMessage = "Authentication required. Please refresh the page and try again.";
+          } else if (res.status === 403) {
+            errorMessage = "Access denied. Please check your permissions.";
+          } else if (res.status === 500) {
+            errorMessage = "Server error. Please try again in a moment.";
+          } else {
+            errorMessage = `Request failed (${res.status}). Please try again.`;
+          }
+        }
       } catch (parseError) {
-        // Don't try to read text after JSON failed - response body is already consumed
-        const error = new Error(`${res.status}: ${res.statusText}`);
-        (error as any).status = res.status;
-        throw error;
+        // If JSON parsing fails, use status-based error messages
+        if (res.status === 401) {
+          errorMessage = "Authentication required. Please refresh the page and try again.";
+        } else if (res.status === 403) {
+          errorMessage = "Access denied. Please check your permissions.";
+        } else if (res.status === 500) {
+          errorMessage = "Server error. Please try again in a moment.";
+        } else {
+          errorMessage = `Request failed (${res.status}). Please try again.`;
+        }
       }
+      
+      const error = new Error(errorMessage);
+      (error as any).status = res.status;
+      throw error;
     }
     
-    return await res.json();
+    // Handle successful responses
+    const contentType = res.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      return await res.json();
+    } else {
+      // Non-JSON response for successful request
+      return await res.text();
+    }
   } catch (error) {
     throw error;
   }

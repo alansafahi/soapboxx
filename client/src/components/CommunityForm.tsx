@@ -351,15 +351,16 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
       };
 
       if (isEditing) {
-        return await apiRequest("PUT", `/api/users/communities/${initialData.id}`, submitData);
+        return await apiRequest("PUT", `/api/communities/${initialData.id}`, submitData);
       } else {
-        return await apiRequest("POST", "/api/users/communities", submitData);
+        return await apiRequest("POST", "/api/communities", submitData);
       }
     },
     onSuccess: () => {
       const message = isEditing ? "Community updated successfully" : "Community created successfully";
       toast({ title: "Success", description: message });
       queryClient.invalidateQueries({ queryKey: ['/api/users/communities'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/communities'] });
       onSuccess();
     },
     onError: (error: any) => {
