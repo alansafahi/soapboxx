@@ -1402,11 +1402,11 @@ export default function SocialFeed() {
                     variant="ghost" 
                     size="sm" 
                     onClick={() => setShareDialogOpen(post.id)}
-                    className="text-gray-500 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 group transition-all duration-200"
-                    title="Share this post"
+                    className="text-gray-500 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 group transition-all duration-200 p-2"
+                    title={`Share this post${post.shareCount > 0 ? ` (${post.shareCount})` : ''}`}
                   >
-                    <Share2 className="w-4 h-4 mr-1 group-hover:scale-110 transition-all duration-200" />
-                    {post.shareCount > 0 && <span className="font-medium">{post.shareCount}</span>}
+                    <Share2 className="w-4 h-4 group-hover:scale-110 transition-all duration-200" />
+                    {post.shareCount > 0 && <span className="ml-1 text-xs font-medium">{post.shareCount}</span>}
                   </Button>
 
                   {/* Flag Button - Only show for other users' posts */}
@@ -1418,7 +1418,7 @@ export default function SocialFeed() {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 group transition-all duration-200"
+                          className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 group transition-all duration-200 p-2"
                           title="Report this content"
                         >
                           <Flag className="w-4 h-4 group-hover:scale-110 transition-all duration-200" />
