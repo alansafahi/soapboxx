@@ -1690,7 +1690,9 @@ export default function SermonCreationStudio() {
                       </Button>
                     </div>
                   </div>
-                ) : (
+                )}
+                
+                {!enhancedOutline && (
                   <div className="bg-yellow-50 p-4 rounded-lg">
                     <p className="text-yellow-800 text-sm">
                       Ready to enhance your sermon! The AI will analyze your content for clarity, engagement, 
