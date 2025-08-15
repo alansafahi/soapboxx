@@ -109,7 +109,7 @@ export default function Sidebar() {
 
   // Get user's church-specific role data
   const { data: adminData, isLoading: roleLoading, error: roleError } = useQuery<any>({
-    queryKey: ["/api/admin-communities"],
+    queryKey: ["/api/auth/admin-communities"],
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     retry: 1
