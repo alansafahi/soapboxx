@@ -371,10 +371,11 @@ export default function SermonCreationStudio() {
       });
       setActiveTab("outline");
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Sunday School research error:', error);
       toast({
         title: "Research failed",
-        description: "Failed to generate lesson research. Please try again.",
+        description: error?.message || "Failed to generate lesson research. Please try again.",
         variant: "destructive"
       });
     }
@@ -392,10 +393,11 @@ export default function SermonCreationStudio() {
       });
       setActiveTab("illustrations");
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Sunday School lesson plan error:', error);
       toast({
         title: "Lesson plan failed", 
-        description: "Failed to generate lesson plan. Please try again.",
+        description: error?.message || "Failed to generate lesson plan. Please try again.",
         variant: "destructive"
       });
     }
@@ -413,10 +415,11 @@ export default function SermonCreationStudio() {
       });
       setActiveTab("enhance");
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Sunday School activities error:', error);
       toast({
         title: "Activities generation failed",
-        description: "Failed to generate activities. Please try again.",
+        description: error?.message || "Failed to generate activities. Please try again.",
         variant: "destructive"
       });
     }
@@ -434,10 +437,11 @@ export default function SermonCreationStudio() {
         description: "Sunday School lesson has been enhanced successfully.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Sunday School enhancement error:', error);
       toast({
         title: "Enhancement failed",
-        description: "Failed to enhance lesson. Please try again.",
+        description: error?.message || "Failed to enhance lesson. Please try again.",
         variant: "destructive"
       });
     }

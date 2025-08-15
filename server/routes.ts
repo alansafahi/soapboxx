@@ -3227,6 +3227,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { scripture, topic, ageGroup } = req.body;
       const userId = req.user.claims.sub;
       
+      // Validation
+      if (!scripture && !topic) {
+        return res.status(400).json({ message: "Please provide either scripture reference or topic" });
+      }
+      
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(500).json({ message: "AI service not configured. Please contact administrator." });
+      }
+      
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
       });
@@ -3291,7 +3300,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      res.status(500).json({ message: "Failed to generate Sunday School research" });
+      console.error('Sunday School research error:', error);
+      res.status(500).json({ message: "Failed to generate Sunday School research", error: error.message });
     }
   });
 
