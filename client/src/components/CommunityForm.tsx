@@ -23,19 +23,19 @@ import { Badge } from './ui/badge';
 import { Upload, X, Plus, Building2, Users, Globe, Phone, MapPin, Clock, Camera, Facebook, Instagram, Twitter, Youtube, Linkedin } from 'lucide-react';
 import { FaTiktok } from 'react-icons/fa';
 
-// Complete form schema with all fields
+// Complete form schema with required fields and user-friendly messages
 const formSchema = z.object({
-  name: z.string().min(2, { message: "Community name must be at least 2 characters." }),
+  name: z.string().min(1, { message: "Please enter a name for your community." }).min(2, { message: "Community name must be at least 2 characters long." }),
   type: z.string().min(1, { message: "Please select a community type." }),
-  denomination: z.string().optional(),
+  denomination: z.string().min(1, { message: "Please select a denomination/type." }),
   customDenomination: z.string().optional(),
   description: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  zipCode: z.string().optional(),
+  address: z.string().min(1, { message: "Please enter the street address." }),
+  city: z.string().min(1, { message: "Please enter the city." }),
+  state: z.string().min(1, { message: "Please enter the state." }),
+  zipCode: z.string().min(1, { message: "Please enter the ZIP code." }),
   phone: z.string().optional(),
-  email: z.string().email({ message: "Invalid email address." }).optional().or(z.literal('')),
+  email: z.string().min(1, { message: "Please enter an admin email address." }).email({ message: "Please enter a valid email address." }),
   adminEmail: z.string().email({ message: "Invalid admin email address." }).optional().or(z.literal('')),
   website: z.string().url({ message: "Invalid URL." }).optional().or(z.literal('')),
   privacySetting: z.string().default('public'),
@@ -486,7 +486,7 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                       <FormItem>
                         <FormLabel>
                           {watchedType === 'church' ? 'Denomination *' : 
-                           watchedType === 'ministry' ? 'Ministry Type *' : 'Group Type *'}
+                         watchedType === 'ministry' ? 'Ministry Type *' : 'Group Type *'}
                         </FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
@@ -628,7 +628,7 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Admin Email *</FormLabel>
                       <FormControl>
                         <Input 
                           type="email"
@@ -728,7 +728,7 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                   render={({ field }) => (
                     <FormItem>
                       <div className="flex items-center justify-between">
-                        <FormLabel>Address</FormLabel>
+                        <FormLabel>Address *</FormLabel>
                         {(watchedType === 'ministry' || watchedType === 'group') && (
                           <div className="flex items-center space-x-2">
                             <FormField
@@ -769,7 +769,7 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                     name="city"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>City</FormLabel>
+                        <FormLabel>City *</FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="Anytown"
@@ -787,7 +787,7 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                     name="state"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>State</FormLabel>
+                        <FormLabel>State *</FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="CA"
@@ -806,7 +806,7 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                   name="zipCode"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>ZIP Code</FormLabel>
+                      <FormLabel>ZIP Code *</FormLabel>
                       <FormControl>
                         <Input 
                           placeholder="12345"

@@ -9333,54 +9333,54 @@ Return JSON with this exact structure:
       // Comprehensive field validation with user-friendly error messages
       const validationErrors = [];
 
-      // Required fields
+      // Required fields with user-friendly messages
       if (!name?.trim()) {
-        validationErrors.push('Community name is required');
+        validationErrors.push('Please enter a name for your community.');
       } else if (name.trim().length < 2) {
-        validationErrors.push('Community name must be at least 2 characters');
+        validationErrors.push('Community name must be at least 2 characters long.');
       }
 
       if (!adminEmail?.trim()) {
-        validationErrors.push('Admin email is required');
+        validationErrors.push('Please enter an admin email address.');
       } else {
         const emailResult = emailValidation.safeParse(adminEmail);
         if (!emailResult.success) {
-          validationErrors.push(emailResult.error.errors[0]?.message || 'Invalid email format');
+          validationErrors.push('Please enter a valid admin email address.');
         }
       }
 
-      // Required address fields
+      // Required address fields with user-friendly messages
       if (!address?.trim()) {
-        validationErrors.push('Address is required');
+        validationErrors.push('Please enter the street address.');
       }
 
       if (!city?.trim()) {
-        validationErrors.push('City is required');
+        validationErrors.push('Please enter the city.');
       }
 
       if (!state?.trim()) {
-        validationErrors.push('State is required');
+        validationErrors.push('Please enter the state.');
       }
 
       if (!zipCode?.trim()) {
-        validationErrors.push('ZIP code is required');
+        validationErrors.push('Please enter the ZIP code.');
       }
 
       // Additional required fields for complete community profile
       if (!type?.trim()) {
-        validationErrors.push('Community type is required');
+        validationErrors.push('Please select a community type.');
       }
 
       if (!denomination?.trim()) {
-        validationErrors.push('Denomination is required');
+        validationErrors.push('Please select a denomination or type.');
       }
 
       // Privacy setting validation
       const privacySetting = req.body.privacy_setting; // snake_case from frontend transformation
       if (!privacySetting?.trim()) {
-        validationErrors.push('Privacy setting is required');
+        validationErrors.push('Please select a privacy setting.');
       } else if (!['public', 'private', 'church_members_only'].includes(privacySetting)) {
-        validationErrors.push('Invalid privacy setting');
+        validationErrors.push('Please select a valid privacy setting.');
       }
 
       // Privacy options for Ministries and Groups
@@ -9389,7 +9389,7 @@ Return JSON with this exact structure:
 
       // Weekly attendance only required for churches
       if (type === 'church' && !weeklyAttendance?.trim()) {
-        validationErrors.push('Weekly attendance is required for churches');
+        validationErrors.push('Please select the weekly attendance for your church.');
       }
 
       // Phone validation
