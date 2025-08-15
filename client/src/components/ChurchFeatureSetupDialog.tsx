@@ -138,7 +138,7 @@ const CONFIGURABLE_FEATURES: FeatureConfig[] = [
   { 
     category: 'admin_portal', 
     name: 'sermon_studio', 
-    displayName: 'Sermon Studio', 
+    displayName: 'Content Creation', 
     description: 'AI-powered sermon creation and research tools',
     icon: Mic,
     priority: 'medium',

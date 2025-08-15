@@ -704,7 +704,7 @@ export default function SermonCreationStudio() {
     <div className="max-w-6xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
       <div className="text-center mb-6 sm:mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 sm:mb-4">
-          {contentType === "sermon" ? "AI-Powered Sermon Creation Studio" : "Sunday School Lesson Creator"}
+          AI-Powered Content Creation Studio
         </h1>
         <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 px-2">
           {contentType === "sermon" 

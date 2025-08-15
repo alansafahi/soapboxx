@@ -174,9 +174,9 @@ export default function Sidebar() {
       label: "ADMIN PORTAL",
       items: [
         { label: "Member Directory", href: "/members", icon: Users, roles: ['admin', 'church-admin', 'church_admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'church_admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Content Creation", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'church_admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
         { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'church_admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Sermon Studio", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'church_admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
+        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'church_admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
         { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'church_admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
       ]
     },
@@ -213,7 +213,7 @@ export default function Sidebar() {
         // Also check if user has church_admin role for admin portal access
         (userRole === 'church_admin' && ['admin', 'church-admin', 'church_admin'].includes(role)) ||
         // Temporary: Allow access for all authenticated users to test Sunday School
-        (group.label === 'ADMIN PORTAL' && user && item.label === 'Sermon Studio')
+        (group.label === 'ADMIN PORTAL' && user && item.label === 'Content Creation')
       );
       
       return hasAccess;

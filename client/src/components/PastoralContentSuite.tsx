@@ -51,7 +51,7 @@ export default function PastoralContentSuite() {
 
   const contentCategories: ContentCategory[] = [
     {
-      name: "AI-Powered Sermon Creation Studio",
+      name: "AI-Powered Content Creation Studio",
       description: "Comprehensive sermon development platform with biblical research, outline generation, and content enhancement",
       icon: <Edit3 className="w-6 h-6" />,
       features: [

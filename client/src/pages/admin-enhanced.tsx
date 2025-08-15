@@ -528,7 +528,7 @@ export default function EnhancedAdminPortal() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-blue-900">
                     <Mic className="h-6 w-6" />
-                    AI-Powered Sermon Creation Studio
+                    AI-Powered Content Creation Studio
                     <Badge variant="outline" className="ml-2 bg-blue-100 text-blue-700">Pastor Tools</Badge>
                   </CardTitle>
                   <p className="text-blue-700 text-sm">

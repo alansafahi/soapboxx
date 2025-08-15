@@ -559,7 +559,7 @@ export default function SimpleLanding() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />
-                    <span className="text-sm sm:text-base">Sermon Studio for Content Sharing</span>
+                    <span className="text-sm sm:text-base">Content Creation for Content Sharing</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500 flex-shrink-0" />

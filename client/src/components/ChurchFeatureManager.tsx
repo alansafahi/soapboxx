@@ -119,7 +119,7 @@ const getFeatureDefinitions = (communityType: string = 'church'): Record<string,
       },
       'admin_features': {
         'sermon_studio': {
-          name: 'Sermon Studio',
+          name: 'Content Creation',
           description: 'AI-powered sermon creation and biblical research',
           icon: MicIcon,
           color: 'text-amber-600',

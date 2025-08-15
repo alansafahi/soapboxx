@@ -422,7 +422,7 @@ export default function TopHeader() {
                 <Link href="/sermon-studio">
                   <DropdownMenuItem className="cursor-pointer">
                     <PenTool className="w-4 h-4 mr-2" />
-                    Sermon Studio
+                    Content Creation
                   </DropdownMenuItem>
                 </Link>
                 <Link href="/engagement-analytics">

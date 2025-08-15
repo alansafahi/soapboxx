@@ -123,7 +123,7 @@ const faqs: FAQItem[] = [
   {
     id: 'church-features',
     question: 'What does SoapBox offer churches?',
-    answer: 'SoapBox provides a complete digital ministry platform including: Prayer wall management and moderation, Sermon Studio with AI assistance, Member engagement analytics, Bible study and devotional tools, Customizable permissions and roles, Direct member communication tools, Donation tracking and analytics, Event management and attendance tracking.',
+    answer: 'SoapBox provides a complete digital ministry platform including: Prayer wall management and moderation, Content Creation with AI assistance, Member engagement analytics, Bible study and devotional tools, Customizable permissions and roles, Direct member communication tools, Donation tracking and analytics, Event management and attendance tracking.',
     category: 'church'
   },
   {
