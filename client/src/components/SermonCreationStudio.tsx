@@ -984,8 +984,8 @@ export default function SermonCreationStudio() {
                     } else if (nextStep?.tab === 'completed') {
                       // If completed step, navigate to completed tab
                       setActiveTab('completed');
-                    } else if (nextStep?.tab) {
-                      setActiveTab(nextStep.tab);
+                    } else {
+                      setActiveTab(nextStep?.tab);
                     }
                   }}
                 >
