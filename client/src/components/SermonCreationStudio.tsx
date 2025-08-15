@@ -68,13 +68,21 @@ const renderFormattedText = (text: string) => {
 
 interface SermonOutline {
   title: string;
-  theme: string;
+  theme?: string;
+  bigIdea?: string;
   mainPoints: string[];
-  introduction: string;
-  conclusion: string;
-  callToAction: string;
+  introduction?: string;
+  conclusion?: string;
+  callToAction?: string;
   scriptureReferences: string[];
   closingPrayer?: string;
+  // Sunday School specific properties
+  openingActivity?: string;
+  bibleStoryMethod?: string;
+  applicationActivities?: string[];
+  memoryVerseActivity?: string;
+  closingActivity?: string;
+  takeHome?: string;
 }
 
 interface BiblicalResearch {
@@ -83,6 +91,9 @@ interface BiblicalResearch {
   historicalContext: string;
   keyThemes: string[];
   practicalApplications: string[];
+  // Sunday School specific properties
+  memoryVerse?: string;
+  discussionQuestions?: string[];
 }
 
 
@@ -406,6 +417,27 @@ export default function SermonCreationStudio() {
       toast({
         title: "Activities generation failed",
         description: "Failed to generate activities. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const sundaySchoolEnhanceMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest('POST', '/api/sunday-school/enhance', data);
+    },
+    onSuccess: (data) => {
+      setEnhancedOutline(data.enhancedOutline);
+      setEnhancementRecommendations(data.recommendations || []);
+      toast({
+        title: "Lesson Enhanced",
+        description: "Sunday School lesson has been enhanced successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Enhancement failed",
+        description: "Failed to enhance lesson. Please try again.",
         variant: "destructive"
       });
     }
@@ -1201,10 +1233,10 @@ export default function SermonCreationStudio() {
                           </div>
                           {contentType === "sermon" ? (
                             <Badge 
-                              variant={illustration.relevanceScore > 0.8 ? "default" : "outline"}
+                              variant={(illustration.relevanceScore || 0) > 0.8 ? "default" : "outline"}
                               className="ml-2"
                             >
-                              {Math.round(illustration.relevanceScore * 100)}% match
+                              {Math.round((illustration.relevanceScore || 0) * 100)}% match
                             </Badge>
                           ) : (
                             <Badge variant="outline" className="ml-2 bg-orange-50 text-orange-700 border-orange-300">
@@ -1522,7 +1554,7 @@ export default function SermonCreationStudio() {
                               <div className="flex justify-between items-start mb-2">
                                 <h5 className="font-medium text-gray-900">{illustration.title}</h5>
                                 <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                                  Relevance: {Math.round(illustration.relevanceScore * 100)}%
+                                  Relevance: {Math.round((illustration.relevanceScore || 0) * 100)}%
                                 </span>
                               </div>
                               <p className="text-gray-700 text-sm leading-relaxed mb-3">

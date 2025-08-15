@@ -3875,14 +3875,15 @@ export type InsertDonationReport = typeof donationReports.$inferInsert;
 
 // Campus types already defined earlier in the file
 
-// Sermon Illustration Types
+// Sermon Illustration Types (supports both sermons and Sunday School activities)
 export interface SermonIllustration {
-  title: string;
-  story: string;
-  application: string;
-  source: string;
-  relevanceScore: number;
-  visualElements: {
+  // Sermon properties
+  title?: string;
+  story?: string;
+  application?: string;
+  source?: string;
+  relevanceScore?: number;
+  visualElements?: {
     slideTitle: string;
     keyImage: string;
     bulletPoints: string[];
@@ -3893,11 +3894,19 @@ export interface SermonIllustration {
     audienceStyle?: string;
     themeStyle?: string;
   };
-  presentationTips: {
+  presentationTips?: {
     timing: string;
     delivery: string;
     interaction: string;
   };
+  // Sunday School activity properties
+  name?: string;
+  type?: string;
+  instructions?: string;
+  materials?: string[];
+  duration?: string;
+  lessonConnection?: string;
+  ageAppropriate?: string;
 }
 
 // Video Content Types for AI Video Generator
