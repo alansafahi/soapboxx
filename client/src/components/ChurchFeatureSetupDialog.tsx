@@ -196,9 +196,20 @@ export default function ChurchFeatureSetupDialog({
         });
         
         if (!initResponse.ok) {
-          const errorData = await initResponse.json();
+          // Try to parse JSON error, but handle HTML responses too
+          let errorData;
+          try {
+            errorData = await initResponse.json();
+          } catch (jsonError) {
+            // If response is HTML (like error page), treat as auth error
+            if (initResponse.status === 401 || initResponse.status === 403) {
+              throw new Error('Authentication error: Please refresh the page and try again');
+            }
+            throw new Error(`Server error (${initResponse.status})`);
+          }
+          
           if (initResponse.status === 401 || initResponse.status === 403) {
-            throw new Error(`Authentication error: ${errorData.error || 'Insufficient permissions'}`);
+            throw new Error(`Authentication error: ${errorData.error || 'Please refresh the page and try again'}`);
           }
           console.warn('Feature initialization failed:', errorData);
         }
