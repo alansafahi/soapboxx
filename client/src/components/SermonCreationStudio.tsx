@@ -1424,26 +1424,76 @@ export default function SermonCreationStudio() {
                                     <p className="text-sm text-slate-700 dark:text-slate-400 leading-relaxed">{illustration.potentialChallenges}</p>
                                   </div>
                                 )}
+                                {illustration.troubleshootingTips && (
+                                  <div className="mb-3">
+                                    <h6 className="font-medium text-slate-800 dark:text-slate-300 mb-1">Troubleshooting Tips:</h6>
+                                    <p className="text-sm text-slate-700 dark:text-slate-400 leading-relaxed">{illustration.troubleshootingTips}</p>
+                                  </div>
+                                )}
                                 {illustration.adaptations && (
-                                  <div>
+                                  <div className="mb-3">
                                     <h6 className="font-medium text-slate-800 dark:text-slate-300 mb-1">Adaptations for Different Needs:</h6>
                                     <p className="text-sm text-slate-700 dark:text-slate-400 leading-relaxed">{illustration.adaptations}</p>
+                                  </div>
+                                )}
+                                {illustration.accessibilityNotes && (
+                                  <div>
+                                    <h6 className="font-medium text-slate-800 dark:text-slate-300 mb-1">Accessibility Considerations:</h6>
+                                    <p className="text-sm text-slate-700 dark:text-slate-400 leading-relaxed">{illustration.accessibilityNotes}</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Educational Objective */}
+                            {illustration.educationalObjective && (
+                              <div className="bg-emerald-50 dark:bg-emerald-900 p-4 rounded-lg border-l-4 border-emerald-400">
+                                <h5 className="font-medium text-emerald-900 dark:text-emerald-200 mb-2 flex items-center">
+                                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                  </svg>
+                                  Learning Objective
+                                </h5>
+                                <p className="text-sm text-emerald-800 dark:text-emerald-300 leading-relaxed">{illustration.educationalObjective}</p>
+                              </div>
+                            )}
+
+                            {/* Biblical Connection */}
+                            {(illustration.biblicalConnection || illustration.lessonConnection) && (
+                              <div className="bg-purple-50 dark:bg-purple-900 p-4 rounded-lg">
+                                <h5 className="font-medium text-purple-900 dark:text-purple-200 mb-2 flex items-center">
+                                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                  </svg>
+                                  Biblical Foundation
+                                </h5>
+                                <p className="text-sm text-purple-800 dark:text-purple-300 leading-relaxed">{illustration.biblicalConnection || illustration.lessonConnection}</p>
+                              </div>
+                            )}
+
+                            {/* Assessment Methods */}
+                            {illustration.assessmentMethods && (
+                              <div className="bg-cyan-50 dark:bg-cyan-900 p-4 rounded-lg">
+                                <h5 className="font-medium text-cyan-900 dark:text-cyan-200 mb-2 flex items-center">
+                                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
+                                  </svg>
+                                  How to Assess Learning
+                                </h5>
+                                <p className="text-sm text-cyan-800 dark:text-cyan-300 leading-relaxed">{illustration.assessmentMethods}</p>
+                                {illustration.learningIndicators && (
+                                  <div className="mt-2 bg-cyan-100 dark:bg-cyan-800 p-2 rounded">
+                                    <h6 className="font-medium text-cyan-900 dark:text-cyan-200 text-xs mb-1">Success Indicators:</h6>
+                                    <p className="text-xs text-cyan-800 dark:text-cyan-300">{illustration.learningIndicators}</p>
                                   </div>
                                 )}
                               </div>
                             )}
                             
-                            {illustration.lessonConnection && (
-                              <div className="bg-purple-50 p-3 rounded-md">
-                                <p className="text-sm font-medium text-purple-900 mb-1">Lesson Connection:</p>
-                                <p className="text-sm text-purple-800 leading-relaxed">{illustration.lessonConnection}</p>
-                              </div>
-                            )}
-                            
                             {illustration.ageAppropriate && (
-                              <div className="bg-yellow-50 p-3 rounded-md">
-                                <p className="text-sm font-medium text-yellow-900 mb-1">Age Appropriateness:</p>
-                                <p className="text-sm text-yellow-800 leading-relaxed">{illustration.ageAppropriate}</p>
+                              <div className="bg-yellow-50 dark:bg-yellow-900 p-3 rounded-md">
+                                <p className="text-sm font-medium text-yellow-900 dark:text-yellow-200 mb-1">Age Appropriateness:</p>
+                                <p className="text-sm text-yellow-800 dark:text-yellow-300 leading-relaxed">{illustration.ageAppropriate}</p>
                               </div>
                             )}
                             
@@ -1504,12 +1554,28 @@ export default function SermonCreationStudio() {
                                     </div>
                                   )}
                                   
+                                  {/* Family Engagement */}
+                                  {illustration.familyEngagement && (
+                                    <div className="bg-blue-50 dark:bg-blue-900 p-3 rounded border-l-4 border-blue-400">
+                                      <h6 className="font-medium text-blue-900 dark:text-blue-200 mb-1">Family Engagement:</h6>
+                                      <p className="text-sm text-blue-800 dark:text-blue-300">{illustration.familyEngagement}</p>
+                                    </div>
+                                  )}
+
                                   {(illustration.takeHomeMessage || illustration.parentConnection) && (
                                     <div className="bg-green-50 dark:bg-green-900 p-3 rounded">
                                       <h6 className="font-medium text-green-900 dark:text-green-200 mb-2">Take Home Message:</h6>
                                       <p className="text-sm text-green-800 dark:text-green-300">
                                         {illustration.takeHomeMessage || illustration.parentConnection || `Students will understand how ${illustration.title || illustration.name} helps them apply today's lesson in their daily lives.`}
                                       </p>
+                                    </div>
+                                  )}
+
+                                  {/* Expected Responses */}
+                                  {illustration.expectedResponses && (
+                                    <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded">
+                                      <h6 className="font-medium text-gray-900 dark:text-gray-200 mb-1">Expected Student Responses:</h6>
+                                      <p className="text-sm text-gray-700 dark:text-gray-400">{illustration.expectedResponses}</p>
                                     </div>
                                   )}
                                 </div>
