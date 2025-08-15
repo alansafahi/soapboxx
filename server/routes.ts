@@ -3495,7 +3495,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     } catch (error) {
       console.error('Sunday School activities error:', error);
-      res.status(500).json({ message: "Failed to generate activities", error: error.message });
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+      res.status(500).json({ 
+        message: "Failed to generate activities", 
+        error: error.message,
+        details: error.name 
+      });
     }
   });
 
