@@ -130,6 +130,13 @@ export default function SermonCreationStudio() {
     queryFn: () => apiRequest('GET', '/api/sermon-studio/completed'),
   });
 
+  // Fetch teaching guidelines for Sunday School
+  const { data: teachingGuidelines } = useQuery({
+    queryKey: ['/api/sunday-school/teaching-guidelines'],
+    queryFn: () => apiRequest('GET', '/api/sunday-school/teaching-guidelines'),
+    enabled: contentType === "sunday-school",
+  });
+
   // Save Draft mutation
   const saveDraftMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -1228,6 +1235,46 @@ export default function SermonCreationStudio() {
               </Button>
             </CardHeader>
             <CardContent>
+              {/* Teaching Guidelines for Sunday School */}
+              {contentType === "sunday-school" && teachingGuidelines && (
+                <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 p-6 rounded-lg border border-blue-200 dark:border-blue-700">
+                  <div className="flex items-center mb-4">
+                    <GraduationCap className="w-6 h-6 mr-3 text-blue-600" />
+                    <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100">Teacher Resource Guide</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    {/* Age-Specific Guidelines */}
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                      <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                        <Baby className="w-4 h-4 mr-2 text-orange-500" />
+                        {ageGroup} Age Guidelines
+                      </h4>
+                      {teachingGuidelines.ageSpecificGuidelines?.[ageGroup] && (
+                        <div className="space-y-2 text-sm">
+                          <div><strong>Attention Span:</strong> {teachingGuidelines.ageSpecificGuidelines[ageGroup].attentionSpan}</div>
+                          <div><strong>Learning Style:</strong> {teachingGuidelines.ageSpecificGuidelines[ageGroup].learningStyle}</div>
+                          <div><strong>Classroom Tips:</strong> {teachingGuidelines.ageSpecificGuidelines[ageGroup].classroom}</div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* General Guidelines */}
+                    <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+                      <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
+                        <Users className="w-4 h-4 mr-2 text-green-500" />
+                        Professional Standards
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        <div><strong>Preparation:</strong> {teachingGuidelines.professionalStandards?.preparation}</div>
+                        <div><strong>Safety:</strong> {teachingGuidelines.professionalStandards?.safetyFirst}</div>
+                        <div><strong>Parent Connection:</strong> {teachingGuidelines.professionalStandards?.parentCommunication}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {illustrations.length > 0 ? (
                 <div className="space-y-4">
                   {/* Selection Controls */}

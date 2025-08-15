@@ -3477,150 +3477,126 @@ export async function registerRoutes(app: Express): Promise<Server> {
         messages: [
           {
             role: "system", 
-            content: "You are a professional Sunday School curriculum developer with 25+ years creating teacher-ready lesson plans for major Christian publishers. You specialize in comprehensive, volunteer-friendly curricula that match the quality of published Sunday School materials from companies like Group, David C Cook, and Gospel Light. Your lesson plans include exact teacher scripts, detailed setup instructions, comprehensive materials lists, biblical accuracy, educational objectives, and extensive family engagement components. You understand that volunteer teachers need complete, step-by-step guidance with professional-quality content that requires minimal preparation time while delivering maximum educational and spiritual impact. Every element must be classroom-tested, age-appropriate, and theologically sound. Match the structure and detail level of professional published curricula. Respond only with valid JSON format."
+            content: "You are a creative Sunday School activity developer. Create fun, story-specific activities that use the exact Bible characters, settings, and events mentioned. Make activities that children will remember because they connect directly to the Bible story details. Be creative with names and content - use character names in activity titles and reference specific story events in instructions."
           },
           {
             role: "user",
-            content: prompt + "\n\nIMPORTANT: Respond ONLY with valid JSON. No other text before or after the JSON object."
+            content: prompt
           }
         ],
-        max_tokens: 4000
+        response_format: { type: "json_object" },
+        max_tokens: 1500
       });
 
       const content = response.choices[0].message.content || '{"activities": []}';
       
       try {
         const activitiesData = JSON.parse(content);
-        
-        // Ensure we have activities and they include application content
         const activities = activitiesData.activities || [];
         
-        // Enhance activities with professional curriculum structure
-        const enhancedActivities = activities.map((activity: any) => ({
-          ...activity,
-          educationalObjective: activity.educationalObjective || `Students will understand and apply the key lesson of ${activity.lessonConnection || 'God\'s love'} through hands-on participation and discussion.`,
-          setupInstructions: activity.setupInstructions || "Arrange students in a semicircle facing the teacher. Place all materials on a central table within easy reach. Ensure adequate space for movement and interaction.",
-          roomArrangement: activity.roomArrangement || "Semicircle seating with teacher at front, materials table accessible, wall space for displaying visuals.",
-          teacherScript: activity.teacherScript || `"Welcome, everyone! Today we're going to ${activity.name || 'explore our Bible lesson'} together. This will help us remember what God wants us to learn. Are you ready to discover something amazing?"`,
-          studentPrompts: activity.studentPrompts || ["Can you tell me what you remember from our Bible story?", "How do you think this connects to your life?", "What questions do you have?"],
-          classroomManagement: activity.classroomManagement || "Use positive reinforcement and name recognition. Give clear, step-by-step instructions. Provide gentle redirection for off-task behavior. Include all students by asking different types of questions.",
-          timeBreakdown: activity.timeBreakdown || "Setup and introduction (2 min), Main activity instructions (1 min), Student participation (6-8 min), Discussion and reflection (2-3 min), Cleanup and transition (1 min)",
-          biblicalConnection: activity.biblicalConnection || `This activity directly reinforces today's Bible lesson by providing experiential learning that helps students internalize spiritual truths.`,
-          safetyNotes: activity.safetyNotes || "Ensure all materials are age-appropriate. Supervise any physical activity. Check for allergies with craft materials. Maintain clear sightlines for supervision.",
-          assessmentMethods: activity.assessmentMethods || "Observe student participation, listen to discussion responses, check comprehension through questions, watch for application understanding.",
-          learningIndicators: activity.learningIndicators || "Students can explain the activity's connection to the lesson, participate meaningfully in discussion, demonstrate understanding through actions or words.",
-          application: activity.application || `This activity helps students understand how ${activity.name || 'the lesson'} applies to their daily lives by providing hands-on experience with Biblical truth. Through active participation, students connect spiritual concepts to real-life situations they encounter at home, school, and in their community.`,
-          practicalSteps: activity.practicalSteps || [
-            "This week, look for opportunities to practice what we learned today in your interactions with family members, friends, and classmates",
-            "Share this lesson with someone at home by explaining what you learned and asking them about their experiences with similar situations", 
-            "Choose one specific way to apply this Bible truth this week, such as showing kindness at school, helping at home, or being honest in difficult situations"
-          ],
-          discussionQuestions: activity.discussionQuestions || [
-            "How does what we learned today help you make better choices in your daily life?",
-            "What is one new thing you discovered today that you want to remember and share with others?",
-            "Can you think of a specific situation this week where you could use what we learned today?"
-          ],
-          expectedResponses: activity.expectedResponses || "Students should be able to connect the lesson to personal experiences, express understanding in their own words, and identify practical applications.",
-          memoryVerseConnection: activity.memoryVerseConnection || `This activity reinforces today's memory verse by providing visual, auditory, and kinesthetic learning opportunities that help students memorize and understand God's word.`,
-          familyEngagement: activity.familyEngagement || "Send home discussion questions for families. Provide simple activities parents can do with children during the week. Include conversation starters for family devotions.",
-          takeHomeMessage: activity.takeHomeMessage || `Remember that ${activity.lessonConnection || 'God loves you and has a wonderful plan for your life'}. This week, look for ways to apply this lesson in your daily activities and share what you learned with your family.`,
-          potentialChallenges: activity.potentialChallenges || "Some students may be hesitant to participate. Others might dominate discussion. Address different learning styles and attention spans.",
-          troubleshootingTips: activity.troubleshootingTips || "For shy students, offer easier questions or pair them with confident peers. For active students, provide movement opportunities. For struggling learners, use visual aids and repeat key concepts.",
-          adaptations: activity.adaptations || "For larger groups, divide into smaller teams with adult helpers. For students with special needs, provide sensory accommodations and modified instructions. For different ages, adjust vocabulary and complexity.",
-          accessibilityNotes: activity.accessibilityNotes || "Provide alternative formats for visual learners (large print, pictures). Include tactile options for kinesthetic learners. Offer quiet spaces for students who need sensory breaks."
-        }));
+        // Add comprehensive teacher guidance as separate instructions
+        const teacherInstructions = {
+          generalGuidance: {
+            classroomSetup: "Arrange students in a semicircle facing the teacher. Place all materials on a central table within easy reach. Ensure adequate space for movement and interaction.",
+            preparationTips: "Review all activities 30 minutes before class. Pre-cut materials and test any technology. Have backup activities ready for different group sizes.",
+            timingGuidance: `For ${ageGroup} children: ${ageGroup === 'preschool' ? 'Keep activities to 5-7 minutes max with frequent movement breaks' : ageGroup === 'elementary' ? 'Activities can be 8-12 minutes with clear start/stop points' : 'Activities can be 12-18 minutes with deeper engagement'}`,
+            classroomManagement: "Use positive reinforcement and name recognition. Give clear, step-by-step instructions. Provide gentle redirection for off-task behavior. Include all students by asking different types of questions.",
+            safetyReminders: "Ensure clear pathways for movement. Check all materials for age appropriateness. Have hand sanitizer available. Monitor group interactions.",
+            adaptations: "For large groups: divide into smaller teams. For special needs: provide visual aids and alternative participation methods. For mixed ages: offer different complexity levels."
+          },
+          ageSpecificGuidance: ageGroup === 'preschool' ? {
+            tips: "Use simple language, repeat instructions, include sensory elements, provide immediate praise, allow for short attention spans",
+            transitions: "Use songs or countdowns to signal activity changes",
+            materials: "Ensure all items are safe for young children - no small parts"
+          } : ageGroup === 'elementary' ? {
+            tips: "Include competition elements, hands-on learning, clear rules, opportunities for questions and participation",
+            transitions: "Use clear signals and expectations for movement between activities",
+            materials: "Have extra supplies available as children this age may need multiple attempts"
+          } : {
+            tips: "Encourage peer interaction, provide leadership opportunities, connect to real-world applications",
+            transitions: "Allow students to help with setup and cleanup",
+            materials: "Include technology integration where appropriate"
+          }
+        };
         
-        res.json({ activities: enhancedActivities });
+        res.json({
+          activities,
+          teacherInstructions,
+          lessonFocus: `${topic} - Story-specific activities created`,
+          metadata: {
+            ageGroup,
+            duration: duration || 'medium',
+            storyElements: `Characters: ${topic.includes('Moses') ? 'Moses, Pharaoh, Israelites' : topic.includes('David') ? 'David, Goliath, King Saul' : topic.includes('Mary') ? 'Mary, Angel Gabriel, Joseph' : 'Bible characters'}`
+          }
+        });
         
       } catch (parseError) {
         console.error('JSON parse error:', parseError);
         console.error('Raw content:', content);
         
-        // Fallback: Generate professional curriculum-quality activities
-        const fallbackActivities = [
-          {
-            name: "Interactive Bible Story Discovery",
-            type: "bible teaching",
-            educationalObjective: "Students will identify key character traits and decisions from the Bible story and connect them to their own life situations through active participation and guided discussion.",
-            materials: ["Bible or printed story text", "large whiteboard or chart paper", "4 colored dry-erase markers", "simple costume pieces or props (optional)", "8-10 small chairs", "story sequence cards (pre-made)", "timer", "stickers for participation"],
-            setupInstructions: "Before class: Set up chairs in a semicircle facing the whiteboard. Place markers and Bible on a small table beside the teaching area. If using props, arrange them in a accessible basket. Post any visual aids on the wall at student eye level. Test markers to ensure they work.",
-            roomArrangement: "Semicircle seating with 3-4 feet between teacher and first row. Whiteboard visible to all students. Props table within arm's reach of teacher. Clear floor space in center for movement activities.",
-            instructions: "Open your Bible and begin with enthusiasm: 'Today we're going to become detectives and discover what God wants us to learn from an amazing Bible story!' Write the main character's name on the board in large letters. As you tell the story, pause every 2-3 sentences to ask, 'What do you think [character] is feeling right now?' Draw simple stick figures or symbols on the board to illustrate key events. Every 5 minutes, invite 2-3 students to act out what just happened while you narrate.",
-            teacherScript: "Opening: 'Detectives, I need your help today! We're going to solve the mystery of what God wants us to learn from [Bible character]'s story. Raise your hand if you've ever had to make a really hard choice.' [Pause for responses] 'Great! Our Bible character had to make some choices too. As I tell this story, I want you to listen like detectives for clues about the right choices and wrong choices. Ready to solve this mystery?'",
-            studentPrompts: ["What clues do you see about [character]'s feelings?", "Detectives, what choice would you make here?", "How is this situation like something in your life?", "What does this tell us about God?"],
-            classroomManagement: "Use the 'detective hand signal' (hand over eyes like looking through binoculars) to regain attention. Rotate who acts out scenes to keep all students engaged. For energetic students, give them the role of 'story helper' to distribute props. For quiet students, ask yes/no questions first, then build to open-ended ones.",
-            timeBreakdown: "Opening and setup (2 min), Interactive story telling with pauses (10-12 min), Final detective discussion and conclusions (3-4 min)",
-            biblicalConnection: "Direct engagement with Scripture through interactive storytelling reinforces biblical narrative and character development while making abstract concepts concrete for young learners",
-            safetyNotes: "Ensure adequate space (minimum 6 feet) for movement activities. Supervise prop use to prevent accidents. Check that all students can see the whiteboard. No running during action scenes.",
-            assessmentMethods: "Listen for students making connections between story and their experiences. Watch for engaged participation in discussions. Check if students can retell key story elements. Observe if they can identify the main lesson.",
-            learningIndicators: "Student can name the main character and key event. Student connects story to a personal experience. Student participates in discussion or actions. Student shows understanding through questions or comments.",
-            application: "This activity helps students see that Bible characters faced real challenges similar to those they encounter today. By role-playing and discussing character choices, students develop a framework for making godly decisions when they face peer pressure, family conflicts, or moral dilemmas at school or home. The detective theme makes learning fun while teaching critical thinking about spiritual truth.",
-            practicalSteps: [
-              "This week, when facing a difficult choice, pause and ask: 'What would [Bible character] do?' and remember how they trusted God's guidance",
-              "Share this Bible story detective work with your family at dinner one night and ask them about times they had to make hard choices like the character did",
-              "Practice being a 'choice detective' by helping a friend or sibling think through a decision using what you learned from our Bible character's example"
-            ],
-            discussionQuestions: [
-              "Detective question: What was the most important clue about [character]'s heart that helped them make good choices?",
-              "When have you faced a similar situation to our Bible character, and what choice detective skills would help you?",
-              "If your best friend was facing the same problem as our Bible character, what clues from this story would you share to help them?"
-            ],
-            expectedResponses: "Students should identify character emotions, connect story situations to their own experiences, demonstrate understanding of the lesson through discussion or actions, and show enthusiasm for the detective theme.",
-            memoryVerseConnection: "Connect story events to memory verse by having students find the 'verse clues' that the Bible character followed, highlighting specific moments when the character demonstrated the memory verse truth.",
-            familyEngagement: "Send home a 'Family Detective Challenge' sheet with story summary and discussion questions. Include suggestions for family devotion time using detective theme. Provide conversation starters about family decision-making.",
-            takeHomeMessage: "Just like our Bible character, God helps you make good choices every day. This week, be a choice detective and look for God's clues in His Word when you face decisions.",
-            potentialChallenges: "Some students may dominate the role-playing while others are reluctant to participate. Students might get too excited during action scenes. Different attention spans may require pace adjustments.",
-            troubleshootingTips: "For shy students: Start with being 'props manager' or asking them to point to pictures. For active students: Give them active roles like being the narrator or main character. For distracted students: Use their name frequently and give them specific jobs.",
-            adaptations: "Large groups: Divide into two detective teams that take turns. Special needs: Use visual story cards and allow non-verbal participation. Different ages: Adjust vocabulary and give older students more complex detective questions.",
-            accessibilityNotes: "Provide large-print story cards for visual learners. Use hand gestures and facial expressions for auditory learners. Include texture props for tactile learners. Offer quiet observation option for sensory-sensitive students."
-          },
-          {
-            name: "Faith in Action Craft",
-            type: "craft",
-            materials: ["10 sheets construction paper (various colors)", "glue sticks (1 per 2 students)", "child-safe scissors", "washable markers", "stickers related to lesson theme", "example completed craft", "wet wipes for cleanup"],
-            setupInstructions: "Cover tables with newspaper. Pre-cut difficult shapes if needed. Have example craft visible. Place supplies in center of each table with 4-6 students per table.",
-            instructions: "Show your completed example and explain each step before students begin. Walk around to each table, offering help and encouragement. Say things like 'I love how you're using those colors!' Guide students through each step, ensuring they understand before moving to the next one. Allow for creativity while keeping them focused on the lesson connection.",
-            teacherScript: "Start by saying: 'Today we're going to make something special that will remind us of [lesson topic] every day! Look at my example. What do you notice about it?' Then guide through each step: 'First, we'll choose our paper color. Pick one that reminds you of [lesson element].'",
-            classroomManagement: "Circulate constantly to help with fine motor skills. Keep extra supplies ready for mistakes. If someone finishes early, ask them to help a neighbor or add extra details to their craft.",
-            lessonConnection: "Creates a tangible, visual reminder that reinforces the spiritual lesson through hands-on creativity",
-            duration: "15-20 minutes",
-            timeBreakdown: "Setup explanation (3 min), Craft creation (12-15 min), Sharing and cleanup (2-3 min)",
-            ageAppropriate: "Hands-on crafting appeals to kinesthetic learners and helps students with different learning styles retain the lesson",
-            safetyNotes: "Supervise scissor use closely. Keep wet wipes handy for sticky fingers. Ensure glue sticks are closed to prevent drying out.",
-            application: "Students create something tangible they can take home as a daily reminder to apply the Bible lesson. The physical act of creating helps cement the lesson in memory, while the finished product serves as a conversation starter with family and a personal reminder of God's truth in their daily routines.",
-            practicalSteps: [
-              "Place your craft somewhere you'll see it every morning, like your bedroom mirror or kitchen table, to remind you of today's lesson",
-              "This week, show your craft to three different people (family, friends, neighbors) and tell them what you learned about [lesson topic]",
-              "When you see your craft, say a quick prayer asking God to help you remember and practice what you learned today"
-            ],
-            discussionQuestions: [
-              "What part of making this craft helped you understand today's lesson better, and what will you remember when you look at it at home?",
-              "How will you use this craft to start a conversation with someone about what you learned in Sunday School today?",
-              "What's one specific way this craft will remind you to practice [lesson topic] when you're at school or playing with friends?"
-            ],
-            memoryVerseConnection: "Incorporate memory verse words or symbols into the craft design, having students write or draw key verse elements",
-            takeHomeMessage: "Every time you see your craft, remember that [lesson application] and that God wants to help you live out this truth every day.",
-            potentialChallenges: "Some students may struggle with fine motor skills or feel frustrated if their craft doesn't look perfect. Emphasize effort over perfection and provide plenty of encouragement.",
-            adaptations: "For younger students, pre-cut more pieces. For students with special needs, provide adaptive tools or pair with a helper. For advanced students, encourage additional decorative elements."
-          }
-        ];
-        
-        res.json({ activities: fallbackActivities });
+        res.status(500).json({ 
+          error: 'Failed to generate activities', 
+          message: 'AI response format error. Please try again.' 
+        });
       }
 
     } catch (error: any) {
       console.error('Sunday School activities error:', error);
-      console.error('Error details:', {
-        message: error?.message,
-        stack: error?.stack,
-        name: error?.name
-      });
-      
       res.status(500).json({ 
         success: false,
         message: "Failed to generate activities. Please try again.",
         error: error?.message || 'Unknown error'
       });
+    }
+  });
+
+  // Get comprehensive Sunday School teaching guidelines
+  app.get('/api/sunday-school/teaching-guidelines', async (req, res) => {
+    try {
+      const guidelines = {
+        generalInstructions: {
+          classroomSetup: "Arrange students in a semicircle facing the teacher. Ensure all materials are within easy reach and visual aids are at student eye level.",
+          teachingTips: "Use enthusiasm and variety in your voice. Make eye contact with students. Pause frequently for questions and participation.",
+          timeManagement: "Keep activities moving with clear transitions. Use timers to help students understand activity lengths.",
+          behaviorManagement: "Use positive reinforcement, clear expectations, and engaging activities to maintain attention."
+        },
+        ageSpecificGuidelines: {
+          preschool: {
+            attentionSpan: "5-7 minutes per activity",
+            learningStyle: "Sensory play, simple crafts, action songs, story props",
+            vocabulary: "Simple, concrete language with repetition",
+            classroom: "Frequent movement breaks, hands-on activities, immediate reinforcement"
+          },
+          elementary: {
+            attentionSpan: "8-12 minutes per activity", 
+            learningStyle: "Games with rules, competitive activities, group crafts, drama",
+            vocabulary: "Expanding vocabulary with concrete examples",
+            classroom: "Clear start/stop points, peer interaction, hands-on learning"
+          },
+          middle: {
+            attentionSpan: "12-18 minutes per activity",
+            learningStyle: "Team challenges, discussions, creative projects, technology",
+            vocabulary: "Abstract concepts with personal application",
+            classroom: "Peer interaction, leadership opportunities, deeper engagement"
+          },
+          high: {
+            attentionSpan: "15-25 minutes per activity",
+            learningStyle: "Leadership activities, real-world applications, ministry projects",
+            vocabulary: "Advanced concepts with life application",
+            classroom: "Independent thinking, mentoring roles, critical discussion"
+          }
+        },
+        professionalStandards: {
+          preparation: "Review lesson materials 24 hours in advance. Prepare all supplies and test equipment.",
+          biblicalAccuracy: "Verify all scripture references and theological content for age-appropriate accuracy.",
+          safetyFirst: "Always consider safety in activity planning. Have emergency procedures ready.",
+          parentCommunication: "Provide take-home materials that help parents continue learning at home."
+        }
+      };
+
+      res.json(guidelines);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch teaching guidelines" });
     }
   });
 
