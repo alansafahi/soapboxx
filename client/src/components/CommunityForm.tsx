@@ -387,24 +387,6 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
               <CardContent className="space-y-4">
                 <FormField
                   control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Community Name *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="First Baptist Church" 
-                          {...field}
-                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="type"
                   render={({ field }) => (
                     <FormItem>
@@ -433,6 +415,32 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
                           </SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {watchedType === 'church' ? 'Church Name *' : 
+                         watchedType === 'ministry' ? 'Ministry Name *' : 
+                         watchedType === 'group' ? 'Group Name *' : 'Community Name *'}
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder={
+                            watchedType === 'church' ? 'First Baptist Church' : 
+                            watchedType === 'ministry' ? 'Youth Ministry' : 
+                            watchedType === 'group' ? 'Bible Study Group' : 'First Baptist Church'
+                          }
+                          {...field}
+                          className="bg-white dark:bg-gray-700 text-black dark:text-white"
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}

@@ -9,6 +9,7 @@ The SoapBox Super App is a comprehensive faith community platform designed to co
 - **Title Updates**: Updated "AI-Powered Sermon Creation Studio" to "AI-Powered Content Creation Studio" for consistent branding
 - **Strategic Navigation Reorganization**: Moved "Content Creation" and "Content Moderation" to top of Admin Portal (positions 2-3) after "Community Administration" to emphasize content management importance
 - **Church Features Initialization Fix**: Improved error handling in church features initialization by properly catching authentication errors and providing clear user feedback. Added debugging to authentication middleware to track session issues during API calls. Enhanced error messages to guide users when authentication problems occur.
+- **Community Form UX Enhancement**: Reordered community creation form fields to show "Community Type" above "Community Name" for better user flow. Made the name field dynamic so it displays "Church Name", "Ministry Name", or "Group Name" based on the selected community type, with appropriate placeholders for each type.
 
 **Professional Sunday School Curriculum (August 15, 2025)**
 - **Complete Reading Plan System**: 62 active reading plans across three subscription tiers (Disciple, Servant, Torchbearer) with authentic scripture integration
