@@ -226,6 +226,13 @@ export default function SermonCreationStudio() {
           : 'Create detailed activities with instructions and materials needed'
       };
     }
+    if (contentType === "sunday-school" && currentResearch && currentOutline && sundaySchoolActivities.length > 0 && activeTab !== 'lesson') {
+      return {
+        tab: 'lesson',
+        title: 'Review Complete Lesson',
+        description: 'Review your complete lesson draft before enhancement'
+      };
+    }
     if (!enhancedOutline) {
       return {
         tab: 'enhance',
@@ -872,7 +879,7 @@ export default function SermonCreationStudio() {
               ✓ {contentType === "sermon" ? "Stories" : "Activities"}
             </div>
             {contentType === "sunday-school" && (
-              <div className={`text-xs ${(currentOutline && sundaySchoolActivities.length > 0) ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+              <div className={`text-xs ${(currentOutline && currentResearch && sundaySchoolActivities.length > 0) ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
                 ✓ Lesson
               </div>
             )}
@@ -1350,14 +1357,71 @@ export default function SermonCreationStudio() {
                             )}
                             
                             {illustration.application && (
-                              <div className="bg-orange-50 p-3 rounded-md">
-                                <p className="text-sm font-medium text-orange-900 mb-2 flex items-center">
-                                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <div className="bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900 dark:to-yellow-900 p-4 rounded-lg border border-orange-200 dark:border-orange-700">
+                                <p className="text-sm font-semibold text-orange-900 dark:text-orange-200 mb-3 flex items-center">
+                                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
                                   </svg>
-                                  How This Connects to the Lesson:
+                                  How This Connects to Today's Lesson:
                                 </p>
-                                <p className="text-sm text-orange-800 leading-relaxed bg-orange-100 p-2 rounded italic">{illustration.application}</p>
+                                
+                                <div className="space-y-3">
+                                  <div className="bg-orange-100 dark:bg-orange-800 p-3 rounded-lg border-l-4 border-orange-400">
+                                    <h5 className="font-medium text-orange-900 dark:text-orange-200 mb-2">Life Application for {ageGroup.replace('-', ' ')} students:</h5>
+                                    <p className="text-sm text-orange-800 dark:text-orange-300 leading-relaxed italic">
+                                      "{illustration.application}"
+                                    </p>
+                                  </div>
+                                  
+                                  {/* Add detailed application sections */}
+                                  {illustration.practicalSteps && (
+                                    <div className="bg-orange-50 dark:bg-orange-900 p-3 rounded">
+                                      <h6 className="font-medium text-orange-900 dark:text-orange-200 mb-2">Action Steps Students Can Take:</h6>
+                                      <ul className="space-y-1">
+                                        {illustration.practicalSteps.map((step: string, stepIdx: number) => (
+                                          <li key={stepIdx} className="flex items-start text-sm text-orange-800 dark:text-orange-300">
+                                            <span className="bg-orange-200 dark:bg-orange-700 text-orange-800 dark:text-orange-200 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5 flex-shrink-0">
+                                              {stepIdx + 1}
+                                            </span>
+                                            {step}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                  
+                                  {illustration.discussionQuestions && (
+                                    <div className="bg-yellow-50 dark:bg-yellow-900 p-3 rounded">
+                                      <h6 className="font-medium text-yellow-900 dark:text-yellow-200 mb-2">Discussion Questions:</h6>
+                                      <ul className="space-y-2">
+                                        {illustration.discussionQuestions.map((question: string, qIdx: number) => (
+                                          <li key={qIdx} className="flex items-start text-sm">
+                                            <span className="bg-yellow-200 dark:bg-yellow-700 text-yellow-800 dark:text-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-2 mt-0.5 flex-shrink-0">
+                                              Q{qIdx + 1}
+                                            </span>
+                                            <span className="text-yellow-800 dark:text-yellow-300">{question}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                  
+                                  {illustration.memoryVerseConnection && (
+                                    <div className="bg-purple-50 dark:bg-purple-900 p-3 rounded border-l-4 border-purple-400">
+                                      <h6 className="font-medium text-purple-900 dark:text-purple-200 mb-1">Memory Verse Connection:</h6>
+                                      <p className="text-sm text-purple-800 dark:text-purple-300 italic">{illustration.memoryVerseConnection}</p>
+                                    </div>
+                                  )}
+                                  
+                                  {(illustration.takeHomeMessage || illustration.parentConnection) && (
+                                    <div className="bg-green-50 dark:bg-green-900 p-3 rounded">
+                                      <h6 className="font-medium text-green-900 dark:text-green-200 mb-2">Take Home Message:</h6>
+                                      <p className="text-sm text-green-800 dark:text-green-300">
+                                        {illustration.takeHomeMessage || illustration.parentConnection || `Students will understand how ${illustration.title || illustration.name} helps them apply today's lesson in their daily lives.`}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             )}
                             
@@ -1530,8 +1594,9 @@ export default function SermonCreationStudio() {
                     {/* Lesson Overview */}
                     <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-900 p-6 rounded-lg border">
                       <h3 className="text-2xl font-bold text-purple-900 dark:text-purple-200 mb-2">{currentOutline.title}</h3>
-                      <p className="text-purple-700 dark:text-purple-300 text-lg mb-3">{currentOutline.bigIdea}</p>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+                      <p className="text-purple-700 dark:text-purple-300 text-lg mb-4">{currentOutline.bigIdea}</p>
+                      
+                      <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                         <div>
                           <span className="font-medium text-purple-800 dark:text-purple-300">Age Group:</span>
                           <span className="ml-2 text-purple-700 dark:text-purple-300 capitalize">{ageGroup.replace('-', ' ')}</span>
@@ -1541,6 +1606,31 @@ export default function SermonCreationStudio() {
                           <span className="ml-2 text-purple-700 dark:text-purple-300">
                             {sermonLength === "short" ? "20-30 minutes" : sermonLength === "medium" ? "35-45 minutes" : "50-60 minutes"}
                           </span>
+                        </div>
+                      </div>
+                      
+                      {/* Enhanced Learning Objectives */}
+                      <div className="bg-purple-100 dark:bg-purple-800 p-4 rounded-lg border border-purple-200 dark:border-purple-600">
+                        <h4 className="font-semibold text-purple-900 dark:text-purple-200 mb-2">Learning Objectives</h4>
+                        <div className="text-sm text-purple-800 dark:text-purple-300 space-y-1">
+                          <div className="flex items-start">
+                            <span className="w-2 h-2 bg-purple-600 rounded-full mr-2 mt-2 flex-shrink-0"></span>
+                            <span>Students will understand the main biblical truth from {currentOutline.scriptureReferences.join(', ')}</span>
+                          </div>
+                          <div className="flex items-start">
+                            <span className="w-2 h-2 bg-purple-600 rounded-full mr-2 mt-2 flex-shrink-0"></span>
+                            <span>Students will be able to apply this lesson to their daily lives</span>
+                          </div>
+                          <div className="flex items-start">
+                            <span className="w-2 h-2 bg-purple-600 rounded-full mr-2 mt-2 flex-shrink-0"></span>
+                            <span>Students will participate in engaging activities that reinforce the lesson</span>
+                          </div>
+                          {currentResearch.memoryVerse && (
+                            <div className="flex items-start">
+                              <span className="w-2 h-2 bg-purple-600 rounded-full mr-2 mt-2 flex-shrink-0"></span>
+                              <span>Students will memorize and understand the significance of today's memory verse</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1567,7 +1657,29 @@ export default function SermonCreationStudio() {
 
                     {/* Lesson Structure */}
                     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border dark:border-gray-600">
-                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 text-lg">Lesson Structure</h4>
+                      <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-4 text-lg flex items-center">
+                        <Clock className="w-5 h-5 mr-2 text-blue-600" />
+                        Complete Lesson Structure & Timeline
+                      </h4>
+                      
+                      {/* Pre-Lesson Preparation */}
+                      <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border-l-4 border-gray-400">
+                        <h5 className="font-medium text-gray-900 dark:text-gray-200 mb-2">Pre-Lesson Preparation (10 minutes before class)</h5>
+                        <div className="text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                          <div className="flex items-start">
+                            <span className="w-2 h-2 bg-gray-500 rounded-full mr-2 mt-2 flex-shrink-0"></span>
+                            <span>Set up materials and activity stations</span>
+                          </div>
+                          <div className="flex items-start">
+                            <span className="w-2 h-2 bg-gray-500 rounded-full mr-2 mt-2 flex-shrink-0"></span>
+                            <span>Review lesson flow and key points</span>
+                          </div>
+                          <div className="flex items-start">
+                            <span className="w-2 h-2 bg-gray-500 rounded-full mr-2 mt-2 flex-shrink-0"></span>
+                            <span>Prepare visual aids and handouts</span>
+                          </div>
+                        </div>
+                      </div>
                       
                       {/* Opening Activity */}
                       {currentOutline.openingActivity && (
