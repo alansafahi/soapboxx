@@ -226,7 +226,7 @@ export default function MyCommunities() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => window.location.href = '/admin?tab=community-admin'}
+              onClick={() => window.location.href = `/community-administration?communityId=${community.id}`}
               className="sm:w-auto text-xs sm:text-sm"
             >
               <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
