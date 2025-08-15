@@ -16289,14 +16289,17 @@ Please provide suggestions for the missing or incomplete sections.`
       }
 
       // Check if user has admin access to this church
-      const userChurch = await storage.getUserChurch(userId, parseInt(communityId));
-      if (!userRole || !['church_admin', 'owner', 'soapbox_owner'].includes(userRole)) {
+      const userRole = await storage.getUserCommunityRole(userId, parseInt(communityId));
+      const adminRoles = ['church_admin', 'owner', 'soapbox_owner', 'pastor', 'lead-pastor', 'ministry_leader'];
+      
+      if (!userRole || !adminRoles.includes(userRole)) {
         return res.status(403).json({ error: 'Admin access required' });
       }
 
       await storage.initializeChurchFeatures(parseInt(communityId), churchSize, userId);
       res.json({ success: true, message: 'Church features initialized successfully' });
     } catch (error) {
+      console.error('Failed to initialize church features:', error);
       res.status(500).json({ error: 'Failed to initialize church features' });
     }
   });
