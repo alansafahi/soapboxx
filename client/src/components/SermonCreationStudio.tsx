@@ -1041,7 +1041,10 @@ export default function SermonCreationStudio() {
                 ) : (
                   <Lightbulb className="w-4 h-4 mr-2" />
                 )}
-                {contentType === "sermon" ? "Generate Outline" : "Create Lesson Plan"}
+                {(outlineMutation.isPending || sundaySchoolLessonPlanMutation.isPending) ? 
+                  (contentType === "sermon" ? "Generating Outline..." : "Creating Lesson Plan...") :
+                  (contentType === "sermon" ? "Generate Outline" : "Create Lesson Plan")
+                }
               </Button>
             </CardHeader>
             <CardContent>
@@ -1310,6 +1313,13 @@ export default function SermonCreationStudio() {
                                 <p className="text-sm text-yellow-800 leading-relaxed">{illustration.ageAppropriate}</p>
                               </div>
                             )}
+                            
+                            {illustration.application && (
+                              <div className="bg-orange-50 p-3 rounded-md">
+                                <p className="text-sm font-medium text-orange-900 mb-1">Application:</p>
+                                <p className="text-sm text-orange-800 leading-relaxed">{illustration.application}</p>
+                              </div>
+                            )}
                           </div>
                         ) : (
                           <>
@@ -1447,7 +1457,10 @@ export default function SermonCreationStudio() {
                 ) : (
                   <Star className="w-4 h-4 mr-2" />
                 )}
-                {contentType === "sermon" ? "Enhance Sermon" : "Enhance Lesson"}
+{enhancedOutline ? 
+                  (contentType === "sermon" ? "Sermon Enhanced With AI" : "Lesson Enhanced With AI") :
+                  (contentType === "sermon" ? "Enhance Sermon" : "Enhance Lesson")
+                }
               </Button>
             </CardHeader>
             <CardContent>
@@ -1479,7 +1492,50 @@ export default function SermonCreationStudio() {
                     <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     <p>Complete both research and outline generation to enhance your {contentType === "sermon" ? "sermon" : "lesson"}</p>
                   </div>
-                ) : enhancedOutline ? (
+                ) : (
+                  <div className="space-y-4">
+                    {/* Show Standard Lesson Plan First */}
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border dark:border-gray-600">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+                        Standard {contentType === "sermon" ? "Sermon" : "Lesson"} Plan
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        Your {contentType === "sermon" ? "sermon" : "lesson"} is ready to use as-is, or click "Enhance {contentType === "sermon" ? "Sermon" : "Lesson"}" above to see how AI can improve it further.
+                      </p>
+                      
+                      <div className="space-y-4">
+                        <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                          <h4 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">
+                            {contentType === "sermon" ? "Theme" : "Big Idea"}
+                          </h4>
+                          <p className="text-blue-800 dark:text-blue-300">{currentOutline.theme || currentOutline.bigIdea}</p>
+                        </div>
+                        
+                        <div className="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
+                          <h4 className="font-semibold text-green-900 dark:text-green-200 mb-3">Main Points</h4>
+                          <div className="space-y-2">
+                            {currentOutline.mainPoints?.map((point: any, index: number) => (
+                              <div key={index} className="border-l-4 border-green-400 pl-4">
+                                <div className="font-medium text-green-900 dark:text-green-200">
+                                  {index + 1}. {renderFormattedText(typeof point === 'string' ? point : point.point || point.details || JSON.stringify(point))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        {currentOutline.conclusion && (
+                          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-200 mb-2">Conclusion</h4>
+                            <p className="text-gray-700 dark:text-gray-300">{currentOutline.conclusion}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {enhancedOutline && (
                   <div className="space-y-6">
                     <div className="bg-green-50 dark:bg-green-900 p-4 rounded-lg border border-green-200 dark:border-green-700">
                       <h4 className="font-semibold text-green-900 dark:text-green-200 mb-2 flex items-center">
