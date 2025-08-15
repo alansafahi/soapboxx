@@ -1301,44 +1301,135 @@ export default function SermonCreationStudio() {
                         
                         {/* Sunday School Activity Format */}
                         {contentType === "sunday-school" ? (
-                          <div className="space-y-3">
+                          <div className="space-y-4">
+                            {/* Setup Instructions */}
+                            {illustration.setupInstructions && (
+                              <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg border-l-4 border-blue-400">
+                                <h5 className="font-medium text-blue-900 dark:text-blue-200 mb-2 flex items-center">
+                                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
+                                  </svg>
+                                  Room Setup & Preparation
+                                </h5>
+                                <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">{illustration.setupInstructions}</p>
+                              </div>
+                            )}
+
+                            {/* Teacher Script */}
+                            {illustration.teacherScript && (
+                              <div className="bg-purple-50 dark:bg-purple-900 p-4 rounded-lg border-l-4 border-purple-400">
+                                <h5 className="font-medium text-purple-900 dark:text-purple-200 mb-2 flex items-center">
+                                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd"/>
+                                  </svg>
+                                  What to Say (Teacher Script)
+                                </h5>
+                                <div className="bg-purple-100 dark:bg-purple-800 p-3 rounded border-l-2 border-purple-300">
+                                  <p className="text-sm text-purple-800 dark:text-purple-300 italic leading-relaxed">"{illustration.teacherScript}"</p>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Detailed Instructions */}
                             {illustration.instructions && (
-                              <div className="bg-green-50 p-3 rounded-md">
-                                <p className="text-sm font-medium text-green-900 mb-2 flex items-center">
-                                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <div className="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
+                                <h5 className="font-medium text-green-900 dark:text-green-200 mb-3 flex items-center">
+                                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" clipRule="evenodd"/>
                                   </svg>
-                                  Step-by-Step Instructions:
-                                </p>
-                                <div className="text-sm text-green-800 leading-relaxed space-y-2">
-                                  {illustration.instructions.split('\n').map((step: string, idx: number) => (
-                                    <div key={idx} className="flex items-start">
-                                      <span className="bg-green-200 text-green-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5 flex-shrink-0">
+                                  Detailed Step-by-Step Instructions
+                                </h5>
+                                <div className="space-y-2">
+                                  {illustration.instructions.split(/\d+\.|\n/).filter((step: string) => step.trim()).map((step: string, idx: number) => (
+                                    <div key={idx} className="flex items-start bg-green-100 dark:bg-green-800 p-3 rounded">
+                                      <span className="bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-3 mt-0.5 flex-shrink-0">
                                         {idx + 1}
                                       </span>
-                                      <span>{step.trim()}</span>
+                                      <span className="text-sm text-green-800 dark:text-green-200 leading-relaxed">{step.trim()}</span>
                                     </div>
                                   ))}
                                 </div>
                               </div>
                             )}
+
+                            {/* Classroom Management Tips */}
+                            {illustration.classroomManagement && (
+                              <div className="bg-amber-50 dark:bg-amber-900 p-4 rounded-lg border-l-4 border-amber-400">
+                                <h5 className="font-medium text-amber-900 dark:text-amber-200 mb-2 flex items-center">
+                                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                                  </svg>
+                                  Classroom Management Tips
+                                </h5>
+                                <p className="text-sm text-amber-800 dark:text-amber-300 leading-relaxed">{illustration.classroomManagement}</p>
+                              </div>
+                            )}
+
+                            {/* Time Breakdown */}
+                            {illustration.timeBreakdown && (
+                              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <h6 className="font-medium text-gray-900 dark:text-gray-200 mb-2 flex items-center">
+                                  <Clock className="w-4 h-4 mr-2" />
+                                  Time Breakdown
+                                </h6>
+                                <p className="text-sm text-gray-700 dark:text-gray-300">{illustration.timeBreakdown}</p>
+                              </div>
+                            )}
                             
+                            {/* Materials List */}
                             {illustration.materials && (
-                              <div className="bg-blue-50 p-3 rounded-md">
-                                <p className="text-sm font-medium text-blue-900 mb-2 flex items-center">
-                                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                              <div className="bg-indigo-50 dark:bg-indigo-900 p-4 rounded-lg">
+                                <h5 className="font-medium text-indigo-900 dark:text-indigo-200 mb-3 flex items-center">
+                                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
                                   </svg>
-                                  Materials & Tools Needed:
-                                </p>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                  Complete Materials & Preparation List
+                                </h5>
+                                <div className="grid grid-cols-1 gap-2">
                                   {illustration.materials.map((material: any, idx: number) => (
-                                    <div key={idx} className="flex items-center text-sm text-blue-800 bg-blue-100 p-2 rounded">
-                                      <span className="w-2 h-2 bg-blue-600 rounded-full mr-2 flex-shrink-0"></span>
-                                      <span className="font-medium">{material}</span>
+                                    <div key={idx} className="flex items-start text-sm bg-indigo-100 dark:bg-indigo-800 p-3 rounded-lg">
+                                      <span className="w-3 h-3 bg-indigo-600 rounded-full mr-3 mt-1 flex-shrink-0"></span>
+                                      <span className="text-indigo-800 dark:text-indigo-200 font-medium">{material}</span>
                                     </div>
                                   ))}
                                 </div>
+                              </div>
+                            )}
+
+                            {/* Safety Notes */}
+                            {illustration.safetyNotes && (
+                              <div className="bg-red-50 dark:bg-red-900 p-4 rounded-lg border-l-4 border-red-400">
+                                <h5 className="font-medium text-red-900 dark:text-red-200 mb-2 flex items-center">
+                                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd"/>
+                                  </svg>
+                                  Safety Considerations
+                                </h5>
+                                <p className="text-sm text-red-800 dark:text-red-300 leading-relaxed">{illustration.safetyNotes}</p>
+                              </div>
+                            )}
+
+                            {/* Potential Challenges & Adaptations */}
+                            {(illustration.potentialChallenges || illustration.adaptations) && (
+                              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
+                                <h5 className="font-medium text-slate-900 dark:text-slate-200 mb-3 flex items-center">
+                                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd"/>
+                                  </svg>
+                                  Teacher Support & Adaptations
+                                </h5>
+                                {illustration.potentialChallenges && (
+                                  <div className="mb-3">
+                                    <h6 className="font-medium text-slate-800 dark:text-slate-300 mb-1">Common Challenges:</h6>
+                                    <p className="text-sm text-slate-700 dark:text-slate-400 leading-relaxed">{illustration.potentialChallenges}</p>
+                                  </div>
+                                )}
+                                {illustration.adaptations && (
+                                  <div>
+                                    <h6 className="font-medium text-slate-800 dark:text-slate-300 mb-1">Adaptations for Different Needs:</h6>
+                                    <p className="text-sm text-slate-700 dark:text-slate-400 leading-relaxed">{illustration.adaptations}</p>
+                                  </div>
+                                )}
                               </div>
                             )}
                             

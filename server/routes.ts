@@ -3449,19 +3449,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       - Memory verse games
       - Take-home activities
 
-      IMPORTANT: Each activity must include rich, meaningful application content that shows students exactly how to apply the Bible lesson in their daily lives. Provide specific, actionable steps and thought-provoking discussion questions.
+      CRITICAL REQUIREMENTS FOR SUNDAY SCHOOL TEACHERS:
+      
+      1. DETAILED TEACHER INSTRUCTIONS: Provide comprehensive, step-by-step instructions that a volunteer teacher can follow exactly. Include setup details, room arrangement, timing cues, and what to say to students.
+      
+      2. COMPREHENSIVE MATERIALS LIST: List every single item needed, including quantities, where teachers can find items, and any preparation required beforehand.
+      
+      3. TEACHER SCRIPTS: Include example phrases, questions to ask, and transitions between activity phases.
+      
+      4. CLASSROOM MANAGEMENT: Include tips for keeping students engaged, handling different personality types, and managing group dynamics.
+      
+      5. EXTENSIVE APPLICATION CONTENT: Each activity must have rich, meaningful application sections that help students understand exactly how to apply the Bible lesson in their daily lives.
 
       For each activity, provide:
       - Activity name and type
-      - Materials needed (be specific and comprehensive)
-      - Detailed step-by-step instructions
+      - Complete materials list with quantities and preparation notes
+      - Extremely detailed step-by-step teacher instructions with exact wording
+      - Room setup and arrangement details
       - How it connects to the lesson
-      - Duration estimate
-      - Comprehensive application content including life lessons
-      - Discussion questions to engage students
-      - Practical steps for real-life application
-      - Memory verse connections where applicable
-      - Take-home messages for families
+      - Duration estimate with time breakdowns
+      - Classroom management tips and potential challenges
+      - Safety considerations if applicable
+      - Extensive application content with multiple real-life scenarios
+      - Multiple discussion questions with expected responses
+      - Practical action steps students can take this week
+      - Memory verse connections with teaching methods
+      - Take-home messages for families with conversation starters
 
       Format as JSON:
       {
@@ -3469,16 +3482,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           {
             "name": "activity name",
             "type": "game/craft/discussion/etc",
-            "materials": ["item1", "item2", "item3"],
-            "instructions": "detailed step by step instructions with clear guidance for teachers",
+            "materials": ["specific item with quantity (e.g., '10 sheets of construction paper')", "preparation needed (e.g., 'pre-cut shapes - 30 minutes before class')"],
+            "setupInstructions": "detailed room setup, where to place materials, how to arrange students",
+            "instructions": "extremely detailed step-by-step instructions with exact teacher dialogue, timing cues, and transitions",
+            "teacherScript": "example phrases and questions teacher should use, including how to introduce and transition",
+            "classroomManagement": "tips for keeping students engaged, handling disruptions, accommodating different learning styles",
             "lessonConnection": "how this reinforces the Bible truth",
             "duration": "5-10 minutes",
+            "timeBreakdown": "Introduction (2 min), Main Activity (6 min), Wrap-up (2 min)",
             "ageAppropriate": "why this works for the age group",
-            "application": "detailed explanation of how this activity helps students apply the Bible lesson to their daily lives",
-            "practicalSteps": ["specific action step 1", "specific action step 2", "specific action step 3"],
-            "discussionQuestions": ["thoughtful question 1", "thoughtful question 2", "thoughtful question 3"],
-            "memoryVerseConnection": "how this activity connects to today's memory verse",
-            "takeHomeMessage": "key message students and families can remember and apply at home"
+            "safetyNotes": "any safety considerations teachers should be aware of",
+            "application": "detailed explanation with multiple real-life scenarios showing how students can apply this Bible lesson",
+            "practicalSteps": ["very specific, actionable step with context", "detailed action with example", "concrete application with timeline"],
+            "discussionQuestions": ["open-ended question with follow-up prompts", "thought-provoking question with example answers", "application question with real scenarios"],
+            "memoryVerseConnection": "specific teaching method connecting this activity to the memory verse",
+            "takeHomeMessage": "clear message for families with conversation starters and weekly application ideas",
+            "potentialChallenges": "common issues teachers might face and how to handle them",
+            "adaptations": "how to modify for different group sizes or special needs"
           }
         ]
       }`;
@@ -3488,14 +3508,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         messages: [
           {
             role: "system", 
-            content: "You are a creative children's ministry specialist with extensive experience in Sunday School curriculum development. Design engaging, educational activities that help children learn Bible truths through play, creativity, and interaction. Focus on age-appropriate activities that are easy for volunteers to lead. Provide comprehensive application content that helps children understand how Bible lessons apply to their daily lives. Include detailed discussion questions, practical action steps, and meaningful connections to memory verses. Make each activity rich with educational value and spiritual application. Always respond with valid JSON format."
+            content: "You are an expert Sunday School curriculum developer and teacher trainer with 20+ years of experience creating detailed lesson plans for volunteer teachers. Your specialty is writing comprehensive, step-by-step instructions that even first-time volunteers can follow successfully. You understand that Sunday School teachers need extremely detailed guidance including exact words to say, room setup instructions, material preparation notes, timing cues, classroom management strategies, and extensive application content. Create activities that are engaging, educationally sound, spiritually meaningful, and practical for volunteer leaders to implement. Every instruction must be clear, specific, and actionable. Always include rich application content with real-life scenarios and practical steps students can take. Respond only with valid JSON format."
           },
           {
             role: "user",
             content: prompt + "\n\nIMPORTANT: Respond ONLY with valid JSON. No other text before or after the JSON object."
           }
         ],
-        max_tokens: 3000
+        max_tokens: 4000
       });
 
       const content = response.choices[0].message.content || '{"activities": []}';
@@ -3506,21 +3526,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Ensure we have activities and they include application content
         const activities = activitiesData.activities || [];
         
-        // Enhance activities that may be missing application content
+        // Enhance activities that may be missing comprehensive content
         const enhancedActivities = activities.map((activity: any) => ({
           ...activity,
-          application: activity.application || `This activity helps students understand how ${activity.name || 'the lesson'} applies to their daily lives by engaging them in meaningful learning experiences.`,
+          setupInstructions: activity.setupInstructions || "Arrange students in a circle or rows facing the teacher. Have all materials within easy reach.",
+          teacherScript: activity.teacherScript || `"Today we're going to ${activity.name || 'do an activity'} to help us remember our Bible lesson. Are you ready to have fun while learning?"`,
+          classroomManagement: activity.classroomManagement || "Keep students engaged by asking questions, using their names, and giving clear instructions one step at a time.",
+          timeBreakdown: activity.timeBreakdown || "Setup (1 min), Introduction (2 min), Main Activity (5-7 min), Discussion (2-3 min), Cleanup (1 min)",
+          safetyNotes: activity.safetyNotes || "Ensure all materials are age-appropriate and supervise students during the activity.",
+          application: activity.application || `This activity helps students understand how ${activity.name || 'the lesson'} applies to their daily lives by providing hands-on experience with the Bible truth. Students learn through active participation and can relate the activity to real-life situations they face.`,
           practicalSteps: activity.practicalSteps || [
-            "Think about how this applies to your week",
-            "Share with a friend or family member", 
-            "Practice this lesson in daily situations"
+            "Think about how this lesson applies to your daily life and interactions with family and friends",
+            "Share what you learned with a parent or sibling this week and ask them about their experiences", 
+            "Practice applying this Bible truth in one specific situation this week, such as at school or during play time"
           ],
           discussionQuestions: activity.discussionQuestions || [
-            "How does this lesson help you in your daily life?",
-            "What is one thing you learned today?",
-            "How can you share this with others?"
+            "How does this lesson help you make good choices in your daily life?",
+            "What is one new thing you learned today that you can share with someone?",
+            "Can you think of a time this week when you could use what we learned today?"
           ],
-          takeHomeMessage: activity.takeHomeMessage || `Remember that ${activity.lessonConnection || 'God loves you'} and apply this lesson throughout the week.`
+          memoryVerseConnection: activity.memoryVerseConnection || `This activity reinforces today's memory verse by providing a visual and interactive way to remember God's truth.`,
+          takeHomeMessage: activity.takeHomeMessage || `Remember that ${activity.lessonConnection || 'God loves you and has a plan for your life'}. This week, look for ways to apply this lesson in your daily activities.`,
+          potentialChallenges: activity.potentialChallenges || "Some students may be shy to participate. Encourage them gently and allow them to observe first if needed.",
+          adaptations: activity.adaptations || "For larger groups, divide into smaller teams. For students with special needs, provide additional support and modify instructions as needed."
         }));
         
         res.json({ activities: enhancedActivities });
@@ -3534,46 +3562,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
           {
             name: "Bible Story Interactive Review",
             type: "discussion",
-            materials: ["Bible", "whiteboard", "markers", "story props"],
-            instructions: "Lead students through the main Bible story points using interactive questions and visual aids. Have students act out key moments from the story.",
-            lessonConnection: "Reinforces the Bible truth through active participation and discussion",
+            materials: ["Bible", "whiteboard or large paper", "3-4 colored markers", "simple story props (optional)", "chairs arranged in semicircle"],
+            setupInstructions: "Arrange chairs in a semicircle facing the whiteboard. Place the Bible and markers within easy reach. If using props, have them ready in a basket beside you.",
+            instructions: "Start by opening your Bible and saying, 'Let's dive into today's amazing Bible story!' Write key story points on the board as you tell them. Ask students to raise their hands when they hear something exciting. Every few minutes, invite 2-3 students to act out what just happened. Use lots of expression in your voice and pause for questions.",
+            teacherScript: "Begin with: 'Who remembers what we're learning about today?' Then say: 'Great! Let's discover what [Bible character] learned that can help us too. As I tell the story, I want you to listen for the moment when [specific lesson point].'",
+            classroomManagement: "If students get too excited, use a simple hand signal (like raised hand) to get attention. Call on different students by name to keep everyone involved. For shy students, offer easier questions like 'What do you think [character] was feeling?'",
+            lessonConnection: "Reinforces the Bible truth through active participation, visual learning, and physical movement",
             duration: "10-15 minutes",
-            ageAppropriate: "Interactive format keeps students engaged and helps them remember key points",
-            application: "Students learn to see how Bible characters faced challenges similar to their own lives, helping them apply Biblical wisdom to modern situations",
+            timeBreakdown: "Introduction (2 min), Story telling with interaction (8-10 min), Final questions (3 min)",
+            ageAppropriate: "Interactive format with movement keeps students engaged while visual aids help them remember key points",
+            safetyNotes: "Ensure adequate space for acting out scenes. Supervise any physical movements.",
+            application: "Students learn to see how Bible characters faced challenges similar to their own lives. By discussing character choices and outcomes, students develop decision-making skills and learn to apply Biblical wisdom to situations like conflicts with friends, obeying parents, or being honest when they make mistakes.",
             practicalSteps: [
-              "Identify one challenge you face that's similar to the Bible character",
-              "Think of how the Bible character's response can guide your actions",
-              "Share your insights with family during the week"
+              "This week, when you face a problem similar to our Bible character, ask yourself: 'What would [character name] do?' and remember how God helped them",
+              "Share this Bible story with someone at home and ask them about a time when they needed to trust God like our character did",
+              "Write or draw one way you can practice the lesson from this story in your daily life, such as being brave at school or kind to siblings"
             ],
             discussionQuestions: [
-              "What was the most important thing the Bible character learned?",
-              "How can you use this lesson when you face difficulties?",
-              "What would you tell a friend about this Bible story?"
+              "What was the most important choice our Bible character made, and why was it good or challenging?",
+              "When in your life might you need to make a similar choice, and how could you use what this character learned?",
+              "If your friend was facing the same problem as our Bible character, what advice would you give them using this story?"
             ],
-            memoryVerseConnection: "Connects to today's memory verse about trusting God in difficult times",
-            takeHomeMessage: "Just like the Bible characters, God is with us in every challenge we face"
+            memoryVerseConnection: "Connect story events to memory verse by highlighting moments when the character demonstrated the verse truth",
+            takeHomeMessage: "Just like the Bible characters, God is with us in every challenge we face. This week, look for ways to trust God like [character name] did.",
+            potentialChallenges: "Some students may dominate discussion while others stay quiet. Use specific names to include everyone and offer easier questions for reluctant participants.",
+            adaptations: "For larger groups, divide into pairs for discussion before sharing with whole group. For special needs, use picture cards to help tell the story."
           },
           {
             name: "Faith in Action Craft",
             type: "craft",
-            materials: ["construction paper", "glue sticks", "scissors", "markers", "stickers"],
-            instructions: "Help students create a visual reminder of today's lesson. Guide them step-by-step through making a craft that represents the main Bible truth.",
-            lessonConnection: "Creates a tangible reminder of the spiritual lesson",
+            materials: ["10 sheets construction paper (various colors)", "glue sticks (1 per 2 students)", "child-safe scissors", "washable markers", "stickers related to lesson theme", "example completed craft", "wet wipes for cleanup"],
+            setupInstructions: "Cover tables with newspaper. Pre-cut difficult shapes if needed. Have example craft visible. Place supplies in center of each table with 4-6 students per table.",
+            instructions: "Show your completed example and explain each step before students begin. Walk around to each table, offering help and encouragement. Say things like 'I love how you're using those colors!' Guide students through each step, ensuring they understand before moving to the next one. Allow for creativity while keeping them focused on the lesson connection.",
+            teacherScript: "Start by saying: 'Today we're going to make something special that will remind us of [lesson topic] every day! Look at my example. What do you notice about it?' Then guide through each step: 'First, we'll choose our paper color. Pick one that reminds you of [lesson element].'",
+            classroomManagement: "Circulate constantly to help with fine motor skills. Keep extra supplies ready for mistakes. If someone finishes early, ask them to help a neighbor or add extra details to their craft.",
+            lessonConnection: "Creates a tangible, visual reminder that reinforces the spiritual lesson through hands-on creativity",
             duration: "15-20 minutes",
-            ageAppropriate: "Hands-on activity appeals to different learning styles",
-            application: "Students create something they can take home as a daily reminder to apply the Bible lesson in their lives",
+            timeBreakdown: "Setup explanation (3 min), Craft creation (12-15 min), Sharing and cleanup (2-3 min)",
+            ageAppropriate: "Hands-on crafting appeals to kinesthetic learners and helps students with different learning styles retain the lesson",
+            safetyNotes: "Supervise scissor use closely. Keep wet wipes handy for sticky fingers. Ensure glue sticks are closed to prevent drying out.",
+            application: "Students create something tangible they can take home as a daily reminder to apply the Bible lesson. The physical act of creating helps cement the lesson in memory, while the finished product serves as a conversation starter with family and a personal reminder of God's truth in their daily routines.",
             practicalSteps: [
-              "Display your craft in your room as a daily reminder",
-              "Explain the craft's meaning to family members", 
-              "Use it to remind yourself to practice the lesson"
+              "Place your craft somewhere you'll see it every morning, like your bedroom mirror or kitchen table, to remind you of today's lesson",
+              "This week, show your craft to three different people (family, friends, neighbors) and tell them what you learned about [lesson topic]",
+              "When you see your craft, say a quick prayer asking God to help you remember and practice what you learned today"
             ],
             discussionQuestions: [
-              "What will this craft remind you to do this week?",
-              "How does making this help you remember the lesson?",
-              "Who will you show this to and why?"
+              "What part of making this craft helped you understand today's lesson better, and what will you remember when you look at it at home?",
+              "How will you use this craft to start a conversation with someone about what you learned in Sunday School today?",
+              "What's one specific way this craft will remind you to practice [lesson topic] when you're at school or playing with friends?"
             ],
-            memoryVerseConnection: "Visual elements incorporate key words from the memory verse",
-            takeHomeMessage: "Every time you see your craft, remember God's love and guidance"
+            memoryVerseConnection: "Incorporate memory verse words or symbols into the craft design, having students write or draw key verse elements",
+            takeHomeMessage: "Every time you see your craft, remember that [lesson application] and that God wants to help you live out this truth every day.",
+            potentialChallenges: "Some students may struggle with fine motor skills or feel frustrated if their craft doesn't look perfect. Emphasize effort over perfection and provide plenty of encouragement.",
+            adaptations: "For younger students, pre-cut more pieces. For students with special needs, provide adaptive tools or pair with a helper. For advanced students, encourage additional decorative elements."
           }
         ];
         
