@@ -1121,21 +1121,23 @@ export default function SermonCreationStudio() {
                 <Lightbulb className="w-5 h-5 mr-2" />
                 {contentType === "sermon" ? "Intelligent Sermon Outliner" : "Lesson Plan Creator"}
               </CardTitle>
-              <Button 
-                onClick={handleGenerateOutline}
-                disabled={outlineMutation.isPending || sundaySchoolLessonPlanMutation.isPending}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                {(outlineMutation.isPending || sundaySchoolLessonPlanMutation.isPending) ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Lightbulb className="w-4 h-4 mr-2" />
-                )}
-                {(outlineMutation.isPending || sundaySchoolLessonPlanMutation.isPending) ? 
-                  (contentType === "sermon" ? "Generating Outline..." : "Creating Lesson Plan...") :
-                  (contentType === "sermon" ? "Generate Outline" : "Create Lesson Plan")
-                }
-              </Button>
+              {!currentOutline && (
+                <Button 
+                  onClick={handleGenerateOutline}
+                  disabled={outlineMutation.isPending || sundaySchoolLessonPlanMutation.isPending}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {(outlineMutation.isPending || sundaySchoolLessonPlanMutation.isPending) ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Lightbulb className="w-4 h-4 mr-2" />
+                  )}
+                  {(outlineMutation.isPending || sundaySchoolLessonPlanMutation.isPending) ? 
+                    (contentType === "sermon" ? "Generating Outline..." : "Creating Lesson Plan...") :
+                    (contentType === "sermon" ? "Generate Outline" : "Create Lesson Plan")
+                  }
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               {currentOutline ? (
@@ -1277,20 +1279,22 @@ export default function SermonCreationStudio() {
                 )}
                 {contentType === "sermon" ? "Story & Content Library" : "Activities & Games Library"}
               </CardTitle>
-              <Button 
-                onClick={handleFindIllustrations}
-                disabled={illustrationsMutation.isPending || sundaySchoolActivitiesMutation.isPending || !currentOutline}
-                className={contentType === "sermon" ? "bg-purple-600 hover:bg-purple-700" : "bg-orange-600 hover:bg-orange-700"}
-              >
-                {(illustrationsMutation.isPending || sundaySchoolActivitiesMutation.isPending) ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : contentType === "sermon" ? (
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                ) : (
-                  <Play className="w-4 h-4 mr-2" />
-                )}
-                {(illustrationsMutation.isPending || sundaySchoolActivitiesMutation.isPending) ? 'Generating...' : (contentType === "sermon" ? 'Generate Stories' : 'Generate Activities')}
-              </Button>
+              {(contentType === "sermon" ? illustrations.length === 0 : sundaySchoolActivities.length === 0) && (
+                <Button 
+                  onClick={handleFindIllustrations}
+                  disabled={illustrationsMutation.isPending || sundaySchoolActivitiesMutation.isPending || !currentOutline}
+                  className={contentType === "sermon" ? "bg-purple-600 hover:bg-purple-700" : "bg-orange-600 hover:bg-orange-700"}
+                >
+                  {(illustrationsMutation.isPending || sundaySchoolActivitiesMutation.isPending) ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : contentType === "sermon" ? (
+                    <MessageSquare className="w-4 h-4 mr-2" />
+                  ) : (
+                    <Play className="w-4 h-4 mr-2" />
+                  )}
+                  {(illustrationsMutation.isPending || sundaySchoolActivitiesMutation.isPending) ? 'Generating...' : (contentType === "sermon" ? 'Generate Stories' : 'Generate Activities')}
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               {/* Teaching Guidelines for Sunday School */}
