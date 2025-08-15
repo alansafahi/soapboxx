@@ -207,22 +207,28 @@ export default function SermonCreationStudio() {
     if (!currentOutline) {
       return {
         tab: 'outline',
-        title: 'Create Sermon Outline',
-        description: 'Build your sermon structure with main points and flow'
+        title: contentType === "sermon" ? 'Create Sermon Outline' : 'Create Lesson Plan',
+        description: contentType === "sermon" 
+          ? 'Build your sermon structure with main points and flow'
+          : 'Build your lesson structure with age-appropriate activities'
       };
     }
     if (illustrations.length === 0) {
       return {
         tab: 'illustrations',
-        title: 'Add Stories & Content',
-        description: 'Find compelling illustrations and stories for your sermon'
+        title: contentType === "sermon" ? 'Add Stories & Content' : 'Add Activities & Games',
+        description: contentType === "sermon" 
+          ? 'Find compelling illustrations and stories for your sermon'
+          : 'Create fun activities and games for your lesson'
       };
     }
     if (!enhancedOutline) {
       return {
         tab: 'enhance',
-        title: 'Enhance Your Sermon',
-        description: 'Polish and refine your sermon with AI suggestions'
+        title: contentType === "sermon" ? 'Enhance Your Sermon' : 'Enhance Your Lesson',
+        description: contentType === "sermon" 
+          ? 'Polish and refine your sermon with AI suggestions'
+          : 'Polish and refine your lesson plan with AI suggestions'
       };
     }
     return null;
