@@ -108,23 +108,26 @@ export default function Sidebar() {
   }, [user]);
 
   // Get user's church-specific role data
-  const { data: userRole, isLoading: roleLoading, error: roleError } = useQuery<string>({
-    queryKey: ["/api/users/role"],
+  const { data: adminData, isLoading: roleLoading, error: roleError } = useQuery<any>({
+    queryKey: ["/api/admin-communities"],
     enabled: !!user,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     retry: 1
   });
 
+  // Extract admin role from admin communities data
+  const userRole = adminData?.hasAdminAccess ? 'church_admin' : null;
+
   // Auto-expand Admin Portal for church admins after role data loads
   useEffect(() => {
-    if (userRole === 'church_admin' && !expandedGroups.has('ADMIN PORTAL')) {
+    if (adminData?.hasAdminAccess && !expandedGroups.has('ADMIN PORTAL')) {
       setExpandedGroups(prev => {
         const newSet = new Set(prev);
         newSet.add('ADMIN PORTAL');
         return newSet;
       });
     }
-  }, [userRole, expandedGroups]);
+  }, [adminData, expandedGroups]);
   
 
 
