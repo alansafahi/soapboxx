@@ -934,6 +934,9 @@ export default function SermonCreationStudio() {
                       setTimeout(() => {
                         handleFindIllustrations();
                       }, 100);
+                    } else if (nextStep?.tab === 'lesson') {
+                      // If lesson review step, just navigate to lesson tab
+                      setActiveTab('lesson');
                     } else if (nextStep?.tab === 'enhance' && !enhancedOutline) {
                       // If enhance step, jump to Enhance
                       setActiveTab('enhance');
@@ -1997,6 +2000,145 @@ export default function SermonCreationStudio() {
                     <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
                     <h3 className="text-lg font-medium text-gray-600 dark:text-gray-400 mb-2">Complete All Previous Steps</h3>
                     <p className="text-gray-500">Generate research, create lesson plan, and add activities to view your complete lesson draft.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        {/* Complete Lesson Tab - Sunday School Only */}
+        {contentType === "sunday-school" && (
+          <TabsContent value="lesson" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <FileText className="w-5 h-5 mr-2" />
+                  Complete Sunday School Lesson Plan
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {currentOutline && currentResearch && sundaySchoolActivities.length > 0 ? (
+                  <div className="space-y-6">
+                    {/* Lesson Overview */}
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 p-6 rounded-lg border border-purple-200 dark:border-purple-700">
+                      <div className="text-center mb-4">
+                        <h2 className="text-2xl font-bold text-purple-900 dark:text-purple-100">{currentOutline.title}</h2>
+                        <p className="text-purple-700 dark:text-purple-300 mt-2">{currentOutline.bigIdea}</p>
+                        <div className="flex justify-center gap-4 mt-3 text-sm">
+                          <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-300">
+                            Age: {ageGroup}
+                          </Badge>
+                          <Badge variant="outline" className="bg-purple-100 text-purple-800 border-purple-300">
+                            Duration: {sermonLength === 'short' ? '20-30 min' : sermonLength === 'medium' ? '35-45 min' : '50-60 min'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Memory Verse */}
+                    {currentResearch.memoryVerse && (
+                      <div className="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg border-l-4 border-yellow-400">
+                        <h3 className="font-semibold text-yellow-900 dark:text-yellow-200 mb-2">Memory Verse</h3>
+                        <p className="text-yellow-800 dark:text-yellow-300 italic text-lg">{currentResearch.memoryVerse}</p>
+                      </div>
+                    )}
+
+                    {/* Activities Preview */}
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border dark:border-gray-600">
+                      <h3 className="text-lg font-semibold mb-4 flex items-center">
+                        <Play className="w-5 h-5 mr-2 text-orange-600" />
+                        Story-Specific Activities Ready
+                      </h3>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {sundaySchoolActivities.slice(0, 4).map((activity, idx) => (
+                          <div key={idx} className="border border-gray-200 dark:border-gray-600 rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-medium text-gray-900 dark:text-gray-100">{activity.name}</h4>
+                              <Badge variant="outline" className="text-xs">
+                                {activity.duration || '8-12 min'}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{activity.type}</p>
+                            {activity.materials && (
+                              <div className="text-xs text-blue-600 dark:text-blue-400">
+                                Materials: {Array.isArray(activity.materials) ? activity.materials.slice(0, 2).join(', ') : activity.materials}
+                                {Array.isArray(activity.materials) && activity.materials.length > 2 && '...'}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {sundaySchoolActivities.length > 4 && (
+                        <div className="mt-4 text-center">
+                          <Badge variant="outline" className="text-sm">
+                            +{sundaySchoolActivities.length - 4} more activities available
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Key Learning Points */}
+                    <div className="bg-indigo-50 dark:bg-indigo-900 p-4 rounded-lg">
+                      <h3 className="font-semibold text-indigo-900 dark:text-indigo-200 mb-3">Key Learning Objectives</h3>
+                      <div className="space-y-2">
+                        {currentOutline.mainPoints.map((point, idx) => (
+                          <div key={idx} className="flex items-start">
+                            <span className="w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3 mt-0.5 flex-shrink-0">
+                              {idx + 1}
+                            </span>
+                            <span className="text-indigo-800 dark:text-indigo-300 text-sm leading-relaxed">
+                              {typeof point === 'string' ? point : point.point || point.details || JSON.stringify(point)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Ready to Enhance */}
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 p-4 rounded-lg border border-green-200 dark:border-green-700">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="font-semibold text-green-900 dark:text-green-200">Lesson Complete!</h3>
+                          <p className="text-green-700 dark:text-green-300 text-sm mt-1">
+                            Your lesson plan is ready to teach. Click "Enhance" to add AI-powered improvements.
+                          </p>
+                        </div>
+                        <Button
+                          onClick={() => setActiveTab('enhance')}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <Star className="w-4 h-4 mr-2" />
+                          Enhance Lesson
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                      Complete Your Lesson Foundation
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-6">
+                      Generate research, create your lesson plan, and add activities to see the complete lesson here.
+                    </p>
+                    <div className="space-y-2 text-sm text-gray-500">
+                      <div className={`flex items-center justify-center ${currentResearch ? 'text-green-600' : ''}`}>
+                        {currentResearch ? <CheckCircle className="w-4 h-4 mr-2" /> : <div className="w-4 h-4 mr-2 border border-gray-300 rounded-full"></div>}
+                        Biblical Research Complete
+                      </div>
+                      <div className={`flex items-center justify-center ${currentOutline ? 'text-green-600' : ''}`}>
+                        {currentOutline ? <CheckCircle className="w-4 h-4 mr-2" /> : <div className="w-4 h-4 mr-2 border border-gray-300 rounded-full"></div>}
+                        Lesson Plan Created
+                      </div>
+                      <div className={`flex items-center justify-center ${sundaySchoolActivities.length > 0 ? 'text-green-600' : ''}`}>
+                        {sundaySchoolActivities.length > 0 ? <CheckCircle className="w-4 h-4 mr-2" /> : <div className="w-4 h-4 mr-2 border border-gray-300 rounded-full"></div>}
+                        Activities Generated
+                      </div>
+                    </div>
                   </div>
                 )}
               </CardContent>
