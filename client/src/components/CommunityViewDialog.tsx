@@ -499,9 +499,42 @@ export function CommunityViewDialog({
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Worship Times</h4>
                     <div className="bg-blue-50 dark:bg-blue-950 p-3 rounded-lg">
-                      <pre className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap font-medium">
-                        {community.worshipTimes}
-                      </pre>
+                      {(() => {
+                        try {
+                          // Try to parse as JSON if it looks like JSON
+                          if (typeof community.worshipTimes === 'string' && community.worshipTimes.startsWith('{')) {
+                            const parsed = JSON.parse(community.worshipTimes);
+                            const days = Object.entries(parsed).filter(([_, time]) => time && time.trim() !== '');
+                            if (days.length === 0) {
+                              return <p className="text-sm text-gray-600 dark:text-gray-400">No worship times specified</p>;
+                            }
+                            return (
+                              <div className="space-y-2">
+                                {days.map(([day, time]) => (
+                                  <div key={day} className="flex justify-between">
+                                    <span className="capitalize font-medium">{day}:</span>
+                                    <span>{time}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          } else {
+                            // Display as regular text
+                            return (
+                              <pre className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap font-medium">
+                                {community.worshipTimes}
+                              </pre>
+                            );
+                          }
+                        } catch {
+                          // If JSON parsing fails, display as regular text
+                          return (
+                            <pre className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap font-medium">
+                              {community.worshipTimes}
+                            </pre>
+                          );
+                        }
+                      })()}
                     </div>
                   </div>
                 )}
@@ -510,11 +543,35 @@ export function CommunityViewDialog({
                   <div>
                     <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Office Hours</h4>
                     <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
-                      <p className="text-sm text-gray-900 dark:text-gray-100">
-                        {community.officeHours || (typeof community.hoursOfOperation === 'object' 
-                          ? JSON.stringify(community.hoursOfOperation) 
-                          : community.hoursOfOperation)}
-                      </p>
+                      {(() => {
+                        const hours = community.officeHours || community.hoursOfOperation;
+                        try {
+                          // Try to parse as JSON if it's an object or JSON string
+                          if (typeof hours === 'object' || (typeof hours === 'string' && hours.startsWith('{'))) {
+                            const parsed = typeof hours === 'object' ? hours : JSON.parse(hours);
+                            const days = Object.entries(parsed).filter(([_, time]) => time && time.trim() !== '');
+                            if (days.length === 0) {
+                              return <p className="text-sm text-gray-600 dark:text-gray-400">No office hours specified</p>;
+                            }
+                            return (
+                              <div className="space-y-2">
+                                {days.map(([day, time]) => (
+                                  <div key={day} className="flex justify-between">
+                                    <span className="capitalize font-medium">{day}:</span>
+                                    <span>{time}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          } else {
+                            // Display as regular text
+                            return <p className="text-sm text-gray-900 dark:text-gray-100">{hours}</p>;
+                          }
+                        } catch {
+                          // If JSON parsing fails, display as regular text
+                          return <p className="text-sm text-gray-900 dark:text-gray-100">{hours}</p>;
+                        }
+                      })()}
                     </div>
                   </div>
                 )}

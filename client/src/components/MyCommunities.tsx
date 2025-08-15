@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Settings, Eye } from "lucide-react";
+import { Plus, Settings, Eye, SortAsc, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { CommunityForm } from "./CommunityForm";
 import { CommunityViewDialog } from "./CommunityViewDialog";
 import { apiRequest } from "@/lib/queryClient";
@@ -77,6 +78,7 @@ export default function MyCommunities() {
   const [createCommunityOpen, setCreateCommunityOpen] = useState(false);
   const [viewCommunityOpen, setViewCommunityOpen] = useState(false);
   const [selectedCommunity, setSelectedCommunity] = useState<UserCommunity | null>(null);
+  const [sortBy, setSortBy] = useState<'name' | 'date'>('name');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -141,6 +143,18 @@ export default function MyCommunities() {
     }
   };
 
+  // Function to sort communities within each type group
+  const sortCommunities = (communities: UserCommunity[]) => {
+    return communities.sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      } else {
+        // Sort by date added (assuming there's an id that represents creation order)
+        return b.id - a.id; // Newer communities first
+      }
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -175,6 +189,21 @@ export default function MyCommunities() {
           </p>
         </div>
         <div className="flex gap-3">
+          {/* Sorting Toggle */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600 dark:text-gray-400">Sort by:</span>
+            <ToggleGroup type="single" value={sortBy} onValueChange={(value) => value && setSortBy(value as 'name' | 'date')}>
+              <ToggleGroupItem value="name" aria-label="Sort by name" size="sm">
+                <SortAsc className="h-4 w-4 mr-1" />
+                Name
+              </ToggleGroupItem>
+              <ToggleGroupItem value="date" aria-label="Sort by date added" size="sm">
+                <Calendar className="h-4 w-4 mr-1" />
+                Date Added
+              </ToggleGroupItem>
+            </ToggleGroup>
+          </div>
+          
           <Dialog open={createCommunityOpen} onOpenChange={setCreateCommunityOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -238,9 +267,7 @@ export default function MyCommunities() {
               </Badge>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {userCommunities
-                .filter(community => community.type === 'church')
-                .sort((a, b) => a.name.localeCompare(b.name))
+              {sortCommunities(userCommunities.filter(community => community.type === 'church'))
                 .map((community) => (
                   <Card key={community.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader className="pb-3">
@@ -310,9 +337,7 @@ export default function MyCommunities() {
               </Badge>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {userCommunities
-                .filter(community => community.type === 'ministry')
-                .sort((a, b) => a.name.localeCompare(b.name))
+              {sortCommunities(userCommunities.filter(community => community.type === 'ministry'))
                 .map((community) => (
                   <Card key={community.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader className="pb-3">
@@ -382,9 +407,7 @@ export default function MyCommunities() {
               </Badge>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {userCommunities
-                .filter(community => community.type === 'group')
-                .sort((a, b) => a.name.localeCompare(b.name))
+              {sortCommunities(userCommunities.filter(community => community.type === 'group'))
                 .map((community) => (
                   <Card key={community.id} className="hover:shadow-lg transition-shadow">
                     <CardHeader className="pb-3">
