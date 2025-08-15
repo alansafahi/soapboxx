@@ -882,6 +882,24 @@ export default function SermonCreationStudio() {
                       setTimeout(() => {
                         handleResearch();
                       }, 100);
+                    } else if (nextStep?.tab === 'outline' && !currentOutline) {
+                      // If outline step, jump to Generate Outline
+                      setActiveTab('outline');
+                      setTimeout(() => {
+                        handleGenerateOutline();
+                      }, 100);
+                    } else if (nextStep?.tab === 'illustrations' && illustrations.length === 0) {
+                      // If illustrations step, jump to Generate Illustrations
+                      setActiveTab('illustrations');
+                      setTimeout(() => {
+                        handleFindIllustrations();
+                      }, 100);
+                    } else if (nextStep?.tab === 'enhance' && !enhancedOutline) {
+                      // If enhance step, jump to Enhance
+                      setActiveTab('enhance');
+                      setTimeout(() => {
+                        handleEnhanceSermon();
+                      }, 100);
                     } else {
                       setActiveTab(nextStep?.tab);
                     }
