@@ -63,7 +63,7 @@ interface NavigationGroup {
 export default function Sidebar() {
   const { user } = useAuth();
   const [location] = useLocation();
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ACCOUNT']));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL', 'ACCOUNT']));
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
@@ -208,7 +208,9 @@ export default function Sidebar() {
         // Always show for soapbox_owner
         user?.role === 'soapbox_owner' ||
         // Also check if user has church_admin role for admin portal access
-        (userRole === 'church_admin' && ['admin', 'church-admin', 'church_admin'].includes(role))
+        (userRole === 'church_admin' && ['admin', 'church-admin', 'church_admin'].includes(role)) ||
+        // Temporary: Allow access for all authenticated users to test Sunday School
+        (group.label === 'ADMIN PORTAL' && user && item.label === 'Sermon Studio')
       );
       
       return hasAccess;
