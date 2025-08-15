@@ -46,7 +46,7 @@ const renderFormattedText = (text: string | any) => {
   const parts = text.split(/(<\/?[^>]+>)/g);
   let isStrong = false;
   
-  return parts.map((part, index) => {
+  return parts.map((part: string, index: number) => {
     if (part === '<strong>') {
       isStrong = true;
       return null;
@@ -953,41 +953,41 @@ export default function SermonCreationStudio() {
                     variant="outline"
                     className="text-xs border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-white dark:border-blue-600 dark:hover:bg-blue-800"
                     onClick={() => {
-                    const nextStep = getNextStep();
-                    if (nextStep?.tab === 'research' && !currentResearch) {
-                      // If first step, jump to Generate Research
-                      setActiveTab('research');
-                      setTimeout(() => {
-                        handleResearch();
-                      }, 100);
-                    } else if (nextStep?.tab === 'outline' && !currentOutline) {
-                      // If outline step, jump to Generate Outline
-                      setActiveTab('outline');
-                      setTimeout(() => {
-                        handleGenerateOutline();
-                      }, 100);
-                    } else if (nextStep?.tab === 'illustrations' && illustrations.length === 0) {
-                      // If illustrations step, jump to Generate Illustrations
-                      setActiveTab('illustrations');
-                      setTimeout(() => {
-                        handleFindIllustrations();
-                      }, 100);
-                    } else if (nextStep?.tab === 'lesson') {
-                      // If lesson review step, just navigate to lesson tab
-                      setActiveTab('lesson');
-                    } else if (nextStep?.tab === 'enhance' && !enhancedOutline) {
-                      // If enhance step, jump to Enhance
-                      setActiveTab('enhance');
-                      setTimeout(() => {
-                        handleEnhanceSermon();
-                      }, 100);
-                    } else if (nextStep?.tab === 'completed') {
-                      // If completed step, navigate to completed tab
-                      setActiveTab('completed');
-                    } else {
-                      setActiveTab(nextStep?.tab);
-                    }
-                  }}
+                      const nextStep = getNextStep();
+                      if (nextStep?.tab === 'research' && !currentResearch) {
+                        // If first step, jump to Generate Research
+                        setActiveTab('research');
+                        setTimeout(() => {
+                          handleResearch();
+                        }, 100);
+                      } else if (nextStep?.tab === 'outline' && !currentOutline) {
+                        // If outline step, jump to Generate Outline
+                        setActiveTab('outline');
+                        setTimeout(() => {
+                          handleGenerateOutline();
+                        }, 100);
+                      } else if (nextStep?.tab === 'illustrations' && illustrations.length === 0) {
+                        // If illustrations step, jump to Generate Illustrations
+                        setActiveTab('illustrations');
+                        setTimeout(() => {
+                          handleFindIllustrations();
+                        }, 100);
+                      } else if (nextStep?.tab === 'lesson') {
+                        // If lesson review step, just navigate to lesson tab
+                        setActiveTab('lesson');
+                      } else if (nextStep?.tab === 'enhance' && !enhancedOutline) {
+                        // If enhance step, jump to Enhance
+                        setActiveTab('enhance');
+                        setTimeout(() => {
+                          handleEnhanceSermon();
+                        }, 100);
+                      } else if (nextStep?.tab === 'completed') {
+                        // If completed step, navigate to completed tab
+                        setActiveTab('completed');
+                      } else {
+                        setActiveTab(nextStep?.tab || 'research');
+                      }
+                    }}
                 >
                   {getProgressSteps().completed === 0 ? 'Start' : 'Continue'} →
                 </Button>
@@ -1061,7 +1061,7 @@ export default function SermonCreationStudio() {
                       {currentResearch.practicalApplications.map((app, idx) => (
                         <li key={idx} className="text-sm text-gray-700 flex items-start">
                           <ChevronRight className="w-4 h-4 mr-1 mt-0.5 text-gray-500" />
-                          <div>{renderFormattedText(typeof app === 'string' ? app : app.title || app.details || JSON.stringify(app))}</div>
+                          <div>{renderFormattedText(typeof app === 'string' ? app : (app as any)?.title || (app as any)?.details || JSON.stringify(app))}</div>
                         </li>
                       ))}
                     </ul>
@@ -1163,7 +1163,7 @@ export default function SermonCreationStudio() {
                             {idx + 1}
                           </span>
                           <div className="text-green-800 text-sm leading-relaxed">
-                            {renderFormattedText(typeof point === 'string' ? point : point.point || point.details || JSON.stringify(point))}
+                            {renderFormattedText(typeof point === 'string' ? point : (point as any)?.point || (point as any)?.details || JSON.stringify(point))}
                           </div>
                         </div>
                       ))}
@@ -1614,7 +1614,7 @@ export default function SermonCreationStudio() {
                                     <div className="bg-orange-50 dark:bg-orange-900 p-3 rounded">
                                       <h6 className="font-medium text-orange-900 dark:text-orange-200 mb-2">Action Steps Students Can Take:</h6>
                                       <ul className="space-y-1">
-                                        {illustration.practicalSteps.map((step: string, stepIdx: number) => (
+                                        {(Array.isArray(illustration.practicalSteps) ? illustration.practicalSteps : [illustration.practicalSteps]).map((step: string, stepIdx: number) => (
                                           <li key={stepIdx} className="flex items-start text-sm text-orange-800 dark:text-orange-300">
                                             <span className="bg-orange-200 dark:bg-orange-700 text-orange-800 dark:text-orange-200 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mr-2 mt-0.5 flex-shrink-0">
                                               {stepIdx + 1}
@@ -1630,7 +1630,7 @@ export default function SermonCreationStudio() {
                                     <div className="bg-yellow-50 dark:bg-yellow-900 p-3 rounded">
                                       <h6 className="font-medium text-yellow-900 dark:text-yellow-200 mb-2">Discussion Questions:</h6>
                                       <ul className="space-y-2">
-                                        {illustration.discussionQuestions.map((question: string, qIdx: number) => (
+                                        {(Array.isArray(illustration.discussionQuestions) ? illustration.discussionQuestions : [illustration.discussionQuestions]).map((question: string, qIdx: number) => (
                                           <li key={qIdx} className="flex items-start text-sm">
                                             <span className="bg-yellow-200 dark:bg-yellow-700 text-yellow-800 dark:text-yellow-200 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold mr-2 mt-0.5 flex-shrink-0">
                                               Q{qIdx + 1}
@@ -2131,7 +2131,7 @@ export default function SermonCreationStudio() {
                               {idx + 1}
                             </span>
                             <span className="text-indigo-800 dark:text-indigo-300 text-sm leading-relaxed">
-                              {typeof point === 'string' ? point : point.point || point.details || JSON.stringify(point)}
+                              {typeof point === 'string' ? point : (point as any)?.point || (point as any)?.details || JSON.stringify(point)}
                             </span>
                           </div>
                         ))}

@@ -3907,6 +3907,28 @@ export interface SermonIllustration {
   duration?: string;
   lessonConnection?: string;
   ageAppropriate?: string;
+  // Extended Sunday School properties
+  setupInstructions?: string;
+  teacherScript?: string;
+  classroomManagement?: string;
+  timeBreakdown?: string;
+  safetyNotes?: string;
+  potentialChallenges?: string;
+  adaptations?: string;
+  troubleshootingTips?: string;
+  accessibilityNotes?: string;
+  educationalObjective?: string;
+  biblicalConnection?: string;
+  assessmentMethods?: string;
+  learningIndicators?: string;
+  practicalSteps?: string;
+  discussionQuestions?: string;
+  memoryVerseConnection?: string;
+  familyEngagement?: string;
+  takeHomeMessage?: string;
+  parentConnection?: string;
+  expectedResponses?: string;
+  setupTime?: string;
 }
 
 // Video Content Types for AI Video Generator
