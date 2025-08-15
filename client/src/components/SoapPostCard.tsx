@@ -476,120 +476,112 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
 
         {/* Spiritual Reaction Bar */}
         <div className="flex items-center justify-between pt-3 border-t border-purple-100 dark:border-purple-800">
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-1">
+            {/* Amen Button - Icon only with tooltip */}
             <button 
               onClick={() => handleReaction('amen')}
-              className="flex items-center space-x-2 group hover:bg-purple-50 dark:hover:bg-purple-900/20 px-3 py-1.5 rounded-md transition-colors"
+              className="flex items-center group hover:bg-purple-50 dark:hover:bg-purple-900/20 p-2 rounded-md transition-colors"
+              title={`Amen (${reactionCount})`}
             >
-              <span className="text-sm">🙏</span>
-              <span className="text-sm font-medium text-gray-600 group-hover:text-purple-600 dark:text-gray-400 dark:group-hover:text-purple-400">
-                Amen
-              </span>
-              <span className="text-xs text-gray-400 dark:text-gray-500">{reactionCount}</span>
+              <span className="text-lg group-hover:scale-110 transition-transform">🙏</span>
+              {reactionCount > 0 && (
+                <span className="ml-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  {reactionCount}
+                </span>
+              )}
             </button>
             
+            {/* Comment Button - Icon only with tooltip */}
             <button 
               onClick={() => handleComment()}
-              className="flex items-center space-x-2 group hover:bg-blue-50 dark:hover:bg-blue-900/20 px-3 py-1.5 rounded-md transition-colors"
+              className="flex items-center group hover:bg-blue-50 dark:hover:bg-blue-900/20 p-2 rounded-md transition-colors"
+              title={`Comment (${post.commentCount || 0})`}
             >
-              <MessageCircle className="w-4 h-4 text-gray-500 group-hover:text-blue-500 transition-colors" />
-              <span className="text-sm font-medium text-gray-600 group-hover:text-blue-600 dark:text-gray-400 dark:group-hover:text-blue-400">
-                Comment
-              </span>
-              <span className="text-xs text-gray-400 dark:text-gray-500">
-                {post.commentCount || 0}
-              </span>
+              <MessageCircle className="w-4 h-4 text-gray-500 group-hover:text-blue-500 transition-colors group-hover:scale-110" />
+              {(post.commentCount || 0) > 0 && (
+                <span className="ml-1 text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  {post.commentCount}
+                </span>
+              )}
             </button>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
+            {/* Reflect Button - Icon only with tooltip */}
             <button 
               onClick={() => handleReflect()}
-              className="flex items-center space-x-1 group hover:bg-green-50 dark:hover:bg-green-900/20 px-2 py-1 rounded-md transition-colors"
+              className="flex items-center group hover:bg-green-50 dark:hover:bg-green-900/20 p-2 rounded-md transition-colors"
+              title="Reflect on this passage"
             >
-              <RotateCcw className="w-4 h-4 text-gray-500 group-hover:text-green-500 transition-colors" />
-              <span className="text-xs font-medium text-gray-500 group-hover:text-green-600 dark:group-hover:text-green-400">
-                Reflect
-              </span>
+              <RotateCcw className="w-4 h-4 text-gray-500 group-hover:text-green-500 transition-colors group-hover:scale-110" />
             </button>
             
+            {/* Save/Remove Button - Icon only with tooltip */}
             {showRemoveOption ? (
               <button 
                 onClick={onRemove}
                 disabled={isRemoving}
-                className="flex items-center space-x-1 group hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors"
+                className="flex items-center group hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-md transition-colors"
+                title={isRemoving ? "Removing..." : "Remove from saved"}
               >
-                <BookmarkX className="w-4 h-4 text-red-500 group-hover:text-red-700 transition-colors" />
-                <span className="text-xs font-medium text-red-600 group-hover:text-red-700 dark:group-hover:text-red-400">
-                  {isRemoving ? "Removing..." : "Remove"}
-                </span>
+                <BookmarkX className="w-4 h-4 text-red-500 group-hover:text-red-700 transition-colors group-hover:scale-110" />
               </button>
             ) : (
               <button 
                 onClick={() => post.isSaved ? unsaveMutation.mutate() : saveMutation.mutate()}
                 disabled={saveMutation.isPending || unsaveMutation.isPending}
-                className={`flex items-center space-x-1 group px-2 py-1 rounded-md transition-colors ${
+                className={`flex items-center group p-2 rounded-md transition-colors ${
                   post.isSaved
                     ? "bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30"
                     : "hover:bg-gray-50 dark:hover:bg-gray-700"
                 }`}
+                title={
+                  saveMutation.isPending || unsaveMutation.isPending
+                    ? (post.isSaved ? "Removing..." : "Saving...")
+                    : (post.isSaved ? "Remove from saved" : "Save reflection")
+                }
               >
                 {post.isSaved ? (
-                  <Bookmark className="w-4 h-4 text-purple-600 transition-colors" />
+                  <Bookmark className="w-4 h-4 text-purple-600 transition-colors group-hover:scale-110" />
                 ) : (
-                  <Save className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
+                  <Save className="w-4 h-4 text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors group-hover:scale-110" />
                 )}
-                <span className={`text-xs font-medium transition-colors ${
-                  post.isSaved
-                    ? "text-purple-600 dark:text-purple-400"
-                    : "text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300"
-                }`}>
-                  {saveMutation.isPending || unsaveMutation.isPending
-                    ? (post.isSaved ? "Removing..." : "Saving...")
-                    : (post.isSaved ? "Saved" : "Save")
-                  }
-                </span>
               </button>
             )}
             
+            {/* Share Button - Icon only with tooltip */}
             <button 
               onClick={() => setShareDialogOpen(true)}
-              className="flex items-center space-x-1 group hover:bg-blue-50 dark:hover:bg-blue-900/20 px-2 py-1 rounded-md transition-colors"
+              className="flex items-center group hover:bg-blue-50 dark:hover:bg-blue-900/20 p-2 rounded-md transition-colors"
+              title="Share reflection"
             >
-              <Share2 className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
-              <span className="text-xs font-medium text-gray-500 group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                Share
-              </span>
+              <Share2 className="w-4 h-4 text-gray-500 group-hover:text-blue-500 transition-colors group-hover:scale-110" />
             </button>
             
-            {/* Flag Button - Only show for other users' posts */}
+            {/* Flag Button - Only show for other users' posts - Icon only with tooltip */}
             {user && post.author && String(user.id) !== String(post.author.id) && (
               <FlagContentDialog
                 contentType="soap_entry"
                 contentId={post.id}
                 trigger={
                   <button 
-                    className="flex items-center space-x-1 group hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors"
+                    className="flex items-center group hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-md transition-colors"
+                    title="Report content"
                   >
-                    <Flag className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors" />
-                    <span className="text-xs font-medium text-gray-500 group-hover:text-red-600 dark:group-hover:text-red-400">
-                      Report
-                    </span>
+                    <Flag className="w-4 h-4 text-gray-400 group-hover:text-red-500 transition-colors group-hover:scale-110" />
                   </button>
                 }
               />
             )}
 
-            {/* Delete Button - Only show for post author */}
+            {/* Delete Button - Only show for post author - Icon only with tooltip */}
             {user && post.author && String(user.id) === String(post.author.id) && (
               <button 
                 onClick={handleDeletePost}
-                className="flex items-center space-x-1 group hover:bg-red-50 dark:hover:bg-red-900/20 px-2 py-1 rounded-md transition-colors"
+                className="flex items-center group hover:bg-red-50 dark:hover:bg-red-900/20 p-2 rounded-md transition-colors"
+                title="Delete reflection"
               >
-                <Trash2 className="w-4 h-4 text-red-500 group-hover:text-red-700 transition-colors" />
-                <span className="text-xs font-medium text-red-600 group-hover:text-red-700 dark:group-hover:text-red-400">
-                  Delete
-                </span>
+                <Trash2 className="w-4 h-4 text-red-500 group-hover:text-red-700 transition-colors group-hover:scale-110" />
               </button>
             )}
           </div>
