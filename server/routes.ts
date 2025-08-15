@@ -3420,7 +3420,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate Sunday School activities and games
   app.post('/api/sunday-school/activities', isAuthenticated, async (req: any, res) => {
     try {
-      const { topic, mainPoints, ageGroup, scripture, research } = req.body;
+      const { topic, mainPoints, ageGroup, scripture, research, duration } = req.body;
       const userId = req.user.id || req.user.claims?.sub;
       
       const openai = new OpenAI({
@@ -3428,10 +3428,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       const activityTypes = {
-        preschool: "sensory play, simple crafts, action songs, story props, coloring activities",
-        elementary: "games with rules, competitive activities, group crafts, drama skits, puzzles",
-        middle: "team challenges, creative projects, discussion games, service activities, technology games",
-        high: "leadership activities, real-world simulations, deep discussion starters, creative expressions, ministry projects"
+        preschool: "sensory play, simple crafts, action songs, story props, coloring activities - 5-7 minute attention spans, need movement breaks",
+        elementary: "games with rules, competitive activities, group crafts, drama skits, puzzles - 10-15 minute activities, love competition and hands-on learning",
+        middle: "team challenges, creative projects, discussion games, service activities, technology games - 15-20 minute focused activities, peer interaction crucial",
+        high: "leadership activities, real-world simulations, deep discussion starters, creative expressions, ministry projects - 20-30 minute in-depth activities, independence and responsibility"
+      };
+
+      const durationGuidance = {
+        short: "30-35 minutes total - 4-5 quick, high-energy activities (5-7 min each)",
+        medium: "45-50 minutes total - 5-6 balanced activities (7-10 min each) with transition time",
+        long: "60-75 minutes total - 6-8 comprehensive activities (8-12 min each) with deeper engagement"
       };
 
       const prompt = `Generate a comprehensive, teacher-ready Sunday School lesson plan for "${topic}" ${scripture ? `from ${scripture}` : ''} following professional curriculum standards. 
@@ -3441,9 +3447,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       LESSON CONTEXT:
       - Bible Reference: ${scripture || 'General Bible topic'}
       - Topic/Theme: ${topic}
-      - Age group: ${ageGroup} - focus on ${activityTypes[ageGroup] || "elementary activities"}
+      - Age group: ${ageGroup} - ${activityTypes[ageGroup] || "elementary activities"}
+      - Class Duration: ${duration || 'medium'} - ${durationGuidance[duration] || "45-50 minutes total"}
       - Main learning points: ${mainPoints?.join(', ') || 'Bible truth'}
       ${research ? `- Research Context: ${JSON.stringify(research)}` : ''}
+
+      AGE-SPECIFIC REQUIREMENTS FOR ${ageGroup?.toUpperCase()} CHILDREN:
+      ${ageGroup === 'preschool' ? `
+      - Activities must be 5-7 minutes MAX with frequent movement breaks
+      - Use simple, concrete language and avoid abstract concepts
+      - Include sensory elements (touch, sound, sight) in every activity
+      - Provide immediate positive reinforcement and simple instructions
+      - Use repetition and familiar songs/rhymes to reinforce learning
+      - Focus on one simple truth: "God loves me" or "Jesus helps me"
+      ` : ''}
+      ${ageGroup === 'elementary' ? `
+      - Activities should be 8-12 minutes with clear start/stop points
+      - Include competitive elements and hands-on learning opportunities
+      - Use concrete examples and stories they can relate to their daily life
+      - Incorporate movement, drama, and interactive games
+      - Allow for questions and encourage participation
+      - Connect Bible truths to school, family, and friendship situations
+      ` : ''}
+      ${ageGroup === 'middle' ? `
+      - Activities can be 12-18 minutes with deeper engagement
+      - Focus on peer interaction and small group discussions
+      - Address identity questions and peer pressure situations
+      - Include technology integration where appropriate
+      - Encourage leadership opportunities within activities
+      - Connect Bible stories to real-world moral decisions they face
+      ` : ''}
+      ${ageGroup === 'high' ? `
+      - Activities can be 15-25 minutes with in-depth exploration
+      - Encourage critical thinking and personal application
+      - Include leadership roles and mentoring opportunities
+      - Address real-world issues and current events
+      - Provide opportunities for service and ministry involvement
+      - Challenge them to live out their faith authentically
+      ` : ''}
 
       STORY-SPECIFIC CUSTOMIZATION REQUIREMENTS:
 
@@ -3456,15 +3497,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       - Include story-specific props, costumes, or materials that relate to THIS Bible passage
       - Reference the historical context, cultural setting, and characters unique to THIS story
 
-      Create a complete 60-75 minute lesson plan that includes:
+      Create a complete lesson plan for ${durationGuidance[duration] || "45-50 minutes total"} that includes:
 
-      LESSON STRUCTURE:
-      1. Welcome & Warm-Up (10 min) - specific icebreaker related to THIS Bible story
-      2. Opening Worship/Prayer (5 min) - prayer connecting to THIS story's themes
-      3. Bible Story/Teaching (20-25 min) - interactive presentation of THIS specific narrative
-      4. Activity Stations (20-25 min) - 3-4 rotating activities ALL related to THIS story
-      5. Memory Verse Practice (5-8 min) - method specific to THIS passage
-      6. Closing Prayer & Application (5-7 min) - takeaways from THIS story
+      LESSON STRUCTURE (TIMED SPECIFICALLY FOR ${duration?.toUpperCase()} CLASS):
+      ${duration === 'short' ? `
+      1. Welcome & Warm-Up (5 min) - quick icebreaker related to THIS Bible story
+      2. Opening Prayer (2 min) - simple prayer connecting to THIS story
+      3. Bible Story/Teaching (12-15 min) - fast-paced, interactive presentation
+      4. Main Activity (8-10 min) - ONE key activity reinforcing THIS story
+      5. Memory Verse Practice (3-5 min) - quick, energetic method
+      6. Closing & Application (3-5 min) - takeaways from THIS story
+      ` : ''}
+      ${duration === 'medium' ? `
+      1. Welcome & Warm-Up (7-8 min) - engaging icebreaker related to THIS Bible story
+      2. Opening Worship/Prayer (4-5 min) - prayer connecting to THIS story's themes
+      3. Bible Story/Teaching (15-18 min) - interactive presentation of THIS narrative
+      4. Activity Stations (15-18 min) - 2-3 rotating activities ALL related to THIS story
+      5. Memory Verse Practice (5-7 min) - engaging method specific to THIS passage
+      6. Closing Prayer & Application (5-7 min) - practical takeaways from THIS story
+      ` : ''}
+      ${duration === 'long' ? `
+      1. Welcome & Warm-Up (10-12 min) - comprehensive icebreaker related to THIS Bible story
+      2. Opening Worship/Prayer (6-8 min) - extended prayer/worship connecting to THIS story
+      3. Bible Story/Teaching (20-25 min) - detailed, interactive presentation of THIS narrative
+      4. Activity Stations (25-30 min) - 4-5 rotating activities ALL related to THIS story
+      5. Memory Verse Practice (8-10 min) - in-depth method specific to THIS passage
+      6. Closing Prayer & Application (8-10 min) - comprehensive takeaways from THIS story
+      ` : ''}
 
       TEACHER REQUIREMENTS (match professional curriculum standards):
       

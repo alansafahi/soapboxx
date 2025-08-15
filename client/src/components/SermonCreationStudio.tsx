@@ -594,7 +594,10 @@ export default function SermonCreationStudio() {
       sundaySchoolActivitiesMutation.mutate({
         topic: sermonTopic,
         mainPoints: currentOutline.mainPoints,
-        ageGroup: ageGroup
+        ageGroup: ageGroup,
+        scripture: scriptureText,
+        research: currentResearch,
+        duration: sermonLength
       });
     }
   };
