@@ -186,7 +186,7 @@ export default function ChurchFeatureSetupDialog({
     try {
       // First ensure features are initialized for this church
       try {
-        await fetch(`/api/church/${churchId}/features/initialize`, {
+        const initResponse = await fetch(`/api/church/${churchId}/features/initialize`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -194,9 +194,20 @@ export default function ChurchFeatureSetupDialog({
           credentials: 'include',
           body: JSON.stringify({ churchSize }),
         });
+        
+        if (!initResponse.ok) {
+          const errorData = await initResponse.json();
+          if (initResponse.status === 401 || initResponse.status === 403) {
+            throw new Error(`Authentication error: ${errorData.error || 'Insufficient permissions'}`);
+          }
+          console.warn('Feature initialization failed:', errorData);
+        }
       } catch (initError) {
+        if (initError instanceof Error && initError.message.includes('Authentication')) {
+          throw initError; // Re-throw authentication errors
+        }
         // Continue even if initialization fails (features might already exist)
-        // Feature initialization warning - silent error handling
+        console.warn('Feature initialization warning:', initError);
       }
 
       // Update all feature settings
@@ -231,10 +242,14 @@ export default function ChurchFeatureSetupDialog({
       
       onClose();
     } catch (error) {
-      // Feature configuration error - silent error handling
+      console.error('Feature configuration error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
       toast({
         title: "Configuration Failed",
-        description: "Failed to configure features. You can adjust them later in the admin portal.",
+        description: errorMessage.includes('Authentication') 
+          ? "Please refresh the page and try again. You may need to log in again."
+          : "Failed to configure features. You can adjust them later in the admin portal.",
         variant: "destructive"
       });
     } finally {

@@ -155,7 +155,15 @@ function configurePassport() {
 // Unified authentication middleware
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   try {
-
+    // Debug session info for church features endpoint
+    if (req.url.includes('/church/') && req.url.includes('/features/')) {
+      console.log('Church features auth check:', {
+        hasSession: !!req.session,
+        sessionUserId: req.session?.userId,
+        cookies: req.headers.cookie?.substring(0, 100) + '...',
+        url: req.url
+      });
+    }
     
     // Check for session-based authentication
     if (req.session && req.session.userId) {
@@ -164,21 +172,29 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
         const user = await storage.getUser(req.session.userId);
         if (user) {
           (req as any).user = user;
+          if (req.url.includes('/church/') && req.url.includes('/features/')) {
+            console.log('Auth successful for user:', user.email);
+          }
           return next();
         }
       } catch (error) {
-
+        if (req.url.includes('/church/') && req.url.includes('/features/')) {
+          console.log('User lookup failed:', error);
+        }
       }
     }
     
     // If no session, return unauthorized
+    if (req.url.includes('/church/') && req.url.includes('/features/')) {
+      console.log('Authentication failed - no valid session');
+    }
 
     return res.status(401).json({ 
       success: false, 
       message: "Authentication required"
     });
   } catch (error) {
-
+    console.log('Auth middleware error:', error);
     return res.status(500).json({ success: false, message: "Authentication error" });
   }
 };
