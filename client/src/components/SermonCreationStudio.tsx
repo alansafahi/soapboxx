@@ -109,6 +109,7 @@ export default function SermonCreationStudio() {
   const [currentOutline, setCurrentOutline] = useState<SermonOutline | null>(null);
   const [currentResearch, setCurrentResearch] = useState<BiblicalResearch | null>(null);
   const [illustrations, setIllustrations] = useState<SermonIllustration[]>([]);
+  const [sundaySchoolActivities, setSundaySchoolActivities] = useState<any[]>([]);
   const [selectedStories, setSelectedStories] = useState<Set<number>>(new Set());
   const [enhancedOutline, setEnhancedOutline] = useState<SermonOutline | null>(null);
   const [enhancementRecommendations, setEnhancementRecommendations] = useState<string[]>([]);
@@ -422,7 +423,7 @@ export default function SermonCreationStudio() {
       return await apiRequest('POST', '/api/sunday-school/activities', data);
     },
     onSuccess: (data) => {
-      setIllustrations(data.activities || []);
+      setSundaySchoolActivities(data.activities || []);
       toast({
         title: "Activities Generated",
         description: "Sunday School activities and games created successfully.",
@@ -1206,7 +1207,7 @@ export default function SermonCreationStudio() {
               </Button>
             </CardHeader>
             <CardContent>
-              {illustrations.length > 0 ? (
+              {(contentType === "sermon" ? illustrations.length > 0 : sundaySchoolActivities.length > 0) ? (
                 <div className="space-y-4">
                   {/* Selection Controls */}
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-600">
@@ -1229,7 +1230,7 @@ export default function SermonCreationStudio() {
                         </span>
                       </label>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {selectedStories.size} of {illustrations.length} selected
+                        {selectedStories.size} of {contentType === "sermon" ? illustrations.length : sundaySchoolActivities.length} selected
                       </span>
                     </div>
                     {selectedStories.size > 0 && (
@@ -1238,7 +1239,7 @@ export default function SermonCreationStudio() {
                       </span>
                     )}
                   </div>
-                  {illustrations.map((illustration, idx) => (
+                  {(contentType === "sermon" ? illustrations : sundaySchoolActivities).map((illustration, idx) => (
                     <Card key={idx} className="border border-gray-200 dark:border-gray-700">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-2">
