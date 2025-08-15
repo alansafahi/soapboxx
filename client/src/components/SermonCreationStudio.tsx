@@ -201,8 +201,10 @@ export default function SermonCreationStudio() {
     if (currentOutline) completed++;
     // Use correct activities array based on content type
     if (contentType === "sermon" ? illustrations.length > 0 : sundaySchoolActivities.length > 0) completed++;
+    // For Sunday School, count lesson step when all prerequisites are complete
+    if (contentType === "sundayschool" && currentResearch && currentOutline && sundaySchoolActivities.length > 0) completed++;
     if (enhancedOutline) completed++;
-    return { completed, total: contentType === "sunday-school" ? 5 : 4 }; // Sunday School has extra "Lesson" step
+    return { completed, total: contentType === "sundayschool" ? 5 : 4 }; // Sunday School has extra "Lesson" step
   };
 
   const getNextStep = () => {
