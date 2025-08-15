@@ -40,6 +40,7 @@ interface CommunityProfile {
   officeHours?: string;
   worshipTimes?: string;
   customDenomination?: string;
+  privacySetting?: string;
 }
 
 export function CommunityAdminTab() {
@@ -141,7 +142,7 @@ export function CommunityAdminTab() {
           }
         } catch (uploadError) {
 
-          throw new Error(`Failed to upload logo: ${uploadError.message}`);
+          throw new Error(`Failed to upload logo: ${uploadError instanceof Error ? uploadError.message : 'Unknown error'}`);
         }
       } else if (profileData.logoFile) {
 
@@ -392,7 +393,7 @@ export function CommunityAdminTab() {
               <CommunitySettings 
                 churchId={parseInt(selectedCommunityId)}
                 userRole="church_admin"
-                communityType={selectedCommunity.type}
+                communityType={selectedCommunity.type as "church" | "group" | "ministry"}
               />
             )}
           </TabsContent>

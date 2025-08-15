@@ -85,10 +85,7 @@ export default function MyCommunities() {
   });
 
   const createCommunityMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/communities', {
-      method: 'POST',
-      body: data,
-    }),
+    mutationFn: (data: any) => apiRequest('POST', '/api/communities', data),
     onSuccess: () => {
       toast({
         title: "Success",
@@ -451,9 +448,9 @@ export default function MyCommunities() {
       {/* Community View Dialog */}
       {selectedCommunity && (
         <CommunityViewDialog
-          community={selectedCommunity}
-          open={viewCommunityOpen}
-          onOpenChange={setViewCommunityOpen}
+          communityId={selectedCommunity.id.toString()}
+          isOpen={viewCommunityOpen}
+          onClose={() => setViewCommunityOpen(false)}
         />
       )}
     </div>

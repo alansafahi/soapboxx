@@ -269,7 +269,7 @@ export function ChurchFeatureManager({ churchId, userRole, communityType = 'chur
   // Auto-initialize features if none exist
   const initializeFeaturesMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(`/api/church/${churchId}/features/initialize`, {
+      const response = await fetch(`/api/churches/${churchId}/features/initialize`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
