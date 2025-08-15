@@ -3315,7 +3315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/sunday-school/lesson-plan', isAuthenticated, async (req: any, res) => {
     try {
       const { scripture, topic, ageGroup, duration } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id || req.user.claims?.sub;
       
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
@@ -3404,7 +3404,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/sunday-school/activities', isAuthenticated, async (req: any, res) => {
     try {
       const { topic, mainPoints, ageGroup } = req.body;
-      const userId = req.user.claims.sub;
+      const userId = req.user.id || req.user.claims?.sub;
       
       const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY,
