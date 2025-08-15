@@ -233,7 +233,7 @@ export default function SermonCreationStudio() {
           : 'Create detailed activities with instructions and materials needed'
       };
     }
-    if (contentType === "sunday-school" && currentResearch && currentOutline && sundaySchoolActivities.length > 0 && activeTab !== 'lesson') {
+    if (contentType === "sundayschool" && currentResearch && currentOutline && sundaySchoolActivities.length > 0 && activeTab !== 'lesson') {
       return {
         tab: 'lesson',
         title: 'Review Complete Lesson',
@@ -827,7 +827,7 @@ export default function SermonCreationStudio() {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className={contentType === "sunday-school" ? "grid w-full grid-cols-3 sm:grid-cols-7 gap-1" : "grid w-full grid-cols-3 sm:grid-cols-6 gap-1"}>
+        <TabsList className={contentType === "sundayschool" ? "grid w-full grid-cols-3 sm:grid-cols-7 gap-1" : "grid w-full grid-cols-3 sm:grid-cols-6 gap-1"}>
           <TabsTrigger value="research" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
             <Search className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
             <span className="hidden sm:inline">Research</span>
@@ -844,7 +844,7 @@ export default function SermonCreationStudio() {
             )}
             <span className="hidden sm:inline">{contentType === "sermon" ? "Stories" : "Activities"}</span>
           </TabsTrigger>
-          {contentType === "sunday-school" && (
+          {contentType === "sundayschool" && (
             <TabsTrigger value="lesson" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
               <FileText className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
               <span className="hidden sm:inline">Lesson</span>
@@ -880,7 +880,7 @@ export default function SermonCreationStudio() {
               style={{ width: `${(getProgressSteps().completed / getProgressSteps().total) * 100}%` }}
             ></div>
           </div>
-          <div className={contentType === "sunday-school" ? "flex justify-between mt-2 space-x-1" : "flex justify-between mt-2"}>
+          <div className={contentType === "sundayschool" ? "flex justify-between mt-2 space-x-1" : "flex justify-between mt-2"}>
             <div className={`text-xs ${currentResearch ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
               ✓ Research
             </div>
@@ -890,7 +890,7 @@ export default function SermonCreationStudio() {
             <div className={`text-xs ${(contentType === "sermon" ? illustrations.length > 0 : sundaySchoolActivities.length > 0) ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
               ✓ {contentType === "sermon" ? "Stories" : "Activities"}
             </div>
-            {contentType === "sunday-school" && (
+            {contentType === "sundayschool" && (
               <div className={`text-xs ${(currentOutline && currentResearch && sundaySchoolActivities.length > 0) ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
                 ✓ Lesson
               </div>
@@ -2008,7 +2008,7 @@ export default function SermonCreationStudio() {
         )}
 
         {/* Complete Lesson Tab - Sunday School Only */}
-        {contentType === "sunday-school" && (
+        {contentType === "sundayschool" && (
           <TabsContent value="lesson" className="space-y-4">
             <Card>
               <CardHeader>
