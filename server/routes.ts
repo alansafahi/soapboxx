@@ -3440,151 +3440,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         long: "60-75 minutes total - 6-8 comprehensive activities (8-12 min each) with deeper engagement"
       };
 
-      const prompt = `Generate a comprehensive, teacher-ready Sunday School lesson plan for "${topic}" ${scripture ? `from ${scripture}` : ''} following professional curriculum standards. 
+      const prompt = `You are creating activities for the Bible story: "${topic}" ${scripture ? `(${scripture})` : ''}
 
-      CRITICAL: Every activity must be SPECIFICALLY CUSTOMIZED to this exact Bible story/topic. No generic templates!
+      MANDATORY: Every activity must use specific details from THIS Bible story. No generic activities allowed!
 
-      LESSON CONTEXT:
-      - Bible Reference: ${scripture || 'General Bible topic'}
-      - Topic/Theme: ${topic}
-      - Age group: ${ageGroup} - ${activityTypes[ageGroup] || "elementary activities"}
-      - Class Duration: ${duration || 'medium'} - ${durationGuidance[duration] || "45-50 minutes total"}
-      - Main learning points: ${mainPoints?.join(', ') || 'Bible truth'}
-      ${research ? `- Research Context: ${JSON.stringify(research)}` : ''}
+      STORY DETAILS TO USE:
+      - Characters: ${topic.includes('Moses') ? 'Moses, Pharaoh, Israelites' : topic.includes('David') ? 'David, Goliath, King Saul' : topic.includes('Mary') ? 'Mary, Angel Gabriel, Joseph' : topic.includes('Noah') ? 'Noah, animals, God' : topic.includes('Jesus') ? 'Jesus, disciples' : 'Bible characters from ' + topic}
+      - Setting: ${topic.includes('Moses') ? 'Egypt, Red Sea, wilderness' : topic.includes('David') ? 'Valley of Elah, battlefield' : topic.includes('Mary') ? 'Nazareth, home' : topic.includes('Noah') ? 'Earth before flood, ark' : 'Bible times'}
+      - Key Objects: ${topic.includes('Moses') ? 'staff, burning bush, plagues' : topic.includes('David') ? 'sling, stones, armor' : topic.includes('Mary') ? 'angel appearance, baby Jesus' : topic.includes('Noah') ? 'ark, animals, rainbow' : 'Bible story items'}
 
-      AGE-SPECIFIC REQUIREMENTS FOR ${ageGroup?.toUpperCase()} CHILDREN:
-      ${ageGroup === 'preschool' ? `
-      - Activities must be 5-7 minutes MAX with frequent movement breaks
-      - Use simple, concrete language and avoid abstract concepts
-      - Include sensory elements (touch, sound, sight) in every activity
-      - Provide immediate positive reinforcement and simple instructions
-      - Use repetition and familiar songs/rhymes to reinforce learning
-      - Focus on one simple truth: "God loves me" or "Jesus helps me"
-      ` : ''}
-      ${ageGroup === 'elementary' ? `
-      - Activities should be 8-12 minutes with clear start/stop points
-      - Include competitive elements and hands-on learning opportunities
-      - Use concrete examples and stories they can relate to their daily life
-      - Incorporate movement, drama, and interactive games
-      - Allow for questions and encourage participation
-      - Connect Bible truths to school, family, and friendship situations
-      ` : ''}
-      ${ageGroup === 'middle' ? `
-      - Activities can be 12-18 minutes with deeper engagement
-      - Focus on peer interaction and small group discussions
-      - Address identity questions and peer pressure situations
-      - Include technology integration where appropriate
-      - Encourage leadership opportunities within activities
-      - Connect Bible stories to real-world moral decisions they face
-      ` : ''}
-      ${ageGroup === 'high' ? `
-      - Activities can be 15-25 minutes with in-depth exploration
-      - Encourage critical thinking and personal application
-      - Include leadership roles and mentoring opportunities
-      - Address real-world issues and current events
-      - Provide opportunities for service and ministry involvement
-      - Challenge them to live out their faith authentically
-      ` : ''}
+      Age: ${ageGroup} | Duration: ${duration} (${durationGuidance[duration] || "45-50 minutes"})
 
-      STORY-SPECIFIC CUSTOMIZATION REQUIREMENTS:
+      Create 4-5 activities that USE THE SPECIFIC BIBLE STORY DETAILS ABOVE:
 
-      - Reference specific characters, events, and details from THIS Bible story (${scripture || topic})
-      - Use activities that directly connect to THIS scripture passage and its unique narrative
-      - Create games and crafts that use props, concepts, or scenarios from THIS specific story
-      - Develop discussion questions about THIS story's characters, setting, conflict, and resolution
-      - Design memory verse activities that highlight THIS passage's specific words and meaning
-      - Ensure all activities reflect the unique themes, symbols, and messages from THIS particular Bible narrative
-      - Include story-specific props, costumes, or materials that relate to THIS Bible passage
-      - Reference the historical context, cultural setting, and characters unique to THIS story
+      Examples:
+      - For Moses: "Pharaoh Says" game (like Simon Says), "Staff of Power" craft, "Red Sea Crossing" obstacle course
+      - For David: "Sling Shot Target Practice", "Giant Goliath Towers" building game, "Shepherd's Courage" drama
+      - For Mary: "Angel Messenger" game, "Baby Jesus Manger" craft, "Mary's Yes Song"
 
-      Create a complete lesson plan for ${durationGuidance[duration] || "45-50 minutes total"} that includes:
-
-      LESSON STRUCTURE (TIMED SPECIFICALLY FOR ${duration?.toUpperCase()} CLASS):
-      ${duration === 'short' ? `
-      1. Welcome & Warm-Up (5 min) - quick icebreaker related to THIS Bible story
-      2. Opening Prayer (2 min) - simple prayer connecting to THIS story
-      3. Bible Story/Teaching (12-15 min) - fast-paced, interactive presentation
-      4. Main Activity (8-10 min) - ONE key activity reinforcing THIS story
-      5. Memory Verse Practice (3-5 min) - quick, energetic method
-      6. Closing & Application (3-5 min) - takeaways from THIS story
-      ` : ''}
-      ${duration === 'medium' ? `
-      1. Welcome & Warm-Up (7-8 min) - engaging icebreaker related to THIS Bible story
-      2. Opening Worship/Prayer (4-5 min) - prayer connecting to THIS story's themes
-      3. Bible Story/Teaching (15-18 min) - interactive presentation of THIS narrative
-      4. Activity Stations (15-18 min) - 2-3 rotating activities ALL related to THIS story
-      5. Memory Verse Practice (5-7 min) - engaging method specific to THIS passage
-      6. Closing Prayer & Application (5-7 min) - practical takeaways from THIS story
-      ` : ''}
-      ${duration === 'long' ? `
-      1. Welcome & Warm-Up (10-12 min) - comprehensive icebreaker related to THIS Bible story
-      2. Opening Worship/Prayer (6-8 min) - extended prayer/worship connecting to THIS story
-      3. Bible Story/Teaching (20-25 min) - detailed, interactive presentation of THIS narrative
-      4. Activity Stations (25-30 min) - 4-5 rotating activities ALL related to THIS story
-      5. Memory Verse Practice (8-10 min) - in-depth method specific to THIS passage
-      6. Closing Prayer & Application (8-10 min) - comprehensive takeaways from THIS story
-      ` : ''}
-
-      TEACHER REQUIREMENTS (match professional curriculum standards):
-      
-      1. STORY-SPECIFIC CONTENT: Every element must relate directly to this Bible story's characters, setting, events, and message
-      2. DETAILED SETUP INSTRUCTIONS: Room arrangement, materials placement, student grouping
-      3. WORD-FOR-WORD TEACHER DIALOGUE: Exact phrases referencing THIS story's details
-      4. COMPREHENSIVE MATERIALS LIST: Every item with quantities, preparation time, and sourcing notes
-      5. CLASSROOM MANAGEMENT STRATEGIES: Specific techniques for engagement, behavior management, and inclusion
-      6. BIBLICAL ACCURACY: Proper references to THIS scripture passage and its theological meaning
-      7. EDUCATIONAL OBJECTIVES: Clear outcomes specific to THIS Bible story's lessons
-      8. FAMILY CONNECTION: Take-home materials discussing THIS story with parents
-
-      Generate 6-8 detailed activities that are ALL CUSTOMIZED to this specific Bible story:
-      - Interactive Bible story presentation using THIS story's unique elements (characters, props, setting)
-      - Hands-on craft that creates something directly from THIS Bible story
-      - Active game that recreates or teaches concepts from THIS specific narrative
-      - Discussion circle with questions about THIS story's characters and events
-      - Memory verse learning activity using THIS passage's specific words and meaning
-      - Quiet reflection about THIS story's personal application
-      - Service project inspired by THIS story's message
-      - Take-home family activity continuing THIS story's themes
-
-      For each activity, provide:
-      - Activity name that references THIS specific Bible story
-      - Type and educational objective tied to THIS story's unique lessons
-      - Complete materials list with story-specific items
-      - Detailed room setup that enhances THIS story's atmosphere
-      - Step-by-step instructions referencing THIS story's characters and events
-      - Teacher scripts that mention specific details from THIS Bible passage
-      - Classroom management strategies for THIS story's activities
-      - Biblical connection explaining how this relates to THIS specific scripture
-      - Safety considerations and accessibility adaptations
-      - Assessment methods for THIS story's key learning points
-      - Discussion questions about THIS story's characters, events, and lessons
-      - Practical application of THIS story's message to children's lives
-      - Family engagement around THIS specific Bible narrative
-      - Variations that maintain connection to THIS particular story
-
-      Format as JSON:
+      JSON Format:
       {
         "activities": [
           {
-            "name": "activity name",
-            "type": "game/craft/discussion/etc",
-            "materials": ["specific item with quantity (e.g., '10 sheets of construction paper')", "preparation needed (e.g., 'pre-cut shapes - 30 minutes before class')"],
-            "setupInstructions": "detailed room setup, where to place materials, how to arrange students",
-            "instructions": "extremely detailed step-by-step instructions with exact teacher dialogue, timing cues, and transitions",
-            "teacherScript": "example phrases and questions teacher should use, including how to introduce and transition",
-            "classroomManagement": "tips for keeping students engaged, handling disruptions, accommodating different learning styles",
-            "lessonConnection": "how this reinforces the Bible truth",
-            "duration": "5-10 minutes",
-            "timeBreakdown": "Introduction (2 min), Main Activity (6 min), Wrap-up (2 min)",
-            "ageAppropriate": "why this works for the age group",
-            "safetyNotes": "any safety considerations teachers should be aware of",
-            "application": "detailed explanation with multiple real-life scenarios showing how students can apply this Bible lesson",
-            "practicalSteps": ["very specific, actionable step with context", "detailed action with example", "concrete application with timeline"],
-            "discussionQuestions": ["open-ended question with follow-up prompts", "thought-provoking question with example answers", "application question with real scenarios"],
-            "memoryVerseConnection": "specific teaching method connecting this activity to the memory verse",
-            "takeHomeMessage": "clear message for families with conversation starters and weekly application ideas",
-            "potentialChallenges": "common issues teachers might face and how to handle them",
-            "adaptations": "how to modify for different group sizes or special needs"
+            "name": "Story-specific activity name (use character names)",
+            "type": "game/craft/discussion",
+            "materials": ["specific items needed"],
+            "instructions": "Step-by-step instructions mentioning story characters/events",
+            "duration": "${ageGroup === 'preschool' ? '5-7 minutes' : ageGroup === 'elementary' ? '8-12 minutes' : '12-18 minutes'}",
+            "lessonConnection": "How this relates to the Bible story"
           }
         ]
       }`;
