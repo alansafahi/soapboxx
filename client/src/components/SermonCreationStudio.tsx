@@ -1279,7 +1279,7 @@ export default function SermonCreationStudio() {
                             />
                             <div>
                               <h4 className="font-semibold text-gray-900 dark:text-gray-100">{illustration.title || illustration.name}</h4>
-                              {contentType === "sunday-school" && illustration.type && (
+                              {contentType === "sundayschool" && illustration.type && (
                                 <Badge variant="outline" className="mt-1 text-xs">
                                   {illustration.type}
                                 </Badge>
@@ -1301,7 +1301,7 @@ export default function SermonCreationStudio() {
                         </div>
                         
                         {/* Sunday School Activity Format */}
-                        {contentType === "sunday-school" ? (
+                        {contentType === "sundayschool" ? (
                           <div className="space-y-4">
                             {/* Setup Instructions */}
                             {illustration.setupInstructions && (
