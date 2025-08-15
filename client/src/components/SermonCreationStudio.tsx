@@ -921,49 +921,73 @@ export default function SermonCreationStudio() {
                     Next: {getNextStep()?.title}
                   </span>
                 </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-xs border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-white dark:border-blue-600 dark:hover:bg-blue-800"
-                  onClick={() => {
-                    const nextStep = getNextStep();
-                    if (nextStep?.tab === 'research' && !currentResearch) {
-                      // If first step, jump to Generate Research
-                      setActiveTab('research');
-                      setTimeout(() => {
-                        handleResearch();
-                      }, 100);
-                    } else if (nextStep?.tab === 'outline' && !currentOutline) {
-                      // If outline step, jump to Generate Outline
-                      setActiveTab('outline');
-                      setTimeout(() => {
-                        handleGenerateOutline();
-                      }, 100);
-                    } else if (nextStep?.tab === 'illustrations' && illustrations.length === 0) {
-                      // If illustrations step, jump to Generate Illustrations
-                      setActiveTab('illustrations');
-                      setTimeout(() => {
-                        handleFindIllustrations();
-                      }, 100);
-                    } else if (nextStep?.tab === 'lesson') {
-                      // If lesson review step, just navigate to lesson tab
-                      setActiveTab('lesson');
-                    } else if (nextStep?.tab === 'enhance' && !enhancedOutline) {
-                      // If enhance step, jump to Enhance
-                      setActiveTab('enhance');
-                      setTimeout(() => {
-                        handleEnhanceSermon();
-                      }, 100);
-                    } else if (nextStep?.tab === 'completed') {
-                      // If completed step, navigate to completed tab
-                      setActiveTab('completed');
-                    } else {
-                      setActiveTab(nextStep?.tab);
-                    }
-                  }}
-                >
-                  {getProgressSteps().completed === 0 ? 'Start' : 'Continue'} →
-                </Button>
+                <div className="flex items-center gap-2">
+                  {/* Back Button - only show if not on first step */}
+                  {getProgressSteps().completed > 0 && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs border-gray-300 text-gray-600 hover:bg-gray-100 dark:text-white dark:border-gray-600 dark:hover:bg-gray-800"
+                      onClick={() => {
+                        // Navigate to previous step based on current progress
+                        if (activeTab === 'completed') setActiveTab('enhance');
+                        else if (activeTab === 'enhance') {
+                          if (contentType === 'sundayschool') setActiveTab('lesson');
+                          else setActiveTab('illustrations');
+                        }
+                        else if (activeTab === 'lesson') setActiveTab('illustrations');
+                        else if (activeTab === 'illustrations') setActiveTab('outline');
+                        else if (activeTab === 'outline') setActiveTab('research');
+                      }}
+                    >
+                      ← Back
+                    </Button>
+                  )}
+                  {/* Continue Button */}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-white dark:border-blue-600 dark:hover:bg-blue-800"
+                    onClick={() => {
+                      const nextStep = getNextStep();
+                      if (nextStep?.tab === 'research' && !currentResearch) {
+                        // If first step, jump to Generate Research
+                        setActiveTab('research');
+                        setTimeout(() => {
+                          handleResearch();
+                        }, 100);
+                      } else if (nextStep?.tab === 'outline' && !currentOutline) {
+                        // If outline step, jump to Generate Outline
+                        setActiveTab('outline');
+                        setTimeout(() => {
+                          handleGenerateOutline();
+                        }, 100);
+                      } else if (nextStep?.tab === 'illustrations' && illustrations.length === 0) {
+                        // If illustrations step, jump to Generate Illustrations
+                        setActiveTab('illustrations');
+                        setTimeout(() => {
+                          handleFindIllustrations();
+                        }, 100);
+                      } else if (nextStep?.tab === 'lesson') {
+                        // If lesson review step, just navigate to lesson tab
+                        setActiveTab('lesson');
+                      } else if (nextStep?.tab === 'enhance' && !enhancedOutline) {
+                        // If enhance step, jump to Enhance
+                        setActiveTab('enhance');
+                        setTimeout(() => {
+                          handleEnhanceSermon();
+                        }, 100);
+                      } else if (nextStep?.tab === 'completed') {
+                        // If completed step, navigate to completed tab
+                        setActiveTab('completed');
+                      } else {
+                        setActiveTab(nextStep?.tab);
+                      }
+                    }}
+                  >
+                    {getProgressSteps().completed === 0 ? 'Start' : 'Continue'} →
+                  </Button>
+                </div>
               </div>
               <p className="text-xs text-blue-600 mt-1">{getNextStep()?.description}</p>
             </div>
