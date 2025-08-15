@@ -398,6 +398,14 @@ export default function SermonCreationStudio() {
         description: "Sunday School lesson plan created successfully.",
       });
       setActiveTab("illustrations");
+      // Auto-trigger activities generation after lesson plan completion
+      setTimeout(() => {
+        sundaySchoolActivitiesMutation.mutate({
+          topic: sermonTopic,
+          mainPoints: data.mainPoints,
+          ageGroup: ageGroup
+        });
+      }, 500);
     },
     onError: (error: any) => {
       console.error('Sunday School lesson plan error:', error);
