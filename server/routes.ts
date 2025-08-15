@@ -3420,7 +3420,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate Sunday School activities and games
   app.post('/api/sunday-school/activities', isAuthenticated, async (req: any, res) => {
     try {
-      const { topic, mainPoints, ageGroup } = req.body;
+      const { topic, mainPoints, ageGroup, scripture, research } = req.body;
       const userId = req.user.id || req.user.claims?.sub;
       
       const openai = new OpenAI({
@@ -3434,56 +3434,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
         high: "leadership activities, real-world simulations, deep discussion starters, creative expressions, ministry projects"
       };
 
-      const prompt = `Generate a comprehensive, teacher-ready Sunday School lesson plan for "${topic}" following professional curriculum standards. 
+      const prompt = `Generate a comprehensive, teacher-ready Sunday School lesson plan for "${topic}" ${scripture ? `from ${scripture}` : ''} following professional curriculum standards. 
 
-      Age group: ${ageGroup} - focus on ${activityTypes[ageGroup] || "elementary activities"}
-      Main learning points: ${mainPoints?.join(', ') || 'Bible truth'}
+      CRITICAL: Every activity must be SPECIFICALLY CUSTOMIZED to this exact Bible story/topic. No generic templates!
+
+      LESSON CONTEXT:
+      - Bible Reference: ${scripture || 'General Bible topic'}
+      - Topic/Theme: ${topic}
+      - Age group: ${ageGroup} - focus on ${activityTypes[ageGroup] || "elementary activities"}
+      - Main learning points: ${mainPoints?.join(', ') || 'Bible truth'}
+      ${research ? `- Research Context: ${JSON.stringify(research)}` : ''}
+
+      STORY-SPECIFIC CUSTOMIZATION REQUIREMENTS:
+
+      - Reference specific characters, events, and details from THIS Bible story (${scripture || topic})
+      - Use activities that directly connect to THIS scripture passage and its unique narrative
+      - Create games and crafts that use props, concepts, or scenarios from THIS specific story
+      - Develop discussion questions about THIS story's characters, setting, conflict, and resolution
+      - Design memory verse activities that highlight THIS passage's specific words and meaning
+      - Ensure all activities reflect the unique themes, symbols, and messages from THIS particular Bible narrative
+      - Include story-specific props, costumes, or materials that relate to THIS Bible passage
+      - Reference the historical context, cultural setting, and characters unique to THIS story
 
       Create a complete 60-75 minute lesson plan that includes:
 
       LESSON STRUCTURE:
-      1. Welcome & Warm-Up (10 min) - with specific icebreaker
-      2. Opening Worship/Prayer (5 min) - age-appropriate
-      3. Bible Story/Teaching (20-25 min) - interactive presentation
-      4. Activity Stations (20-25 min) - 3-4 rotating activities
-      5. Memory Verse Practice (5-8 min) - engaging method
-      6. Closing Prayer & Application (5-7 min) - practical takeaways
+      1. Welcome & Warm-Up (10 min) - specific icebreaker related to THIS Bible story
+      2. Opening Worship/Prayer (5 min) - prayer connecting to THIS story's themes
+      3. Bible Story/Teaching (20-25 min) - interactive presentation of THIS specific narrative
+      4. Activity Stations (20-25 min) - 3-4 rotating activities ALL related to THIS story
+      5. Memory Verse Practice (5-8 min) - method specific to THIS passage
+      6. Closing Prayer & Application (5-7 min) - takeaways from THIS story
 
       TEACHER REQUIREMENTS (match professional curriculum standards):
       
-      1. COMPLETE LESSON PLAN: Include exact timing, transitions, and teacher scripts for every segment
+      1. STORY-SPECIFIC CONTENT: Every element must relate directly to this Bible story's characters, setting, events, and message
       2. DETAILED SETUP INSTRUCTIONS: Room arrangement, materials placement, student grouping
-      3. WORD-FOR-WORD TEACHER DIALOGUE: Exact phrases for introductions, instructions, and transitions
+      3. WORD-FOR-WORD TEACHER DIALOGUE: Exact phrases referencing THIS story's details
       4. COMPREHENSIVE MATERIALS LIST: Every item with quantities, preparation time, and sourcing notes
       5. CLASSROOM MANAGEMENT STRATEGIES: Specific techniques for engagement, behavior management, and inclusion
-      6. BIBLICAL ACCURACY: Proper scripture references, age-appropriate theology, sound doctrine
-      7. EDUCATIONAL OBJECTIVES: Clear, measurable learning outcomes and assessment methods
-      8. FAMILY CONNECTION: Take-home materials and parent discussion guides
+      6. BIBLICAL ACCURACY: Proper references to THIS scripture passage and its theological meaning
+      7. EDUCATIONAL OBJECTIVES: Clear outcomes specific to THIS Bible story's lessons
+      8. FAMILY CONNECTION: Take-home materials discussing THIS story with parents
 
-      Generate 6-8 detailed activities including:
-      - Interactive Bible story presentation with props/visuals
-      - Hands-on craft reinforcing the lesson theme
-      - Active game teaching the biblical concept
-      - Discussion circle with guided questions
-      - Memory verse learning activity
-      - Quiet reflection/prayer time
-      - Service project or application activity
-      - Take-home family activity
+      Generate 6-8 detailed activities that are ALL CUSTOMIZED to this specific Bible story:
+      - Interactive Bible story presentation using THIS story's unique elements (characters, props, setting)
+      - Hands-on craft that creates something directly from THIS Bible story
+      - Active game that recreates or teaches concepts from THIS specific narrative
+      - Discussion circle with questions about THIS story's characters and events
+      - Memory verse learning activity using THIS passage's specific words and meaning
+      - Quiet reflection about THIS story's personal application
+      - Service project inspired by THIS story's message
+      - Take-home family activity continuing THIS story's themes
 
       For each activity, provide:
-      - Activity name, type, and educational objective
-      - Complete materials list with exact quantities and prep instructions
-      - Detailed room setup with student arrangement specifications
-      - Step-by-step teacher instructions with exact timing
-      - Word-for-word teacher scripts and student prompts
-      - Classroom management strategies and troubleshooting tips
-      - Biblical connection and theological accuracy notes
+      - Activity name that references THIS specific Bible story
+      - Type and educational objective tied to THIS story's unique lessons
+      - Complete materials list with story-specific items
+      - Detailed room setup that enhances THIS story's atmosphere
+      - Step-by-step instructions referencing THIS story's characters and events
+      - Teacher scripts that mention specific details from THIS Bible passage
+      - Classroom management strategies for THIS story's activities
+      - Biblical connection explaining how this relates to THIS specific scripture
       - Safety considerations and accessibility adaptations
-      - Assessment methods and learning indicators
-      - Discussion questions with expected age-appropriate responses
-      - Practical application steps for daily life
-      - Family engagement components and conversation starters
-      - Variations for different group sizes and special needs
+      - Assessment methods for THIS story's key learning points
+      - Discussion questions about THIS story's characters, events, and lessons
+      - Practical application of THIS story's message to children's lives
+      - Family engagement around THIS specific Bible narrative
+      - Variations that maintain connection to THIS particular story
 
       Format as JSON:
       {
