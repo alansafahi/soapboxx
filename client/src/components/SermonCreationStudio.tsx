@@ -921,38 +921,11 @@ export default function SermonCreationStudio() {
                     Next: {getNextStep()?.title}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  {/* Back Button - only show if not on first step */}
-                  {getProgressSteps().completed > 0 && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-700"
-                      onClick={() => {
-                        // Navigate to previous step based on current progress
-                        if (activeTab === 'completed' && enhancedOutline) {
-                          setActiveTab('enhance');
-                        } else if (activeTab === 'enhance' || (contentType === "sundayschool" && activeTab === 'lesson')) {
-                          if (contentType === "sundayschool") {
-                            setActiveTab('lesson');
-                          } else {
-                            setActiveTab('illustrations');
-                          }
-                        } else if ((activeTab === 'lesson' && contentType === "sundayschool") || activeTab === 'illustrations') {
-                          setActiveTab('outline');
-                        } else if (activeTab === 'outline') {
-                          setActiveTab('research');
-                        }
-                      }}
-                    >
-                      ← Back
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="text-xs border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-white dark:border-blue-600 dark:hover:bg-blue-800"
-                    onClick={() => {
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs border-blue-300 text-blue-700 hover:bg-blue-100 dark:text-white dark:border-blue-600 dark:hover:bg-blue-800"
+                  onClick={() => {
                     const nextStep = getNextStep();
                     if (nextStep?.tab === 'research' && !currentResearch) {
                       // If first step, jump to Generate Research
