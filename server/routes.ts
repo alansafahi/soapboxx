@@ -3217,6 +3217,255 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ===============================================================================
+  // SUNDAY SCHOOL LESSON CREATION STUDIO API ENDPOINTS
+  // Comprehensive system for creating age-appropriate Sunday School lessons
+  // ===============================================================================
+
+  // Generate Sunday School lesson research
+  app.post('/api/sunday-school/research', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scripture, topic, ageGroup } = req.body;
+      const userId = req.user.claims.sub;
+      
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const ageGroupGuidance = {
+        preschool: "3-5 year olds - use very simple language, focus on God's love, include sensory activities",
+        elementary: "6-10 year olds - concrete thinking, Bible stories, moral lessons, interactive games",
+        middle: "11-13 year olds - identity formation, peer relationships, applying faith to daily life",
+        high: "14-18 year olds - deeper questions, real-world application, leadership opportunities"
+      };
+
+      const prompt = `As a children's ministry expert and biblical educator, provide comprehensive research for a Sunday School lesson on ${topic ? `the topic: "${topic}"` : ''} ${scripture ? `based on the scripture: "${scripture}"` : ''}. 
+
+      Target age group: ${ageGroupGuidance[ageGroup] || "elementary school children"}
+
+      Please provide:
+      1. Age-appropriate biblical commentary and key truths
+      2. Historical and cultural context simplified for children
+      3. Key themes and spiritual principles for this age group
+      4. Cross-references to related Bible stories children know
+      5. Practical applications for children's daily lives
+      6. Memory verse suggestions
+      7. Discussion questions appropriate for the age group
+
+      Format your response as JSON:
+      {
+        "commentary": "age-appropriate biblical explanation",
+        "historicalContext": "simplified historical background",
+        "keyThemes": ["child-friendly theme1", "theme2", "theme3"],
+        "crossReferences": ["child-familiar story1", "story2", "story3"],
+        "practicalApplications": ["kid application1", "application2", "application3"],
+        "memoryVerse": "suggested memory verse",
+        "discussionQuestions": ["question1", "question2", "question3"]
+      }`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a children's ministry expert with deep knowledge of child development and biblical education. Provide age-appropriate, engaging content that helps children understand and apply Bible truths."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 1500
+      });
+      
+      const research = JSON.parse(response.choices[0].message.content || '{}');
+      
+      res.json({
+        commentary: research.commentary || "Biblical commentary for children",
+        historicalContext: research.historicalContext || "Historical context for children",
+        keyThemes: research.keyThemes || [],
+        crossReferences: research.crossReferences || [],
+        practicalApplications: research.practicalApplications || [],
+        memoryVerse: research.memoryVerse || "",
+        discussionQuestions: research.discussionQuestions || []
+      });
+
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate Sunday School research" });
+    }
+  });
+
+  // Generate Sunday School lesson plan
+  app.post('/api/sunday-school/lesson-plan', isAuthenticated, async (req: any, res) => {
+    try {
+      const { scripture, topic, ageGroup, duration } = req.body;
+      const userId = req.user.claims.sub;
+      
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const ageGroupGuidance = {
+        preschool: "3-5 year olds - 15-20 minute attention spans, hands-on activities, repetition, simple songs",
+        elementary: "6-10 year olds - 30-45 minute lessons, games, crafts, drama, competition elements",
+        middle: "11-13 year olds - 45-60 minutes, small group discussions, service projects, technology integration",
+        high: "14-18 year olds - 60+ minutes, deep discussions, leadership roles, real-world connections"
+      };
+
+      const durationGuidance = {
+        short: "20-30 minutes - fast-paced, high-energy activities",
+        medium: "35-45 minutes - balanced mix of teaching and activities", 
+        long: "50-60 minutes - comprehensive lesson with multiple activities"
+      };
+
+      const prompt = `Create a comprehensive Sunday School lesson plan for ${topic ? `the topic: "${topic}"` : ''} ${scripture ? `based on the scripture: "${scripture}"` : ''}. 
+
+      Target age group: ${ageGroupGuidance[ageGroup] || "elementary school children"}
+      Lesson duration: ${durationGuidance[duration] || "35-45 minutes"}
+
+      Create a structured, engaging lesson plan with:
+      1. Catchy lesson title that appeals to children
+      2. Central truth/big idea (one key takeaway)
+      3. Engaging opening activity or game
+      4. Bible story presentation method
+      5. 3-4 main learning points with activities
+      6. Interactive application activities
+      7. Memory verse and learning activity
+      8. Closing prayer or reflection
+      9. Take-home reminder or craft idea
+
+      Format as JSON:
+      {
+        "title": "engaging lesson title for kids",
+        "bigIdea": "one key truth children should remember",
+        "openingActivity": "fun way to start the lesson and introduce topic",
+        "bibleStoryMethod": "creative way to tell the Bible story (drama, props, interactive, etc.)",
+        "mainPoints": ["learning point 1", "learning point 2", "learning point 3"],
+        "applicationActivities": ["hands-on activity 1", "activity 2", "activity 3"],
+        "memoryVerseActivity": "creative way to learn the memory verse",
+        "closingActivity": "meaningful way to end the lesson",
+        "takeHome": "craft, reminder, or activity children can do at home",
+        "scriptureReferences": ["main verse", "supporting verse 1", "supporting verse 2"]
+      }`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are an experienced children's ministry leader and Sunday School teacher. Create engaging, age-appropriate lesson plans that help children learn and apply Bible truths through interactive, fun activities."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 1800
+      });
+
+      const lessonPlan = JSON.parse(response.choices[0].message.content || '{}');
+      
+      res.json({
+        title: lessonPlan.title || "Bible Lesson for Kids",
+        bigIdea: lessonPlan.bigIdea || "God loves children",
+        openingActivity: lessonPlan.openingActivity || "",
+        bibleStoryMethod: lessonPlan.bibleStoryMethod || "",
+        mainPoints: lessonPlan.mainPoints || [],
+        applicationActivities: lessonPlan.applicationActivities || [],
+        memoryVerseActivity: lessonPlan.memoryVerseActivity || "",
+        closingActivity: lessonPlan.closingActivity || "",
+        takeHome: lessonPlan.takeHome || "",
+        scriptureReferences: lessonPlan.scriptureReferences || []
+      });
+
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate lesson plan" });
+    }
+  });
+
+  // Generate Sunday School activities and games
+  app.post('/api/sunday-school/activities', isAuthenticated, async (req: any, res) => {
+    try {
+      const { topic, mainPoints, ageGroup } = req.body;
+      const userId = req.user.claims.sub;
+      
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const activityTypes = {
+        preschool: "sensory play, simple crafts, action songs, story props, coloring activities",
+        elementary: "games with rules, competitive activities, group crafts, drama skits, puzzles",
+        middle: "team challenges, creative projects, discussion games, service activities, technology games",
+        high: "leadership activities, real-world simulations, deep discussion starters, creative expressions, ministry projects"
+      };
+
+      const prompt = `Generate creative activities and games for a Sunday School lesson on "${topic}". 
+
+      Age group: ${ageGroup} - focus on ${activityTypes[ageGroup] || "elementary activities"}
+      Main learning points: ${mainPoints?.join(', ') || 'Bible truth'}
+
+      Create 8-10 diverse activities including:
+      - Opening icebreaker games
+      - Bible story reinforcement activities  
+      - Creative crafts related to the lesson
+      - Active games that teach the concept
+      - Quiet reflection or prayer activities
+      - Group discussion activities
+      - Memory verse games
+      - Take-home activities
+
+      For each activity, provide:
+      - Activity name and type
+      - Materials needed
+      - Instructions
+      - How it connects to the lesson
+      - Duration estimate
+
+      Format as JSON:
+      {
+        "activities": [
+          {
+            "name": "activity name",
+            "type": "game/craft/discussion/etc",
+            "materials": ["item1", "item2", "item3"],
+            "instructions": "step by step instructions",
+            "lessonConnection": "how this reinforces the Bible truth",
+            "duration": "5-10 minutes",
+            "ageAppropriate": "why this works for the age group"
+          }
+        ]
+      }`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a creative children's ministry specialist. Design engaging, educational activities that help children learn Bible truths through play, creativity, and interaction. Focus on age-appropriate activities that are easy for volunteers to lead."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        response_format: { type: "json_object" },
+        max_tokens: 2000
+      });
+
+      const activitiesData = JSON.parse(response.choices[0].message.content || '{"activities": []}');
+      
+      res.json({
+        activities: activitiesData.activities || []
+      });
+
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate activities" });
+    }
+  });
+
+  // ===============================================================================
   // LEGACY COMPATIBILITY SECTION - WILL BE REMOVED SEPTEMBER 30, 2025
   // All endpoints below are deprecated and maintained for backward compatibility only
   // Developers must migrate to new kebab-case endpoints before the deadline

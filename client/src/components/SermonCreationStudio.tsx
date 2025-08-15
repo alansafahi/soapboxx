@@ -21,7 +21,8 @@ import {
   Clock, Target, RefreshCw, Save, Download, Share2,
   ChevronRight, CheckCircle, AlertCircle, Loader2,
   ChevronDown, FileText, FileImage, FileDown, Code,
-  Archive, Edit3, Eye
+  Archive, Edit3, Eye, GraduationCap, Baby, Users,
+  Sparkles, Play, Palette, Music
 } from "lucide-react";
 
 // Helper function to render formatted text with HTML
@@ -88,10 +89,12 @@ interface BiblicalResearch {
 
 export default function SermonCreationStudio() {
   const [activeTab, setActiveTab] = useState("research");
+  const [contentType, setContentType] = useState("sermon");
   const [scriptureText, setScriptureText] = useState("");
   const [sermonTopic, setSermonTopic] = useState("");
   const [targetAudience, setTargetAudience] = useState("general");
   const [sermonLength, setSermonLength] = useState("medium");
+  const [ageGroup, setAgeGroup] = useState("elementary"); // For Sunday School
   const [currentOutline, setCurrentOutline] = useState<SermonOutline | null>(null);
   const [currentResearch, setCurrentResearch] = useState<BiblicalResearch | null>(null);
   const [illustrations, setIllustrations] = useState<SermonIllustration[]>([]);
@@ -344,6 +347,70 @@ export default function SermonCreationStudio() {
     }
   });
 
+  // Sunday School mutations
+  const sundaySchoolResearchMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest('POST', '/api/sunday-school/research', data);
+    },
+    onSuccess: (data) => {
+      setCurrentResearch(data);
+      toast({
+        title: "Research Complete",
+        description: "Sunday School lesson research generated successfully.",
+      });
+      setActiveTab("outline");
+    },
+    onError: () => {
+      toast({
+        title: "Research failed",
+        description: "Failed to generate lesson research. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const sundaySchoolLessonPlanMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest('POST', '/api/sunday-school/lesson-plan', data);
+    },
+    onSuccess: (data) => {
+      setCurrentOutline(data);
+      toast({
+        title: "Lesson Plan Complete",
+        description: "Sunday School lesson plan created successfully.",
+      });
+      setActiveTab("illustrations");
+    },
+    onError: () => {
+      toast({
+        title: "Lesson plan failed", 
+        description: "Failed to generate lesson plan. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
+  const sundaySchoolActivitiesMutation = useMutation({
+    mutationFn: async (data: any) => {
+      return await apiRequest('POST', '/api/sunday-school/activities', data);
+    },
+    onSuccess: (data) => {
+      setIllustrations(data.activities || []);
+      toast({
+        title: "Activities Generated",
+        description: "Sunday School activities and games created successfully.",
+      });
+      setActiveTab("enhance");
+    },
+    onError: () => {
+      toast({
+        title: "Activities generation failed",
+        description: "Failed to generate activities. Please try again.",
+        variant: "destructive"
+      });
+    }
+  });
+
   // Save Completed Sermon mutation
   const saveCompletedMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -402,45 +469,79 @@ export default function SermonCreationStudio() {
     if (!scriptureText && !sermonTopic) {
       toast({
         title: "Input Required",
-        description: "Please provide either a scripture reference or sermon topic.",
+        description: contentType === "sermon" 
+          ? "Please provide either a scripture reference or sermon topic."
+          : "Please provide either a scripture reference or lesson topic.",
         variant: "destructive"
       });
       return;
     }
-    researchMutation.mutate({ scripture: scriptureText, topic: sermonTopic });
+    
+    if (contentType === "sermon") {
+      researchMutation.mutate({ scripture: scriptureText, topic: sermonTopic });
+    } else {
+      sundaySchoolResearchMutation.mutate({ 
+        scripture: scriptureText, 
+        topic: sermonTopic, 
+        ageGroup: ageGroup 
+      });
+    }
   };
 
   const handleGenerateOutline = () => {
     if (!scriptureText && !sermonTopic) {
       toast({
         title: "Input Required",
-        description: "Please provide either a scripture reference or sermon topic.",
+        description: contentType === "sermon"
+          ? "Please provide either a scripture reference or sermon topic."
+          : "Please provide either a scripture reference or lesson topic.",
         variant: "destructive"
       });
       return;
     }
-    outlineMutation.mutate({ 
-      scripture: scriptureText, 
-      topic: sermonTopic, 
-      audience: targetAudience, 
-      length: sermonLength 
-    });
+    
+    if (contentType === "sermon") {
+      outlineMutation.mutate({ 
+        scripture: scriptureText, 
+        topic: sermonTopic, 
+        audience: targetAudience, 
+        length: sermonLength 
+      });
+    } else {
+      sundaySchoolLessonPlanMutation.mutate({
+        scripture: scriptureText,
+        topic: sermonTopic,
+        ageGroup: ageGroup,
+        duration: sermonLength
+      });
+    }
   };
 
   const handleFindIllustrations = () => {
     if (!currentOutline) {
       toast({
-        title: "Outline Required",
-        description: "Please generate a sermon outline first.",
+        title: contentType === "sermon" ? "Outline Required" : "Lesson Plan Required",
+        description: contentType === "sermon" 
+          ? "Please generate a sermon outline first."
+          : "Please generate a lesson plan first.",
         variant: "destructive"
       });
       return;
     }
-    illustrationsMutation.mutate({
-      topic: sermonTopic,
-      mainPoints: currentOutline.mainPoints,
-      audience: targetAudience
-    });
+    
+    if (contentType === "sermon") {
+      illustrationsMutation.mutate({
+        topic: sermonTopic,
+        mainPoints: currentOutline.mainPoints,
+        audience: targetAudience
+      });
+    } else {
+      sundaySchoolActivitiesMutation.mutate({
+        topic: sermonTopic,
+        mainPoints: currentOutline.mainPoints,
+        ageGroup: ageGroup
+      });
+    }
   };
 
   const handleEnhanceSermon = () => {
@@ -518,20 +619,53 @@ export default function SermonCreationStudio() {
   return (
     <div className="max-w-6xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
       <div className="text-center mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 sm:mb-4">
-          AI-Powered Sermon Creation Studio
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2 sm:mb-4">
+          {contentType === "sermon" ? "AI-Powered Sermon Creation Studio" : "Sunday School Lesson Creator"}
         </h1>
-        <p className="text-base sm:text-lg text-gray-600 px-2">
-          Transform your sermon preparation with intelligent research, outline generation, and content enhancement
+        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 px-2">
+          {contentType === "sermon" 
+            ? "Transform your sermon preparation with intelligent research, outline generation, and content enhancement"
+            : "Create engaging Sunday School lessons with age-appropriate activities, games, and biblical teachings"
+          }
         </p>
+
+        {/* Content Type Selector */}
+        <div className="flex justify-center mt-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-1 shadow-sm border dark:border-gray-600">
+            <div className="flex">
+              <button
+                onClick={() => setContentType("sermon")}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+                  contentType === "sermon"
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+                }`}
+              >
+                <BookOpen className="w-4 h-4" />
+                Sermon
+              </button>
+              <button
+                onClick={() => setContentType("sundayschool")}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${
+                  contentType === "sundayschool"
+                    ? "bg-purple-600 text-white"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100"
+                }`}
+              >
+                <GraduationCap className="w-4 h-4" />
+                Sunday School
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Input Section */}
-      <Card className="border-2 border-blue-200 bg-blue-50">
+      <Card className={`border-2 ${contentType === "sermon" ? "border-blue-200 bg-blue-50" : "border-purple-200 bg-purple-50"} dark:bg-gray-800 dark:border-gray-600`}>
         <CardHeader>
-          <CardTitle className="flex items-center text-blue-900">
+          <CardTitle className={`flex items-center ${contentType === "sermon" ? "text-blue-900 dark:text-blue-200" : "text-purple-900 dark:text-purple-200"}`}>
             <Target className="w-5 h-5 mr-2" />
-            Sermon Foundation
+            {contentType === "sermon" ? "Sermon Foundation" : "Lesson Foundation"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -548,47 +682,78 @@ export default function SermonCreationStudio() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-blue-800 dark:text-blue-400 mb-2">
-                Sermon Topic/Theme
+              <label className={`block text-sm font-medium mb-2 ${contentType === "sermon" ? "text-blue-800 dark:text-blue-400" : "text-purple-800 dark:text-purple-400"}`}>
+                {contentType === "sermon" ? "Sermon Topic/Theme" : "Lesson Topic/Theme"}
               </label>
               <Input
-                placeholder="e.g., Grace, Faith in Action, God's Love"
+                placeholder={contentType === "sermon" 
+                  ? "e.g., Grace, Faith in Action, God's Love"
+                  : "e.g., David and Goliath, God's Love for Children, Jesus Feeds 5000"
+                }
                 value={sermonTopic}
                 onChange={(e) => setSermonTopic(e.target.value)}
-                className="bg-white text-gray-900 placeholder-gray-500"
+                className="bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
               />
             </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {contentType === "sermon" ? (
+              <div>
+                <label className="block text-sm font-medium text-blue-800 dark:text-blue-400 mb-2">
+                  Target Audience
+                </label>
+                <select 
+                  value={targetAudience}
+                  onChange={(e) => setTargetAudience(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="general">General Congregation</option>
+                  <option value="youth">Youth/Young Adults</option>
+                  <option value="families">Families with Children</option>
+                  <option value="seniors">Senior Adults</option>
+                  <option value="seekers">Seekers/New Believers</option>
+                </select>
+              </div>
+            ) : (
+              <div>
+                <label className="block text-sm font-medium text-purple-800 dark:text-purple-400 mb-2">
+                  Age Group
+                </label>
+                <select 
+                  value={ageGroup}
+                  onChange={(e) => setAgeGroup(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                >
+                  <option value="preschool">Preschool (3-5 years)</option>
+                  <option value="elementary">Elementary (6-10 years)</option>
+                  <option value="middle">Middle School (11-13 years)</option>
+                  <option value="high">High School (14-18 years)</option>
+                </select>
+              </div>
+            )}
             <div>
-              <label className="block text-sm font-medium text-blue-800 dark:text-blue-400 mb-2">
-                Target Audience
-              </label>
-              <select 
-                value={targetAudience}
-                onChange={(e) => setTargetAudience(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900"
-              >
-                <option value="general">General Congregation</option>
-                <option value="youth">Youth/Young Adults</option>
-                <option value="families">Families with Children</option>
-                <option value="seniors">Senior Adults</option>
-                <option value="seekers">Seekers/New Believers</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-blue-800 dark:text-blue-400 mb-2">
-                Sermon Length
+              <label className={`block text-sm font-medium mb-2 ${contentType === "sermon" ? "text-blue-800 dark:text-blue-400" : "text-purple-800 dark:text-purple-400"}`}>
+                {contentType === "sermon" ? "Sermon Length" : "Lesson Duration"}
               </label>
               <select 
                 value={sermonLength}
                 onChange={(e) => setSermonLength(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-md bg-white text-gray-900"
+                className="w-full p-2 border border-gray-300 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               >
-                <option value="short">Short (15-20 minutes)</option>
-                <option value="medium">Medium (25-30 minutes)</option>
-                <option value="long">Long (35-45 minutes)</option>
+                {contentType === "sermon" ? (
+                  <>
+                    <option value="short">Short (15-20 minutes)</option>
+                    <option value="medium">Medium (25-30 minutes)</option>
+                    <option value="long">Long (35-45 minutes)</option>
+                  </>
+                ) : (
+                  <>
+                    <option value="short">Short (20-30 minutes)</option>
+                    <option value="medium">Medium (35-45 minutes)</option>
+                    <option value="long">Long (50-60 minutes)</option>
+                  </>
+                )}
               </select>
             </div>
           </div>
@@ -604,11 +769,15 @@ export default function SermonCreationStudio() {
           </TabsTrigger>
           <TabsTrigger value="outline" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
             <Lightbulb className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Outline</span>
+            <span className="hidden sm:inline">{contentType === "sermon" ? "Outline" : "Plan"}</span>
           </TabsTrigger>
           <TabsTrigger value="illustrations" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
-            <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
-            <span className="hidden sm:inline">Stories</span>
+            {contentType === "sermon" ? (
+              <MessageSquare className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            ) : (
+              <Play className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
+            )}
+            <span className="hidden sm:inline">{contentType === "sermon" ? "Stories" : "Activities"}</span>
           </TabsTrigger>
           <TabsTrigger value="enhance" className="flex items-center justify-center text-xs sm:text-sm px-1 sm:px-3">
             <Star className="w-3 h-3 sm:w-4 sm:h-4 sm:mr-2" />
@@ -627,7 +796,9 @@ export default function SermonCreationStudio() {
         {/* Progress Bar */}
         <div className="mt-4 mb-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Sermon Creation Progress</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              {contentType === "sermon" ? "Sermon Creation Progress" : "Lesson Creation Progress"}
+            </span>
             <span className="text-sm text-gray-500">
               {getProgressSteps().completed}/{getProgressSteps().total} steps completed
             </span>
@@ -643,10 +814,10 @@ export default function SermonCreationStudio() {
               ✓ Research
             </div>
             <div className={`text-xs ${currentOutline ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
-              ✓ Outline
+              ✓ {contentType === "sermon" ? "Outline" : "Plan"}
             </div>
             <div className={`text-xs ${illustrations.length > 0 ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
-              ✓ Stories
+              ✓ {contentType === "sermon" ? "Stories" : "Activities"}
             </div>
             <div className={`text-xs ${enhancedOutline ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
               ✓ Enhanced
@@ -694,14 +865,14 @@ export default function SermonCreationStudio() {
             <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
               <CardTitle className="flex items-center">
                 <BookOpen className="w-5 h-5 mr-2" />
-                Biblical Research Assistant
+                {contentType === "sermon" ? "Biblical Research Assistant" : "Lesson Research Assistant"}
               </CardTitle>
               <Button 
                 onClick={handleResearch}
-                disabled={researchMutation.isPending}
+                disabled={researchMutation.isPending || sundaySchoolResearchMutation.isPending}
                 className="bg-blue-600 hover:bg-blue-700"
               >
-                {researchMutation.isPending ? (
+                {(researchMutation.isPending || sundaySchoolResearchMutation.isPending) ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
                   <Search className="w-4 h-4 mr-2" />
@@ -745,7 +916,9 @@ export default function SermonCreationStudio() {
                   </div>
                   
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-2">Practical Applications</h4>
+                    <h4 className="font-semibold text-gray-900 mb-2">
+                      {contentType === "sermon" ? "Practical Applications" : "Child-Friendly Applications"}
+                    </h4>
                     <ul className="space-y-1">
                       {currentResearch.practicalApplications.map((app, idx) => (
                         <li key={idx} className="text-sm text-gray-700 flex items-start">
@@ -755,6 +928,28 @@ export default function SermonCreationStudio() {
                       ))}
                     </ul>
                   </div>
+
+                  {/* Sunday School specific content */}
+                  {contentType === "sunday-school" && currentResearch.memoryVerse && (
+                    <div className="bg-yellow-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-yellow-900 mb-2">Memory Verse</h4>
+                      <p className="text-yellow-800 text-sm leading-relaxed italic">{currentResearch.memoryVerse}</p>
+                    </div>
+                  )}
+
+                  {contentType === "sunday-school" && currentResearch.discussionQuestions && (
+                    <div className="bg-indigo-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-indigo-900 mb-2">Discussion Questions</h4>
+                      <ul className="space-y-1">
+                        {currentResearch.discussionQuestions.map((question, idx) => (
+                          <li key={idx} className="text-sm text-indigo-700 flex items-start">
+                            <span className="text-indigo-500 mr-2">{idx + 1}.</span>
+                            <div>{question}</div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
@@ -772,19 +967,19 @@ export default function SermonCreationStudio() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center">
                 <Lightbulb className="w-5 h-5 mr-2" />
-                Intelligent Sermon Outliner
+                {contentType === "sermon" ? "Intelligent Sermon Outliner" : "Lesson Plan Creator"}
               </CardTitle>
               <Button 
                 onClick={handleGenerateOutline}
-                disabled={outlineMutation.isPending}
+                disabled={outlineMutation.isPending || sundaySchoolLessonPlanMutation.isPending}
                 className="bg-green-600 hover:bg-green-700"
               >
-                {outlineMutation.isPending ? (
+                {(outlineMutation.isPending || sundaySchoolLessonPlanMutation.isPending) ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
                   <Lightbulb className="w-4 h-4 mr-2" />
                 )}
-                Generate Outline
+                {contentType === "sermon" ? "Generate Outline" : "Create Lesson Plan"}
               </Button>
             </CardHeader>
             <CardContent>
@@ -792,13 +987,31 @@ export default function SermonCreationStudio() {
                 <div className="space-y-6">
                   <div className="text-center bg-indigo-50 p-4 rounded-lg">
                     <h3 className="text-xl font-bold text-indigo-900">{currentOutline.title}</h3>
-                    <p className="text-indigo-700 mt-1">{currentOutline.theme}</p>
+                    <p className="text-indigo-700 mt-1">{contentType === "sermon" ? currentOutline.theme : currentOutline.bigIdea}</p>
                   </div>
                   
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-blue-900 mb-2">Introduction</h4>
-                    <p className="text-blue-800 text-sm leading-relaxed">{currentOutline.introduction}</p>
-                  </div>
+                  {/* Sunday School specific elements */}
+                  {contentType === "sunday-school" && currentOutline.openingActivity && (
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-green-900 mb-2">Opening Activity</h4>
+                      <p className="text-green-800 text-sm leading-relaxed">{currentOutline.openingActivity}</p>
+                    </div>
+                  )}
+                  
+                  {contentType === "sunday-school" && currentOutline.bibleStoryMethod && (
+                    <div className="bg-yellow-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-yellow-900 mb-2">Bible Story Method</h4>
+                      <p className="text-yellow-800 text-sm leading-relaxed">{currentOutline.bibleStoryMethod}</p>
+                    </div>
+                  )}
+                  
+                  {/* Sermon specific introduction */}
+                  {contentType === "sermon" && currentOutline.introduction && (
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-blue-900 mb-2">Introduction</h4>
+                      <p className="text-blue-800 text-sm leading-relaxed">{currentOutline.introduction}</p>
+                    </div>
+                  )}
                   
                   <div className="bg-green-50 p-4 rounded-lg">
                     <h4 className="font-semibold text-green-900 mb-3">Main Points</h4>
@@ -816,15 +1029,57 @@ export default function SermonCreationStudio() {
                     </div>
                   </div>
                   
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-purple-900 mb-2">Conclusion</h4>
-                    <p className="text-purple-800 text-sm leading-relaxed">{currentOutline.conclusion}</p>
-                  </div>
+                  {/* Sunday School specific activities */}
+                  {contentType === "sunday-school" && currentOutline.applicationActivities && (
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-purple-900 mb-2">Application Activities</h4>
+                      <ul className="space-y-1">
+                        {currentOutline.applicationActivities.map((activity, idx) => (
+                          <li key={idx} className="text-sm text-purple-800 flex items-start">
+                            <span className="text-purple-600 mr-2">•</span>
+                            <div>{activity}</div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   
-                  <div className="bg-orange-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-orange-900 mb-2">Call to Action</h4>
-                    <p className="text-orange-800 text-sm leading-relaxed">{currentOutline.callToAction}</p>
-                  </div>
+                  {contentType === "sunday-school" && currentOutline.memoryVerseActivity && (
+                    <div className="bg-pink-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-pink-900 mb-2">Memory Verse Activity</h4>
+                      <p className="text-pink-800 text-sm leading-relaxed">{currentOutline.memoryVerseActivity}</p>
+                    </div>
+                  )}
+                  
+                  {/* Sermon specific elements */}
+                  {contentType === "sermon" && currentOutline.conclusion && (
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-purple-900 mb-2">Conclusion</h4>
+                      <p className="text-purple-800 text-sm leading-relaxed">{currentOutline.conclusion}</p>
+                    </div>
+                  )}
+                  
+                  {contentType === "sermon" && currentOutline.callToAction && (
+                    <div className="bg-orange-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-orange-900 mb-2">Call to Action</h4>
+                      <p className="text-orange-800 text-sm leading-relaxed">{currentOutline.callToAction}</p>
+                    </div>
+                  )}
+                  
+                  {/* Both content types */}
+                  {contentType === "sunday-school" && currentOutline.closingActivity && (
+                    <div className="bg-teal-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-teal-900 mb-2">Closing Activity</h4>
+                      <p className="text-teal-800 text-sm leading-relaxed">{currentOutline.closingActivity}</p>
+                    </div>
+                  )}
+                  
+                  {contentType === "sunday-school" && currentOutline.takeHome && (
+                    <div className="bg-cyan-50 p-4 rounded-lg">
+                      <h4 className="font-semibold text-cyan-900 mb-2">Take Home Activity</h4>
+                      <p className="text-cyan-800 text-sm leading-relaxed">{currentOutline.takeHome}</p>
+                    </div>
+                  )}
                   
                   <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
                     <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Scripture References</h4>
@@ -860,20 +1115,26 @@ export default function SermonCreationStudio() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center">
-                <MessageSquare className="w-5 h-5 mr-2" />
-                Story & Content Library
+                {contentType === "sermon" ? (
+                  <MessageSquare className="w-5 h-5 mr-2" />
+                ) : (
+                  <Play className="w-5 h-5 mr-2" />
+                )}
+                {contentType === "sermon" ? "Story & Content Library" : "Activities & Games Library"}
               </CardTitle>
               <Button 
                 onClick={handleFindIllustrations}
-                disabled={illustrationsMutation.isPending || !currentOutline}
-                className="bg-purple-600 hover:bg-purple-700"
+                disabled={illustrationsMutation.isPending || sundaySchoolActivitiesMutation.isPending || !currentOutline}
+                className={contentType === "sermon" ? "bg-purple-600 hover:bg-purple-700" : "bg-orange-600 hover:bg-orange-700"}
               >
-                {illustrationsMutation.isPending ? (
+                {(illustrationsMutation.isPending || sundaySchoolActivitiesMutation.isPending) ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
+                ) : contentType === "sermon" ? (
                   <MessageSquare className="w-4 h-4 mr-2" />
+                ) : (
+                  <Play className="w-4 h-4 mr-2" />
                 )}
-                {illustrationsMutation.isPending ? 'Generating Sermon...' : 'Generate Sermon'}
+                {(illustrationsMutation.isPending || sundaySchoolActivitiesMutation.isPending) ? 'Generating...' : (contentType === "sermon" ? 'Generate Stories' : 'Generate Activities')}
               </Button>
             </CardHeader>
             <CardContent>
@@ -895,7 +1156,9 @@ export default function SermonCreationStudio() {
                           }}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Select All Stories</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {contentType === "sermon" ? "Select All Stories" : "Select All Activities"}
+                        </span>
                       </label>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
                         {selectedStories.size} of {illustrations.length} selected
@@ -928,20 +1191,71 @@ export default function SermonCreationStudio() {
                               className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                             />
                             <div>
-                              <h4 className="font-semibold text-gray-900 dark:text-gray-100">{illustration.title}</h4>
+                              <h4 className="font-semibold text-gray-900 dark:text-gray-100">{illustration.title || illustration.name}</h4>
+                              {contentType === "sunday-school" && illustration.type && (
+                                <Badge variant="outline" className="mt-1 text-xs">
+                                  {illustration.type}
+                                </Badge>
+                              )}
                             </div>
                           </div>
-                          <Badge 
-                            variant={illustration.relevanceScore > 0.8 ? "default" : "outline"}
-                            className="ml-2"
-                          >
-                            {Math.round(illustration.relevanceScore * 100)}% match
-                          </Badge>
+                          {contentType === "sermon" ? (
+                            <Badge 
+                              variant={illustration.relevanceScore > 0.8 ? "default" : "outline"}
+                              className="ml-2"
+                            >
+                              {Math.round(illustration.relevanceScore * 100)}% match
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="ml-2 bg-orange-50 text-orange-700 border-orange-300">
+                              {illustration.duration || "Activity"}
+                            </Badge>
+                          )}
                         </div>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">{illustration.story}</p>
-                        <div className="bg-blue-50 dark:bg-blue-900 p-3 rounded-md mb-3">
-                          <p className="text-sm text-blue-800 dark:text-blue-200"><strong>Application:</strong> {illustration.application}</p>
-                        </div>
+                        
+                        {/* Sunday School Activity Format */}
+                        {contentType === "sunday-school" ? (
+                          <div className="space-y-3">
+                            {illustration.instructions && (
+                              <div className="bg-green-50 p-3 rounded-md">
+                                <p className="text-sm font-medium text-green-900 mb-1">Instructions:</p>
+                                <p className="text-sm text-green-800 leading-relaxed">{illustration.instructions}</p>
+                              </div>
+                            )}
+                            
+                            {illustration.materials && (
+                              <div className="bg-blue-50 p-3 rounded-md">
+                                <p className="text-sm font-medium text-blue-900 mb-1">Materials Needed:</p>
+                                <ul className="text-sm text-blue-800 list-disc list-inside">
+                                  {illustration.materials.map((material, idx) => (
+                                    <li key={idx}>{material}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            
+                            {illustration.lessonConnection && (
+                              <div className="bg-purple-50 p-3 rounded-md">
+                                <p className="text-sm font-medium text-purple-900 mb-1">Lesson Connection:</p>
+                                <p className="text-sm text-purple-800 leading-relaxed">{illustration.lessonConnection}</p>
+                              </div>
+                            )}
+                            
+                            {illustration.ageAppropriate && (
+                              <div className="bg-yellow-50 p-3 rounded-md">
+                                <p className="text-sm font-medium text-yellow-900 mb-1">Age Appropriateness:</p>
+                                <p className="text-sm text-yellow-800 leading-relaxed">{illustration.ageAppropriate}</p>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <>
+                            <p className="text-sm text-gray-700 dark:text-gray-300 mb-3 leading-relaxed">{illustration.story}</p>
+                            <div className="bg-blue-50 dark:bg-blue-900 p-3 rounded-md mb-3">
+                              <p className="text-sm text-blue-800 dark:text-blue-200"><strong>Application:</strong> {illustration.application}</p>
+                            </div>
+                          </>
+                        )}
                         
                         {/* Visual Elements Section */}
                         {illustration.visualElements && (
@@ -1035,8 +1349,17 @@ export default function SermonCreationStudio() {
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                  <p>Generate a sermon outline first, then find relevant illustrations to enhance your message</p>
+                  {contentType === "sermon" ? (
+                    <>
+                      <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>Generate a sermon outline first, then find relevant illustrations to enhance your message</p>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p>Create your lesson plan first, then generate engaging activities and games for your class</p>
+                    </>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -1049,19 +1372,19 @@ export default function SermonCreationStudio() {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center">
                 <Star className="w-5 h-5 mr-2" />
-                Sermon Content Enhancer
+                {contentType === "sermon" ? "Sermon Content Enhancer" : "Lesson Content Enhancer"}
               </CardTitle>
               <Button 
                 onClick={handleEnhanceSermon}
-                disabled={enhanceMutation.isPending || !currentOutline || !currentResearch}
+                disabled={enhanceMutation.isPending || sundaySchoolEnhanceMutation.isPending || !currentOutline || !currentResearch}
                 className="bg-yellow-600 hover:bg-yellow-700"
               >
-                {enhanceMutation.isPending ? (
+                {(enhanceMutation.isPending || sundaySchoolEnhanceMutation.isPending) ? (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
                   <Star className="w-4 h-4 mr-2" />
                 )}
-                Enhance Sermon
+                {contentType === "sermon" ? "Enhance Sermon" : "Enhance Lesson"}
               </Button>
             </CardHeader>
             <CardContent>
@@ -1070,12 +1393,16 @@ export default function SermonCreationStudio() {
                   <div className="bg-green-50 p-4 rounded-lg text-center">
                     <CheckCircle className="w-8 h-8 mx-auto mb-2 text-green-600" />
                     <h4 className="font-semibold text-green-900">Clarity Analysis</h4>
-                    <p className="text-sm text-green-700">Reviews readability and flow</p>
+                    <p className="text-sm text-green-700">
+                      {contentType === "sermon" ? "Reviews readability and flow" : "Reviews age-appropriate language"}
+                    </p>
                   </div>
                   <div className="bg-blue-50 p-4 rounded-lg text-center">
                     <Target className="w-8 h-8 mx-auto mb-2 text-blue-600" />
                     <h4 className="font-semibold text-blue-900">Engagement Optimization</h4>
-                    <p className="text-sm text-blue-700">Suggests interaction points</p>
+                    <p className="text-sm text-blue-700">
+                      {contentType === "sermon" ? "Suggests interaction points" : "Optimizes for child engagement"}
+                    </p>
                   </div>
                   <div className="bg-purple-50 p-4 rounded-lg text-center">
                     <BookOpen className="w-8 h-8 mx-auto mb-2 text-purple-600" />
@@ -1087,17 +1414,17 @@ export default function SermonCreationStudio() {
                 {!currentOutline || !currentResearch ? (
                   <div className="text-center py-8 text-gray-500">
                     <AlertCircle className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>Complete both research and outline generation to enhance your sermon</p>
+                    <p>Complete both research and outline generation to enhance your {contentType === "sermon" ? "sermon" : "lesson"}</p>
                   </div>
                 ) : enhancedOutline ? (
                   <div className="space-y-6">
                     <div className="bg-green-50 dark:bg-green-900 p-4 rounded-lg border border-green-200 dark:border-green-700">
                       <h4 className="font-semibold text-green-900 dark:text-green-200 mb-2 flex items-center">
                         <CheckCircle className="w-5 h-5 mr-2" />
-                        Enhanced Sermon Complete
+                        Enhanced {contentType === "sermon" ? "Sermon" : "Lesson"} Complete
                       </h4>
                       <p className="text-green-700 dark:text-green-300 text-sm">
-                        Your sermon has been enhanced with AI recommendations and is ready for delivery or further customization.
+                        Your {contentType === "sermon" ? "sermon" : "lesson"} has been enhanced with AI recommendations and is ready for {contentType === "sermon" ? "delivery" : "teaching"} or further customization.
                       </p>
                     </div>
 
@@ -1125,8 +1452,10 @@ export default function SermonCreationStudio() {
                         
                         <div className="grid md:grid-cols-2 gap-6 mb-6">
                           <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
-                            <h4 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">Theme</h4>
-                            <p className="text-blue-800 dark:text-blue-300">{enhancedOutline.theme}</p>
+                            <h4 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">
+                              {contentType === "sermon" ? "Theme" : "Big Idea"}
+                            </h4>
+                            <p className="text-blue-800 dark:text-blue-300">{enhancedOutline.theme || enhancedOutline.bigIdea}</p>
                           </div>
                           
                           <div className="bg-purple-50 dark:bg-purple-900 p-4 rounded-lg">
