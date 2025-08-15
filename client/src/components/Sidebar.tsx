@@ -94,14 +94,7 @@ export default function Sidebar() {
         });
       }
       
-      // Auto-expand Admin Portal for church admins only on initial load
-      if (userRole === 'church_admin' && !expandedGroups.has('ADMIN PORTAL')) {
-        setExpandedGroups(prev => {
-          const newSet = new Set(prev);
-          newSet.add('ADMIN PORTAL');
-          return newSet;
-        });
-      }
+
     };
 
     // Set initial state
@@ -121,6 +114,17 @@ export default function Sidebar() {
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     retry: 1
   });
+
+  // Auto-expand Admin Portal for church admins after role data loads
+  useEffect(() => {
+    if (userRole === 'church_admin' && !expandedGroups.has('ADMIN PORTAL')) {
+      setExpandedGroups(prev => {
+        const newSet = new Set(prev);
+        newSet.add('ADMIN PORTAL');
+        return newSet;
+      });
+    }
+  }, [userRole, expandedGroups]);
   
 
 

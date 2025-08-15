@@ -1993,11 +1993,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.session?.userId || (req.user as any)?.id || (req.user as any)?.claims?.sub;
       
+      console.log('Admin communities check - userId:', userId);
+      console.log('Admin communities check - req.user:', req.user);
+      
       if (!userId) {
         return res.status(401).json({ message: 'User authentication required' });
       }
 
       // Get communities where user has admin roles
+      console.log('Checking admin roles for user:', userId);
+      console.log('ADMIN_ROLES:', ADMIN_ROLES);
+      
       const adminCommunitiesResult = await pool.query(`
         SELECT DISTINCT 
           uc.community_id,
@@ -2011,6 +2017,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ORDER BY c.name
       `, [userId, ADMIN_ROLES]);
 
+      console.log('Admin communities query result:', adminCommunitiesResult.rows);
+
       const adminCommunities = adminCommunitiesResult.rows.map(row => ({
         communityId: row.community_id,
         role: row.role,
@@ -2019,15 +2027,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Also check if user has global admin roles (soapbox_owner, etc.)
       const user = await storage.getUser(userId);
+      console.log('User from storage:', user);
+      console.log('GLOBAL_ADMIN_ROLES:', GLOBAL_ADMIN_ROLES);
+      
       const hasGlobalAdminRole = user && GLOBAL_ADMIN_ROLES.includes(user.role || '');
+      console.log('Has global admin role:', hasGlobalAdminRole);
 
-      res.json({
+      const response = {
         hasAdminAccess: adminCommunities.length > 0 || hasGlobalAdminRole,
         adminCommunities,
         globalAdminRole: hasGlobalAdminRole ? user?.role : null
-      });
+      };
+      
+      console.log('Admin communities response:', response);
+      res.json(response);
     } catch (error) {
-      res.status(500).json({ message: 'Failed to fetch admin communities' });
+      console.error('Admin communities error:', error);
+      res.status(500).json({ message: 'Failed to fetch admin communities', error: error.message });
     }
   });
 
