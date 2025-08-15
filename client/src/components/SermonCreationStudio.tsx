@@ -2820,7 +2820,6 @@ export default function SermonCreationStudio() {
           </CardContent>
         </Card>
       )}
-      </Tabs>
 
       {/* Enhanced Share Dialog */}
       <ShareDialog
