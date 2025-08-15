@@ -4353,7 +4353,39 @@ export class DatabaseStorage implements IStorage {
         .limit(limit)
         .offset(offset);
 
-      return entries;
+      // Get reaction counts for each SOAP entry
+      const soapIds = entries.map(entry => entry.id).filter(Boolean);
+      let reactionCounts: Record<number, number> = {};
+      
+      if (soapIds.length > 0) {
+        const reactionCountResult = await db
+          .select({
+            soapId: soapReactions.soapId,
+            reactionCount: sql<number>`count(*)`
+          })
+          .from(soapReactions)
+          .where(
+            and(
+              inArray(soapReactions.soapId, soapIds),
+              eq(soapReactions.reactionType, 'amen')
+            )
+          )
+          .groupBy(soapReactions.soapId);
+        
+        reactionCounts = reactionCountResult.reduce((acc: Record<number, number>, row) => {
+          acc[row.soapId] = Number(row.reactionCount) || 0;
+          return acc;
+        }, {});
+      }
+
+      // Add reaction counts to entries
+      const entriesWithCounts = entries.map(entry => ({
+        ...entry,
+        likeCount: reactionCounts[entry.id] || 0,
+        reactionCount: reactionCounts[entry.id] || 0
+      }));
+
+      return entriesWithCounts;
     } catch (error) {
       return [];
     }
@@ -4514,6 +4546,31 @@ export class DatabaseStorage implements IStorage {
       //   });
       // }
 
+      // Get reaction counts for each SOAP entry
+      const soapIds = entries.map(entry => entry.id).filter(Boolean);
+      let reactionCounts: Record<number, number> = {};
+      
+      if (soapIds.length > 0) {
+        const reactionCountResult = await db
+          .select({
+            soapId: soapReactions.soapId,
+            reactionCount: sql<number>`count(*)`
+          })
+          .from(soapReactions)
+          .where(
+            and(
+              inArray(soapReactions.soapId, soapIds),
+              eq(soapReactions.reactionType, 'amen')
+            )
+          )
+          .groupBy(soapReactions.soapId);
+        
+        reactionCounts = reactionCountResult.reduce((acc: Record<number, number>, row) => {
+          acc[row.soapId] = Number(row.reactionCount) || 0;
+          return acc;
+        }, {});
+      }
+
       const finalEntries = entries.map(entry => ({
         ...entry,
         author: {
@@ -4521,7 +4578,9 @@ export class DatabaseStorage implements IStorage {
           lastName: entry.lastName,
           email: entry.email,
           profileImageUrl: entry.profileImageUrl
-        }
+        },
+        likeCount: reactionCounts[entry.id] || 0,
+        reactionCount: reactionCounts[entry.id] || 0
       }));
       
       return finalEntries;
