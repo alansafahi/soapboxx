@@ -251,6 +251,15 @@ export default function SermonCreationStudio() {
           : 'Polish and refine your lesson plan with AI suggestions'
       };
     }
+    if (enhancedOutline) {
+      return {
+        tab: 'completed',
+        title: contentType === "sermon" ? 'View Completed Sermon' : 'View Completed Lesson',
+        description: contentType === "sermon" 
+          ? 'Your enhanced sermon is ready - view, save, or share it'
+          : 'Your enhanced lesson is ready - view, save, or share it'
+      };
+    }
     return null;
   };
 
@@ -945,6 +954,9 @@ export default function SermonCreationStudio() {
                       setTimeout(() => {
                         handleEnhanceSermon();
                       }, 100);
+                    } else if (nextStep?.tab === 'completed') {
+                      // If completed step, navigate to completed tab
+                      setActiveTab('completed');
                     } else {
                       setActiveTab(nextStep?.tab);
                     }
