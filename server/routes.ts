@@ -3225,7 +3225,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/sunday-school/research', isAuthenticated, async (req: any, res) => {
     try {
       const { scripture, topic, ageGroup } = req.body;
-      const userId = req.user.claims.sub;
+      // Handle different auth systems - some use req.user.claims.sub, others use req.user.id
+      const userId = req.user?.claims?.sub || req.user?.id;
+      
+      if (!userId) {
+        console.log('Authentication debug - req.user:', req.user);
+        return res.status(401).json({ message: "Authentication required. Please log in again." });
+      }
       
       // Validation
       if (!scripture && !topic) {
