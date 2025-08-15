@@ -192,7 +192,8 @@ export default function SermonCreationStudio() {
     let completed = 0;
     if (currentResearch) completed++;
     if (currentOutline) completed++;
-    if (illustrations.length > 0) completed++;
+    // Use correct activities array based on content type
+    if (contentType === "sermon" ? illustrations.length > 0 : sundaySchoolActivities.length > 0) completed++;
     if (enhancedOutline) completed++;
     return { completed, total: 4 };
   };
@@ -214,7 +215,7 @@ export default function SermonCreationStudio() {
           : 'Build your lesson structure with age-appropriate activities'
       };
     }
-    if (illustrations.length === 0) {
+    if (contentType === "sermon" ? illustrations.length === 0 : sundaySchoolActivities.length === 0) {
       return {
         tab: 'illustrations',
         title: contentType === "sermon" ? 'Add Stories & Content' : 'Add Activities & Games',
@@ -428,7 +429,7 @@ export default function SermonCreationStudio() {
         title: "Activities Generated",
         description: "Sunday School activities and games created successfully.",
       });
-      setActiveTab("enhance");
+      // Do not auto-advance to enhance for Sunday School - stay on activities tab
     },
     onError: (error: any) => {
       console.error('Sunday School activities error:', error);
@@ -867,7 +868,7 @@ export default function SermonCreationStudio() {
             <div className={`text-xs ${currentOutline ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
               ✓ {contentType === "sermon" ? "Outline" : "Plan"}
             </div>
-            <div className={`text-xs ${illustrations.length > 0 ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
+            <div className={`text-xs ${(contentType === "sermon" ? illustrations.length > 0 : sundaySchoolActivities.length > 0) ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
               ✓ {contentType === "sermon" ? "Stories" : "Activities"}
             </div>
             <div className={`text-xs ${enhancedOutline ? 'text-green-600 font-medium' : 'text-gray-400'}`}>
