@@ -319,35 +319,66 @@ export function CommunityForm({ mode, initialData, onSuccess, onCancel }: Commun
         }
       }
 
-      // Prepare data for submission
+      // Prepare data for submission with server-expected field names
       const submitData = {
-        ...values,
-        logoUrl,
-        socialLinks: {
-          facebook: values.facebookUrl,
-          instagram: values.instagramUrl,
-          twitter: values.twitterUrl,
-          tiktok: values.tiktokUrl,
-          youtube: values.youtubeUrl,
-          linkedin: values.linkedinUrl,
-        },
-        additionalTimes: [
+        // Basic fields
+        name: values.name,
+        type: values.type,
+        denomination: values.denomination,
+        address: values.address,
+        city: values.city,
+        state: values.state,
+        zip_code: values.zipCode, // server expects snake_case
+        admin_phone: values.phone, // server expects snake_case
+        admin_email: values.email, // server expects snake_case
+        website: values.website,
+        description: values.description,
+        logo_url: logoUrl, // server expects snake_case
+        size: values.weeklyAttendance, // map weekly attendance to size
+        
+        // CamelCase fields (server expects these)
+        establishedYear: values.establishedYear,
+        parentChurchName: values.parentChurchName,
+        missionStatement: values.missionStatement,
+        
+        // Social media URLs (server expects camelCase)
+        facebookUrl: values.facebookUrl,
+        instagramUrl: values.instagramUrl,
+        twitterUrl: values.twitterUrl,
+        tiktokUrl: values.tiktokUrl,
+        youtubeUrl: values.youtubeUrl,
+        linkedinUrl: values.linkedinUrl,
+        
+        // Service times (server expects camelCase)
+        sundayService: values.sundayService,
+        wednesdayService: values.wednesdayService,
+        
+        // Time rows for additional times
+        timeRows: [
           values.customTime1 && values.customTime1Label ? {
             eventLabel: values.customTime1Label,
             timeSchedule: values.customTime1,
-            language: "English"
+            language: values.customTime1Language || "English"
           } : null,
           values.customTime2 && values.customTime2Label ? {
             eventLabel: values.customTime2Label,
             timeSchedule: values.customTime2,
-            language: "English"
+            language: values.customTime2Language || "English"
           } : null,
           values.customTime3 && values.customTime3Label ? {
             eventLabel: values.customTime3Label,
             timeSchedule: values.customTime3,
-            language: "English"
+            language: values.customTime3Language || "English"
           } : null,
         ].filter(Boolean),
+        
+        // Additional required fields for server validation
+        weeklyAttendance: values.weeklyAttendance,
+        
+        // Privacy settings (server expects snake_case)
+        privacy_setting: values.privacySetting,
+        hideAddress: values.hideAddress,
+        hidePhone: values.hidePhone,
       };
 
       if (isEditing) {
