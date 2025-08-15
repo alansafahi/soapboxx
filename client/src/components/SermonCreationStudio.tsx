@@ -1002,18 +1002,35 @@ export default function SermonCreationStudio() {
                 <BookOpen className="w-5 h-5 mr-2" />
                 {contentType === "sermon" ? "Biblical Research Assistant" : "Lesson Research Assistant"}
               </CardTitle>
-              <Button 
-                onClick={handleResearch}
-                disabled={researchMutation.isPending || sundaySchoolResearchMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                {(researchMutation.isPending || sundaySchoolResearchMutation.isPending) ? (
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <Search className="w-4 h-4 mr-2" />
-                )}
-                Generate Research
-              </Button>
+              {!currentResearch && (
+                <Button 
+                  onClick={handleResearch}
+                  disabled={researchMutation.isPending || sundaySchoolResearchMutation.isPending}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {(researchMutation.isPending || sundaySchoolResearchMutation.isPending) ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Search className="w-4 h-4 mr-2" />
+                  )}
+                  Generate Research
+                </Button>
+              )}
+              {currentResearch && (
+                <Button 
+                  onClick={handleResearch}
+                  disabled={researchMutation.isPending || sundaySchoolResearchMutation.isPending}
+                  variant="outline"
+                  className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                >
+                  {(researchMutation.isPending || sundaySchoolResearchMutation.isPending) ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Search className="w-4 h-4 mr-2" />
+                  )}
+                  Recreate Research
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               {currentResearch ? (
