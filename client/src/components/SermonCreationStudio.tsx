@@ -377,7 +377,7 @@ export default function SermonCreationStudio() {
         title: "Research Complete",
         description: "Sunday School lesson research generated successfully.",
       });
-      setActiveTab("outline");
+      // User controls when to proceed to lesson plan - no auto-generation
     },
     onError: (error: any) => {
       console.error('Sunday School research error:', error);
@@ -399,15 +399,7 @@ export default function SermonCreationStudio() {
         title: "Lesson Plan Complete",
         description: "Sunday School lesson plan created successfully.",
       });
-      setActiveTab("illustrations");
-      // Auto-trigger activities generation after lesson plan completion
-      setTimeout(() => {
-        sundaySchoolActivitiesMutation.mutate({
-          topic: sermonTopic,
-          mainPoints: data.mainPoints,
-          ageGroup: ageGroup
-        });
-      }, 500);
+      // User controls when to proceed to activities - no auto-generation
     },
     onError: (error: any) => {
       console.error('Sunday School lesson plan error:', error);
@@ -1216,10 +1208,11 @@ export default function SermonCreationStudio() {
                       <label className="flex items-center space-x-2">
                         <input
                           type="checkbox"
-                          checked={selectedStories.size === illustrations.length && illustrations.length > 0}
+                          checked={selectedStories.size === (contentType === "sermon" ? illustrations.length : sundaySchoolActivities.length) && (contentType === "sermon" ? illustrations.length : sundaySchoolActivities.length) > 0}
                           onChange={(e) => {
+                            const items = contentType === "sermon" ? illustrations : sundaySchoolActivities;
                             if (e.target.checked) {
-                              setSelectedStories(new Set(Array.from({length: illustrations.length}, (_, i) => i)));
+                              setSelectedStories(new Set(Array.from({length: items.length}, (_, i) => i)));
                             } else {
                               setSelectedStories(new Set());
                             }
