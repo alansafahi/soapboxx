@@ -3434,12 +3434,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         high: "leadership activities, real-world simulations, deep discussion starters, creative expressions, ministry projects"
       };
 
-      const prompt = `Generate creative activities and games for a Sunday School lesson on "${topic}". 
+      const prompt = `Generate creative and comprehensive activities and games for a Sunday School lesson on "${topic}". 
 
       Age group: ${ageGroup} - focus on ${activityTypes[ageGroup] || "elementary activities"}
       Main learning points: ${mainPoints?.join(', ') || 'Bible truth'}
 
-      Create 8-10 diverse activities including:
+      Create 8-10 diverse, detailed activities including:
       - Opening icebreaker games
       - Bible story reinforcement activities  
       - Creative crafts related to the lesson
@@ -3449,12 +3449,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       - Memory verse games
       - Take-home activities
 
+      IMPORTANT: Each activity must include rich, meaningful application content that shows students exactly how to apply the Bible lesson in their daily lives. Provide specific, actionable steps and thought-provoking discussion questions.
+
       For each activity, provide:
       - Activity name and type
-      - Materials needed
-      - Instructions
+      - Materials needed (be specific and comprehensive)
+      - Detailed step-by-step instructions
       - How it connects to the lesson
       - Duration estimate
+      - Comprehensive application content including life lessons
+      - Discussion questions to engage students
+      - Practical steps for real-life application
+      - Memory verse connections where applicable
+      - Take-home messages for families
 
       Format as JSON:
       {
@@ -3463,10 +3470,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             "name": "activity name",
             "type": "game/craft/discussion/etc",
             "materials": ["item1", "item2", "item3"],
-            "instructions": "step by step instructions",
+            "instructions": "detailed step by step instructions with clear guidance for teachers",
             "lessonConnection": "how this reinforces the Bible truth",
             "duration": "5-10 minutes",
-            "ageAppropriate": "why this works for the age group"
+            "ageAppropriate": "why this works for the age group",
+            "application": "detailed explanation of how this activity helps students apply the Bible lesson to their daily lives",
+            "practicalSteps": ["specific action step 1", "specific action step 2", "specific action step 3"],
+            "discussionQuestions": ["thoughtful question 1", "thoughtful question 2", "thoughtful question 3"],
+            "memoryVerseConnection": "how this activity connects to today's memory verse",
+            "takeHomeMessage": "key message students and families can remember and apply at home"
           }
         ]
       }`;
@@ -3475,8 +3487,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         model: "gpt-4o",
         messages: [
           {
-            role: "system",
-            content: "You are a creative children's ministry specialist. Design engaging, educational activities that help children learn Bible truths through play, creativity, and interaction. Focus on age-appropriate activities that are easy for volunteers to lead."
+            role: "system", 
+            content: "You are a creative children's ministry specialist with extensive experience in Sunday School curriculum development. Design engaging, educational activities that help children learn Bible truths through play, creativity, and interaction. Focus on age-appropriate activities that are easy for volunteers to lead. Provide comprehensive application content that helps children understand how Bible lessons apply to their daily lives. Include detailed discussion questions, practical action steps, and meaningful connections to memory verses. Make each activity rich with educational value and spiritual application."
           },
           {
             role: "user",
