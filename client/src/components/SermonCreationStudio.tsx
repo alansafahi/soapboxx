@@ -194,6 +194,14 @@ export default function SermonCreationStudio() {
     };
   }, [currentOutline, currentResearch, illustrations, enhancedOutline]);
 
+  // Scroll to top when navigating to completed tab
+  useEffect(() => {
+    if (activeTab === 'completed') {
+      // Scroll to top of page smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [activeTab]);
+
   // Progress tracking functions
   const getProgressSteps = () => {
     let completed = 0;
@@ -2629,7 +2637,15 @@ export default function SermonCreationStudio() {
         </TabsContent>
 
         {/* Completed Sermons Tab */}
-        <TabsContent value="completed" className="space-y-4">
+        <TabsContent value="completed" className="space-y-4" 
+          ref={(el) => {
+            if (el && activeTab === 'completed') {
+              // Scroll to top when entering completed tab
+              setTimeout(() => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }, 100);
+            }
+          }}>
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
