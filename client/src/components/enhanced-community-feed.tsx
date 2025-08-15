@@ -723,20 +723,21 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="text-xs sm:text-sm px-2 sm:px-3"
+                            className="text-xs sm:text-sm p-2"
                             onClick={() => handleComment(post.id)}
+                            title={`Comment (${post.commentCount || 0})`}
                           >
-                            <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                            <span>{post.commentCount || 0}</span>
+                            <MessageCircle className="h-3 w-3 sm:h-4 sm:w-4 group-hover:scale-110 transition-all duration-200" />
+                            {(post.commentCount || 0) > 0 && <span className="ml-1 text-xs font-medium">{post.commentCount}</span>}
                           </Button>
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            className="text-xs sm:text-sm px-2 sm:px-3"
+                            className="text-xs sm:text-sm p-2"
                             onClick={() => handleShare(post)}
+                            title="Share this post"
                           >
-                            <Share2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                            <span>0</span>
+                            <Share2 className="h-3 w-3 sm:h-4 sm:w-4 group-hover:scale-110 transition-all duration-200" />
                           </Button>
 
                           {/* Flag Button - Only show for other users' posts */}
@@ -748,11 +749,10 @@ export default function EnhancedCommunityFeed({ highlightId }: EnhancedCommunity
                                 <Button 
                                   variant="ghost" 
                                   size="sm" 
-                                  className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs sm:text-sm px-2 sm:px-3"
+                                  className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 text-xs sm:text-sm p-2"
                                   title="Report this content"
                                 >
-                                  <Flag className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                                  <span className="hidden sm:inline">Report</span>
+                                  <Flag className="h-3 w-3 sm:h-4 sm:w-4 group-hover:scale-110 transition-all duration-200" />
                                 </Button>
                               }
                             />

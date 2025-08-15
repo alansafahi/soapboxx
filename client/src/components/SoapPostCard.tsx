@@ -474,7 +474,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
           ) : null}
         </div>
 
-        {/* Spiritual Reaction Bar */}
+        {/* Spiritual Reaction Bar - All buttons grouped on the left like other social posts */}
         <div className="flex items-center justify-between pt-3 border-t border-purple-100 dark:border-purple-800">
           <div className="flex items-center space-x-1">
             {/* Amen Button - Icon only with tooltip */}
@@ -504,9 +504,7 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                 </span>
               )}
             </button>
-          </div>
-          
-          <div className="flex items-center space-x-1">
+            
             {/* Reflect Button - Icon only with tooltip */}
             <button 
               onClick={() => handleReflect()}
@@ -573,7 +571,9 @@ function SoapPostCard({ post, showRemoveOption = false, onRemove, isRemoving = f
                 }
               />
             )}
-
+          </div>
+          
+          <div className="flex items-center space-x-1">
             {/* Delete Button - Only show for post author - Icon only with tooltip */}
             {user && post.author && String(user.id) === String(post.author.id) && (
               <button 
