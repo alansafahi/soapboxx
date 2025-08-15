@@ -1091,31 +1091,49 @@ export default function SermonCreationStudio() {
                   </div>
                 ) : enhancedOutline ? (
                   <div className="space-y-6">
-                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                      <h4 className="font-semibold text-green-900 mb-2 flex items-center">
+                    <div className="bg-green-50 dark:bg-green-900 p-4 rounded-lg border border-green-200 dark:border-green-700">
+                      <h4 className="font-semibold text-green-900 dark:text-green-200 mb-2 flex items-center">
                         <CheckCircle className="w-5 h-5 mr-2" />
                         Enhanced Sermon Complete
                       </h4>
-                      <p className="text-green-700 text-sm">
+                      <p className="text-green-700 dark:text-green-300 text-sm">
                         Your sermon has been enhanced with AI recommendations and is ready for delivery or further customization.
                       </p>
                     </div>
 
-                    <div className="bg-white p-6 rounded-lg border space-y-6">
+                    {/* AI Enhancement Recommendations */}
+                    {enhancementRecommendations && enhancementRecommendations.length > 0 && (
+                      <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+                        <h4 className="font-semibold text-blue-900 dark:text-blue-200 mb-3 flex items-center">
+                          <Star className="w-5 h-5 mr-2" />
+                          AI Enhancement Recommendations
+                        </h4>
+                        <div className="space-y-2">
+                          {enhancementRecommendations.map((recommendation, index) => (
+                            <div key={index} className="flex items-start space-x-2">
+                              <CheckCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                              <p className="text-blue-800 dark:text-blue-200 text-sm">{recommendation}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border dark:border-gray-600 space-y-6">
                       <div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">{enhancedOutline.title}</h3>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-4">{enhancedOutline.title}</h3>
                         
                         <div className="grid md:grid-cols-2 gap-6 mb-6">
-                          <div className="bg-blue-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-blue-900 mb-2">Theme</h4>
-                            <p className="text-blue-800">{enhancedOutline.theme}</p>
+                          <div className="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                            <h4 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">Theme</h4>
+                            <p className="text-blue-800 dark:text-blue-300">{enhancedOutline.theme}</p>
                           </div>
                           
-                          <div className="bg-purple-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-purple-900 mb-2">Scripture References</h4>
+                          <div className="bg-purple-50 dark:bg-purple-900 p-4 rounded-lg">
+                            <h4 className="font-semibold text-purple-900 dark:text-purple-200 mb-2">Scripture References</h4>
                             <div className="flex flex-wrap gap-2">
                               {enhancedOutline.scriptureReferences?.map((ref, idx) => (
-                                <span key={idx} className="bg-purple-200 text-purple-800 px-2 py-1 rounded text-sm">
+                                <span key={idx} className="bg-purple-200 dark:bg-purple-700 text-purple-800 dark:text-purple-200 px-2 py-1 rounded text-sm">
                                   {ref}
                                 </span>
                               ))}
@@ -1124,17 +1142,17 @@ export default function SermonCreationStudio() {
                         </div>
 
                         <div className="space-y-4">
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-gray-900 mb-3">Introduction</h4>
-                            <p className="text-gray-700 leading-relaxed">{enhancedOutline.introduction}</p>
+                          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-200 mb-3">Introduction</h4>
+                            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{enhancedOutline.introduction}</p>
                           </div>
 
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-gray-900 mb-3">Main Points</h4>
+                          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-200 mb-3">Main Points</h4>
                             <div className="space-y-3">
                               {enhancedOutline.mainPoints?.map((point: any, index: number) => (
                                 <div key={index} className="border-l-4 border-blue-400 pl-4">
-                                  <div className="font-medium text-gray-900">
+                                  <div className="font-medium text-gray-900 dark:text-gray-200">
                                     {index + 1}. {renderFormattedText(typeof point === 'string' ? point : point.point || point.details || JSON.stringify(point))}
                                   </div>
                                 </div>
@@ -1142,20 +1160,20 @@ export default function SermonCreationStudio() {
                             </div>
                           </div>
 
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-gray-900 mb-3">Conclusion</h4>
-                            <p className="text-gray-700 leading-relaxed">{enhancedOutline.conclusion}</p>
+                          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                            <h4 className="font-semibold text-gray-900 dark:text-gray-200 mb-3">Conclusion</h4>
+                            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">{enhancedOutline.conclusion}</p>
                           </div>
 
-                          <div className="bg-yellow-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-yellow-900 mb-3">Call to Action</h4>
-                            <p className="text-yellow-800 leading-relaxed">{enhancedOutline.callToAction}</p>
+                          <div className="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg">
+                            <h4 className="font-semibold text-yellow-900 dark:text-yellow-200 mb-3">Call to Action</h4>
+                            <p className="text-yellow-800 dark:text-yellow-300 leading-relaxed">{enhancedOutline.callToAction}</p>
                           </div>
 
                           {enhancedOutline.closingPrayer && (
-                            <div className="bg-green-50 p-4 rounded-lg">
-                              <h4 className="font-semibold text-green-900 mb-3">Closing Prayer</h4>
-                              <p className="text-green-800 leading-relaxed italic">{enhancedOutline.closingPrayer}</p>
+                            <div className="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
+                              <h4 className="font-semibold text-green-900 dark:text-green-200 mb-3">Closing Prayer</h4>
+                              <p className="text-green-800 dark:text-green-300 leading-relaxed italic">{enhancedOutline.closingPrayer}</p>
                             </div>
                           )}
                         </div>
