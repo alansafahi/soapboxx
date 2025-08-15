@@ -1,5 +1,5 @@
 import { useLocation, Link } from "wouter";
-import { Home, Users, Calendar, Hand, User } from "lucide-react";
+import { Home, Users, Hand, BookOpen } from "lucide-react";
 import { cn } from "../lib/utils";
 
 export default function MobileNav() {
@@ -19,22 +19,16 @@ export default function MobileNav() {
       isActive: location === "/community",
     },
     {
-      icon: Calendar,
-      label: "Events",
-      path: "/events",
-      isActive: location === "/events",
-    },
-    {
       icon: Hand,
       label: "Prayer",
       path: "/prayer",
       isActive: location === "/prayer",
     },
     {
-      icon: User,
-      label: "Profile",
-      path: "/profile",
-      isActive: location === "/profile",
+      icon: BookOpen,
+      label: "S.O.A.P.",
+      path: "/soap",
+      isActive: location === "/soap",
     },
   ];
 
