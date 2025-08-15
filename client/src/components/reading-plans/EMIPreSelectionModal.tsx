@@ -79,7 +79,7 @@ export default function EMIPreSelectionModal({
       setStep('results');
     },
     onError: (error) => {
-      console.error('Error generating curated plans:', error);
+
       toast({
         title: "Error",
         description: "Unable to generate personalized recommendations. Please try again.",
@@ -107,7 +107,7 @@ export default function EMIPreSelectionModal({
       onClose();
     },
     onError: (error) => {
-      console.error('Error creating custom plan:', error);
+
       toast({
         title: "Error",
         description: "Failed to create your custom reading plan. Please try again.",

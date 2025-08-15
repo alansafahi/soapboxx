@@ -84,7 +84,7 @@ export default function ContentDistributionHub() {
           description: `"${parsedData.title}" is ready for content distribution.`
         });
       } catch (error) {
-        console.error('Error loading sermon data:', error);
+
       }
     } else if (lessonData) {
       try {
@@ -105,7 +105,7 @@ export default function ContentDistributionHub() {
           description: `"${parsedData.title}" is ready for content distribution with age-appropriate messaging.`
         });
       } catch (error) {
-        console.error('Error loading lesson data:', error);
+
       }
     }
   }, []);

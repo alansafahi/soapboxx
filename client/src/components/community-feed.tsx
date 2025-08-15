@@ -341,15 +341,15 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
   };
 
   const handleCommentClick = (discussionId: number) => {
-    console.log('Comment clicked for discussion:', discussionId);
+
     setCommentDialogOpen(discussionId);
   };
 
   const handleShareDiscussion = (discussionId: number) => {
-    console.log('Share clicked for discussion:', discussionId);
+
     const discussion = discussions.find(d => d.id === discussionId);
     if (!discussion) {
-      console.log('Discussion not found');
+
       return;
     }
 
@@ -386,27 +386,11 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
       });
     },
     onError: (error) => {
-      // Share API error handled
-      // Fallback to clipboard sharing
-      const discussion = discussions.find(d => d.id === error.discussionId);
-      if (discussion) {
-        const shareUrl = `${window.location.origin}/discussions/${error.discussionId}`;
-        const shareText = `Check out this discussion: "${discussion.title}"`;
-        
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
-          toast({
-            title: "Link copied",
-            description: "Discussion link copied to clipboard",
-          });
-        } else {
-          toast({
-            title: "Share failed",
-            description: "Unable to share discussion",
-            variant: "destructive",
-          });
-        }
-      }
+      toast({
+        title: "Share failed",
+        description: "Unable to share discussion",
+        variant: "destructive",
+      });
     },
   });
 
@@ -539,17 +523,11 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
                     <div className="text-gray-600 dark:text-gray-100 dark:font-semibold text-sm mb-3">
                       <FormattedContent 
                         content={discussion.content} 
-                        attachedMedia={discussion.attachedMedia}
+                        attachedMedia={discussion.attachedMedia as { type: string; url: string; filename: string; size?: number; }[] | undefined}
                       />
                     </div>
                     <div className="flex items-center space-x-4 relative z-10" style={{pointerEvents: 'auto'}}>
-                      {/* Simple test button */}
-                      <button 
-                        onClick={() => alert('TEST BUTTON WORKS!')}
-                        className="bg-red-500 text-white px-4 py-2 rounded"
-                      >
-                        TEST
-                      </button>
+
                       
                       {/* Reaction Emojis */}
                       <div className="flex items-center space-x-1">
@@ -618,8 +596,8 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            console.log('COMMENT BUTTON CLICKED!', discussion.id);
-                            alert('Comment button clicked for discussion ' + discussion.id);
+
+
                             handleCommentClick(discussion.id);
                           }}
                           className="flex items-center space-x-1 px-3 py-1 text-gray-500 hover:text-blue-500 hover:bg-blue-50 rounded transition-all duration-300"
@@ -638,8 +616,8 @@ export default function CommunityFeed({ highlightId }: CommunityFeedProps = {}) 
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            console.log('SHARE BUTTON CLICKED!', discussion.id);
-                            alert('Share button clicked for discussion ' + discussion.id);
+
+
                             handleShareDiscussion(discussion.id);
                           }}
                           className="flex items-center space-x-1 px-3 py-1 text-gray-500 hover:text-green-500 hover:bg-green-50 rounded transition-all duration-300"

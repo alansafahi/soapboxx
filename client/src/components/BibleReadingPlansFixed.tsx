@@ -314,7 +314,7 @@ export default function BibleReadingPlansFixed() {
         
         const response = await fetch(`/api/reading-plans/filtered?${params}`);
         if (!response.ok) {
-          console.warn('Filtered API failed, falling back to all plans');
+
           const fallbackResponse = await fetch('/api/reading-plans');
           return fallbackResponse.json();
         }
