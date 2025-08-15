@@ -425,6 +425,8 @@ export default function SermonCreationStudio() {
       return await apiRequest('POST', '/api/sunday-school/activities', data);
     },
     onSuccess: (data) => {
+      // Store Sunday School activities in the illustrations array for unified handling
+      setIllustrations(data.activities || []);
       setSundaySchoolActivities(data.activities || []);
       toast({
         title: "Activities Generated",
@@ -1223,7 +1225,7 @@ export default function SermonCreationStudio() {
               </Button>
             </CardHeader>
             <CardContent>
-              {(contentType === "sermon" ? illustrations.length > 0 : sundaySchoolActivities.length > 0) ? (
+              {illustrations.length > 0 ? (
                 <div className="space-y-4">
                   {/* Selection Controls */}
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-gray-600">
@@ -1231,11 +1233,10 @@ export default function SermonCreationStudio() {
                       <label className="flex items-center space-x-2">
                         <input
                           type="checkbox"
-                          checked={selectedStories.size === (contentType === "sermon" ? illustrations.length : sundaySchoolActivities.length) && (contentType === "sermon" ? illustrations.length : sundaySchoolActivities.length) > 0}
+                          checked={selectedStories.size === illustrations.length && illustrations.length > 0}
                           onChange={(e) => {
-                            const items = contentType === "sermon" ? illustrations : sundaySchoolActivities;
                             if (e.target.checked) {
-                              setSelectedStories(new Set(Array.from({length: items.length}, (_, i) => i)));
+                              setSelectedStories(new Set(Array.from({length: illustrations.length}, (_, i) => i)));
                             } else {
                               setSelectedStories(new Set());
                             }
@@ -1247,7 +1248,7 @@ export default function SermonCreationStudio() {
                         </span>
                       </label>
                       <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {selectedStories.size} of {contentType === "sermon" ? illustrations.length : sundaySchoolActivities.length} selected
+                        {selectedStories.size} of {illustrations.length} selected
                       </span>
                     </div>
                     {selectedStories.size > 0 && (
@@ -1256,7 +1257,7 @@ export default function SermonCreationStudio() {
                       </span>
                     )}
                   </div>
-                  {(contentType === "sermon" ? illustrations : sundaySchoolActivities).map((illustration, idx) => (
+                  {illustrations.map((illustration, idx) => (
                     <Card key={idx} className="border border-gray-200 dark:border-gray-700">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-2">
