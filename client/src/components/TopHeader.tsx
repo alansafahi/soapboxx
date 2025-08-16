@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles, Building2, CheckCircle, UserCog, Users2, HandHeart, QrCode, Flag, Trophy, Bookmark, Building, LogOut } from "lucide-react";
+import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles, Building2, CheckCircle, UserCog, Users2, HandHeart, QrCode, Flag, Trophy, Bookmark, Building, LogOut, HelpCircle } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import ProfileVerificationRing from "./ProfileVerificationRing";
@@ -606,7 +606,14 @@ export default function TopHeader() {
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link href="/settings">
+                <Settings className="mr-2 h-4 w-4" />
                 Settings
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/help">
+                <HelpCircle className="mr-2 h-4 w-4" />
+                Help & Support
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
