@@ -83,7 +83,12 @@ export default function SidebarComplete() {
   }, [user, userAdminCommunities]);
 
   // Use centralized navigation from shared/navigation.ts
-  const allNavigationGroups = getFilteredNavigation(user?.role || 'member', isMobile);
+  const allNavigationGroups = getFilteredNavigation(
+    user?.role || 'member', 
+    userAdminCommunities?.globalAdminRole || null, 
+    isMobile, 
+    user
+  );
 
   // Use the navigation groups directly from centralized system - NO hardcoded filtering
   const navigationGroups = allNavigationGroups;
@@ -213,8 +218,8 @@ export default function SidebarComplete() {
                       
                       return (
                         <Link key={item.label} href={item.href}>
-                          <a
-                            className={`flex items-center px-2 py-2 text-sm rounded-md transition-colors group ${
+                          <div
+                            className={`flex items-center px-2 py-2 text-sm rounded-md transition-colors group cursor-pointer ${
                               isActive
                                 ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-sm'
                                 : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
@@ -226,7 +231,7 @@ export default function SidebarComplete() {
                             {!isCollapsed && (
                               <span className="text-xs font-medium">{item.label}</span>
                             )}
-                          </a>
+                          </div>
                         </Link>
                       );
                     })}
