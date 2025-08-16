@@ -1,0 +1,101 @@
+Here’s the **implementation copy for Replit** to remove ambiguity between “Posts” on the **Social Feed** and “Posts” inside **Topics**. This update improves UX clarity by separating **broadcast-style** and **discussion-style** content.
+
+---
+
+## 🛠️ Implementation Instructions for Replit
+
+---
+
+### 1. **Update Topics Page Labels & Buttons**
+
+**File:** `TopicsPage.tsx` (or wherever Topics tab UI is structured)
+
+#### ✅ Replace:
+
+* `Posts` tab → `Discussions`
+* `New Post` button → `Start Discussion`
+
+#### ✅ Update Headline/Subheadline:
+
+**Current:**
+
+```tsx
+<h1>Community Discussion Topics</h1>
+<p>Connect through posts and topics with your community.</p>
+```
+
+**Change to:**
+
+```tsx
+<h1>Community Discussion Topics</h1>
+<p>Ask questions, start long-form conversations, or share your thoughts for others to respond to.</p>
+```
+
+---
+
+### 2. **Ensure Social Feed Uses ‘Post’ Terminology Only**
+
+**File:** `SocialFeedPage.tsx`
+
+#### ✅ Maintain:
+
+* Tab headers: `Latest Posts`, `My Posts`
+* Button: `New Post`
+
+#### ✅ Optional (Clarify subtext):
+
+```tsx
+<h1>📢 Social Feed</h1>
+<p>Share short-form updates, encouragement, photos, or praise reports with everyone in your community.</p>
+```
+
+---
+
+### 3. **Prevent Post Creation Inside Topics**
+
+To avoid confusion, **disable or remove** the ability to create “posts” inside the Topics component logic. Only allow new threads via `Start Discussion`.
+
+#### ✅ Topics table should support:
+
+* `title`, `category`, `description`, `comments` (array or subtable)
+* Threads = primary objects; replies nested
+
+#### ✅ Posts table (Social Feed) remains independent.
+
+---
+
+### 4. **Update Routes & Logic (if needed)**
+
+| Component           | Old Route             | New Route                                      |
+| ------------------- | --------------------- | ---------------------------------------------- |
+| Posts Tab in Topics | `/topics/posts`       | 🚫 Remove or redirect to `/topics/discussions` |
+| Discussions Tab     | `/topics/discussions` | ✅ Keep active                                  |
+| Social Feed         | `/home` or `/feed`    | ✅ Show all social posts                        |
+
+---
+
+### 5. **UI Elements: Mobile Tabs**
+
+On mobile view of `/topics`, show:
+
+```
+[ 🧵 Discussions ]     [ ➕ Start Discussion ]
+```
+
+And remove tab for “Posts” entirely.
+
+---
+
+### 6. **Future-proof: Optional Enum in Database**
+
+Add an enum-type `content_type` column if needed in a shared table in future, with values like:
+
+* `post` (for social feed)
+* `discussion` (for threaded topic)
+* `comment` (for replies)
+
+But for now, keep them separate for clarity.
+
+---
+
+Let me know if you want to refactor existing components or migrate any shared logic into a common layout. I can also help generate new DB schema for `topics` or `discussions`.

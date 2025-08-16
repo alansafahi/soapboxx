@@ -52,8 +52,8 @@ export default function NewTopicPage() {
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
 
       toast({
-        title: "Topic created!",
-        description: "Your topic has been posted successfully.",
+        title: "Discussion started!",
+        description: "Your discussion has been posted successfully.",
       });
 
       // Redirect to topics list
@@ -74,7 +74,7 @@ export default function NewTopicPage() {
   return (
     <div className="max-w-3xl mx-auto p-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Start a New Topic</h1>
+        <h1 className="text-2xl font-bold">Start a New Discussion</h1>
         <button
           className="text-sm flex items-center gap-1 text-purple-600 hover:underline"
           onClick={() => navigate("/topics")}
@@ -126,7 +126,7 @@ export default function NewTopicPage() {
         </div>
 
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading ? "Creating Topic..." : "Post Topic"}
+          {loading ? "Creating Discussion..." : "Start Discussion"}
         </Button>
       </form>
     </div>

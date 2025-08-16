@@ -6,7 +6,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Badge } from "../components/ui/badge";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
-import { PlusCircle, MessageSquare, Users, Heart, MessageCircle, Plus, Loader2 } from "lucide-react";
+import { PlusCircle, MessageSquare, MessageCircle, Plus, Loader2 } from "lucide-react";
 
 interface TopicThread {
   id: string;
@@ -18,14 +18,7 @@ interface TopicThread {
   isNew?: boolean;
 }
 
-interface Post {
-  id: number;
-  author: string;
-  content: string;
-  timestamp: string;
-  likes: number;
-  comments: number;
-}
+
 
 const mockTopics: TopicThread[] = [
   {
@@ -71,40 +64,7 @@ const mockTopics: TopicThread[] = [
   },
 ];
 
-const samplePosts: Post[] = [
-  {
-    id: 1,
-    author: "Sarah Johnson",
-    content: "Grateful for our pastor's message today about finding peace in difficult times. Really needed to hear that! 🙏",
-    timestamp: "2h ago",
-    likes: 12,
-    comments: 3,
-  },
-  {
-    id: 2,
-    author: "Mike Chen", 
-    content: "Looking forward to the youth retreat next weekend! Who else is going?",
-    timestamp: "4h ago",
-    likes: 8,
-    comments: 5,
-  },
-  {
-    id: 3,
-    author: "Lisa Davis",
-    content: "Beautiful sunrise this morning. Reminded me of God's faithfulness every day.",
-    timestamp: "6h ago", 
-    likes: 15,
-    comments: 2,
-  },
-  {
-    id: 4,
-    author: "Pastor Tom",
-    content: "Reminder: Community service day this Saturday at 9 AM. We'll be helping at the local food bank. All are welcome!",
-    timestamp: "8h ago",
-    likes: 20,
-    comments: 7,
-  },
-];
+
 
 const categories = ["All", "Bible Study", "Youth", "Member Topics", "Prayer Requests", "Events", "Testimonies"];
 
@@ -160,71 +120,22 @@ export default function TopicsPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Community Discussion Topics</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">Connect through posts and topics with your community.</p>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Ask questions, start long-form conversations, or share your thoughts for others to respond to.</p>
         </div>
       </div>
 
       {/* Posts/Topics Tabs */}
       <Tabs defaultValue="topics" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="posts" className="flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Posts
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-1 mb-6">
           <TabsTrigger value="topics" className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4" />
-            Topics
+            Discussions
           </TabsTrigger>
         </TabsList>
 
-        {/* Posts Tab Content */}
-        <TabsContent value="posts">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <p className="text-gray-600 dark:text-gray-400">Recent community posts and updates</p>
-            <Button 
-              size="sm"
-              className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
-            >
-              <PlusCircle className="w-4 h-4 mr-2" />
-              New Post
-            </Button>
-          </div>
-          
-          <div className="space-y-4">
-            {samplePosts.map((post) => (
-              <Card key={post.id} className="border border-gray-200 dark:border-gray-700">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <Avatar className="w-10 h-10">
-                      <AvatarFallback className="bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400">
-                        {post.author.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-medium text-gray-900 dark:text-white">{post.author}</span>
-                        <span className="text-gray-500 dark:text-gray-400 text-sm">{post.timestamp}</span>
-                      </div>
-                      <p className="text-gray-700 dark:text-gray-300 mb-3">{post.content}</p>
-                      <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                        <button className="flex items-center gap-1 hover:text-purple-600">
-                          <Heart className="w-4 h-4" />
-                          {post.likes}
-                        </button>
-                        <button className="flex items-center gap-1 hover:text-purple-600">
-                          <MessageCircle className="w-4 h-4" />
-                          {post.comments}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
 
-        {/* Topics Tab Content */}
+
+        {/* Discussions Tab Content */}
         <TabsContent value="topics">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
             <p className="text-gray-600 dark:text-gray-400">Browse threaded discussions by category</p>
@@ -233,7 +144,7 @@ export default function TopicsPage() {
               className="bg-purple-600 hover:bg-purple-700 text-white w-full sm:w-auto"
             >
               <PlusCircle className="w-4 h-4 mr-2" />
-              Start New Topic
+              Start Discussion
             </Button>
           </div>
 
@@ -341,6 +252,7 @@ export default function TopicsPage() {
           onClick={() => navigate("/topics/new")}
           size="icon"
           className="w-14 h-14 rounded-full bg-purple-600 hover:bg-purple-700 text-white shadow-lg"
+          title="Start Discussion"
         >
           <Plus className="w-6 h-6" />
         </Button>

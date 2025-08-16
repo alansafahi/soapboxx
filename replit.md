@@ -4,16 +4,18 @@
 The SoapBox Super App is a comprehensive faith community platform designed to connect churches and believers through technology. It serves as a spiritual hub offering daily inspirations, prayer networks, community discussions, sermon management, and AI-powered pastoral tools. The project aims to provide a modern solution for spiritual engagement and church administration, capturing market potential in the faith technology sector.
 
 ## Recent Changes
-**August 16, 2025 - Topics System Implementation & Navigation Fixes**
+**August 16, 2025 - Topics System Implementation & UX Clarity Improvements**
 - Implemented new Topics system to replace "Discussions" throughout the application
-- Created enhanced TopicsPage.tsx with Posts/Topics tab interface for better UX
-- Added Posts tab for short-form social updates with avatar support and engagement metrics
-- Added Topics tab with category filtering (Bible Study, Youth, Prayer Requests, etc.)
-- Implemented visual enhancements: "New" badges, last replier info, improved topic cards
-- Added mobile floating action button (FAB) for ergonomic topic creation
+- Enhanced TopicsPage.tsx with single "Discussions" tab for threaded conversations
+- Removed confusing "Posts" tab from Topics page to eliminate UX ambiguity with Social Feed
+- Updated terminology: "Posts" → "Discussions", "New Post" → "Start Discussion" in Topics context
+- Connected Topics to real backend API (/api/discussions) with proper data transformation
+- Added visual enhancements: "New" badges, last replier info, improved discussion cards
+- Implemented category filtering (Bible Study, Youth, Prayer Requests, etc.)
+- Added mobile floating action button (FAB) for ergonomic discussion creation
 - Fixed all navigation references: Desktop sidebar, mobile hamburger menu, and bottom nav now show "Topics"
 - Enhanced centralized navigation system with proper mobile/desktop filtering
-- Resolved all TypeScript compilation errors and mobile detection bugs
+- Resolved all TypeScript compilation errors and backend connection issues
 
 **August 16, 2025 - Critical Debugging and Restoration Complete**
 - Successfully resolved all TypeScript compilation errors (570+ errors reduced to 0)
