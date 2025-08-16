@@ -50,12 +50,13 @@ import {
   Smartphone,
   Mail,
   Copy,
-  Flag
+  Flag,
+  Search
 } from "lucide-react";
 import { FaFacebook as Facebook, FaTwitter as Twitter } from "react-icons/fa";
 import { formatDistanceToNow } from "date-fns";
 import ExpirationSettings from "./ExpirationSettings";
-import { ShareDialog } from './ShareDialog';
+import ShareDialog from './ShareDialog';
 import FormattedContent from '../utils/FormattedContent';
 import { SoapPostCard } from './SoapPostCard';
 import { FlagContentDialog } from './content-moderation/FlagContentDialog';
@@ -194,8 +195,10 @@ export default function SocialFeed() {
   }, []);
 
   // Fetch feed posts
-  const { data: feedPosts = [], isLoading, error } = useQuery({
+  const { data: feedPosts = [], isLoading, error } = useQuery<FeedPost[]>({
     queryKey: ['/api/discussions'],
+    refetchOnWindowFocus: false,
+    staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
   // Display a limited number of posts initially
@@ -378,13 +381,14 @@ export default function SocialFeed() {
       // Snapshot the previous value
       const previousPosts = queryClient.getQueryData(['/api/discussions']);
 
-      // Create optimistic post
-      const optimisticPost = {
+      // Create optimistic post that matches FeedPost interface exactly
+      const optimisticPost: FeedPost = {
         id: Date.now(), // Temporary ID
-        type: 'discussion',
+        type: 'discussion' as const,
         content: postData.content,
         author: {
           id: user?.id || '',
+          name: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'User' : 'User',
           firstName: user?.firstName || '',
           lastName: user?.lastName || '',
           email: user?.email || '',
@@ -408,16 +412,22 @@ export default function SocialFeed() {
       };
 
       // Optimistically update the feed
-      queryClient.setQueryData(['/api/discussions'], (old: any) => 
-        Array.isArray(old) ? [optimisticPost, ...old] : [optimisticPost]
+      queryClient.setQueryData<FeedPost[]>(['/api/discussions'], (old = []) => 
+        [optimisticPost, ...old]
       );
 
-      // Return a context object with the snapshotted value
-      return { previousPosts };
+      // Return a context object with the snapshotted value and optimistic ID
+      return { previousPosts, optimisticId: optimisticPost.id };
     },
-    onSuccess: (data) => {
-      // Invalidate and refetch to get the real data from server
-      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
+    onSuccess: (data, variables, context) => {
+      // Replace optimistic post with real data from server
+      queryClient.setQueryData<FeedPost[]>(['/api/discussions'], (old = []) => {
+        // Find and replace the optimistic post (with temporary ID) with real post
+        const realPost = data;
+        return old.map(post => 
+          post.id === context?.optimisticId ? realPost : post
+        );
+      });
       
       // Reset form
       setNewPost('');
