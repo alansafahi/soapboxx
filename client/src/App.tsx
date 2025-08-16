@@ -73,6 +73,8 @@ const SourceAttributionPage = lazy(() => import("./pages/SourceAttribution"));
 const SocialFeedPage = lazy(() => import("./pages/social-feed"));
 const BookmarkedPrayersPage = lazy(() => import("./pages/BookmarkedPrayersPage"));
 const SavedReflectionsPage = lazy(() => import("./pages/saved-reflections"));
+const TopicsPage = lazy(() => import("./pages/TopicsPage"));
+const NewTopicPage = lazy(() => import("./pages/NewTopicPage"));
 const FAQPage = lazy(() => import("./pages/faq"));
 const OnboardingPage = lazy(() => import("./pages/onboarding"));
 const SpiritualAssessmentPage = lazy(() => import("./pages/spiritual-assessment"));
@@ -179,6 +181,8 @@ function AppRouter() {
                                     <ProtectedRoute path="/image-gallery" component={ImageGallery} />
                                     <ProtectedRoute path="/community" component={Community} />
                                     <ProtectedRoute path="/discussions" component={() => { window.location.replace('/community'); return null; }} />
+                                    <ProtectedRoute path="/topics" component={TopicsPage} />
+                                    <ProtectedRoute path="/topics/new" component={NewTopicPage} />
                                     <ProtectedRoute path="/social-feed" component={SocialFeedPage} />
                                     <ProtectedRoute path="/churches" component={Churches} />
                                     <ProtectedRoute path="/communities" component={Communities} />

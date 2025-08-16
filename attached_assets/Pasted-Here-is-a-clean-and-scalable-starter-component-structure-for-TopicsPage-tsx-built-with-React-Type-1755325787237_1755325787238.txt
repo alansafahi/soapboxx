@@ -1,0 +1,128 @@
+Here is a clean and scalable starter component structure for TopicsPage.tsx, built with React + TypeScript, assuming you’re using a typical component-based structure with Tailwind or similar for styling.
+
+This will give you:
+
+A page wrapper
+
+A “Start New Topic” button
+
+A list of topic threads
+
+Placeholder for filters (e.g., by category)
+
+Navigation to topic detail pages
+
+📄 TopicsPage.tsx (Starter Template)
+tsx
+Copy
+Edit
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { TopicThread } from "@/types/forum"; // define your type in a shared types file
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { PlusCircle, MessageSquare } from "lucide-react";
+
+const dummyThreads: TopicThread[] = [
+  {
+    id: "1",
+    title: "What did you think of Sunday’s message?",
+    repliesCount: 14,
+    category: "Bible Study",
+    lastReplyAt: "2h ago",
+  },
+  {
+    id: "2",
+    title: "How do you keep your faith in college?",
+    repliesCount: 22,
+    category: "Member Topics",
+    lastReplyAt: "1d ago",
+  },
+  {
+    id: "3",
+    title: "Let’s meet for prayer at 6pm Wednesday.",
+    repliesCount: 4,
+    category: "Coordination",
+    lastReplyAt: "5h ago",
+  },
+];
+
+const TopicsPage: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <div className="max-w-4xl mx-auto p-4">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold flex items-center gap-2">
+          <MessageSquare className="w-6 h-6" />
+          Topics
+        </h1>
+        <Button
+          onClick={() => navigate("/topics/new")}
+          className="flex items-center gap-2"
+        >
+          <PlusCircle className="w-4 h-4" />
+          Start New Topic
+        </Button>
+      </div>
+
+      {/* Filter Options */}
+      <div className="mb-4">
+        {/* Future: Add category filter, sort by newest/popular */}
+        <p className="text-sm text-muted">Browse recent community discussions below.</p>
+      </div>
+
+      {/* List of Topics */}
+      <div className="space-y-4">
+        {dummyThreads.map((thread) => (
+          <Card
+            key={thread.id}
+            className="cursor-pointer hover:bg-muted/40"
+            onClick={() => navigate(`/topics/${thread.id}`)}
+          >
+            <CardContent className="p-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold">{thread.title}</h2>
+                <span className="text-sm text-muted">{thread.repliesCount} replies</span>
+              </div>
+              <div className="text-sm text-gray-500 mt-1">
+                {thread.category} • Last reply {thread.lastReplyAt}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default TopicsPage;
+🧱 Supporting Type (in types/forum.ts)
+ts
+Copy
+Edit
+export type TopicThread = {
+  id: string;
+  title: string;
+  category: string;
+  repliesCount: number;
+  lastReplyAt: string;
+};
+🧩 Optional: Routes to Add
+In App.tsx or your route config:
+
+tsx
+Copy
+Edit
+<Route path="/topics" element={<TopicsPage />} />
+<Route path="/topics/new" element={<NewTopicPage />} /> // form to create topic
+<Route path="/topics/:id" element={<TopicDetailPage />} /> // single thread view
+✅ Next Steps (If You Want To Expand):
+NewTopicPage.tsx: form to create a new topic (with title, body, category)
+
+TopicDetailPage.tsx: shows full thread with comments
+
+Add filtering or sorting (e.g. tabs: Newest, Most Active, My Topics)
+
+Connect to Supabase or your backend for live data
+

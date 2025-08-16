@@ -19,7 +19,8 @@ import {
   Settings,
   Sparkles,
   Play,
-  Mic
+  Mic,
+  MessageSquare
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -48,6 +49,7 @@ export const navigationConfig: NavigationGroup[] = [
       { label: "Contacts", href: "/contacts", icon: UserPlus },
       { label: "Communities", href: "/communities", icon: Users },
       { label: "Events", href: "/events", icon: Calendar },
+      { label: "Topics", href: "/topics", icon: MessageSquare },
       { label: "Donation", href: "/donation-demo", icon: DollarSign },
     ]
   },
@@ -185,7 +187,7 @@ export function getFilteredNavigation(
 // Mobile bottom navigation specific items (simplified for mobile)
 export const mobileBottomNavItems = [
   { label: "Home", href: "/", icon: Home },
-  { label: "Chat", href: "/community", icon: Users },
+  { label: "Topics", href: "/topics", icon: MessageSquare },
   { label: "Prayer Wall", href: "/prayer", icon: Heart },
   { label: "S.O.A.P.", href: "/soap", icon: BookOpen },
 ];
