@@ -85,28 +85,12 @@ export default function SidebarComplete() {
   // Use centralized navigation from shared/navigation.ts
   const allNavigationGroups = getFilteredNavigation(user?.role || 'member', isMobile);
 
-  // Mobile navigation filtering - same logic as regular Sidebar
-  const mobileNavigationItems = [
-    "Messages", "Contacts", "Communities", "Events", "Topics", "Donation"
-  ];
-
-  // Filter for mobile: only show specific items from COMMUNITY group + Admin Tools
-  const navigationGroups = isMobile ? [
-    {
-      label: "COMMUNITY",
-      items: allNavigationGroups.find(g => g.label === "COMMUNITY")?.items.filter(item => 
-        mobileNavigationItems.includes(item.label)
-      ) || []
-    },
-    {
-      label: "ADMIN PORTAL", 
-      items: allNavigationGroups.find(g => g.label === "ADMIN PORTAL")?.items || []
-    }
-  ].filter(group => group.items.length > 0) : allNavigationGroups;
+  // Use the navigation groups directly from centralized system - NO hardcoded filtering
+  const navigationGroups = allNavigationGroups;
 
   // Filter groups based on user permissions and admin access
   const visibleGroups = navigationGroups.filter(group => {
-    if (group.label === 'ADMIN PORTAL') {
+    if (group.label === 'ADMIN TOOLS' || group.label === 'ADMIN PORTAL') {
       // Show admin portal for users with actual admin access to communities OR soapbox_owner
       return user && (userAdminCommunities?.hasAdminAccess || user?.role === 'soapbox_owner' || hasCommunityAdminRole);
     }
