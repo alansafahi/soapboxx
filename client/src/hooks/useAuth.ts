@@ -11,50 +11,16 @@ export function useAuth() {
 
   // Direct authentication check without React Query caching
   const checkAuth = async () => {
-    // If logout flag is set, don't check auth - user explicitly logged out
-    if (logoutFlag) {
-      setAuthState({ 
-        user: null, 
-        isLoading: false, 
-        isAuthenticated: false 
-      });
-      return null;
-    }
-
-    try {
-      const response = await fetch('/api/auth/user', {
-        credentials: 'include',
-        headers: { 
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
-      });
-      
-      
-      if (response.ok) {
-        const userData = await response.json();
-        setAuthState({ 
-          user: userData, 
-          isLoading: false, 
-          isAuthenticated: true 
-        });
-        return userData;
-      } else {
-        setAuthState({ 
-          user: null, 
-          isLoading: false, 
-          isAuthenticated: false 
-        });
-        return null;
-      }
-    } catch (error) {
-      setAuthState({ 
-        user: null, 
-        isLoading: false, 
-        isAuthenticated: false 
-      });
-      return null;
-    }
+    // SECURITY: Disable automatic authentication until cross-user issue is resolved
+    console.log('AUTH CHECK DISABLED - Security lockdown active');
+    setAuthState({ 
+      user: null, 
+      isLoading: false, 
+      isAuthenticated: false 
+    });
+    return null;
+    
+    // Previous auth check code disabled to prevent cross-user authentication
   };
 
   // Logout function to properly clear authentication state

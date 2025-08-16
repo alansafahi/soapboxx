@@ -44,50 +44,17 @@ export function useImmediateAuth() {
 
   const checkAuth = async () => {
     try {
-      // Don't check auth if we're in the middle of logging out
-      if (isLoggingOut) {
-        return;
-      }
+      // SECURITY: Disable automatic authentication until cross-user issue is resolved
+      console.log('AUTH CHECK DISABLED - Security measure active');
+      const newState = {
+        user: null,
+        isAuthenticated: false,
+        isLoading: false
+      };
+      notifyListeners(newState);
+      return;
       
-      const response = await fetch('/api/auth/user', {
-        credentials: 'include',
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      });
-
-
-      if (response.ok) {
-        const userData = await response.json();
-        
-        const newState = {
-          user: userData,
-          isAuthenticated: true,
-          isLoading: false
-        };
-        
-        notifyListeners(newState);
-        
-        // Force render update
-        setTimeout(() => {
-          const event = new CustomEvent('authStateChanged', { detail: newState });
-          window.dispatchEvent(event);
-        }, 100);
-        
-        // Immediate redirect if on login page
-        if (window.location.pathname === '/login') {
-          window.location.replace('/');
-        }
-      } else {
-        const newState = {
-          user: null,
-          isAuthenticated: false,
-          isLoading: false
-        };
-        notifyListeners(newState);
-      }
+      // Previous auth check code disabled to prevent cross-user authentication
     } catch (error) {
       const newState = {
         user: null,
