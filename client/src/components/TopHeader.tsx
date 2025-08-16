@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles, Building2, CheckCircle, UserCog, Users2, HandHeart, QrCode, Flag, Trophy, Bookmark, Building, LogOut, HelpCircle, AlertTriangle } from "lucide-react";
+import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles, Building2, CheckCircle, UserCog, Users2, HandHeart, QrCode, Flag, Trophy, Bookmark, Building, LogOut, HelpCircle, AlertTriangle, NotebookPen } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import ProfileVerificationRing from "./ProfileVerificationRing";

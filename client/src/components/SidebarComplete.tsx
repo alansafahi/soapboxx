@@ -57,7 +57,8 @@ import {
   UserCog,
   Users2,
   HelpCircle,
-  MessageCircle
+  MessageCircle,
+  NotebookPen
 } from "lucide-react";
 
 interface NavigationItem {
@@ -179,8 +180,8 @@ export default function SidebarComplete() {
       items: [
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
         { label: "Reading Plans", href: "/reading-plans", icon: Calendar },
-        { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
-        { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
+        { label: "Prayer Wall", href: "/prayer-wall", icon: HandHeart },
+        { label: "S.O.A.P. Journal", href: "/soap", icon: NotebookPen },
         { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles }, // Divine Volunteer System - RESTORED
         { label: "Saved Reflections", href: "/saved-reflections", icon: Bookmark },
         { label: "Bookmarked Prayers", href: "/bookmarked-prayers", icon: Heart },
