@@ -47,18 +47,7 @@ import {
   UserPlus,
   Sparkles
 } from "lucide-react";
-
-interface NavigationItem {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  roles?: string[];
-}
-
-interface NavigationGroup {
-  label: string;
-  items: NavigationItem[];
-}
+import { getFilteredNavigation, type NavigationGroup } from "../../../shared/navigation";
 
 export default function Sidebar() {
   const { user } = useAuth();
@@ -139,95 +128,13 @@ export default function Sidebar() {
   });
 
 
-  const navigationGroups: NavigationGroup[] = [
-    {
-      label: "COMMUNITY",
-      items: [
-        { label: "Home", href: "/", icon: Home },
-        { label: "Messages", href: "/messages", icon: Mail },
-        { label: "Contacts", href: "/contacts", icon: UserPlus },
-        { label: "Communities", href: "/communities", icon: Users },
-        { label: "Events", href: "/events", icon: Calendar },
-        { label: "Discussions", href: "/community", icon: MessageSquare },
-        { label: "Donation", href: "/donation-demo", icon: DollarSign },
-      ]
-    },
-    {
-      label: "SPIRITUAL TOOLS",
-      items: [
-        { label: "Today's Reading", href: "/bible", icon: BookOpen },
-        { label: "Reading Plans", href: "/reading-plans", icon: BookOpen },
-        { label: "Prayer Wall", href: "/prayer", icon: Heart },
-        { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
-      ]
-    },
-    {
-      label: "MEDIA CONTENTS",
-      items: [
-        { label: "Video Library", href: "/video-library", icon: Video },
-        { label: "Image Gallery", href: "/image-gallery", icon: ImageIcon },
-      ]
-    },
-    {
-      label: "ADMIN PORTAL",
-      items: [
-        { label: "Member Directory", href: "/members", icon: Users, roles: ['admin', 'church-admin', 'church_admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Content Creation", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'church_admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'church_admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'church_admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'church_admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-      ]
-    },
-    {
-      label: "SOAPBOX PORTAL",
-      items: [
-        { label: "Church Management", href: "/admin", icon: Shield, roles: ['soapbox_owner'] },
-      ]
-    },
-    {
-      label: "ACCOUNT",
-      items: [
-        { label: "Profile", href: "/profile", icon: User },
-        { label: "Settings", href: "/settings", icon: Settings },
-      ]
-    }
-  ];
-
-  // Filter groups based on user role - Wait for user data to load before filtering
-  const visibleGroups = navigationGroups.map(group => {
-    const filteredItems = group.items.filter(item => {
-      if (!item.roles) return true;
-      
-      // If user data is still loading, show all items to prevent flickering
-      if (!user) return true;
-      
-      const hasAccess = item.roles.some(role => 
-        // Check if user has the role directly (global role)
-        user?.role === role || 
-        // Check church-specific role
-        userRole === role ||
-        // Always show for soapbox_owner
-        user?.role === 'soapbox_owner' ||
-        // Also check if user has church_admin role for admin portal access
-        (userRole === 'church_admin' && ['admin', 'church-admin', 'church_admin'].includes(role)) ||
-        // Temporary: Allow access for all authenticated users to test Sunday School
-        (group.label === 'ADMIN PORTAL' && user && item.label === 'Content Creation')
-      );
-      
-      return hasAccess;
-    });
-
-    return {
-      ...group,
-      items: filteredItems
-    };
-  }).filter(group => {
-    // Don't filter out empty groups during initial load when user is null
-    if (!user) return true;
-    
-    const hasItems = group.items.length > 0;
-    return hasItems;
-  });
+  // Get filtered navigation from centralized config
+  const visibleGroups = getFilteredNavigation(
+    user?.role,
+    userRole,
+    false, // isMobile = false for desktop sidebar
+    user
+  );
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {

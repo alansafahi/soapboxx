@@ -1,36 +1,16 @@
 import { useLocation, Link } from "wouter";
-import { Home, Users, Hand, BookOpen } from "lucide-react";
 import { cn } from "../lib/utils";
+import { mobileBottomNavItems } from "../../../shared/navigation";
 
 export default function MobileNav() {
   const [location] = useLocation();
 
-  const navItems = [
-    {
-      icon: Home,
-      label: "Home",
-      path: "/",
-      isActive: location === "/",
-    },
-    {
-      icon: Users,
-      label: "Discussions",
-      path: "/community",
-      isActive: location === "/community",
-    },
-    {
-      icon: Hand,
-      label: "Prayer Wall",
-      path: "/prayer",
-      isActive: location === "/prayer",
-    },
-    {
-      icon: BookOpen,
-      label: "S.O.A.P. Journal",
-      path: "/soap",
-      isActive: location === "/soap",
-    },
-  ];
+  const navItems = mobileBottomNavItems.map(item => ({
+    icon: item.icon,
+    label: item.label,
+    path: item.href,
+    isActive: location === item.href,
+  }));
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-4 py-2 z-40">
