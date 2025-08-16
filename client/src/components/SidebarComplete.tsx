@@ -55,7 +55,9 @@ import {
   Building,
   HandHeart,
   UserCog,
-  Users2
+  Users2,
+  HelpCircle,
+  MessageCircle
 } from "lucide-react";
 
 interface NavigationItem {
@@ -461,6 +463,12 @@ export default function SidebarComplete() {
                 <Link href="/settings" className="flex items-center">
                   <Settings className="w-4 h-4 mr-2" />
                   Settings
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/help" className="flex items-center">
+                  <HelpCircle className="w-4 h-4 mr-2" />
+                  Help & Support
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={toggleTheme}>

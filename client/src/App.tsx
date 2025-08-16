@@ -201,6 +201,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/people" component={PeoplePage} />
                                     <ProtectedRoute path="/profile" component={Profile} />
                                     <ProtectedRoute path="/settings" component={SettingsPage} />
+                                    <ProtectedRoute path="/help" component={lazy(() => import('./pages/help'))} />
                                     <ProtectedRoute path="/weekly-checkin" component={WeeklyCheckinPage} />
                                     <ProtectedRoute path="/notification-settings" component={NotificationSettingsPage} />
                                     <ProtectedRoute path="/spiritual-assessment" component={SpiritualAssessmentPage} />
@@ -255,8 +256,7 @@ function AppRouter() {
                     </AnimatePresence>
                 </main>
             </div>
-            {/* Global Chat Widget - Enhanced with comprehensive knowledge base */}
-            <ChatWidget position="bottom-right" />
+            {/* Chat widget removed from floating position to eliminate mobile navigation overlap */}
         </div>
     );
 }
