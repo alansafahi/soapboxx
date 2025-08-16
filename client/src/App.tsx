@@ -206,7 +206,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/profile" component={Profile} />
                                     <ProtectedRoute path="/settings" component={SettingsPage} />
                                     <ProtectedRoute path="/help" component={lazy(() => import('./pages/help'))} />
-                                    <Route path="/emergency-logout" component={lazy(() => import('./pages/emergency-logout'))} />
+
                                     <Route path="/force-logout" component={lazy(() => import('./pages/force-logout'))} />
                                     <Route path="/ultimate-logout" component={lazy(() => import('./pages/ultimate-logout'))} />
                                     <ProtectedRoute path="/weekly-checkin" component={WeeklyCheckinPage} />
