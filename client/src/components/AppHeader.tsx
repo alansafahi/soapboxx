@@ -91,9 +91,7 @@ export default function AppHeader() {
       label: "SPIRITUAL TOOLS",
       items: [
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
-        { label: "Reading Plans", href: "/reading-plans", icon: Calendar },
-        { label: "Prayer Wall", href: "/prayer-wall", icon: HandHeart },
-        { label: "S.O.A.P. Journal", href: "/soap", icon: NotebookPen },
+
         { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },

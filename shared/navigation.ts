@@ -59,9 +59,7 @@ export const navigationConfig: NavigationGroup[] = [
     desktopOnly: true,
     items: [
       { label: "Today's Reading", href: "/bible", icon: BookOpen },
-      { label: "Reading Plans", href: "/reading-plans", icon: BookOpen, mobileOnly: false, desktopOnly: true },
-      { label: "Prayer Wall", href: "/prayer", icon: HandHeart, mobileOnly: false, desktopOnly: true },
-      { label: "S.O.A.P. Journal", href: "/soap", icon: NotebookPen, mobileOnly: false, desktopOnly: true },
+
       { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles },
       { label: "Audio Bible", href: "/audio-bible", icon: Play },
       { label: "Audio Routines", href: "/audio-routines", icon: Mic },
