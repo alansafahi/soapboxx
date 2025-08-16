@@ -55,6 +55,8 @@ interface RequestWithSession extends express.Request {
 }
 
 import { AIPersonalizationService } from "./ai-personalization";
+import { sendEmail } from "./email-service";
+
 // Import AI pastoral functions
 async function generateSoapSuggestions(scripture: string, scriptureReference: string, contextualInfo: any) {
   try {
@@ -1621,20 +1623,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         )
         .limit(1);
 
-      if (userRole.length === 0) {
+      if (userChurch.length === 0) {
         return res.status(403).json({ success: false, message: "You are not a member of this church" });
       }
 
       // Clear any existing primary church
       await db
         .update(userChurches)
-        .set({ is_primary: false })
+        .set({ isPrimary: false })
         .where(eq(userChurches.userId, userId));
 
       // Set new primary church
       await db
         .update(userChurches)
-        .set({ is_primary: true })
+        .set({ isPrimary: true })
         .where(
           and(
             eq(userChurches.userId, userId),

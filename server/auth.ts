@@ -72,7 +72,7 @@ function configurePassport() {
       try {
         const email = profile.emails?.[0]?.value;
         if (!email) {
-          return done(new Error('No email found in Google profile'), null);
+          return done(new Error('No email found in Google profile'), false);
         }
 
         // Check if user exists
@@ -115,11 +115,11 @@ function configurePassport() {
       keyID: process.env.APPLE_KEY_ID || 'A9J6FBJP8J',
       privateKeyString: process.env.APPLE_CLIENT_SECRET,
       scope: ['name', 'email']
-    }, async (accessToken, refreshToken, idToken, profile, done) => {
+    }, async (accessToken: any, refreshToken: any, idToken: any, profile: any, done: any) => {
       try {
         const email = profile.email;
         if (!email) {
-          return done(new Error('No email found in Apple profile'), null);
+          return done(new Error('No email found in Apple profile'), false);
         }
 
         // Check if user exists

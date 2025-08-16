@@ -2150,22 +2150,22 @@ export class DatabaseStorage implements IStorage {
       
       return {
         id: userChurch.id,
-        userId: userChurch.user_id,
-        communityId: userChurch.community_id,
+        userId: userChurch.userId,
+        communityId: userChurch.communityId,
         role: userChurch.role || 'member',
-        roleId: userChurch.role_id,
+        roleId: userChurch.roleId,
         title: userChurch.title,
         department: userChurch.department,
         bio: userChurch.bio,
-        additionalPermissions: userChurch.additional_permissions || [],
-        restrictedPermissions: userChurch.restricted_permissions || [],
-        assignedBy: userChurch.assigned_by,
-        assignedAt: userChurch.assigned_at,
-        joinedAt: userChurch.joined_at,
-        lastAccessedAt: userChurch.last_accessed_at,
-        isActive: userChurch.is_active,
-        isPrimary: userChurch.is_primary,
-        expiresAt: userChurch.expires_at
+        additionalPermissions: userChurch.additionalPermissions || [],
+        restrictedPermissions: userChurch.restrictedPermissions || [],
+        assignedBy: userChurch.assignedBy,
+        assignedAt: userChurch.assignedAt,
+        joinedAt: userChurch.joinedAt,
+        lastAccessedAt: userChurch.lastAccessedAt,
+        isActive: userChurch.isActive,
+        isPrimary: userChurch.isPrimary,
+        expiresAt: userChurch.expiresAt
       };
     } catch (error) {
       return undefined;
