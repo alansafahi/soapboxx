@@ -18,15 +18,18 @@ import { invitations, userCommunities } from "../shared/schema";
 import { eq } from "drizzle-orm";
 
 // CRITICAL SECURITY: Session destruction mode to prevent re-authentication  
-let EMERGENCY_LOGOUT_ACTIVE = false; // Reset to false to allow normal login
-const blockedUserIds = new Set<number>();
+let EMERGENCY_LOGOUT_ACTIVE = false; // PERMANENTLY DISABLED - Normal authentication restored
+const blockedUserIds = new Set<number>(); // Cleared - No users blocked
 
 // Reset emergency mode function for normal operation
 const resetEmergencyMode = () => {
   EMERGENCY_LOGOUT_ACTIVE = false;
   blockedUserIds.clear();
-  console.log('✅ EMERGENCY MODE RESET - Normal authentication restored');
+  console.log('✅ EMERGENCY MODE RESET - Normal authentication restored for all users');
 };
+
+// AUTOMATICALLY RESET EMERGENCY MODE ON SERVER START
+resetEmergencyMode();
 
 // Session configuration
 export function getSession() {
@@ -184,7 +187,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     // 1. Check session-based authentication
     if (req.session && req.session.userId) {
       // Block specific user IDs that have been force-logged out
-      if (blockedUserIds.has(req.session.userId)) {
+      if (blockedUserIds.has(Number(req.session.userId))) {
         console.log(`🚫 Blocked user ${req.session.userId} attempting re-authentication`);
         req.session.destroy(() => {});
         return res.status(401).json({ 
@@ -980,10 +983,14 @@ export function setupAuth(app: Express): void {
       }
       
       // STEP 2.5: Block the problematic admin account to prevent cross-user login
-      const adminUser = await storage.getUserByEmail('alan@soapboxsuperapp.com');
-      if (adminUser) {
-        blockedUserIds.add(adminUser.id);
-        console.log(`Admin user ${adminUser.id} blocked to prevent cross-user authentication`);
+      try {
+        const adminUser = await storage.getUserByEmail('alan@soapboxsuperapp.com');
+        if (adminUser) {
+          blockedUserIds.add(Number(adminUser.id));
+          console.log(`Admin user ${adminUser.id} blocked to prevent cross-user authentication`);
+        }
+      } catch (error) {
+        console.log('Admin user lookup failed during emergency logout');
       }
       
       // STEP 3: Nuclear database destruction
