@@ -19,114 +19,21 @@ import { useTheme } from "../hooks/useTheme";
 import { getFilteredNavigation, type NavigationGroup } from "../../../shared/navigation";
 import soapboxLogo from "../assets/soapbox-logo.jpeg";
 import {
-  Home, 
-  Users, 
-  Calendar, 
-  MessageSquare, 
-  Heart, 
-  Settings,
-  ChevronDown,
-  BookOpen,
-  Play,
-  Mic,
-  Video,
-  ImageIcon,
-  DollarSign,
-  BarChart3,
-  Megaphone,
-  PenTool,
-  Share2,
-  TrendingUp,
-  User,
   LogOut,
-  Bell,
+  ChevronDown,
   Sun,
-  Shield,
   Moon,
-  Mail,
   ChevronLeft,
   ChevronRight,
-  UserPlus,
-  Sparkles,
-  Trophy,
-  QrCode,
-  Bookmark,
-  Flag,
-  Building2,
-  Building,
-  HandHeart,
-  UserCog,
-  Users2,
-  HelpCircle,
-  MessageCircle,
-  NotebookPen
 } from "lucide-react";
-
-interface NavigationItem {
-  label: string;
-  href: string;
-  icon: any;
-  roles?: string[];
-}
-
-interface NavigationGroup {
-  label: string;
-  items: NavigationItem[];
-}
 
 export default function SidebarComplete() {
   const { user } = useAuth();
   const [location] = useLocation();
-
-  // Get user's community admin roles for ADMIN PORTAL visibility
-  const { data: userAdminCommunities } = useQuery<{
-    hasAdminAccess: boolean;
-    adminCommunities: Array<{
-      communityId: number;
-      role: string;
-      communityName: string;
-    }>;
-    globalAdminRole: string | null;
-  }>({
-    queryKey: ["/api/auth/admin-communities"],
-    enabled: !!user,
-  });
-
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['COMMUNITY', 'SPIRITUAL TOOLS', 'MEDIA CONTENTS', 'ADMIN PORTAL', 'ACCOUNT']));
-  const [forceUpdate, setForceUpdate] = useState(Date.now());
-
-  // Force immediate re-render to clear cache  
-  useEffect(() => {
-    setForceUpdate(Date.now());
-    // Force component refresh to clear navigation cache
-    const timer = setTimeout(() => setForceUpdate(Date.now() + 1), 100);
-    return () => clearTimeout(timer);
-  }, []);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const isFeatureEnabled = useIsFeatureEnabled();
-
-  // Get user's churches to check for admin roles
-  const { data: userCommunities = [], isLoading: communitiesLoading, error: communitiesError } = useQuery({
-    queryKey: ["/api/users/communities"],
-    enabled: !!user,
-  });
-
-  // Remove problematic useEffect that causes infinite loops
-  // Feature filtering now happens directly at render time
-  
-
-
-  // Check if user has admin role in any community
-  const hasCommunityAdminRole = useMemo(() => {
-    if (!userCommunities || !Array.isArray(userCommunities) || userCommunities.length === 0) {
-      return false;
-    }
-    
-    const adminRoles = ['church_admin', 'church-admin', 'admin', 'pastor', 'lead-pastor', 'elder'];
-    return userCommunities.some((uc: any) => adminRoles.includes(uc.role));
-  }, [userCommunities]);
 
   // Responsive sidebar behavior
   useEffect(() => {
@@ -153,14 +60,27 @@ export default function SidebarComplete() {
     
     // Cleanup
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [user]);
 
-  // Get unread message count for notification badge - temporarily disabled to fix dialog issues
-  const { data: unreadCount = 0 } = useQuery<number>({
-    queryKey: ["/api/messages/unread-count"],
-    enabled: false, // Disabled to prevent 500 errors
-    refetchInterval: 30000, // Refresh every 30 seconds
+  // Get user's church-specific role data
+  const { data: userAdminCommunities, isLoading: roleLoading, error: roleError } = useQuery<any>({
+    queryKey: ["/api/users/admin-communities"],
+    enabled: !!user,
   });
+
+  // Check if user has any church admin role
+  const hasCommunityAdminRole = useMemo(() => {
+    if (!user || !userAdminCommunities) return false;
+    
+    const adminRoles = ['admin', 'pastor', 'lead_pastor', 'church_admin', 'administrator', 'associate_pastor'];
+    const globalAdminRoles = ['soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin', 'system-admin', 'super-admin'];
+    
+    // Check if user has global admin role
+    if (globalAdminRoles.includes(user.role)) return true;
+    
+    // Check if user has admin access to any communities
+    return userAdminCommunities?.hasAdminAccess || false;
+  }, [user, userAdminCommunities]);
 
   // Use centralized navigation from shared/navigation.ts
   const allNavigationGroups = getFilteredNavigation(user?.role || 'member', isMobile);
@@ -233,234 +153,169 @@ export default function SidebarComplete() {
 
   return (
     <div 
-      key={`sidebar-complete-${forceUpdate}`} 
       className={`${isCollapsed ? 'w-12 sm:w-16' : 'w-48 sm:w-64'} bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 h-screen flex flex-col transition-all duration-300 ${isMobile ? 'fixed z-50' : 'relative'} overflow-hidden`}
     >
       {/* Header with Logo and Actions */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-        {/* Logo and Toggle */}
-        <div className={`flex items-center mb-4 ${isCollapsed ? 'flex-col space-y-2' : 'justify-between'}`}>
-          {!isCollapsed ? (
-            <>
-              <Link href="/" className="flex items-center space-x-3">
-                <div className="w-12 h-12 flex items-center justify-center flex-shrink-0">
-                  <img 
-                    src={soapboxLogo} 
-                    alt="SoapBox Logo" 
-                    className="w-12 h-12 object-contain rounded-lg"
-                  />
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">SoapBox</div>
-                  <div className="text-lg font-bold text-gray-900 dark:text-white leading-tight">Super App</div>
-                </div>
-              </Link>
-              
-              {/* Collapse Toggle Button - Expanded Mode */}
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="w-8 h-8" 
-                onClick={() => setIsCollapsed(!isCollapsed)}
-              >
-                <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-              </Button>
-            </>
-          ) : (
-            <>
-              {/* Logo - Collapsed Mode */}
-              <Link href="/" className="flex items-center justify-center">
-                <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                  <img 
-                    src={soapboxLogo} 
-                    alt="SoapBox Logo" 
-                    className="w-8 h-8 object-contain rounded-lg"
-                  />
-                </div>
-              </Link>
-              
-              {/* Expand Toggle Button - Collapsed Mode - More Prominent */}
-              <Button 
-                variant="outline" 
-                size="icon" 
-                className="w-8 h-8 border-purple-300 hover:bg-purple-50 dark:border-purple-600 dark:hover:bg-purple-900/20" 
-                onClick={() => setIsCollapsed(!isCollapsed)}
-                title="Expand sidebar"
-              >
-                <ChevronRight className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-              </Button>
-            </>
+      <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-gray-700">
+        {!isCollapsed && (
+          <div className="flex items-center space-x-2">
+            <img 
+              src={soapboxLogo} 
+              alt="SoapBox" 
+              className="w-8 h-8 rounded-full object-cover border-2 border-blue-200 dark:border-blue-600" 
+            />
+            <span className="font-bold text-sm bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              SoapBox
+            </span>
+          </div>
+        )}
+        
+        <div className="flex items-center space-x-1">
+          {!isCollapsed && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleTheme}
+              className="p-1 h-7 w-7 hover:bg-blue-100 dark:hover:bg-gray-700"
+            >
+              {theme === 'dark' ? <Sun className="h-3 w-3" /> : <Moon className="h-3 w-3" />}
+            </Button>
           )}
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="p-1 h-7 w-7 hover:bg-blue-100 dark:hover:bg-gray-700"
+          >
+            {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+          </Button>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4 space-y-6">
-        {!isCollapsed ? (
-          // Expanded Navigation - Filtered Groups  
-          visibleGroups.map((group, idx) => {
-
-            // Ensure admin groups are always expanded for users with admin access
-            // FORCE SPIRITUAL TOOLS TO BE EXPANDED TO SHOW D.I.V.I.N.E.
-            const isExpanded = expandedGroups.has(group.label) || 
-              group.label === 'SPIRITUAL TOOLS' ||
-              (user?.role === 'soapbox_owner' && group.label === 'ADMIN PORTAL') ||
-              (userAdminCommunities?.hasAdminAccess && group.label === 'ADMIN PORTAL');
-            
-            return (
-              <div key={group.label} className="space-y-2">
-                {/* Group Header */}
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+        <nav className="p-2 space-y-1">
+          {visibleGroups.map((group) => (
+            <div key={group.label} className="mb-3">
+              {!isCollapsed && (
                 <button
                   onClick={() => toggleGroup(group.label)}
-                  className="flex items-center justify-between w-full px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                  className="flex items-center justify-between w-full px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
                 >
                   <span>{group.label}</span>
-                  <ChevronDown className={`w-4 h-4 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                  <ChevronDown 
+                    className={`h-3 w-3 transition-transform ${
+                      expandedGroups.has(group.label) ? 'transform rotate-180' : ''
+                    }`} 
+                  />
                 </button>
-
-                {/* Group Items */}
-                {isExpanded && (
-                  <div className="space-y-1">
-                    {group.items.map((item) => {
-                      const isActive = location === item.href;
-                      const hasPermission = !item.roles || item.roles.includes(user?.role || '');
+              )}
+              
+              {(isCollapsed || expandedGroups.has(group.label)) && (
+                <div className={`${isCollapsed ? 'space-y-1' : 'mt-1 space-y-1'}`}>
+                  {group.items
+                    .filter(item => {
+                      // Filter items based on roles if specified
+                      if (item.roles && item.roles.length > 0) {
+                        return item.roles.includes(user?.role || '');
+                      }
+                      return true;
+                    })
+                    .map((item) => {
+                      const Icon = item.icon;
+                      const isActive = location === item.href || 
+                        (item.href !== '/' && location.startsWith(item.href));
                       
-                      if (!hasPermission) return null;
-
                       return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className={`flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 ${
-                            isActive
-                              ? 'bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 text-purple-700 dark:text-purple-300 border-l-4 border-purple-500'
-                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-purple-600 dark:hover:text-purple-400'
-                          }`}
-                        >
-                          <item.icon className={`w-5 h-5 mr-3 flex-shrink-0 ${isActive ? 'text-purple-600 dark:text-purple-400' : ''}`} />
-                          <span className="truncate">{item.label}</span>
-                          {item.href === '/messages' && unreadCount > 0 && (
-                            <Badge variant="secondary" className="ml-auto bg-red-500 text-white text-xs">
-                              {unreadCount}
-                            </Badge>
-                          )}
+                        <Link key={item.label} href={item.href}>
+                          <a
+                            className={`flex items-center px-2 py-2 text-sm rounded-md transition-colors group ${
+                              isActive
+                                ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-sm'
+                                : 'text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800'
+                            }`}
+                          >
+                            <Icon className={`h-4 w-4 ${isCollapsed ? 'mx-auto' : 'mr-3'} ${
+                              isActive ? 'text-white' : 'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300'
+                            }`} />
+                            {!isCollapsed && (
+                              <span className="text-xs font-medium">{item.label}</span>
+                            )}
+                          </a>
                         </Link>
                       );
                     })}
-                  </div>
-                )}
-              </div>
-            );
-          })
-        ) : (
-          // Collapsed Navigation - Icons Only
-          <div className="space-y-2">
-            {navigationGroups.flatMap(group => 
-              group.items.filter(item => !item.roles || item.roles.includes(user?.role || ''))
-            ).map((item) => {
-              const isActive = location === item.href;
-              
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center justify-center w-12 h-12 rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? 'bg-gradient-to-r from-purple-100 to-blue-100 dark:from-purple-900/30 dark:to-blue-900/30 text-purple-700 dark:text-purple-300'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-purple-600 dark:hover:text-purple-400'
-                  }`}
-                  title={item.label}
-                >
-                  <item.icon className="w-6 h-6" />
-                  {item.href === '/messages' && unreadCount > 0 && (
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                      {unreadCount}
-                    </div>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        )}
-      </nav>
+                </div>
+              )}
+            </div>
+          ))}
+        </nav>
+      </div>
 
       {/* User Profile Section */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
-        {!isCollapsed ? (
+      {user && (
+        <div className="border-t border-gray-200 dark:border-gray-700 p-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start p-2 h-auto">
-                <Avatar className="w-8 h-8 mr-3">
-                  <AvatarImage src={user?.profileImageUrl} alt={user?.firstName} />
-                  <AvatarFallback>
-                    {user?.firstName?.[0]}{user?.lastName?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex flex-col items-start text-left min-w-0 flex-1">
-                  <span className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    {user?.firstName} {user?.lastName}
-                  </span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {user?.email}
-                  </span>
+              <Button 
+                variant="ghost" 
+                className={`w-full ${isCollapsed ? 'p-1 h-10' : 'justify-start p-2 h-auto'} hover:bg-gray-100 dark:hover:bg-gray-800`}
+              >
+                <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2'}`}>
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={user.profileImageUrl || undefined} />
+                    <AvatarFallback className="text-xs bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                      {user.firstName?.[0]?.toUpperCase() || user.email[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {!isCollapsed && (
+                    <>
+                      <div className="flex-1 text-left">
+                        <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                          {user.firstName || user.email}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
+                          {user.role?.replace('_', ' ') || 'Member'}
+                        </p>
+                      </div>
+                      <ChevronDown className="h-3 w-3 text-gray-400" />
+                    </>
+                  )}
                 </div>
-                <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400 ml-2" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">{user?.firstName} {user?.lastName}</p>
-                  <p className="text-xs leading-none text-gray-500 dark:text-gray-400">{user?.email}</p>
+                  <p className="text-sm font-medium leading-none">{user.firstName} {user.lastName}</p>
+                  <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/profile" className="flex items-center">
-                  <User className="w-4 h-4 mr-2" />
-                  Profile
+                <Link href="/profile">
+                  <a className="flex items-center w-full">
+                    Profile
+                  </a>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href="/settings" className="flex items-center">
-                  <Settings className="w-4 h-4 mr-2" />
-                  Settings
+                <Link href="/settings">
+                  <a className="flex items-center w-full">
+                    Settings
+                  </a>
                 </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/help" className="flex items-center">
-                  <HelpCircle className="w-4 h-4 mr-2" />
-                  Help & Support
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={toggleTheme}>
-                {theme === 'light' ? <Moon className="w-4 h-4 mr-2" /> : <Sun className="w-4 h-4 mr-2" />}
-                {theme === 'light' ? 'Dark mode' : 'Light mode'}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="text-red-600 dark:text-red-400">
-                <LogOut className="w-4 h-4 mr-2" />
+                <LogOut className="mr-2 h-4 w-4" />
                 Sign out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : (
-          <div className="flex flex-col space-y-2">
-            <Avatar className="w-8 h-8 mx-auto">
-              <AvatarImage src={user?.profileImageUrl} alt={user?.firstName} />
-              <AvatarFallback>
-                {user?.firstName?.[0]}{user?.lastName?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <Button variant="ghost" size="icon" onClick={toggleTheme} title={theme === 'light' ? 'Dark mode' : 'Light mode'}>
-              {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-            </Button>
-            <Button variant="ghost" size="icon" onClick={logout} title="Sign out" className="text-red-600 dark:text-red-400">
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
