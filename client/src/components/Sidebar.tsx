@@ -132,7 +132,7 @@ export default function Sidebar() {
   const visibleGroups = getFilteredNavigation(
     user?.role,
     userRole,
-    false, // isMobile = false for desktop sidebar
+    isMobile, // Use actual mobile state
     user
   );
 
