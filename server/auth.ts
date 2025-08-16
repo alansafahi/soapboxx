@@ -203,20 +203,9 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
       userId = existingUser.id || existingUser.sub;
     }
 
-    // 3. DISABLED: Auto-repair session functionality that was causing logout failures
-    // This was automatically re-authenticating users even after logout!
-    // if (!userId && req.session) {
-    //   try {
-    //     const adminUser = await storage.getUserByEmail('alan@soapboxsuperapp.com');
-    //     if (adminUser && adminUser.emailVerified) {
-    //       userId = adminUser.id;
-    //       req.session.userId = adminUser.id;
-    //       req.session.authenticated = true;
-    //     }
-    //   } catch (error) {
-    //     // Silent fallback for session repair
-    //   }
-    // }
+    // 3. PERMANENTLY DISABLED: Auto-repair session functionality removed completely
+    // This was causing CRITICAL SECURITY ISSUE where users could be logged in as other users
+    // DO NOT RE-ENABLE - causes cross-user authentication vulnerabilities
 
     if (userId) {
       try {
@@ -990,6 +979,13 @@ export function setupAuth(app: Express): void {
         console.log(`User ${(req.session as any).userId} permanently blocked from re-authentication`);
       }
       
+      // STEP 2.5: Block the problematic admin account to prevent cross-user login
+      const adminUser = await storage.getUserByEmail('alan@soapboxsuperapp.com');
+      if (adminUser) {
+        blockedUserIds.add(adminUser.id);
+        console.log(`Admin user ${adminUser.id} blocked to prevent cross-user authentication`);
+      }
+      
       // STEP 3: Nuclear database destruction
       await pool.query('DELETE FROM sessions');
       console.log('💥 ALL SESSIONS OBLITERATED FROM DATABASE');
@@ -1019,10 +1015,10 @@ export function setupAuth(app: Express): void {
       
       console.log('🔥 EMERGENCY LOGOUT COMPLETED - SYSTEM LOCKED DOWN');
       
-      // Reset emergency mode after 5 seconds to allow normal login
+      // Reset emergency mode after 10 seconds to allow normal login
       setTimeout(() => {
         resetEmergencyMode();
-      }, 5000);
+      }, 10000);
       
       res.json({ 
         success: true,
