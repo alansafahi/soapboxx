@@ -45,7 +45,7 @@ export default function Header() {
     { href: "/", label: "Home", icon: Home },
     { href: "/events", label: "Events", icon: Calendar },
     { href: "/prayers", label: "Prayers", icon: Heart },
-    { href: "/discussions", label: "Discussions", icon: MessageSquare },
+    { href: "/topics", label: "Topics", icon: MessageSquare },
     { href: "/devotionals", label: "Devotionals", icon: Book },
     { href: "/members", label: "Members", icon: Users },
     { href: "/communities", label: "Communities", icon: Church },

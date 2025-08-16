@@ -259,10 +259,10 @@ export default function TopHeader() {
                 Events
               </DropdownMenuItem>
             </Link>
-            <Link href="/discussions">
+            <Link href="/topics">
               <DropdownMenuItem className="cursor-pointer">
                 <MessageSquare className="w-4 h-4 mr-2" />
-                Discussions
+                Topics
               </DropdownMenuItem>
             </Link>
             <Link href="/sms-giving">

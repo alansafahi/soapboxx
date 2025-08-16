@@ -168,7 +168,7 @@ export default function SidebarFixed() {
         { label: "Contacts", href: "/contacts", icon: UserPlus },
         { label: "Communities", href: "/communities", icon: Building },
         { label: "Events", href: "/events", icon: Calendar },
-        { label: "Discussions", href: "/discussions", icon: MessageSquare },
+        { label: "Topics", href: "/topics", icon: MessageSquare },
         { label: "Donation", href: "/donation", icon: DollarSign },
       ]
     },
