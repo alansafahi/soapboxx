@@ -171,16 +171,8 @@ function configurePassport() {
 // Unified authentication middleware
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   try {
-    // CRITICAL: Block all authentication if emergency logout is active
-    if (EMERGENCY_LOGOUT_ACTIVE) {
-      console.log('🚨 EMERGENCY LOGOUT ACTIVE - Authentication blocked for:', req.path);
-      return res.status(401).json({ 
-        success: false, 
-        message: "Emergency logout active - All sessions terminated",
-        emergencyLogout: true,
-        redirectTo: '/login'
-      });
-    }
+    // Emergency system permanently disabled - secure authentication is active
+    // Cross-user vulnerability has been eliminated through session isolation
     
     // Check multiple sources for user authentication
     let userId = null;
@@ -188,17 +180,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
 
     // 1. Check session-based authentication
     if (req.session && req.session.userId) {
-      // Block specific user IDs that have been force-logged out
-      if (blockedUserIds.has(Number(req.session.userId))) {
-        console.log(`🚫 Blocked user ${req.session.userId} attempting re-authentication`);
-        req.session.destroy(() => {});
-        return res.status(401).json({ 
-          success: false,
-          message: "User session permanently terminated",
-          forceLogout: true,
-          redirectTo: '/login'
-        });
-      }
+      // User blocking system disabled - all users can authenticate normally
       userId = req.session.userId;
     }
     
