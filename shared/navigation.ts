@@ -19,7 +19,9 @@ import {
   Sparkles,
   Play,
   Mic,
-  MessageSquare
+  MessageSquare,
+  HandHeart,
+  NotebookPen
 } from "lucide-react";
 
 export interface NavigationItem {
@@ -58,8 +60,8 @@ export const navigationConfig: NavigationGroup[] = [
     items: [
       { label: "Today's Reading", href: "/bible", icon: BookOpen },
       { label: "Reading Plans", href: "/reading-plans", icon: BookOpen, mobileOnly: false, desktopOnly: true },
-      { label: "Prayer Wall", href: "/prayer", icon: Heart, mobileOnly: false, desktopOnly: true },
-      { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool, mobileOnly: false, desktopOnly: true },
+      { label: "Prayer Wall", href: "/prayer", icon: HandHeart, mobileOnly: false, desktopOnly: true },
+      { label: "S.O.A.P. Journal", href: "/soap", icon: NotebookPen, mobileOnly: false, desktopOnly: true },
       { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles },
       { label: "Audio Bible", href: "/audio-bible", icon: Play },
       { label: "Audio Routines", href: "/audio-routines", icon: Mic },
@@ -187,6 +189,6 @@ export function getFilteredNavigation(
 export const mobileBottomNavItems = [
   { label: "Home", href: "/", icon: Home },
   { label: "Reading Plans", href: "/reading-plans", icon: BookOpen },
-  { label: "Prayer Wall", href: "/prayer", icon: Heart },
-  { label: "S.O.A.P.", href: "/soap", icon: BookOpen },
+  { label: "Prayer Wall", href: "/prayer", icon: HandHeart },
+  { label: "S.O.A.P. Journal", href: "/soap", icon: NotebookPen },
 ];

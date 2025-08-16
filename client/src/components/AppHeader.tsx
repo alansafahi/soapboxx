@@ -40,7 +40,8 @@ import {
   Users2,
   HandHeart,
   UserCog,
-  Shield
+  Shield,
+  NotebookPen
 } from "lucide-react";
 import { useTheme } from "../hooks/useTheme";
 
@@ -91,8 +92,8 @@ export default function AppHeader() {
       items: [
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
         { label: "Reading Plans", href: "/reading-plans", icon: Calendar },
-        { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
-        { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
+        { label: "Prayer Wall", href: "/prayer-wall", icon: HandHeart },
+        { label: "S.O.A.P. Journal", href: "/soap", icon: NotebookPen },
         { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles },
         { label: "Audio Bible", href: "/audio-bible", icon: Play },
         { label: "Audio Routines", href: "/audio-routines", icon: Mic },
