@@ -90,6 +90,9 @@ export default function SidebarComplete() {
     user
   );
 
+  // Debug: Log what we're getting from centralized navigation
+  console.log('DEBUG: Navigation groups from shared/navigation.ts:', allNavigationGroups);
+  
   // Use the navigation groups directly from centralized system - NO hardcoded filtering
   const navigationGroups = allNavigationGroups;
 
