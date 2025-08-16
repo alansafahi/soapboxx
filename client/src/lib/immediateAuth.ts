@@ -104,7 +104,7 @@ export function useImmediateAuth() {
 
   const logout = async () => {
     try {
-      console.log('NUCLEAR LOGOUT: Starting complete session destruction');
+      console.log('LOGOUT: Starting normal logout process');
       isLoggingOut = true;
       
       // Clear state immediately
