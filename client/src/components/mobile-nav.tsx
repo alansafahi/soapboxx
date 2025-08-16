@@ -14,7 +14,7 @@ export default function MobileNav() {
     },
     {
       icon: Users,
-      label: "Chat",
+      label: "Group Chat",
       path: "/community",
       isActive: location === "/community",
     },
