@@ -166,8 +166,8 @@ export default function SidebarComplete() {
         { label: "Home", href: "/", icon: Home },
         { label: "Messages", href: "/messages", icon: Mail },
         { label: "Contacts", href: "/contacts", icon: UserPlus },
-        { label: "My Community", href: "/community", icon: Users },
-        { label: "All Communities", href: "/communities", icon: Building },
+        { label: "Chat", href: "/community", icon: Users },
+        { label: "Communities", href: "/communities", icon: Building },
         { label: "Events", href: "/events", icon: Calendar },
         { label: "Donation", href: "/donation", icon: DollarSign },
       ]
