@@ -133,7 +133,7 @@ export function useImmediateAuth() {
         }
       }
       
-      // Call logout endpoint with nuclear option
+      // Call normal logout endpoint
       try {
         const response = await fetch('/api/auth/logout', {
           method: 'POST',
@@ -141,9 +141,9 @@ export function useImmediateAuth() {
           headers: { 'Content-Type': 'application/json' }
         });
         const result = await response.json();
-        console.log('NUCLEAR LOGOUT: Server response:', result);
+        console.log('LOGOUT: Server response:', result);
       } catch (e) {
-        console.error('NUCLEAR LOGOUT: API call failed:', e);
+        console.error('LOGOUT: API call failed:', e);
       }
       
       // Clear window references
@@ -151,14 +151,14 @@ export function useImmediateAuth() {
       if ((window as any).auth) (window as any).auth = null;
       if ((window as any).session) (window as any).session = null;
       
-      // Force redirect with replace to prevent back navigation
-      console.log('NUCLEAR LOGOUT: Forcing redirect');
-      window.location.replace('/login');
+      // Redirect to login page
+      console.log('LOGOUT: Redirecting to login');
+      window.location.href = '/login';
       
     } catch (error) {
-      console.error('NUCLEAR LOGOUT: Critical error:', error);
-      // Force redirect even on error
-      window.location.replace('/login');
+      console.error('LOGOUT: Error during logout:', error);
+      // Redirect on error
+      window.location.href = '/login';
     }
   };
 

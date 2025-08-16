@@ -952,57 +952,24 @@ export function setupAuth(app: Express): void {
     }
   );
 
-  // EMERGENCY SESSION TERMINATOR - Blocks all future sessions
+  // Normal logout endpoint - secure session termination
   app.post('/api/auth/logout', async (req, res) => {
     try {
-      console.log('🚨 EMERGENCY SESSION TERMINATOR ACTIVATED 🚨');
+      console.log('LOGOUT: Normal user logout process');
       
-      // STEP 1: Activate emergency logout mode to block all future sessions
-      EMERGENCY_LOGOUT_ACTIVE = true;
-      
-      // STEP 2: Get current user ID and block it permanently
-      if ((req.session as any)?.userId) {
-        blockedUserIds.add((req.session as any).userId);
-        console.log(`User ${(req.session as any).userId} permanently blocked from re-authentication`);
-      }
-      
-      // STEP 2.5: PERMANENTLY DISABLE AUTOMATIC AUTHENTICATION
-      // Block ALL users to prevent cross-user authentication completely
-      try {
-        const allUsers = await db.select({ id: users.id }).from(users);
-        allUsers.forEach(user => {
-          blockedUserIds.add(Number(user.id));
-        });
-        console.log(`ALL USERS BLOCKED - Complete authentication shutdown: ${allUsers.length} users`);
-      } catch (error) {
-        console.log('User blocking failed during emergency shutdown');
-      }
-      
-      // STEP 3: Nuclear database destruction
-      await pool.query('DELETE FROM sessions');
-      console.log('💥 ALL SESSIONS OBLITERATED FROM DATABASE');
-      
-      // STEP 4: Destroy session store completely
+      // Clear session safely
       req.session.destroy((err: any) => {
         if (err) console.error('Session destroy error:', err);
       });
       
-      // STEP 5: Clear all possible cookies with extreme prejudice
-      const domains = [undefined, req.get('host'), '.' + req.get('host'), 'replit.dev', '.replit.dev'];
-      const cookieNames = ['connect.sid', 'sessionId', 'auth', 'user', 'session', 'passport'];
+      // Clear authentication cookies
+      res.clearCookie('connect.sid', { path: '/', httpOnly: true, secure: false });
       
-      domains.forEach(domain => {
-        cookieNames.forEach(name => {
-          const options: any = { path: '/', httpOnly: true, secure: false };
-          if (domain) options.domain = domain;
-          res.clearCookie(name, options);
-        });
+      res.json({ 
+        success: true, 
+        message: "Logged out successfully",
+        redirectTo: '/login'
       });
-      
-      // STEP 6: Set anti-cache headers
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
       res.setHeader('X-Logout-Success', 'true');
       
       console.log('🔥 EMERGENCY LOGOUT COMPLETED - SYSTEM LOCKED DOWN');
