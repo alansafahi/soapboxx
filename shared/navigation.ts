@@ -74,7 +74,6 @@ export const navigationConfig: NavigationGroup[] = [
   },
   {
     label: "ADMIN TOOLS",
-    desktopOnly: true,
     items: [
       { 
         label: "Member Directory", 
