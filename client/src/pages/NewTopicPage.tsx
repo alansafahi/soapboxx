@@ -40,8 +40,7 @@ export default function NewTopicPage() {
     setLoading(true);
 
     try {
-      await apiRequest('/api/posts', 'POST', {
-        postType: 'discussion',
+      await apiRequest('/api/discussions', 'POST', {
         title: title.trim(),
         content: body.trim(),
         category,
@@ -50,7 +49,7 @@ export default function NewTopicPage() {
       });
 
       // Invalidate the topics cache to refresh the list
-      queryClient.invalidateQueries({ queryKey: ['/api/posts', 'discussion'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
 
       toast({
         title: "Topic created!",

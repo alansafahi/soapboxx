@@ -2604,6 +2604,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create new discussion
+  app.post('/api/discussions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.session?.userId || (req.user as any)?.id || (req.user as any)?.claims?.sub;
+      const { title, content, category, isPublic = true, audience = 'public' } = req.body;
+
+      if (!title || !content) {
+        return res.status(400).json({ message: "Title and content are required" });
+      }
+
+      const newDiscussion = await storage.createDiscussion({
+        authorId: userId,
+        title,
+        content,
+        category: category || 'general',
+        isPublic,
+        audience
+      });
+
+      res.json(newDiscussion);
+    } catch (error) {
+      console.error('Error creating discussion:', error);
+      res.status(500).json({ message: "Failed to create discussion", error: error.message });
+    }
+  });
+
   // Pin/Unpin posts for pastors and church admins
   app.post('/api/discussions/:id/pin', isAuthenticated, async (req: any, res) => {
     try {

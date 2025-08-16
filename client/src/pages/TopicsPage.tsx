@@ -114,19 +114,19 @@ export default function TopicsPage() {
 
   // Fetch topics from API
   const { data: topics = [], isLoading, error } = useQuery({
-    queryKey: ['/api/posts', 'discussion'],
-    queryFn: () => fetch('/api/posts?postType=discussion&limit=50').then(res => res.json()),
+    queryKey: ['/api/discussions'],
+    queryFn: () => fetch('/api/discussions?limit=50').then(res => res.json()),
   });
 
   // Transform API data to match our interface
-  const transformedTopics: TopicThread[] = topics.map((post: any) => ({
-    id: post.id.toString(),
-    title: post.title || "Untitled Discussion",
-    repliesCount: post.commentCount || 0,
-    category: post.category || "General",
-    lastReplyAt: formatRelativeTime(post.updatedAt),
-    lastReplier: post.authorName || "Unknown",
-    isNew: isNewPost(post.createdAt)
+  const transformedTopics: TopicThread[] = topics.map((discussion: any) => ({
+    id: discussion.id.toString(),
+    title: discussion.title || "Untitled Discussion",
+    repliesCount: discussion.comment_count || 0,
+    category: discussion.category || "General",
+    lastReplyAt: formatRelativeTime(discussion.updated_at),
+    lastReplier: discussion.author_name || "Community Member",
+    isNew: isNewPost(discussion.created_at)
   }));
 
   // Filter topics by selected category
@@ -159,7 +159,7 @@ export default function TopicsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Community Discussions</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Community Discussion Topics</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">Connect through posts and topics with your community.</p>
         </div>
       </div>
