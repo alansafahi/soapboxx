@@ -148,19 +148,17 @@ export default function Sidebar() {
         { label: "Contacts", href: "/contacts", icon: UserPlus },
         { label: "Communities", href: "/communities", icon: Users },
         { label: "Events", href: "/events", icon: Calendar },
+        { label: "Discussions", href: "/community", icon: MessageSquare },
         { label: "Donation", href: "/donation-demo", icon: DollarSign },
-        { label: "Discussions", href: "/discussions", icon: MessageSquare },
       ]
     },
     {
       label: "SPIRITUAL TOOLS",
       items: [
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
-        { label: "Prayer Wall", href: "/prayer-wall", icon: Heart },
+        { label: "Reading Plans", href: "/reading-plans", icon: BookOpen },
+        { label: "Prayer Wall", href: "/prayer", icon: Heart },
         { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
-        { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles },
-        { label: "Audio Bible", href: "/audio-bible", icon: Play },
-        { label: "Audio Routines", href: "/audio-routines", icon: Mic },
       ]
     },
     {
