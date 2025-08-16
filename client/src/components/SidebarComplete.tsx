@@ -161,14 +161,14 @@ export default function SidebarComplete() {
   });
 
   // COMPLETE navigation structure with ALL features
-  const navigationGroups: NavigationGroup[] = [
+  const allNavigationGroups: NavigationGroup[] = [
     {
       label: "COMMUNITY",
       items: [
         { label: "Home", href: "/", icon: Home },
         { label: "Messages", href: "/messages", icon: Mail },
         { label: "Contacts", href: "/contacts", icon: UserPlus },
-        { label: "Group Chat", href: "/community", icon: Users },
+        { label: "Topics", href: "/topics", icon: MessageSquare },
         { label: "Communities", href: "/communities", icon: Building },
         { label: "Events", href: "/events", icon: Calendar },
         { label: "Donation", href: "/donation", icon: DollarSign },
@@ -221,6 +221,25 @@ export default function SidebarComplete() {
       ]
     }
   ];
+
+  // Mobile navigation filtering - same logic as regular Sidebar
+  const mobileNavigationItems = [
+    "Messages", "Contacts", "Communities", "Events", "Topics", "Donation"
+  ];
+
+  // Filter for mobile: only show specific items from COMMUNITY group + Admin Tools
+  const navigationGroups = isMobile ? [
+    {
+      label: "COMMUNITY",
+      items: allNavigationGroups.find(g => g.label === "COMMUNITY")?.items.filter(item => 
+        mobileNavigationItems.includes(item.label)
+      ) || []
+    },
+    {
+      label: "ADMIN PORTAL", 
+      items: allNavigationGroups.find(g => g.label === "ADMIN PORTAL")?.items || []
+    }
+  ].filter(group => group.items.length > 0) : allNavigationGroups;
 
   // Filter groups based on user permissions and admin access
   const visibleGroups = navigationGroups.filter(group => {
