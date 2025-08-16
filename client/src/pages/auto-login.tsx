@@ -15,28 +15,9 @@ export default function AutoLoginPage() {
         setStatus('loading');
         setMessage('Establishing authenticated session...');
 
-        const response = await fetch('/api/debug/auto-login', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include'
-        });
-
-        if (response.ok) {
-          setStatus('success');
-          setMessage('Authentication successful! Redirecting to dashboard...');
-          
-          // Refresh auth state
-          await checkAuth();
-          
-          // Redirect after a short delay
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 2000);
-        } else {
-          throw new Error('Auto-login failed');
-        }
+        // Auto-login endpoint disabled for production - redirect to manual login
+        setStatus('error');
+        setMessage('Auto-login is disabled. Please use manual login.');
       } catch (error) {
         setStatus('error');
         setMessage('Auto-login failed. Please try manual login.');

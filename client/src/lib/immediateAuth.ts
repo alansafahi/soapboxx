@@ -14,6 +14,7 @@ let globalAuthState: AuthState = {
 };
 
 let authListeners: Array<(state: AuthState) => void> = [];
+let isLoggingOut = false;
 
 const notifyListeners = (newState: AuthState) => {
   globalAuthState = newState;
@@ -43,6 +44,10 @@ export function useImmediateAuth() {
 
   const checkAuth = async () => {
     try {
+      // Don't check auth if we're in the middle of logging out
+      if (isLoggingOut) {
+        return;
+      }
       
       const response = await fetch('/api/auth/user', {
         credentials: 'include',
@@ -99,6 +104,9 @@ export function useImmediateAuth() {
 
   const logout = async () => {
     try {
+      // Set logout flag to prevent checkAuth from running
+      isLoggingOut = true;
+      
       // Clear state immediately
       const newState = {
         user: null,
@@ -107,27 +115,51 @@ export function useImmediateAuth() {
       };
       notifyListeners(newState);
       
-      // Clear storage
+      // Clear storage completely
       localStorage.clear();
       sessionStorage.clear();
       
-      // Call logout endpoint
-      try {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-      } catch (apiError) {
-        // Silent fail - logout should still work locally
+      // Clear any cached auth data
+      if ('indexedDB' in window) {
+        try {
+          // Clear IndexedDB if it exists
+          indexedDB.deleteDatabase('authCache');
+        } catch (e) {
+          // Silent fail
+        }
       }
       
-      // Force redirect
-      window.location.replace('/');
+      // Call logout endpoint multiple times to ensure session destruction
+      for (let i = 0; i < 3; i++) {
+        try {
+          await fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+        } catch (apiError) {
+          // Continue trying
+        }
+      }
+      
+      // Clear all cookies manually
+      document.cookie.split(";").forEach(function(c) { 
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+      });
+      
+      // Force redirect to login page instead of home
+      window.location.href = '/login';
     } catch (error) {
-      window.location.replace('/');
+      // Reset logout flag on error
+      isLoggingOut = false;
+      window.location.href = '/login';
+    } finally {
+      // Reset logout flag after a delay to allow redirect
+      setTimeout(() => {
+        isLoggingOut = false;
+      }, 3000);
     }
   };
 
