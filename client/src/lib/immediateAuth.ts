@@ -44,18 +44,32 @@ export function useImmediateAuth() {
 
   const checkAuth = async () => {
     try {
-      // SECURITY: Disable automatic authentication until cross-user issue is resolved
-      console.log('AUTH CHECK DISABLED - Security measure active');
-      const newState = {
-        user: null,
-        isAuthenticated: false,
-        isLoading: false
-      };
-      notifyListeners(newState);
-      return;
+      const response = await fetch('/api/user', { 
+        credentials: 'include',
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       
-      // Previous auth check code disabled to prevent cross-user authentication
+      if (response.ok) {
+        const userData = await response.json();
+        const newState = {
+          user: userData,
+          isAuthenticated: true,
+          isLoading: false
+        };
+        notifyListeners(newState);
+      } else {
+        const newState = {
+          user: null,
+          isAuthenticated: false,
+          isLoading: false
+        };
+        notifyListeners(newState);
+      }
     } catch (error) {
+      console.error('Auth check failed:', error);
       const newState = {
         user: null,
         isAuthenticated: false,
