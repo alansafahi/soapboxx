@@ -16,6 +16,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { useTheme } from "../hooks/useTheme";
+import { getFilteredNavigation, type NavigationGroup } from "../../../shared/navigation";
 import soapboxLogo from "../assets/soapbox-logo.jpeg";
 import {
   Home, 
@@ -161,65 +162,8 @@ export default function SidebarComplete() {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  // COMPLETE navigation structure with ALL features
-  const allNavigationGroups: NavigationGroup[] = [
-    {
-      label: "COMMUNITY",
-      items: [
-        { label: "Home", href: "/", icon: Home },
-        { label: "Messages", href: "/messages", icon: Mail },
-        { label: "Contacts", href: "/contacts", icon: UserPlus },
-        { label: "Topics", href: "/topics", icon: MessageSquare },
-        { label: "Communities", href: "/communities", icon: Building },
-        { label: "Events", href: "/events", icon: Calendar },
-        { label: "Donation", href: "/donation", icon: DollarSign },
-      ]
-    },
-    {
-      label: "SPIRITUAL TOOLS",  
-      items: [
-        { label: "Today's Reading", href: "/bible", icon: BookOpen },
-
-        { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles }, // Divine Volunteer System - RESTORED
-        { label: "Saved Reflections", href: "/saved-reflections", icon: Bookmark },
-        { label: "Bookmarked Prayers", href: "/bookmarked-prayers", icon: Heart },
-        { label: "Audio Bible", href: "/audio-bible", icon: Play },
-        { label: "Audio Routines", href: "/audio-routines", icon: Mic },
-        { label: "Engagement Board", href: "/leaderboard", icon: Trophy },
-      ]
-    },
-    {
-      label: "MEDIA CONTENTS",
-      items: [
-        { label: "Video Library", href: "/video-library", icon: Video },
-        { label: "Image Gallery", href: "/image-gallery", icon: ImageIcon },
-      ]
-    },
-    {
-      label: "ADMIN PORTAL",
-      items: [
-        { label: "Community Administration", href: "/community-administration", icon: Building2, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Content Creation", href: "/sermon-studio", icon: PenTool, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Content Moderation", href: "/moderation-dashboard", icon: Flag, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Staff Management", href: "/staff-management", icon: UserCog, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Member Management", href: "/member-management", icon: Users2, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Volunteer Management", href: "/volunteer-management", icon: HandHeart, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Background Check Management", href: "/background-check-management", icon: Shield, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Communication Hub", href: "/communication", icon: Megaphone, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Analytics Dashboard", href: "/analytics-dashboard", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Engagement Analytics", href: "/engagement-analytics", icon: TrendingUp, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "Donation Analytics", href: "/donation-analytics", icon: BarChart3, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-        { label: "QR Code Management", href: "/qr-management", icon: QrCode, roles: ['admin', 'church-admin', 'system-admin', 'super-admin', 'pastor', 'lead-pastor', 'soapbox_owner', 'soapbox-support', 'platform-admin', 'regional-admin'] },
-      ]
-    },
-    {
-      label: "ACCOUNT",
-      items: [
-        { label: "Profile", href: "/profile", icon: User },
-        { label: "Settings", href: "/settings", icon: Settings },
-      ]
-    }
-  ];
+  // Use centralized navigation from shared/navigation.ts
+  const allNavigationGroups = getFilteredNavigation(user?.role || 'member', isMobile);
 
   // Mobile navigation filtering - same logic as regular Sidebar
   const mobileNavigationItems = [
