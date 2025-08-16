@@ -101,7 +101,7 @@ function configurePassport() {
         
         return done(null, user);
       } catch (error) {
-        return done(error, null);
+        return done(error, false);
       }
     }));
   }
@@ -148,7 +148,7 @@ function configurePassport() {
         
         return done(null, user);
       } catch (error) {
-        return done(error, null);
+        return done(error, false);
       }
     }));
   }
@@ -437,8 +437,8 @@ export function setupAuth(app: Express): void {
           : 'Registration successful! Please check your email to verify your account before logging in.',
         email: newUser.email,
         requiresVerification: true,
-        ...(claimableChurch && { claimableChurch }),
-        ...(staffInvite && { staffInvitation: { communityId: staffInvite.communityId, role: staffInvite.role } })
+        ...(claimableChurch ? { claimableChurch } : {}),
+        ...(staffInvite ? { staffInvitation: { communityId: staffInvite.communityId, role: staffInvite.role } } : {})
       };
 
       res.status(201).json(response);
@@ -955,7 +955,7 @@ export function setupAuth(app: Express): void {
   // Normal logout endpoint - secure session termination
   app.post('/api/auth/logout', async (req, res) => {
     try {
-      console.log('LOGOUT: Normal user logout process');
+      console.log('LOGOUT: Starting normal logout process');
       
       // Clear session safely
       req.session.destroy((err: any) => {
@@ -965,34 +965,27 @@ export function setupAuth(app: Express): void {
       // Clear authentication cookies
       res.clearCookie('connect.sid', { path: '/', httpOnly: true, secure: false });
       
+      // Set logout success header
+      res.setHeader('X-Logout-Success', 'true');
+      
+      // Send single response
       res.json({ 
         success: true, 
         message: "Logged out successfully",
         redirectTo: '/login'
       });
-      res.setHeader('X-Logout-Success', 'true');
       
-      console.log('🔥 EMERGENCY LOGOUT COMPLETED - SYSTEM LOCKED DOWN');
+      console.log('LOGOUT: Normal logout completed successfully');
       
-      // PERMANENTLY DISABLE EMERGENCY MODE RESET
-      // No automatic reset - manual reset required to prevent cross-user authentication
-      console.log('⚠️ Emergency mode is PERMANENT until manual reset - No automatic authentication recovery');
-      
-      res.json({ 
-        success: true,
-        message: 'EMERGENCY LOGOUT - All sessions terminated, normal login restored in 5 seconds',
-        emergencyMode: true,
-        resetIn: 5000,
-        timestamp: new Date().toISOString()
-      });
     } catch (error) {
-      console.error('Emergency logout error:', error);
-      EMERGENCY_LOGOUT_ACTIVE = true; // Still activate emergency mode
-      res.json({ 
-        success: true,
-        message: 'Emergency logout attempted - System locked',
-        emergencyMode: true
-      });
+      console.error('Logout error:', error);
+      // Only send response if not already sent
+      if (!res.headersSent) {
+        res.status(500).json({ 
+          success: false,
+          message: 'Logout failed'
+        });
+      }
     }
   });
 
