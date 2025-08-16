@@ -53,14 +53,15 @@ export const navigationConfig: NavigationGroup[] = [
   },
   {
     label: "SPIRITUAL TOOLS",
+    desktopOnly: true,
     items: [
       { label: "Today's Reading", href: "/bible", icon: BookOpen },
-      { label: "Reading Plans", href: "/reading-plans", icon: BookOpen, desktopOnly: true },
+      { label: "Reading Plans", href: "/reading-plans", icon: BookOpen },
       { label: "Prayer Wall", href: "/prayer", icon: Heart },
       { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
-      { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles, desktopOnly: true },
-      { label: "Audio Bible", href: "/audio-bible", icon: Play, desktopOnly: true },
-      { label: "Audio Routines", href: "/audio-routines", icon: Mic, desktopOnly: true },
+      { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles },
+      { label: "Audio Bible", href: "/audio-bible", icon: Play },
+      { label: "Audio Routines", href: "/audio-routines", icon: Mic },
     ]
   },
   {
@@ -73,6 +74,7 @@ export const navigationConfig: NavigationGroup[] = [
   },
   {
     label: "ADMIN TOOLS",
+    desktopOnly: true,
     items: [
       { 
         label: "Member Directory", 
