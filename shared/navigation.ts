@@ -48,7 +48,7 @@ export const navigationConfig: NavigationGroup[] = [
       { label: "Contacts", href: "/contacts", icon: UserPlus },
       { label: "Communities", href: "/communities", icon: Users },
       { label: "Events", href: "/events", icon: Calendar },
-      { label: "Discussions", href: "/community", icon: MessageSquare },
+      { label: "Group Chat", href: "/community", icon: MessageSquare },
       { label: "Donation", href: "/donation-demo", icon: DollarSign },
     ]
   },
@@ -185,7 +185,7 @@ export function getFilteredNavigation(
 // Mobile bottom navigation specific items (simplified for mobile)
 export const mobileBottomNavItems = [
   { label: "Home", href: "/", icon: Home },
-  { label: "Discussions", href: "/community", icon: Users },
+  { label: "Group Chat", href: "/community", icon: Users },
   { label: "Prayer Wall", href: "/prayer", icon: Heart },
   { label: "S.O.A.P. Journal", href: "/soap", icon: BookOpen },
 ];
