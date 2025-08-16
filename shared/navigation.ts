@@ -57,9 +57,9 @@ export const navigationConfig: NavigationGroup[] = [
     desktopOnly: true,
     items: [
       { label: "Today's Reading", href: "/bible", icon: BookOpen },
-      { label: "Reading Plans", href: "/reading-plans", icon: BookOpen },
-      { label: "Prayer Wall", href: "/prayer", icon: Heart },
-      { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
+      { label: "Reading Plans", href: "/reading-plans", icon: BookOpen, mobileOnly: false, desktopOnly: true },
+      { label: "Prayer Wall", href: "/prayer", icon: Heart, mobileOnly: false, desktopOnly: true },
+      { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool, mobileOnly: false, desktopOnly: true },
       { label: "D.I.V.I.N.E.", href: "/divine", icon: Sparkles },
       { label: "Audio Bible", href: "/audio-bible", icon: Play },
       { label: "Audio Routines", href: "/audio-routines", icon: Mic },
@@ -186,7 +186,7 @@ export function getFilteredNavigation(
 // Mobile bottom navigation specific items (simplified for mobile)
 export const mobileBottomNavItems = [
   { label: "Home", href: "/", icon: Home },
-  { label: "Topics", href: "/topics", icon: MessageSquare },
+  { label: "Reading Plans", href: "/reading-plans", icon: BookOpen },
   { label: "Prayer Wall", href: "/prayer", icon: Heart },
   { label: "S.O.A.P.", href: "/soap", icon: BookOpen },
 ];
