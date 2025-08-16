@@ -148,7 +148,7 @@ export default function Sidebar() {
         { label: "Contacts", href: "/contacts", icon: UserPlus },
         { label: "Communities", href: "/communities", icon: Users },
         { label: "Events", href: "/events", icon: Calendar },
-        { label: "Group Chat", href: "/community", icon: MessageSquare },
+        { label: "Discussions", href: "/community", icon: MessageSquare },
         { label: "Donation", href: "/donation-demo", icon: DollarSign },
       ]
     },
@@ -157,8 +157,8 @@ export default function Sidebar() {
       items: [
         { label: "Today's Reading", href: "/bible", icon: BookOpen },
         { label: "Reading Plans", href: "/reading-plans", icon: BookOpen },
-        { label: "Prayer", href: "/prayer", icon: Heart },
-        { label: "S.O.A.P.", href: "/soap", icon: PenTool },
+        { label: "Prayer Wall", href: "/prayer", icon: Heart },
+        { label: "S.O.A.P. Journal", href: "/soap", icon: PenTool },
       ]
     },
     {

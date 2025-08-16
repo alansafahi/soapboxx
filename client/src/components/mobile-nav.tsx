@@ -14,19 +14,19 @@ export default function MobileNav() {
     },
     {
       icon: Users,
-      label: "Group Chat",
+      label: "Discussions",
       path: "/community",
       isActive: location === "/community",
     },
     {
       icon: Hand,
-      label: "Prayer",
+      label: "Prayer Wall",
       path: "/prayer",
       isActive: location === "/prayer",
     },
     {
       icon: BookOpen,
-      label: "S.O.A.P.",
+      label: "S.O.A.P. Journal",
       path: "/soap",
       isActive: location === "/soap",
     },
