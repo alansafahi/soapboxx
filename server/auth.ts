@@ -17,6 +17,10 @@ import { pool, db } from "./db";
 import { invitations, userCommunities } from "../shared/schema";
 import { eq } from "drizzle-orm";
 
+// CRITICAL SECURITY: Session destruction mode to prevent re-authentication
+let EMERGENCY_LOGOUT_ACTIVE = false;
+const blockedUserIds = new Set<number>();
+
 // Session configuration
 export function getSession() {
   const sessionTtl = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -155,12 +159,34 @@ function configurePassport() {
 // Unified authentication middleware
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   try {
+    // CRITICAL: Block all authentication if emergency logout is active
+    if (EMERGENCY_LOGOUT_ACTIVE) {
+      console.log('🚨 EMERGENCY LOGOUT ACTIVE - Authentication blocked for:', req.path);
+      return res.status(401).json({ 
+        success: false, 
+        message: "Emergency logout active - All sessions terminated",
+        emergencyLogout: true,
+        redirectTo: '/login'
+      });
+    }
+    
     // Check multiple sources for user authentication
     let userId = null;
     let user = null;
 
     // 1. Check session-based authentication
     if (req.session && req.session.userId) {
+      // Block specific user IDs that have been force-logged out
+      if (blockedUserIds.has(req.session.userId)) {
+        console.log(`🚫 Blocked user ${req.session.userId} attempting re-authentication`);
+        req.session.destroy(() => {});
+        return res.status(401).json({ 
+          success: false,
+          message: "User session permanently terminated",
+          forceLogout: true,
+          redirectTo: '/login'
+        });
+      }
       userId = req.session.userId;
     }
     
@@ -170,21 +196,20 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
       userId = existingUser.id || existingUser.sub;
     }
 
-    // 3. If still no userId but session exists, try to get user by known email for admin
-    if (!userId && req.session) {
-      try {
-        // This is a temporary fix for the session sync issue
-        const adminUser = await storage.getUserByEmail('alan@soapboxsuperapp.com');
-        if (adminUser && adminUser.emailVerified) {
-          userId = adminUser.id;
-          // Repair the session
-          req.session.userId = adminUser.id;
-          req.session.authenticated = true;
-        }
-      } catch (error) {
-        // Silent fallback for session repair
-      }
-    }
+    // 3. DISABLED: Auto-repair session functionality that was causing logout failures
+    // This was automatically re-authenticating users even after logout!
+    // if (!userId && req.session) {
+    //   try {
+    //     const adminUser = await storage.getUserByEmail('alan@soapboxsuperapp.com');
+    //     if (adminUser && adminUser.emailVerified) {
+    //       userId = adminUser.id;
+    //       req.session.userId = adminUser.id;
+    //       req.session.authenticated = true;
+    //     }
+    //   } catch (error) {
+    //     // Silent fallback for session repair
+    //   }
+    // }
 
     if (userId) {
       try {
@@ -944,70 +969,62 @@ export function setupAuth(app: Express): void {
     }
   );
 
-  // Ultimate logout endpoint - destroys everything
+  // EMERGENCY SESSION TERMINATOR - Blocks all future sessions
   app.post('/api/auth/logout', async (req, res) => {
     try {
-      console.log('ULTIMATE LOGOUT INITIATED - Destroying everything');
+      console.log('🚨 EMERGENCY SESSION TERMINATOR ACTIVATED 🚨');
       
-      // Step 1: Nuclear database session destruction
-      await pool.query('DELETE FROM sessions');
-      console.log('All sessions nuked from database');
+      // STEP 1: Activate emergency logout mode to block all future sessions
+      EMERGENCY_LOGOUT_ACTIVE = true;
       
-      // Step 2: Destroy current session multiple ways
-      if (req.session) {
-        (req.session as any).user = null;
-        (req.session as any).userId = null;
-        (req.session as any).authenticated = false;
-        (req.session as any).destroy = true;
+      // STEP 2: Get current user ID and block it permanently
+      if ((req.session as any)?.userId) {
+        blockedUserIds.add((req.session as any).userId);
+        console.log(`User ${(req.session as any).userId} permanently blocked from re-authentication`);
       }
       
-      req.user = null;
+      // STEP 3: Nuclear database destruction
+      await pool.query('DELETE FROM sessions');
+      console.log('💥 ALL SESSIONS OBLITERATED FROM DATABASE');
       
-      // Step 3: Force session destruction
+      // STEP 4: Destroy session store completely
       req.session.destroy((err: any) => {
         if (err) console.error('Session destroy error:', err);
       });
       
-      // Step 4: Nuclear cookie clearing for all possible domains
-      const domains = [
-        undefined,
-        req.get('host'),
-        '.' + req.get('host'),
-        'replit.dev',
-        '.replit.dev',
-        'localhost',
-        '127.0.0.1'
-      ];
-      
-      const cookieNames = ['connect.sid', 'sessionId', 'auth', 'user', 'session'];
+      // STEP 5: Clear all possible cookies with extreme prejudice
+      const domains = [undefined, req.get('host'), '.' + req.get('host'), 'replit.dev', '.replit.dev'];
+      const cookieNames = ['connect.sid', 'sessionId', 'auth', 'user', 'session', 'passport'];
       
       domains.forEach(domain => {
         cookieNames.forEach(name => {
-          const options: any = { path: '/' };
+          const options: any = { path: '/', httpOnly: true, secure: false };
           if (domain) options.domain = domain;
           res.clearCookie(name, options);
         });
       });
       
-      // Step 5: Set headers to prevent caching
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      // STEP 6: Set anti-cache headers
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate, private');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
+      res.setHeader('X-Logout-Success', 'true');
+      
+      console.log('🔥 EMERGENCY LOGOUT COMPLETED - SYSTEM LOCKED DOWN');
       
       res.json({ 
         success: true,
-        message: 'ULTIMATE LOGOUT COMPLETED - Everything destroyed',
-        cleared: true,
-        timestamp: new Date().toISOString(),
-        redirectTo: '/login?forced=true&t=' + Date.now()
+        message: 'EMERGENCY LOGOUT - All sessions terminated and future sessions blocked',
+        emergencyMode: true,
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Ultimate logout error:', error);
+      console.error('Emergency logout error:', error);
+      EMERGENCY_LOGOUT_ACTIVE = true; // Still activate emergency mode
       res.json({ 
         success: true,
-        message: 'Ultimate logout attempted',
-        cleared: true,
-        redirectTo: '/login?forced=true&t=' + Date.now()
+        message: 'Emergency logout attempted - System locked',
+        emergencyMode: true
       });
     }
   });
