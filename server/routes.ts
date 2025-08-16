@@ -18442,6 +18442,21 @@ Please provide suggestions for the missing or incomplete sections.`
 
 
 
+  // Get current authenticated user endpoint
+  app.get('/api/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error('Get user endpoint error:', error);
+      res.status(500).json({ message: "Failed to get user information" });
+    }
+  });
+
   // Simple health check endpoint
   app.get('/health', (req, res) => {
     res.json({ 
