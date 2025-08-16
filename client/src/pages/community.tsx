@@ -51,7 +51,7 @@ export default function CommunityPage() {
 
   // Determine page title based on route
   const isDiscussionsPage = location === '/discussions';
-  const pageTitle = isDiscussionsPage ? 'Discussions' : 'Community';
+  const pageTitle = isDiscussionsPage ? 'Discussions' : 'Community Group Chat';
   const pageDescription = isDiscussionsPage 
     ? 'Join meaningful conversations with fellow believers' 
     : 'Connect with fellow believers and share your faith journey';
