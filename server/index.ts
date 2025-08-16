@@ -204,6 +204,10 @@ app.use((req, res, next) => {
   // Setup security recovery system
   const { setupSecurityRecovery } = await import('./security-recovery');
   setupSecurityRecovery(app);
+  
+  // Setup emergency recovery system for immediate restoration
+  const { setupEmergencyRecovery } = await import('./emergency-recovery');
+  setupEmergencyRecovery(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

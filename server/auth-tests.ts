@@ -1,28 +1,62 @@
 import { SecureSessionManager } from './secure-auth';
 import { pool } from './db';
+import { storage } from './storage';
 
 // Comprehensive authentication testing suite
 export class AuthSecurityTests {
   
+  // Setup test users
+  static async setupTestUsers(): Promise<void> {
+    try {
+      // Create test users if they don't exist
+      const testUsers = [
+        { id: 'test_user_1', email: 'test1@example.com', username: 'testuser1' },
+        { id: 'test_user_2', email: 'test2@example.com', username: 'testuser2' },
+        { id: 'test_blacklist_user', email: 'blacklist@example.com', username: 'blacklistuser' },
+        { id: 'test_multi_user', email: 'multi@example.com', username: 'multiuser' },
+        { id: 'test_chapin_user', email: 'chapin@example.com', username: 'chapinuser' },
+        { id: 'test_alan_user', email: 'alan@example.com', username: 'alanuser' }
+      ];
+
+      for (const user of testUsers) {
+        // Check if user exists
+        const existing = await storage.getUserById(user.id);
+        if (!existing) {
+          // Create test user
+          await pool.query(`
+            INSERT INTO users (id, email, username, created_at, updated_at)
+            VALUES ($1, $2, $3, NOW(), NOW())
+            ON CONFLICT (id) DO NOTHING
+          `, [user.id, user.email, user.username]);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to setup test users:', error);
+    }
+  }
+
   // Test 1: Session Isolation - Different users should never share sessions
   static async testSessionIsolation(): Promise<boolean> {
     console.log('🧪 Testing Session Isolation...');
     
     try {
+      // Setup test users first
+      await this.setupTestUsers();
+      
       // Create mock request objects
       const mockReq1 = { ip: '192.168.1.1', get: () => 'UserAgent1' } as any;
       const mockReq2 = { ip: '192.168.1.2', get: () => 'UserAgent2' } as any;
       
       // Create sessions for two different users
-      const session1 = await SecureSessionManager.createSession('user1', mockReq1);
-      const session2 = await SecureSessionManager.createSession('user2', mockReq2);
+      const session1 = await SecureSessionManager.createSession('test_user_1', mockReq1);
+      const session2 = await SecureSessionManager.createSession('test_user_2', mockReq2);
       
       // Validate sessions return correct users
       const userId1 = await SecureSessionManager.validateSession(session1, mockReq1);
       const userId2 = await SecureSessionManager.validateSession(session2, mockReq2);
       
       // Test: Sessions should return their respective users
-      if (userId1 !== 'user1' || userId2 !== 'user2') {
+      if (userId1 !== 'test_user_1' || userId2 !== 'test_user_2') {
         console.error('❌ Session isolation failed: Cross-user session detected');
         return false;
       }
@@ -50,11 +84,11 @@ export class AuthSecurityTests {
       const mockReq = { ip: '192.168.1.100', get: () => 'TestAgent' } as any;
       
       // Create session
-      const sessionId = await SecureSessionManager.createSession('testuser', mockReq);
+      const sessionId = await SecureSessionManager.createSession('test_user_1', mockReq);
       
       // Validate session exists
       let userId = await SecureSessionManager.validateSession(sessionId, mockReq);
-      if (userId !== 'testuser') {
+      if (userId !== 'test_user_1') {
         console.error('❌ Session creation failed');
         return false;
       }
@@ -85,7 +119,7 @@ export class AuthSecurityTests {
       const mockReq = { ip: '192.168.1.200', get: () => 'BlacklistTest' } as any;
       
       // Create session
-      const sessionId = await SecureSessionManager.createSession('blacklistuser', mockReq);
+      const sessionId = await SecureSessionManager.createSession('test_blacklist_user', mockReq);
       
       // Invalidate session (adds to blacklist)
       await SecureSessionManager.invalidateSession(sessionId);
@@ -122,22 +156,22 @@ export class AuthSecurityTests {
       const mockReq3 = { ip: '192.168.1.12', get: () => 'Device3' } as any;
       
       // Create multiple sessions for same user (simulating multiple devices)
-      const session1 = await SecureSessionManager.createSession('multiuser', mockReq1);
-      const session2 = await SecureSessionManager.createSession('multiuser', mockReq2);
-      const session3 = await SecureSessionManager.createSession('multiuser', mockReq3);
+      const session1 = await SecureSessionManager.createSession('test_multi_user', mockReq1);
+      const session2 = await SecureSessionManager.createSession('test_multi_user', mockReq2);
+      const session3 = await SecureSessionManager.createSession('test_multi_user', mockReq3);
       
       // Validate all sessions work
       const validation1 = await SecureSessionManager.validateSession(session1, mockReq1);
       const validation2 = await SecureSessionManager.validateSession(session2, mockReq2);
       const validation3 = await SecureSessionManager.validateSession(session3, mockReq3);
       
-      if (validation1 !== 'multiuser' || validation2 !== 'multiuser' || validation3 !== 'multiuser') {
+      if (validation1 !== 'test_multi_user' || validation2 !== 'test_multi_user' || validation3 !== 'test_multi_user') {
         console.error('❌ Multi-session setup failed');
         return false;
       }
       
       // Nuclear logout
-      await SecureSessionManager.invalidateAllUserSessions('multiuser');
+      await SecureSessionManager.invalidateAllUserSessions('test_multi_user');
       
       // Test: All sessions should be invalid
       const postNuke1 = await SecureSessionManager.validateSession(session1, mockReq1);
@@ -164,11 +198,11 @@ export class AuthSecurityTests {
     try {
       // Simulate Chapin's browser
       const chapinReq = { ip: '192.168.2.100', get: () => 'Chrome/119 (Chapin Device)' } as any;
-      const chapinSession = await SecureSessionManager.createSession('chapin_user_id', chapinReq);
+      const chapinSession = await SecureSessionManager.createSession('test_chapin_user', chapinReq);
       
       // Simulate Alan's browser on different machine
       const alanReq = { ip: '192.168.3.200', get: () => 'Safari/16 (Alan Device)' } as any;
-      const alanSession = await SecureSessionManager.createSession('alan_user_id', alanReq);
+      const alanSession = await SecureSessionManager.createSession('test_alan_user', alanReq);
       
       // Test: Chapin's session should not validate on Alan's device
       const crossValidation1 = await SecureSessionManager.validateSession(chapinSession, alanReq);
@@ -185,7 +219,7 @@ export class AuthSecurityTests {
       const correctValidation1 = await SecureSessionManager.validateSession(chapinSession, chapinReq);
       const correctValidation2 = await SecureSessionManager.validateSession(alanSession, alanReq);
       
-      if (correctValidation1 !== 'chapin_user_id' || correctValidation2 !== 'alan_user_id') {
+      if (correctValidation1 !== 'test_chapin_user' || correctValidation2 !== 'test_alan_user') {
         console.error('❌ Legitimate session validation failed');
         return false;
       }
@@ -232,10 +266,18 @@ export class AuthSecurityTests {
   // Clean up test data
   static async cleanupTestData(): Promise<void> {
     try {
+      // Clean up test sessions
       await pool.query(`
         DELETE FROM secure_sessions 
-        WHERE user_id IN ('user1', 'user2', 'testuser', 'blacklistuser', 'multiuser', 'chapin_user_id', 'alan_user_id')
+        WHERE user_id IN ('test_user_1', 'test_user_2', 'test_blacklist_user', 'test_multi_user', 'test_chapin_user', 'test_alan_user')
       `);
+      
+      // Clean up test users
+      await pool.query(`
+        DELETE FROM users 
+        WHERE id IN ('test_user_1', 'test_user_2', 'test_blacklist_user', 'test_multi_user', 'test_chapin_user', 'test_alan_user')
+      `);
+      
       console.log('🧹 Test data cleaned up');
     } catch (error) {
       console.error('Cleanup error:', error);

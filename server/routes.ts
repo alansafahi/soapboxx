@@ -452,6 +452,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // AUTHENTICATION SETUP FIRST - This must come before all other routes
   setupAuth(app);
+  
+  // Setup secure authentication system and security recovery
+  const { setupSecureAuth } = await import('./secure-auth');
+  const { setupSecurityRecovery } = await import('./security-recovery');
+  const { setupSecurityTestEndpoint } = await import('./auth-tests');
+  
+  setupSecureAuth(app);
+  setupSecurityRecovery(app);
+  setupSecurityTestEndpoint(app);
 
   // Serve static uploaded files
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
