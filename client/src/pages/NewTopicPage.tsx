@@ -4,7 +4,9 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
 import { Label } from "../components/ui/label";
+import { useToast } from "../hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
+import { apiRequest, queryClient } from "../lib/queryClient";
 
 const categoryOptions = [
   "Bible Study",
@@ -17,13 +19,15 @@ const categoryOptions = [
 
 export default function NewTopicPage() {
   const [, navigate] = useLocation();
+  const { toast } = useToast();
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [body, setBody] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Basic validation
@@ -33,12 +37,39 @@ export default function NewTopicPage() {
     }
 
     setError("");
+    setLoading(true);
 
-    // TODO: Replace with API call
-    console.log("Submit:", { title, category, body });
+    try {
+      await apiRequest('/api/posts', 'POST', {
+        postType: 'discussion',
+        title: title.trim(),
+        content: body.trim(),
+        category,
+        isPublic: true,
+        audience: 'public'
+      });
 
-    // Redirect to topics list
-    navigate("/topics");
+      // Invalidate the topics cache to refresh the list
+      queryClient.invalidateQueries({ queryKey: ['/api/posts', 'discussion'] });
+
+      toast({
+        title: "Topic created!",
+        description: "Your topic has been posted successfully.",
+      });
+
+      // Redirect to topics list
+      navigate("/topics");
+    } catch (error) {
+      console.error('Failed to create topic:', error);
+      setError("Failed to create topic. Please try again.");
+      toast({
+        title: "Error",
+        description: "Failed to create topic. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -95,8 +126,8 @@ export default function NewTopicPage() {
           />
         </div>
 
-        <Button type="submit" className="w-full">
-          Post Topic
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? "Creating Topic..." : "Post Topic"}
         </Button>
       </form>
     </div>

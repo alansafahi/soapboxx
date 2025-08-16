@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Badge } from "../components/ui/badge";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
-import { PlusCircle, MessageSquare, Users, Heart, MessageCircle, Plus } from "lucide-react";
+import { PlusCircle, MessageSquare, Users, Heart, MessageCircle, Plus, Loader2 } from "lucide-react";
 
 interface TopicThread {
   id: string;
@@ -111,10 +112,47 @@ export default function TopicsPage() {
   const [, navigate] = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  // Fetch topics from API
+  const { data: topics = [], isLoading, error } = useQuery({
+    queryKey: ['/api/posts', 'discussion'],
+    queryFn: () => fetch('/api/posts?postType=discussion&limit=50').then(res => res.json()),
+  });
+
+  // Transform API data to match our interface
+  const transformedTopics: TopicThread[] = topics.map((post: any) => ({
+    id: post.id.toString(),
+    title: post.title || "Untitled Discussion",
+    repliesCount: post.commentCount || 0,
+    category: post.category || "General",
+    lastReplyAt: formatRelativeTime(post.updatedAt),
+    lastReplier: post.authorName || "Unknown",
+    isNew: isNewPost(post.createdAt)
+  }));
+
   // Filter topics by selected category
   const filteredTopics = selectedCategory === "All" 
-    ? mockTopics 
-    : mockTopics.filter(topic => topic.category === selectedCategory);
+    ? transformedTopics 
+    : transformedTopics.filter(topic => topic.category === selectedCategory);
+
+  // Helper functions
+  function formatRelativeTime(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    return date.toLocaleDateString();
+  }
+
+  function isNewPost(dateString: string): boolean {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60);
+    return diffInHours < 24; // Consider posts newer than 24 hours as "new"
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-4">
@@ -217,9 +255,28 @@ export default function TopicsPage() {
             ))}
           </div>
 
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex justify-center items-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+              <span className="ml-2 text-gray-600 dark:text-gray-400">Loading topics...</span>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="text-center py-12">
+              <p className="text-red-500 mb-4">Failed to load topics. Please try again.</p>
+              <Button onClick={() => window.location.reload()} variant="outline">
+                Retry
+              </Button>
+            </div>
+          )}
+
           {/* Topics List */}
-          <div className="space-y-4">
-            {filteredTopics.map((topic) => (
+          {!isLoading && !error && (
+            <div className="space-y-4">
+              {filteredTopics.map((topic) => (
               <Card
                 key={topic.id}
                 className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700 transition-colors"
@@ -258,9 +315,11 @@ export default function TopicsPage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
+            </div>
+          )}
 
-          {filteredTopics.length === 0 && (
+          {/* Empty State */}
+          {!isLoading && !error && filteredTopics.length === 0 && (
             <div className="text-center py-12">
               <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <p className="text-gray-500 dark:text-gray-400">No topics found in this category.</p>
