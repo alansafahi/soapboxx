@@ -4,6 +4,12 @@
 The SoapBox Super App is a comprehensive faith community platform designed to connect churches and believers through technology. It serves as a spiritual hub offering daily inspirations, prayer networks, community discussions, sermon management, and AI-powered pastoral tools. The project aims to provide a modern solution for spiritual engagement and church administration, capturing market potential in the faith technology sector.
 
 ## Recent Changes
+**August 16, 2025 - User Experience Improvements**
+- Fixed onboarding flow: Daily devotion reminders now auto-check by default
+- Fixed mobile verification: "Add Mobile Later" button now properly completes onboarding
+- Enhanced social feed: Added optimistic updates for immediate post visibility upon sharing
+- Fixed mobile navigation: Improved dark mode visibility with proper contrast for icons and active states
+
 **August 16, 2025 - Critical Debugging and Restoration Complete**
 - Successfully resolved all TypeScript compilation errors (570+ errors reduced to 0)
 - Fixed database schema field name mismatches (snake_case vs camelCase)
