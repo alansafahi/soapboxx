@@ -1,4 +1,4 @@
-import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles, Building2, CheckCircle, UserCog, Users2, HandHeart, QrCode, Flag, Trophy, Bookmark, Building, LogOut, HelpCircle } from "lucide-react";
+import { Bell, Moon, Sun, User, Check, X, Calendar, MessageSquare, Heart, Menu, Home, Users, BookOpen, Play, Mic, Video, BarChart3, Settings, UserPlus, DollarSign, Megaphone, Share2, TrendingUp, Shield, PenTool, Image, Sparkles, Building2, CheckCircle, UserCog, Users2, HandHeart, QrCode, Flag, Trophy, Bookmark, Building, LogOut, HelpCircle, AlertTriangle } from "lucide-react";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import ProfileVerificationRing from "./ProfileVerificationRing";
@@ -620,6 +620,45 @@ export default function TopHeader() {
             <DropdownMenuItem onClick={logout}>
               <LogOut className="mr-2 h-4 w-4" />
               Sign out
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={async () => {
+                try {
+                  // Clear all storage immediately
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  
+                  // Clear all cookies
+                  document.cookie.split(";").forEach(function(c) { 
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+                  });
+                  
+                  // Call emergency logout
+                  await fetch('/api/emergency-logout', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                  });
+                  
+                  // Multiple logout attempts
+                  for (let i = 0; i < 3; i++) {
+                    await fetch('/api/auth/logout', {
+                      method: 'POST',
+                      credentials: 'include',
+                      headers: { 'Content-Type': 'application/json' },
+                    });
+                  }
+                  
+                  // Force redirect
+                  window.location.href = '/login';
+                } catch (error) {
+                  window.location.href = '/login';
+                }
+              }}
+              className="text-orange-600 dark:text-orange-400 cursor-pointer font-bold"
+            >
+              <AlertTriangle className="mr-2 h-4 w-4" />
+              Emergency Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

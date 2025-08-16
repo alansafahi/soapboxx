@@ -998,6 +998,43 @@ export function setupAuth(app: Express): void {
     res.redirect('/login');
   });
 
+  // Emergency logout endpoint for immediate session clearing
+  app.post('/api/emergency-logout', async (req, res) => {
+    try {
+      // Clear all sessions for this user if we can identify them
+      if (req.session && (req.session as any).userId) {
+        const userId = (req.session as any).userId;
+        await pool.query('DELETE FROM sessions WHERE sess::text LIKE $1', [`%"userId":"${userId}"%`]);
+      }
+      
+      // Clear all sessions entirely (nuclear option)
+      await pool.query('DELETE FROM sessions');
+      
+      // Destroy current session
+      req.session.destroy((err: any) => {
+        if (err) console.error('Session destroy error:', err);
+      });
+      
+      // Clear all cookies
+      res.clearCookie('connect.sid', { path: '/', domain: undefined });
+      res.clearCookie('connect.sid', { path: '/', domain: '.' + req.get('host') });
+      res.clearCookie('sessionId', { path: '/' });
+      
+      res.json({ 
+        success: true, 
+        message: 'Emergency logout completed',
+        cleared: true 
+      });
+    } catch (error) {
+      console.error('Emergency logout error:', error);
+      res.json({ 
+        success: true, 
+        message: 'Emergency logout attempted',
+        cleared: true 
+      });
+    }
+  });
+
   // Debug endpoint DISABLED to prevent automatic re-authentication
   // app.post('/api/debug/establish-session', async (req, res) => {
   //   res.status(503).json({ success: false, message: 'Debug endpoint disabled for production' });

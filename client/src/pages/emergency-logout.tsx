@@ -28,8 +28,23 @@ export default function EmergencyLogoutPage() {
           document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
         });
         
-        // Call logout endpoint multiple times
-        for (let i = 0; i < 5; i++) {
+        // Call emergency logout endpoint
+        try {
+          const response = await fetch('/api/emergency-logout', {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+          const result = await response.json();
+          console.log('Emergency logout result:', result);
+        } catch (e) {
+          console.error('Emergency logout failed:', e);
+        }
+        
+        // Also call regular logout endpoint multiple times
+        for (let i = 0; i < 3; i++) {
           try {
             await fetch('/api/auth/logout', {
               method: 'POST',
