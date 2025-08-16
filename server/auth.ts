@@ -17,9 +17,16 @@ import { pool, db } from "./db";
 import { invitations, userCommunities } from "../shared/schema";
 import { eq } from "drizzle-orm";
 
-// CRITICAL SECURITY: Session destruction mode to prevent re-authentication
-let EMERGENCY_LOGOUT_ACTIVE = false;
+// CRITICAL SECURITY: Session destruction mode to prevent re-authentication  
+let EMERGENCY_LOGOUT_ACTIVE = false; // Reset to false to allow normal login
 const blockedUserIds = new Set<number>();
+
+// Reset emergency mode function for normal operation
+const resetEmergencyMode = () => {
+  EMERGENCY_LOGOUT_ACTIVE = false;
+  blockedUserIds.clear();
+  console.log('✅ EMERGENCY MODE RESET - Normal authentication restored');
+};
 
 // Session configuration
 export function getSession() {
@@ -1012,10 +1019,16 @@ export function setupAuth(app: Express): void {
       
       console.log('🔥 EMERGENCY LOGOUT COMPLETED - SYSTEM LOCKED DOWN');
       
+      // Reset emergency mode after 5 seconds to allow normal login
+      setTimeout(() => {
+        resetEmergencyMode();
+      }, 5000);
+      
       res.json({ 
         success: true,
-        message: 'EMERGENCY LOGOUT - All sessions terminated and future sessions blocked',
+        message: 'EMERGENCY LOGOUT - All sessions terminated, normal login restored in 5 seconds',
         emergencyMode: true,
+        resetIn: 5000,
         timestamp: new Date().toISOString()
       });
     } catch (error) {
@@ -1038,6 +1051,15 @@ export function setupAuth(app: Express): void {
   app.post('/api/emergency-logout', async (req, res) => {
     // Redirect to main logout
     res.redirect(307, '/api/auth/logout');
+  });
+  
+  // Reset emergency mode endpoint for development
+  app.post('/api/reset-emergency', (req, res) => {
+    resetEmergencyMode();
+    res.json({ 
+      success: true, 
+      message: 'Emergency mode reset - Normal authentication restored' 
+    });
   });
 
   // Debug endpoint DISABLED to prevent automatic re-authentication
