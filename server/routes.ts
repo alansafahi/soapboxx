@@ -11,6 +11,10 @@ import {
   churches, // Legacy alias for backward compatibility
   userCommunities,
   userChurches, // Legacy alias for backward compatibility
+  posts,
+  postComments,
+  postReactions,
+  postBookmarks,
   soapEntries, 
   discussions, 
   events,
@@ -28,7 +32,10 @@ import {
   prayerCircleUpdates,
   volunteerOpportunities,
   readingPlans,
-  readingPlanDays
+  readingPlanDays,
+  insertPostSchema,
+  insertPostCommentSchema,
+  insertPostReactionSchema
 } from "../shared/schema";
 import * as schema from "../shared/schema";
 const { userPoints } = schema;
@@ -2390,7 +2397,184 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all discussions (main endpoint for community feed)
+  // Unified Posts API Routes
+  app.post('/api/posts', isAuthenticated, async (req, res) => {
+    try {
+      const validatedData = insertPostSchema.parse(req.body);
+      const post = await storage.createPost(validatedData);
+      res.json(post);
+    } catch (error) {
+      console.error('Create post error:', error);
+      res.status(400).json({ 
+        error: error instanceof Error ? error.message : 'Failed to create post' 
+      });
+    }
+  });
+
+  app.get('/api/posts', async (req, res) => {
+    try {
+      const { limit, offset, communityId, postType } = req.query;
+      const currentUserId = req.user?.id;
+      
+      const posts = await storage.getPosts(
+        limit ? parseInt(limit as string) : 50,
+        offset ? parseInt(offset as string) : 0,
+        communityId ? parseInt(communityId as string) : undefined,
+        currentUserId,
+        postType as string
+      );
+      
+      res.json(posts);
+    } catch (error) {
+      console.error('Get posts error:', error);
+      res.status(500).json({ error: 'Failed to fetch posts' });
+    }
+  });
+
+  app.get('/api/posts/:id', async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const currentUserId = req.user?.id;
+      
+      const post = await storage.getPost(postId, currentUserId);
+      
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+      
+      res.json(post);
+    } catch (error) {
+      console.error('Get post error:', error);
+      res.status(500).json({ error: 'Failed to fetch post' });
+    }
+  });
+
+  app.patch('/api/posts/:id', isAuthenticated, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const updates = req.body;
+      
+      const post = await storage.updatePost(postId, updates);
+      res.json(post);
+    } catch (error) {
+      console.error('Update post error:', error);
+      res.status(400).json({ 
+        error: error instanceof Error ? error.message : 'Failed to update post' 
+      });
+    }
+  });
+
+  app.delete('/api/posts/:id', isAuthenticated, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      await storage.deletePost(postId, userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Delete post error:', error);
+      res.status(400).json({ 
+        error: error instanceof Error ? error.message : 'Failed to delete post' 
+      });
+    }
+  });
+
+  // Post Comments
+  app.post('/api/posts/:id/comments', isAuthenticated, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const validatedData = insertPostCommentSchema.parse({
+        ...req.body,
+        postId,
+        authorId: req.user.id
+      });
+      
+      const comment = await storage.createPostComment(validatedData);
+      res.json(comment);
+    } catch (error) {
+      console.error('Create comment error:', error);
+      res.status(400).json({ 
+        error: error instanceof Error ? error.message : 'Failed to create comment' 
+      });
+    }
+  });
+
+  app.get('/api/posts/:id/comments', async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const comments = await storage.getPostComments(postId);
+      res.json(comments);
+    } catch (error) {
+      console.error('Get comments error:', error);
+      res.status(500).json({ error: 'Failed to fetch comments' });
+    }
+  });
+
+  // Post Reactions
+  app.post('/api/posts/:id/reactions', isAuthenticated, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const { reactionType } = req.body;
+      const userId = req.user.id;
+      
+      const result = await storage.addPostReaction(postId, userId, reactionType);
+      res.json(result);
+    } catch (error) {
+      console.error('Add reaction error:', error);
+      res.status(400).json({ 
+        error: error instanceof Error ? error.message : 'Failed to add reaction' 
+      });
+    }
+  });
+
+  app.delete('/api/posts/:id/reactions/:reactionType', isAuthenticated, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const reactionType = req.params.reactionType;
+      const userId = req.user.id;
+      
+      const result = await storage.removePostReaction(postId, userId, reactionType);
+      res.json(result);
+    } catch (error) {
+      console.error('Remove reaction error:', error);
+      res.status(400).json({ 
+        error: error instanceof Error ? error.message : 'Failed to remove reaction' 
+      });
+    }
+  });
+
+  // Post Bookmarks
+  app.post('/api/posts/:id/bookmark', isAuthenticated, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      await storage.bookmarkPost(userId, postId);
+      res.json({ bookmarked: true });
+    } catch (error) {
+      console.error('Bookmark post error:', error);
+      res.status(400).json({ 
+        error: error instanceof Error ? error.message : 'Failed to bookmark post' 
+      });
+    }
+  });
+
+  app.delete('/api/posts/:id/bookmark', isAuthenticated, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id);
+      const userId = req.user.id;
+      
+      await storage.unbookmarkPost(userId, postId);
+      res.json({ bookmarked: false });
+    } catch (error) {
+      console.error('Unbookmark post error:', error);
+      res.status(400).json({ 
+        error: error instanceof Error ? error.message : 'Failed to unbookmark post' 
+      });
+    }
+  });
+
+  // Legacy Get all discussions (main endpoint for community feed)
   app.get('/api/discussions', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.session?.userId || (req.user as any)?.id || (req.user as any)?.claims?.sub;

@@ -826,7 +826,87 @@ export const eventMetrics = pgTable("event_metrics", {
   notes: text("notes"),
 });
 
-// Community discussions
+// Unified Posts System - Combines discussions, SOAP entries, announcements, etc.
+export const posts = pgTable("posts", {
+  id: serial("id").primaryKey(),
+  authorId: varchar("author_id").notNull().references(() => users.id),
+  communityId: integer("community_id").references(() => communities.id),
+  
+  // Post type selector - unified content types
+  postType: varchar("post_type", { length: 30 }).notNull().default("discussion"), // discussion, soap, announcement, prayer, event_update
+  
+  // Universal fields for all post types
+  title: varchar("title", { length: 255 }), // Optional for SOAP entries
+  content: text("content").notNull(),
+  category: varchar("category", { length: 50 }), // general, prayer, bible_study, events
+  
+  // SOAP-specific fields (only used when postType = 'soap')
+  scripture: text("scripture"), // The Bible verse or passage
+  scriptureReference: varchar("scripture_reference", { length: 100 }), // e.g., "John 3:16"
+  observation: text("observation"), // What does the passage say?
+  application: text("application"), // How does this apply to my life?
+  prayer: text("prayer"), // Personal prayer based on the scripture
+  devotionalDate: timestamp("devotional_date"), // When this devotion was for
+  streakDay: integer("streak_day"), // Day in consecutive streak
+  
+  // Sharing and privacy settings
+  isPublic: boolean("is_public").default(true),
+  audience: varchar("audience", { length: 20 }).default("public"), // 'public', 'church', 'private'
+  isSharedWithGroup: boolean("is_shared_with_group").default(false),
+  isSharedWithPastor: boolean("is_shared_with_pastor").default(false),
+  
+  // Common metadata
+  moodTag: varchar("mood_tag", { length: 255 }), // Mood/activity tag
+  suggestedVerses: jsonb("suggested_verses"), // AI-generated Bible verse suggestions
+  attachedMedia: jsonb("attached_media"), // Array of uploaded media files
+  linkedVerse: jsonb("linked_verse"), // User-selected Bible verse to link with post
+  tags: text("tags").array(), // Additional topic tags
+  
+  // Moderation and featuring
+  isPinned: boolean("is_pinned").default(false), // Featured posts from pastors/admins
+  pinnedBy: varchar("pinned_by").references(() => users.id), // Who pinned this post
+  pinnedAt: timestamp("pinned_at"), // When it was pinned
+  pinnedUntil: timestamp("pinned_until"), // Optional expiration for pin
+  pinCategory: varchar("pin_category", { length: 30 }), // 'announcement', 'sermon', 'weekly_encouragement'
+  isFeatured: boolean("is_featured").default(false), // Pastor can feature entries
+  featuredBy: varchar("featured_by").references(() => users.id),
+  featuredAt: timestamp("featured_at"),
+  
+  // AI assistance
+  aiAssisted: boolean("ai_assisted").default(false), // Was AI used to help create this?
+  aiSuggestions: jsonb("ai_suggestions"), // Store AI suggestions used
+  
+  // Engagement metrics
+  likeCount: integer("like_count").default(0),
+  commentCount: integer("comment_count").default(0),
+  reactionCounts: jsonb("reaction_counts"), // Store reaction counts for different types
+  
+  // Content moderation fields
+  isHidden: boolean("is_hidden").default(false), // Hidden by moderation
+  hiddenReason: varchar("hidden_reason", { length: 255 }), // Reason for hiding
+  hiddenBy: varchar("hidden_by").references(() => users.id), // Who hid the content
+  hiddenAt: timestamp("hidden_at"), // When it was hidden
+  
+  // Data expiration privacy fields
+  expiresAt: timestamp("expires_at"), // When content should be hidden for privacy
+  allowsExpiration: boolean("allows_expiration").default(false), // User permission for expiration
+  expiredAt: timestamp("expired_at"), // When content was actually marked as expired
+  
+  // Timing and metadata
+  estimatedReadTime: integer("estimated_read_time"), // Minutes spent on this entry
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("posts_author_idx").on(table.authorId),
+  index("posts_community_idx").on(table.communityId),
+  index("posts_type_idx").on(table.postType),
+  index("posts_date_idx").on(table.createdAt),
+  index("posts_public_idx").on(table.isPublic),
+  index("posts_expires_idx").on(table.expiresAt),
+  index("posts_devotional_date_idx").on(table.devotionalDate), // For SOAP entries
+]);
+
+// Keep discussions table for backward compatibility during migration
 export const discussions = pgTable("discussions", {
   id: serial("id").primaryKey(),
   authorId: varchar("author_id").notNull().references(() => users.id),
@@ -859,6 +939,43 @@ export const discussions = pgTable("discussions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Unified Post Comments - Works for all post types
+export const postComments = pgTable("post_comments", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").notNull().references(() => posts.id),
+  authorId: varchar("author_id").notNull().references(() => users.id),
+  content: text("content").notNull(),
+  parentId: integer("parent_id").references((): any => postComments.id),
+  likeCount: integer("like_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Unified Post Reactions - Works for all post types (likes, amens, hearts, fire, etc.)
+export const postReactions = pgTable("post_reactions", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").notNull().references(() => posts.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  reactionType: varchar("reaction_type", { length: 20 }).notNull(), // "like", "amen", "heart", "fire", "pray"
+  emoji: varchar("emoji", { length: 10 }), // Optional emoji representation
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userPostReactionUnique: unique().on(table.userId, table.postId, table.reactionType),
+}));
+
+// Unified Post Bookmarks - Works for all post types
+export const postBookmarks = pgTable("post_bookmarks", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  postId: integer("post_id").notNull().references(() => posts.id),
+  bookmarkType: varchar("bookmark_type", { length: 20 }).default("saved"), // saved, favorite, archived
+  notes: text("notes"), // Optional user notes for their saved post
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  userPostBookmarkUnique: unique().on(table.userId, table.postId),
+}));
+
+// Legacy tables for backward compatibility during migration
 // Discussion comments  
 export const discussionComments = pgTable("discussion_comments", {
   id: serial("id").primaryKey(),
@@ -2961,6 +3078,17 @@ export type BibleVerseShare = typeof bibleVerseShares.$inferSelect;
 export type InsertBibleVerseShare = typeof bibleVerseShares.$inferInsert;
 
 // S.O.A.P. Entry Types
+// Unified Posts Types
+export type Post = typeof posts.$inferSelect;
+export type InsertPost = typeof posts.$inferInsert;
+export type PostComment = typeof postComments.$inferSelect;
+export type InsertPostComment = typeof postComments.$inferInsert;
+export type PostReaction = typeof postReactions.$inferSelect;
+export type InsertPostReaction = typeof postReactions.$inferInsert;
+export type PostBookmark = typeof postBookmarks.$inferSelect;
+export type InsertPostBookmark = typeof postBookmarks.$inferInsert;
+
+// Legacy Types for backward compatibility
 export type SoapEntry = typeof soapEntries.$inferSelect;
 export type InsertSoapEntry = typeof soapEntries.$inferInsert;
 
@@ -2973,6 +3101,37 @@ export type SoapBookmark = typeof soapBookmarks.$inferSelect;
 export type InsertSoapBookmark = typeof soapBookmarks.$inferInsert;
 
 // S.O.A.P. Zod Schema
+// Unified Posts Zod Schemas
+export const insertPostSchema = createInsertSchema(posts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  likeCount: true,
+  commentCount: true,
+  reactionCounts: true,
+}).extend({
+  postType: z.enum(["discussion", "soap", "announcement", "prayer", "event_update"]),
+  audience: z.enum(["public", "church", "private"]).default("public"),
+});
+
+export const insertPostCommentSchema = createInsertSchema(postComments).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  likeCount: true,
+});
+
+export const insertPostReactionSchema = createInsertSchema(postReactions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPostBookmarkSchema = createInsertSchema(postBookmarks).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Legacy Schema for backward compatibility
 export const insertSoapEntrySchema = createInsertSchema(soapEntries).omit({
   id: true,
   createdAt: true,

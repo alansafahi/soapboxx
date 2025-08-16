@@ -13,6 +13,10 @@ import {
   eventCheckIns,
   eventRecurrenceRules,
   eventMetrics,
+  posts,
+  postComments,
+  postReactions,
+  postBookmarks,
   discussions,
   discussionComments,
   discussionLikes,
@@ -120,6 +124,14 @@ import {
   type InsertBibleVerseShare,
   type SoapEntry,
   type InsertSoapEntry,
+  type Post,
+  type InsertPost,
+  type PostComment,
+  type InsertPostComment,
+  type PostReaction,
+  type InsertPostReaction,
+  type PostBookmark,
+  type InsertPostBookmark,
   // Gamification type imports
   type UserStreak,
   type InsertUserStreak,
@@ -738,7 +750,23 @@ export interface IStorage {
   addPointTransaction(transaction: InsertPointTransaction): Promise<PointTransaction>;
   getLeaderboard(type: string, category: string, churchId?: number): Promise<LeaderboardEntry[]>;
 
-  // SOAP operations
+  // Unified Posts operations
+  createPost(post: InsertPost): Promise<Post>;
+  getPosts(limit?: number, offset?: number, communityId?: number, currentUserId?: string, postType?: string): Promise<any[]>;
+  getPost(postId: number, currentUserId?: string): Promise<any>;
+  updatePost(postId: number, updates: Partial<Post>): Promise<Post>;
+  deletePost(postId: number, userId: string): Promise<void>;
+  
+  // Unified Post interaction operations
+  createPostComment(comment: InsertPostComment): Promise<PostComment>;
+  getPostComments(postId: number): Promise<any[]>;
+  addPostReaction(postId: number, userId: string, reactionType: string): Promise<{ reacted: boolean; reactionCount: number }>;
+  removePostReaction(postId: number, userId: string, reactionType: string): Promise<{ reacted: boolean; reactionCount: number }>;
+  bookmarkPost(userId: string, postId: number): Promise<void>;
+  unbookmarkPost(userId: string, postId: number): Promise<void>;
+  isPostBookmarked(userId: string, postId: number): Promise<boolean>;
+  
+  // Legacy SOAP operations (for backward compatibility)
   addSoapReaction(soapId: number, userId: string, reactionType: string, emoji: string): Promise<{ reacted: boolean; reactionCount: number }>;
   saveSoapEntry(soapId: number, userId: string): Promise<void>;
   getSavedSoapEntries(userId: string): Promise<any[]>;
@@ -746,7 +774,7 @@ export interface IStorage {
   isSoapEntrySaved(soapId: number, userId: string): Promise<boolean>;
   createSoapEntry(entry: any): Promise<any>;
   
-  // SOAP comment operations
+  // Legacy SOAP comment operations
   createSoapComment(comment: { soapId: number; authorId: string; content: string; parentId?: number | null }): Promise<any>;
   getSoapComments(soapId: number): Promise<any[]>;
   
@@ -4642,6 +4670,483 @@ export class DatabaseStorage implements IStorage {
       return entries;
     } catch (error) {
       return [];
+    }
+  }
+
+  // Unified Posts System Implementation
+  async createPost(post: InsertPost): Promise<Post> {
+    try {
+      const [newPost] = await db.insert(posts).values({
+        ...post,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).returning();
+      
+      // Award points based on post type
+      const pointValues = {
+        discussion: 20,
+        soap: 25,
+        announcement: 15,
+        prayer: 20,
+        event_update: 15
+      };
+      
+      await this.addPointsToUser(
+        post.authorId,
+        pointValues[post.postType] || 15,
+        `post_${post.postType}`,
+        newPost.id
+      );
+      
+      // Special handling for SOAP entries - check streak
+      if (post.postType === 'soap') {
+        setImmediate(async () => {
+          try {
+            await this.checkSoapStreak(post.authorId);
+          } catch (error) {
+            // Silent error handling for streak checks
+          }
+        });
+      }
+      
+      return newPost;
+    } catch (error) {
+      throw new Error(`Failed to create ${post.postType} post`);
+    }
+  }
+
+  async getPosts(limit = 50, offset = 0, communityId?: number, currentUserId?: string, postType?: string): Promise<any[]> {
+    try {
+      let whereConditions = [
+        eq(posts.isPublic, true),
+        or(
+          isNull(posts.expiresAt),
+          gt(posts.expiresAt, new Date())
+        ),
+        or(
+          isNull(posts.isHidden),
+          eq(posts.isHidden, false)
+        )
+      ];
+
+      if (communityId) {
+        whereConditions.push(eq(posts.communityId, communityId));
+      }
+
+      if (postType) {
+        whereConditions.push(eq(posts.postType, postType));
+      }
+
+      const postsData = await db
+        .select({
+          id: posts.id,
+          postType: posts.postType,
+          title: posts.title,
+          content: posts.content,
+          category: posts.category,
+          scripture: posts.scripture,
+          scriptureReference: posts.scriptureReference,
+          observation: posts.observation,
+          application: posts.application,
+          prayer: posts.prayer,
+          devotionalDate: posts.devotionalDate,
+          streakDay: posts.streakDay,
+          isPublic: posts.isPublic,
+          audience: posts.audience,
+          moodTag: posts.moodTag,
+          attachedMedia: posts.attachedMedia,
+          linkedVerse: posts.linkedVerse,
+          tags: posts.tags,
+          isPinned: posts.isPinned,
+          isFeatured: posts.isFeatured,
+          likeCount: posts.likeCount,
+          commentCount: posts.commentCount,
+          reactionCounts: posts.reactionCounts,
+          createdAt: posts.createdAt,
+          authorId: posts.authorId,
+          userId: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          emailVerified: users.emailVerified,
+          phoneVerified: users.phoneVerified,
+          role: users.role
+        })
+        .from(posts)
+        .leftJoin(users, eq(posts.authorId, users.id))
+        .where(and(...whereConditions))
+        .orderBy(desc(posts.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      // Get reaction counts for each post
+      const postIds = postsData.map(post => post.id).filter(Boolean);
+      let reactionCounts: Record<number, Record<string, number>> = {};
+      
+      if (postIds.length > 0) {
+        const reactionCountResults = await db
+          .select({
+            postId: postReactions.postId,
+            reactionType: postReactions.reactionType,
+            count: sql<number>`count(*)`
+          })
+          .from(postReactions)
+          .where(inArray(postReactions.postId, postIds))
+          .groupBy(postReactions.postId, postReactions.reactionType);
+        
+        reactionCountResults.forEach(row => {
+          if (!reactionCounts[row.postId]) {
+            reactionCounts[row.postId] = {};
+          }
+          reactionCounts[row.postId][row.reactionType] = Number(row.count) || 0;
+        });
+      }
+
+      return postsData.map(post => ({
+        ...post,
+        author: {
+          firstName: post.firstName,
+          lastName: post.lastName,
+          email: post.email,
+          profileImageUrl: post.profileImageUrl
+        },
+        reactionCounts: reactionCounts[post.id] || {},
+        totalReactions: Object.values(reactionCounts[post.id] || {}).reduce((sum, count) => sum + count, 0)
+      }));
+    } catch (error) {
+      console.error('Error getting posts:', error);
+      return [];
+    }
+  }
+
+  async getPost(postId: number, currentUserId?: string): Promise<any> {
+    try {
+      const postData = await db
+        .select({
+          id: posts.id,
+          postType: posts.postType,
+          title: posts.title,
+          content: posts.content,
+          category: posts.category,
+          scripture: posts.scripture,
+          scriptureReference: posts.scriptureReference,
+          observation: posts.observation,
+          application: posts.application,
+          prayer: posts.prayer,
+          devotionalDate: posts.devotionalDate,
+          streakDay: posts.streakDay,
+          isPublic: posts.isPublic,
+          audience: posts.audience,
+          moodTag: posts.moodTag,
+          attachedMedia: posts.attachedMedia,
+          linkedVerse: posts.linkedVerse,
+          tags: posts.tags,
+          isPinned: posts.isPinned,
+          isFeatured: posts.isFeatured,
+          likeCount: posts.likeCount,
+          commentCount: posts.commentCount,
+          reactionCounts: posts.reactionCounts,
+          createdAt: posts.createdAt,
+          authorId: posts.authorId,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl,
+          role: users.role
+        })
+        .from(posts)
+        .leftJoin(users, eq(posts.authorId, users.id))
+        .where(eq(posts.id, postId))
+        .limit(1);
+
+      if (!postData.length) {
+        return null;
+      }
+
+      const post = postData[0];
+
+      // Get reaction counts
+      const reactionCountResults = await db
+        .select({
+          reactionType: postReactions.reactionType,
+          count: sql<number>`count(*)`
+        })
+        .from(postReactions)
+        .where(eq(postReactions.postId, postId))
+        .groupBy(postReactions.reactionType);
+      
+      const reactionCounts: Record<string, number> = {};
+      reactionCountResults.forEach(row => {
+        reactionCounts[row.reactionType] = Number(row.count) || 0;
+      });
+
+      return {
+        ...post,
+        author: {
+          firstName: post.firstName,
+          lastName: post.lastName,
+          profileImageUrl: post.profileImageUrl
+        },
+        reactionCounts,
+        totalReactions: Object.values(reactionCounts).reduce((sum, count) => sum + count, 0)
+      };
+    } catch (error) {
+      console.error('Error getting post:', error);
+      return null;
+    }
+  }
+
+  async updatePost(postId: number, updates: Partial<Post>): Promise<Post> {
+    try {
+      const [updatedPost] = await db
+        .update(posts)
+        .set({
+          ...updates,
+          updatedAt: new Date()
+        })
+        .where(eq(posts.id, postId))
+        .returning();
+
+      return updatedPost;
+    } catch (error) {
+      throw new Error('Failed to update post');
+    }
+  }
+
+  async deletePost(postId: number, userId: string): Promise<void> {
+    try {
+      // Verify ownership or admin permissions
+      const post = await db
+        .select({ authorId: posts.authorId })
+        .from(posts)
+        .where(eq(posts.id, postId))
+        .limit(1);
+
+      if (!post.length || post[0].authorId !== userId) {
+        throw new Error('Unauthorized to delete this post');
+      }
+
+      await db.delete(posts).where(eq(posts.id, postId));
+    } catch (error) {
+      throw new Error('Failed to delete post');
+    }
+  }
+
+  async createPostComment(comment: InsertPostComment): Promise<PostComment> {
+    try {
+      const [newComment] = await db.insert(postComments).values({
+        ...comment,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).returning();
+
+      // Update comment count on post
+      await db
+        .update(posts)
+        .set({
+          commentCount: sql`${posts.commentCount} + 1`
+        })
+        .where(eq(posts.id, comment.postId));
+
+      // Award points for commenting
+      await this.addPointsToUser(
+        comment.authorId,
+        5,
+        'post_comment',
+        newComment.id
+      );
+
+      return newComment;
+    } catch (error) {
+      throw new Error('Failed to create comment');
+    }
+  }
+
+  async getPostComments(postId: number): Promise<any[]> {
+    try {
+      return await db
+        .select({
+          id: postComments.id,
+          content: postComments.content,
+          createdAt: postComments.createdAt,
+          authorId: postComments.authorId,
+          parentId: postComments.parentId,
+          likeCount: postComments.likeCount,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          profileImageUrl: users.profileImageUrl
+        })
+        .from(postComments)
+        .leftJoin(users, eq(postComments.authorId, users.id))
+        .where(eq(postComments.postId, postId))
+        .orderBy(postComments.createdAt);
+    } catch (error) {
+      return [];
+    }
+  }
+
+  async addPostReaction(postId: number, userId: string, reactionType: string): Promise<{ reacted: boolean; reactionCount: number }> {
+    try {
+      // Check if reaction already exists
+      const existingReaction = await db
+        .select()
+        .from(postReactions)
+        .where(and(
+          eq(postReactions.postId, postId),
+          eq(postReactions.userId, userId),
+          eq(postReactions.reactionType, reactionType)
+        ))
+        .limit(1);
+
+      if (existingReaction.length > 0) {
+        // Remove existing reaction
+        await db
+          .delete(postReactions)
+          .where(and(
+            eq(postReactions.postId, postId),
+            eq(postReactions.userId, userId),
+            eq(postReactions.reactionType, reactionType)
+          ));
+        
+        // Update reaction count in post
+        await this.updatePostReactionCounts(postId);
+        
+        const count = await this.getPostReactionCount(postId, reactionType);
+        return { reacted: false, reactionCount: count };
+      } else {
+        // Add new reaction
+        await db.insert(postReactions).values({
+          postId,
+          userId,
+          reactionType,
+          createdAt: new Date()
+        });
+
+        // Award points for reactions
+        const pointValues: Record<string, number> = {
+          amen: 3,
+          heart: 1,
+          fire: 2,
+          pray: 5,
+          like: 1
+        };
+
+        await this.addPointsToUser(
+          userId,
+          pointValues[reactionType] || 1,
+          'post_reaction',
+          postId
+        );
+        
+        // Update reaction count in post
+        await this.updatePostReactionCounts(postId);
+        
+        const count = await this.getPostReactionCount(postId, reactionType);
+        return { reacted: true, reactionCount: count };
+      }
+    } catch (error) {
+      throw new Error('Failed to toggle reaction');
+    }
+  }
+
+  async removePostReaction(postId: number, userId: string, reactionType: string): Promise<{ reacted: boolean; reactionCount: number }> {
+    try {
+      await db
+        .delete(postReactions)
+        .where(and(
+          eq(postReactions.postId, postId),
+          eq(postReactions.userId, userId),
+          eq(postReactions.reactionType, reactionType)
+        ));
+      
+      await this.updatePostReactionCounts(postId);
+      const count = await this.getPostReactionCount(postId, reactionType);
+      return { reacted: false, reactionCount: count };
+    } catch (error) {
+      throw new Error('Failed to remove reaction');
+    }
+  }
+
+  private async updatePostReactionCounts(postId: number): Promise<void> {
+    try {
+      const reactionCounts = await db
+        .select({
+          reactionType: postReactions.reactionType,
+          count: sql<number>`count(*)`
+        })
+        .from(postReactions)
+        .where(eq(postReactions.postId, postId))
+        .groupBy(postReactions.reactionType);
+
+      const counts: Record<string, number> = {};
+      reactionCounts.forEach(row => {
+        counts[row.reactionType] = Number(row.count) || 0;
+      });
+
+      await db
+        .update(posts)
+        .set({ reactionCounts: counts })
+        .where(eq(posts.id, postId));
+    } catch (error) {
+      console.error('Failed to update reaction counts:', error);
+    }
+  }
+
+  private async getPostReactionCount(postId: number, reactionType: string): Promise<number> {
+    try {
+      const result = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(postReactions)
+        .where(and(
+          eq(postReactions.postId, postId),
+          eq(postReactions.reactionType, reactionType)
+        ));
+
+      return Number(result[0]?.count) || 0;
+    } catch (error) {
+      return 0;
+    }
+  }
+
+  async bookmarkPost(userId: string, postId: number): Promise<void> {
+    try {
+      await db.insert(postBookmarks).values({
+        userId,
+        postId,
+        createdAt: new Date()
+      }).onConflictDoNothing();
+    } catch (error) {
+      throw new Error('Failed to bookmark post');
+    }
+  }
+
+  async unbookmarkPost(userId: string, postId: number): Promise<void> {
+    try {
+      await db
+        .delete(postBookmarks)
+        .where(and(
+          eq(postBookmarks.userId, userId),
+          eq(postBookmarks.postId, postId)
+        ));
+    } catch (error) {
+      throw new Error('Failed to unbookmark post');
+    }
+  }
+
+  async isPostBookmarked(userId: string, postId: number): Promise<boolean> {
+    try {
+      const result = await db
+        .select()
+        .from(postBookmarks)
+        .where(and(
+          eq(postBookmarks.userId, userId),
+          eq(postBookmarks.postId, postId)
+        ))
+        .limit(1);
+
+      return result.length > 0;
+    } catch (error) {
+      return false;
     }
   }
 
