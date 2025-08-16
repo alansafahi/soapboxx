@@ -104,7 +104,7 @@ export function useImmediateAuth() {
 
   const logout = async () => {
     try {
-      // Set logout flag to prevent checkAuth from running
+      console.log('NUCLEAR LOGOUT: Starting complete session destruction');
       isLoggingOut = true;
       
       // Clear state immediately
@@ -115,51 +115,69 @@ export function useImmediateAuth() {
       };
       notifyListeners(newState);
       
-      // Clear storage completely
+      // Nuclear storage clearing
       localStorage.clear();
       sessionStorage.clear();
       
-      // Clear any cached auth data
+      // Clear all possible databases
       if ('indexedDB' in window) {
         try {
-          // Clear IndexedDB if it exists
-          indexedDB.deleteDatabase('authCache');
+          const databases = ['authCache', 'sessionStore', 'soapbox', 'userCache'];
+          for (const db of databases) {
+            indexedDB.deleteDatabase(db);
+          }
         } catch (e) {
-          // Silent fail
+          console.error('Database clear error:', e);
         }
       }
       
-      // Call logout endpoint multiple times to ensure session destruction
-      for (let i = 0; i < 3; i++) {
-        try {
-          await fetch('/api/auth/logout', {
-            method: 'POST',
-            credentials: 'include',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-        } catch (apiError) {
-          // Continue trying
+      // Aggressive cookie clearing for all possible domains
+      const domains = [
+        window.location.hostname,
+        '.' + window.location.hostname,
+        'replit.dev',
+        '.replit.dev',
+        'localhost',
+        undefined
+      ];
+      
+      const cookies = document.cookie.split(";");
+      for (let cookie of cookies) {
+        const eqPos = cookie.indexOf("=");
+        const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+        
+        for (const domain of domains) {
+          const domainStr = domain ? `;domain=${domain}` : '';
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/${domainStr}`;
         }
       }
       
-      // Clear all cookies manually
-      document.cookie.split(";").forEach(function(c) { 
-        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-      });
+      // Call logout endpoint with nuclear option
+      try {
+        const response = await fetch('/api/auth/logout', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const result = await response.json();
+        console.log('NUCLEAR LOGOUT: Server response:', result);
+      } catch (e) {
+        console.error('NUCLEAR LOGOUT: API call failed:', e);
+      }
       
-      // Force redirect to login page instead of home
-      window.location.href = '/login';
+      // Clear window references
+      if ((window as any).user) (window as any).user = null;
+      if ((window as any).auth) (window as any).auth = null;
+      if ((window as any).session) (window as any).session = null;
+      
+      // Force redirect with replace to prevent back navigation
+      console.log('NUCLEAR LOGOUT: Forcing redirect');
+      window.location.replace('/login');
+      
     } catch (error) {
-      // Reset logout flag on error
-      isLoggingOut = false;
-      window.location.href = '/login';
-    } finally {
-      // Reset logout flag after a delay to allow redirect
-      setTimeout(() => {
-        isLoggingOut = false;
-      }, 3000);
+      console.error('NUCLEAR LOGOUT: Critical error:', error);
+      // Force redirect even on error
+      window.location.replace('/login');
     }
   };
 

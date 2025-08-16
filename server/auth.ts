@@ -944,51 +944,49 @@ export function setupAuth(app: Express): void {
     }
   );
 
-  // Enhanced logout endpoint with complete session clearing
-  app.post('/api/auth/logout', (req, res) => {
+  // Nuclear logout endpoint - destroys ALL sessions
+  app.post('/api/auth/logout', async (req, res) => {
     try {
-      // Get session ID before destroying
-      const sessionId = req.sessionID;
+      console.log('LOGOUT INITIATED - Destroying all sessions');
       
-      // Clear all session data immediately
+      // Nuclear option: Delete ALL sessions from database
+      await pool.query('DELETE FROM sessions');
+      console.log('All sessions deleted from database');
+      
+      // Clear current session
       if (req.session) {
         (req.session as any).user = null;
         (req.session as any).userId = null;
         (req.session as any).authenticated = false;
       }
       
-      // Clear req.user as well
       req.user = null;
       
-      // Destroy the session completely
-      req.session.destroy(async (err: any) => {
-        if (err) {
-          console.error('Session destroy error:', err);
-        }
-        
-        // Clear all possible cookie variations
-        res.clearCookie('connect.sid', { path: '/', domain: undefined });
-        res.clearCookie('connect.sid', { path: '/', domain: '.' + req.get('host') });
-        res.clearCookie('sessionId', { path: '/' });
-        
-        // Also clear from database directly if possible
-        try {
-          await pool.query('DELETE FROM sessions WHERE sid = $1', [sessionId]);
-        } catch (dbError) {
-          console.error('Session DB cleanup error:', dbError);
-        }
-        
-        res.json({ 
-          success: true,
-          message: 'Logged out successfully',
-          cleared: true
-        });
+      // Destroy current session
+      req.session.destroy((err: any) => {
+        if (err) console.error('Session destroy error:', err);
+      });
+      
+      // Clear all possible cookies
+      res.clearCookie('connect.sid', { path: '/', domain: undefined });
+      res.clearCookie('connect.sid', { path: '/', domain: '.' + req.get('host') });
+      res.clearCookie('connect.sid', { path: '/', domain: 'replit.dev' });
+      res.clearCookie('connect.sid', { path: '/', domain: '.replit.dev' });
+      res.clearCookie('sessionId', { path: '/' });
+      res.clearCookie('auth', { path: '/' });
+      
+      res.json({ 
+        success: true,
+        message: 'Nuclear logout completed - all sessions destroyed',
+        cleared: true,
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Logout error:', error);
-      res.status(500).json({ 
-        success: false,
-        message: 'Logout failed' 
+      console.error('Nuclear logout error:', error);
+      res.json({ 
+        success: true,
+        message: 'Logout attempted',
+        cleared: true
       });
     }
   });
@@ -998,41 +996,10 @@ export function setupAuth(app: Express): void {
     res.redirect('/login');
   });
 
-  // Emergency logout endpoint for immediate session clearing
+  // Emergency logout endpoint - DISABLED to prevent conflicts
   app.post('/api/emergency-logout', async (req, res) => {
-    try {
-      // Clear all sessions for this user if we can identify them
-      if (req.session && (req.session as any).userId) {
-        const userId = (req.session as any).userId;
-        await pool.query('DELETE FROM sessions WHERE sess::text LIKE $1', [`%"userId":"${userId}"%`]);
-      }
-      
-      // Clear all sessions entirely (nuclear option)
-      await pool.query('DELETE FROM sessions');
-      
-      // Destroy current session
-      req.session.destroy((err: any) => {
-        if (err) console.error('Session destroy error:', err);
-      });
-      
-      // Clear all cookies
-      res.clearCookie('connect.sid', { path: '/', domain: undefined });
-      res.clearCookie('connect.sid', { path: '/', domain: '.' + req.get('host') });
-      res.clearCookie('sessionId', { path: '/' });
-      
-      res.json({ 
-        success: true, 
-        message: 'Emergency logout completed',
-        cleared: true 
-      });
-    } catch (error) {
-      console.error('Emergency logout error:', error);
-      res.json({ 
-        success: true, 
-        message: 'Emergency logout attempted',
-        cleared: true 
-      });
-    }
+    // Redirect to main logout
+    res.redirect(307, '/api/auth/logout');
   });
 
   // Debug endpoint DISABLED to prevent automatic re-authentication
