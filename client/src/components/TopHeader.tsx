@@ -689,6 +689,13 @@ export default function TopHeader() {
               <AlertTriangle className="mr-2 h-4 w-4" />
               NUCLEAR LOGOUT
             </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={() => window.location.replace('/ultimate-logout')}
+              className="text-red-800 dark:text-red-300 cursor-pointer font-bold bg-red-100 dark:bg-red-900/30"
+            >
+              <AlertTriangle className="mr-2 h-4 w-4" />
+              ULTIMATE LOGOUT
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

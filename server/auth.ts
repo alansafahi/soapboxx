@@ -944,49 +944,70 @@ export function setupAuth(app: Express): void {
     }
   );
 
-  // Nuclear logout endpoint - destroys ALL sessions
+  // Ultimate logout endpoint - destroys everything
   app.post('/api/auth/logout', async (req, res) => {
     try {
-      console.log('LOGOUT INITIATED - Destroying all sessions');
+      console.log('ULTIMATE LOGOUT INITIATED - Destroying everything');
       
-      // Nuclear option: Delete ALL sessions from database
+      // Step 1: Nuclear database session destruction
       await pool.query('DELETE FROM sessions');
-      console.log('All sessions deleted from database');
+      console.log('All sessions nuked from database');
       
-      // Clear current session
+      // Step 2: Destroy current session multiple ways
       if (req.session) {
         (req.session as any).user = null;
         (req.session as any).userId = null;
         (req.session as any).authenticated = false;
+        (req.session as any).destroy = true;
       }
       
       req.user = null;
       
-      // Destroy current session
+      // Step 3: Force session destruction
       req.session.destroy((err: any) => {
         if (err) console.error('Session destroy error:', err);
       });
       
-      // Clear all possible cookies
-      res.clearCookie('connect.sid', { path: '/', domain: undefined });
-      res.clearCookie('connect.sid', { path: '/', domain: '.' + req.get('host') });
-      res.clearCookie('connect.sid', { path: '/', domain: 'replit.dev' });
-      res.clearCookie('connect.sid', { path: '/', domain: '.replit.dev' });
-      res.clearCookie('sessionId', { path: '/' });
-      res.clearCookie('auth', { path: '/' });
+      // Step 4: Nuclear cookie clearing for all possible domains
+      const domains = [
+        undefined,
+        req.get('host'),
+        '.' + req.get('host'),
+        'replit.dev',
+        '.replit.dev',
+        'localhost',
+        '127.0.0.1'
+      ];
+      
+      const cookieNames = ['connect.sid', 'sessionId', 'auth', 'user', 'session'];
+      
+      domains.forEach(domain => {
+        cookieNames.forEach(name => {
+          const options: any = { path: '/' };
+          if (domain) options.domain = domain;
+          res.clearCookie(name, options);
+        });
+      });
+      
+      // Step 5: Set headers to prevent caching
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
       
       res.json({ 
         success: true,
-        message: 'Nuclear logout completed - all sessions destroyed',
+        message: 'ULTIMATE LOGOUT COMPLETED - Everything destroyed',
         cleared: true,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        redirectTo: '/login?forced=true&t=' + Date.now()
       });
     } catch (error) {
-      console.error('Nuclear logout error:', error);
+      console.error('Ultimate logout error:', error);
       res.json({ 
         success: true,
-        message: 'Logout attempted',
-        cleared: true
+        message: 'Ultimate logout attempted',
+        cleared: true,
+        redirectTo: '/login?forced=true&t=' + Date.now()
       });
     }
   });
