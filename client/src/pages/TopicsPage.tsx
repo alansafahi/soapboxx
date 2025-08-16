@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { PlusCircle, MessageSquare } from "lucide-react";
@@ -37,7 +37,7 @@ const dummyThreads: TopicThread[] = [
 ];
 
 export default function TopicsPage() {
-  const [, navigate] = useNavigate();
+  const [, navigate] = useLocation();
 
   return (
     <div className="max-w-4xl mx-auto p-4">

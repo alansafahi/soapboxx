@@ -4,7 +4,6 @@ import {
   UserPlus, 
   Users, 
   Calendar, 
-  MessageSquare, 
   DollarSign,
   BookOpen,
   Heart,

@@ -136,8 +136,7 @@ export default function Sidebar() {
     user
   );
 
-  // Debug logging for mobile navigation issues - remove after testing
-  console.log('Sidebar Debug - isMobile:', isMobile, 'visibleGroups:', visibleGroups.map(g => g.label));
+
 
   const toggleGroup = (groupLabel: string) => {
     setExpandedGroups(prev => {

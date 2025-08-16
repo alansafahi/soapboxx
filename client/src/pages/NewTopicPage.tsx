@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Textarea } from "../components/ui/textarea";
@@ -16,7 +16,7 @@ const categoryOptions = [
 ];
 
 export default function NewTopicPage() {
-  const [, navigate] = useNavigate();
+  const [, navigate] = useLocation();
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
