@@ -1,5 +1,16 @@
 import { useLocation, Link } from "wouter";
-import { Home, Users, Hand, BookOpen } from "lucide-react";
+import { 
+  Home, 
+  Users, 
+  Hand, 
+  BookOpen, 
+  MessageCircle, 
+  UserCheck, 
+  Building2, 
+  Calendar, 
+  MessageSquare, 
+  Heart 
+} from "lucide-react";
 import { cn } from "../lib/utils";
 
 export default function MobileNav() {
@@ -13,22 +24,28 @@ export default function MobileNav() {
       isActive: location === "/",
     },
     {
-      icon: Users,
-      label: "Group Chat",
-      path: "/community",
-      isActive: location === "/community",
+      icon: MessageCircle,
+      label: "Messages",
+      path: "/messages",
+      isActive: location.startsWith("/messages"),
     },
     {
-      icon: Hand,
-      label: "Prayer",
-      path: "/prayer",
-      isActive: location === "/prayer",
+      icon: Users,
+      label: "Community",
+      path: "/communities",
+      isActive: location.startsWith("/communities"),
+    },
+    {
+      icon: Calendar,
+      label: "Events",
+      path: "/events",
+      isActive: location.startsWith("/events"),
     },
     {
       icon: BookOpen,
-      label: "S.O.A.P.",
-      path: "/soap",
-      isActive: location === "/soap",
+      label: "Bible",
+      path: "/bible",
+      isActive: location.startsWith("/bible") || location === "/soap",
     },
   ];
 
