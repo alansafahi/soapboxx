@@ -197,6 +197,14 @@ app.use((req, res, next) => {
   const enhancedRoutes = await import('./enhanced-routes');
   app.use('/api', enhancedRoutes.default);
 
+  // Setup secure authentication transition system
+  const { SecureAuthTransition } = await import('./secure-auth-transition');
+  SecureAuthTransition.setupTransitionEndpoints(app);
+  
+  // Setup security recovery system
+  const { setupSecurityRecovery } = await import('./security-recovery');
+  setupSecurityRecovery(app);
+
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
