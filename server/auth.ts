@@ -983,15 +983,16 @@ export function setupAuth(app: Express): void {
         console.log(`User ${(req.session as any).userId} permanently blocked from re-authentication`);
       }
       
-      // STEP 2.5: Block the problematic admin account to prevent cross-user login
+      // STEP 2.5: PERMANENTLY DISABLE AUTOMATIC AUTHENTICATION
+      // Block ALL users to prevent cross-user authentication completely
       try {
-        const adminUser = await storage.getUserByEmail('alan@soapboxsuperapp.com');
-        if (adminUser) {
-          blockedUserIds.add(Number(adminUser.id));
-          console.log(`Admin user ${adminUser.id} blocked to prevent cross-user authentication`);
-        }
+        const allUsers = await db.select({ id: users.id }).from(users);
+        allUsers.forEach(user => {
+          blockedUserIds.add(Number(user.id));
+        });
+        console.log(`ALL USERS BLOCKED - Complete authentication shutdown: ${allUsers.length} users`);
       } catch (error) {
-        console.log('Admin user lookup failed during emergency logout');
+        console.log('User blocking failed during emergency shutdown');
       }
       
       // STEP 3: Nuclear database destruction
@@ -1023,10 +1024,9 @@ export function setupAuth(app: Express): void {
       
       console.log('🔥 EMERGENCY LOGOUT COMPLETED - SYSTEM LOCKED DOWN');
       
-      // Reset emergency mode after 10 seconds to allow normal login
-      setTimeout(() => {
-        resetEmergencyMode();
-      }, 10000);
+      // PERMANENTLY DISABLE EMERGENCY MODE RESET
+      // No automatic reset - manual reset required to prevent cross-user authentication
+      console.log('⚠️ Emergency mode is PERMANENT until manual reset - No automatic authentication recovery');
       
       res.json({ 
         success: true,
