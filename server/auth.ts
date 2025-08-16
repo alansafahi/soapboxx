@@ -17,9 +17,9 @@ import { pool, db } from "./db";
 import { invitations, userCommunities } from "../shared/schema";
 import { eq } from "drizzle-orm";
 
-// CRITICAL SECURITY: Session destruction mode to prevent re-authentication  
-let EMERGENCY_LOGOUT_ACTIVE = false; // PERMANENTLY DISABLED - Normal authentication restored
-const blockedUserIds = new Set<number>(); // Cleared - No users blocked
+// CRITICAL SECURITY: Force logout all users immediately
+let EMERGENCY_LOGOUT_ACTIVE = true; // ACTIVATED - All sessions terminated
+const blockedUserIds = new Set<number>(); // Block all problematic users
 
 // Reset emergency mode function for normal operation
 const resetEmergencyMode = () => {
@@ -28,8 +28,9 @@ const resetEmergencyMode = () => {
   console.log('✅ EMERGENCY MODE RESET - Normal authentication restored for all users');
 };
 
-// AUTOMATICALLY RESET EMERGENCY MODE ON SERVER START
-resetEmergencyMode();
+// FORCE EMERGENCY MODE - Block all authentication
+console.log('🚨 FORCE LOGOUT ACTIVATED - All sessions terminated');
+EMERGENCY_LOGOUT_ACTIVE = true;
 
 // Session configuration
 export function getSession() {
