@@ -178,7 +178,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/video-library" component={VideoLibrary} />
                                     <ProtectedRoute path="/image-gallery" component={ImageGallery} />
                                     <ProtectedRoute path="/community" component={Community} />
-                                    <ProtectedRoute path="/discussions" component={() => { window.location.href = '/community'; return null; }} />
+                                    <ProtectedRoute path="/discussions" component={() => { window.location.replace('/community'); return null; }} />
                                     <ProtectedRoute path="/social-feed" component={SocialFeedPage} />
                                     <ProtectedRoute path="/churches" component={Churches} />
                                     <ProtectedRoute path="/communities" component={Communities} />
