@@ -87,7 +87,7 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
     // Step 4: Privacy & Preferences
     emailUpdates: true,
     prayerRequestNotifications: true,
-    dailyDevotionReminders: false,
+    dailyDevotionReminders: true,
     showInDirectory: true,
     allowDirectMessages: true,
     
@@ -602,14 +602,24 @@ export default function OnboardingFlow({ inviteToken, inviterName, churchName, p
                   variant="outline"
                   size="sm"
                   className="flex-1 border-orange-200 text-orange-700 hover:bg-orange-100"
-                  onClick={() => {/* Will implement SMS verification later */}}
+                  onClick={() => {
+                    // Skip mobile verification for now - continue to completion
+                    handleComplete();
+                  }}
                 >
                   Add Mobile Later
                 </Button>
                 <Button
                   size="sm"
                   className="flex-1 bg-orange-600 hover:bg-orange-700"
-                  onClick={() => {/* Will implement SMS verification now */}}
+                  onClick={() => {
+                    // For now, redirect to main app - SMS verification will be implemented later
+                    toast({
+                      title: "Coming soon!",
+                      description: "SMS verification will be available soon. You can add your mobile number in settings.",
+                    });
+                    handleComplete();
+                  }}
                 >
                   Verify Mobile Now
                 </Button>

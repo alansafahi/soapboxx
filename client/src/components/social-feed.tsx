@@ -366,12 +366,57 @@ export default function SocialFeed() {
     }
   };
 
-  // Create post mutation
+  // Create post mutation with optimistic updates
   const createPostMutation = useMutation({
     mutationFn: async (postData: any) => {
       return apiRequest('POST', '/api/discussions', postData);
     },
-    onSuccess: () => {
+    onMutate: async (postData) => {
+      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+      await queryClient.cancelQueries({ queryKey: ['/api/discussions'] });
+
+      // Snapshot the previous value
+      const previousPosts = queryClient.getQueryData(['/api/discussions']);
+
+      // Create optimistic post
+      const optimisticPost = {
+        id: Date.now(), // Temporary ID
+        type: 'discussion',
+        content: postData.content,
+        author: {
+          id: user?.id || '',
+          firstName: user?.firstName || '',
+          lastName: user?.lastName || '',
+          email: user?.email || '',
+          profileImageUrl: user?.profileImageUrl || null,
+          emailVerified: user?.emailVerified || false,
+          phoneVerified: user?.phoneVerified || false,
+          role: user?.role || 'member'
+        },
+        audience: postData.audience,
+        createdAt: new Date(),
+        likeCount: 0,
+        commentCount: 0,
+        shareCount: 0,
+        isLiked: false,
+        isBookmarked: false,
+        mood: postData.mood,
+        linkedVerse: postData.linkedVerse,
+        attachedMedia: postData.attachedMedia,
+        tags: [],
+        isPinned: false
+      };
+
+      // Optimistically update the feed
+      queryClient.setQueryData(['/api/discussions'], (old: any) => 
+        Array.isArray(old) ? [optimisticPost, ...old] : [optimisticPost]
+      );
+
+      // Return a context object with the snapshotted value
+      return { previousPosts };
+    },
+    onSuccess: (data) => {
+      // Invalidate and refetch to get the real data from server
       queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
       
       // Reset form
@@ -389,12 +434,21 @@ export default function SocialFeed() {
         duration: 3000, // Auto-dismiss after 3 seconds
       });
     },
-    onError: (error: any) => {
+    onError: (error: any, newPost, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousPosts) {
+        queryClient.setQueryData(['/api/discussions'], context.previousPosts);
+      }
+      
       toast({
         title: "Error",
         description: `Failed to share post: ${error.message || 'Please try again.'}`,
         variant: "destructive",
       });
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure we have the latest data
+      queryClient.invalidateQueries({ queryKey: ['/api/discussions'] });
     }
   });
 
