@@ -944,10 +944,11 @@ export function setupAuth(app: Express): void {
     }
   );
 
-  // Logout endpoint
+  // Enhanced logout endpoint with complete session clearing
   app.post('/api/auth/logout', (req, res) => {
     try {
-
+      // Get session ID before destroying
+      const sessionId = req.sessionID;
       
       // Clear all session data immediately
       if (req.session) {
@@ -959,23 +960,32 @@ export function setupAuth(app: Express): void {
       // Clear req.user as well
       req.user = null;
       
-      const sessionId = req.sessionID;
-      
       // Destroy the session completely
       req.session.destroy(async (err: any) => {
         if (err) {
+          console.error('Session destroy error:', err);
         }
         
-        // Clear session cookies
-        res.clearCookie('connect.sid', { path: '/' });
+        // Clear all possible cookie variations
+        res.clearCookie('connect.sid', { path: '/', domain: undefined });
+        res.clearCookie('connect.sid', { path: '/', domain: '.' + req.get('host') });
+        res.clearCookie('sessionId', { path: '/' });
         
+        // Also clear from database directly if possible
+        try {
+          await pool.query('DELETE FROM sessions WHERE sid = $1', [sessionId]);
+        } catch (dbError) {
+          console.error('Session DB cleanup error:', dbError);
+        }
         
         res.json({ 
           success: true,
-          message: 'Logged out successfully' 
+          message: 'Logged out successfully',
+          cleared: true
         });
       });
     } catch (error) {
+      console.error('Logout error:', error);
       res.status(500).json({ 
         success: false,
         message: 'Logout failed' 

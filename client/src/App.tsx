@@ -202,6 +202,7 @@ function AppRouter() {
                                     <ProtectedRoute path="/profile" component={Profile} />
                                     <ProtectedRoute path="/settings" component={SettingsPage} />
                                     <ProtectedRoute path="/help" component={lazy(() => import('./pages/help'))} />
+                                    <Route path="/emergency-logout" component={lazy(() => import('./pages/emergency-logout'))} />
                                     <ProtectedRoute path="/weekly-checkin" component={WeeklyCheckinPage} />
                                     <ProtectedRoute path="/notification-settings" component={NotificationSettingsPage} />
                                     <ProtectedRoute path="/spiritual-assessment" component={SpiritualAssessmentPage} />
