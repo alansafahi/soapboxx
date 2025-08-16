@@ -48,7 +48,6 @@ export const navigationConfig: NavigationGroup[] = [
       { label: "Contacts", href: "/contacts", icon: UserPlus },
       { label: "Communities", href: "/communities", icon: Users },
       { label: "Events", href: "/events", icon: Calendar },
-      { label: "Group Chat", href: "/community", icon: MessageSquare },
       { label: "Donation", href: "/donation-demo", icon: DollarSign },
     ]
   },
@@ -73,7 +72,7 @@ export const navigationConfig: NavigationGroup[] = [
     ]
   },
   {
-    label: "ADMIN PORTAL",
+    label: "ADMIN TOOLS",
     items: [
       { 
         label: "Member Directory", 
@@ -185,7 +184,7 @@ export function getFilteredNavigation(
 // Mobile bottom navigation specific items (simplified for mobile)
 export const mobileBottomNavItems = [
   { label: "Home", href: "/", icon: Home },
-  { label: "Group Chat", href: "/community", icon: Users },
+  { label: "Chat", href: "/community", icon: Users },
   { label: "Prayer Wall", href: "/prayer", icon: Heart },
-  { label: "S.O.A.P. Journal", href: "/soap", icon: BookOpen },
+  { label: "S.O.A.P.", href: "/soap", icon: BookOpen },
 ];
